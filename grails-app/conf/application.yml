@@ -1,0 +1,161 @@
+---
+grails:
+    profile: com.k_int.grails.profiles:okapi-module:3.3.0
+    codegen:
+        defaultPackage: mod.rs
+    gorm:
+        reactor:
+            # Whether to translate GORM events into Reactor events
+            # Disabled by default for performance reasons
+            events: false
+info:
+    app:
+        name: '@info.app.name@'
+        version: '@info.app.version@'
+        grailsVersion: '@info.app.grailsVersion@'
+spring:
+    main:
+        banner-mode: "off"
+    groovy:
+        template:
+            check-template-location: false
+
+# Spring Actuator Endpoints are Disabled by Default
+endpoints:
+    enabled: false
+    jmx:
+        enabled: true
+
+---
+grails:
+    mime:
+        disable:
+            accept:
+                header:
+                    userAgents:
+                        - Gecko
+                        - WebKit
+                        - Presto
+                        - Trident
+        types:
+            json:
+              - application/json
+              - text/json   
+            hal:
+              - application/hal+json
+              - application/hal+xml  
+            xml:
+              - text/xml
+              - application/xml                                 
+            atom: application/atom+xml
+            css: text/css
+            csv: text/csv
+            js: text/javascript
+            rss: application/rss+xml
+            text: text/plain
+            all: '*/*'            
+    urlmapping:
+        cache:
+            maxsize: 1000
+    controllers:
+        defaultScope: singleton
+    converters:
+        encoding: UTF-8
+
+---
+grails:
+    mime:
+        disable:
+            accept:
+                header:
+                    userAgents: []
+    gorm:
+        multiTenancy:
+            mode: SCHEMA
+            tenantResolverClass: com.k_int.okapi.OkapiTenantResolver    # See src/main/groovy
+            
+    plugin:
+      springsecurity:
+        providerNames:
+          - 'okapiAuthenticationProvider'
+          
+        controllerAnnotations:
+          staticRules:
+            -
+              pattern: '/okapi/**'
+              access:
+                - 'permitAll' # Should maybe lock this down to the Super tenant once it is properly enforced?
+            -
+              pattern: '/**'
+              access:
+                - 'permitAll'
+        filterChain:
+          chainMap:
+            - 
+              pattern: '/**'
+              filters: 'JOINED_FILTERS,-securityContextPersistenceFilter,-rememberMeAuthenticationFilter,-basicAuthenticationFilter'
+    databinding:
+        dateFormats:
+          - 'yyyy-MM-dd HH:mm:ss.S'
+          - "yyyy-MM-dd'T'hh:mm:ss'Z'"
+          - 'yyyy-mm-dd'
+          
+    server:
+        host: 10.0.2.2
+        port: 8080
+
+okapi:
+  schema:
+    appName: 'mod-rs'
+
+dataSource:
+  pooled: true
+  jmxExport: false
+  dbCreate: none
+  username: "${db.username:folio}"
+  password: "${db.password:folio}"
+  driverClassName: org.postgresql.Driver
+  dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
+  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_dev}"
+  schemaHandler: com.k_int.okapi.OkapiSchemaHandler
+  
+environments:
+  test:
+    dataSource:
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_test}"
+
+  production:
+    dataSource:
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs}"
+      properties:
+        initialSize: 5
+        maxActive: 50
+        minIdle: 5
+        maxIdle: 25
+        maxWait: 10000
+        maxAge: 600000
+        timeBetweenEvictionRunsMillis: 5000
+        minEvictableIdleTimeMillis: 60000
+        validationQuery: SELECT 1
+        validationInterval: 30000
+        testOnBorrow: true
+        testWhileIdle: true
+        testOnReturn: false
+        removeAbandoned: true
+        removeAbandonedTimeout: 60
+        abandonWhenPercentageFull: 50
+        jdbcInterceptors: ConnectionState
+        defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+        
+  development:
+    # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
+    # OKAPI supplies information about how to reach it to the modules. These options are used for self reg and other calls
+    # when the request did not come through OKAPI.
+    okapi: 
+      service:
+        host: localhost
+        port: 9130
+
+    gorm:
+      tenantId: public # Used by SystemPropertyTenantResolver
+    
