@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class AgencyIdType extends ReferenceData {
 
-	public AgencyIdType(String code = null, boolean validated = false) {
-		super(ReferenceTypes.AGENCY_ID_TYPE, code, validated);
+	public AgencyIdType() {
+		this(null);
+	}
+
+	public AgencyIdType(String code) {
+		super(ReferenceTypes.AGENCY_ID_TYPE, code);
 	}
 }

@@ -4,12 +4,16 @@ import com.k_int.folio.rs.models.ISO18626.Types.Standard.CurrencyCode;
 
 public class Costs {
 	/** The currency this cost is represented by */
-	CurrencyCode currencyCode;
+	public CurrencyCode currencyCode;
 
 	/** The cost in terms of the currency */
-	String monetaryValue;
+	public String monetaryValue;
 
-	public Costs(CurrencyCode currencyCode = null, String monetaryValue = null) {
+	public Costs() {
+		this(null, null);
+	}
+
+	public Costs(CurrencyCode currencyCode, String monetaryValue) {
 		this.currencyCode = currencyCode;
 		this.monetaryValue = monetaryValue;
 	}

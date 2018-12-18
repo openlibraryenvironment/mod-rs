@@ -1,33 +1,42 @@
 package com.k_int.folio.rs.models.ISO18626.Request
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+@JacksonXmlRootElement
 public class Message {
 
 	/** The header for the message */
-	Header header;
+	public Header header;
 
 	/** Details about the item being requested */
-	BibliographicInfo bibliographicInfo;
+	public BibliographicInfo bibliographicInfo;
 
 	//* Details about the publication */
-	PublicationInfo publicationInfo;
+	public PublicationInfo publicationInfo;
 
 	/** Details about the service */
-	ServiceInfo serviceInfo;
+	public ServiceInfo serviceInfo;
 
 	/** The Suppliers */
-	List<SupplierInfo> supplierInfo;
+	@JacksonXmlElementWrapper(useWrapping = false)
+ 	public List<SupplierInfo> supplierInfo;
 
 	/** The delivery information */
-	List<RequestedDeliveryInfo> requestedDeliveryInfo;
+	@JacksonXmlElementWrapper(useWrapping = false)
+	public List<RequestedDeliveryInfo> requestedDeliveryInfo;
 
 	/** Requesting agency information */
-	RequestingAgencyInfo requestingAgencyInfo;
+	public RequestingAgencyInfo requestingAgencyInfo;
 
 	/** Patron information */
-	PatronInfo patronInfo;
+	public PatronInfo patronInfo;
 
 	/** Billing information*/
-	BillingInfo billingInfo;
+	public BillingInfo billingInfo;
+
+	public Message() {
+	}
 
 	public Message(Header header = null, BibliographicInfo bibliographicInfo = null, PublicationInfo publicationInfo = null,
 		           ServiceInfo serviceInfo = null, List<SupplierInfo> supplierInfo = null, List<RequestedDeliveryInfo> requestedDeliveryInfo = null,

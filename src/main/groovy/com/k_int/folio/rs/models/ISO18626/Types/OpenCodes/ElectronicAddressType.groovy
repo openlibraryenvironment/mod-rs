@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class ElectronicAddressType extends ReferenceData {
 
-	public ElectronicAddressType(String code = null, boolean validated = false) {
-		super(ReferenceTypes.ELECTRONIC_ADDRESS_TYPE, code, validated);
+	public ElectronicAddressType() {
+		this(null);
+	}
+
+	public ElectronicAddressType(String code) {
+		super(ReferenceTypes.ELECTRONIC_ADDRESS_TYPE, code);
 	}
 }

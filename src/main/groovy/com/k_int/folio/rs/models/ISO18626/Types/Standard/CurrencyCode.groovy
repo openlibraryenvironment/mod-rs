@@ -12,7 +12,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
  */
 public class CurrencyCode extends ReferenceData {
 
-	public CurrencyCode(String code = null, boolean validated = false) {
-		super(ReferenceTypes.CURRENCY_CODE, code, validated);
+	public CurrencyCode() {
+		this(null);
+	}
+
+	public CurrencyCode(String code) {
+		super(ReferenceTypes.CURRENCY_CODE, code);
 	}
 }

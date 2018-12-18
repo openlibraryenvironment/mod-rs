@@ -1,5 +1,6 @@
 package com.k_int.folio.rs.models.ISO18626.Request
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.k_int.folio.rs.models.ISO18626.YesNo;
 import com.k_int.folio.rs.models.ISO18626.Types.Closed.RequestSubType;
 import com.k_int.folio.rs.models.ISO18626.Types.Closed.RequestType;
@@ -14,6 +15,7 @@ public class ServiceInfo {
 	public RequestType requestType;
 
 	/** The subtype of a request */
+	@JacksonXmlElementWrapper(useWrapping = false)
 	public List<RequestSubType> requestSubType;
 
 	/** The previous request id, if there was one */

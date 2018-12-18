@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class RequestSubType extends ReferenceData {
 
-	public RequestSubType(String code = null, boolean validated = false) {
-		super(ReferenceTypes.REQUEST_SUB_TYPE, code, validated);
+	public RequestSubType() {
+		this(null);
+	}
+
+	public RequestSubType(String code) {
+		super(ReferenceTypes.REQUEST_SUB_TYPE, code);
 	}
 }

@@ -1,5 +1,6 @@
 package com.k_int.folio.rs.models.ISO18626.Request
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.k_int.folio.rs.models.ISO18626.YesNo
 import com.k_int.folio.rs.models.ISO18626.Types.Address
 import com.k_int.folio.rs.models.ISO18626.Types.OpenCodes.PatronType;
@@ -22,6 +23,7 @@ public class PatronInfo {
 	public YesNo sendToPatron;
 
 	/** The addresses the patron can be contacted at */
+	@JacksonXmlElementWrapper(useWrapping = false)
 	public List<Address> address;
 
 	public PatronInfo() {

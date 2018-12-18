@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class BibliographicRecordIdentifierCode extends ReferenceData {
 
-	public BibliographicRecordIdentifierCode(String code = null, boolean validated = false) {
-		super(ReferenceTypes.BIBLIOGRAPHIC_RECORD_IDENTIFIER_CODE, code, validated);
+	public BibliographicRecordIdentifierCode() {
+		this(null);
+	}
+
+	public BibliographicRecordIdentifierCode(String code) {
+		super(ReferenceTypes.BIBLIOGRAPHIC_RECORD_IDENTIFIER_CODE, code);
 	}
 }

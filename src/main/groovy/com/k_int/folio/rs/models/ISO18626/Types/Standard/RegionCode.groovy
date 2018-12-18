@@ -12,7 +12,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
  */
 public class RegionCode extends ReferenceData {
 
-	public RegionCode(String code = null, boolean validated = false) {
-		super(ReferenceTypes.REGION_CODE, code, validated);
+	public RegionCode() {
+		this(null);
+	}
+
+	public RegionCode(String code) {
+		super(ReferenceTypes.REGION_CODE, code);
 	}
 }

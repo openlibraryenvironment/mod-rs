@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class ReasonForMessage extends ReferenceData {
 
-	public ReasonForMessage(String code = null, boolean validated = false) {
-		super(ReferenceTypes.REASON_FOR_MESSAGE, code, validated);
+	public ReasonForMessage() {
+		this(null);
+	}
+
+	public ReasonForMessage(String code) {
+		super(ReferenceTypes.REASON_FOR_MESSAGE, code);
 	}
 }

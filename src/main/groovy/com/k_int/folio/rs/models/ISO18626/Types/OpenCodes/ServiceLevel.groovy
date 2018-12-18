@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class ServiceLevel extends ReferenceData {
 
-	public ServiceLevel(String code = null, boolean validated = false) {
-		super(ReferenceTypes.SERVICE_LEVEL, code, validated);
+	public ServiceLevel() {
+		this(null);
+	}
+
+	public ServiceLevel(String code) {
+		super(ReferenceTypes.SERVICE_LEVEL, code);
 	}
 }

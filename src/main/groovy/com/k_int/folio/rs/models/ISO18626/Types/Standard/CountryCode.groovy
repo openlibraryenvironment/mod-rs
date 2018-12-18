@@ -12,7 +12,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
  */
 public class CountryCode extends ReferenceData {
 
-	public CountryCode(String code = null, boolean validated = false) {
-		super(ReferenceTypes.COUNTRY_CODE, code, validated);
+	public CountryCode() {
+		this(null);
+	}
+
+	public CountryCode(String code) {
+		super(ReferenceTypes.COUNTRY_CODE, code);
 	}
 }

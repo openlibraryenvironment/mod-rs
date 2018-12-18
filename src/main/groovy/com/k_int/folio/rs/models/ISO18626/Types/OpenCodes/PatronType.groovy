@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class PatronType extends ReferenceData {
 
-	public PatronType(String code = null, boolean validated = false) {
-		super(ReferenceTypes.PATRON_TYPE, code, validated);
+	public PatronType() {
+		this(null);
+	}
+
+	public PatronType(String code) {
+		super(ReferenceTypes.PATRON_TYPE, code);
 	}
 }

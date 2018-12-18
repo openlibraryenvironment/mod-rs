@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class Format extends ReferenceData {
 
-	public Format(String code = null, boolean validated = false) {
-		super(ReferenceTypes.FORMAT, code, validated);
+	public Format() {
+		this(null);
+	}
+
+	public Format(String code) {
+		super(ReferenceTypes.FORMAT, code);
 	}
 }

@@ -1,5 +1,6 @@
 package com.k_int.folio.rs.models.ISO18626.Request
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.k_int.folio.rs.models.ISO18626.Types.BibliographicItemId;
 import com.k_int.folio.rs.models.ISO18626.Types.BibliographicRecordId;
 
@@ -42,7 +43,8 @@ public class BibliographicInfo {
 	public estimatedNumberOfPages;
 
 	/** The ids that this item can be identified by */
-	public List<BibliographicItemId> bibliographicItemId;
+	@JacksonXmlElementWrapper(useWrapping = false)
+ 	public List<BibliographicItemId> bibliographicItemId;
 
 	/** Sponsor */
 	public String sponsor;
@@ -51,7 +53,8 @@ public class BibliographicInfo {
 	String informationSource;
 
 	/** the The ids for the record */
-	List<BibliographicRecordId> bibliographicRecordId;
+	@JacksonXmlElementWrapper(useWrapping = false)
+ 	List<BibliographicRecordId> bibliographicRecordId;
 
 	public BibliographicInfo() {
 	} 	

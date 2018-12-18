@@ -5,7 +5,11 @@ import com.k_int.folio.rs.models.ISO18626.Types.ReferenceTypes;
 
 public class ReasonRetry extends ReferenceData {
 
-	public ReasonRetry(String code = null, boolean validated = false) {
-		super(ReferenceTypes.REASON_RETRY, code, validated);
+	public ReasonRetry() {
+		this(null);
+	}
+
+	public ReasonRetry(String code) {
+		super(ReferenceTypes.REASON_RETRY, code);
 	}
 }
