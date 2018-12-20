@@ -38,9 +38,9 @@ public class Message {
 	public Message() {
 	}
 
-	public Message(Header header = null, BibliographicInfo bibliographicInfo = null, PublicationInfo publicationInfo = null,
-		           ServiceInfo serviceInfo = null, List<SupplierInfo> supplierInfo = null, List<RequestedDeliveryInfo> requestedDeliveryInfo = null,
-				   RequestingAgencyInfo requestingAgencyInfo = null, PatronInfo patronInfo = null, BillingInfo billingInfo = null) {
+	public Message(Header header, BibliographicInfo bibliographicInfo, PublicationInfo publicationInfo,
+		           ServiceInfo serviceInfo, List<SupplierInfo> supplierInfo, List<RequestedDeliveryInfo> requestedDeliveryInfo,
+				   RequestingAgencyInfo requestingAgencyInfo, PatronInfo patronInfo, BillingInfo billingInfo) {
 		this.header = header;
 		this.bibliographicInfo = bibliographicInfo;
 		this.publicationInfo = publicationInfo;

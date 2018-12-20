@@ -18,7 +18,7 @@ class DeliveryInfo {
 	SentVia sentVia;
 
 	/** Was the item sent to the patron */
-	YesNo sentToPatron;
+	boolean sentToPatron;
 
 	/** Conditions for the use of the item */
 	LoanCondition loanCondition;
@@ -29,7 +29,7 @@ class DeliveryInfo {
 	/** The total cost for the item (including delivery) */
 	Costs deliveryCosts;
 
-	public DeliveryInfo(Date dateSent = null, String itemId = null, SentVia sentVia = null, YesNo sentToPatron = null,
+	public DeliveryInfo(Date dateSent = null, String itemId = null, SentVia sentVia = null, boolean sentToPatron = null,
 		                LoanCondition loanCondition = null, DeliveredFormat deliveredFormat = null, Costs deliveryCosts = null) {
 		this.dateSent = dateSent;
 		this.itemId = itemId;
@@ -38,6 +38,5 @@ class DeliveryInfo {
 		this.loanCondition = loanCondition;
 		this.deliveredFormat = deliveredFormat;
 		this.deliveryCosts = deliveryCosts;
-		
 	}
 }

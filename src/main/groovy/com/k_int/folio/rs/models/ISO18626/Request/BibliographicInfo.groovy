@@ -40,7 +40,7 @@ public class BibliographicInfo {
 	public String pagesRequested;
 
 	/** Estimated number of pages */
-	public estimatedNumberOfPages;
+	public estimatedNoPages;
 
 	/** The ids that this item can be identified by */
 	@JacksonXmlElementWrapper(useWrapping = false)

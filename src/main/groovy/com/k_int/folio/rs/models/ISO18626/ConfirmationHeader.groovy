@@ -8,8 +8,8 @@ public class ConfirmationHeader extends HeaderBase {
 	/** The statatus of the received request */
 	public MessageStatus messageStatus;
 
-	/** The error that occurred if any */
-	public ErrorData errorData;
+	/** Multiple Item request Id */
+	public String multipleItemRequestId;
 
 	public ConfirmationHeader() {
 	}

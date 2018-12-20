@@ -16,5 +16,7 @@ class UrlMappings {
     }
 
     '/licenses/custprops'(resources: 'customPropertyDefinition')
+	
+	"/Chas/$action" ( controller: "Chas")
   }
 }

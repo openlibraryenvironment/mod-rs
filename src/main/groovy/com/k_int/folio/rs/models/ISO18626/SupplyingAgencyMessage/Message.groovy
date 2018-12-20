@@ -1,5 +1,8 @@
 package com.k_int.folio.rs.models.ISO18626.SupplyingAgencyMessage
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
+
+@JacksonXmlRootElement(localName="supplyingAgencyMessage")
 public class Message {
 	Header header;
 	MessageInfo messageInfo;
@@ -7,7 +10,10 @@ public class Message {
 	DeliveryInfo deliveryInfo;
 	ReturnInfo returnInfo;
 	
-	public Message(Header header = null, MessageInfo messageInfo = null, StatusInfo statusInfo = null,
+	public Message() {
+	}
+
+	public Message(Header header, MessageInfo messageInfo = null, StatusInfo statusInfo = null,
 		           DeliveryInfo deliveryInfo = null, ReturnInfo returnInfo = null) {
 		this.header = header;
 		this.messageInfo = messageInfo;

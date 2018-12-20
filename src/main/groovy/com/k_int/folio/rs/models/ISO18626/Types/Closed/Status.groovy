@@ -9,7 +9,7 @@ public class Status extends ReferenceData {
 		this(null);
 	}
 
-	public Status(String code = null) {
+	public Status(String code) {
 		super(ReferenceTypes.STATUS, code);
 	}
 }
