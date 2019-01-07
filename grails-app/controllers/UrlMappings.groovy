@@ -1,4 +1,4 @@
-//package org.olf.licenses
+package org.olf.licenses
 
 class UrlMappings {
 
@@ -16,7 +16,7 @@ class UrlMappings {
     }
 
     '/licenses/custprops'(resources: 'customPropertyDefinition')
-	
+
 	"/Chas/$action" ( controller: "Chas")
   }
 }

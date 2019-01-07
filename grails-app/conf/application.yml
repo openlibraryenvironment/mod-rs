@@ -1,6 +1,6 @@
 ---
 grails:
-    profile: com.k_int.grails.profiles:okapi-module:3.3.0
+    profile: com.k_int.grails.profiles:okapi-module:3.3.2
     codegen:
         defaultPackage: mod.rs
     gorm:
