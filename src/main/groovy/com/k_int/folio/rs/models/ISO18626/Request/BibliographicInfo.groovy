@@ -6,7 +6,7 @@ import com.k_int.folio.rs.models.ISO18626.Types.BibliographicRecordId;
 
 public class BibliographicInfo {
 
-	/** Suppliers unqiue bibliographic id */
+	/** Suppliers unique bibliographic id */
 	public String supplierUniqueRecordId;
 
 	/** Title */
