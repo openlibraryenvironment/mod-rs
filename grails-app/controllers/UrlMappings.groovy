@@ -6,16 +6,8 @@ class UrlMappings {
     "/"(controller: 'application', action:'index')
     "/_/$action" (controller: 'okapi', action:'tenant')
 
-    "/licenses/licenses"(resources:'license')
+    "/rs/patronrequests"(resources:'patronRequest')
 
-    '/licenses/refdata'(resources: 'refdata') {
-      collection {
-        "/$domain/$property" (controller: 'refdata', action: 'lookup')
-      }
-    }
-
-    '/licenses/custprops'(resources: 'customPropertyDefinition')
-
-	"/Chas/$action" ( controller: "Chas")
+    "/Chas/$action" ( controller: "Chas")
   }
 }

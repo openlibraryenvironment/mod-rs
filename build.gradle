@@ -3,6 +3,7 @@ buildscript {
         mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
         maven { url "http://maven.k-int.com/content/repositories/releases" }
+        maven { url "http://maven.k-int.com/content/repositories/private" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -20,6 +21,9 @@ apply plugin:"com.bmuschko.docker-remote-api"
 
 repositories {
     mavenLocal()
+    // Ian: Added k-int nexus to act as a proxy repo for remote repos, and k-int specifics
+    maven { url "http://nexus.k-int.com/content/groups/public" }
+    maven { url "http://maven.k-int.com/content/repositories/private" }
     maven { url "https://repo.grails.org/grails/core" }
 }
 
@@ -47,7 +51,7 @@ dependencies {
     compile "org.liquibase:liquibase-core:3.5.+"
     compile "com.ibm.icu:icu4j:62.+"
     compile "com.k_int.grails:web-toolkit:3.+"
-	compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
     compile "com.k_int.okapi:grails-okapi:3.+"
     console "org.grails:grails-console"
     profile "com.k_int.grails.profiles:okapi-module:3.3.2"
