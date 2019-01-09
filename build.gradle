@@ -160,6 +160,15 @@ buildProperties.doLast {
 
   // Load the app version
   String version = properties.getProperty('info.app.version')
+
+  // Because order matters. The version may be missing from the properties. We should
+  // re-add it if it is.
+  if (version && !(version =~ version_regex)) {
+    // Write the value again.
+    version = project.version
+    properties.setProperty('info.app.version', version)
+  }
+
   def versionParts
   if (version && (versionParts = version =~ version_regex)) {
     versionParts[0].with {
