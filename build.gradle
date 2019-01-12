@@ -42,6 +42,7 @@ dependencies {
     compile "org.grails:grails-logging"
     compile "org.grails.plugins:cache"
     compile "org.grails.plugins:async"
+    runtime "org.grails.plugins:events"
     compile "org.grails.plugins:hibernate5"
     compile "org.springframework.boot:spring-boot-starter-undertow"
     compile "org.hibernate:hibernate-core:5.2.7.Final"
