@@ -42,7 +42,6 @@
       ],
       "visible": true
     }
-    }
   ],
   "launchDescriptor": {
     "dockerImage": "${info.app.name}:${info.app.version}",

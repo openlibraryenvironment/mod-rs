@@ -13,21 +13,33 @@ import com.k_int.web.toolkit.refdata.Defaults
 
 class PatronRequest implements MultiTenant<PatronRequest> {
 
+  // internal ID of the patron request
   String id
+
+  // Title of the item requested
   String title
+
+  // Patron reference (EG Barcode)
+  String patronReference
 
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
   @Defaults(['Loan', 'Copy-non-returnable'])
   RefdataValue serviceType
 
+  // Status
+  @Defaults(['Idle', 'Approved', 'Pending', 'Cancelled', 'Shipped', 'Awaiting Collection', 'Filfilled', 'Unfilled'])
+  RefdataValue state
 
   static constraints = {
   }
 
   static mapping = {
-             id column: 'pr_id', generator: 'uuid', length:36
-    serviceType column: 'pr_service_type_fk'
+                 id column: 'pr_id', generator: 'uuid', length:36
+              title column: 'pr_title'
+    patronReference column: 'pr_patron_reference'
+        serviceType column: 'pr_service_type_fk'
+              state column: 'pr_state_fk'
   }
 
 }
