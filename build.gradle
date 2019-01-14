@@ -3,7 +3,6 @@ buildscript {
         mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
         maven { url "http://maven.k-int.com/content/repositories/releases" }
-        maven { url "http://maven.k-int.com/content/repositories/private" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -23,7 +22,7 @@ repositories {
     mavenLocal()
     // Ian: Added k-int nexus to act as a proxy repo for remote repos, and k-int specifics
     maven { url "http://nexus.k-int.com/content/groups/public" }
-    maven { url "http://maven.k-int.com/content/repositories/private" }
+    maven { url "http://maven.k-int.com/content/repositories/releases" }
     maven { url "https://repo.grails.org/grails/core" }
 }
 
@@ -45,7 +44,7 @@ dependencies {
     runtime "org.grails.plugins:events"
     compile "org.grails.plugins:hibernate5"
     compile "org.springframework.boot:spring-boot-starter-undertow"
-    compile "org.hibernate:hibernate-core:5.2.7.Final"
+    compile "org.hibernate:hibernate-core:5.1.16.Final"
     compile "org.postgresql:postgresql:42.2.+"
     compile "org.grails.plugins:spring-security-core:3.2.+"
     compile "org.grails.plugins:database-migration:3.0.4"
