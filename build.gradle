@@ -3,12 +3,12 @@ buildscript {
         mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
         maven { url "http://maven.k-int.com/content/repositories/releases" }
-        maven { url "http://maven.k-int.com/content/repositories/private" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "org.grails.plugins:database-migration:3.0.4"
         classpath "com.bmuschko:gradle-docker-plugin:3.2.1"
+        classpath "org.grails.plugins:views-gradle:1.2.10"
     }
 }
 
@@ -17,13 +17,14 @@ group "mod.rs"
 
 apply plugin:"eclipse"
 apply plugin:"org.grails.grails-web"
+apply plugin:"org.grails.plugins.views-json"
 apply plugin:"com.bmuschko.docker-remote-api"
 
 repositories {
     mavenLocal()
     // Ian: Added k-int nexus to act as a proxy repo for remote repos, and k-int specifics
     maven { url "http://nexus.k-int.com/content/groups/public" }
-    maven { url "http://maven.k-int.com/content/repositories/private" }
+    maven { url "http://maven.k-int.com/content/repositories/releases" }
     maven { url "https://repo.grails.org/grails/core" }
 	jcenter()
 }
@@ -43,9 +44,11 @@ dependencies {
     compile "org.grails:grails-logging"
     compile "org.grails.plugins:cache"
     compile "org.grails.plugins:async"
+    runtime "org.grails.plugins:events"
     compile "org.grails.plugins:hibernate5"
+    compile "org.grails.plugins:views-json"
     compile "org.springframework.boot:spring-boot-starter-undertow"
-    compile "org.hibernate:hibernate-core:5.2.7.Final"
+    compile "org.hibernate:hibernate-core:5.1.16.Final"
     compile "org.postgresql:postgresql:42.2.+"
     compile "org.grails.plugins:spring-security-core:3.2.+"
     compile "org.grails.plugins:database-migration:3.0.4"

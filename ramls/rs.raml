@@ -1,0 +1,34 @@
+#%RAML 1.0
+
+title: ResourceSharing API
+baseUri: https://github.com/openlibraryenvironment/mod-rs
+version: v1
+
+documentation:
+  - title: mod-rs API
+    content: This documents the API calls that can be made to query and manage resource sharing requests
+
+types:
+  PatronRequest: !include patronRequest.json
+
+
+/rs:
+  /patronrequests:
+    get:
+      description: List current patron requests
+      responses:
+        200:
+          description: "OK"
+    post:
+      description: Submit a new patron request
+      body: 
+        application/json:
+          type: PatronRequest
+    /{patronId}:
+      get:
+        description: Retrieve a specific patron request
+      post:
+        description: Update a specific patron request
+  /refdata:
+    description: List all refdata categories currently known
+

@@ -8,7 +8,15 @@
       "handlers" : [
         {
           "methods": ["GET", "POST"],
-          "pathPattern": "/rs/patronrequests"
+          "pathPattern": "/rs/patronrequests*"
+        },
+        {
+          "methods": ["GET", "POST"],
+          "pathPattern": "/rs/refdata*"
+        },
+        {
+          "methods": ["GET", "POST"],
+          "pathPattern": "/rs/custprops*"
         }
       ]
     },{
@@ -41,7 +49,6 @@
         "module.rs-stripes.enabled"
       ],
       "visible": true
-    }
     }
   ],
   "launchDescriptor": {

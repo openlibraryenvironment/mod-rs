@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "A request made by a service user to locate and supply an item",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title":{
+      "type": "string"
+    },
+    "author":{
+      "type": "string"
+    },
+    "patronReference":{
+      "type": "string"
+    },
+    "serviceType":{
+      "type": "string"
+    },
+    "state":{
+      "type": "string"
+    },
+    "tags":{
+      "type": "string"
+    },
+    "customProperties":{
+      "type": "string"
+    }
+  },
+  "required": [
+  ]
+}
