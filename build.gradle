@@ -25,6 +25,7 @@ repositories {
     maven { url "http://nexus.k-int.com/content/groups/public" }
     maven { url "http://maven.k-int.com/content/repositories/private" }
     maven { url "https://repo.grails.org/grails/core" }
+	jcenter()
 }
 
 dependencies {
@@ -54,6 +55,9 @@ dependencies {
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
     compile "com.k_int.okapi:grails-okapi:3.+"
     console "org.grails:grails-console"
+	compile "io.springfox:springfox-swagger2:2.9.2"
+	compile "io.springfox:springfox-swagger-ui:2.9.2"
+	compile "io.springfox.grails:springfox-grails:1.0.1-SNAPSHOT"
     profile "com.k_int.grails.profiles:okapi-module:3.3.4"
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-datastore-rest-client"
