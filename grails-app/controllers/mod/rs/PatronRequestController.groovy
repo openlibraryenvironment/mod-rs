@@ -8,9 +8,9 @@ import groovy.util.logging.Slf4j
 
 @Slf4j
 @CurrentTenant
-class PatronRequestCotroller extends OkapiTenantAwareController<PatronRequest>  {
+class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
 
-  PatronRequestCotroller() {
+  PatronRequestController() {
     super(PatronRequest)
   }
 }
