@@ -1,19 +1,16 @@
 package mod.rs
 
+
 class UrlMappings {
 
-    static mappings = {
-        delete "/$controller/$id(.$format)?"(action:"delete")
-        get "/$controller(.$format)?"(action:"index")
-        get "/$controller/$id(.$format)?"(action:"show")
-        post "/$controller(.$format)?"(action:"save")
-        put "/$controller/$id(.$format)?"(action:"update")
-        patch "/$controller/$id(.$format)?"(action:"patch")
+  static mappings = {
+    "/"(controller: 'application', action:'index')
 
-        '/'(controller: 'application', action:'index')
-        '/rs/patronRequests'(resources: 'patronRequest')
-  
-        "500"(view: '/error')
-        "404"(view: '/notFound')
-    }
+    "/rs/patronrequests" (resources:'patronRequest')
+
+    "/chas/$action" ( controller: "Chas")
+
+    "500"(view: '/error')
+    "404"(view: '/notFound')
+  }
 }
