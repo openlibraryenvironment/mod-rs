@@ -5,12 +5,17 @@ import grails.databinding.BindInitializer
 import grails.gorm.MultiTenant
 import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.refdata.Defaults
+import com.k_int.web.toolkit.custprops.CustomProperties
+import com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+import com.k_int.web.toolkit.tags.Tag
+import com.k_int.web.toolkit.tags.Taggable
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
  * requesting that reshare locate and deliver a resource from a remote partner. 
  */
 
+// class PatronRequest implements CustomProperties,Taggable,MultiTenant<PatronRequest> {
 class PatronRequest implements MultiTenant<PatronRequest> {
 
   // internal ID of the patron request

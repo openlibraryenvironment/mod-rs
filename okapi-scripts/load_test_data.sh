@@ -10,6 +10,12 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   title:"Brain of the firm",
   patronReference:"Iantest112",
   serviceType:"Loan",
-  state:"Idle"
+  state:"Idle",
+  tags:[
+    "Testdata", "TestRun1"
+  ],
+  customProperties:{
+    "patronWalletHash": ["298348743738748728524854289743765"],
+  }
 }
 '`
