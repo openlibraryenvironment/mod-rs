@@ -27,6 +27,10 @@ class PatronRequest implements MultiTenant<PatronRequest> {
   // Patron reference (EG Barcode)
   String patronReference
 
+  // These 2 dates are maintained by the framework for us
+  Date dateCreated
+  Date lastUpdated
+
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
   @Defaults(['Loan', 'Copy-non-returnable'])
@@ -42,6 +46,9 @@ class PatronRequest implements MultiTenant<PatronRequest> {
   static mapping = {
                  id column: 'pr_id', generator: 'uuid', length:36
               title column: 'pr_title'
+            version column: 'pr_version'
+        dateCreated column: 'pr_date_created'
+        lastUpdated column: 'pr_last_updated'
     patronReference column: 'pr_patron_reference'
         serviceType column: 'pr_service_type_fk'
               state column: 'pr_state_fk'

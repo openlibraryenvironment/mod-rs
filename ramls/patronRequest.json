@@ -6,6 +6,27 @@
   "properties": {
     "id": {
       "type": "string"
+    },
+    "title":{
+      "type": "string"
+    },
+    "author":{
+      "type": "string"
+    },
+    "patronReference":{
+      "type": "string"
+    },
+    "serviceType":{
+      "type": "string"
+    },
+    "state":{
+      "type": "string"
+    },
+    "tags":{
+      "type": "string"
+    },
+    "customProperties":{
+      "type": "string"
     }
   },
   "required": [
