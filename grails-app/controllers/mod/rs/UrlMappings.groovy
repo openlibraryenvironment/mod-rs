@@ -11,7 +11,7 @@ class UrlMappings {
     "/chas/$action" ( controller: "Chas")
 
     // Call /rs/refdata to list all refdata categories
-    '/rs/refdata/'(resources: 'refdata') {
+    '/rs/refdata'(resources: 'refdata') {
       collection {
         "/$domain/$property" (controller: 'refdata', action: 'lookup')
       }
