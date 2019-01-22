@@ -1,24 +1,5 @@
-Thumbs.db
-.DS_Store
-.gradle
-build/
-out/
-bin
-.idea
-*.iml
-*.ipr
-*.iws
-
-# Eclipse files
-.classpath
-.project
-.settings
-
-# Vagrant files
-.vagrant
-
-# Log files
-*.log
-
-# Package files
-*.jar
+/build/
+/bin
+/.*
+!/.gitignore
+/_settings.gradle

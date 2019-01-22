@@ -13,7 +13,6 @@ import com.k_int.web.toolkit.refdata.Defaults
  * requesting that reshare locate and deliver a resource from a remote partner. 
  */
 
-// class PatronRequest implements CustomProperties,Taggable,MultiTenant<PatronRequest> {
 class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronRequest> {
 
   // internal ID of the patron request
