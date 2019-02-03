@@ -1,3 +1,19 @@
+
+---
+rabbitmq:
+    connections:
+      - name: main
+        host: localhost
+        username: chas
+        password: chas
+    queues:
+      - name: ReShare
+        durable: false
+    #    consumers:
+    #        WorkflowConsumer:
+    #            queue: ReShare
+    #            connection: main
+    #    enabled: false
 ---
 grails:
     profile: com.k_int.grails.profiles:okapi-module:3.3.4
@@ -73,12 +89,12 @@ grails:
         multiTenancy:
             mode: SCHEMA
             tenantResolverClass: com.k_int.okapi.OkapiTenantResolver    # See src/main/groovy
-            
+
     plugin:
       springsecurity:
         providerNames:
           - 'okapiAuthenticationProvider'
-          
+
         controllerAnnotations:
           staticRules:
             -
@@ -99,7 +115,7 @@ grails:
           - 'yyyy-MM-dd HH:mm:ss.S'
           - "yyyy-MM-dd'T'hh:mm:ss'Z'"
           - 'yyyy-mm-dd'
-          
+
     server:
         host: 10.0.2.2
         port: 8080
@@ -118,7 +134,7 @@ dataSource:
   dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
   url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_dev}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
-  
+
 environments:
   test:
     dataSource:
@@ -146,7 +162,7 @@ environments:
         abandonWhenPercentageFull: 50
         jdbcInterceptors: ConnectionState
         defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
-        
+
   development:
     # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
     # OKAPI supplies information about how to reach it to the modules. These options are used for self reg and other calls
@@ -158,4 +174,4 @@ environments:
 
     gorm:
       tenantId: public # Used by SystemPropertyTenantResolver
-    
+

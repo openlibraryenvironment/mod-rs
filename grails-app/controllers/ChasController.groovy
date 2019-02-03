@@ -1,4 +1,5 @@
 
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -52,5 +53,14 @@ class ChasController {
 
 		// Return the result as xml
 		render(text: xml, contentType: "text/xml", encoding: "UTF-8");
+	}
+
+	RabbitMessagePublisher rabbitMessagePublisher;
+	
+	def TestRabbit() {
+        render rabbitMessagePublisher.rpc {
+            routingKey = "ReShare"
+            body = '{"field1":"contents of field1")';
+        }
 	}
 }

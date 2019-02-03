@@ -22,6 +22,31 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
+logger ('grails.app.init', DEBUG)
+logger ('grails.app.controllers', DEBUG)
+logger ('grails.app.domains', DEBUG)
+logger ('grails.app.jobs', DEBUG)
+logger ('grails.app.services', DEBUG)
+logger ('com.k_int', DEBUG)
+logger ('okapi', INFO)
+logger ('folio', DEBUG)
+logger ('org.olf', DEBUG)
+logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+logger ('com.k_int.okapi.OkapiClient', WARN)
+logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
+
+// Uncomment below logging for output of OKAPI client http.
+//logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+//logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+//logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+
+if (Environment.currentEnvironment == Environment.TEST) {
+  logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+  logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+  logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+}
+
+
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir != null) {
     appender("FULL_STACKTRACE", FileAppender) {
@@ -34,4 +59,3 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
 }
 root(INFO, ['STDOUT'])
-
