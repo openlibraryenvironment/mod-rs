@@ -1,20 +1,8 @@
+---
+###
+# All root settings (anything not under the 'environements' key) here are loaded for every profile. 
+###
 
----
-rabbitmq:
-    connections:
-      - name: main
-        host: localhost
-        username: chas
-        password: chas
-    queues:
-      - name: ReShare
-        durable: false
-    #    consumers:
-    #        WorkflowConsumer:
-    #            queue: ReShare
-    #            connection: main
-    #    enabled: false
----
 grails:
     profile: com.k_int.grails.profiles:okapi-module:3.3.4
     codegen:
@@ -123,6 +111,20 @@ grails:
 okapi:
   schema:
     appName: 'mod-rs'
+    
+rabbitmq:
+  connections:
+    - name: main
+      host: localhost
+      username: chas
+      password: chas
+  queues:
+    - name: ReShare
+      durable: false
+  consumers:
+    WorkflowConsumer:
+      queue: ReShare
+      connection: main
 
 dataSource:
   pooled: true
@@ -135,6 +137,10 @@ dataSource:
   url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_dev}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
 
+##
+# The settings below are loaded per environment. i.e. Anything declared under 'environments.production' will override
+# values at the root when that particular profile is active.
+##
 environments:
   test:
     dataSource:

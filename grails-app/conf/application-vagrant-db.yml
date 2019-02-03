@@ -36,3 +36,7 @@ okapi:
   service:
     host: localhost
     port: 9130
+    
+rabbitmq:
+  enabled: false
+  
