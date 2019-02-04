@@ -39,4 +39,16 @@ okapi:
     
 rabbitmq:
   enabled: false
+  connections:
+    - name: main
+      host: localhost
+      username: chas
+      password: chas
+  queues:
+    - name: ReShare
+      durable: false
+  consumers:
+    WorkflowConsumer:
+      queue: ReShare
+      connection: main
   

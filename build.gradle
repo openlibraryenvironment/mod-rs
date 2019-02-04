@@ -71,10 +71,10 @@ dependencies {
   compile "org.springframework.boot:spring-boot-starter-undertow"
   compile "org.hibernate:hibernate-core:5.1.16.Final"
   compile "org.postgresql:postgresql:42.2.5"
-  compile "org.grails.plugins:spring-security-core:3.2.+"
+  compile "org.grails.plugins:spring-security-core:3.2.3"
   compile "org.grails.plugins:database-migration:3.0.4"
-  compile "org.liquibase:liquibase-core:3.5.+"
-  compile "com.ibm.icu:icu4j:62.+"
+  compile "org.liquibase:liquibase-core:3.5.5"
+  compile "com.ibm.icu:icu4j:62.1"
   compile "com.k_int.grails:web-toolkit:3.+"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
   compile "com.k_int.okapi:grails-okapi:3.+"
@@ -85,9 +85,9 @@ dependencies {
   testCompile "org.grails:grails-datastore-rest-client"
   testCompile "org.grails:grails-web-testing-support"
   testCompile "org.grails.plugins:geb"
-  testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:2.47.+"
-  testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.+"
-  testRuntime "net.sourceforge.htmlunit:htmlunit:2.+"
+  testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:2.47.2"
+  testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.2"
+  testRuntime "net.sourceforge.htmlunit:htmlunit:2.33"
 }
 
 bootRun {
