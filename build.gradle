@@ -21,6 +21,27 @@ apply plugin: "org.grails.plugins.views-json"
 apply plugin: "com.bmuschko.docker-remote-api"
 apply plugin: "com.k_int.gradle.plugin"
 
+eclipse {
+  classpath {
+    file {
+      whenMerged {
+        def confEntries = (entries.findAll { it.path == 'grails-app/conf' }) as List
+        
+        if (confEntries) {
+          def singleEnty = confEntries[0]
+          
+          // Remove all the entries.
+          entries.removeAll ( confEntries )
+          
+          // Set the output directory, and re-add.
+          singleEnty.output = "bin/main"
+          entries << singleEnty
+        }
+      }
+    }
+  }
+}
+
 repositories {
   mavenLocal()
   // Ian: Added k-int nexus to act as a proxy repo for remote repos, and k-int specifics
@@ -131,6 +152,7 @@ task generateDescriptors(type: Copy) {
   from ('./src/main/okapi') {
     include '*-template.json'
   }
+  
   into './build/resources/main/okapi'
   filteringCharset = 'UTF-8'
   expand(props)
