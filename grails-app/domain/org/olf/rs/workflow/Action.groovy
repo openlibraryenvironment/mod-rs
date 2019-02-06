@@ -2,12 +2,13 @@ package org.olf.rs.workflow
 
 import org.olf.rs.PatronRequest
 
-import com.k_int.web.toolkit.custprops.CustomProperties
-import com.k_int.web.toolkit.tags.Taggable
-
-import grails.gorm.MultiTenant
+import com.k_int.web.toolkit.custprops.CustomProperties;
+import com.k_int.web.toolkit.tags.Taggable;
+import grails.events.annotation.Subscriber;
+import grails.gorm.multitenancy.Tenants;
+import grails.gorm.MultiTenant;
 import grails.util.Holders;
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Slf4j;
 
 // Do we also need to implement CustomProperties and Taggable as well, what is the purpose of these two ?
 @Slf4j 
@@ -145,21 +146,34 @@ class Action implements MultiTenant<Action> {
 		return(serviceAction);
 	}
 
-	static def createDefault() {
-		// ensure the stati are created first
-		Status.createDefault();
+   /**
+    * This is called by the eventing mechanism - There is no web request context
+    * there may be something funky to do with events and multi tenant setup.
+    */
+    @Subscriber('okapi:schema_update')
+    public void onSchemaUpdate(tenantName, tenantId) {
+        log.info("Creating default data from actions / status and transitions for (${tenantName}, ${tenantId})");
 
-		createIfNotExists(APPROVE, APPROVE, APPROVE, "Approve", true, Status.PENDING, null, null, true, false);
-		createIfNotExists(CHECK_IN, CHECK_IN, CHECK_IN, "CheckIn", true, Status.CHECKED_IN, null, null, true, false);
-		createIfNotExists(COLLECTED, COLLECTED, COLLECTED, "Collected", true, Status.COLLECTED, null, null, true, false);
-		createIfNotExists(NEW_REQUEST, NEW_REQUEST, NEW_REQUEST, "NewRequest", true, Status.IN_PROCESS, null, null, false, false);
-		createIfNotExists(NOT_SUPPLY, NOT_SUPPLY, NOT_SUPPLY, "NotSupply", true, Status.UNFILLED, null, null, true, false);
-		createIfNotExists(PATRON_RETURNED, PATRON_RETURNED, PATRON_RETURNED, "Patron Returned", true, Status.PATRON_RETURNED, null, null, false, false);
-		createIfNotExists(RECEIVE, RECEIVE, RECEIVE, "Receive", true, Status.AWAITING_COLLECTION, null, null, false, false);
-		createIfNotExists(RECEIVED_MESSAGE, RECEIVED_MESSAGE, RECEIVED_MESSAGE, "ReceivedMessage", false, null, null, null, false, false);
-		createIfNotExists(RETURN, RETURN, RETURN, "Return", true, Status.RETURNED, null, null, true, false);
-		createIfNotExists(SEND_MESSAGE, SEND_MESSAGE, SEND_MESSAGE, "SendMessage", false, null, null, null, false, false);
-		createIfNotExists(SHIP, SHIP, SHIP, "Ship", true, Status.FULFILLED, null, null, true, false);
-		createIfNotExists(VALIDATE, VALIDATE, VALIDATE, "Validate", false, Status.VALIDATED, null, null, true, false);
+		// Need to connect to the appropriate tenant
+		Tenants.withId(tenantId) {
+			// ensure the stati are created first
+			Status.createDefault();
+	
+			createIfNotExists(APPROVE, APPROVE, APPROVE, "Approve", true, Status.PENDING, null, null, true, false);
+			createIfNotExists(CHECK_IN, CHECK_IN, CHECK_IN, "CheckIn", true, Status.CHECKED_IN, null, null, true, false);
+			createIfNotExists(COLLECTED, COLLECTED, COLLECTED, "Collected", true, Status.COLLECTED, null, null, true, false);
+			createIfNotExists(NEW_REQUEST, NEW_REQUEST, NEW_REQUEST, "NewRequest", true, Status.IN_PROCESS, null, null, false, false);
+			createIfNotExists(NOT_SUPPLY, NOT_SUPPLY, NOT_SUPPLY, "NotSupply", true, Status.UNFILLED, null, null, true, false);
+			createIfNotExists(PATRON_RETURNED, PATRON_RETURNED, PATRON_RETURNED, "Patron Returned", true, Status.PATRON_RETURNED, null, null, false, false);
+			createIfNotExists(RECEIVE, RECEIVE, RECEIVE, "Receive", true, Status.AWAITING_COLLECTION, null, null, false, false);
+			createIfNotExists(RECEIVED_MESSAGE, RECEIVED_MESSAGE, RECEIVED_MESSAGE, "ReceivedMessage", false, null, null, null, false, false);
+			createIfNotExists(RETURN, RETURN, RETURN, "Return", true, Status.RETURNED, null, null, true, false);
+			createIfNotExists(SEND_MESSAGE, SEND_MESSAGE, SEND_MESSAGE, "SendMessage", false, null, null, null, false, false);
+			createIfNotExists(SHIP, SHIP, SHIP, "Ship", true, Status.FULFILLED, null, null, true, false);
+			createIfNotExists(VALIDATE, VALIDATE, VALIDATE, "Validate", false, Status.VALIDATED, null, null, true, false);
+
+			// Now create the state transitions
+			StateTransition.createDefault();
+      }
 	}
 }

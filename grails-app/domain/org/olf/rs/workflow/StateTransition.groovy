@@ -31,7 +31,7 @@ class StateTransition implements MultiTenant<StateTransition> {
 		action     column : 'st_action'
 		fromStatus column : 'st_from_status'
 		nextAction column : 'st_next_action'
-		qualifier  column : 'qualifier'
+		qualifier  column : 'st_qualifier'
 		toStatus   column : 'st_to_status'
 	}
 
@@ -77,7 +77,7 @@ class StateTransition implements MultiTenant<StateTransition> {
 		}		
 	}
 	
-	static def createArchiveHubTransitions() {
+	static def createDefault() {
 	
 		// Action: Validate - Requester
 		createIfNotExists([Status.IDLE], Action.VALIDATE, QUALIFIER_REQUESTER, null, null);
