@@ -79,7 +79,7 @@ class Action implements MultiTenant<Action> {
 		areYouSureDialog                nullable : true
 		bulkEnabled                     nullable : true
 		description      maxSize : 512, nullable : false, blank : false
-		id               maxSize : 20,  nullable : false, blank : false, unique : true
+		id               maxSize : 20,  nullable : false, blank : false, unique : true, generator : 'assigned'
 		name             maxSize : 40,  nullable : false, blank : false, unique : true
 		selectable                      nullable : true
 		serviceClass     maxSize : 64,  nullable : true, blank : true
