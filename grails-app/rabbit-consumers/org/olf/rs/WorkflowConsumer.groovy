@@ -11,9 +11,21 @@ class WorkflowConsumer {
 //	    consumers : 1,
 //    	transacted: true,
 //	    retry     : true,
-		queue     : "ReShare"
+//		queue     : "ReShare"
 	]
 
+	/**
+	 * Handle an incoming JSON RabbitMQ message.
+	 *
+	 * @param body    The JSON as a map
+	 * @param context Properties of the incoming message.
+	 * @return
+	 */
+    def handleMessage(Map body, MessageContext context) {
+		println "Map body: " + body.toString();
+		return "Have consumed it!"
+    }
+	
 	/**
 	 * Handle an incoming RabbitMQ message.
 	 *
@@ -22,7 +34,9 @@ class WorkflowConsumer {
 	 * @return
 	 */
 	def handleMessage(def body, MessageContext context) {
-		println body
+		String contextBody = new String(context.body);
+		println "body: " + body
+		println "contextBody: " + contextBody
 		return "Have consumed it!"
 	}
 }

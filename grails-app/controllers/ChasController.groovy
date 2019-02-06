@@ -1,5 +1,7 @@
 
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import com.budjb.rabbitmq.RabbitContext;
+import com.budjb.rabbitmq.RunningState;
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -56,11 +58,42 @@ class ChasController {
 	}
 
 	RabbitMessagePublisher rabbitMessagePublisher;
+	RabbitContext rabbitContext;
 	
 	def TestRabbit() {
-        render rabbitMessagePublisher.rpc {
-            routingKey = "ReShare"
-            body = '{"field1":"contents of field1")';
-        }
+		boolean successful = true;
+		if (RabbitRunning()) {
+			try {
+				// Note: use rpc if you want to wait for a response			
+				rabbitMessagePublisher.send {
+					routingKey = "ReShare"
+					body = '{"field1":"contents of field1"}';
+				}
+			} catch (Exception e) {
+				log.error("Exception thrown while puting a message on the ReShare rabbit queue", e);
+				successful = false;
+			}
+		} else {
+				successful = false;
+		}
+		render(text: successful ? "Successfully sent a message to rabbit" : "Failed to send the message to rabbit, check the log file and retry later", contentType: "text/plain", encoding: "UTF-8");
+		
+	}
+
+	boolean rabbitInitialised = false;
+	private boolean RabbitRunning() {
+		boolean rabbitRunning = true;	
+		if (!rabbitInitialised || (rabbitContext.getRunningState() != RunningState.RUNNING)) {
+			try {
+				// Load the configuration and attempt to start
+				rabbitContext.load();
+				rabbitContext.start();
+				rabbitInitialised = true;
+			} catch (Exception e) {
+				log.error("Failed to start rabbit: ", e);
+				rabbitRunning = false;
+			}
+		}
+		return(rabbitRunning);
 	}
 }

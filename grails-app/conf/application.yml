@@ -111,6 +111,22 @@ grails:
 okapi:
   schema:
     appName: 'mod-rs'
+
+rabbitmq:
+  enabled: false
+  connections:
+    - name: main
+      host: localhost
+      username: chas
+      password: chas
+      isDefault: true
+  queues:
+    - name: ReShare
+      durable: false
+  consumers:
+    WorkflowConsumer:
+      queue: ReShare
+      match: any
     
 dataSource:
   pooled: true
