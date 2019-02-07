@@ -5,27 +5,35 @@
   "additionalProperties": false,
   "properties": {
     "id": {
+      "description": "internal ID of the patron request (NOT of the requested item)",
       "type": "string"
     },
     "title":{
+      "description": "Title of the item requested",
       "type": "string"
     },
     "author":{
+      "description": "Author of the item requested",
       "type": "string"
     },
     "patronReference":{
+      "description": "Patron reference (EG Barcode)",
       "type": "string"
     },
     "serviceType":{
+      "description": "e.g. 'Loan', 'Copy-non-returnable'",
       "type": "string"
     },
     "state":{
+      "description": "One of 'Idle', 'Approved', 'Pending', 'Cancelled', 'Shipped', 'Awaiting Collection', 'Filfilled', 'Unfilled'",
       "type": "string"
     },
     "tags":{
+      "description": "XXX to do",
       "type": "string"
     },
     "customProperties":{
+      "description": "XXX to do",
       "type": "string"
     }
   },
