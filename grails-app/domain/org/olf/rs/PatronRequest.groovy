@@ -20,8 +20,23 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
   // internal ID of the patron request
   String id
 
+  @Defaults(['Book', 'Journal', 'Other'])
+  RefdataValue publicationType
+
   // Title of the item requested
   String title
+  String author
+  String subtitle
+  String sponsoringBody
+  String publisher
+  String placeOfPublication
+  String volume
+  String issue
+  String startPage
+  String numberOfPages
+  String publicationDate
+  String publicationDateOfComponent
+  String edition
 
   // Patron reference (EG Barcode)
   String patronReference
@@ -51,11 +66,36 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
   Action pendingAction;
 
   static constraints = {
+                     
+                   dateCreated (nullable:true, blank:false)
+                   lastUpdated (nullable:true, blank:false)
+               patronReference (nullable:true, blank:false)
+                   serviceType (nullable:true, blank:false)
+                         state (nullable:true, blank:false)
+	               isRequester (nullable:true, blank:false)
+	           numberOfRetries (nullable:true)
+	delayPerformingActionUntil (nullable:true)
+	 			 pendingAction (nullable:true)
+               publicationType (nullable:true, blank:false)
+
+                         title (nullable:true, blank:false)
+                        author (nullable:true, blank:false)
+                      subtitle (nullable:true, blank:false)
+                sponsoringBody (nullable:true, blank:false)
+                     publisher (nullable:true, blank:false)
+            placeOfPublication (nullable:true, blank:false)
+                        volume (nullable:true, blank:false)
+                         issue (nullable:true, blank:false)
+                     startPage (nullable:true, blank:false)
+                 numberOfPages (nullable:true, blank:false)
+               publicationDate (nullable:true, blank:false)
+    publicationDateOfComponent (nullable:true, blank:false)
+                       edition (nullable:true, blank:false)
+
   }
 
   static mapping = {
                             id column : 'pr_id', generator: 'uuid', length:36
-                         title column : 'pr_title'
                        version column : 'pr_version'
                    dateCreated column : 'pr_date_created'
                    lastUpdated column : 'pr_last_updated'
@@ -66,7 +106,22 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
 	           numberOfRetries column : 'pr_number_of_retries'
 	delayPerformingActionUntil column : 'pr_delay_performing_action_until'
 	 			 pendingAction column : 'pr_pending_action_fk'
-			  
+               publicationType column: 'pr_pub_type_fk'
+
+                         title column: 'pr_title'
+                        author column: 'pr_author'
+                      subtitle column: 'pr_sub_title'
+                sponsoringBody column: 'pr_sponsoring_body'
+                     publisher column: 'pr_publisher'
+            placeOfPublication column: 'pr_place_of_pub'
+                        volume column: 'pr_volume'
+                         issue column: 'pr_issue'
+                     startPage column: 'pr_start_page'
+                 numberOfPages column: 'pr_num_pages'
+               publicationDate column: 'pr_pub_date'
+    publicationDateOfComponent column: 'pr_pubdate_of_component'
+                       edition column: 'pr_edition'
+
   }
 
 }

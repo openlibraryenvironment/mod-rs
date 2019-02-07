@@ -3,7 +3,7 @@
   "name": "${info.app.name}",
   "provides": [
     {
-      "id": "resourcesharing",
+      "id": "rs",
       "version": "${info.app.minorVersion}",
       "handlers" : [
         {
