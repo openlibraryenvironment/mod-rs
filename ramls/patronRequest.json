@@ -8,12 +8,45 @@
       "description": "internal ID of the patron request (NOT of the requested item)",
       "type": "string"
     },
+    "publicationType":{
+      "type": "string"
+    },
     "title":{
       "description": "Title of the item requested",
       "type": "string"
     },
     "author":{
       "description": "Author of the item requested",
+      "type": "string"
+    },
+    "sponsoringBody":{
+      "type": "string"
+    },
+    "publisher":{
+      "type": "string"
+    },
+    "placeOfPublication":{
+      "type": "string"
+    },
+    "volume":{
+      "type": "string"
+    },
+    "issue":{
+      "type": "string"
+    },
+    "startPage":{
+      "type": "string"
+    },
+    "numberOfPages":{
+      "type": "string"
+    },
+    "publicationDate":{
+      "type": "string"
+    },
+    "publicationDateOfComponent":{
+      "type": "string"
+    },
+    "edition":{
       "type": "string"
     },
     "patronReference":{

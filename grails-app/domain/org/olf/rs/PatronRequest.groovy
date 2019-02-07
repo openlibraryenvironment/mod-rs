@@ -23,6 +23,7 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
 
   // Title of the item requested
   String title
+  String author
   String subtitle
   String sponsoringBody
   String publisher
@@ -61,6 +62,7 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
                publicationType(nullable:true, blank:false)
 
                          title(nullable:true, blank:false)
+                        author(nullable:true, blank:false)
                       subtitle(nullable:true, blank:false)
                 sponsoringBody(nullable:true, blank:false)
                      publisher(nullable:true, blank:false)
@@ -86,6 +88,7 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
                publicationType column: 'pr_pub_type_fk'
 
                          title column: 'pr_title'
+                        author column: 'pr_author'
                       subtitle column: 'pr_sub_title'
                 sponsoringBody column: 'pr_sponsoring_body'
                      publisher column: 'pr_publisher'
