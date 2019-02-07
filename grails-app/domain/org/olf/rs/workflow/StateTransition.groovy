@@ -7,6 +7,9 @@ class StateTransition implements MultiTenant<StateTransition> {
 	static public final String QUALIFIER_REQUESTER = "R";
 	static public final String QUALIFIER_SUPPLIER  = "S";
 
+	/** We have the id as a uuid */
+	String id;
+
 	/** The status the request is currently at */
 	Status fromStatus;
 
@@ -27,6 +30,7 @@ class StateTransition implements MultiTenant<StateTransition> {
 						toStatus   : Status];
 
 	static mapping = {
+		table      'wf_state_transition'
         id         column : 'st_id', generator: 'uuid', length:36
 		action     column : 'st_action'
 		fromStatus column : 'st_from_status'
@@ -37,8 +41,9 @@ class StateTransition implements MultiTenant<StateTransition> {
 
     static constraints = {
 			action     nullable : false
-			fromStatus nullable : false
+			fromStatus nullable : false, unique : ['action', 'toStatus', 'qualifier']
 			nextAction nullable : true
+			qualifier  nullable : false
 			toStatus   nullable : false
     }
 
@@ -54,25 +59,30 @@ class StateTransition implements MultiTenant<StateTransition> {
 		}
 	}
 
-	static def createIfNotExists1(List<Status> fromStatusList, Action action, Status toStatus, String qualifier, String nextActionCode) {
+	static def createIfNotExists1(List<String> fromStatusList, Action action, Status toStatus, String qualifier, String nextActionCode) {
 		if (toStatus && fromStatusList) {
 			Action nextAction;
 			if (nextActionCode) {
-				nextAction = Action.findById(nextActionCode);
+				nextAction = Action.get(nextActionCode);
 			}
-			fromStatusList.each() { Status fromStatus ->
-				StateTransition transition = StateTransition.findByFromStatusAndActionAndQualifierAndToStatus(fromStatus, action, qualifier, toStatus);
-				if (transition == null) {
-					transition = new StateTransition();
-					transition.fromStatus = fromStatus;
-					transition.action = action;
-					transition.qualifier = qualifier;
-					transition.toStatus = toStatus;
+			fromStatusList.each() { String fromStatusCode ->
+				Status fromStatus = Status.get(fromStatusCode);
+				if (fromStatus != null) {
+					StateTransition transition = StateTransition.findByFromStatusAndActionAndQualifierAndToStatus(fromStatus, action, qualifier, toStatus);
+					if (transition == null) {
+						transition = new StateTransition();
+						transition.fromStatus = fromStatus;
+						transition.action = action;
+						transition.qualifier = qualifier;
+						transition.toStatus = toStatus;
+					}
+	
+					// Next action may have changed
+					transition.nextAction = nextAction;
+					if (!transition.save(flush : true)) {
+						log.error("Unable to save transition, from status \"" + transition.fromStatus.name + "\", action: \"" + transition.action.name + "\", to status: \"" + transition.fromStatus.name + "\", errors: " + transition.errors);
+					}
 				}
-
-				// Next action may have changed
-				transition.nextAction = nextAction;
-				transition.save();
 			}
 		}		
 	}
@@ -110,9 +120,9 @@ class StateTransition implements MultiTenant<StateTransition> {
 		createIfNotExists([Status.SHIPPED], Action.CHECK_IN, QUALIFIER_SUPPLIER, null, null);
 	}
 	
-	static Action getNextAction(Status fromStatus, Action action, Status toStatus) {
+	static Action getNextAction(Status fromStatus, Action action, Status toStatus, String qualifier) {
 		Action nextAction = null;
-		StateTransition transition = findByFromStatusAndActionAndToStatus(fromStatus, action, toStatus);
+		StateTransition transition = findByFromStatusAndActionAndToStatusAndQualifier(fromStatus, action, toStatus, qualifier);
 		if (transition != null) {
 			nextAction = transition.nextAction;
 		}

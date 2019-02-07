@@ -132,12 +132,15 @@ dataSource:
   pooled: true
   jmxExport: false
   dbCreate: none
-  username: "${db.username:folio}"
-  password: "${db.password:folio}"
   driverClassName: org.postgresql.Driver
   dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
-  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_dev}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
+  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:mod-rs_dev}"
+  #username: "${db.username:folio}"
+  #password: "${db.password:folio}"
+  #url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}" # Port 54321 forwarded so as not to clash.
+  username: folio_admin
+  password: folio_admin
 
 ##
 # The settings below are loaded per environment. i.e. Anything declared under 'environments.production' will override
