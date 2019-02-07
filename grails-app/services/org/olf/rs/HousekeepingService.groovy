@@ -4,6 +4,7 @@ import grails.gorm.multitenancy.Tenants
 import grails.events.annotation.Subscriber
 import grails.gorm.multitenancy.WithoutTenant
 import grails.gorm.transactions.Transactional
+import org.olf.rs.workflow.Action;
 
 /**
  * This service works at the module level, it's often called without a tenant context.
@@ -32,6 +33,8 @@ public class HousekeepingService {
 
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
+		// Create the Actions / status and transitions for the core state model 
+		Action.CreateDefault();
     }
   }
 
