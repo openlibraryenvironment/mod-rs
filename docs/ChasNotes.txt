@@ -49,3 +49,8 @@ run okapi-scripts\register_and_enable.sh
 curl -XPOST -H "X-OKAPI-TENANT: chas" "http://localhost:8080/_/tenant"
 
 
+
+rabbitmqctl add_user folio folio
+rabbitmqctl set_user_tags folio administrator
+rabbitmq-plugins enable rabbitmq_management
+
