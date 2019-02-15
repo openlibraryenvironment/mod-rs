@@ -20,6 +20,7 @@ public class RabbitService {
 					routingKey = queue
 					replyTo = responseQueue
 					correlationId = messageId
+					deliveryMode = 2 // persistent
 					messageId = messageId
 					timestamp = OffsetDateTime.now()
 					body = message;
