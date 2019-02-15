@@ -8,10 +8,14 @@ Initial username and password are guest, can only be acceessed from localhost, s
 To enable the managment ui interface: rabbitmq-plugins enable rabbitmq_management
 Management UI available at: http://localhost:15672 
 
-Add queue ReShare
-Create user: reshare, with topic workflow
+Create user: reshare
 
 See http://budjb.github.io/grails-rabbitmq-native/3.x/latest/ about getting started
+
+For delayed messages see the RabbitMQ Delayed Message Plugin at https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/
+
+Copy plugin to plugins directory
+To enable: rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 
 Database stuff
 Tennant Examples:

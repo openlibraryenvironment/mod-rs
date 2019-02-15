@@ -1,7 +1,6 @@
 
-import com.budjb.rabbitmq.RabbitContext;
-import com.budjb.rabbitmq.RunningState;
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher;
+import org.olf.rs.RabbitService;
+import org.olf.rs.rabbit.Queue;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -57,43 +56,14 @@ class ChasController {
 		render(text: xml, contentType: "text/xml", encoding: "UTF-8");
 	}
 
-	RabbitMessagePublisher rabbitMessagePublisher;
-	RabbitContext rabbitContext;
+	RabbitService rabbitService;
 	
-	def TestRabbit() {
-		boolean successful = true;
-		if (RabbitRunning()) {
-			try {
-				// Note: use rpc if you want to wait for a response			
-				rabbitMessagePublisher.send {
-					routingKey = "ReShare"
-					body = '{"field1":"contents of field1"}';
-				}
-			} catch (Exception e) {
-				log.error("Exception thrown while puting a message on the ReShare rabbit queue", e);
-				successful = false;
-			}
-		} else {
-				successful = false;
-		}
-		render(text: successful ? "Successfully sent a message to rabbit" : "Failed to send the message to rabbit, check the log file and retry later", contentType: "text/plain", encoding: "UTF-8");
-		
+	def CheckRabbit() {
+		render(text: rabbitService.Running() ? "Rabbit is running" : "Rabbit is not running, is there a problem", contentType: "text/plain", encoding: "UTF-8");
 	}
 
-	boolean rabbitInitialised = false;
-	private boolean RabbitRunning() {
-		boolean rabbitRunning = true;	
-		if (!rabbitInitialised || (rabbitContext.getRunningState() != RunningState.RUNNING)) {
-			try {
-				// Load the configuration and attempt to start
-				rabbitContext.load();
-				rabbitContext.start();
-				rabbitInitialised = true;
-			} catch (Exception e) {
-				log.error("Failed to start rabbit: ", e);
-				rabbitRunning = false;
-			}
-		}
-		return(rabbitRunning);
+	def TestRabbit() {
+		boolean successful = rabbitService.Send(Queue.RESHARE_ACTION, "Message-1", '{"field1":"contents of field1"}', Queue.PROCESSOR_RESPONSE);
+		render(text: successful ? "Successfully sent a message to rabbit" : "Failed to send the message to rabbit, check the log file and retry later", contentType: "text/plain", encoding: "UTF-8");
 	}
 }

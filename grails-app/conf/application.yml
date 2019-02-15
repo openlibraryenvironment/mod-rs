@@ -121,11 +121,24 @@ rabbitmq:
       password: chas
       isDefault: true
   queues:
-    - name: ReShare
-      durable: false
+    - name: ReShareAction
+      durable: true
+    - name: ISO18626
+      durable: true
+    - name: ISO10161
+      durable: true
+    - name: GenericScript
+      durable: true
+    - name: ProcessorResponse
+      durable: true
+    - name: NewMessage
+      durable: true
   consumers:
-    WorkflowConsumer:
-      queue: ReShare
+    ReShareConsumer:
+      queue: ReShareAction
+      match: any
+    ProcessorResponseConsumer:
+      queue: ProcessorResponse
       match: any
     
 dataSource:
