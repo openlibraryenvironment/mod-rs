@@ -49,8 +49,15 @@ run okapi-scripts\register_and_enable.sh
 curl -XPOST -H "X-OKAPI-TENANT: chas" "http://localhost:8080/_/tenant"
 
 
+wget https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20171201-3.7.x.zip
+unzip and move .ez file to /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.11/plugins
+service rabbitmq-server restart
 
 rabbitmqctl add_user folio folio
 rabbitmqctl set_user_tags folio administrator
 rabbitmq-plugins enable rabbitmq_management
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
+service rabbitmq-server restart
+
 

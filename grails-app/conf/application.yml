@@ -116,9 +116,10 @@ rabbitmq:
   enabled: false
   connections:
     - name: main
+      # The new vagrant image config.vm.box = "projectreshare/development" exposes a rabbitmq with the user/pass folio/folio
       host: localhost
-      username: chas
-      password: chas
+      username: folio
+      password: folio
       isDefault: true
   queues:
     - name: ReShare
