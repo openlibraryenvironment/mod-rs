@@ -14,7 +14,8 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "folio/testing-backend"
+  # config.vm.box = "folio/testing-backend"
+  config.vm.box = "projectreshare/development"
     
   config.vm.provider "virtualbox" do |v|
     v.memory = 10240
@@ -30,6 +31,12 @@ Vagrant.configure(2) do |config|
   # vbox instance can use it.
   config.vm.network "forwarded_port", guest: 5432, host: 54321
   config.vm.network "forwarded_port", guest: 9130, host: 9130
+
+  # RabbitMQ ports
+  config.vm.network "forwarded_port", guest: 15672, host: 15672
+  # Erlang and inet_dist_listen_min/max cluster ports - probably not needed for normal dev operation
+  # config.vm.network "forwarded_port", guest: 4369, host: 4369
+  # config.vm.network "forwarded_port", guest: 35197, host: 35197
 
 
   # Create a forwarded port mapping which allows access to a specific port
