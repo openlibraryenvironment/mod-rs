@@ -2,16 +2,11 @@ package org.olf.rs
 
 import com.budjb.rabbitmq.consumer.MessageContext
 
-class WorkflowConsumer {
+class ProcessorResponseConsumer {
 	/**
 	 * Consumer configuration.
 	 */
 	static rabbitConfig = [
-//		connection: 'main',
-//	    consumers : 1,
-//    	transacted: true,
-//	    retry     : true,
-//		queue     : "ReShare"
 	]
 
 	/**
@@ -23,7 +18,9 @@ class WorkflowConsumer {
 	 */
     def handleMessage(Map body, MessageContext context) {
 		println "Map body: " + body.toString();
-		return "Have consumed it!"
+
+		// No response to send
+		return (null);
     }
 	
 	/**
@@ -37,6 +34,8 @@ class WorkflowConsumer {
 		String contextBody = new String(context.body);
 		println "body: " + body
 		println "contextBody: " + contextBody
-		return "Have consumed it!"
+
+		// No response to send
+		return (null);
 	}
 }
