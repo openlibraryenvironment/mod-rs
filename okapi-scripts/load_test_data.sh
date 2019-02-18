@@ -31,7 +31,6 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   patronReference:"Patron001",
   notARealProperty:"Test that this is ignored in accordance with Postels law",
   serviceType:"Loan",
-  state:"Idle",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
   ],
@@ -49,7 +48,6 @@ PATRON_REQ_2=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   author:"Beer, Stafford",
   patronReference:"Patron001",
   serviceType:"Loan",
-  state:"Idle",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
   ],
@@ -67,7 +65,6 @@ PATRON_REQ_3=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   patronReference:"Patron004",
   publisher:"Boston : Academic Press",
   serviceType:"Loan",
-  state:"Idle",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
   ],
