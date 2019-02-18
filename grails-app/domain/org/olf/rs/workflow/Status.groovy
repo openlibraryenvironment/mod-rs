@@ -2,8 +2,31 @@ package org.olf.rs.workflow
 
 import grails.gorm.MultiTenant
 import groovy.util.logging.Slf4j
+import com.k_int.web.toolkit.databinding.BindUsingWhenRef
 
 @Slf4j 
+@BindUsingWhenRef({ obj, propName, source ->
+
+  Status val = null;
+
+  def data = source.getAt(propName)
+
+  // If the data is asking for null binding then ensure we return here.
+  if (data == null) {
+    return null
+  }
+
+  if ( data instanceof Map ) {
+    if ( data.id ) {
+      val = Status.read(data.id);
+    }
+  }
+  else if ( data instanceof String ) {
+    val = Status.findByName(data)
+  }
+
+  val
+})
 class Status implements MultiTenant<Status> {
 
 	static public final String APPROVED            = "approved";	
