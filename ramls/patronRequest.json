@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "description": "A request made by a service user to locate and supply an item",
+  "note": "This schema is not actionable code, but a hand-crafted documentation of the Real Truth, which is found in ../grails-app/domain/org/olf/rs/PatronRequest.groovy",
   "additionalProperties": false,
   "properties": {
     "id": {
