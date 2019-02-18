@@ -29,6 +29,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   title:"Brain of the firm",
   author:"Beer, Stafford",
   patronReference:"Patron001",
+  state:"Idle",
   notARealProperty:"Test that this is ignored in accordance with Postels law",
   serviceType:"Loan",
   tags:[
@@ -47,6 +48,7 @@ PATRON_REQ_2=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   title:"The Heart of Enterprise",
   author:"Beer, Stafford",
   patronReference:"Patron001",
+  state:"Idle",
   serviceType:"Loan",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
@@ -64,6 +66,7 @@ PATRON_REQ_3=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   isbn:"978-0120847280",
   patronReference:"Patron004",
   publisher:"Boston : Academic Press",
+  state:"Idle",
   serviceType:"Loan",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
