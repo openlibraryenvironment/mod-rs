@@ -11,6 +11,7 @@ class Status implements MultiTenant<Status> {
 	static public final String CANCELLED           = "cancelled";	
 	static public final String CHECKED_IN          = "checked in";	
 	static public final String COLLECTED           = "collected";	
+	static public final String ERROR               = "error";	
 	static public final String FULFILLED           = "fulfilled";	
 	static public final String IDLE                = "idle";	
 	static public final String IN_PROCESS          = "in process";	
@@ -28,6 +29,7 @@ class Status implements MultiTenant<Status> {
 	static public final String NAME_CANCELLED           = "Cancelled";
 	static public final String NAME_CHECKED_IN          = "Checked In";
 	static public final String NAME_COLLECTED           = "Collected";
+	static public final String NAME_ERROR               = "Error";
 	static public final String NAME_FULFILLED           = "Fulfilled";
 	static public final String NAME_IDLE                = "Idle";
 	static public final String NAME_IN_PROCESS          = "In Process";
@@ -45,6 +47,7 @@ class Status implements MultiTenant<Status> {
 	static public final String DESCRIPTION_CANCELLED           = "The request is no longer required and has been cancelled";
 	static public final String DESCRIPTION_CHECKED_IN          = "The supplier has checked the item back in and nothing further needs to happen with the request";
 	static public final String DESCRIPTION_COLLECTED           = "The patron has collected the item from the requester";
+	static public final String DESCRIPTION_ERROR               = "An error occurred processing the last action";
 	static public final String DESCRIPTION_FULFILLED           = "The request has been fulfilled and nothing further needs to happen with the request";
 	static public final String DESCRIPTION_IDLE                = "The requester has received a new request from a patron";
 	static public final String DESCRIPTION_IN_PROCESS          = "The supplier is looking into whether they can supply the item or not";
@@ -110,6 +113,7 @@ class Status implements MultiTenant<Status> {
 		createIfNotExists(CANCELLED,           NAME_CANCELLED,           DESCRIPTION_CANCELLED);
 		createIfNotExists(CHECKED_IN,          NAME_CHECKED_IN,          DESCRIPTION_CHECKED_IN);
 		createIfNotExists(COLLECTED,           NAME_COLLECTED,           DESCRIPTION_COLLECTED);
+		createIfNotExists(ERROR,               NAME_ERROR,               DESCRIPTION_ERROR);
 		createIfNotExists(FULFILLED,           NAME_FULFILLED,           DESCRIPTION_FULFILLED);
 		createIfNotExists(IDLE,                NAME_IDLE,                DESCRIPTION_IDLE);
 		createIfNotExists(IN_PROCESS,          NAME_IN_PROCESS,          DESCRIPTION_IN_PROCESS);

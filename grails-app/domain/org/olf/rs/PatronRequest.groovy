@@ -65,6 +65,15 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
   /** The action waiting to be performed on this request */
   Action pendingAction;
 
+  /** If we hit an error this is the action we were trying to perform */
+  Action errorAction;
+
+  /** If we hit an error this was the status prior to the error occurring */
+  Status preErrorStatus;
+
+  // The audit of what has happened to this request */
+  static hasMany = [audit: PatronRequestAudit];
+
   static constraints = {
                      
                    dateCreated (nullable:true, blank:false)
@@ -76,6 +85,8 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
 	           numberOfRetries (nullable:true)
 	delayPerformingActionUntil (nullable:true)
 	 			 pendingAction (nullable:true)
+				   errorAction (nullable:true)
+			    preErrorStatus (nullable:true)
                publicationType (nullable:true, blank:false)
 
                          title (nullable:true, blank:false)
@@ -106,6 +117,8 @@ class PatronRequest implements CustomProperties, Taggable, MultiTenant<PatronReq
 	           numberOfRetries column : 'pr_number_of_retries'
 	delayPerformingActionUntil column : 'pr_delay_performing_action_until'
 	 			 pendingAction column : 'pr_pending_action_fk'
+				   errorAction column : 'pr_error_action_fk'
+			    preErrorStatus column : 'pr_pre_error_status_fk'
                publicationType column: 'pr_pub_type_fk'
 
                          title column: 'pr_title'

@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.Date;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit;
 
 
 abstract class AbstractAction {
@@ -30,9 +31,6 @@ abstract class AbstractAction {
 		SUCCESS
 	}
 
-	/** For sending data to the client */
-	def clientService;
-
 	/** For determining the valid actions */
 	def workflowService;
 
@@ -53,14 +51,18 @@ abstract class AbstractAction {
 
 	public void execute(PatronRequest requestToBeProcessed) {
 		long processingStartTime = System.currentTimeMillis();
-			
-		// TODO: I have removed the auditing / error recording I had previously, need to put in place something else
-		 
+		boolean errored = false;
+
+		// Setup the audit record
+		PatronRequestAudit patronRequestAudit = new PatronRequestAudit();
+		patronRequestAudit.dateCreated = new Date();
+		patronRequestAudit.fromStatus = requestToBeProcessed.state;
+		patronRequestAudit.action = requestToBeProcessed.pendingAction;
+		patronRequestAudit.patronRequest = requestToBeProcessed;
+		requestToBeProcessed
+		
 		// The Next action that is to be executed
 		Action nextAction = null;
-
-		// The status we will be changing the request  being processed to
-		Status newStatus = null;
 
 		// Will we be performing a retry
 		boolean performRetry = false;
@@ -69,11 +71,11 @@ abstract class AbstractAction {
 			// Now perform the action
 			switch (perform(requestToBeProcessed)) {
 				case ActionResponse.SUCCESS:
-					newStatus = getAction().statusSuccessYes;
+					patronRequestAudit.toStatus = getAction().statusSuccessYes;
 					break
 
 				case ActionResponse.NO:
-					newStatus = getAction().statusSuccessNo;
+					patronRequestAudit.toStatus = getAction().statusSuccessNo;
 					break;
 
 				case ActionResponse.RETRY:
@@ -95,41 +97,50 @@ abstract class AbstractAction {
 					break;
 
 				case ActionResponse.ERROR:
-					newStatus = getAction().statusFailure;
+					errored = true;
+					patronRequestAudit.toStatus = getAction().statusFailure;
 					break;
 
 				default:
-					// Need to set the status to error processing or something similar, need to look up the record as opposed to caching it as it is a multi tennant system
-					newStatus = Status.GetByCode(Status.ERROR_PROCESSING);
+					// Hit an error if we have reached here
+					errored = true;
 					break;
 			}
 
 			// No point looking up the next action for a retry as it will not change
-			if (!performRetry) {
+			if (!performRetry && !errored) {
 				// Now we have the new status, determine if we have a new action to perform
-				nextAction = StateTransition.getNextAction(requestToBeProcessed.Status, getAction(), newStatus);
+				nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus);
 			}
 
 		} catch (Exception e) {
 			// Note: If an exception is thrown from another method and not caught within it
 			// Then the entire transaction will get rolled back including any saves made after the exception
 			// Will need to test whether a read only transaction service throwing an exception causes a rollback
-			newStatus = Status.GetByCode(Status.ERROR_PROCESSING);
-			nextAction = null;
+			errored = true;
 		}
 
 		try {
+			// If we have hit an error, save the current status and pending action
+			if (errored) {
+				nextAction = null;
+				requestToBeProcessed.preErrorStatus = requestToBeProcessed.state;
+				requestToBeProcessed.errorAction = requestToBeProcessed.pendingAction;
+				if (patronRequestAudit.toStatus == null) {
+					patronRequestAudit.toStatus = Status.get(Status.ERROR);
+				}
+			}
+		
 			// Set the status and pending action on the request and the audit trail, if a retry will not be performed
 			if (!performRetry) {
 				requestToBeProcessed.lastUpdated = new Date();
 				requestToBeProcessed.pendingAction = nextAction;
-				requestToBeProcessed.Status = newStatus;
+				requestToBeProcessed.state = patronRequestAudit.toStatus;
 				requestToBeProcessed.numberOfRetries = null;
 
-				// Not forgetting abut the audit
-	
-				// Save the request, this should save all the errors and audit record as well
-				long duration = System.currentTimeMillis() - processingStartTime;
+				// Not forgetting to add the audit record
+				patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
+				requestToBeProcessed.AddToAdudit(patronRequestAudit);
 			}
 
 			if (!requestToBeProcessed.save(flush : true)) {
@@ -141,6 +152,7 @@ abstract class AbstractAction {
 			}
 		} catch (Exception e) {
 			// TODO: Log to the log file and see if we can generate an audit record to log this exception
+			log.error("Excpetion thrown while processnig request: " + requestToBeProcessed.id + " for action: " + requestToBeProcessed.pendingAction.name, e);
 		}
 	}
 
