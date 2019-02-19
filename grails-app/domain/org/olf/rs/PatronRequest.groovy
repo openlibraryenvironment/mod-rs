@@ -7,7 +7,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.custprops.CustomProperties
 import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.workflow.Action;
-import org.olf.rs.workflow.Status
+import org.olf.rs.workflow.Status;
 import com.k_int.web.toolkit.tags.Tag
 
 /**
@@ -65,47 +65,44 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** The action waiting to be performed on this request */
   Action pendingAction;
 
-  static hasMany = [
-    tags: Tag
-  ]
-
   /** If we hit an error this is the action we were trying to perform */
   Action errorAction;
 
   /** If we hit an error this was the status prior to the error occurring */
   Status preErrorStatus;
 
-  // The audit of what has happened to this request */
-  static hasMany = [audit: PatronRequestAudit];
+  // The audit of what has happened to this request and tags that are associated with the request */
+  static hasMany = [audit : PatronRequestAudit,
+	                tags  : Tag];
 
   static constraints = {
                      
-                   dateCreated (nullable:true, blank:false)
-                   lastUpdated (nullable:true, blank:false)
-               patronReference (nullable:true, blank:false)
-                   serviceType (nullable:true, blank:false)
-                         state (nullable:true, blank:false)
-	               isRequester (nullable:true, blank:false)
-	           numberOfRetries (nullable:true)
-	delayPerformingActionUntil (nullable:true)
-	 			 pendingAction (nullable:true)
-				   errorAction (nullable:true)
-			    preErrorStatus (nullable:true)
-               publicationType (nullable:true, blank:false)
+                   dateCreated (nullable : true, blank : false)
+                   lastUpdated (nullable : true, blank : false)
+               patronReference (nullable : true, blank : false)
+                   serviceType (nullable : true, blank : false)
+                         state (nullable : true, blank : false)
+	               isRequester (nullable : true, blank : false)
+	           numberOfRetries (nullable : true)
+	delayPerformingActionUntil (nullable : true)
+	 			 pendingAction (nullable : true)
+				   errorAction (nullable : true)
+			    preErrorStatus (nullable : true)
+               publicationType (nullable : true, blank : false)
 
-                         title (nullable:true, blank:false)
-                        author (nullable:true, blank:false)
-                      subtitle (nullable:true, blank:false)
-                sponsoringBody (nullable:true, blank:false)
-                     publisher (nullable:true, blank:false)
-            placeOfPublication (nullable:true, blank:false)
-                        volume (nullable:true, blank:false)
-                         issue (nullable:true, blank:false)
-                     startPage (nullable:true, blank:false)
-                 numberOfPages (nullable:true, blank:false)
-               publicationDate (nullable:true, blank:false)
-    publicationDateOfComponent (nullable:true, blank:false)
-                       edition (nullable:true, blank:false)
+                         title (nullable : true, blank : false)
+                        author (nullable : true, blank : false)
+                      subtitle (nullable : true, blank : false)
+                sponsoringBody (nullable : true, blank : false)
+                     publisher (nullable : true, blank : false)
+            placeOfPublication (nullable : true, blank : false)
+                        volume (nullable : true, blank : false)
+                         issue (nullable : true, blank : false)
+                     startPage (nullable : true, blank : false)
+                 numberOfPages (nullable : true, blank : false)
+               publicationDate (nullable : true, blank : false)
+    publicationDateOfComponent (nullable : true, blank : false)
+                       edition (nullable : true, blank : false)
 
   }
 
@@ -123,21 +120,21 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	 			 pendingAction column : 'pr_pending_action_fk'
 				   errorAction column : 'pr_error_action_fk'
 			    preErrorStatus column : 'pr_pre_error_status_fk'
-               publicationType column: 'pr_pub_type_fk'
+               publicationType column : 'pr_pub_type_fk'
 
-                         title column: 'pr_title'
-                        author column: 'pr_author'
-                      subtitle column: 'pr_sub_title'
-                sponsoringBody column: 'pr_sponsoring_body'
-                     publisher column: 'pr_publisher'
-            placeOfPublication column: 'pr_place_of_pub'
-                        volume column: 'pr_volume'
-                         issue column: 'pr_issue'
-                     startPage column: 'pr_start_page'
-                 numberOfPages column: 'pr_num_pages'
-               publicationDate column: 'pr_pub_date'
-    publicationDateOfComponent column: 'pr_pubdate_of_component'
-                       edition column: 'pr_edition'
+                         title column : 'pr_title'
+                        author column : 'pr_author'
+                      subtitle column : 'pr_sub_title'
+                sponsoringBody column : 'pr_sponsoring_body'
+                     publisher column : 'pr_publisher'
+            placeOfPublication column : 'pr_place_of_pub'
+                        volume column : 'pr_volume'
+                         issue column : 'pr_issue'
+                     startPage column : 'pr_start_page'
+                 numberOfPages column : 'pr_num_pages'
+               publicationDate column : 'pr_pub_date'
+    publicationDateOfComponent column : 'pr_pubdate_of_component'
+                       edition column : 'pr_edition'
 
   }
 
