@@ -39,6 +39,8 @@ copy the following from application-vagrant.yml to application.yml
 #Run the following from the mod-rs directory, Note: this may error out complaining about not being able to find the postgres driver, this can be ignored
 # This may throw a NumberFormatException, when this happens check the file has been created and Ctrl+C to exit
 grails dbm-generate-gorm-changelog initial-model.groovy
+If the above fails try the following line
+grailsw.bat -Dgrails.env=vagrant-db dbm-generate-gorm-changelog
 
 
 # The following should work, but dosn't for me, when it does work no need to copy from vagrant and run the generate above
