@@ -48,6 +48,7 @@ grailsw.bat -Dgrails.env=vagrant-db dbm-generate-gorm-changelog
 
 Refresh migrations folder in Eclipse
 Clean project in Eclipse (may not need to do this you do the above)
+Reset database details in application.yml
 Start the app.
 run okapi-scripts\register_and_enable.sh
 

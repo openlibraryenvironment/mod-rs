@@ -2,6 +2,11 @@ package org.olf.rs
 
 import com.budjb.rabbitmq.consumer.MessageContext
 
+/** This is the class that deals the generic reshare actions, nothing protocol specific, the actions may trigger a protocol action to be performed
+ * 
+ * @author Chas
+ *
+ */
 class ReShareConsumer {
 	/**
 	 * Consumer configuration.

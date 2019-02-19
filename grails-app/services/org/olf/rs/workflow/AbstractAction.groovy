@@ -1,9 +1,6 @@
 package org.olf.rs.workflow
 
-import java.io.File;
 import java.util.Date;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestAudit;
 
@@ -28,11 +25,11 @@ abstract class AbstractAction {
 		RETRY,
 		
 		// We were successful or a positive response for a conditional
-		SUCCESS
-	}
+		SUCCESS,
 
-	/** For determining the valid actions */
-	def workflowService;
+		// We have sent the message off to a protocol message queue and are awaiting a response
+		IN_PROTOCOL_QUEUE
+	}
 
 	static public int setSmallRetryIncrement() {
 		retryIncrement = ONE_SECOND;
@@ -42,8 +39,13 @@ abstract class AbstractAction {
 		retryIncrement = THIRTY_SECONDS;
 	}
 
+	/** Returns the code that represents this action */
+	abstract String GetActionCode();
+
 	/** Returns the action that this class represents */	
-	abstract Action getAction();
+	public Action getAction() {
+		return(Action.get(GetActionCode()));
+	}
 
 	/** Performs the action */
 	abstract ActionResponse perform(PatronRequest requestToBeProcessed);
@@ -78,6 +80,12 @@ abstract class AbstractAction {
 					patronRequestAudit.toStatus = getAction().statusSuccessNo;
 					break;
 
+					case ActionResponse.IN_PROTOCOL_QUEUE:
+					// We stay at the same status
+					patronRequestAudit.toStatus = patronRequestAudit.fromStatus;
+					requestToBeProcessed.awaitingProtocolResponse = true;
+					break;
+					
 				case ActionResponse.RETRY:
 					// We will retry later
 					performRetry = true;
@@ -108,7 +116,7 @@ abstract class AbstractAction {
 			}
 
 			// No point looking up the next action for a retry as it will not change
-			if (!performRetry && !errored) {
+			if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
 				// Now we have the new status, determine if we have a new action to perform
 				nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus);
 			}
@@ -134,9 +142,13 @@ abstract class AbstractAction {
 			// Set the status and pending action on the request and the audit trail, if a retry will not be performed
 			if (!performRetry) {
 				requestToBeProcessed.lastUpdated = new Date();
-				requestToBeProcessed.pendingAction = nextAction;
 				requestToBeProcessed.state = patronRequestAudit.toStatus;
 				requestToBeProcessed.numberOfRetries = null;
+
+				// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response				
+				if (!requestToBeProcessed.awaitingProtocolResponse) {
+					requestToBeProcessed.pendingAction = nextAction;
+				}
 
 				// Not forgetting to add the audit record
 				patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
@@ -149,6 +161,16 @@ abstract class AbstractAction {
 					errors += "\t" + error + "\n";
 				}
 				log.error("Error saving request " + requestToBeProcessed.id + errors);
+			}
+
+			// If we have a next action add that into the queue
+			if (nextAction != null) {
+				// TODO: We need to put this request back onto the queue
+			}
+
+			// If we are performing a retry add it into the queue with a delay
+			if (performRetry) {
+				// TODO: Add it back into the queue with a delay
 			}
 		} catch (Exception e) {
 			// TODO: Log to the log file and see if we can generate an audit record to log this exception

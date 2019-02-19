@@ -71,6 +71,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** If we hit an error this was the status prior to the error occurring */
   Status preErrorStatus;
 
+  /** Are we waiting for a protocol message to be sent */
+  boolean awaitingProtocolResponse;
+
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [audit : PatronRequestAudit,
 	                tags  : Tag];
@@ -88,6 +91,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	 			 pendingAction (nullable : true)
 				   errorAction (nullable : true)
 			    preErrorStatus (nullable : true)
+	  awaitingProtocolResponse (nullable : true)
                publicationType (nullable : true, blank : false)
 
                          title (nullable : true, blank : false)
@@ -120,6 +124,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	 			 pendingAction column : 'pr_pending_action_fk'
 				   errorAction column : 'pr_error_action_fk'
 			    preErrorStatus column : 'pr_pre_error_status_fk'
+      awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
                publicationType column : 'pr_pub_type_fk'
 
                          title column : 'pr_title'
