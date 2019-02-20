@@ -120,9 +120,9 @@ class StateTransition implements MultiTenant<StateTransition> {
 		createIfNotExists([Status.SHIPPED], Action.CHECK_IN, QUALIFIER_SUPPLIER, null, null);
 	}
 	
-	static Action getNextAction(Status fromStatus, Action action, Status toStatus, String qualifier) {
+	static Action getNextAction(Status fromStatus, Action action, Status toStatus, boolean isRequester) {
 		Action nextAction = null;
-		StateTransition transition = findByFromStatusAndActionAndToStatusAndQualifier(fromStatus, action, toStatus, qualifier);
+		StateTransition transition = findByFromStatusAndActionAndToStatusAndQualifier(fromStatus, action, toStatus, isRequester ? QUALIFIER_REQUESTER : QUALIFIER_SUPPLIER);
 		if (transition != null) {
 			nextAction = transition.nextAction;
 		}

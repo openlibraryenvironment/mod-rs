@@ -20,13 +20,21 @@ class ReShareMessageService {
 	static private final String ACTION_CODE = "action";
 	static private final String REQUEST_ID  = "requestId";
 	static private final String TENANT_ID   = "tenantId";
-	
+
+	/** Domains are no longer a bean, so we save the instance when it is created, so we can call this service in the domain events */
+	public static ReShareMessageService instance;
+
 	/** The cache of action codes against the class that performs that action */
 	private static Map<String, AbstractAction> actionCache = [ : ];
 
 	/** The service that we use to put the message on the queue */
 	private RabbitService rabbitService;
-	
+
+	public ReShareMessageService(RabbitService rabbitService) {
+		this.rabbitService = rabbitService;
+		instance = this;
+	}
+
 	/** Registers an action with the implementing class
 	 * 
 	 * @param actionCode The code that represents the action to be performed
@@ -40,16 +48,56 @@ class ReShareMessageService {
 			
 			// If we havn't, we need to instantiate an instance for this action
 			if (actionClass == null) {
-				// Now setup the link between the action and the class that will do the work
+				// We will prefix the classname with action and postfix it with Service
+				String realClassName = "action" + className + "Service";
+
 				try {
-					actionClass = Holders.grailsApplication.mainContext.getBean(className + "Service");
+					// Now setup the link between the action and the class that will do the work
+					actionClass = Holders.grailsApplication.mainContext.getBean(realClassName);
 					actionCache[actionCode] = actionClass;
 				} catch (Exception e) {
-					log.error("Unable to locate action bean: " + className);
+					log.error("Unable to locate action bean: " + realClassName);
 				}
 			}
 		}
 	}
+
+	/**
+	 * Determines the current tenant id
+	 * 
+	 * @return The tenant id there is one otherwise null
+	 */
+	private String getTenantId() {
+		String tenantId = null;
+		try {
+			tenantId = Tenants.currentId();
+		} catch (Exception e) {
+			def chas = 1;
+		}
+		return(tenantId);
+	}
+
+	/**
+	 * This is called after the request has been saved to see if it needs adding to the queue
+	 * 
+	 * @param patronRequest
+	 */
+	public void checkAddToQueue(PatronRequest patronRequest) {
+		// must not be waiting for a protocol action to happen
+		if (!patronRequest.awaitingProtocolResponse) {
+			// Must have a pending action
+			if (patronRequest.pendingAction) {
+				// We need the tenant id in order to add it to the queue
+				String tenantId = getTenantId();
+		
+				// If we do not have a tenant id, then we cannot queue it
+				if (tenantId) {
+					// We can add it to the queue
+					queue(tenantId, patronRequest.pendingAction.id, patronRequest.id);
+				}
+			}
+		}
+	} 
 
 	/**
 	 *  Performs the designated action
@@ -67,21 +115,32 @@ class ReShareMessageService {
 					// Fetch the patron request we need to process
 					PatronRequest patronRequest = PatronRequest.get(requestId);
 					if (patronRequest) {
-						// Get hold of the class that is going to deal with this action
-						AbstractAction actionClass = actionCache[actionCode];
-						if (actionClass) {
-							// Perform the action against this request
-							actionClass.execute(patronRequest);
+						// If the pending action is not the same as in the message then we need to abandon
+						if (patronRequest.pendingAction && actionCode.equals(patronRequest.pendingAction.id)) {
+							// Ensure the action cache is populated
+							// TODO: I believe this is redundant and is just occurring because of how we are testing, needs confirming
+							if (!actionCache) {
+								Action.CreateDefault();
+							}
+
+							// Get hold of the class that is going to deal with this action
+							AbstractAction actionClass = actionCache[actionCode];
+							if (actionClass) {
+								// Perform the action against this request
+								actionClass.execute(patronRequest);
+							} else {
+								log.error("No class defined for action: " + actionCode + ", unable to process request id" + requestId);
+								// TODO: Do we add an audit record against the request ?
+							}
 						} else {
-							log.errorEnabled("No class defined for action: " + actionCode + ", unable to process request id" + requestId);
-							// TODO: Do we add an audit record against the request ?
+							log.error("Message action does not match that on the request for request " + requestId + "for tenant " + tenantId + ", message action " + actionCode + ", pending action " + (patronRequest.pendingAction ? patronRequest.pendingAction.id : "<null>"));
 						}
 					} else {
 						log.error("Failed to find patron request " + requestId + "for tenant " + tenantId);
 					}
 				}
 			} catch (Exception e) {
-				log.errorEnabled("Exception thrown while trying to process message for Tenanr: " + tenantId + " for request " + requestId + " and action " + actionCode, e);
+				log.error("Exception thrown while trying to process message for Tenanr: " + tenantId + " for request " + requestId + " and action " + actionCode, e);
 			}
 		} else {
 			log.error("The ReShard queue message details does not contain the expected details (action, request id and tenant id), contents: " + ((messageDetails == null) ? "<null>" : messageDetails.toString()));

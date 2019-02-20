@@ -54,129 +54,131 @@ abstract class AbstractAction {
 	abstract ActionResponse perform(PatronRequest requestToBeProcessed);
 
 	public void execute(PatronRequest requestToBeProcessed) {
-		long processingStartTime = System.currentTimeMillis();
-		boolean errored = false;
+		// Shouldn't really have got here if we do not have a pending action
+		if (requestToBeProcessed.pendingAction) {
+			long processingStartTime = System.currentTimeMillis();
+			boolean errored = false;
 
-		// Setup the audit record
-		PatronRequestAudit patronRequestAudit = new PatronRequestAudit();
-		patronRequestAudit.dateCreated = new Date();
-		patronRequestAudit.fromStatus = requestToBeProcessed.state;
-		patronRequestAudit.action = requestToBeProcessed.pendingAction;
-		patronRequestAudit.patronRequest = requestToBeProcessed;
-		requestToBeProcessed
-		
-		// The Next action that is to be executed
-		Action nextAction = null;
+			// Setup the audit record
+			PatronRequestAudit patronRequestAudit = new PatronRequestAudit();
+			patronRequestAudit.dateCreated = new Date();
+			patronRequestAudit.fromStatus = requestToBeProcessed.state;
+			patronRequestAudit.action = requestToBeProcessed.pendingAction;
+			patronRequestAudit.patronRequest = requestToBeProcessed;
+			requestToBeProcessed
 
-		// Will we be performing a retry
-		boolean performRetry = false;
-	
-		try {
-			// Now perform the action
-			switch (perform(requestToBeProcessed)) {
-				case ActionResponse.SUCCESS:
-					patronRequestAudit.toStatus = getAction().statusSuccessYes;
-					break
+			// The Next action that is to be executed
+			Action nextAction = null;
 
-				case ActionResponse.NO:
-					patronRequestAudit.toStatus = getAction().statusSuccessNo;
-					break;
+			// Will we be performing a retry
+			boolean performRetry = false;
 
-					case ActionResponse.IN_PROTOCOL_QUEUE:
-					// We stay at the same status
-					patronRequestAudit.toStatus = patronRequestAudit.fromStatus;
-					requestToBeProcessed.awaitingProtocolResponse = true;
-					break;
-					
-				case ActionResponse.RETRY:
-					// We will retry later
-					performRetry = true;
+			try {
+				// Now perform the action
+				switch (perform(requestToBeProcessed)) {
+					case ActionResponse.SUCCESS:
+						patronRequestAudit.toStatus = getAction().statusSuccessYes;
+						break
 
-					// Increment the number of retries
-					if (requestToBeProcessed.numberOfRetries) {
-						// Should probably do something more sensible when we reach the max retry count
-						if (requestToBeProcessed.numberOfRetries < MAXIMUM_RETRY_COUNT) {
-							requestToBeProcessed.numberOfRetries++;
+					case ActionResponse.NO:
+						patronRequestAudit.toStatus = getAction().statusSuccessNo;
+						break;
+
+						case ActionResponse.IN_PROTOCOL_QUEUE:
+						// We stay at the same status
+						patronRequestAudit.toStatus = patronRequestAudit.fromStatus;
+						requestToBeProcessed.awaitingProtocolResponse = true;
+						break;
+
+					case ActionResponse.RETRY:
+						// We will retry later
+						performRetry = true;
+
+						// Increment the number of retries
+						if (requestToBeProcessed.numberOfRetries) {
+							// Should probably do something more sensible when we reach the max retry count
+							if (requestToBeProcessed.numberOfRetries < MAXIMUM_RETRY_COUNT) {
+								requestToBeProcessed.numberOfRetries++;
+							}
+						} else {
+							requestToBeProcessed.numberOfRetries = 1;
 						}
-					} else {
-						requestToBeProcessed.numberOfRetries = 1;
+
+						// Note: The next retry time increment is a power of 2 based on the number of retries, eg. 1, 2, 4, 8, 16
+						requestToBeProcessed.delayPerformingActionUntil = new Date(System.currentTimeMillis() + (retryIncrement * 2.power(requestToBeProcessed.numberOfRetries + 1)));
+						break;
+
+					case ActionResponse.ERROR:
+						errored = true;
+						patronRequestAudit.toStatus = getAction().statusFailure;
+						break;
+
+					default:
+						// Hit an error if we have reached here
+						errored = true;
+						break;
+				}
+
+				// No point looking up the next action for a retry as it will not change
+				if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
+					// Now we have the new status, determine if we have a new action to perform
+					nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus, requestToBeProcessed.isRequester);
+				}
+			} catch (Exception e) {
+				// Note: If an exception is thrown from another method and not caught within it
+				// Then the entire transaction will get rolled back including any saves made after the exception
+				// Will need to test whether a read only transaction service throwing an exception causes a rollback
+				errored = true;
+			}
+
+			try {
+				// If we have hit an error, save the current status and pending action
+				if (errored) {
+					nextAction = null;
+					requestToBeProcessed.preErrorStatus = requestToBeProcessed.state;
+					requestToBeProcessed.errorAction = requestToBeProcessed.pendingAction;
+					if (patronRequestAudit.toStatus == null) {
+						patronRequestAudit.toStatus = Status.get(Status.ERROR);
+					}
+				}
+
+				// Set the status and pending action on the request and the audit trail, if a retry will not be performed
+				if (!performRetry) {
+					requestToBeProcessed.lastUpdated = new Date();
+					requestToBeProcessed.state = patronRequestAudit.toStatus;
+					requestToBeProcessed.numberOfRetries = null;
+
+					// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response				
+					if (!requestToBeProcessed.awaitingProtocolResponse) {
+						requestToBeProcessed.pendingAction = nextAction;
 					}
 
-					// Note: The next retry time increment is a power of 2 based on the number of retries, eg. 1, 2, 4, 8, 16
-					requestToBeProcessed.delayPerformingActionUntil = new Date(System.currentTimeMillis() + (retryIncrement * 2.power(requestToBeProcessed.numberOfRetries + 1)));
-					break;
-
-				case ActionResponse.ERROR:
-					errored = true;
-					patronRequestAudit.toStatus = getAction().statusFailure;
-					break;
-
-				default:
-					// Hit an error if we have reached here
-					errored = true;
-					break;
-			}
-
-			// No point looking up the next action for a retry as it will not change
-			if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
-				// Now we have the new status, determine if we have a new action to perform
-				nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus);
-			}
-
-		} catch (Exception e) {
-			// Note: If an exception is thrown from another method and not caught within it
-			// Then the entire transaction will get rolled back including any saves made after the exception
-			// Will need to test whether a read only transaction service throwing an exception causes a rollback
-			errored = true;
-		}
-
-		try {
-			// If we have hit an error, save the current status and pending action
-			if (errored) {
-				nextAction = null;
-				requestToBeProcessed.preErrorStatus = requestToBeProcessed.state;
-				requestToBeProcessed.errorAction = requestToBeProcessed.pendingAction;
-				if (patronRequestAudit.toStatus == null) {
-					patronRequestAudit.toStatus = Status.get(Status.ERROR);
-				}
-			}
-		
-			// Set the status and pending action on the request and the audit trail, if a retry will not be performed
-			if (!performRetry) {
-				requestToBeProcessed.lastUpdated = new Date();
-				requestToBeProcessed.state = patronRequestAudit.toStatus;
-				requestToBeProcessed.numberOfRetries = null;
-
-				// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response				
-				if (!requestToBeProcessed.awaitingProtocolResponse) {
-					requestToBeProcessed.pendingAction = nextAction;
+					// Not forgetting to add the audit record
+					patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
+					requestToBeProcessed.addToAudit(patronRequestAudit);
 				}
 
-				// Not forgetting to add the audit record
-				patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
-				requestToBeProcessed.AddToAdudit(patronRequestAudit);
-			}
-
-			if (!requestToBeProcessed.save(flush : true)) {
-				String errors = "\n";
-				requestToBeProcessed.errors.each() {error ->
-					errors += "\t" + error + "\n";
+				if (!requestToBeProcessed.save(flush : true)) {
+					String errors = "\n";
+					requestToBeProcessed.errors.each() {error ->
+						errors += "\t" + error + "\n";
+					}
+					log.error("Error saving request " + requestToBeProcessed.id + errors);
 				}
-				log.error("Error saving request " + requestToBeProcessed.id + errors);
-			}
 
-			// If we have a next action add that into the queue
-			if (nextAction != null) {
-				// TODO: We need to put this request back onto the queue
-			}
+				// If we have a next action add that into the queue
+				if (nextAction != null) {
+					// TODO: We need to put this request back onto the queue
+				}
 
-			// If we are performing a retry add it into the queue with a delay
-			if (performRetry) {
-				// TODO: Add it back into the queue with a delay
+				// If we are performing a retry add it into the queue with a delay
+				if (performRetry) {
+					// TODO: Add it back into the queue with a delay
+				}
+			} catch (Exception e) {
+				// TODO: Log to the log file and see if we can generate an audit record to log this exception
+				log.error("Excpetion thrown while processnig request: " + requestToBeProcessed.id + " for action: " + patronRequestAudit.action.name, e);
 			}
-		} catch (Exception e) {
-			// TODO: Log to the log file and see if we can generate an audit record to log this exception
-			log.error("Excpetion thrown while processnig request: " + requestToBeProcessed.id + " for action: " + requestToBeProcessed.pendingAction.name, e);
 		}
 	}
 }

@@ -156,18 +156,18 @@ class Action implements MultiTenant<Action> {
 		// ensure the stati are created first
 		Status.createDefault();
 
-		createIfNotExists(APPROVE,          NAME_APPROVE,          DESCRIPTION_APPROVE, "ActionApprove", true, Status.PENDING, null, null, true, false);
-		createIfNotExists(CHECK_IN,         NAME_CHECK_IN,         DESCRIPTION_CHECK_IN, "ActionCheckIn", true, Status.CHECKED_IN, null, null, true, false);
-		createIfNotExists(COLLECTED,        NAME_COLLECTED,        DESCRIPTION_COLLECTED, "ActionCollected", true, Status.COLLECTED, null, null, true, false);
-		createIfNotExists(NEW_REQUEST,      NAME_NEW_REQUEST,      DESCRIPTION_NEW_REQUEST, "ActionNewRequest", true, Status.IN_PROCESS, null, null, false, false);
-		createIfNotExists(NOT_SUPPLY,       NAME_NOT_SUPPLY,       DESCRIPTION_NOT_SUPPLY, "ActionNotSupply", true, Status.UNFILLED, null, null, true, false);
-		createIfNotExists(PATRON_RETURNED,  NAME_PATRON_RETURNED,  DESCRIPTION_PATRON_RETURNED, "ActionPatronReturned", true, Status.PATRON_RETURNED, null, null, false, false);
-		createIfNotExists(RECEIVE,          NAME_RECEIVE,          DESCRIPTION_RECEIVE, "ActionReceive", true, Status.AWAITING_COLLECTION, null, null, false, false);
-		createIfNotExists(RECEIVED_MESSAGE, NAME_RECEIVED_MESSAGE, DESCRIPTION_RECEIVED_MESSAGE, "ActionReceivedMessage", false, Status.RECEIVED, null, null, false, false);
-		createIfNotExists(RETURN,           NAME_RETURN,           DESCRIPTION_RETURN, "ActionReturn", true, Status.RETURNED, null, null, true, false);
-		createIfNotExists(SEND_MESSAGE,     NAME_SEND_MESSAGE,     DESCRIPTION_SEND_MESSAGE, "ActionSendMessage", false, Status.SENDING_MESSAGE, null, null, false, false);
-		createIfNotExists(SHIP,             NAME_SHIP,             DESCRIPTION_SHIP, "ActionShip", true, Status.FULFILLED, null, null, true, false);
-		createIfNotExists(VALIDATE,         NAME_VALIDATE,         DESCRIPTION_VALIDATE, "ActionValidate", false, Status.VALIDATED, null, null, true, false);
+		createIfNotExists(APPROVE,          NAME_APPROVE,          DESCRIPTION_APPROVE, "Approve", true, Status.PENDING, null, null, true, false);
+		createIfNotExists(CHECK_IN,         NAME_CHECK_IN,         DESCRIPTION_CHECK_IN, "CheckIn", true, Status.CHECKED_IN, null, null, true, false);
+		createIfNotExists(COLLECTED,        NAME_COLLECTED,        DESCRIPTION_COLLECTED, "Collected", true, Status.COLLECTED, null, null, true, false);
+		createIfNotExists(NEW_REQUEST,      NAME_NEW_REQUEST,      DESCRIPTION_NEW_REQUEST, "NewRequest", true, Status.IN_PROCESS, null, null, false, false);
+		createIfNotExists(NOT_SUPPLY,       NAME_NOT_SUPPLY,       DESCRIPTION_NOT_SUPPLY, "NotSupply", true, Status.UNFILLED, null, null, true, false);
+		createIfNotExists(PATRON_RETURNED,  NAME_PATRON_RETURNED,  DESCRIPTION_PATRON_RETURNED, "PatronReturned", true, Status.PATRON_RETURNED, null, null, false, false);
+		createIfNotExists(RECEIVE,          NAME_RECEIVE,          DESCRIPTION_RECEIVE, "Receive", true, Status.AWAITING_COLLECTION, null, null, false, false);
+		createIfNotExists(RECEIVED_MESSAGE, NAME_RECEIVED_MESSAGE, DESCRIPTION_RECEIVED_MESSAGE, "ReceivedMessage", false, Status.RECEIVED, null, null, false, false);
+		createIfNotExists(RETURN,           NAME_RETURN,           DESCRIPTION_RETURN, "Return", true, Status.RETURNED, null, null, true, false);
+		createIfNotExists(SEND_MESSAGE,     NAME_SEND_MESSAGE,     DESCRIPTION_SEND_MESSAGE, "SendMessage", false, Status.SENDING_MESSAGE, null, null, false, false);
+		createIfNotExists(SHIP,             NAME_SHIP,             DESCRIPTION_SHIP, "Ship", true, Status.FULFILLED, null, null, true, false);
+		createIfNotExists(VALIDATE,         NAME_VALIDATE,         DESCRIPTION_VALIDATE, "Validate", false, Status.VALIDATED, null, null, true, false);
 
 		// Now create the state transitions
 		StateTransition.createDefault();

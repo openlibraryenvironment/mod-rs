@@ -33,12 +33,12 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
 	Long duration;
 
     static constraints = {
-        action        (nullable : false, blank : false)
+        action        (nullable : false)
         dateCreated   (nullable : false)
 		duration      (nullable : false)
-		fromStatus    (nullable : false, blank : false)
-		patronRequest (nullable : false, blank : false)
-		toStatus      (nullable : false, blank : false)
+		fromStatus    (nullable : false)
+		patronRequest (nullable : false)
+		toStatus      (nullable : false)
     }
 
     static mapping = {

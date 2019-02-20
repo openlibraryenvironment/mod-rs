@@ -7,6 +7,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.custprops.CustomProperties
 import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.workflow.Action;
+import org.olf.rs.workflow.ReShareMessageService
 import org.olf.rs.workflow.Status;
 import com.k_int.web.toolkit.tags.Tag
 
@@ -84,20 +85,20 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   static constraints = {
                      
-                   dateCreated (nullable : true, blank : false)
-                   lastUpdated (nullable : true, blank : false)
-               patronReference (nullable : true, blank : false)
-                   serviceType (nullable : true, blank : false)
-                         state (nullable : true, blank : false)
-	               isRequester (nullable : true, blank : false)
+                   dateCreated (nullable : true)
+                   lastUpdated (nullable : true)
+               patronReference (nullable : true)
+                   serviceType (nullable : true)
+                         state (nullable : true)
+	               isRequester (nullable : true)
 	           numberOfRetries (nullable : true)
 	delayPerformingActionUntil (nullable : true)
 	 			 pendingAction (nullable : true)
 				   errorAction (nullable : true)
 			    preErrorStatus (nullable : true)
-	  awaitingProtocolResponse (nullable : true)
-	  			  rotaPosition (nullable : true)
-               publicationType (nullable : true, blank : false)
+	  awaitingProtocolResponse ( )
+	  			  rotaPosition ( )
+               publicationType (nullable : true)
 
                          title (nullable : true, blank : false)
                         author (nullable : true, blank : false)
@@ -149,4 +150,28 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   }
 
+  /**
+   * If this is a requester request we are inserting then set the pending action to be VALIDATE
+   */
+  def beforeInsert() {
+	  // Are we a requester
+	  if (isRequester) {
+		  // Set the pending action to be validate
+		  pendingAction = Action.get(Action.VALIDATE);
+	  }
+  }
+
+  /**
+   * Perform checks to see if needs adding to the reshare queue  
+   */
+  def afterInsert() {
+	  ReShareMessageService.instance.checkAddToQueue(this);
+  }
+
+  /**
+   * Perform checks to see if this request needs adding to the ReShare queue  
+   */
+  def afterUpdate() {
+	  ReShareMessageService.instance.checkAddToQueue(this);
+  }
 }
