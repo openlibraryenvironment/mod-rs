@@ -10,10 +10,13 @@ abstract class AbstractAction {
 	static private final Integer ONE_SECOND      = 1000;
 	static private final Integer THIRTY_SECONDS  = 30 * ONE_SECOND;
 
-		// The increment to be used when we are retrying
+	// The increment to be used when we are retrying
 	static Integer retryIncrement = THIRTY_SECONDS;
 	static private final int MAXIMUM_RETRY_COUNT = 16;
 
+	/** For Service used for sending requests to the ReShare queue */
+	ReShareMessageService reShareMessageService;
+	
 	protected enum ActionResponse {
 		// An error has occurred, could be as simple as validation error, details will be in the audit
 		ERROR,
@@ -40,16 +43,15 @@ abstract class AbstractAction {
 	}
 
 	/** Returns the code that represents this action */
-	abstract String GetActionCode();
+	abstract String getActionCode();
 
 	/** Returns the action that this class represents */	
 	public Action getAction() {
-		return(Action.get(GetActionCode()));
+		return(Action.get(getActionCode()));
 	}
 
 	/** Performs the action */
 	abstract ActionResponse perform(PatronRequest requestToBeProcessed);
-
 
 	public void execute(PatronRequest requestToBeProcessed) {
 		long processingStartTime = System.currentTimeMillis();

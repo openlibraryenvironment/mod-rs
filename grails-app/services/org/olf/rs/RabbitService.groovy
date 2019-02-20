@@ -11,7 +11,7 @@ public class RabbitService {
 	RabbitContext rabbitContext;
 	boolean rabbitInitialised = false;
 	
-	public boolean Send(String queue, String messageId, String message, String responseQueue) {
+	public boolean Send(String queue, String messageId, Object message, String responseQueue = null) {
 		boolean successful = true;
 		if (Running()) {
 			try {

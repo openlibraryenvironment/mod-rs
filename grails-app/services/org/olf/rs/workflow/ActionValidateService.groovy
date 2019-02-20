@@ -1,14 +1,17 @@
 package org.olf.rs.workflow
 
+import grails.gorm.transactions.Transactional;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.workflow.AbstractAction.ActionResponse;
 
+import grails.gorm.transactions.Transactional
 
-class ValidateAction extends AbstractAction {
+@Transactional
+class ActionValidateService extends AbstractAction {
 
 	/** Returns the action that this class represents */
 	@Override
-	String GetActionCode() {
+	String getActionCode() {
 		return(Action.VALIDATE);
 	}
 

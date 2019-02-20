@@ -1,6 +1,7 @@
 package org.olf.rs
 
-import com.budjb.rabbitmq.consumer.MessageContext
+import com.budjb.rabbitmq.consumer.MessageContext;
+import org.olf.rs.workflow.ReShareMessageService;
 
 /** This is the class that deals the generic reshare actions, nothing protocol specific, the actions may trigger a protocol action to be performed
  * 
@@ -14,6 +15,9 @@ class ReShareConsumer {
 	static rabbitConfig = [
 	]
 
+	/** The service that is goinf to process the incoming message */
+	ReShareMessageService reShareMessageService;
+
 	/**
 	 * Handle an incoming JSON RabbitMQ message.
 	 *
@@ -22,8 +26,11 @@ class ReShareConsumer {
 	 * @return
 	 */
     def handleMessage(Map body, MessageContext context) {
-		println "Map body: " + body.toString();
-		return '{"field2":"Have swallowed it"}'
+		// Just hand it off to the service
+		reShareMessageService.processAnIncomingMessage(body);
+
+		// There is nothing to return
+		return(null);
     }
 	
 	/**
@@ -34,9 +41,9 @@ class ReShareConsumer {
 	 * @return
 	 */
 	def handleMessage(def body, MessageContext context) {
-		String contextBody = new String(context.body);
-		println "body: " + body
-		println "contextBody: " + contextBody
-		return "Have consumed it!"
+		log.error("Received a message in the generic handle message for the ReShareConsumer, this should not happen: " + ((body == null) ? "Null Body" : body.toString()));
+
+		// There is nothing to return
+		return(null);
 	}
 }
