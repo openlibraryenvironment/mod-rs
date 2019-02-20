@@ -74,8 +74,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Are we waiting for a protocol message to be sent */
   boolean awaitingProtocolResponse;
 
+  /** The position we are in the rota */
+  int rotaPosition;
+ 
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [audit : PatronRequestAudit,
+					rota  : PatronRequestRota,
 	                tags  : Tag];
 
   static constraints = {
@@ -92,6 +96,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 				   errorAction (nullable : true)
 			    preErrorStatus (nullable : true)
 	  awaitingProtocolResponse (nullable : true)
+	  			  rotaPosition (nullable : true)
                publicationType (nullable : true, blank : false)
 
                          title (nullable : true, blank : false)
@@ -125,6 +130,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 				   errorAction column : 'pr_error_action_fk'
 			    preErrorStatus column : 'pr_pre_error_status_fk'
       awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
+                  rotaPosition column : 'pr_rota_position'
                publicationType column : 'pr_pub_type_fk'
 
                          title column : 'pr_title'

@@ -2,7 +2,7 @@ package org.olf.rs
 
 import grails.gorm.MultiTenant;
 import org.olf.rs.workflow.Action;
-import org.olf.rs.workflow.Status
+import org.olf.rs.workflow.Status;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -15,7 +15,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
     long id
 
 	/** The request this audit record belongs to */
-	static belongsTo = [patronRequest: PatronRequest]
+	static belongsTo = [patronRequest : PatronRequest]
 
 	/** The date time the action was processed */
 	Date dateCreated;
@@ -33,12 +33,12 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
 	Long duration;
 
     static constraints = {
-        action        (nullable: false, blank: false)
-        dateCreated   (nullable: false, blank: false)
-		duration      (nullable: false)
-		fromStatus    (nullable: false, blank: false)
-		patronRequest (nullable: false, blank: false)
-		toStatus      (nullable: false, blank: false)
+        action        (nullable : false, blank : false)
+        dateCreated   (nullable : false)
+		duration      (nullable : false)
+		fromStatus    (nullable : false, blank : false)
+		patronRequest (nullable : false, blank : false)
+		toStatus      (nullable : false, blank : false)
     }
 
     static mapping = {
