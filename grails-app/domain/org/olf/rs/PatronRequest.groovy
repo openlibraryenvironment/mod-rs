@@ -85,19 +85,19 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   static constraints = {
                      
-                   dateCreated (nullable : true)
-                   lastUpdated (nullable : true)
+                   dateCreated (nullable : true, bindable: false)
+                   lastUpdated (nullable : true, bindable: false)
                patronReference (nullable : true)
                    serviceType (nullable : true)
-                         state (nullable : true)
-	               isRequester (nullable : true)
-	           numberOfRetries (nullable : true)
-	delayPerformingActionUntil (nullable : true)
+                         state (nullable : true, bindable: false)
+	               isRequester (nullable : true, bindable: false)
+	           numberOfRetries (nullable : true, bindable: false)
+	delayPerformingActionUntil (nullable : true, bindable: false)
 	 			 pendingAction (nullable : true)
-				   errorAction (nullable : true)
-			    preErrorStatus (nullable : true)
-	  awaitingProtocolResponse ( )
-	  			  rotaPosition ( )
+				   errorAction (nullable : true, bindable: false)
+			    preErrorStatus (nullable : true, bindable: false)
+	  awaitingProtocolResponse (                 bindable: false)
+	  			  rotaPosition (                 bindable: false)
                publicationType (nullable : true)
 
                          title (nullable : true, blank : false)
@@ -159,6 +159,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 		  // Set the pending action to be validate
 		  pendingAction = Action.get(Action.VALIDATE);
 	  }
+
+	  // Status needs to be set to idle
+	  state = Status.get(Status.IDLE);	  
   }
 
   /**
