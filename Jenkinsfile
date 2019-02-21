@@ -1,17 +1,22 @@
 #!groovy
 
 node {
-  stage 'checkout'
-  checkout scm
+  stage ('checkout') {
+    checkout scm
+  }
 
-  stage 'test'
-  sh './gradlew clean test'
+  stage ('test') {
+    sh './gradlew --no-daemon --console=plain clean test'
+  }
 
-  stage 'build'
-  sh './gradlew build'
+  stage ('build') {
+    sh './gradlew --no-daemon --console=plain build'
+  }
 
-  stage 'archive'
-  archiveArtifacts artifacts: 'build/libs/mod-rs-*'
+  stage ('archive') {
+    archiveArtifacts artifacts: 'build/libs/mod-rs-*'
+  }
+
   // step([$class: 'ArtifactArchiver', artifacts: 'build/libs/*.jar', fingerprint: true])
   // 
   // stage 'reports'
