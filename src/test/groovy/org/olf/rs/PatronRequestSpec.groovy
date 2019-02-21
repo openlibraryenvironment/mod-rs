@@ -11,8 +11,4 @@ class PatronRequestSpec extends Specification implements DomainUnitTest<PatronRe
     def cleanup() {
     }
 
-    void "test something"() {
-        expect:"fix me"
-            true == false
-    }
 }
