@@ -2,6 +2,7 @@ package org.olf.rs
 
 import javax.persistence.Transient
 import grails.databinding.BindInitializer
+import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.custprops.CustomProperties
@@ -77,7 +78,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   /** The position we are in the rota */
   int rotaPosition;
- 
+
+  /** Lets us know the if the system has updated the record, as we do not want validation on the pendingAction field to happen as it has already happened */
+  boolean systemUpdate = false;
+  static transients = ['systemUpdate'];
+
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [audit : PatronRequestAudit,
 					rota  : PatronRequestRota,
@@ -93,7 +98,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	               isRequester (nullable : true, bindable: false)
 	           numberOfRetries (nullable : true, bindable: false)
 	delayPerformingActionUntil (nullable : true, bindable: false)
-	 			 pendingAction (nullable : true)
+	 			 pendingAction (nullable : true, actionValidator : true)
 				   errorAction (nullable : true, bindable: false)
 			    preErrorStatus (nullable : true, bindable: false)
 	  awaitingProtocolResponse (                 bindable: false)
@@ -164,6 +169,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	  state = Status.get(Status.IDLE);	  
   }
 
+  
   /**
    * Perform checks to see if needs adding to the reshare queue  
    */

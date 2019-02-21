@@ -158,6 +158,10 @@ abstract class AbstractAction {
 					requestToBeProcessed.addToAudit(patronRequestAudit);
 				}
 
+				// We do not want validation occuring on the pendingAction field
+				requestToBeProcessed.systemUpdate = true;
+
+				// We can now save
 				if (!requestToBeProcessed.save(flush : true)) {
 					String errors = "\n";
 					requestToBeProcessed.errors.each() {error ->

@@ -33,6 +33,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   isRequester = true,
   notARealProperty:"Test that this is ignored in accordance with Postels law",
   serviceType:"Loan",
+  pendingAction:"approve"
   tags:[
     "Testdata", "TestRun1", "MonographTest"
   ],
@@ -89,3 +90,6 @@ curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Conte
 
 echo List requests after creation
 curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
+
+echo hit return to exit
+read a

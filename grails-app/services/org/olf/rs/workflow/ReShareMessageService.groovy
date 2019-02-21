@@ -67,12 +67,11 @@ class ReShareMessageService {
 	 * 
 	 * @return The tenant id there is one otherwise null
 	 */
-	private String getTenantId() {
+	static public String getTenantId() {
 		String tenantId = null;
 		try {
 			tenantId = Tenants.currentId();
 		} catch (Exception e) {
-			def chas = 1;
 		}
 		return(tenantId);
 	}
