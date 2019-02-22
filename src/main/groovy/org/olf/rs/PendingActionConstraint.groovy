@@ -5,10 +5,10 @@ import org.grails.datastore.gorm.validation.constraints.AbstractConstraint;
 import org.olf.rs.workflow.Status
 import org.springframework.validation.Errors
 
-class PendingActionValidator extends AbstractConstraint  {
-	static NAME = 'actionValidator'
+class PendingActionConstraint extends AbstractConstraint  {
+	static NAME = 'pendingAction'
 
-	PendingActionValidator(java.lang.Class constraintOwningClass, java.lang.String constraintPropertyName, java.lang.Object constraintParameter, org.springframework.context.MessageSource messageSource) {
+	PendingActionConstraint(java.lang.Class constraintOwningClass, java.lang.String constraintPropertyName, java.lang.Object constraintParameter, org.springframework.context.MessageSource messageSource) {
 		super(constraintOwningClass, constraintPropertyName, constraintParameter, messageSource);
 		def chas = 1;
 	}
