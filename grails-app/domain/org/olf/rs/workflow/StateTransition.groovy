@@ -128,4 +128,8 @@ class StateTransition implements MultiTenant<StateTransition> {
 		}
 		return(nextAction);
 	}
+	
+	static boolean isValid(Status fromStatus, Action action, boolean isRequester) {
+		return(countByFromStatusAndActionAndQualifier(fromStatus, action, isRequester ? QUALIFIER_REQUESTER : QUALIFIER_SUPPLIER) > 0);
+	}
 }
