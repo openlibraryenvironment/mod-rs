@@ -98,7 +98,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 	               isRequester (nullable : true, bindable: false)
 	           numberOfRetries (nullable : true, bindable: false)
 	delayPerformingActionUntil (nullable : true, bindable: false)
-	 			 pendingAction (nullable : true, actionValidator : true)
+	 			 pendingAction (nullable : true, pendingAction : true)
 				   errorAction (nullable : true, bindable: false)
 			    preErrorStatus (nullable : true, bindable: false)
 	  awaitingProtocolResponse (                 bindable: false)
