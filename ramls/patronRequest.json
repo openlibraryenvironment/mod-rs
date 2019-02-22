@@ -20,6 +20,9 @@
       "description": "Author of the item requested",
       "type": "string"
     },
+    "subtitle":{
+      "type": "string"
+    },
     "sponsoringBody":{
       "type": "string"
     },
@@ -58,9 +61,42 @@
       "description": "e.g. 'Loan', 'Copy-non-returnable'",
       "type": "string"
     },
+    "isRequester":{
+      "description": "Is the this the requester or suppliers view of the request",
+      "type": "boolean"
+    },
     "state":{
       "description": "One of 'Idle', 'Approved', 'Pending', 'Cancelled', 'Shipped', 'Awaiting Collection', 'Filfilled', 'Unfilled'",
       "type": "string"
+    },
+    "numberOfRetries":{
+      "description": "The number of retries that have occurred",
+      "type": "integer"
+    },
+    "delayPerformingActionUntil":{
+      "description": "Delay performing the action until this date / time arrives",
+      "type": "string",
+      "format": "date-time"
+    },
+    "pendingAction":{
+      "description": "The action waiting to be performed on this request. No support yet for Action object, so use string for now",
+      "type": "string"
+    },
+    "errorAction":{
+      "description": "If we hit an error this is the action we were trying to perform",
+      "type": "string"
+    },
+    "preErrorStatus":{
+      "description": "If we hit an error this was the status prior to the error occurring. Same options as for 'state'",
+      "type": "string"
+    },
+    "awaitingProtocolResponse":{
+      "description": "Are we waiting for a protocol message to be sent",
+      "type": "boolean"
+    },
+    "rotaPosition":{
+      "description": "The position we are in the rota",
+      "type": "integer"
     },
     "tags":{
       "description": "XXX to do",
