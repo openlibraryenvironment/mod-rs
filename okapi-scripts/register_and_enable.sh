@@ -2,7 +2,7 @@ BASEDIR=$(dirname "$0")
 
 DIR="$BASEDIR/../"
 
-print "Using directory $DIR"
+echo "Using directory $DIR"
 
 # echo Please make sure you have run ./gradlew clean generateDescriptors before starting this script
 pushd "$DIR"
