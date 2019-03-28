@@ -122,7 +122,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   static mapping = {
-                            id column : 'pr_id', generator: 'uuid', length:36
+                            id column : 'pr_id', generator: 'uuid2', length:36
                        version column : 'pr_version'
                    dateCreated column : 'pr_date_created'
                    lastUpdated column : 'pr_last_updated'
