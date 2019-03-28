@@ -4,7 +4,7 @@
 ###
 
 grails:
-    profile: com.k_int.grails.profiles:okapi-module:3.3.4
+    profile: rest-api
     codegen:
         defaultPackage: mod.rs
     gorm:
