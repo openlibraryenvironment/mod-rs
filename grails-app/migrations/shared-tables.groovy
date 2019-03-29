@@ -3,7 +3,8 @@ databaseChangeLog = {
   changeSet(author: "Ian (manual)", id: "20190328-00001") {
 
     createTable(tableName: "tenant-symbol-mapping") {
-      column(autoIncrement: "true", name: "id", type: "VARCHAR(36)") {
+
+      column(name: "tsm_id", type: "VARCHAR(36)") {
         constraints(nullable: "false")
       }
 
