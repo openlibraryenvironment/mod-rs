@@ -10,6 +10,8 @@ import groovy.sql.Sql
 import grails.core.GrailsApplication
 import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.datastore.mapping.core.exceptions.ConfigurationException
+import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
+
 
 
 
@@ -22,6 +24,9 @@ public class HousekeepingService {
   HibernateDatastore hibernateDatastore
   DataSource dataSource
   GrailsApplication grailsApplication
+
+  private static final SHARED_SCHEMA_NAME='__shared_mod_rs';
+
 
   /**
    * This is called by the eventing mechanism - There is no web request context
@@ -57,17 +62,24 @@ public class HousekeepingService {
    */
   public synchronized void ensureSharedSchema() {
     try {
-      log.debug("See if we already have a datastore for __rs_shared")
-      hibernateDatastore.getDatastoreForConnection('__rs_shared');
-      log.debug("__rs_shared found. all is well");
+      log.debug("See if we already have a datastore for ${SHARED_SCHEMA_NAME}")
+      hibernateDatastore.getDatastoreForConnection(SHARED_SCHEMA_NAME);
+      log.debug("${SHARED_SCHEMA_NAME} found. all is well");
     }
     catch ( ConfigurationException ce ) {
-      log.debug("register schema __rs_shared");
-      createAccountSchema('__rs_shared');
+      log.error("register schema ${SHARED_SCHEMA_NAME}");
+      createAccountSchema(SHARED_SCHEMA_NAME);
     }
+
+    // Now run any migrations to the schema that have not been completed yet
+    updateAccountSchema(SHARED_SCHEMA_NAME,'system-level-changelog.groovy');
+
     log.debug("ensureSharedSchema completed");
   }
 
+  /**
+   * Create a schema in the supplied DB
+   */
   private synchronized void createAccountSchema(String schema_name) {
     Sql sql = null
     try {
@@ -78,6 +90,49 @@ public class HousekeepingService {
       }
     } finally {
         sql?.close()
+    }
+  }
+
+
+  /**
+   * Synchronize a DB schema with a liquibase defintion.
+   * this function is inspired by the grails-okapi module grails-app/services/com/k_int/okapi/OkapiTenantAdminService.groovy
+   * It's job is to run a liquibase migration file against a given schema. 
+   */
+  void updateAccountSchema(String schema_name, String migration_file) {
+
+    log.debug("updateAccountSchema(${schema_name},${migration_file})")
+    // Now try create the tables for the schema
+    try {
+      GrailsLiquibase gl = new GrailsLiquibase(grailsApplication.mainContext)
+      gl.dataSource = dataSource
+      gl.dropFirst = false
+      gl.changeLog = migration_file; // 'module-tenant-changelog.groovy'
+      gl.contexts = []
+      gl.labels = []
+      gl.defaultSchema = schema_name
+      gl.databaseChangeLogTableName = 'tenant_changelog'
+      gl.databaseChangeLogLockTableName = 'tenant_changelog_lock'
+      gl.afterPropertiesSet() // this runs the update command
+    } catch (Exception e) {
+      log.error("Exception trying to create new account schema tables for $schema_name", e)
+      throw e
+    }
+    finally {
+      log.debug("Database migration completed")
+    }
+
+    // This function actually adds the schema into the hibernate list of known schemas
+    // without it withTenant(x) won't work.
+    try {
+      log.debug("adding tenant for ${schema_name}")
+      hibernateDatastore.addTenantForSchema(schema_name)
+    } catch (Exception e) {
+      log.error("Exception adding tenant schema for ${schema_name}", e)
+      throw e
+    }
+    finally {
+      log.debug("added schema")
     }
   }
 
