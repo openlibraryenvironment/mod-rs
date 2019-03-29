@@ -4,15 +4,10 @@ import grails.gorm.MultiTenant;
 import org.olf.rs.workflow.Action;
 import org.olf.rs.workflow.Status;
 
-/**
- * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
- * requesting that reshare locate and deliver a resource from a remote partner. 
- */
-
 class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
 
   // internal ID of the audit record
-  long id
+  String id
 
   /** The request this audit record belongs to */
   static belongsTo = [patronRequest : PatronRequest]
@@ -42,7 +37,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
   }
 
   static mapping = {
-    id            column : 'pra_id'
+    id            column : 'pra_id', generator: 'uuid2', length:36
     version       column : 'pra_version'
     action        column : 'pra_action_fk'
     dateCreated   column : 'pra_date_created'
