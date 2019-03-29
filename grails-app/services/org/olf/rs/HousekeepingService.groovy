@@ -12,6 +12,7 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 
+import org.olf.rs.shared.TenantSymbolMapping;
 
 
 
@@ -75,6 +76,16 @@ public class HousekeepingService {
     updateAccountSchema(SHARED_SCHEMA_NAME,'system-level-changelog.groovy');
 
     log.debug("ensureSharedSchema completed");
+  }
+
+  public void ensureSharedConfig() {
+    Tenants.withId(SHARED_SCHEMA_NAME) {
+      TenantSymbolMapping.withNewTransaction {
+        TenantSymbolMapping.findBySymbol('test:1234') ?: new TenantSymbolMapping(
+                                                                symbol:'test:1234',
+                                                                tenant:'tenant').save(flush:true, failOnError:true);
+      }
+    }
   }
 
   /**

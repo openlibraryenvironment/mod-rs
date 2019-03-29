@@ -8,6 +8,7 @@ class BootStrap {
   def init = { servletContext ->
 
     housekeepingService.ensureSharedSchema();
+    housekeepingService.ensureSharedConfig();
 
     if ( grailsApplication.config.rabbitmq?.enabled ) {
       log.debug("mod-rs starting, with rabbitmq enabled");
