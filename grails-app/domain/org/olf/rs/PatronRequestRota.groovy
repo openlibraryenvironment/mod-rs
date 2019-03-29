@@ -2,15 +2,10 @@ package org.olf.rs
 
 import grails.gorm.MultiTenant;
 
-/**
- * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
- * requesting that reshare locate and deliver a resource from a remote partner. 
- */
-
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
     // internal ID of the audit record
-    long id
+    String id
 
 	// These 2 dates are maintained by the framework for us
 	Date dateCreated
@@ -60,7 +55,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     }
 
     static mapping = {
-        id                     column : 'prr_id'
+        id                     column : 'prr_id', generator: 'uuid2', length:36
         version                column : 'prr_version'
         availability           column : 'prr_availability'
         availableFrom          column : 'prr_available_from'
