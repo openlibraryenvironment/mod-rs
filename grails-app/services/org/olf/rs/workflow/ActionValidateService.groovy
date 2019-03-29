@@ -4,8 +4,6 @@ import grails.gorm.transactions.Transactional;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.workflow.AbstractAction.ActionResponse;
 
-import grails.gorm.transactions.Transactional
-
 @Transactional
 class ActionValidateService extends AbstractAction {
 
