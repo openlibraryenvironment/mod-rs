@@ -31,7 +31,7 @@ class StateTransition implements MultiTenant<StateTransition> {
 
 	static mapping = {
 		table      'wf_state_transition'
-        id         column : 'st_id', generator: 'uuid', length:36
+        id         column : 'st_id', generator: 'uuid2', length:36
 		action     column : 'st_action'
 		fromStatus column : 'st_from_status'
 		nextAction column : 'st_next_action'
