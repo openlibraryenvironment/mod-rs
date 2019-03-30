@@ -15,3 +15,9 @@ okapi-login               -- Utility script to log on to diku tenant as admin an
 
 README	                  -- This file
 
+
+
+
+Using send161
+
+./send161.groovy -s ReShare:DIKUA -r PALCI:ACMAIN -t "The Heart of Enterprise"
