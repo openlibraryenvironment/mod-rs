@@ -37,6 +37,7 @@ import static groovyx.net.http.ContentType.XML
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.GET
 import static groovyx.net.http.Method.POST
+import groovy.json.JsonOutput
 
 
 import java.text.*
@@ -93,10 +94,7 @@ def recip_symbol_to_use = prefSymbol(recipient_record?.id,pref_auth);
 println("Sender symbol to use: ${sender_symbol_to_use}");
 println("Recipient symbol to use: ${recip_symbol_to_use}");
 
-// curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/directory/serviceAccount?filters=accountHolder.symbols.symbol%3dBRYN&filters=accountHolder.symbols.authority.symbol%3dPALCI&filters=service.type.value%3diso10161&stats=true"
-
-// curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/directory/api/findSymbol?for=$BRYN_ID&ns=OCLC"
-
+send10161()
 
 private void login(String username, String password) {
   def postBody = [username: username, password: password]
@@ -205,4 +203,68 @@ def prefSymbol(id, auth) {
     }
   }
   result
+}
+
+def send10161() {
+
+  def payload_as_string = JsonOutput.toJson(getPayload())
+
+  def rabbit_request=[
+    "properties":[:],
+    "routing_key":"RSOutViaProtocol.TCP",
+    "payload_encoding":"string",
+    "payload": payload_as_string
+  ]
+
+  println(rabbit_request)
+}
+
+private Map getPayload() {
+  def payload = [
+    "header":[
+      "protocol":"TCP",
+      "address":"localhost",
+      "port":8999
+    ],
+    "message":[
+      "request": [
+        "protocol_version_num":1,
+        "transaction_id":[
+          "transaction_group_qualifier":"'$tgq'",
+          "transaction_qualifier":"'$tq'"
+        ],
+        "service_date_time": [
+          "date_time_of_this_service":["date":"20170101", "time":"0000"],
+          "date_time_of_original_service":["date":"20180101","time":"1111"],
+        ],
+        "requester_id":[
+          "person_or_institution_symbol":[
+            "institution_symbol":"ILLTEST-local-001"
+          ]
+        ],
+        "responder_id":[
+          "person_or_institution_symbol":[
+            "institution_symbol":"ILLTEST-local-002"
+          ]
+        ],
+        "transaction_type":"simple",
+        "iLL_service_type":["loan","copy-non-returnable","locations","estimate","responder-specific"],
+        "requester_optional_messages":[
+                  "can_send_RECEIVED":true,
+                  "can_send_RETURNED":true,
+                  "requester_SHIPPED":"desires",
+                  "requester_CHECKED_IN":"desires"
+        ],
+        "place_on_hold": "according_to_policy",
+        "item_id":[
+          "title":"A test title"
+        ],
+        "retry_flag":false,
+        "forward_flag":false,
+        "requester_note":"ILLTEST-CASE-001"
+      ]
+    ]
+  ]
+
+  return payload
 }
