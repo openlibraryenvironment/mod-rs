@@ -10,6 +10,9 @@ import org.olf.rs.workflow.ReShareMessageService;
  *
  */
 class RSMSConsumer {
+
+  def housekeepingService
+
   /**
    * Consumer configuration.
    */
@@ -23,14 +26,25 @@ class RSMSConsumer {
    *
    * @param body    The converted body of the incoming message.
    * @param context Properties of the incoming message.
+   *        Context has body,channel,consumerTag,envelope,properties
    * @return
    */
   def handleMessage(Map body, MessageContext context) {
 
-    log.debug("Incoming message from ResourceSharingMessageService Body:${body} ${body?.class?.name} Context:${context}");
+    log.debug("Incoming message from ResourceSharingMessageService Body:${body} Context:${context}");
 
+    
     if ( body ) {
-      log.debug("Processing");
+      log.debug("Message is bound for ${context.envelope.routingKey}");
+
+      // Strip off "RSInboundMessage."
+      String symbol = context.envelope.routingKey.substring(17);
+
+      // See if we have a tenant registered for that symbol
+      String tenant = housekeepingService.findTenantForSymbol(symbol);
+
+
+      log.debug("Result of resolve tenant for ${symbol} : ${tenant}");
     }
     else {
       log.debug("Body is null");
@@ -38,5 +52,8 @@ class RSMSConsumer {
 
     // There is nothing to return
     return(null);
+  }
+
+  def routeToTenant(body) {
   }
 }

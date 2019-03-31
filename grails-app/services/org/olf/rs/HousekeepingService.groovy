@@ -79,13 +79,34 @@ public class HousekeepingService {
   }
 
   public void ensureSharedConfig() {
+    // This is for DEVELOPMENT ONLY - Need to find a sysadmin way to do this
+    registerTenantSymbolMapping('RESHARE:DIKUA', 'diku');
+    registerTenantSymbolMapping('RESHARE:DIKUB', 'diku');
+    registerTenantSymbolMapping('RESHARE:DIKUC', 'diku');
+    registerTenantSymbolMapping('RESHARE:ACMAIN', 'diku');
+  }
+
+  public void registerTenantSymbolMapping(String symbol, String tenant) {
     Tenants.withId(SHARED_SCHEMA_NAME) {
       TenantSymbolMapping.withNewTransaction {
-        TenantSymbolMapping.findBySymbol('test:1234') ?: new TenantSymbolMapping(
-                                                                symbol:'test:1234',
-                                                                tenant:'tenant').save(flush:true, failOnError:true);
+        TenantSymbolMapping.findBySymbol(symbol) ?: new TenantSymbolMapping(
+                                                                symbol:symbol,
+                                                                tenant:tenant).save(flush:true, failOnError:true);
       }
     }
+  }
+
+  public String findTenantForSymbol(String symbol) {
+    String result = null;
+    Tenants.withId(SHARED_SCHEMA_NAME) {
+      TenantSymbolMapping.withNewTransaction {
+        def mapping = TenantSymbolMapping.findBySymbol(symbol);
+        if ( mapping ) {
+          result = mapping.tenant;
+        }
+      }
+    }
+    return result;
   }
 
   /**
