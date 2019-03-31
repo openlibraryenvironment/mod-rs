@@ -7,6 +7,12 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.RabbitService;
 import org.olf.rs.rabbit.Queue;
 
+// For @Subscriber
+import grails.events.annotation.*
+
+// PreInsertEvent etc
+import org.grails.datastore.mapping.engine.event.*;
+
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
  * 
@@ -160,4 +166,31 @@ class ReShareMessageService {
 		messageBody[TENANT_ID] = tenantId;
 		rabbitService.Send(Queue.RESHARE_ACTION, requestId + "_" + System.currentTimeMillis(), messageBody);
 	}
+
+  @Subscriber 
+  void afterInsert(PostInsertEvent event) {
+    if ( event.entityObject instanceof PatronRequest ) {
+      // Stuff to do after insert of a patron request which need access
+      // to the spring boot infrastructure
+      log.debug("afterInsert PatronRequest id: ${event.entityObject.id}");
+    }
+  }
+
+  @Subscriber 
+  void afterUpdate(PostUpdateEvent event) { 
+    if ( event.entityObject instanceof PatronRequest ) {
+      // Stuff to do after update of a patron request which need access
+      // to the spring boot infrastructure
+      log.debug("afterUpdate PatronRequest id: ${event.entityObject.id}");
+    }
+  }
+
+  @Subscriber
+  void beforeInsert(PreInsertEvent event) {
+    if ( event.entityObject instanceof PatronRequest ) {
+      // Stuff to do before insert of a patron request which need access
+      // to the spring boot infrastructure
+      log.debug("beforeInsert of PatronRequest");
+    }
+  }
 }
