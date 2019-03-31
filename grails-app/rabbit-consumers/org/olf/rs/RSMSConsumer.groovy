@@ -25,10 +25,16 @@ class RSMSConsumer {
    * @param context Properties of the incoming message.
    * @return
    */
-  def handleMessage(def body, MessageContext context) {
-    log.debug("Incoming message from ResourceSharingMessageService ${body} ${context}");
+  def handleMessage(Map body, MessageContext context) {
 
+    log.debug("Incoming message from ResourceSharingMessageService Body:${body} ${body?.class?.name} Context:${context}");
 
+    if ( body ) {
+      log.debug("Processing");
+    }
+    else {
+      log.debug("Body is null");
+    }
 
     // There is nothing to return
     return(null);
