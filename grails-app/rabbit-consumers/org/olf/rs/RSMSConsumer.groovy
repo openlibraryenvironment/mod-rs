@@ -43,8 +43,9 @@ class RSMSConsumer {
       // See if we have a tenant registered for that symbol
       String tenant = housekeepingService.findTenantForSymbol(symbol);
 
-
       log.debug("Result of resolve tenant for ${symbol} : ${tenant}");
+      // We've got a tenant, so now we need to issue an event to that tennant - this might involve
+      // creating a request, or updating the state of an existing request.
     }
     else {
       log.debug("Body is null");
