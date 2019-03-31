@@ -85,8 +85,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [audit : PatronRequestAudit,
-					rota  : PatronRequestRota,
-	                tags  : Tag];
+          rota  : PatronRequestRota,
+                  tags  : Tag];
 
   static constraints = {
                      
@@ -95,14 +95,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                patronReference (nullable : true)
                    serviceType (nullable : true)
                          state (nullable : true, bindable: false)
-	               isRequester (nullable : true, bindable: false)
-	           numberOfRetries (nullable : true, bindable: false)
-	delayPerformingActionUntil (nullable : true, bindable: false)
-	 			 pendingAction (nullable : true, pendingAction : true)
-				   errorAction (nullable : true, bindable: false)
-			    preErrorStatus (nullable : true, bindable: false)
-	  awaitingProtocolResponse (                 bindable: false)
-	  			  rotaPosition (                 bindable: false)
+                   isRequester (nullable : true, bindable: false)
+               numberOfRetries (nullable : true, bindable: false)
+    delayPerformingActionUntil (nullable : true, bindable: false)
+                 pendingAction (nullable : true, pendingAction : true)
+                   errorAction (nullable : true, bindable: false)
+                preErrorStatus (nullable : true, bindable: false)
+      awaitingProtocolResponse (bindable: false)
+                  rotaPosition (bindable: false)
                publicationType (nullable : true)
 
                          title (nullable : true, blank : false)
@@ -129,12 +129,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                patronReference column : 'pr_patron_reference'
                    serviceType column : 'pr_service_type_fk'
                          state column : 'pr_state_fk'
-	               isRequester column : "pr_is_requester"
-	           numberOfRetries column : 'pr_number_of_retries'
-	delayPerformingActionUntil column : 'pr_delay_performing_action_until'
-	 			 pendingAction column : 'pr_pending_action_fk'
-				   errorAction column : 'pr_error_action_fk'
-			    preErrorStatus column : 'pr_pre_error_status_fk'
+                 isRequester column : "pr_is_requester"
+             numberOfRetries column : 'pr_number_of_retries'
+  delayPerformingActionUntil column : 'pr_delay_performing_action_until'
+          pendingAction column : 'pr_pending_action_fk'
+           errorAction column : 'pr_error_action_fk'
+          preErrorStatus column : 'pr_pre_error_status_fk'
       awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
                   rotaPosition column : 'pr_rota_position'
                publicationType column : 'pr_pub_type_fk'
@@ -159,14 +159,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * If this is a requester request we are inserting then set the pending action to be VALIDATE
    */
   def beforeInsert() {
-	  // Are we a requester
-	  if (isRequester) {
-		  // Set the pending action to be validate
-		  pendingAction = Action.get(Action.VALIDATE);
-	  }
+    // Are we a requester
+    if (isRequester) {
+      // Set the pending action to be validate
+      pendingAction = Action.get(Action.VALIDATE);
+    }
 
-	  // Status needs to be set to idle
-	  state = Status.get(Status.IDLE);	  
+    // Status needs to be set to idle
+    state = Status.get(Status.IDLE);    
   }
 
   
@@ -174,13 +174,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * Perform checks to see if needs adding to the reshare queue  
    */
   def afterInsert() {
-	  ReShareMessageService.instance.checkAddToQueue(this);
+    ReShareMessageService.instance.checkAddToQueue(this);
   }
 
   /**
    * Perform checks to see if this request needs adding to the ReShare queue  
    */
   def afterUpdate() {
-	  ReShareMessageService.instance.checkAddToQueue(this);
+    ReShareMessageService.instance.checkAddToQueue(this);
   }
 }

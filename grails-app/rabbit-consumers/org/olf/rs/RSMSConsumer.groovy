@@ -2,6 +2,8 @@ package org.olf.rs
 
 import com.budjb.rabbitmq.consumer.MessageContext;
 import org.olf.rs.workflow.ReShareMessageService;
+import org.olf.rs.PatronRequest;
+import grails.gorm.multitenancy.Tenants;
 
 /** ResourceSharingMessageService consumer - Will likely need to be merged with other classes in this directory
  * but kept separate for now
@@ -54,6 +56,19 @@ class RSMSConsumer {
       //   recipient:[institution_symbol:RESHSARE:DIKUA], 
       //   recipient_event:ILL]
       log.debug("Perform action ${body.participantInfo.recipient_event} for symbol ${symbol} who resides in tenant ${tenant}");
+
+      Tenants.withId(tenant+'_mod_rs') { // Tenants.withId needs a schema name
+        switch ( body.participantInfo.recipient_event ) {
+          case 'ILL':
+            log.debug("Create new patron request");
+            def new_pr = new PatronRequest(title: body.request.item_id.title,
+                                           isRequester:false).save(flush:true, failOnError:true);
+            break;
+          default:
+            log.warn("Unhandled ILL event: ${body.participantInfo.recipient_event}");
+            break;
+        }
+      }
     }
     else {
       log.debug("Body is null");
