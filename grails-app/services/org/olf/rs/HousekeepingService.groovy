@@ -68,7 +68,6 @@ public class HousekeepingService {
       log.debug("${SHARED_SCHEMA_NAME} found. all is well");
     }
     catch ( ConfigurationException ce ) {
-      log.error("register schema ${SHARED_SCHEMA_NAME}");
       createAccountSchema(SHARED_SCHEMA_NAME);
     }
 

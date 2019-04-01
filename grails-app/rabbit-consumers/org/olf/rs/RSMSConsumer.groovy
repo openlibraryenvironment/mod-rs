@@ -62,6 +62,7 @@ class RSMSConsumer {
           case 'ILL':
             log.debug("Create new patron request");
             def new_pr = new PatronRequest(title: body.request.item_id.title,
+                                           patronReference: body.request.client_id?.client_identifier,
                                            isRequester:false).save(flush:true, failOnError:true);
             break;
           default:
@@ -74,6 +75,7 @@ class RSMSConsumer {
       log.debug("Body is null");
     }
 
+    log.debug("handleMessage completed OK");
     // There is nothing to return
     return(null);
   }

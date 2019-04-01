@@ -42,8 +42,14 @@ payload='{
                   \"requester_CHECKED_IN\":\"desires\"
         },
         \"place_on_hold\": \"according_to_policy\",
+        \"client_id\":{
+          \"client_name\":\"Ian Ibbotson\",
+          \"client_status\":\"Current\",
+          \"client_identifier\":\"ianibbo\"
+        },
         \"item_id\":{
-          \"title\":\"Platform for Change - A message from Stafford Beer\"
+          \"title\":\"The Shadow Saga\",
+          \"author\":\"Orson Scott Card\"
         },
         \"retry_flag\":false,
         \"forward_flag\":false,
