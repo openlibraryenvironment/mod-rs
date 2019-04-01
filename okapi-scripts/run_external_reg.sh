@@ -11,5 +11,5 @@ echo Start mod-rs in external-register mode
 # curl --header "X-Okapi-Tenant: diku" http://localhost:9130/content -X GET
 
 # THis DOES work as expected however - 
-java -jar build/libs/mod-rs-1.0.jar -Xmx1G --rabbitmq.enabled=true --grails.server.host=10.0.2.2 --dataSource.username=folio_admin --dataSource.password=folio_admin --dataSource.url=jdbc:postgresql://localhost:54321/okapi_modules
+java -jar build/libs/mod-rs-1.0.jar -Xmx1G --rabbitmq.enabled=true --server.port=8081 --grails.server.host=10.0.2.2 --dataSource.username=folio_admin --dataSource.password=folio_admin --dataSource.url=jdbc:postgresql://localhost:54321/okapi_modules
 

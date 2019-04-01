@@ -43,7 +43,7 @@ payload='{
         },
         \"place_on_hold\": \"according_to_policy\",
         \"item_id\":{
-          \"title\":\"A test title\"
+          \"title\":\"Platform for Change - A message from Stafford Beer\"
         },
         \"retry_flag\":false,
         \"forward_flag\":false,
