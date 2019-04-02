@@ -49,7 +49,13 @@ payload='{
         },
         \"item_id\":{
           \"title\":\"The Shadow Saga\",
-          \"author\":\"Orson Scott Card\"
+          \"author\":\"Orson Scott Card\",
+          \"publisher\":\"A test publisher\",
+          \"sub_title\":\"A test subtitle\",
+          \"title_of_article\":\"A test title_of_article\",
+          \"iSBN\":\"A test ISBN\",
+          \"iSSN\":\"A test ISSN\",
+          \"pagination\":\"A test pagination\"
         },
         \"retry_flag\":false,
         \"forward_flag\":false,
