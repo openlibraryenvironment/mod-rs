@@ -40,13 +40,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    */
   int protocolStatus;
 
-  /**
-   * Use 1:M mapping from patron request to audit record
-   */
-  static belongsTo =  [
-    owner: PatronRequest
-  ]
-
   static constraints = {
     availability           (nullable : true,  blank: false)
     availableFrom          (nullable : true)

@@ -27,14 +27,6 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
   /** How long it took to process this action */
   Long duration;
 
-  /**
-   * Use 1:M mapping from patron request to audit record
-   */
-  static belongsTo =  [
-    owner: PatronRequest
-  ]
-
-
   static constraints = {
     action        (nullable : false)
     dateCreated   (nullable : false)
