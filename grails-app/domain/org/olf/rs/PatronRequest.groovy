@@ -89,7 +89,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
           rota  : PatronRequestRota,
           tags  : Tag];
 
-  static mappedBy : [
+  static mappedBy = [
     rota: 'owner',        
     audit: 'owner'
   ]
@@ -176,17 +176,22 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   
+
   /**
+   * II :: This has been replaced by ReShareMessageService::afterInsert GORM event to aleviate the need for
+   *       statics in service classes
    * Perform checks to see if needs adding to the reshare queue  
+   * def afterInsert() {
+   *   ReShareMessageService.instance.checkAddToQueue(this);
+   * }
    */
-  def afterInsert() {
-    ReShareMessageService.instance.checkAddToQueue(this);
-  }
 
   /**
    * Perform checks to see if this request needs adding to the ReShare queue  
+   * II :: This has been replaced by ReShareMessageService::afterInsert GORM event to aleviate the need for
+   *       statics in service classes
+   * def afterUpdate() {
+   *   ReShareMessageService.instance.checkAddToQueue(this);
+   * }
    */
-  def afterUpdate() {
-    ReShareMessageService.instance.checkAddToQueue(this);
-  }
 }

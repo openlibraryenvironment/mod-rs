@@ -13,6 +13,7 @@ import grails.events.annotation.*
 // PreInsertEvent etc
 import org.grails.datastore.mapping.engine.event.*;
 
+
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
  * 
@@ -27,26 +28,18 @@ class ReShareMessageService {
 	static private final String REQUEST_ID  = "requestId";
 	static private final String TENANT_ID   = "tenantId";
 
-	/** Domains are no longer a bean, so we save the instance when it is created, so we can call this service in the domain events */
-	public static ReShareMessageService instance;
-
 	/** The cache of action codes against the class that performs that action */
-	private static Map<String, AbstractAction> actionCache = [ : ];
+	private Map<String, AbstractAction> actionCache = [ : ];
 
-	/** The service that we use to put the message on the queue */
+	/** The service that we use to put the message on the queue - Injected by framework */
 	private RabbitService rabbitService;
-
-	public ReShareMessageService(RabbitService rabbitService) {
-		this.rabbitService = rabbitService;
-		instance = this;
-	}
 
 	/** Registers an action with the implementing class
 	 * 
 	 * @param actionCode The code that represents the action to be performed
 	 * @param className The name of the class that implements the action, we automatically append "Service" to the name of the class
 	 */
-	static public void registerClass(String actionCode, String className) {
+	public void registerClass(String actionCode, String className) {
 		// Nothing to do if we have not been passed a code and class name
 		if (className && actionCode) {
 			// Have we already registered this action
@@ -173,6 +166,8 @@ class ReShareMessageService {
       // Stuff to do after insert of a patron request which need access
       // to the spring boot infrastructure
       log.debug("afterInsert PatronRequest id: ${event.entityObject.id}");
+      PatronRequest pr = (PatronRequest) event.entityObject;
+      checkAddToQueue(pr);
     }
   }
 
@@ -182,6 +177,8 @@ class ReShareMessageService {
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
       log.debug("afterUpdate PatronRequest id: ${event.entityObject.id}");
+      PatronRequest pr = (PatronRequest) event.entityObject;
+      checkAddToQueue(pr);
     }
   }
 
