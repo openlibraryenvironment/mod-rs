@@ -90,8 +90,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
           tags  : Tag];
 
   static mappedBy = [
-    rota: 'owner',        
-    audit: 'owner'
+    rota: 'patronRequest',        
+    audit: 'patronRequest'
   ]
 
   static constraints = {
