@@ -174,9 +174,7 @@ databaseChangeLog = {
 
             column(name: "pr_last_updated", type: "timestamp")
 
-            column(name: "pr_rota_position", type: "INT") {
-                constraints(nullable: "false")
-            }
+            column(name: "pr_rota_position", type: "INT") 
 
             column(name: "pr_pub_type_fk", type: "VARCHAR(36)")
 
@@ -278,9 +276,7 @@ databaseChangeLog = {
 
             column(name: "prr_protocol_status", type: "INT")
 
-            column(name: "prr_rota_position", type: "INT") {
-                constraints(nullable: "false")
-            }
+            column(name: "prr_rota_position", type: "INT")
 
             column(name: "prr_shelfmark", type: "VARCHAR(255)")
 
