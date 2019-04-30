@@ -77,7 +77,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   boolean awaitingProtocolResponse;
 
   /** The position we are in the rota */
-  int rotaPosition;
+  Long rotaPosition;
 
   /** Lets us know the if the system has updated the record, as we do not want validation on the pendingAction field to happen as it has already happened */
   boolean systemUpdate = false;

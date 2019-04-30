@@ -15,7 +15,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   static belongsTo = [patronRequest : PatronRequest]
 
   /** The position in the rota */
-  int rotaPosition;
+  Long rotaPosition;
 
   /** The directory entry that represents this rota entry */ 
   String directoryId;
@@ -38,7 +38,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   /** The status the protocol thinks we are at with this messsage,
    *  the meaning we vary from protocol to protocol, but it is assumed it will map onto an enum 
    */
-  int protocolStatus;
+  Long protocolStatus;
 
   static constraints = {
     availability           (nullable : true,  blank: false)
