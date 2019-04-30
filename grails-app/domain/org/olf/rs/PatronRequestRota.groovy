@@ -32,7 +32,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   /** The normalised availability - this is what we have interpreted the availability field as */
   NormalisedAvailability normalisedAvailability;
 
-  /** The ate we have determined the item is available from */
+  /** The date we have determined the item is available from */
   Date availableFrom;
 
   /** The status the protocol thinks we are at with this messsage,
