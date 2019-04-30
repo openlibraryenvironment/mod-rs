@@ -11,6 +11,7 @@ import grails.core.GrailsApplication
 import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
+import org.olf.rs.workflow.ReShareMessageService
 
 import org.olf.rs.shared.TenantSymbolMapping;
 
@@ -25,6 +26,7 @@ public class HousekeepingService {
   HibernateDatastore hibernateDatastore
   DataSource dataSource
   GrailsApplication grailsApplication
+  ReShareMessageService reShareMessageService 
 
   private static final SHARED_SCHEMA_NAME='__shared_mod_rs';
 
@@ -51,7 +53,7 @@ public class HousekeepingService {
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
       // Create the Actions / status and transitions for the core state model 
-      Action.CreateDefault();
+      Action.CreateDefault(reShareMessageService);
     }
   }
 
