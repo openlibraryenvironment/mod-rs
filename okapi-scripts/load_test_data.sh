@@ -5,6 +5,14 @@ AUTH_TOKEN=`./okapi-login`
 echo Listing current requests
 curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
 
+
+echo Get the directory record for our responding system - we want to send a request to DIKUA
+RESHARE_DIKUA=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/directory/entry?filters=symbols.symbol%3dDIKUA&filters=symbols.authority.value=RESHARE&stats=true"`
+
+DIKUA_ID=`echo $RESHARE_DIKUA | jq -r ".results[0].id" | tr -d '\r'`
+
+echo Submitting requests to responder with symbol RESHARE:DIKUA - has directory ID $RESHARE_DIKUA
+
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
   title:"Brain of the firm",
   author:"Beer, Stafford",
@@ -21,12 +29,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
     "patronWalletHash": ["298348743738748728524854289743765"],
   },
   rota:[
-    { directoryId:"TEST-DIRENT-000001", rotaPosition:"0" },
-    { directoryId:"TEST-DIRENT-000002", rotaPosition:"1" },
-    { directoryId:"TEST-DIRENT-000003", rotaPosition:"2" },
-    { directoryId:"TEST-DIRENT-000004", rotaPosition:"3" },
-    { directoryId:"TEST-DIRENT-000005", rotaPosition:"4" },
-    { directoryId:"TEST-DIRENT-000006", rotaPosition:"5" }
+    { directoryId:"'"$DIKUA_ID"'", rotaPosition:"0" }
   ]
 }
 ' | jq -r ".id" | tr -d '\r'`
@@ -48,12 +51,7 @@ PATRON_REQ_2=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
     "patronWalletHash": ["298348743738748728524854289743765"],
   },
   rota:[
-    { directoryId:"TEST-DIRENT-000001", rotaPosition:"0" },
-    { directoryId:"TEST-DIRENT-000002", rotaPosition:"1" },
-    { directoryId:"TEST-DIRENT-000003", rotaPosition:"2" },
-    { directoryId:"TEST-DIRENT-000004", rotaPosition:"3" },
-    { directoryId:"TEST-DIRENT-000005", rotaPosition:"4" },
-    { directoryId:"TEST-DIRENT-000006", rotaPosition:"5" }
+    { directoryId:"'"$DIKUA_ID"'", rotaPosition:"0" }
   ]
 }
 ' | jq -r ".id" | tr -d '\r'`
@@ -75,12 +73,7 @@ PATRON_REQ_3=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
     "patronWalletHash": ["298348743738748728524854289743765"],
   },
   rota:[
-    { directoryId:"TEST-DIRENT-000001", rotaPosition:"0" },
-    { directoryId:"TEST-DIRENT-000002", rotaPosition:"1" },
-    { directoryId:"TEST-DIRENT-000003", rotaPosition:"2" },
-    { directoryId:"TEST-DIRENT-000004", rotaPosition:"3" },
-    { directoryId:"TEST-DIRENT-000005", rotaPosition:"4" },
-    { directoryId:"TEST-DIRENT-000006", rotaPosition:"5" }
+    { directoryId:"'"$DIKUA_ID"'", rotaPosition:"0" }
   ]
 }
 ' | jq -r ".id" | tr -d '\r'`
