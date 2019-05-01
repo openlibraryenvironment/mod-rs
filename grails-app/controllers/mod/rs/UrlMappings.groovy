@@ -6,7 +6,9 @@ class UrlMappings {
   static mappings = {
     "/"(controller: 'application', action:'index')
 
-    "/rs/patronrequests" (resources:'patronRequest')
+    "/rs/patronrequests" (resources:'patronRequest') {
+      '/validActions' (controller: 'patronRequest', action: 'validActions')
+    }
 
     "/chas/$action" ( controller: "Chas")
 

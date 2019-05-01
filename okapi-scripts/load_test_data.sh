@@ -32,9 +32,11 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
     { directoryId:"'"$DIKUA_ID"'", rotaPosition:"0" }
   ]
 }
-' | jq -r ".id" | tr -d '\r'`
+'`
 
-echo Created request 1: $PATRON_REQ_1
+PATRON_REQ_1_ID=`echo $PATRON_REQ_1 | jq -r ".id" | tr -d '\r'`
+
+echo Created request 1: $PATRON_REQ_1_ID
 
 
 PATRON_REQ_2=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
@@ -83,7 +85,10 @@ echo Created request 3: $PATRON_REQ_3
 
 echo Attempt to read back request 1
 
-curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests/$PATRON_REQ_1
+curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests/$PATRON_REQ_1_ID
+
+echo Find out what valid actions we can take for patron request 1
+curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests/$PATRON_REQ_1_ID/validActions
 
 echo List requests after creation
 curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
