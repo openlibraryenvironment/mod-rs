@@ -1,6 +1,17 @@
 response.status 500
 
-json {    
-    message "Internal server error"
-    error 500
+json {
+  Exception ex = request.exception
+  error 500
+
+  if (ex) {
+    stackTrace (ex.stackTrace) { StackTraceElement ste ->
+      "${ste}"
+    }
+    message = ex.message
+
+  } else {
+    message "Unknown Internal server error"
+  }
 }
+
