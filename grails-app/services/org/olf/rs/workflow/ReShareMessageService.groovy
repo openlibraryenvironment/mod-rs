@@ -12,6 +12,9 @@ import org.grails.datastore.mapping.engine.event.PostDeleteEvent
 import org.grails.datastore.mapping.engine.event.PostInsertEvent
 import org.grails.datastore.mapping.engine.event.PreInsertEvent
 import org.grails.datastore.mapping.engine.event.PostUpdateEvent
+import org.grails.datastore.mapping.engine.event.SaveOrUpdateEvent
+
+import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
 
 import javax.annotation.PostConstruct;
 import groovy.transform.CompileStatic
@@ -178,7 +181,6 @@ class ReShareMessageService implements ApplicationListener {
 
   void afterInsert(PostInsertEvent event) {
     log.debug("afterInsert ${event} ${event?.entityObject?.class?.name}");
-    System.err.println("** AI **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after insert of a patron request which need access
       // to the spring boot infrastructure
@@ -190,7 +192,6 @@ class ReShareMessageService implements ApplicationListener {
 
   void afterUpdate(PostUpdateEvent event) { 
     log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
-    System.err.println("** AU **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
@@ -202,7 +203,6 @@ class ReShareMessageService implements ApplicationListener {
 
   void beforeInsert(PreInsertEvent event) {
     log.debug("beforeInsert ${event} ${event?.entityObject?.class?.name}");
-    System.err.println("** BI **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do before insert of a patron request which need access
       // to the spring boot infrastructure
@@ -211,14 +211,25 @@ class ReShareMessageService implements ApplicationListener {
   }
 
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
-    if ( event instanceof org.grails.datastore.mapping.engine.event.PostUpdateEvent ) {
-      beforeUpdate(event);
+    if ( event instanceof AbstractPersistenceEvent ) {
+      if ( event instanceof PostUpdateEvent ) {
+        afterUpdate(event);
+      }
+      else if ( event instanceof PreInsertEvent ) {
+        beforeInsert(event);
+      }
+      else if ( event instanceof PostInsertEvent ) {
+        afterInsert(event);
+      }
+      else if ( event instanceof SaveOrUpdateEvent ) {
+        log.debug("SAVE OR UPDATE EVENT");
+      }
+      else {
+        // log.debug("No special handling for appliaction event of class ${event}");
+      }
     }
-    else if ( event instanceof org.grails.datastore.mapping.engine.event.PreInsertEvent ) {
-      beforeInsert(event);
-    }
-    else if ( event instanceof org.grails.datastore.mapping.engine.event.PostInsertEvent ) {
-      afterInsert(event);
+    else {
+      // log.debug("Event is not a persistence event: ${event}");
     }
   }
 }
