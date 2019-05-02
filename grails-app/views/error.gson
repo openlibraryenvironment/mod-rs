@@ -1,14 +1,13 @@
 response.status 500
+Exception ex = request.getAttribute('exception') as Exception
 
 json {
-  Exception ex = request.exception
   error 500
-
   if (ex) {
     stackTrace (ex.stackTrace) { StackTraceElement ste ->
       "${ste}"
     }
-    message = ex.message
+    message "${ex.message}"
 
   } else {
     message "Unknown Internal server error"
