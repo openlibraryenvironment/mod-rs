@@ -7,16 +7,16 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.RabbitService;
 import org.olf.rs.rabbit.Queue;
 
-import grails.events.annotation.Subscriber
-
 // PreInsertEvent etc
 import org.grails.datastore.mapping.engine.event.PostDeleteEvent
 import org.grails.datastore.mapping.engine.event.PostInsertEvent
+import org.grails.datastore.mapping.engine.event.PreInsertEvent
 import org.grails.datastore.mapping.engine.event.PostUpdateEvent
 
 import javax.annotation.PostConstruct;
-
 import groovy.transform.CompileStatic
+import org.springframework.context.ApplicationListener
+import org.springframework.context.ApplicationEvent
 
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
@@ -25,7 +25,7 @@ import groovy.transform.CompileStatic
  *
  */
 @Slf4j 
-class ReShareMessageService {
+class ReShareMessageService implements ApplicationListener {
 
   /** The properties we put on the message queue to identify the request that needs to be processed */
   static private final String ACTION_CODE = "action";
@@ -176,10 +176,9 @@ class ReShareMessageService {
     rabbitService.Send(Queue.RESHARE_ACTION, requestId + "_" + System.currentTimeMillis(), messageBody);
   }
 
-  @Subscriber 
   void afterInsert(PostInsertEvent event) {
     log.debug("afterInsert ${event} ${event?.entityObject?.class?.name}");
-    println("** AI");
+    System.err.println("** AI **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after insert of a patron request which need access
       // to the spring boot infrastructure
@@ -189,10 +188,9 @@ class ReShareMessageService {
     }
   }
 
-  @Subscriber 
   void afterUpdate(PostUpdateEvent event) { 
     log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
-    println("** AU");
+    System.err.println("** AU **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
@@ -202,14 +200,25 @@ class ReShareMessageService {
     }
   }
 
-  @Subscriber
   void beforeInsert(PreInsertEvent event) {
     log.debug("beforeInsert ${event} ${event?.entityObject?.class?.name}");
-    println("** BI");
+    System.err.println("** BI **\n");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do before insert of a patron request which need access
       // to the spring boot infrastructure
       log.debug("beforeInsert of PatronRequest");
+    }
+  }
+
+  public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
+    if ( event instanceof org.grails.datastore.mapping.engine.event.PostUpdateEvent ) {
+      beforeUpdate(event);
+    }
+    else if ( event instanceof org.grails.datastore.mapping.engine.event.PreInsertEvent ) {
+      beforeInsert(event);
+    }
+    else if ( event instanceof org.grails.datastore.mapping.engine.event.PostInsertEvent ) {
+      afterInsert(event);
     }
   }
 }
