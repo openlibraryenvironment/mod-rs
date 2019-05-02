@@ -7,12 +7,16 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.RabbitService;
 import org.olf.rs.rabbit.Queue;
 
-// For @Subscriber
-import grails.events.annotation.*
+import grails.events.annotation.Subscriber
 
 // PreInsertEvent etc
-import org.grails.datastore.mapping.engine.event.*;
+import org.grails.datastore.mapping.engine.event.PostDeleteEvent
+import org.grails.datastore.mapping.engine.event.PostInsertEvent
+import org.grails.datastore.mapping.engine.event.PostUpdateEvent
 
+import javax.annotation.PostConstruct;
+
+import groovy.transform.CompileStatic
 
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
@@ -34,12 +38,20 @@ class ReShareMessageService {
   /** The service that we use to put the message on the queue - Injected by framework */
   private RabbitService rabbitService;
 
+  @PostConstruct
+  public void init() {
+    log.debug("ReShareMessageService::init()");
+  }
+
   /** Registers an action with the implementing class
    * 
    * @param actionCode The code that represents the action to be performed
    * @param className The name of the class that implements the action, we automatically append "Service" to the name of the class
    */
   public void registerClass(String actionCode, String className) {
+
+    log.debug("ReShareMessageService::registerClass(${actionCode},${className}");
+
     // Nothing to do if we have not been passed a code and class name
     if (className && actionCode) {
       // Have we already registered this action
@@ -81,6 +93,7 @@ class ReShareMessageService {
    * @param patronRequest
    */
   public void checkAddToQueue(PatronRequest patronRequest) {
+    log.debug("checkAddToQueue(...)");
     // must not be waiting for a protocol action to happen
     if (!patronRequest.awaitingProtocolResponse) {
       // Must have a pending action
@@ -103,6 +116,8 @@ class ReShareMessageService {
    * @param messageDetails Defines the details that we need to act upon
    */
   public void processAnIncomingMessage(Map messageDetails) {
+
+    log.debug("ReShareMessageService::processAnIncomingMessage(...)");
 
     String actionCode = messageDetails[ACTION_CODE];
     String requestId = messageDetails[REQUEST_ID];
@@ -153,6 +168,7 @@ class ReShareMessageService {
    * @param requestId The request id that the action is to be performed upon
    */
   public void queue(String tenantId, String actionCode, String requestId) {
+    log.debug("queue(${tenantId}, ${actionCode}, ${requestId})");
     Map<String, String> messageBody = [ : ];
     messageBody[ACTION_CODE] = actionCode;
     messageBody[REQUEST_ID] = requestId;
@@ -162,6 +178,8 @@ class ReShareMessageService {
 
   @Subscriber 
   void afterInsert(PostInsertEvent event) {
+    log.debug("afterInsert ${event} ${event?.entityObject?.class?.name}");
+    println("** AI");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after insert of a patron request which need access
       // to the spring boot infrastructure
@@ -173,6 +191,8 @@ class ReShareMessageService {
 
   @Subscriber 
   void afterUpdate(PostUpdateEvent event) { 
+    log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
+    println("** AU");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
@@ -184,6 +204,8 @@ class ReShareMessageService {
 
   @Subscriber
   void beforeInsert(PreInsertEvent event) {
+    log.debug("beforeInsert ${event} ${event?.entityObject?.class?.name}");
+    println("** BI");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do before insert of a patron request which need access
       // to the spring boot infrastructure

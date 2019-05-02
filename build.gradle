@@ -65,7 +65,7 @@ dependencies {
   compile "org.grails:grails-logging"
   compile "org.grails.plugins:cache"
   compile "org.grails.plugins:async"
-  runtime "org.grails.plugins:events"
+  compile "org.grails.plugins:events"
   compile "org.grails.plugins:hibernate5"
   compile "org.grails.plugins:views-json"
   compile "org.springframework.boot:spring-boot-starter-undertow"
@@ -79,6 +79,8 @@ dependencies {
 
   compile 'com.k_int.grails:web-toolkit-ce:3.3.25'
   compile 'com.k_int.okapi:grails-okapi:3.4.8'
+
+  compile 'org.grails.plugins:rxjava'
 
   compile "org.grails.plugins:rabbitmq-native:3.4.6"
   console "org.grails:grails-console"
