@@ -210,6 +210,15 @@ class ReShareMessageService implements ApplicationListener {
     }
   }
 
+  void onSaveOrUpdate(SaveOrUpdateEvent event) {
+    log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
+    if ( event.entityObject instanceof PatronRequest ) {
+      // Stuff to do before insert of a patron request which need access
+      // to the spring boot infrastructure
+      log.debug("onSaveOrUpdate of PatronRequest");
+    }
+  }
+
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
     if ( event instanceof AbstractPersistenceEvent ) {
       if ( event instanceof PostUpdateEvent ) {
@@ -222,7 +231,7 @@ class ReShareMessageService implements ApplicationListener {
         afterInsert(event);
       }
       else if ( event instanceof SaveOrUpdateEvent ) {
-        log.debug("SAVE OR UPDATE EVENT");
+        onSaveOrUpdate(event);
       }
       else {
         // log.debug("No special handling for appliaction event of class ${event}");
