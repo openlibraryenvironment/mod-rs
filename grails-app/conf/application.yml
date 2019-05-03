@@ -120,15 +120,15 @@ rabbitmq:
   connections:
     - name: main
       # The new vagrant image config.vm.box = "projectreshare/development" exposes a rabbitmq with the user/pass folio/folio
-      host: localhost
+      host: ${rabbitmq.service.host:localhost}
       # Ian: Updated these to match the config of the rabbitmq now embedded in the Vagrant image used by the mod-rs project. 
       # If you look at the vagrant file you'll see rabbit ports exposed. The install sets up an rsms account/password.
       # That vagrant image also runs an rsms service which will receive incoming ILL messages and post them to the 
       # exchange": "RSExchange" with a binding pattern of "binding": "RSInboundMessage.#"
       # A Rabbit consumer for this channel has been set up. RS Message services also allows youyo post to RSExchange using
       # a binding of RSOutViaProtocol.# (EG #=TCP) to send a message to a remote system
-      username: rsms
-      password: rsms
+      username: ${rabbitmq.username:rsms}
+      password: ${rabbitmq.username:rsms}
       isDefault: true
   queues:
     - name: ReShareAction
