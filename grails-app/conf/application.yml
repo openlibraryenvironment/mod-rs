@@ -111,6 +111,9 @@ grails:
 okapi:
   schema:
     appName: 'mod-rs'
+  service:
+    register: false
+    deploy: false
 
 rabbitmq:
   enabled: false
