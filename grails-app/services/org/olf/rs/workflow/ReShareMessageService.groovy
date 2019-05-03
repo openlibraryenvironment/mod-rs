@@ -21,6 +21,8 @@ import groovy.transform.CompileStatic
 import org.springframework.context.ApplicationListener
 import org.springframework.context.ApplicationEvent
 
+import org.grails.orm.hibernate.AbstractHibernateDatastore
+
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
  * 
@@ -213,9 +215,13 @@ class ReShareMessageService implements ApplicationListener {
   void onSaveOrUpdate(SaveOrUpdateEvent event) {
     log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
     if ( event.entityObject instanceof PatronRequest ) {
-      // Stuff to do before insert of a patron request which need access
-      // to the spring boot infrastructure
       log.debug("onSaveOrUpdate of PatronRequest");
+      AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
+      PatronRequest pr = (PatronRequest) event.entityObject;
+      // II: I don't know that this can work - this event is triggered asychronously, and as such
+      // I don't think currentTenant will return the right thing when called from get tenantId in checkAddToQueue
+      // Commenting out until I can discuss with Steve and Chas
+      // checkAddToQueue(pr);
     }
   }
 
