@@ -128,7 +128,7 @@ rabbitmq:
       # A Rabbit consumer for this channel has been set up. RS Message services also allows youyo post to RSExchange using
       # a binding of RSOutViaProtocol.# (EG #=TCP) to send a message to a remote system
       username: ${rabbitmq.username:rsms}
-      password: ${rabbitmq.username:rsms}
+      password: ${rabbitmq.password:rsms}
       isDefault: true
   queues:
     - name: ReShareAction
