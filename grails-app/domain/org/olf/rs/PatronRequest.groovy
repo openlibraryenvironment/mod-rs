@@ -6,6 +6,7 @@ import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.custprops.CustomProperties
+import com.k_int.web.toolkit.refdata.CategoryId
 import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.workflow.Action;
 import org.olf.rs.workflow.ReShareMessageService
@@ -23,7 +24,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String id
 
   @Defaults(['Book', 'Journal', 'Other'])
-  RefdataValue publicationType
+  @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
+  ProtocolReferenceDataValue publicationType
 
   // Title of the item requested
   String title
@@ -50,7 +52,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
   @Defaults(['Loan', 'Copy-non-returnable'])
-  RefdataValue serviceType
+  @CategoryId(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE)
+  ProtocolReferenceDataValue serviceType
 
   /** Is the this the requester or suppliers view of the request */
   Boolean isRequester;
