@@ -41,7 +41,7 @@ class ReShareMessageService implements ApplicationListener {
   private Map<String, AbstractAction> actionCache = [ : ];
 
   /** The service that we use to put the message on the queue - Injected by framework */
-  private RabbitService rabbitService;
+  RabbitService rabbitService;
 
   @PostConstruct
   public void init() {
@@ -83,28 +83,32 @@ class ReShareMessageService implements ApplicationListener {
    * 
    * @return The tenant id there is one otherwise null
    */
-  static public String getTenantId() {
-    String tenantId = null;
-    try {
-      tenantId = Tenants.currentId();
-    } catch (Exception e) {
-    }
-    return(tenantId);
-  }
+  	static public String getTenantId(AbstractPersistenceEvent event = null) {
+		String tenantId = null;
+		try {
+			if (event == null) {
+				tenantId = Tenants.currentId();
+			} else {
+				tenantId = Tenants.currentId(event.source);
+			}
+		} catch (Exception e) {
+		}
+		return(tenantId);
+	}
 
   /**
    * This is called after the request has been saved to see if it needs adding to the queue
    * 
    * @param patronRequest
    */
-  public void checkAddToQueue(PatronRequest patronRequest) {
+  public void checkAddToQueue(PatronRequest patronRequest, AbstractPersistenceEvent event = null) {
     log.debug("checkAddToQueue(...)");
     // must not be waiting for a protocol action to happen
     if (!patronRequest.awaitingProtocolResponse) {
       // Must have a pending action
       if (patronRequest.pendingAction) {
         // We need the tenant id in order to add it to the queue
-        String tenantId = getTenantId();
+        String tenantId = getTenantId(event);
     
         // If we do not have a tenant id, then we cannot queue it
         if (tenantId) {
@@ -138,7 +142,7 @@ class ReShareMessageService implements ApplicationListener {
               // Ensure the action cache is populated
               // TODO: I believe this is redundant and is just occurring because of how we are testing, needs confirming
               if (!actionCache) {
-                Action.CreateDefault();
+                Action.CreateDefault(this);
               }
 
               // Get hold of the class that is going to deal with this action
@@ -188,7 +192,7 @@ class ReShareMessageService implements ApplicationListener {
       // to the spring boot infrastructure
       log.debug("afterInsert PatronRequest id: ${event.entityObject.id}");
       PatronRequest pr = (PatronRequest) event.entityObject;
-      checkAddToQueue(pr);
+      checkAddToQueue(pr, event);
     }
   }
 
@@ -199,7 +203,7 @@ class ReShareMessageService implements ApplicationListener {
       // to the spring boot infrastructure
       log.debug("afterUpdate PatronRequest id: ${event.entityObject.id}");
       PatronRequest pr = (PatronRequest) event.entityObject;
-      checkAddToQueue(pr);
+      checkAddToQueue(pr, event);
     }
   }
 
@@ -212,18 +216,15 @@ class ReShareMessageService implements ApplicationListener {
     }
   }
 
-  void onSaveOrUpdate(SaveOrUpdateEvent event) {
-    log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
-    if ( event.entityObject instanceof PatronRequest ) {
-      log.debug("onSaveOrUpdate of PatronRequest");
-      AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
-      PatronRequest pr = (PatronRequest) event.entityObject;
-      // II: I don't know that this can work - this event is triggered asychronously, and as such
-      // I don't think currentTenant will return the right thing when called from get tenantId in checkAddToQueue
-      // Commenting out until I can discuss with Steve and Chas
-      // checkAddToQueue(pr);
-    }
-  }
+  	void onSaveOrUpdate(SaveOrUpdateEvent event) {
+		log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
+		if ( event.entityObject instanceof PatronRequest ) {
+			log.debug("onSaveOrUpdate of PatronRequest");
+			AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
+			PatronRequest pr = (PatronRequest) event.entityObject;
+			checkAddToQueue(pr, event);
+		}
+	}
 
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
     if ( event instanceof AbstractPersistenceEvent ) {
