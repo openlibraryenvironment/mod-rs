@@ -174,6 +174,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       pendingAction = Action.get(Action.VALIDATE);
     }
 
+	// Set the rota position to 0, so that it is always set
+	rotaPosition = 0;
+
     // Status needs to be set to idle
     state = Status.get(Status.IDLE);    
   }
