@@ -130,6 +130,9 @@ rabbitmq:
       username: ${rabbitmq.username:rsms}
       password: ${rabbitmq.password:rsms}
       isDefault: true
+  exchanges:
+    - name: RSExchange
+      type: topic
   queues:
     - name: ReShareAction
       durable: true
