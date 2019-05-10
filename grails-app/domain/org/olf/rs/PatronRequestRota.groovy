@@ -47,7 +47,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     directoryId            (nullable : false, blank : false, maxSize : 36)
     lastUpdated            (nullable : true)
     normalisedAvailability (nullable : true)
-    patronRequest          (nullable : false, blank : false)
+    patronRequest          (nullable : false)
     protocolStatus         (nullable : true)
     rotaPosition           (nullable : false) // unique['patronRequest'] if you wanted to - but I don't know why you would.
     shelfmark              (nullable : true,  blank: false)

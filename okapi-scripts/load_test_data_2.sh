@@ -5,6 +5,7 @@ AUTH_TOKEN=`./okapi-login`
 echo Listing current requests
 curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
 
+#  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
   title:"Brain of the firm",
   author:"Beer, Stafford",
@@ -12,7 +13,6 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   state:"Idle",
   isRequester = true,
   notARealProperty:"Test that this is ignored in accordance with Postels law",
-  serviceType:"Loan",
   pendingAction:"approve",
   tags:[
     "Testdata", "TestRun1", "MonographTest"
@@ -30,6 +30,8 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   ]
 }
 '`
+
+echo Result : $PATRON_REQ_1
 
 PATRON_REQ_1_ID=`echo PATRON_REQ_1 | jq -r ".id" | tr -d '\r'`
 

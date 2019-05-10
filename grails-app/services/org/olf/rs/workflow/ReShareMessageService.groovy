@@ -83,18 +83,18 @@ class ReShareMessageService implements ApplicationListener {
    * 
    * @return The tenant id there is one otherwise null
    */
-  	static public String getTenantId(AbstractPersistenceEvent event = null) {
-		String tenantId = null;
-		try {
-			if (event == null) {
-				tenantId = Tenants.currentId();
-			} else {
-				tenantId = Tenants.currentId(event.source);
-			}
-		} catch (Exception e) {
-		}
-		return(tenantId);
-	}
+    static public String getTenantId(AbstractPersistenceEvent event = null) {
+    String tenantId = null;
+    try {
+      if (event == null) {
+        tenantId = Tenants.currentId();
+      } else {
+        tenantId = Tenants.currentId(event.source);
+      }
+    } catch (Exception e) {
+    }
+    return(tenantId);
+  }
 
   /**
    * This is called after the request has been saved to see if it needs adding to the queue
@@ -216,17 +216,21 @@ class ReShareMessageService implements ApplicationListener {
     }
   }
 
-  	void onSaveOrUpdate(SaveOrUpdateEvent event) {
-		log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
-		if ( event.entityObject instanceof PatronRequest ) {
-			log.debug("onSaveOrUpdate of PatronRequest");
-			AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
-			PatronRequest pr = (PatronRequest) event.entityObject;
-			checkAddToQueue(pr, event);
-		}
-	}
+  void onSaveOrUpdate(SaveOrUpdateEvent event) {
+    // log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
+    if ( event.entityObject instanceof PatronRequest ) {
+      log.debug("onSaveOrUpdate of PatronRequest");
+      AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
+      PatronRequest pr = (PatronRequest) event.entityObject;
+      checkAddToQueue(pr, event);
+    }
+    else {
+      log.debug("No onSaveOrUpdate handling for ${event?.entityObject?.class?.name}");
+    }
+  }
 
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
+    log.debug("--> ${event?.class.name} ${event}");
     if ( event instanceof AbstractPersistenceEvent ) {
       if ( event instanceof PostUpdateEvent ) {
         afterUpdate(event);

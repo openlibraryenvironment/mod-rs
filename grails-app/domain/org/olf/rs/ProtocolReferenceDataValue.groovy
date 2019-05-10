@@ -1,6 +1,8 @@
 package org.olf.rs
 
 import com.k_int.web.toolkit.refdata.RefdataValue
+import grails.gorm.annotation.Entity
+import com.k_int.web.toolkit.databinding.BindUsingWhenRef
 
 class ProtocolReferenceDataValue extends RefdataValue {
 

@@ -50,25 +50,30 @@ class RSMSConsumer {
       // We've got a tenant, so now we need to issue an event to that tennant - this might involve
       // creating a request, or updating the state of an existing request.
 
-      // Resource sharing message services arranges for us to have some extra properties in the body:
-      // participantInfo:[sender:[institution_symbol:RESHARE:ACMAIN], 
-      //   sender_event:ILLreq, 
-      //   recipient:[institution_symbol:RESHSARE:DIKUA], 
-      //   recipient_event:ILL]
-      log.debug("Perform action ${body.participantInfo.recipient_event} for symbol ${symbol} who resides in tenant ${tenant}");
-
-      Tenants.withId(tenant+'_mod_rs') { // Tenants.withId needs a schema name
-        switch ( body.participantInfo.recipient_event ) {
-          case 'ILL':
-            log.debug("Create new patron request");
-            def new_pr = new PatronRequest(title: body.request.item_id.title,
-                                           patronReference: body.request.client_id?.client_identifier,
-                                           isRequester:false).save(flush:true, failOnError:true);
-            break;
-          default:
-            log.warn("Unhandled ILL event: ${body.participantInfo.recipient_event}");
-            break;
+      if ( tenant ) {
+        // Resource sharing message services arranges for us to have some extra properties in the body:
+        // participantInfo:[sender:[institution_symbol:RESHARE:ACMAIN], 
+        //   sender_event:ILLreq, 
+        //   recipient:[institution_symbol:RESHSARE:DIKUA], 
+        //   recipient_event:ILL]
+        log.debug("Perform action ${body.participantInfo.recipient_event} for symbol ${symbol} who resides in tenant ${tenant}");
+  
+        Tenants.withId(tenant+'_mod_rs') { // Tenants.withId needs a schema name
+          switch ( body.participantInfo.recipient_event ) {
+            case 'ILL':
+              log.debug("Create new patron request");
+              def new_pr = new PatronRequest(title: body.request.item_id.title,
+                                             patronReference: body.request.client_id?.client_identifier,
+                                             isRequester:false).save(flush:true, failOnError:true);
+              break;
+            default:
+              log.warn("Unhandled ILL event: ${body.participantInfo.recipient_event}");
+              break;
+          }
         }
+      }
+      else {
+        log.debug("Unable to resolve tenant for symbol ${symbol}");
       }
     }
     else {
