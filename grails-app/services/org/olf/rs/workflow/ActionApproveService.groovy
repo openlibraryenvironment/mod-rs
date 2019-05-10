@@ -20,6 +20,14 @@ class ActionApproveService extends AbstractAction {
   ActionResponse perform(PatronRequest requestToBeProcessed) {
     // For the time being we just return OK as we do not do anything
     log.debug("ActionApproveService::perform(${requestToBeProcessed})");
+
+    // Ian having a shot at figuring out how we will auto-approve validated requests and cause them to be sent
+    // ToDo: if ( auto_approve )
+    if ( 1==1 ) {
+      requestToBeProcessed.pendingAction = Action.get(Action.APPROVED);
+      requestToBeProcessed.save(flush:true, failOnError:true);
+    }
+
     return(ActionResponse.SUCCESS);
   }
 }

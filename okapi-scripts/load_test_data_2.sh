@@ -35,6 +35,6 @@ echo Result : $PATRON_REQ_1
 
 echo Parse result to extract request ID
 
-PATRON_REQ_1_ID=`echo PATRON_REQ_1 | jq -r ".id" | tr -d '\r'`
+PATRON_REQ_1_ID=`echo $PATRON_REQ_1 | jq -r ".id" | tr -d '\r'`
 
-echo Created request 1: $PATRON_REQ_1
+echo Created request 1: $PATRON_REQ_1_ID
