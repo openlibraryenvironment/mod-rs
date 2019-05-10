@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
   # config.vm.box = "projectreshare/development"
     
   config.vm.provider "virtualbox" do |v|
-    v.memory = 12288
+    v.memory = 8192
     v.cpus = 5
   end
 
@@ -33,7 +33,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 9130, host: 9130
 
   # Connection oriented ISO 10161
-  config.vm.network "forwarded_port", guest: 8999, host: 8999
+  # config.vm.network "forwarded_port", guest: 8999, host: 8999
 
   # RabbitMQ ports
   config.vm.network "forwarded_port", guest: 15672, host: 15672

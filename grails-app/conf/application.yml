@@ -115,6 +115,7 @@ okapi:
     register: false
     deploy: false
 
+# http://budjb.github.io/grails-rabbitmq-native/3.x/latest/
 rabbitmq:
   enabled: false
   connections:
@@ -133,6 +134,7 @@ rabbitmq:
   exchanges:
     - name: RSExchange
       type: topic
+      durable: true
   queues:
     - name: ReShareAction
       durable: true
