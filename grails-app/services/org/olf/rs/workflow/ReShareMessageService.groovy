@@ -225,12 +225,12 @@ class ReShareMessageService implements ApplicationListener {
       checkAddToQueue(pr, event);
     }
     else {
-      log.debug("No onSaveOrUpdate handling for ${event?.entityObject?.class?.name}");
+      // log.debug("No onSaveOrUpdate handling for ${event?.entityObject?.class?.name}");
     }
   }
 
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
-    log.debug("--> ${event?.class.name} ${event}");
+    // log.debug("--> ${event?.class.name} ${event}");
     if ( event instanceof AbstractPersistenceEvent ) {
       if ( event instanceof PostUpdateEvent ) {
         afterUpdate(event);
