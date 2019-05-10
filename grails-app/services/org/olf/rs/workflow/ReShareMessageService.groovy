@@ -102,7 +102,9 @@ class ReShareMessageService implements ApplicationListener {
    * @param patronRequest
    */
   public void checkAddToQueue(PatronRequest patronRequest, AbstractPersistenceEvent event = null) {
-    log.debug("checkAddToQueue(...)");
+
+    log.debug("checkAddToQueue(...) ${patronRequest.id}");
+
     // must not be waiting for a protocol action to happen
     if (!patronRequest.awaitingProtocolResponse) {
       // Must have a pending action
@@ -126,7 +128,7 @@ class ReShareMessageService implements ApplicationListener {
    */
   public void processAnIncomingMessage(Map messageDetails) {
 
-    log.debug("ReShareMessageService::processAnIncomingMessage(...)");
+    log.debug("ReShareMessageService::processAnIncomingMessage(${messageDetails})");
 
     String actionCode = messageDetails[ACTION_CODE];
     String requestId = messageDetails[REQUEST_ID];
@@ -165,9 +167,8 @@ class ReShareMessageService implements ApplicationListener {
         log.error("Exception thrown while trying to process message for Tenanr: " + tenantId + " for request " + requestId + " and action " + actionCode, e);
       }
     } else {
-      log.error("The ReShard queue message details does not contain the expected details (action, request id and tenant id), contents: " + ((messageDetails == null) ? "<null>" : messageDetails.toString()));
+      log.error("The ReShare queue message details does not contain the expected details (action, request id and tenant id), contents: " + ((messageDetails == null) ? "<null>" : messageDetails.toString()));
     }
-
   }
 
   /** Adds a request to the queue
@@ -177,7 +178,7 @@ class ReShareMessageService implements ApplicationListener {
    * @param requestId The request id that the action is to be performed upon
    */
   public void queue(String tenantId, String actionCode, String requestId) {
-    log.debug("queue(${tenantId}, ${actionCode}, ${requestId})");
+    log.debug("queue(tenant:${tenantId}, action:${actionCode}, requestId:${requestId})");
     Map<String, String> messageBody = [ : ];
     messageBody[ACTION_CODE] = actionCode;
     messageBody[REQUEST_ID] = requestId;
@@ -186,46 +187,45 @@ class ReShareMessageService implements ApplicationListener {
   }
 
   void afterInsert(PostInsertEvent event) {
-    log.debug("afterInsert ${event} ${event?.entityObject?.class?.name}");
+    // log.debug("afterInsert ${event} ${event?.entityObject?.class?.name}");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after insert of a patron request which need access
       // to the spring boot infrastructure
-      log.debug("afterInsert PatronRequest id: ${event.entityObject.id}");
+      // log.debug("afterInsert PatronRequest id: ${event.entityObject.id}");
       PatronRequest pr = (PatronRequest) event.entityObject;
       checkAddToQueue(pr, event);
     }
   }
 
   void afterUpdate(PostUpdateEvent event) { 
-    log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
+    // log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
-      log.debug("afterUpdate PatronRequest id: ${event.entityObject.id}");
+      // log.debug("afterUpdate PatronRequest id: ${event.entityObject.id}");
       PatronRequest pr = (PatronRequest) event.entityObject;
       checkAddToQueue(pr, event);
     }
   }
 
   void beforeInsert(PreInsertEvent event) {
-    log.debug("beforeInsert ${event} ${event?.entityObject?.class?.name}");
+    // log.debug("beforeInsert ${event} ${event?.entityObject?.class?.name}");
     if ( event.entityObject instanceof PatronRequest ) {
       // Stuff to do before insert of a patron request which need access
       // to the spring boot infrastructure
-      log.debug("beforeInsert of PatronRequest");
+      // log.debug("beforeInsert of PatronRequest");
     }
   }
 
   void onSaveOrUpdate(SaveOrUpdateEvent event) {
     // log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
     if ( event.entityObject instanceof PatronRequest ) {
-      log.debug("onSaveOrUpdate of PatronRequest");
       AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
       PatronRequest pr = (PatronRequest) event.entityObject;
-      checkAddToQueue(pr, event);
-    }
-    else {
-      // log.debug("No onSaveOrUpdate handling for ${event?.entityObject?.class?.name}");
+      if ( event?.entityObject?.id ) {
+        log.debug("onSaveOrUpdate of PatronRequest :: ${event?.entityObject?.id}");
+        checkAddToQueue(pr, event);
+      }
     }
   }
 
@@ -242,6 +242,8 @@ class ReShareMessageService implements ApplicationListener {
         afterInsert(event);
       }
       else if ( event instanceof SaveOrUpdateEvent ) {
+        // On save the record will not have an ID, but it appears that a subsequent event gets triggered
+        // once the id has been allocated
         onSaveOrUpdate(event);
       }
       else {
