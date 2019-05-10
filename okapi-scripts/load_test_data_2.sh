@@ -2,8 +2,8 @@
 
 AUTH_TOKEN=`./okapi-login`
 
-echo Listing current requests
-curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
+# echo Listing current requests
+# curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET http://localhost:9130/rs/patronrequests 
 
 #  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
@@ -32,6 +32,8 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
 '`
 
 echo Result : $PATRON_REQ_1
+
+echo Parse result to extract request ID
 
 PATRON_REQ_1_ID=`echo PATRON_REQ_1 | jq -r ".id" | tr -d '\r'`
 
