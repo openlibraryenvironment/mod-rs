@@ -14,8 +14,8 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  # config.vm.box = "folio/testing-backend"
-  config.vm.box = "projectreshare/development"
+  config.vm.box = "folio/testing-backend"
+  # config.vm.box = "projectreshare/development"
     
   config.vm.provider "virtualbox" do |v|
     v.memory = 12288
@@ -88,8 +88,32 @@ Vagrant.configure(2) do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get -y update
+    sudo apt-get -y install rabbitmq-server
+    # sudo apt-get install -y apache2
+
+    # Create the rabbit user for message passing
+    if [ `rabbitmqctl list_users | grep -i "^rsms" | wc -l` -eq 0 ]
+    then
+      echo Creating message queue user rsms for resource sharing message services
+      rabbitmqctl add_user rsms rsms
+      rabbitmqctl set_user_tags rsms administrator
+      rabbitmqctl set_permissions -p / rsms ".*" ".*" ".*"
+    else
+      echo RabbitMQ user rsms already present
+    fi
+
+    # The medium term goal is to remove this user and use the rsms account above. This account
+    # will be deprecated in a future release, do not rely upon it
+    if [ `rabbitmqctl list_users | grep -i "^adm" | wc -l` -eq 0 ]
+    then
+      echo Creating message queue user adm for resource sharing message services
+      rabbitmqctl add_user adm admpass
+      rabbitmqctl set_user_tags adm administrator
+      rabbitmqctl set_permissions -p / adm ".*" ".*" ".*"
+    else
+      echo RabbitMQ user adm already present
+    fi
+  SHELL
 end
