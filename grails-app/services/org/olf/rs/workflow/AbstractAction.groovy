@@ -3,8 +3,9 @@ package org.olf.rs.workflow
 import java.util.Date;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestAudit;
+import groovy.util.logging.Slf4j;
 
-
+@Slf4j
 abstract class AbstractAction {
 
 	static private final Integer ONE_SECOND      = 1000;
@@ -77,10 +78,12 @@ abstract class AbstractAction {
 				// Now perform the action
 				switch (perform(requestToBeProcessed)) {
 					case ActionResponse.SUCCESS:
+                                                log.debug("Action completed OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessYes;
 						break
 
 					case ActionResponse.NO:
+                                                log.debug("Action did not complete OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessNo;
 						break;
 
@@ -91,6 +94,7 @@ abstract class AbstractAction {
 						break;
 
 					case ActionResponse.RETRY:
+                                                log.debug("Action retry");
 						// We will retry later
 						performRetry = true;
 
@@ -109,11 +113,13 @@ abstract class AbstractAction {
 						break;
 
 					case ActionResponse.ERROR:
+                                                log.debug("Action ERROR");
 						errored = true;
 						patronRequestAudit.toStatus = getAction().statusFailure;
 						break;
 
 					default:
+                                                log.error("Unhandled response code from Action handler");
 						// Hit an error if we have reached here
 						errored = true;
 						break;
@@ -122,8 +128,11 @@ abstract class AbstractAction {
 				// No point looking up the next action for a retry as it will not change
 				if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
 					// Now we have the new status, determine if we have a new action to perform
+                                        log.debug("Work out next action based on ${requestToBeProcessed.state}, ${getAction()}, ${patronRequestAudit.toStatus}");
 					nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus, requestToBeProcessed.isRequester);
+                                        log.debug("Determined that next action should be ${nextAction}");
 				}
+
 			} catch (Exception e) {
 				// Note: If an exception is thrown from another method and not caught within it
 				// Then the entire transaction will get rolled back including any saves made after the exception
@@ -144,16 +153,19 @@ abstract class AbstractAction {
 
 				// Set the status and pending action on the request and the audit trail, if a retry will not be performed
 				if (!performRetry) {
+                                        log.debug("No retry set");
 					requestToBeProcessed.lastUpdated = new Date();
 					requestToBeProcessed.state = patronRequestAudit.toStatus;
 					requestToBeProcessed.numberOfRetries = null;
 
 					// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response				
 					if (!requestToBeProcessed.awaitingProtocolResponse) {
+                                                log.debug("We're not awaiting a protocol response - set next action to ${nextAction}");
 						requestToBeProcessed.pendingAction = nextAction;
 					}
 
 					// Not forgetting to add the audit record
+                                        log.debug("Auditing...");
 					patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
 					requestToBeProcessed.addToAudit(patronRequestAudit);
 				}
