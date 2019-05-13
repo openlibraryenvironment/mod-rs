@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
   # config.vm.box = "projectreshare/development"
     
   config.vm.provider "virtualbox" do |v|
-    v.memory = 8192
+    v.memory = 10240
     v.cpus = 5
   end
 
