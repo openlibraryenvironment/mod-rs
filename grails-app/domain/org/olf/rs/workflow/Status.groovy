@@ -38,6 +38,8 @@ class Status implements MultiTenant<Status> {
 	static public final String FULFILLED           = "fulfilled";	
 	static public final String IDLE                = "idle";	
 	static public final String IN_PROCESS          = "in process";	
+	static public final String LOCATED             = "located";	
+	static public final String NO_LOCATIONS        = "no locations";	
 	static public final String PATRON_RETURNED     = "patron returned";	
 	static public final String PENDING             = "pending";	
 	static public final String RECEIVED            = "received";	
@@ -56,6 +58,8 @@ class Status implements MultiTenant<Status> {
 	static public final String NAME_FULFILLED           = "Fulfilled";
 	static public final String NAME_IDLE                = "Idle";
 	static public final String NAME_IN_PROCESS          = "In Process";
+	static public final String NAME_LOCATED             = "Located";
+	static public final String NAME_NO_LOCATIONS        = "No Locations";
 	static public final String NAME_PATRON_RETURNED     = "Patron Returned";
 	static public final String NAME_PENDING             = "Pending";
 	static public final String NAME_RECEIVED            = "Received";
@@ -74,6 +78,8 @@ class Status implements MultiTenant<Status> {
 	static public final String DESCRIPTION_FULFILLED           = "The request has been fulfilled and nothing further needs to happen with the request";
 	static public final String DESCRIPTION_IDLE                = "The requester has received a new request from a patron";
 	static public final String DESCRIPTION_IN_PROCESS          = "The supplier is looking into whether they can supply the item or not";
+	static public final String DESCRIPTION_LOCATED             = "The system has located appropriate copies and ranked them according to local routing policy"
+	static public final String DESCRIPTION_NO_LOCATIONS        = "The system was unable to locate any appropriate copy according to routing polcy"
 	static public final String DESCRIPTION_PATRON_RETURNED     = "The patron has returned the item to the requester";
 	static public final String DESCRIPTION_PENDING             = "The requester is awaiting a decision by the potential supplier";
 	static public final String DESCRIPTION_RECEIVED            = "The item has been received by the requester";
@@ -140,6 +146,8 @@ class Status implements MultiTenant<Status> {
 		createIfNotExists(FULFILLED,           NAME_FULFILLED,           DESCRIPTION_FULFILLED);
 		createIfNotExists(IDLE,                NAME_IDLE,                DESCRIPTION_IDLE);
 		createIfNotExists(IN_PROCESS,          NAME_IN_PROCESS,          DESCRIPTION_IN_PROCESS);
+		createIfNotExists(LOCATED,             NAME_LOCATED,             DESCRIPTION_LOCATED);
+		createIfNotExists(NO_LOCATIONS,        NAME_NO_LOCATIONS,        DESCRIPTION_NO_LOCATIONS);
 		createIfNotExists(PATRON_RETURNED,     NAME_PATRON_RETURNED,     DESCRIPTION_PATRON_RETURNED);
 		createIfNotExists(PENDING,             NAME_PENDING,             DESCRIPTION_PENDING);
 		createIfNotExists(RECEIVED,            NAME_RECEIVED,            DESCRIPTION_RECEIVED);

@@ -11,6 +11,7 @@ class Action implements MultiTenant<Action> {
   static public final String APPROVE          = "approve";
   static public final String CHECK_IN         = "check in";
   static public final String COLLECTED        = "collected";
+  static public final String LOCATE           = "locate"; // attempt to locate potential suppliers, rank according to routing policy
   static public final String NEW_REQUEST      = "new request";
   static public final String NOT_SUPPLY       = "not supply";
   static public final String PATRON_RETURNED  = "patron returned";
@@ -24,6 +25,7 @@ class Action implements MultiTenant<Action> {
   static public final String NAME_APPROVE          = "Approve";
   static public final String NAME_CHECK_IN         = "Check In";
   static public final String NAME_COLLECTED        = "Collected";
+  static public final String NAME_LOCATE           = "Locate";
   static public final String NAME_NEW_REQUEST      = "New Request";
   static public final String NAME_NOT_SUPPLY       = "Not Supply";
   static public final String NAME_PATRON_RETURNED  = "Patron Returned";
@@ -37,6 +39,7 @@ class Action implements MultiTenant<Action> {
   static public final String DESCRIPTION_APPROVE          = "Users approves the request so that it can be sent to a supplier";
   static public final String DESCRIPTION_CHECK_IN         = "Supplying library checks in the request, triggers a check in on the suppliers circ system";
   static public final String DESCRIPTION_COLLECTED        = "The patron has collected the item, triggers a checkout of the temporary item on the requesterd circ system";
+  static public final String DESCRIPTION_LOCATE           = 'Attempt to locate appropriate copies and rank the rota according to routing policies';
   static public final String DESCRIPTION_NEW_REQUEST      = "A new request has been received";
   static public final String DESCRIPTION_NOT_SUPPLY       = "The supplying library has decided they are not going to supply the request";
   static public final String DESCRIPTION_PATRON_RETURNED  = "The patron has returned the item to the requesting library, triggers a check in of the temporary item in the requesters circ system";
@@ -157,18 +160,22 @@ class Action implements MultiTenant<Action> {
       // ensure the stati are created first
       Status.createDefault();
 
-      createIfNotExists(APPROVE,         NAME_APPROVE,          DESCRIPTION_APPROVE, "Approve", true, Status.PENDING, null, null, true, false, reShareMessageService);
-      createIfNotExists(CHECK_IN,        NAME_CHECK_IN,         DESCRIPTION_CHECK_IN, "CheckIn", true, Status.CHECKED_IN, null, null, true, false, reShareMessageService);
-      createIfNotExists(COLLECTED,       NAME_COLLECTED,        DESCRIPTION_COLLECTED, "Collected", true, Status.COLLECTED, null, null, true, false, reShareMessageService);
-      createIfNotExists(NEW_REQUEST,     NAME_NEW_REQUEST,      DESCRIPTION_NEW_REQUEST, "NewRequest", true, Status.IN_PROCESS, null, null, false, false, reShareMessageService);
-      createIfNotExists(NOT_SUPPLY,      NAME_NOT_SUPPLY,       DESCRIPTION_NOT_SUPPLY, "NotSupply", true, Status.UNFILLED, null, null, true, false, reShareMessageService);
-      createIfNotExists(PATRON_RETURNED, NAME_PATRON_RETURNED,  DESCRIPTION_PATRON_RETURNED, "PatronReturned", true, Status.PATRON_RETURNED, null, null, false, false, reShareMessageService);
-      createIfNotExists(RECEIVE,         NAME_RECEIVE,          DESCRIPTION_RECEIVE, "Receive", true, Status.AWAITING_COLLECTION, null, null, false, false, reShareMessageService);
+      //                id,              name,                  description,                 serviceClass, selectable, statusSuccessYes, statusSuccessNo, statusFailure, bulkEnabled, areYouSureDialog
+      createIfNotExists(APPROVE,         NAME_APPROVE,          DESCRIPTION_APPROVE,          "Approve", true, Status.PENDING, null, null, true, false, reShareMessageService);
+      createIfNotExists(CHECK_IN,        NAME_CHECK_IN,         DESCRIPTION_CHECK_IN,         "CheckIn", true, Status.CHECKED_IN, null, null, true, false, reShareMessageService);
+      createIfNotExists(COLLECTED,       NAME_COLLECTED,        DESCRIPTION_COLLECTED,        "Collected", true, Status.COLLECTED, null, null, true, false, reShareMessageService);
+      createIfNotExists(LOCATE,          NAME_LOCATE,           DESCRIPTION_LOCATE,           "Locate", true, Status.LOCATED, Status.NO_LOCATIONS, null, true, false, reShareMessageService);
+      createIfNotExists(NEW_REQUEST,     NAME_NEW_REQUEST,      DESCRIPTION_NEW_REQUEST,      "NewRequest", true, Status.IN_PROCESS, null, null, false, false, reShareMessageService);
+      createIfNotExists(NOT_SUPPLY,      NAME_NOT_SUPPLY,       DESCRIPTION_NOT_SUPPLY,       "NotSupply", true, Status.UNFILLED, null, null, true, false, reShareMessageService);
+      createIfNotExists(PATRON_RETURNED, NAME_PATRON_RETURNED,  DESCRIPTION_PATRON_RETURNED,  "PatronReturned", true, Status.PATRON_RETURNED, null, null, false, false, reShareMessageService);
+      createIfNotExists(RECEIVE,         NAME_RECEIVE,          DESCRIPTION_RECEIVE,          "Receive", true, Status.AWAITING_COLLECTION, null, null, false, false, reShareMessageService);
       createIfNotExists(RECEIVED_MESSAGE,NAME_RECEIVED_MESSAGE, DESCRIPTION_RECEIVED_MESSAGE, "ReceivedMessage", false, Status.RECEIVED, null, null, false, false, reShareMessageService);
-      createIfNotExists(RETURN,          NAME_RETURN,           DESCRIPTION_RETURN, "Return", true, Status.RETURNED, null, null, true, false, reShareMessageService);
-      createIfNotExists(SEND_MESSAGE,    NAME_SEND_MESSAGE,     DESCRIPTION_SEND_MESSAGE, "SendMessage", false, Status.SENDING_MESSAGE, null, null, false, false, reShareMessageService);
-      createIfNotExists(SHIP,            NAME_SHIP,             DESCRIPTION_SHIP, "Ship", true, Status.FULFILLED, null, null, true, false, reShareMessageService);
-      createIfNotExists(VALIDATE,        NAME_VALIDATE,         DESCRIPTION_VALIDATE, "Validate", false, Status.VALIDATED, null, null, true, false, reShareMessageService);
+      createIfNotExists(RETURN,          NAME_RETURN,           DESCRIPTION_RETURN,           "Return", true, Status.RETURNED, null, null, true, false, reShareMessageService);
+      createIfNotExists(SEND_MESSAGE,    NAME_SEND_MESSAGE,     DESCRIPTION_SEND_MESSAGE,     "SendMessage", false, Status.SENDING_MESSAGE, null, null, false, false, reShareMessageService);
+      createIfNotExists(SHIP,            NAME_SHIP,             DESCRIPTION_SHIP,             "Ship", true, Status.FULFILLED, null, null, true, false, reShareMessageService);
+      createIfNotExists(VALIDATE,        NAME_VALIDATE,         DESCRIPTION_VALIDATE,         "Validate", false, Status.VALIDATED, null, null, true, false, reShareMessageService);
+      
+      
 
       // Now create the state transitions
       StateTransition.createDefault();

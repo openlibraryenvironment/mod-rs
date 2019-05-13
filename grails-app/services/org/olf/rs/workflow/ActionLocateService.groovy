@@ -7,19 +7,19 @@ import groovy.util.logging.Slf4j
 
 @Slf4j
 @Transactional
-class ActionApproveService extends AbstractAction {
+class ActionLocateService extends AbstractAction {
 
   /** Returns the action that this class represents */
   @Override
   String getActionCode() {
-    return(Action.APPROVE);
+    return(Action.LOCATE);
   }
 
   /** Performs the action */
   @Override
   ActionResponse perform(PatronRequest requestToBeProcessed) {
     // For the time being we just return OK as we do not do anything
-    log.debug("ActionApproveService::perform(${requestToBeProcessed})");
+    log.debug("ActionLocateService::perform(${requestToBeProcessed})");
 
     return(ActionResponse.SUCCESS);
   }
