@@ -95,10 +95,10 @@ class StateTransition implements MultiTenant<StateTransition> {
 		// Action: Approved - Requester
 		createIfNotExists([Status.LOCATED], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
 
-        // Action: Located - Requester
+                // Action: Located - Requester
 		createIfNotExists([Status.LOCATED], Action.LOCATE, QUALIFIER_REQUESTER, Action.APPROVE, null);
 
-        // Action: Located - Requester
+                // Action: Located - Requester
 		createIfNotExists([Status.NO_LOCATIONS], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
 
 		// Action: New Request - Responder
