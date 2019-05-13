@@ -133,12 +133,23 @@ class ReShareMessageService implements ApplicationListener {
     String actionCode = messageDetails[ACTION_CODE];
     String requestId = messageDetails[REQUEST_ID];
     String tenantId = messageDetails[TENANT_ID];
+
     if (actionCode && requestId && tenantId) {
       try {
         Tenants.withId(tenantId) {
           // Fetch the patron request we need to process
+          int retries = 0;
+
           PatronRequest patronRequest = PatronRequest.get(requestId);
+          while ( ( patronRequest == null ) && ( retries++ < 5 ) )  {
+            Thread.sleep(1000);
+            log.debug("Retry find request ${requestId}");
+            patronRequest = PatronRequest.get(requestId);
+          }
+
           if (patronRequest) {
+            log.debug("Got request ${requestId}");
+
             // If the pending action is not the same as in the message then we need to abandon
             if (patronRequest.pendingAction && actionCode.equals(patronRequest.pendingAction.id)) {
               // Ensure the action cache is populated
