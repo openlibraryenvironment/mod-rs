@@ -182,11 +182,6 @@ abstract class AbstractAction {
 					log.error("Error saving request " + requestToBeProcessed.id + errors);
 				}
 
-				// If we have a next action add that into the queue
-				if (nextAction != null) {
-					// TODO: We need to put this request back onto the queue
-				}
-
 				// If we are performing a retry add it into the queue with a delay
 				if (performRetry) {
 					// TODO: Add it back into the queue with a delay

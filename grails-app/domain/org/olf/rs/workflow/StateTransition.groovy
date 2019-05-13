@@ -90,13 +90,16 @@ class StateTransition implements MultiTenant<StateTransition> {
 	static def createDefault() {
 
 		// Action: Validate - Requester
-		createIfNotExists([Status.IDLE], Action.VALIDATE, QUALIFIER_REQUESTER, null, null);
+		createIfNotExists([Status.IDLE], Action.VALIDATE, QUALIFIER_REQUESTER, Action.LOCATE, null);
 
 		// Action: Approved - Requester
-		createIfNotExists([Status.VALIDATED], Action.LOCATE, QUALIFIER_REQUESTER, null, null);
+		createIfNotExists([Status.VALIDATED], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
 
-                // Action: Located, No Locations - Requester
-		createIfNotExists([Status.LOCATED, Status.NO_LOCATIONS], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
+                // Action: Located - Requester
+		createIfNotExists([Status.LOCATED], Action.LOCATE, QUALIFIER_REQUESTER, Action.APPROVE, null);
+
+                // Action: Located - Requester
+		createIfNotExists([Status.NO_LOCATIONS], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
 
 		// Action: New Request - Responder
 		createIfNotExists([Status.IDLE], Action.NEW_REQUEST, QUALIFIER_SUPPLIER, null, null);
