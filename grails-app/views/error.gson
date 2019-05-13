@@ -1,14 +1,16 @@
 response.status 500
-Exception ex = request.getAttribute('exception') as Exception
+
+// Grabt the cause.. The exception here will be a servlet exception wrapper for the actual problem.
+Throwable ex = (request.getAttribute('javax.servlet.error.exception') ?: request.getAttribute('exception')) as Throwable
+if (ex.cause) {
+  ex = ex.cause
+}
 
 json {
   error 500
   if (ex) {
-    stackTrace (ex.stackTrace) { StackTraceElement ste ->
-      "${ste}"
-    }
-    message "${ex.message}"
-
+    message "${ex}"
+    stackTrace (ex.stackTrace.collect { "${it}" })
   } else {
     message "Unknown Internal server error"
   }
