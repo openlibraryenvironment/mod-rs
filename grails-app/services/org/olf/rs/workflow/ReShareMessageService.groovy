@@ -230,14 +230,7 @@ class ReShareMessageService implements ApplicationListener {
 
   void onSaveOrUpdate(SaveOrUpdateEvent event) {
     // log.debug("onSaveOrUpdate ${event} ${event?.entityObject?.class?.name}");
-    if ( event.entityObject instanceof PatronRequest ) {
-      AbstractHibernateDatastore ds = (AbstractHibernateDatastore) event.source
-      PatronRequest pr = (PatronRequest) event.entityObject;
-      if ( event?.entityObject?.id ) {
-        log.debug("onSaveOrUpdate of PatronRequest :: ${event?.entityObject?.id}");
-        checkAddToQueue(pr, event);
-      }
-    }
+	  // I don't think we need this method as afterUpdate is triggered
   }
 
   public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
