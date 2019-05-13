@@ -79,6 +79,7 @@ dependencies {
 
   compile 'com.k_int.grails:web-toolkit-ce:3.3.25'
   compile 'com.k_int.okapi:grails-okapi:3.5.1'
+  runtime "com.zaxxer:HikariCP:3.2.0"
 
   compile 'org.grails.plugins:rxjava'
 
