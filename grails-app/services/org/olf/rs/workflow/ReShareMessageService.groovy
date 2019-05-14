@@ -134,7 +134,7 @@ class ReShareMessageService implements ApplicationListener {
 	private PatronRequest getPatronRequest(String requestId, Long version = null) {
 		PatronRequest patronRequest = PatronRequest.get(requestId);
 		if ((patronRequest != null) && (version != null)) {
-			if (!patronRequest.version < version) {
+			if (!patronRequest.version.CompareTo(version) < 0) {
 				// Wrong version
                                 // ARGH! This was nulling out the patronRequest and making downstream calls think the item was not found
                                 // Returning null just makes us spin! Throw a runtime exception instead!
