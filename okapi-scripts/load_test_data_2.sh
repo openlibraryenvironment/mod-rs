@@ -19,15 +19,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   ],
   customProperties:{
     "patronWalletHash": ["298348743738748728524854289743765"],
-  },
-  rota:[
-    { directoryId:"TEST-DIRENT-000001", rotaPosition:"0" },
-    { directoryId:"TEST-DIRENT-000002", rotaPosition:"1" },
-    { directoryId:"TEST-DIRENT-000003", rotaPosition:"2" },
-    { directoryId:"TEST-DIRENT-000004", rotaPosition:"3" },
-    { directoryId:"TEST-DIRENT-000005", rotaPosition:"4" },
-    { directoryId:"TEST-DIRENT-000006", rotaPosition:"5" }
-  ]
+  }
 }
 '`
 
