@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.ApplicationEvent
 
 import org.grails.orm.hibernate.AbstractHibernateDatastore
+import grails.gorm.transactions.Transactional
 
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
@@ -135,7 +136,10 @@ class ReShareMessageService implements ApplicationListener {
 		if ((patronRequest != null) && (version != null)) {
 			if (!patronRequest.version >= version) {
 				// Wrong version
-				patronRequest = null;
+                                // ARGH! This was nulling out the patronRequest and making downstream calls think the item was not found
+                                // Returning null just makes us spin! Throw a runtime exception instead!
+				// patronRequest = null;
+                                throw new RuntimeException("Version inconsistency. getPatronRequest expected version ${version} of patronRequest.id ${requestId} but got version ${patronRequest.version}");
 			}
 		}
 		return(patronRequest);
@@ -161,11 +165,18 @@ class ReShareMessageService implements ApplicationListener {
 					// Fetch the patron request we need to process
 					int retries = 0;
 
+                                        // Note from Ian: I am seeing transaction isolation issues here. When the requester thread issues a message on rabbit
+                                        // this thread handles the incoming message. I can see the request in the psql console BUT I am never able to locate
+                                        // the request in this loop. I suspect that because the transaction for this loop started before the commit on the sender
+                                        // this loop is prevented from seeing that new record. Just a theory, but the record never becomes visible to this thread
+                                        // at the moment for me.
 					PatronRequest patronRequest = getPatronRequest(requestId, version);
-					while ( ( patronRequest == null ) && ( retries++ < 5 ) )  {
-						Thread.sleep(1000);
+					while ( ( patronRequest == null ) && ( retries++ < 20 ) )  {
+						Thread.sleep(1500);
 						log.debug("Retry find request ${requestId}");
-						patronRequest = getPatronRequest(requestId, version);
+                                                PatronRequest.withTransaction { status ->
+						  patronRequest = getPatronRequest(requestId, version);
+                                                }
 					}
 
 					if (patronRequest) {
@@ -194,7 +205,7 @@ class ReShareMessageService implements ApplicationListener {
 					} else {
 						log.error("Failed to find patron request " + requestId + "for tenant " + tenantId);
 					}
-				}
+                                }
 			} catch (Exception e) {
 				log.error("Exception thrown while trying to process message for Tenanr: " + tenantId + " for request " + requestId + " and action " + actionCode, e);
 			}
