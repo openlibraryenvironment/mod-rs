@@ -134,12 +134,13 @@ class ReShareMessageService implements ApplicationListener {
 	private PatronRequest getPatronRequest(String requestId, Long version = null) {
 		PatronRequest patronRequest = PatronRequest.get(requestId);
 		if ((patronRequest != null) && (version != null)) {
-			if (!patronRequest.version.equals(version)) {
+                        // Wait for a version of the record that is at least as high as the one we are expecting.
+                        // I think we should thrown an exception in this case rather than quietly ignoring
+			if (patronRequest.version < version) {
 				// Wrong version
-                                // ARGH! This was nulling out the patronRequest and making downstream calls think the item was not found
                                 // Returning null just makes us spin! Throw a runtime exception instead!
-				// patronRequest = null;
-                                throw new RuntimeException("Version inconsistency. getPatronRequest expected version ${version} of patronRequest.id ${requestId} but got version ${patronRequest.version}");
+                                log.error("Unexpected prior version in database... Waiting for a more up to date version of the record");
+				patronRequest = null;
 			}
 		}
 		return(patronRequest);
