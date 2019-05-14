@@ -133,7 +133,7 @@ class ReShareMessageService implements ApplicationListener {
 	private PatronRequest getPatronRequest(String requestId, Long version = null) {
 		PatronRequest patronRequest = PatronRequest.get(requestId);
 		if ((patronRequest != null) && (version != null)) {
-			if (!patronRequest.version.equals(version)) {
+			if (!patronRequest.version >= version) {
 				// Wrong version
 				patronRequest = null;
 			}
