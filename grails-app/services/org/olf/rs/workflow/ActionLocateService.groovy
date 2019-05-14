@@ -33,7 +33,7 @@ class ActionLocateService extends AbstractAction {
                                            directoryId:directoryService.getIDForSymbol('RESHARE','DIKUA'), 
                                            rotaPosition:0) );
 
-      requestToBeProcessed.save(flush:true, failOnError:true);
+		// The request is saved outside of this call, if a save is made here then it will cause problems as the pendingAction has not been updated							   
     }
     else {
       log.debug("request already has a rota of size ${requestToBeProcessed.rota.size()}");
