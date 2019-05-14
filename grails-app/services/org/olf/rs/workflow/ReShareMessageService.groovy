@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.ApplicationEvent
 
 import org.grails.orm.hibernate.AbstractHibernateDatastore
+import grails.gorm.transactions.Transactional
 
 /**
  *  This service adds messages to the reshare and deals with them appropriately when one has been received
@@ -135,7 +136,10 @@ class ReShareMessageService implements ApplicationListener {
 		if ((patronRequest != null) && (version != null)) {
 			if (!patronRequest.version.equals(version)) {
 				// Wrong version
-				patronRequest = null;
+                                // ARGH! This was nulling out the patronRequest and making downstream calls think the item was not found
+                                // Returning null just makes us spin! Throw a runtime exception instead!
+				// patronRequest = null;
+                                throw new RuntimeException("Version inconsistency. getPatronRequest expected version ${version} of patronRequest.id ${requestId} but got version ${patronRequest.version}");
 			}
 		}
 		return(patronRequest);
@@ -170,7 +174,9 @@ class ReShareMessageService implements ApplicationListener {
 					while ( ( patronRequest == null ) && ( retries++ < 20 ) )  {
 						Thread.sleep(1500);
 						log.debug("Retry find request ${requestId}");
-						patronRequest = getPatronRequest(requestId, version);
+                                                PatronRequest.withTransaction { status ->
+						  patronRequest = getPatronRequest(requestId, version);
+                                                }
 					}
 
 					if (patronRequest) {
