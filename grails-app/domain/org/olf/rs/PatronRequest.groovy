@@ -41,6 +41,19 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String publicationDate
   String publicationDateOfComponent
   String edition
+  String issn
+  String isbn
+  String doi
+  String coden
+  String sici
+  String bici
+  String eissn // Shudder!
+  String stitle
+  String part
+  String artnum
+  String ssn
+  String quarter
+  
 
   // Patron reference (EG Barcode)
   String patronReference
@@ -127,6 +140,19 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                publicationDate (nullable: true, blank : false)
     publicationDateOfComponent (nullable: true, blank : false)
                        edition (nullable: true, blank : false)
+                          issn (nullable: true, blank : false)
+                          isbn (nullable: true, blank : false)
+                           doi (nullable: true, blank : false)
+                         coden (nullable: true, blank : false)
+                          sici (nullable: true, blank : false)
+                          bici (nullable: true, blank : false)
+                         eissn (nullable: true, blank : false)
+                        stitle (nullable: true, blank : false)
+                          part (nullable: true, blank : false)
+                        artnum (nullable: true, blank : false)
+                           ssn (nullable: true, blank : false)
+                       quarter (nullable: true, blank : false)
+ 
 
   }
 
@@ -161,7 +187,18 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                publicationDate column : 'pr_pub_date'
     publicationDateOfComponent column : 'pr_pubdate_of_component'
                        edition column : 'pr_edition'
-
+                          issn column : 'pr_issn'
+                          isbn column : 'pr_isbn'
+                           doi column : 'pr_doi'
+                         coden column : 'pr_coden'
+                          sici column : 'pr_sici'
+                          bici column : 'pr_bici'
+                         eissn column : 'pr_eissn'
+                        stitle column : 'pr_stitle'
+                          part column : 'pr_part'
+                        artnum column : 'pr_artnum'
+                           ssn column : 'pr_ssn'
+                       quarter column : 'pr_quarter'
   }
 
   /**

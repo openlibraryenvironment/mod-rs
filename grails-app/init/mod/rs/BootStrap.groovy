@@ -1,14 +1,18 @@
 package mod.rs
 
+import com.k_int.okapi.OkapiTenantAdminService
+
 class BootStrap {
 
   def grailsApplication
   def housekeepingService
-
+  OkapiTenantAdminService okapiTenantAdminService
+  
   def init = { servletContext ->
 
-    housekeepingService.ensureSharedSchema();
-    housekeepingService.ensureSharedConfig();
+    okapiTenantAdminService.freshenAllTenantSchemas()
+    //housekeepingService.ensureSharedSchema();
+    //housekeepingService.ensureSharedConfig();
 
     if ( grailsApplication.config.rabbitmq?.enabled ) {
       log.debug("mod-rs starting, with rabbitmq enabled");
