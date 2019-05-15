@@ -92,14 +92,38 @@ class StateTransition implements MultiTenant<StateTransition> {
 		// Action: Validate - Requester
 		createIfNotExists([Status.IDLE], Action.VALIDATE, QUALIFIER_REQUESTER, Action.LOCATE, null);
 
+        // Action: Located - Requester
+		createIfNotExists([Status.VALIDATED], Action.LOCATE, QUALIFIER_REQUESTER, Action.APPROVE, null);
+
 		// Action: Approved - Requester
 		createIfNotExists([Status.LOCATED], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
 
-                // Action: Located - Requester
-		createIfNotExists([Status.LOCATED], Action.LOCATE, QUALIFIER_REQUESTER, Action.APPROVE, null);
+		// Action: Send Message - Requester
+		createIfNotExists([Status.APPROVED], Action.SEND_MESSAGE, QUALIFIER_REQUESTER, null, null);
 
-                // Action: Located - Requester
-		createIfNotExists([Status.NO_LOCATIONS], Action.APPROVE, QUALIFIER_REQUESTER, null, null);
+		// Action: Informed Not Supplied - requester
+		createIfNotExists([Status.PENDING], Action.INFORMED_NOT_SUPPLIED, QUALIFIER_REQUESTER, Action.NEXT_RESPONDER, null);
+
+		// Action: Next Responder - requester
+		createIfNotExists([Status.UNFILLED], Action.NEXT_RESPONDER, QUALIFIER_REQUESTER, Action.APPROVE, null);
+
+		// Action: Informed Shipped - requester
+		createIfNotExists([Status.PENDING], Action.INFORMED_SHIPPED, QUALIFIER_REQUESTER, null, null);
+
+		// Action: Received - requester
+		createIfNotExists([Status.SHIPPED], Action.RECEIVE, QUALIFIER_REQUESTER, null, null);
+
+		// Action: Notify Patron - requester
+		createIfNotExists([Status.RECEIVED], Action.NOTIFY_PATRON, QUALIFIER_REQUESTER, null, null);
+
+		// Action: Collected - requester
+		createIfNotExists([Status.AWAITING_COLLECTION], Action.COLLECTED, QUALIFIER_REQUESTER, null, null);
+
+		// Action: Patron Returned - requester
+		createIfNotExists([Status.COLLECTED], Action.PATRON_RETURNED, QUALIFIER_REQUESTER, null, null);
+
+		// Action: Returned - requester
+		createIfNotExists([Status.PATRON_RETURNED], Action.RETURN, QUALIFIER_REQUESTER, null, null);
 
 		// Action: New Request - Responder
 		createIfNotExists([Status.IDLE], Action.NEW_REQUEST, QUALIFIER_SUPPLIER, null, null);
@@ -109,21 +133,15 @@ class StateTransition implements MultiTenant<StateTransition> {
 
 		// Action: Not Supplied - Responder
 		createIfNotExists([Status.IN_PROCESS], Action.NOT_SUPPLY, QUALIFIER_SUPPLIER, null, null);
+		
+		// Action: Informed Received - responder
+		createIfNotExists([Status.SHIPPED], Action.INFORMED_RECEIVED, QUALIFIER_SUPPLIER, null, null);
 
-		// Action: Received - requester
-		createIfNotExists([Status.AWAITING_COLLECTION], Action.RECEIVE, QUALIFIER_REQUESTER, null, null);
-
-		// Action: Collected - requester
-		createIfNotExists([Status.COLLECTED], Action.COLLECTED, QUALIFIER_REQUESTER, null, null);
-
-		// Action: Patron Returned - requester
-		createIfNotExists([Status.PATRON_RETURNED], Action.PATRON_RETURNED, QUALIFIER_REQUESTER, null, null);
-
-		// Action: Returned - requester
-		createIfNotExists([Status.PATRON_RETURNED], Action.RETURN, QUALIFIER_REQUESTER, null, null);
+		// Action: Informed Returned - responder
+		createIfNotExists([Status.RECEIVED], Action.INFORMED_RETURNED, QUALIFIER_SUPPLIER, null, null);
 
 		// Action: Checked In - responder
-		createIfNotExists([Status.SHIPPED], Action.CHECK_IN, QUALIFIER_SUPPLIER, null, null);
+		createIfNotExists([Status.RETURNED], Action.CHECK_IN, QUALIFIER_SUPPLIER, null, null);
 	}
 
 	static String GetQualifer(boolean isRequester) {

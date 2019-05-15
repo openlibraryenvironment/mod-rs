@@ -137,6 +137,7 @@ abstract class AbstractAction {
 				// Note: If an exception is thrown from another method and not caught within it
 				// Then the entire transaction will get rolled back including any saves made after the exception
 				// Will need to test whether a read only transaction service throwing an exception causes a rollback
+				log.error("Excpetion thrown while performing an action for request: " + requestToBeProcessed.id + " for action: " + patronRequestAudit.action.name, e);
 				errored = true;
 			}
 
