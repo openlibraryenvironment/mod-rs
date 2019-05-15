@@ -239,6 +239,20 @@ databaseChangeLog = {
             column(name: "pr_quarter", type: "VARCHAR(255)")
 
             column(name: "pr_sub_title", type: "VARCHAR(255)")
+
+            column(name: 'pr_issn', type: "VARCHAR(255)")
+            column(name: 'pr_isbn', type: "VARCHAR(255)")
+            column(name: 'pr_doi', type: "VARCHAR(255)")
+            column(name: 'pr_coden', type: "VARCHAR(255)")
+            column(name: 'pr_sici', type: "VARCHAR(255)")
+            column(name: 'pr_bici', type: "VARCHAR(255)")
+            column(name: 'pr_eissn', type: "VARCHAR(255)")
+            column(name: 'pr_stitle', type: "VARCHAR(255)")
+            column(name: 'pr_part', type: "VARCHAR(255)")
+            column(name: 'pr_artnum', type: "VARCHAR(255)")
+            column(name: 'pr_ssn', type: "VARCHAR(255)")
+            column(name: 'pr_quarter', type: "VARCHAR(255)")
+
         }
     }
 
