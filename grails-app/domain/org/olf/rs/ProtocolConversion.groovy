@@ -24,8 +24,8 @@ class ProtocolConversion implements MultiTenant<ProtocolConversion> {
     static mapping = {
         id              column : 'pc_id',              length : 36, generator : 'uuid2'
         version         column : 'pc_version'
-        conversionValue column : 'pc_conversionValue', length : 255
+        conversionValue column : 'pc_conversion_value', length : 255
         protocol        column : 'pc_protocol'
-        referenceValue  column : 'pc_referenceValue'
+        referenceValue  column : 'pc_reference_value'
     }
 }
