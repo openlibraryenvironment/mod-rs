@@ -17,7 +17,7 @@ abstract class AbstractAction {
 
 	/** For Service used for sending requests to the ReShare queue */
 	ReShareMessageService reShareMessageService;
-	
+
 	protected enum ActionResponse {
 		// An error has occurred, could be as simple as validation error, details will be in the audit
 		ERROR,
@@ -27,7 +27,7 @@ abstract class AbstractAction {
 
 		// This is for when we cannot carry out the action and therefore will retry a minute later
 		RETRY,
-		
+
 		// We were successful or a positive response for a conditional
 		SUCCESS,
 
@@ -66,7 +66,6 @@ abstract class AbstractAction {
 			patronRequestAudit.fromStatus = requestToBeProcessed.state;
 			patronRequestAudit.action = requestToBeProcessed.pendingAction;
 			patronRequestAudit.patronRequest = requestToBeProcessed;
-			requestToBeProcessed
 
 			// The Next action that is to be executed
 			Action nextAction = null;
@@ -78,23 +77,23 @@ abstract class AbstractAction {
 				// Now perform the action
 				switch (perform(requestToBeProcessed)) {
 					case ActionResponse.SUCCESS:
-                                                log.debug("Action completed OK");
+						log.debug("Action completed OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessYes;
 						break
 
 					case ActionResponse.NO:
-                                                log.debug("Action did not complete OK");
+						log.debug("Action did not complete OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessNo;
 						break;
 
-						case ActionResponse.IN_PROTOCOL_QUEUE:
-						// We stay at the same status
+					case ActionResponse.IN_PROTOCOL_QUEUE:
+					// We stay at the same status
 						patronRequestAudit.toStatus = patronRequestAudit.fromStatus;
 						requestToBeProcessed.awaitingProtocolResponse = true;
 						break;
 
 					case ActionResponse.RETRY:
-                                                log.debug("Action retry");
+						log.debug("Action retry");
 						// We will retry later
 						performRetry = true;
 
@@ -103,6 +102,11 @@ abstract class AbstractAction {
 							// Should probably do something more sensible when we reach the max retry count
 							if (requestToBeProcessed.numberOfRetries < MAXIMUM_RETRY_COUNT) {
 								requestToBeProcessed.numberOfRetries++;
+							} else {
+								// Hit the maximum number of retries
+								performRetry = false;
+								errored = true;
+								patronRequestAudit.toStatus = getAction().statusFailure;
 							}
 						} else {
 							requestToBeProcessed.numberOfRetries = 1;
@@ -113,13 +117,13 @@ abstract class AbstractAction {
 						break;
 
 					case ActionResponse.ERROR:
-                                                log.debug("Action ERROR");
+						log.debug("Action ERROR");
 						errored = true;
 						patronRequestAudit.toStatus = getAction().statusFailure;
 						break;
 
 					default:
-                                                log.error("Unhandled response code from Action handler");
+						log.error("Unhandled response code from Action handler");
 						// Hit an error if we have reached here
 						errored = true;
 						break;
@@ -128,9 +132,9 @@ abstract class AbstractAction {
 				// No point looking up the next action for a retry as it will not change
 				if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
 					// Now we have the new status, determine if we have a new action to perform
-                                        log.debug("Work out next action based on ${requestToBeProcessed.state}, ${getAction()}, ${patronRequestAudit.toStatus}");
+					log.debug("Work out next action based on ${requestToBeProcessed.state}, ${getAction()}, ${patronRequestAudit.toStatus}");
 					nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus, requestToBeProcessed.isRequester);
-                                        log.debug("Determined that next action should be ${nextAction}");
+					log.debug("Determined that next action should be ${nextAction}");
 				}
 
 			} catch (Exception e) {
@@ -154,19 +158,19 @@ abstract class AbstractAction {
 
 				// Set the status and pending action on the request and the audit trail, if a retry will not be performed
 				if (!performRetry) {
-                                        log.debug("No retry set");
+					log.debug("No retry set");
 					requestToBeProcessed.lastUpdated = new Date();
 					requestToBeProcessed.state = patronRequestAudit.toStatus;
 					requestToBeProcessed.numberOfRetries = null;
 
-					// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response				
+					// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response
 					if (!requestToBeProcessed.awaitingProtocolResponse) {
-                                                log.debug("We're not awaiting a protocol response - set next action to ${nextAction}");
+						log.debug("We're not awaiting a protocol response - set next action to ${nextAction}");
 						requestToBeProcessed.pendingAction = nextAction;
 					}
 
 					// Not forgetting to add the audit record
-                                        log.debug("Auditing...");
+					log.debug("Auditing...");
 					patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
 					requestToBeProcessed.addToAudit(patronRequestAudit);
 				}
@@ -181,11 +185,6 @@ abstract class AbstractAction {
 						errors += "\t" + error + "\n";
 					}
 					log.error("Error saving request " + requestToBeProcessed.id + errors);
-				}
-
-				// If we are performing a retry add it into the queue with a delay
-				if (performRetry) {
-					// TODO: Add it back into the queue with a delay
 				}
 			} catch (Exception e) {
 				// TODO: Log to the log file and see if we can generate an audit record to log this exception
