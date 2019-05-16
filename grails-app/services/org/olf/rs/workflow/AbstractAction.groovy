@@ -158,7 +158,6 @@ abstract class AbstractAction {
 
 				// Set the status and pending action on the request and the audit trail, if a retry will not be performed
 				if (!performRetry) {
-					log.debug("No retry set");
 					requestToBeProcessed.lastUpdated = new Date();
 					requestToBeProcessed.state = patronRequestAudit.toStatus;
 					requestToBeProcessed.numberOfRetries = null;

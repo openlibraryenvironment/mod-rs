@@ -172,16 +172,16 @@ class ReShareMessageService implements ApplicationListener {
 					// this loop is prevented from seeing that new record. Just a theory, but the record never becomes visible to this thread
 					// at the moment for me.
 					PatronRequest patronRequest = getPatronRequest(requestId, version);
-					while ( ( patronRequest == null ) && ( retries++ < 20 ) )  {
+					while ( ( patronRequest == null ) && ( ++retries < 20 ) )  {
 						Thread.sleep(1500);
-						log.debug("Retry find request ${requestId}");
+						log.debug("Retry [${retries}] find request ${requestId}[${version}]");
 						PatronRequest.withTransaction { status ->
 							patronRequest = getPatronRequest(requestId, version);
 						}
 					}
 
 					if (patronRequest) {
-						log.debug("Got request ${requestId}");
+						log.debug("Got request ${requestId}[${patronRequest.version}]");
 
 						// If the pending action is not the same as in the message then we need to abandon
 						if (patronRequest.pendingAction && actionCode.equals(patronRequest.pendingAction.id)) {
