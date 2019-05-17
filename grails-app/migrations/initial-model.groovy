@@ -786,7 +786,5 @@ databaseChangeLog = {
       addColumn(tableName: "custom_property") {
           column(name: "note", type: "CLOB")
       }
-    }
-}
-    
+    }    
 }
