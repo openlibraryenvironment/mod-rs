@@ -781,4 +781,12 @@ databaseChangeLog = {
     changeSet(author: "sosguthorpe (generated)", id: "1557919926348-82") {
         addForeignKeyConstraint(baseColumnNames: "act_status_success_yes", baseTableName: "wf_action", constraintName: "FKtjmco83abnf357nvx18ung5fk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "wf_status")
     }
+    
+    changeSet(author: "sosguthorpe", id: "2019-05-17-1") {
+      addColumn(tableName: "custom_property") {
+          column(name: "note", type: "CLOB")
+      }
+    }
+}
+    
 }
