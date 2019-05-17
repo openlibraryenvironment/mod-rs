@@ -28,7 +28,7 @@ class ActionApproveService extends AbstractAction {
 		// The action cannot be performed if we do not have a rota item at the current rota position
 		PersistentSet rota = requestToBeProcessed.rota;
 		if ((rota == null) || (requestToBeProcessed.rotaPosition >= rota.size())) {
-			
+			console.log("Rota null or passed end (${rota}/${requestToBeProcessed.rotaPosition}/${rota?.size()})");
 		} else {
 			result = ActionResponse.SUCCESS;
 		}
