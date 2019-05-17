@@ -20,6 +20,30 @@ import org.olf.rs.workflow.ReShareMessageService
 public class DirectoryService {
 
   String getIDForSymbol(String authority, String symbol) {
-    return 'DS-LOOKUP-RESULT'
+    // This helper needs to talk to mod-directory, and in particular, needs to return the results of
+    // calling
+    // /directory/entry?filters=symbols.symbol%3dDIKUA&filters=symbols.authority.value=RESHARE&stats=true
+    // That call returns an array - if one row is returned, this method should return the object so that the ID can be extracted (Or
+    // whatever other properties are needed). If multiple rows, an exception, if no rows, null.
+    //
+    // Asking steve for advice as there is no incoming OKAPI request object here so authentication and authorization are problems
+    //
+    return getDirectoryEntryForSymbol(authority,symbol)?.id;
   }
+
+  Map getDirectoryEntryForSymbol(String authority, String symbol) {
+    // This helper needs to talk to mod-directory, and in particular, needs to return the results of
+    // calling
+    // /directory/entry?filters=symbols.symbol%3dDIKUA&filters=symbols.authority.value=RESHARE&stats=true
+    // That call returns an array - if one row is returned, this method should return the object so that the ID can be extracted (Or
+    // whatever other properties are needed). If multiple rows, an exception, if no rows, null.
+    //
+    // Asking steve for advice as there is no incoming OKAPI request object here so authentication and authorization are problems
+    //
+
+    return [
+      id:'1234'
+    ]
+  }
+
 }
