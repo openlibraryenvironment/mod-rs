@@ -9,6 +9,7 @@ buildscript {
     classpath "org.grails.plugins:database-migration:3.0.4"
     classpath "com.bmuschko:gradle-docker-plugin:3.2.1"
     classpath "org.grails.plugins:views-gradle:1.2.10"
+    classpath "com.k_int.gradle:kint-gradle-plugin:1.0.1"
   }
 }
 
@@ -18,26 +19,27 @@ apply plugin: "eclipse"
 apply plugin: "org.grails.grails-web"
 apply plugin: "org.grails.plugins.views-json"
 apply plugin: "com.bmuschko.docker-remote-api"
+apply plugin: "com.k_int.gradle.plugin"
 
 eclipse {
   classpath {
     defaultOutputDir = file('bin/main')
-//    file {
-//      whenMerged {
-//        def confEntries = (entries.findAll { it.path == 'grails-app/conf' }) as List
-//        
-//        if (confEntries) {
-//          def singleEnty = confEntries[0]
-//          
-//          // Remove all the entries.
-//          entries.removeAll ( confEntries )
-//          
-//          // Set the output directory, and re-add.
-//          singleEnty.output = "bin/main"
-//          entries << singleEnty
-//        }
-//      }
-//    }
+    file {
+      whenMerged {
+        def confEntries = (entries.findAll { it.path == 'grails-app/conf' }) as List
+        
+        if (confEntries) {
+          def singleEnty = confEntries[0]
+          
+          // Remove all the entries.
+          entries.removeAll ( confEntries )
+          
+          // Set the output directory, and re-add.
+          singleEnty.output = "bin/main"
+          entries << singleEnty
+        }
+      }
+    }
   }
 }
 
@@ -75,9 +77,8 @@ dependencies {
   compile "org.liquibase:liquibase-core:3.5.5"
   compile "com.ibm.icu:icu4j:62.1"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
-  profile "org.grails.profiles:rest-api"
 
-  compile 'com.k_int.grails:web-toolkit-ce:3.3.25'
+  compile 'com.k_int.grails:web-toolkit-ce:3.4.2'
   compile 'com.k_int.okapi:grails-okapi:3.5.1'
   runtime "com.zaxxer:HikariCP:3.2.0"
 
@@ -93,12 +94,6 @@ dependencies {
   testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.2"
   testRuntime "net.sourceforge.htmlunit:htmlunit:2.33"
 }
-
-def includes = [
-  'web-toolkit-ce'  : 'com.k_int.grails:web-toolkit-ce:3.4.1',
-  'grails-okapi'    : 'com.k_int.okapi:grails-okapi:3.5.1'
-]
-
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
 version="${appVersion}"
 
@@ -224,30 +219,6 @@ buildProperties.doLast {
 }
 
 processResources.dependsOn generateDescriptors
-
-includes?.each { String projectName, String mavenString ->
-  def igp = subprojects?.find {
-    if (it.name == "${projectName}") {
-      return it
-    }
-    false
-  }
-
-  if (igp) {
-    println "Using local ${igp.name} at ${igp.projectDir}"
-    grails {
-      plugins {
-        compile igp
-      }
-    }
-  } else {
-    // Use declared maven version.
-    println "Installing ${projectName} from maven"
-    dependencies {
-      compile "${mavenString}"
-    }
-  }
-}
 
 /**
  * Docker build config.
