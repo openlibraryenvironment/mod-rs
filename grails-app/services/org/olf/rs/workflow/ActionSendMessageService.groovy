@@ -33,10 +33,27 @@ class ActionSendMessageService extends AbstractAction {
 
     // Not sure this is what's intended, but want to start wiring together the edge module
     // so sending a message this way for now, expect this to change when @chas gets to it.
-    rabbitService.Send(Queue.ISO18626, 
+    // rabbitService.Send(Queue.ISO18626, 
+    rabbitService.Send('RSOutViaProtocol.ISO18626/HTTP(S)',
                        java.util.UUID.randomUUID().toString(),
                        [
-                         "stub":"stub"
+                         "header":[
+                           "to":[ 
+                             "symbol":"RESHARE:DIKU",
+                             "addressInfo":[
+                             ]
+                           ],
+                           "from":[
+                             "symbol":"RESHARE:DIKU"
+                           ],
+                         ],
+                         "canonicalMessage":[
+                           "request":[
+                             "itemId":[
+                               "title":"Brain of the Firm"
+                             ]
+                           ]
+                         ]
                        ]);
 
     return(ActionResponse.SUCCESS);
