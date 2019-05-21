@@ -93,6 +93,9 @@ Vagrant.configure(2) do |config|
     sudo apt-get -y install rabbitmq-server
     # sudo apt-get install -y apache2
 
+    # Enable rabbitmq
+    rabbitmq-plugins enable rabbitmq_management
+
     # Create the rabbit user for message passing
     if [ `rabbitmqctl list_users | grep -i "^rsms" | wc -l` -eq 0 ]
     then

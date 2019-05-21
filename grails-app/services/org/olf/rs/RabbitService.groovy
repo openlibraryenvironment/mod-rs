@@ -37,6 +37,33 @@ public class RabbitService {
 		return(successful);
 	}
 
+  public boolean sendToExchange(String ex, String rk, String messageId, Object message, String responseQueue = null) {
+    log.debug("RabbitService::sendToExchange(${ex}, ${rk}, ${messageId}, ...)");
+    boolean successful = true;
+    if (Running()) {
+      try {
+        // Note: use rpc if you want to wait for a response
+        rabbitMessagePublisher.send {
+          exchange = ex
+          routingKey = rk
+          deliveryMode = 2 // persistent
+          messageId = messageId
+          body = message;
+        }
+        log.debug("rabbitMessagePublisher.send completed");
+      } catch (Exception e) {
+        log.error("Exception thrown while puting a message on the ReShare rabbit queue", e);
+        successful = false;
+      }
+    } else {
+        successful = false;
+    }
+
+    log.debug("RabbitService::Send returns ${successful}");
+    return(successful);
+  }
+
+
 	public boolean Running(boolean startIfNot = true) {
 		boolean rabbitRunning = true;
 		if (!rabbitInitialised || (rabbitContext.getRunningState() != RunningState.RUNNING)) {
