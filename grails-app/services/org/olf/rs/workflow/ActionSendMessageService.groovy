@@ -42,7 +42,7 @@ class ActionSendMessageService extends AbstractAction {
                        requestToBeProcessed.id,
                        [
                          "header":[
-                           "addressTo":'http://localhost:8080/iso18626'
+                           "address":'http://localhost:8080/iso18626'
                          ],
                          'message':[
                            "request":[

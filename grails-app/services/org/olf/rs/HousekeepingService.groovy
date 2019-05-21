@@ -99,15 +99,15 @@ public class HousekeepingService {
 
   public String findTenantForSymbol(String symbol) {
     String result = null;
-    Tenants.withId(SHARED_SCHEMA_NAME) {
-      TenantSymbolMapping.withNewTransaction {
-        def mapping = TenantSymbolMapping.findBySymbol(symbol);
-        if ( mapping ) {
-          result = mapping.tenant;
-        }
-      }
-    }
-    return result;
+    //Tenants.withId(SHARED_SCHEMA_NAME) {
+    //  TenantSymbolMapping.withNewTransaction {
+    //    def mapping = TenantSymbolMapping.findBySymbol(symbol);
+    //    if ( mapping ) {
+    //      result = mapping.tenant;
+    //    }
+    //  }
+    //}
+    return 'diku';
   }
 
   /**
