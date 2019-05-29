@@ -148,6 +148,10 @@ rabbitmq:
       durable: true
     - name: NewMessage
       durable: true
+    # This is the name of the Queue on which we post requests to send messages. This is the queue defined by the resource_sharing_message_services
+    # It expects a routing key of RSOutViaProtocol.#. Need to work out with chas what relationship he sees betweent his and the protocol queues above.
+    - name: OutboundRSMessageQueue
+      durable: true
   consumers:
     ReShareConsumer:
       queue: ReShareAction
@@ -210,6 +214,8 @@ environments:
       service:
         host: localhost
         port: 9130
+        register: false
+        deploy: false
 
     gorm:
       tenantId: public # Used by SystemPropertyTenantResolver
