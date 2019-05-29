@@ -42,7 +42,8 @@ class ActionSendMessageService extends AbstractAction {
                        requestToBeProcessed.id,
                        [
                          "header":[
-                           "address":'http://localhost:8080/iso18626'
+                           // This will come from directory service in time, for now, loop back to locally running edge module
+                           "address":'http://localhost:8079/iso18626'
                          ],
                          'message':[
                            "request":[

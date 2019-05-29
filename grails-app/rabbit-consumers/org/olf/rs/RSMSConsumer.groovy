@@ -58,17 +58,25 @@ class RSMSConsumer {
         //   recipient_event:ILL]
   
         Tenants.withId(tenant+'_mod_rs') { // Tenants.withId needs a schema name
-          if ( body.message.request ) {
-            log.debug("Create new patron request");
-            def request = body.message.request;
-            def new_pr = new PatronRequest(title: request.bibliographicInfo?.title,
-                                           subtitle: request.bibliographicInfo?.subtitle,
-                                           author: request.bibliographicInfo?.author,
-                                           patronReference: request.patronInfo?.patronId,
-                                           isRequester:false).save(flush:true, failOnError:true);
+          try {
+            // Element under message determines message type - request for a new request
+            if ( body.message.request ) {
+              log.debug("Create new patron request");
+              def request = body.message.request;
+              def new_pr = new PatronRequest(title: request.bibliographicInfo?.title,
+                                             subtitle: request.bibliographicInfo?.subtitle,
+                                             author: request.bibliographicInfo?.author,
+                                             patronReference: request.patronInfo?.patronId,
+                                             isRequester:false)
+              def responder_role_id = new_pr.save(flush:true, failOnError:true);
+              log.debug("Responder id will be ${responder_role_id}");
+            }
+            else {
+              log.warn("Unhandled ILL event: ${body}");
+            }
           }
-          else {
-            log.warn("Unhandled ILL event: ${body}");
+          catch ( Exception e ) {
+            log.error("Problem saving incoming protocol message",e);
           }
         }
       }
