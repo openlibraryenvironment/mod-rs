@@ -47,6 +47,24 @@ class ProcessorResponseConsumer {
   def handleMessage(Map body, MessageContext context) {
     log.debug("**ProcessorResponse** ${body} Context:${context}");
 
+    // [processorResponse:[status:OK, patronRequestId:6ae55a4d-988d-49a5-8109-4811dbbfff29, tenant:diku_mod_rs, action:send message, result:OK, protocolResponseMessage:[version:1.2]]]
+    if ( body?.processorResponse?.patronRequestId &&
+         body?.processorResponse?.tenant &&
+         body?.processorResponse?.action ) {
+      Tenants.withId(body?.processorResponse?.tenant) {
+
+        def pr = PatronRequest.get(body?.processorResponse?.patronRequestId);
+
+        if ( body?.processorResponse?.result == 'OK' ) {
+          // action body?.processorResponse?.action completed OK - Do something
+          log.debug("patron request ${pr} - action ${body?.processorResponse?.action} completed OK...");
+        }
+        else {
+          // action body?.processorResponse?.action did not complete OK - Do something else
+          log.debug("patron request ${pr} - action ${body?.processorResponse?.action} result...${body?.processorResponse?.result}");
+        }
+      }
+    }
     // This is an indication that a protocol message was either sent or not, we need to move the patron request status
     // along accordingly.
   }
