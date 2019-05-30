@@ -1,5 +1,6 @@
 package org.olf.rs.workflow
 
+import grails.gorm.multitenancy.Tenants;
 import grails.gorm.transactions.Transactional;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.workflow.AbstractAction.ActionResponse;
@@ -46,7 +47,13 @@ class ActionSendMessageService extends AbstractAction {
                        [
                          "header":[
                            // This will come from directory service in time, for now, loop back to locally running edge module
-                           "address":'http://localhost:8079/iso18626'
+                           "address":'http://localhost:8079/iso18626',
+                           // These properties make it easy for us to process the ProcessorResponse when it comes back
+                           'tenant': Tenants.currentId(),
+                           // The mod-rs request we are talking about
+                           'patronRequestId':requestToBeProcessed.id,
+                           // The action being performed
+                           'action':Action.SEND_MESSAGE
                          ],
                          'message':[
                            "request":[
