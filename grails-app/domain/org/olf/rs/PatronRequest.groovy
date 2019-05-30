@@ -89,7 +89,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** If we hit an error this was the status prior to the error occurring */
   Status preErrorStatus;
 
-  /** Are we waiting for a protocol message to be sent */
+  /** Are we waiting for a protocol message to be sent  - If so, pendingAction will contain the action we are currently trying to perform */
   boolean awaitingProtocolResponse;
 
   /** The position we are in the rota */

@@ -29,12 +29,15 @@ class ActionSendMessageService extends AbstractAction {
     // For the time being we just return OK as we do not do anything
     log.debug("ActionSendMessageService::perform(${requestToBeProcessed})");
 
+    // This is fluff - obviously what we shoulds really be doing here is looking up the active rota position
+    // and sending there.
+
     Map directoryEntryForResponder = directoryService.getDirectoryEntryForSymbol('RESHARE','DIKUA');
 
-    // Not sure this is what's intended, but want to start wiring together the edge module
-    // so sending a message this way for now, expect this to change when @chas gets to it.
-    // rabbitService.Send(Queue.ISO18626, 
-    // Content of this message is defined in https://github.com/openlibraryenvironment/edge-resource-sharing-message-services/blob/master/doc/CanonicalMessageFormat.md
+    // Chas says this should be done for us by the framework, but doing this here makes things appear to work as they should
+    // requestToBeProcessed.awaitingProtocolResponse = true;
+    // requestToBeProcessed.pendingAction = Action.get(Action.SEND_MESSAGE);
+    // requestToBeProcessed.save(flush:true, failOnError:true);
 
     rabbitService.sendToExchange(
                        'RSExchange',
@@ -72,6 +75,7 @@ class ActionSendMessageService extends AbstractAction {
                        ]);
 
     log.debug("rabbitService.Send completed");
-    return(ActionResponse.SUCCESS);
+    return(ActionResponse.IN_PROTOCOL_QUEUE);
+    // return(ActionResponse.SUCCESS);
   }
 }
