@@ -156,9 +156,14 @@ rabbitmq:
     ReShareConsumer:
       queue: ReShareAction
       match: any
-    ProcessorResponseConsumer:
-      queue: ProcessorResponse
-      match: any
+    # ProcessorResponseConsumer configuration moved to the consumer itself. Defining the exchange/topic/queue binding
+    # in this way did not work as expected. Does work as expected when specified in grails-app/rabbit-consumers/ProcessorResponseConsumer
+    # Leaving this here as a signpost for why we did it this way.
+    # ProcessorResponseConsumer:
+    #   exchange: RSExchange
+    #   binding: ProcessorResponse.#
+    #   queue: ProcessorResponse
+    #   match: any
     
 dataSource:
   pooled: true
