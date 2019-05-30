@@ -73,9 +73,17 @@ class ActionSendMessageService extends AbstractAction {
                                'requestingAgencyRequestId':requestToBeProcessed.id
                              ],
                              "bibliographicInfo":[
-                                "title":"Platform for Change",
-                                "subtitle":"A message from Stafford Beer",
-                                "author":"Beer, S"
+                                "title":requestToBeProcessed.title,
+                                "subtitle":requestToBeProcessed.subtitle,
+                                "author":requestToBeProcessed.author
+                             ],
+                             "patronInfo":[
+                               "patronId":requestToBeProcessed.patronReference,
+                               "surname":null,
+                               "givenName":null,
+                               "patronType":null,
+                               "sendToPatron":null,
+                               "address:null
                              ]
                            ]
                          ]
