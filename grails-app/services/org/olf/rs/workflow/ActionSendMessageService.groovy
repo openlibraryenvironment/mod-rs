@@ -73,16 +73,29 @@ class ActionSendMessageService extends AbstractAction {
                                'requestingAgencyRequestId':requestToBeProcessed.id
                              ],
                              "bibliographicInfo":[
+                                "supplierUniqueRecordId":null,
                                 "title":requestToBeProcessed.title,
                                 "subtitle":requestToBeProcessed.subtitle,
-                                "author":requestToBeProcessed.author
+                                "author":requestToBeProcessed.author,
+                                "seriesTitle": requestToBeProcessed.stitle,
+                                "edition": requestToBeProcessed.edition,
+                                "titleOfComponent": requestToBeProcessed.titleOfComponent,
+                                "authorOfComponent": requestToBeProcessed.authorOfComponent,
+                                "volume": requestToBeProcessed.volume,
+                                "issue": requestToBeProcessed.issue,
+                                "pagesRequested":requestToBeProcessed.startPage,
+                                "estimatedNoPages":requestToBeProcessed.numberOfPages,
+                                "bibliographicItemId":[],
+                                "sponsor":requestToBeProcessed.sponsor,
+                                "informationSource": requestToBeProcessed.informationSource,
+                                "bibliographicRecordId": []
                              ],
                              "patronInfo":[
                                "patronId":requestToBeProcessed.patronReference,
-                               "surname":null,
-                               "givenName":null,
-                               "patronType":null,
-                               "sendToPatron":null,
+                               "surname":requestToBeProcessed.patronSurname,
+                               "givenName":requestToBeProcessed.patronGivenName,
+                               "patronType":requestToBeProcessed.patronType,
+                               "sendToPatron":requestToBeProcessed.sendToPatron,
                                "address":null
                              ]
                            ]
