@@ -83,7 +83,7 @@ class ActionSendMessageService extends AbstractAction {
                                "givenName":null,
                                "patronType":null,
                                "sendToPatron":null,
-                               "address:null
+                               "address":null
                              ]
                            ]
                          ]

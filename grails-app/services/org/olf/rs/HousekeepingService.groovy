@@ -28,7 +28,7 @@ public class HousekeepingService {
   GrailsApplication grailsApplication
   ReShareMessageService reShareMessageService 
 
-  private static final SHARED_SCHEMA_NAME='__shared_mod_rs';
+  private static final SHARED_SCHEMA_NAME='__shared_ill_mappings';
 
 
   /**
