@@ -27,6 +27,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
+  // Bibliographic descriptive fields
   // Title of the item requested
   String title
   String author
@@ -48,15 +49,23 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String sici
   String bici
   String eissn // Shudder!
-  String stitle
+  String stitle // Series Title
   String part
   String artnum
   String ssn
   String quarter
   
+  String titleOfComponent
+  String authorOfComponent
+  String sponsor
+  String informationSource
 
   // Patron reference (EG Barcode)
   String patronReference
+  String patronSurname
+  String patronGivenName
+  String patronType
+  Boolean sendToPatron
 
   // These 2 dates are maintained by the framework for us
   Date dateCreated
@@ -153,6 +162,15 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                            ssn (nullable: true, blank : false)
                        quarter (nullable: true, blank : false)
  
+              titleOfComponent (nullable: true, blank : false)
+             authorOfComponent (nullable: true, blank : false)
+                       sponsor (nullable: true, blank : false)
+             informationSource (nullable: true, blank : false)
+                 patronSurname (nullable: true, blank : false)
+               patronGivenName (nullable: true, blank : false)
+                    patronType (nullable: true, blank : false)
+                  sendToPatron (nullable: true, blank : false)
+
 
   }
 
@@ -199,6 +217,16 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                         artnum column : 'pr_artnum'
                            ssn column : 'pr_ssn'
                        quarter column : 'pr_quarter'
+
+              titleOfComponent column : 'pr_title_of_component'
+             authorOfComponent column : 'pr_author_of_component'
+                       sponsor column : 'pr_sponsor'
+             informationSource column : 'pr_information_source'
+
+                 patronSurname column : 'pr_patron_surname'
+               patronGivenName column : 'pr_patron_name'
+                    patronType column : 'pr_patron_type'
+                  sendToPatron column : 'pr_send_to_patron'
   }
 
   /**

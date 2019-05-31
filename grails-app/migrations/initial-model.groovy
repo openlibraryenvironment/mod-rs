@@ -787,4 +787,18 @@ databaseChangeLog = {
           column(name: "note", type: "CLOB")
       }
     }    
+
+    changeSet(author: "ianibbo", id: "2019-05-31-1") {
+      addColumn(tableName: "patron_request") {
+          column(name: "pr_title_of_component", type: "VARCHAR(255)")
+          column(name: "pr_author_of_component", type: "VARCHAR(255)")
+          column(name: "pr_sponsor", type: "VARCHAR(255)")
+          column(name: "pr_information_source", type: "VARCHAR(255)")
+          column(name: 'pr_patron_surname', type: "VARCHAR(255)")
+          column(name: 'pr_patron_name', type: "VARCHAR(255)")
+          column(name: 'pr_patron_type', type: "VARCHAR(255)")
+          column(name: 'pr_send_to_patron', type: "BOOLEAN")
+      }
+    }    
+
 }
