@@ -169,7 +169,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                  patronSurname (nullable: true, blank : false)
                patronGivenName (nullable: true, blank : false)
                     patronType (nullable: true, blank : false)
-                  sendToPatron (nullable: true, blank : false)
+                  sendToPatron (nullable: true )
 
 
   }

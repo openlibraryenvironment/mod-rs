@@ -77,12 +77,12 @@ abstract class AbstractAction {
 				// Now perform the action
 				switch (perform(requestToBeProcessed)) {
 					case ActionResponse.SUCCESS:
-						log.debug("Action completed OK");
+						//log.debug("Action completed OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessYes;
 						break
 
 					case ActionResponse.NO:
-						log.debug("Action did not complete OK");
+						log.warn("Action did not complete OK");
 						patronRequestAudit.toStatus = getAction().statusSuccessNo;
 						break;
 
@@ -93,7 +93,7 @@ abstract class AbstractAction {
 						break;
 
 					case ActionResponse.RETRY:
-						log.debug("Action retry");
+						log.warn("Action retry");
 						// We will retry later
 						performRetry = true;
 
@@ -117,7 +117,7 @@ abstract class AbstractAction {
 						break;
 
 					case ActionResponse.ERROR:
-						log.debug("Action ERROR");
+						log.warn("Action ERROR");
 						errored = true;
 						patronRequestAudit.toStatus = getAction().statusFailure;
 						break;
@@ -132,9 +132,9 @@ abstract class AbstractAction {
 				// No point looking up the next action for a retry as it will not change
 				if (!requestToBeProcessed.awaitingProtocolResponse && !performRetry && !errored) {
 					// Now we have the new status, determine if we have a new action to perform
-					log.debug("Work out next action based on ${requestToBeProcessed.state}, ${getAction()}, ${patronRequestAudit.toStatus}");
+					log.debug("Work out next action - ${requestToBeProcessed.state}, ${getAction()}, ${patronRequestAudit.toStatus}");
 					nextAction = StateTransition.getNextAction(requestToBeProcessed.state, getAction(), patronRequestAudit.toStatus, requestToBeProcessed.isRequester);
-					log.debug("Determined that next action should be ${nextAction}");
+					log.debug("Next action will be :: ${nextAction}");
 				}
 
 			} catch (Exception e) {
@@ -164,12 +164,12 @@ abstract class AbstractAction {
 
 					// If we are waiting for a protocol response we do not reset the pending action, that will happen when we get the protocol response
 					if (!requestToBeProcessed.awaitingProtocolResponse) {
-						log.debug("We're not awaiting a protocol response - set next action to ${nextAction}");
+						log.debug("Not awaiting a protocol response - set next action to ${nextAction}");
 						requestToBeProcessed.pendingAction = nextAction;
 					}
 
 					// Not forgetting to add the audit record
-					log.debug("Auditing...");
+					// log.debug("Auditing...");
 					patronRequestAudit.duration = System.currentTimeMillis() - processingStartTime;
 					requestToBeProcessed.addToAudit(patronRequestAudit);
 				}

@@ -29,11 +29,16 @@ class ActionLocateService extends AbstractAction {
       log.debug("Patron request has no rota - find appropriate copies and rank rota according to routing policy");
 
       // Initially, we are going to mock this out by looking up the directory entry for RESHARE:DIKUA
+      log.debug("Adding in mock rota - DIKUB, DIKUC as a lending string");
       requestToBeProcessed.addToRota(new PatronRequestRota(
-                                           directoryId:directoryService.getIDForSymbol('RESHARE','DIKUA'), 
+                                           directoryId:directoryService.getIDForSymbol('RESHARE','DIKUB'), 
                                            rotaPosition:0) );
 
-		// The request is saved outside of this call, if a save is made here then it will cause problems as the pendingAction has not been updated							   
+      requestToBeProcessed.addToRota(new PatronRequestRota(
+                                           directoryId:directoryService.getIDForSymbol('RESHARE','DIKUC'), 
+                                           rotaPosition:0) );
+
+      // The request is saved outside of this call, if a save is made here then it will cause problems as the pendingAction has not been updated							   
     }
     else {
       log.debug("request already has a rota of size ${requestToBeProcessed.rota.size()}");

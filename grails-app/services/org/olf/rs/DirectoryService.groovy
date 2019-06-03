@@ -66,7 +66,7 @@ public class DirectoryService {
       log.error("Get directory entry");
     }
     else {
-      log.error("Unable to call directory service -- no token");
+      log.warn("no JWT available for directory service call");
     }
 
     return [
