@@ -53,10 +53,82 @@
 		"edition": {
 			"type": "string"
 		},
+                "issn": {
+                        "type": "string"
+                },
+                "isbn": {
+                        "type": "string"
+                },
+                "doi": {
+                        "type": "string"
+                },
+                "coden": {
+                        "type": "string"
+                },
+                "sici": {
+                        "type": "string"
+                },
+                "bici": {
+                        "type": "string"
+                },
+                "eissn": {
+			"description": "Shudder!",
+                        "type": "string"
+                },
+                "stitle": {
+			"description": "Series Title",
+                        "type": "string"
+                },
+                "part": {
+                        "type": "string"
+                },
+                "artnum": {
+                        "type": "string"
+                },
+                "ssn": {
+                        "type": "string"
+                },
+                "quarter": {
+                        "type": "string"
+                },
+                "titleOfComponent": {
+                        "type": "string"
+                },
+                "authorOfComponent": {
+                        "type": "string"
+                },
+                "sponsor": {
+                        "type": "string"
+                },
+                "informationSource": {
+                        "type": "string"
+                },
 		"patronReference": {
 			"description": "Patron reference (EG Barcode)",
 			"type": "string"
 		},
+                "patronSurname": {
+                        "type": "string"
+                },
+                "patronGivenName": {
+                        "type": "string"
+                },
+                "patronType": {
+                        "type": "string"
+                },
+                "sendToPatron": {
+                        "type": "boolean"
+                },
+                "dateCreated": {
+                        "description": "This date is maintained by the framework for us",
+                        "type": "string",
+			"format": "date-time"
+                },
+                "lastUpdated": {
+                        "description": "This date is maintained by the framework for us",
+                        "type": "string",
+			"format": "date-time"
+                },
 		"serviceType": {
 			"description": "e.g. 'Loan', 'Copy-non-returnable'",
 			"type": "string"
@@ -97,6 +169,10 @@
 		"rotaPosition": {
 			"description": "The position we are in the rota",
 			"type": "integer"
+		},
+		"systemUpdate": {
+			"description": "Lets us know the if the system has updated the record, as we do not want validation on the pendingAction field to happen as it has already happened",
+			"type": "boolean"
 		},
 		"tags": {
 			"description": "XXX to do",
