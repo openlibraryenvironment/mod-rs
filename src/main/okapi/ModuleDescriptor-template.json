@@ -7,7 +7,7 @@
       "version": "${info.app.minorVersion}",
       "handlers" : [
         {
-          "methods": ["GET", "POST"],
+          "methods": ["GET", "POST", "PUT", "DELETE"],
           "pathPattern": "/rs/patronrequests*"
         },
         {
