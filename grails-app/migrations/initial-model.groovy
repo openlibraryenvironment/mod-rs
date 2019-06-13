@@ -801,4 +801,9 @@ databaseChangeLog = {
       }
     }    
 
+    changeSet(author: "ianibbo", id: "2019-06-13-1") {
+      addColumn(tableName: "patron_request") {
+          column(name: 'pr_needed_by', type: "timestamp")
+      }
+    }
 }

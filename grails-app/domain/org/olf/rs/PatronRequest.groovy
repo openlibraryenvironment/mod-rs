@@ -71,6 +71,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
+  Date neededBy
+
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
   @Defaults(['Loan', 'Copy-non-returnable'])
@@ -170,8 +172,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                patronGivenName (nullable: true, blank : false)
                     patronType (nullable: true, blank : false)
                   sendToPatron (nullable: true )
-
-
+                      neededBy (nullable: true )
   }
 
   static mapping = {
@@ -227,6 +228,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                patronGivenName column : 'pr_patron_name'
                     patronType column : 'pr_patron_type'
                   sendToPatron column : 'pr_send_to_patron'
+                      neededBy column : 'pr_needed_by'
   }
 
   /**
