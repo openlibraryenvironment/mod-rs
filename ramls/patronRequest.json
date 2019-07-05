@@ -129,6 +129,10 @@
                         "type": "string",
 			"format": "date-time"
                 },
+                "neededBy": {
+                        "type": "string",
+			"format": "date-time"
+                },
 		"serviceType": {
 			"description": "e.g. 'Loan', 'Copy-non-returnable'",
 			"type": "string"
