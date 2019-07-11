@@ -4,7 +4,9 @@ import org.olf.rs.PatronRequest;
 @Field PatronRequest patronRequest
 json g.render(patronRequest, [expand: ['state',
                                        'serviceType',
-                                       'publicationType'
+                                       'publicationType',
+                                       'rota',
+                                       'tags'
                                        ],
-                              excludes: ['audit', 'rota', 'tags']])
+                              excludes: ['audit']])
 
