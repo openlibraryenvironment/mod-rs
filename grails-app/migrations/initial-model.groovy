@@ -806,4 +806,10 @@ databaseChangeLog = {
           column(name: 'pr_needed_by', type: "timestamp")
       }
     }
+
+    changeSet(author: "ianibbo", id: "2019-07-11-1") {
+      addColumn(tableName: "patron_request") {
+          column(name: 'pr_req_inst_symbol', type: "VARCHAR(255)")
+      }
+    }
 }

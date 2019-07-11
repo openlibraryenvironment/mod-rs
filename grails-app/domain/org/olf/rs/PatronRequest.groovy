@@ -27,6 +27,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
+  // A string representing the institution of the requesting patron
+  // resolvable in the directory.
+  String requestingInstitutionSymbol
+
   // Bibliographic descriptive fields
   // Title of the item requested
   String title
@@ -173,6 +177,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                     patronType (nullable: true, blank : false)
                   sendToPatron (nullable: true )
                       neededBy (nullable: true )
+   requestingInstitutionSymbol (nullable: true )
   }
 
   static mapping = {
@@ -218,6 +223,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                         artnum column : 'pr_artnum'
                            ssn column : 'pr_ssn'
                        quarter column : 'pr_quarter'
+
+   requestingInstitutionSymbol column : 'pr_req_inst_symbol'
 
               titleOfComponent column : 'pr_title_of_component'
              authorOfComponent column : 'pr_author_of_component'
