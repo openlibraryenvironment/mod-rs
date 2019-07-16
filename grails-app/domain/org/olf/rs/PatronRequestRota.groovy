@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import grails.gorm.MultiTenant;
+import org.olf.rs.workflow.Status;
 
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
@@ -40,6 +41,11 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    */
   Long protocolStatus;
 
+  /**
+   * a workflow state for this rota entry
+   */
+  Status state
+
   static constraints = {
     availability           (nullable : true,  blank: false)
     availableFrom          (nullable : true)
@@ -52,6 +58,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           (nullable : false) // unique['patronRequest'] if you wanted to - but I don't know why you would.
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
+    state                  (nullable : true,  blank: false);
   }
 
   static mapping = {
@@ -68,5 +75,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           column : "prr_rota_position"
     shelfmark              column : "prr_shelfmark"
     systemIdentifier       column : "prr_system_identifier"
+    state                  column : "prr_state_fk"
   }
 }

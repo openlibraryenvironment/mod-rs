@@ -75,7 +75,16 @@ PATRON_REQ_3=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
     "patronWalletHash": ["298348743738748728524854289743765"],
   },
   rota:[
-    { directoryId:"'"$DIKUA_ID"'", rotaPosition:"0" }
+    { 
+      directoryId:"'"$DIKUA_ID"'", 
+      rotaPosition:"0" ,
+      availability:"Availability as a string from the shared index",
+      normalisedAvailability:"Unknown",
+      protocolStatus:0,
+      shelfmark:"A shelfmark",
+      systemIdentifier:"The remote identifier for the ITEM",
+      state:"Idle"
+    }
   ]
 }
 ' | jq -r ".id" | tr -d '\r'`

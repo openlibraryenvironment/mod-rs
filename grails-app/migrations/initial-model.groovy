@@ -812,4 +812,10 @@ databaseChangeLog = {
           column(name: 'pr_req_inst_symbol', type: "VARCHAR(255)")
       }
     }
+
+    changeSet(author: "ianibbo", id: "2019-07-16-1") {
+      addColumn(tableName: "patron_request_rota") {
+          column(name: 'prr_state_fk', type: "VARCHAR(40)")
+      }
+    }
 }
