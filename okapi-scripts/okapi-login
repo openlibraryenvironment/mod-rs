@@ -1,10 +1,16 @@
 #! /bin/sh
 USAGE="Usage: `basename $0` [-h] [-u username] [-p password] [-t tenant]"
 
+OKAPI="http://localhost:9130"
 TENANT="diku"
 UN="diku_admin"
 PW="admin"
-OKAPI="http://localhost:9130"
+
+if [ -f .okapirc ]; then
+  . .okapirc
+elif [ -f $HOME/.okapirc ]; then
+  . $HOME/.okapirc
+fi
 
 # Parse command line options.
 while getopts hupt: OPT; do
