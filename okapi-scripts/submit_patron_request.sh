@@ -15,7 +15,7 @@ fi
 
 #  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/patronrequests -d ' {
-  title:"Platform for Change",
+  title:"Platform for Beer",
   author:"Beer, Stafford A",
   subtitle:"A message from Stafford Beer",
   sponsoringBody:"A sponsoring body",
@@ -54,6 +54,16 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUT
       shelfmark:"A shelfmark",
       systemIdentifier:"The remote identifier for the ITEM",
       state:"Idle"
+    },
+    { 
+      directoryId:"ANOTHER-DIR-ID", 
+      rotaPosition:"1" ,
+      availability:"Availability as a string from the shared index",
+      normalisedAvailability:"Unknown",
+      protocolStatus:0,
+      shelfmark:"Another shelfmark",
+      systemIdentifier:"The remote identifier for a different ITEM",
+      state:"Pending"
     }
   ]
 }
