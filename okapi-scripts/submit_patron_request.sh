@@ -2,6 +2,17 @@
 
 AUTH_TOKEN=`./okapi-login`
 
+OKAPI="http://localhost:9130"
+TENANT="diku"
+
+if [ -f .okapirc ]; then
+  . .okapirc
+elif [ -f $HOME/.okapirc ]; then
+  . $HOME/.okapirc
+fi
+
+
+
 #  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
   requestingInstitutionSymbol:"wibble:wobble",
@@ -44,6 +55,16 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
       shelfmark:"A shelfmark",
       systemIdentifier:"The remote identifier for the ITEM",
       state:"Idle"
+    },
+    { 
+      directoryId:"ANOTHER-DIR-ID", 
+      rotaPosition:"1" ,
+      availability:"Availability as a string from the shared index",
+      normalisedAvailability:"Unknown",
+      protocolStatus:0,
+      shelfmark:"Another shelfmark",
+      systemIdentifier:"The remote identifier for a different ITEM",
+      state:"Pending"
     }
   ]
 }
