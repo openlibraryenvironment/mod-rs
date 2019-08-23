@@ -240,7 +240,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     rotaPosition = 0;
 
     // Status needs to be set to idle
-    state = Status.get(Status.IDLE);    
+    state = Status.lookupOrCreate('PatronRequest', 'IDLE');
   }
 
 }
