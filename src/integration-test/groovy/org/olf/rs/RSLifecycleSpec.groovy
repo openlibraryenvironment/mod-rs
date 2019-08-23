@@ -58,6 +58,27 @@ class RSLifecycleSpec extends GebSpec {
       'TestTenantG' | 'TestTenantG'
   }
 
+  void "Create a new request"(tenant_id, p_title, p_patron_id) {
+    when:"post new request"
+      def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
+        header 'X-Okapi-Tenant', tenant_id
+        contentType 'application/json; charset=UTF-8'
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+        json {
+          title=p_title
+          patronReference=p_patron_id
+        }
+      }
+      
+
+    then:"Check the return value"
+      resp.status == OK.value()
+   
+    where:
+      tenant_id | p_title | p_patron_id
+      'TestTenantG' | 'Brain of the firm' | '1234-5678'
+  }
+
   void "Delete the tenants"(tenant_id, note) {
 
     expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
