@@ -88,34 +88,18 @@ Vagrant.configure(2) do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    sudo apt-get -y update
-    sudo apt-get -y install rabbitmq-server
-    # sudo apt-get install -y apache2
+    # sudo apt-get -y update
+    # sudo apt-get -y dist-upgrade
+    docker pull wurstmeister/zookeeper
+    docker pull wurstmeister/kafka
+    docker run --name zookeeper-1 --restart always -p 2181:2181 -d wurstmeister/zookeeper
+    docker run --name kafka-1 --restart always -p 9092:9092 \
+             -e "KAFKA_ADVERTISED_HOST_NAME=localhost" \
+             -e "KAFKA_ZOOKEEPER_CONNECT=zookeeper-1:2181" \
+             -e "KAFKA_BROKER_ID=1" \
+             -e "KAFKA_LOG_RETENTION_BYTES=-1" \
+             -e "KAFKA_LOG_RETENTION_HOURS=-1" \
+             -d wurstmeister/kafka
 
-    # Enable rabbitmq
-    rabbitmq-plugins enable rabbitmq_management
-
-    # Create the rabbit user for message passing
-    if [ `rabbitmqctl list_users | grep -i "^rsms" | wc -l` -eq 0 ]
-    then
-      echo Creating message queue user rsms for resource sharing message services
-      rabbitmqctl add_user rsms rsms
-      rabbitmqctl set_user_tags rsms administrator
-      rabbitmqctl set_permissions -p / rsms ".*" ".*" ".*"
-    else
-      echo RabbitMQ user rsms already present
-    fi
-
-    # The medium term goal is to remove this user and use the rsms account above. This account
-    # will be deprecated in a future release, do not rely upon it
-    if [ `rabbitmqctl list_users | grep -i "^adm" | wc -l` -eq 0 ]
-    then
-      echo Creating message queue user adm for resource sharing message services
-      rabbitmqctl add_user adm admpass
-      rabbitmqctl set_user_tags adm administrator
-      rabbitmqctl set_permissions -p / adm ".*" ".*" ".*"
-    else
-      echo RabbitMQ user adm already present
-    fi
   SHELL
 end
