@@ -14,12 +14,6 @@ class BootStrap {
     //housekeepingService.ensureSharedSchema();
     //housekeepingService.ensureSharedConfig();
 
-    if ( grailsApplication.config.rabbitmq?.enabled ) {
-      log.debug("mod-rs starting, with rabbitmq enabled");
-    }
-    else {
-      log.debug("mod-rs starting, with rabbitmq disabled");
-    }
   }
 
   def destroy = {
