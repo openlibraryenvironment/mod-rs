@@ -34,13 +34,11 @@ Vagrant.configure(2) do |config|
   # Connection oriented ISO 10161
   # config.vm.network "forwarded_port", guest: 8999, host: 8999
 
-  # RabbitMQ ports
-  config.vm.network "forwarded_port", guest: 15672, host: 15672
-  config.vm.network "forwarded_port", guest: 5672, host: 5672
-  # Erlang and inet_dist_listen_min/max cluster ports - probably not needed for normal dev operation
-  config.vm.network "forwarded_port", guest: 4369, host: 4369
-  config.vm.network "forwarded_port", guest: 35197, host: 35197
-
+  # Zookeeper 2181
+  config.vm.network "forwarded_port", guest: 2181, host: 2181
+  
+  # Kafka
+  config.vm.network "forwarded_port", guest: 9092, host: 9092
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
