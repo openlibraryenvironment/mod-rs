@@ -8,9 +8,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.custprops.CustomProperties
 import com.k_int.web.toolkit.refdata.CategoryId
 import com.k_int.web.toolkit.refdata.Defaults
-import org.olf.rs.workflow.Action;
-import org.olf.rs.workflow.ReShareMessageService
-import org.olf.rs.workflow.Status;
+import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.tags.Tag
 
 /**
@@ -95,12 +93,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Delay performing the action until this date / time arrives */
   Date delayPerformingActionUntil;
 
-  /** The action waiting to be performed on this request */
-  Action pendingAction;
-
-  /** If we hit an error this is the action we were trying to perform */
-  Action errorAction;
-
   /** If we hit an error this was the status prior to the error occurring */
   Status preErrorStatus;
 
@@ -135,8 +127,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                    isRequester (nullable: true, bindable: true)  // Should be false, only set to true for testing, shouldn't be sent in by client it should be set by the code
                numberOfRetries (nullable: true, bindable: false)
     delayPerformingActionUntil (nullable: true, bindable: false)
-                 pendingAction (nullable: true, pendingAction : true) // The "pendingAction" attribute validates that the pending action is valid
-                   errorAction (nullable: true, bindable: false)
                 preErrorStatus (nullable: true, bindable: false)
       awaitingProtocolResponse (bindable: false)
                   rotaPosition (nullable: true, bindable: false)
@@ -191,8 +181,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
                    isRequester column : "pr_is_requester"
                numberOfRetries column : 'pr_number_of_retries'
     delayPerformingActionUntil column : 'pr_delay_performing_action_until'
-                 pendingAction column : 'pr_pending_action_fk'
-                   errorAction column : 'pr_error_action_fk'
                 preErrorStatus column : 'pr_pre_error_status_fk'
       awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
                   rotaPosition column : 'pr_rota_position'
@@ -243,10 +231,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    */
   def beforeInsert() {
     // Are we a requester
-    if (isRequester) {
+    // if (isRequester) {
       // Set the pending action to be validate
-      pendingAction = Action.get(Action.VALIDATE);
-    }
+    //   pendingAction = Action.get(Action.VALIDATE);
+    // }
 
     // Set the rota position to 0, so that it is always set
     rotaPosition = 0;
@@ -255,23 +243,4 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     state = Status.get(Status.IDLE);    
   }
 
-  
-
-  /**
-   * II :: This has been replaced by ReShareMessageService::afterInsert GORM event to aleviate the need for
-   *       statics in service classes
-   * Perform checks to see if needs adding to the reshare queue  
-   * def afterInsert() {
-   *   ReShareMessageService.instance.checkAddToQueue(this);
-   * }
-   */
-
-  /**
-   * Perform checks to see if this request needs adding to the ReShare queue  
-   * II :: This has been replaced by ReShareMessageService::afterInsert GORM event to aleviate the need for
-   *       statics in service classes
-   * def afterUpdate() {
-   *   ReShareMessageService.instance.checkAddToQueue(this);
-   * }
-   */
 }

@@ -1,8 +1,7 @@
 package org.olf.rs
 
 import grails.gorm.MultiTenant;
-import org.olf.rs.workflow.Action;
-import org.olf.rs.workflow.Status;
+import org.olf.rs.statemodel.Status;
 
 class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
 
@@ -19,7 +18,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
   Status fromStatus;
 
   /** The action that was performed */ 
-  Action action;
+  // Action action;
 
   /** The status we ended up in after performing the action */
   Status toStatus;

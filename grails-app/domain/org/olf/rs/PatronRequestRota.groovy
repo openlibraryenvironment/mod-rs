@@ -1,7 +1,7 @@
 package org.olf.rs
 
 import grails.gorm.MultiTenant;
-import org.olf.rs.workflow.Status;
+import org.olf.rs.statemodel.Status;
 
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
