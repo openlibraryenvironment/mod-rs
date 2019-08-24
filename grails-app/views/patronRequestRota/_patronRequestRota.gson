@@ -1,7 +1,0 @@
-import groovy.transform.*
-import org.olf.rs.PatronRequestRota;
-
-@Field PatronRequestRota patronRequestRota
-json g.render(patronRequestRota, [expand: ['state'],
-                                  excludes: ['patronRequest']])
-
