@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<request xmlns="http://illtransactions.org/2013/iso18626">
+	<header>
+		<supplyingAgencyId>
+			<agencyIdType p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType1</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</supplyingAgencyId>
+		<requestingAgencyId>
+			<agencyIdType p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType2</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</requestingAgencyId>
+		<multipleItemRequestId>multipleItemRequestId1</multipleItemRequestId>
+		<timestamp>1900-01-01T01:01:01+0000</timestamp>
+		<requestingAgencyRequestId>requestingAgencyRequestId1</requestingAgencyRequestId>
+		<supplyingAgencyRequestId>supplyingAgencyRequestId1</supplyingAgencyRequestId>
+		<requestingAgencyAuthentication>
+			<accountId>accountId1</accountId>
+			<securityCode>securityCode1</securityCode>
+		</requestingAgencyAuthentication>
+	</header>
+	<bibliographicInfo>
+		<supplierUniqueRecordId>supplierUniqueRecordId1</supplierUniqueRecordId>
+		<title>title1</title>
+		<author>author1</author>
+		<subtitle>subtitle1</subtitle>
+		<seriesTitle>seriesTitle1</seriesTitle>
+		<edition>edition1</edition>
+		<titleOfComponent>titleOfComponent1</titleOfComponent>
+		<authorOfComponent>authorOfComponent1</authorOfComponent>
+		<volume>volume1</volume>
+		<issue>issue1</issue>
+		<pagesRequested>pagesRequested1</pagesRequested>
+		<estimatedNoPages>estimatedNoPages1</estimatedNoPages>
+		<bibliographicItemId>
+			<bibliographicItemIdentifier>bibliographicItemIdentifier1</bibliographicItemIdentifier>
+			<bibliographicItemIdentifierCode
+				p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicItemIdentifierCode1</bibliographicItemIdentifierCode>
+		</bibliographicItemId>
+		<bibliographicItemId>
+			<bibliographicItemIdentifier>bibliographicItemIdentifier2</bibliographicItemIdentifier>
+			<bibliographicItemIdentifierCode
+				p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicItemIdentifierCode2</bibliographicItemIdentifierCode>
+		</bibliographicItemId>
+		<bibliographicItemId>
+			<bibliographicItemIdentifier>bibliographicItemIdentifier3</bibliographicItemIdentifier>
+			<bibliographicItemIdentifierCode
+				p4:scheme="http://uri3"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicItemIdentifierCode3</bibliographicItemIdentifierCode>
+		</bibliographicItemId>
+		<sponsor>sponsor1</sponsor>
+		<informationSource>informationSource1</informationSource>
+		<bibliographicRecordId>
+			<bibliographicRecordIdentifierCode
+				p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicRecordIdentifierCode1</bibliographicRecordIdentifierCode>
+			<bibliographicRecordIdentifier>bibliographicRecordIdentifier1</bibliographicRecordIdentifier>
+		</bibliographicRecordId>
+		<bibliographicRecordId>
+			<bibliographicRecordIdentifierCode
+				p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicRecordIdentifierCode2</bibliographicRecordIdentifierCode>
+			<bibliographicRecordIdentifier>bibliographicRecordIdentifier2</bibliographicRecordIdentifier>
+		</bibliographicRecordId>
+		<bibliographicRecordId>
+			<bibliographicRecordIdentifierCode
+				p4:scheme="http://uri3"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">bibliographicRecordIdentifierCode3</bibliographicRecordIdentifierCode>
+			<bibliographicRecordIdentifier>bibliographicRecordIdentifier3</bibliographicRecordIdentifier>
+		</bibliographicRecordId>
+	</bibliographicInfo>
+	<publicationInfo>
+		<publisher>publisher1</publisher>
+		<publicationType p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">publicationType1</publicationType>
+		<publicationDate>publicationDate1</publicationDate>
+		<placeOfPublication>placeOfPublication1</placeOfPublication>
+	</publicationInfo>
+	<serviceInfo>
+		<requestType>New</requestType>
+		<requestSubType>BookingRequest</requestSubType>
+		<requestSubType>MultipleItemRequest</requestSubType>
+		<requestSubType>PatronRequest</requestSubType>
+		<requestingAgencyPreviousRequestId>requestingAgencyPreviousRequestId1</requestingAgencyPreviousRequestId>
+		<serviceType>Copy</serviceType>
+		<serviceLevel p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">serviceLevel1</serviceLevel>
+		<preferredFormat p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">preferredFormat1</preferredFormat>
+		<needBeforeDate>1900-01-02T23:59:59+0000</needBeforeDate>
+		<copyrightCompliance p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">copyrightCompliance1</copyrightCompliance>
+		<anyEdition>Y</anyEdition>
+		<startDate>1900-01-03T23:59:59+0000</startDate>
+		<endDate>1900-01-04T23:59:59+0000</endDate>
+		<note>note1</note>
+	</serviceInfo>
+	<supplierInfo>
+		<sortOrder>1</sortOrder>
+		<supplierCode>
+			<agencyIdType p4:scheme="http://uri3"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType3</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</supplierCode>
+		<supplierDescription>supplierDescription1</supplierDescription>
+		<callNumber>callNumber1</callNumber>
+		<summaryHoldings>summaryHoldings1</summaryHoldings>
+		<availabilityNote>availabilityNote1</availabilityNote>
+	</supplierInfo>
+	<supplierInfo>
+		<sortOrder>2</sortOrder>
+		<supplierCode>
+			<agencyIdType p4:scheme="http://uri4"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType4</agencyIdType>
+			<agencyIdValue>agencyIdValue2</agencyIdValue>
+		</supplierCode>
+		<supplierDescription>supplierDescription2</supplierDescription>
+		<callNumber>callNumber2</callNumber>
+		<summaryHoldings>summaryHoldings2</summaryHoldings>
+		<availabilityNote>availabilityNote2</availabilityNote>
+	</supplierInfo>
+	<supplierInfo>
+		<sortOrder>3</sortOrder>
+		<supplierCode>
+			<agencyIdType p4:scheme="http://uri5"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType5</agencyIdType>
+			<agencyIdValue>agencyIdValue3</agencyIdValue>
+		</supplierCode>
+		<supplierDescription>supplierDescription3</supplierDescription>
+		<callNumber>callNumber3</callNumber>
+		<summaryHoldings>summaryHoldings3</summaryHoldings>
+		<availabilityNote>availabilityNote3</availabilityNote>
+	</supplierInfo>
+	<requestedDeliveryInfo>
+		<sortOrder>1</sortOrder>
+		<address>
+			<electronicAddress>
+				<electronicAddressType p5:scheme="http://uri1"
+					xmlns:p5="http://illtransactions.org/2013/iso18626">electronicAddressType1</electronicAddressType>
+				<electronicAddressData>electronicAddressData1</electronicAddressData>
+			</electronicAddress>
+		</address>
+	</requestedDeliveryInfo>
+	<requestedDeliveryInfo>
+		<sortOrder>2</sortOrder>
+		<address>
+			<electronicAddress>
+				<electronicAddressType p5:scheme="http://uri2"
+					xmlns:p5="http://illtransactions.org/2013/iso18626">electronicAddressType2</electronicAddressType>
+				<electronicAddressData>electronicAddressData2</electronicAddressData>
+			</electronicAddress>
+		</address>
+	</requestedDeliveryInfo>
+	<requestedDeliveryInfo>
+		<sortOrder>3</sortOrder>
+		<address>
+			<electronicAddress>
+				<electronicAddressType p5:scheme="http://uri3"
+					xmlns:p5="http://illtransactions.org/2013/iso18626">electronicAddressType3</electronicAddressType>
+				<electronicAddressData>electronicAddressData3</electronicAddressData>
+			</electronicAddress>
+		</address>
+	</requestedDeliveryInfo>
+	<requestingAgencyInfo>
+		<name>name1</name>
+		<contactName>contactName1</contactName>
+	</requestingAgencyInfo>
+	<patronInfo>
+		<patronId>patronId1</patronId>
+		<surname>surname1</surname>
+		<givenName>givenName1</givenName>
+		<patronType p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">patronType1</patronType>
+		<sendToPatron>Y</sendToPatron>
+	</patronInfo>
+	<billingInfo>
+		<paymentMethod p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">paymentMethod1</paymentMethod>
+		<maximumCosts>
+			<currencyCode p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">currencyCode1</currencyCode>
+			<monetaryValue>1</monetaryValue>
+		</maximumCosts>
+		<billingMethod p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">billingMethod1</billingMethod>
+		<billingName>billingName1</billingName>
+	</billingInfo>
+</request>

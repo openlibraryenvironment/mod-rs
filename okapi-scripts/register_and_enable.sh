@@ -1,18 +1,17 @@
 BASEDIR=$(dirname "$0")
+pushd "$BASEDIR/../service"
 
 DIR="$BASEDIR/../"
 
 echo "Using directory $DIR"
 
-# echo Please make sure you have run ./gradlew clean generateDescriptors before starting this script
-pushd "$DIR"
-
 # Check for decriptor target directory.
 
-DESCRIPTORDIR="build/resources/main/okapi"
+DESCRIPTORDIR="../service/build/resources/main/okapi"
 
 if [ ! -d "$DESCRIPTORDIR" ]; then
     echo "No descriptors found. Let's try building them."
+    
     ./gradlew generateDescriptors
 fi
 

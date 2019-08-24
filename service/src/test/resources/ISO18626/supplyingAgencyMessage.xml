@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<supplyingAgencyMessage
+	xmlns="http://illtransactions.org/2013/iso18626">
+	<header>
+		<supplyingAgencyId>
+			<agencyIdType p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType1</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</supplyingAgencyId>
+		<requestingAgencyId>
+			<agencyIdType p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType2</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</requestingAgencyId>
+		<multipleItemRequestId>multipleItemRequestId1</multipleItemRequestId>
+		<timestamp>1900-01-01T01:01:01+0000</timestamp>
+		<requestingAgencyRequestId>requestingAgencyRequestId1</requestingAgencyRequestId>
+		<supplyingAgencyRequestId>supplyingAgencyRequestId1</supplyingAgencyRequestId>
+		<requestingAgencyAuthentication>
+			<accountId>accountId1</accountId>
+			<securityCode>securityCode1</securityCode>
+		</requestingAgencyAuthentication>
+	</header>
+	<messageInfo>
+		<reasonForMessage>RequestResponse</reasonForMessage>
+		<answerYesNo>Y</answerYesNo>
+		<note>note1</note>
+		<reasonUnfilled p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">reasonUnfilled1</reasonUnfilled>
+		<reasonRetry p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">reasonRetry1</reasonRetry>
+		<offeredCosts>
+			<currencyCode p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">currencyCode1</currencyCode>
+			<monetaryValue>1</monetaryValue>
+		</offeredCosts>
+		<retryAfter>1900-01-01T01:01:01+0000</retryAfter>
+		<retryBefore>1900-01-01T01:01:01+0000</retryBefore>
+	</messageInfo>
+	<statusInfo>
+		<status>RequestReceived</status>
+		<expectedDeliveryDate>1900-01-01T01:01:01+0000</expectedDeliveryDate>
+		<dueDate>1900-01-01T01:01:01+0000</dueDate>
+		<lastChange>1900-01-01T01:01:01+0000</lastChange>
+	</statusInfo>
+	<deliveryInfo>
+		<dateSent>1900-01-01T01:01:01+0000</dateSent>
+		<itemId>itemId1</itemId>
+		<sentVia p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">sentVia1</sentVia>
+		<sentToPatron>true</sentToPatron>
+		<loanCondition p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">loanCondition1</loanCondition>
+		<deliveredFormat p3:scheme="http://uri1"
+			xmlns:p3="http://illtransactions.org/2013/iso18626">deliveredFormat1</deliveredFormat>
+		<deliveryCosts>
+			<currencyCode p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">currencyCode2</currencyCode>
+			<monetaryValue>1</monetaryValue>
+		</deliveryCosts>
+	</deliveryInfo>
+	<returnInfo>
+		<returnAgencyId>
+			<agencyIdType p4:scheme="http://uri3"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType3</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</returnAgencyId>
+		<name>name1</name>
+		<physicalAddress>
+			<line1>line11</line1>
+			<line2>line21</line2>
+			<locality>locality1</locality>
+			<postalCode>postalCode1</postalCode>
+			<region p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">region1</region>
+			<country p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">country1</country>
+		</physicalAddress>
+	</returnInfo>
+</supplyingAgencyMessage>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<requestingAgencyMessageConfirmation
+	xmlns="http://illtransactions.org/2013/iso18626">
+	<confirmationHeader>
+		<supplyingAgencyId>
+			<agencyIdType p4:scheme="http://uri1"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType1</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</supplyingAgencyId>
+		<requestingAgencyId>
+			<agencyIdType p4:scheme="http://uri2"
+				xmlns:p4="http://illtransactions.org/2013/iso18626">agencyIdType2</agencyIdType>
+			<agencyIdValue>agencyIdValue1</agencyIdValue>
+		</requestingAgencyId>
+		<timestamp>1900-01-01T01:01:01+0000</timestamp>
+		<requestingAgencyRequestId>requestingAgencyRequestId1</requestingAgencyRequestId>
+		<multipleItemRequestId>multipleItemRequestId1</multipleItemRequestId>
+		<timestampReceived>1900-01-01T01:01:01+0000</timestampReceived>
+		<messageStatus>OK</messageStatus>
+	</confirmationHeader>
+	<action>StatusRequest</action>
+	<errorData>
+		<errorType>UnsupportedActionType</errorType>
+		<errorValue>errorValue1</errorValue>
+	</errorData>
+</requestingAgencyMessageConfirmation>
