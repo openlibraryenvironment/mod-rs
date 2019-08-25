@@ -14,6 +14,11 @@ import com.k_int.okapi.OkapiHeaders
 import spock.lang.Shared
 import grails.gorm.multitenancy.Tenants
 
+import grails.databinding.SimpleMapDataBindingSource
+import grails.web.databinding.GrailsWebDataBinder
+import org.olf.okapi.modules.directory.DirectoryEntry
+import grails.gorm.multitenancy.Tenants
+
 
 @Slf4j
 @Integration
@@ -26,6 +31,7 @@ class RSLifecycleSpec extends GebSpec {
   // Auto injected by spring
   def grailsApplication
   EventPublicationService eventPublicationService
+  GrailsWebDataBinder grailsWebDataBinder
 
   final Closure authHeaders = {
     header OkapiHeaders.TOKEN, 'dummy'
@@ -77,11 +83,25 @@ class RSLifecycleSpec extends GebSpec {
       'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
   }
 
+
+  /**
+   * We want our integration tests to work without recourse to any other module - so we directly install
+   * the test data needed here. 
+   */
   void "Bootstrap directory data for integration tests"(tenant_id, entry) {
     when:"Load the default directory"
-      logger.debug("Sync directory entry ${entry}")
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        logger.debug("Sync directory entry ${entry}")
+        def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
+        DirectoryEntry de = new DirectoryEntry()
+        grailsWebDataBinder.bind(de, source)
+        de.save(flush:true, failOnError:true)
+        logger.debug("Result of bind: ${de} ${de.id}");
+      }
+
     then:"Test directory entries are present"
       1==1
+
     where:
       tenant_id | entry
       'TestTenantG' | [ id:'RS-T-D-0001', name: 'A Test entry' ]
