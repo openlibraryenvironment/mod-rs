@@ -88,12 +88,14 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", inline: <<-SHELL
     # sudo apt-get -y update
     # sudo apt-get -y dist-upgrade
+    echo "Initialise kafka/docker"
+    docker network create zookeepernet
     docker pull wurstmeister/zookeeper
     docker pull wurstmeister/kafka
-    docker run --name zookeeper1 --restart always -p 2181:2181 -d wurstmeister/zookeeper
-    docker run --name kafka1 --restart always -p 9092:9092 \
+    docker run --name zookeeper1 --restart always -p 2181:2181 --network zookeepernet -d wurstmeister/zookeeper
+    docker run --name kafka1 --restart always --network zookeepernet -p 9092:9092 \
              -e "KAFKA_ADVERTISED_HOST_NAME=localhost" \
-             -e "KAFKA_ZOOKEEPER_CONNECT=localhost:2181" \
+             -e "KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181" \
              -e "KAFKA_BROKER_ID=1" \
              -e "KAFKA_LOG_RETENTION_BYTES=-1" \
              -e "KAFKA_LOG_RETENTION_HOURS=-1" \

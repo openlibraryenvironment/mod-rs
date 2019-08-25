@@ -61,8 +61,8 @@ class RSLifecycleSpec extends GebSpec {
       'TestTenantG' | 'TestTenantG'
   }
 
-  void "Test eventing with mod-directory"(tenant_id, entry_id, entry_uri) {
-    when:"We emit a directory event"
+  void "Test eventing"(tenant_id, entry_id, entry_uri) {
+    when:"We emit a kafka event"
       logger.debug("Publish ${entry_uri}");
       eventPublicationService.publishAsJSON('modDirectory-entryChange-'+tenant_id, 
                                             java.util.UUID.randomUUID().toString(), 
@@ -75,6 +75,16 @@ class RSLifecycleSpec extends GebSpec {
       'TestTenantG' | 'TNS' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/TheNewSchool.json'
       'TestTenantG' | 'AC' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/AlleghenyCollege.json'
       'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
+  }
+
+  void "Bootstrap directory data for integration tests"(tenant_id, entry) {
+    when:"Load the default directory"
+      logger.debug("Sync directory entry ${entry}")
+    then:"Test directory entries are present"
+      1==1
+    where:
+      tenant_id | entry
+      'TestTenantG' | [ id:'RS-T-D-0001', name: 'A Test entry' ]
   }
 
   void "Create a new request"(tenant_id, p_title, p_patron_id) {
