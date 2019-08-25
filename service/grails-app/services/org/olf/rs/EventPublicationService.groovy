@@ -14,6 +14,7 @@ public class EventPublicationService {
 
   @javax.annotation.PostConstruct
   public void init() {
+    log.debug("Configuring event publication service");
     Properties props = new Properties()
     props.put('zk.connect', 'localhost:2181')
     props.put('bootstrap.servers', 'localhost:9092') // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
@@ -38,6 +39,15 @@ public class EventPublicationService {
     )
 
     log.debug("Send returned, callback will be called once complete");
+  }
+
+  @javax.annotation.PreDestroy
+  private void cleanUp() throws Exception {
+    log.info("EventPublicationService::cleanUp");
+    if ( producer != null ) {
+      producer.close();
+      producer = null;
+    }
   }
 
 }

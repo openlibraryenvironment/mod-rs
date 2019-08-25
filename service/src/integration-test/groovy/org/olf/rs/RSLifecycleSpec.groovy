@@ -23,7 +23,9 @@ class RSLifecycleSpec extends GebSpec {
   @Shared
   private Map test_info = [:]
 
+  // Auto injected by spring
   def grailsApplication
+  EventPublicationService eventPublicationService
 
   final Closure authHeaders = {
     header OkapiHeaders.TOKEN, 'dummy'
@@ -57,6 +59,22 @@ class RSLifecycleSpec extends GebSpec {
     where:
       tenantid | name
       'TestTenantG' | 'TestTenantG'
+  }
+
+  void "Test eventing with mod-directory"(tenant_id, entry_id, entry_uri) {
+    when:"We emit a directory event"
+      logger.debug("Publish ${entry_uri}");
+      eventPublicationService.publishAsJSON('modDirectory-entryChange-'+tenant_id, 
+                                            java.util.UUID.randomUUID().toString(), 
+                                            [ 'test': 'test' ] )
+
+    then:"The response is correct"
+
+    where:
+      tenant_id | entry_id | entry_uri
+      'TestTenantG' | 'TNS' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/TheNewSchool.json'
+      'TestTenantG' | 'AC' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/AlleghenyCollege.json'
+      'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
   }
 
   void "Create a new request"(tenant_id, p_title, p_patron_id) {
