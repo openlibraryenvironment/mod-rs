@@ -20,6 +20,13 @@ import org.springframework.context.ApplicationEvent
 import org.grails.orm.hibernate.AbstractHibernateDatastore
 import grails.gorm.transactions.Transactional
 
+
+/**
+ * This class listens for asynchronous domain class events and fires of any needed indications
+ * This is the grails async framework in action - the notifications are in a separate thread to
+ * the actual save or update of the domain class instance. Handlers should be short lived and if
+ * work is needed, spawn a worker task.
+ */
 public class AppListenerService implements ApplicationListener {
 
   EventPublicationService eventPublicationService
