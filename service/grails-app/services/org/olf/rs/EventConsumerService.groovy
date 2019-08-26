@@ -17,7 +17,7 @@ public class EventConsumerService {
   private KafkaConsumer consumer = null;
   private boolean running = true;
   private boolean tenant_list_updated = false;
-  private List tenant_list = []
+  private Set tenant_list = null;
 
   @javax.annotation.PostConstruct
   public void init() {
