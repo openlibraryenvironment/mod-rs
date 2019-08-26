@@ -21,6 +21,10 @@ Vagrant.configure(2) do |config|
     v.cpus = 5
   end
 
+  # Ian: I'm seeing a wierd error on every startup after the first, https://github.com/dotless-de/vagrant-vbguest/issues/278
+  # suggests adding the following - testing. Alternate suggestions include manually running vagrant vbguest --do install
+  config.vbguest.installer_arguments = ['--nox11', '-- --do']
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
@@ -85,7 +89,7 @@ Vagrant.configure(2) do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
+  config.vm.provision "shell", run: 'once', inline: <<-SHELL
     # sudo apt-get -y update
     # sudo apt-get -y dist-upgrade
     echo "Initialise kafka/docker"

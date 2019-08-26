@@ -12,6 +12,7 @@ import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 
 import org.olf.rs.shared.TenantSymbolMapping;
+import org.olf.rs.statemodel.Status;
 
 
 
@@ -46,8 +47,13 @@ public class HousekeepingService {
   private void setupData(tenantName, tenantId) {
     log.info("HousekeepingService::setupData(${tenantName},${tenantId})");
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
-    // Tenants.withId(tenantId) {
-    // }
+    Tenants.withId(tenantId) {
+      Status.lookupOrCreate('PatronRequest', 'IDLE');
+      Status.lookupOrCreate('PatronRequest', 'VALIDATED');
+      Status.lookupOrCreate('PatronRequest', 'PENDING');
+      Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
+      Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
+    }
   }
 
 

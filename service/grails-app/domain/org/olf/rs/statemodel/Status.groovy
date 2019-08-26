@@ -35,6 +35,15 @@ class Status implements MultiTenant<Status> {
     Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code).save(flush:true, failOnError:true)
     return s;
   }
+
+  public static Status lookup(String model, String code) {
+    Status result = null;
+    StateModel sm = StateModel.findByShortcode(model);
+    if ( sm ) {
+      result = Status.findByOwnerAndCode(sm, code);
+    }
+    return result;
+  }
 }
 
 

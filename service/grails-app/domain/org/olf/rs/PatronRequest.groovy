@@ -231,16 +231,20 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    */
   def beforeInsert() {
     // Are we a requester
-    // if (isRequester) {
-      // Set the pending action to be validate
-    //   pendingAction = Action.get(Action.VALIDATE);
-    // }
+    if (isRequester) {
+      if ( tags == null ) {
+        tags = [];
+      }
+
+      tags.add('PATRON_REQUEST_CHECK_NEEDED');
+    }
 
     // Set the rota position to 0, so that it is always set
     rotaPosition = 0;
 
     // Status needs to be set to idle
-    // state = Status.lookupOrCreate('PatronRequest', 'IDLE');
+    state = Status.lookup('PatronRequest', 'IDLE');
+
   }
 
 }
