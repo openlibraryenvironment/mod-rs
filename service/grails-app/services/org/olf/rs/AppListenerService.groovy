@@ -34,6 +34,9 @@ public class AppListenerService implements ApplicationListener {
   void afterInsert(PostInsertEvent event) {
     if ( event.entityObject instanceof PatronRequest ) {
       PatronRequest pr = (PatronRequest) event.entityObject;
+      String tenant = Tenants.currentId(event.source);
+
+      String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       eventPublicationService.publishAsJSON(
         'PatronRequest',  // topic
