@@ -46,11 +46,12 @@ public class EventConsumerService {
 
     try {
       while ( running ) {
+
         def topics = null;
         if ( ( tenant_list == null ) || ( tenant_list.size() == 0 ) ) 
           topics = [ 'dummy_topic' ]
         else
-          topics = tenant_list.collect { "${it}_PatronRequestEvents".toString() }
+          topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() }
        
         log.debug("Listening out for ${topics}");
         tenant_list_updated = false;

@@ -38,8 +38,9 @@ public class AppListenerService implements ApplicationListener {
 
       String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
+      log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
       eventPublicationService.publishAsJSON(
-        'PatronRequest',  // topic
+        topic,
         null,             // key
         [
           event:'NewPatronRequest_ind',
