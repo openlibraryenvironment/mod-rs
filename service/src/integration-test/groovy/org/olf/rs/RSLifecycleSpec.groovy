@@ -33,6 +33,8 @@ class RSLifecycleSpec extends GebSpec {
   EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
 
+  String created_request_id = null;
+
   final Closure authHeaders = {
     header OkapiHeaders.TOKEN, 'dummy'
     header OkapiHeaders.USER_ID, 'dummy'
@@ -113,25 +115,63 @@ class RSLifecycleSpec extends GebSpec {
       def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
         header 'X-Okapi-Tenant', tenant_id
         contentType 'application/json; charset=UTF-8'
+        accept 'application/json; charset=UTF-8'
         authHeaders.rehydrate(delegate, owner, thisObject)()
         json {
           title=p_title
           patronReference=p_patron_id
         }
       }
+      // logger.debug("Response: RESP:${resp} JSON:${resp.json}");
+      // Stash the ID
+      this.created_request_id = resp.json.id
       
 
     then:"Check the return value"
       resp.status == CREATED.value()
+      created_request_id != null;
    
     where:
       tenant_id | p_title | p_patron_id
       'TestTenantG' | 'Brain of the firm' | '1234-5678'
   }
 
+  void "Wait for the new request to become validated"(tenant_id, ref) {
+
+    boolean completed = false;
+
+    when:"post new request"
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+
+        int i = 0;
+        while ( i < 5 ) {
+          Thread.sleep(1000);
+          def r = PatronRequest.executeQuery('select pr.id, pr.title, pr.state.code from PatronRequest as pr');
+          logger.debug("Current requests ${r}");
+          i++;
+          completed=true;
+        }
+      }
+
+    then:"Check the return value"
+      completed == true
+
+    where:
+      tenant_id|ref
+      'TestTenantG' | 'RS-T-D-0001'
+  }
+
   void "Delete the tenants"(tenant_id, note) {
 
     expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
+      // Snooze
+      try {
+        Thread.sleep(1000);
+      }
+      catch ( Exception e ) {
+        e.printStackTrace()
+      }
+
       def resp = restBuilder().delete("$baseUrl/_/tenant") {
         header 'X-Okapi-Tenant', tenant_id
         authHeaders.rehydrate(delegate, owner, thisObject)()
