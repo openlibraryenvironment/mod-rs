@@ -63,10 +63,26 @@ public class AppListenerService implements ApplicationListener {
   // https://www.codota.com/code/java/methods/org.hibernate.event.spi.PostUpdateEvent/getPersister
   void afterUpdate(PostUpdateEvent event) {
     if ( event.entityObject instanceof PatronRequest ) {
-      log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name} dirtyProps:${event?.entityObject?.dirtyPropertyNames}");
-      // Stuff to do after update of a patron request which need access
-      // to the spring boot infrastructure
-      // PatronRequest pr = (PatronRequest) event.entityObject;
+      PatronRequest pr = (PatronRequest)event.entityObject;
+      String tenant = Tenants.currentId(event.source);
+      if ( pr.stateHasChanged==true ) {
+        log.debug("PatronRequest State has changed - issue an indication event so we can react accordingly");
+        String topic = "${tenant}_PatronRequestEvents".toString()
+        eventPublicationService.publishAsJSON(
+          topic,
+          null,             // key
+          [
+            event:'STATUS_'+pr.state.code+'_ind',
+            tenant: tenant,
+            oid:'org.olf.rs.PatronRequest:'+pr.id,
+            payload:[
+              id: pr.id,
+              title: pr.title,
+              state: pr.state.code
+            ]
+          ]
+        );
+      }
     }
   }
 
