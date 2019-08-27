@@ -54,6 +54,7 @@ public class AppListenerService implements ApplicationListener {
     }
   }
 
+  // https://www.codota.com/code/java/methods/org.hibernate.event.spi.PostUpdateEvent/getPersister
   void afterUpdate(PostUpdateEvent event) {
     if ( event.entityObject instanceof PatronRequest ) {
       log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");

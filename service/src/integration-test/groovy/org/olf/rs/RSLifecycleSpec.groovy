@@ -19,6 +19,12 @@ import grails.web.databinding.GrailsWebDataBinder
 import org.olf.okapi.modules.directory.DirectoryEntry
 import grails.gorm.multitenancy.Tenants
 
+// Added for conditions.eventually
+// def conditions = new PollingConditions(timeout: 30)
+// conditions.eventually { assert c1 == c2 }
+import spock.util.concurrent.PollingConditions
+
+
 
 @Slf4j
 @Integration
