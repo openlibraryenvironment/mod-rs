@@ -31,6 +31,10 @@ public class AppListenerService implements ApplicationListener {
 
   EventPublicationService eventPublicationService
 
+  /**
+   * It's not really enough to do this afterInsert - we actually want this event to fire after the transaction
+   * has committed. Be aware that the event may arrive back before the transaction has committed.
+   */
   void afterInsert(PostInsertEvent event) {
     if ( event.entityObject instanceof PatronRequest ) {
       PatronRequest pr = (PatronRequest) event.entityObject;

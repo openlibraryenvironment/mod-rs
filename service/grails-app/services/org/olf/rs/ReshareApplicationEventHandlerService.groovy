@@ -15,6 +15,8 @@ import org.olf.rs.statemodel.Status
  */
 public class ReshareApplicationEventHandlerService {
 
+  private static final int MAX_RETRIES = 10;
+
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
   // implementations of the different indications.
@@ -46,7 +48,7 @@ public class ReshareApplicationEventHandlerService {
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      def req = PatronRequest.get(eventData.payload.id)
+      def req = delayedGet(eventData.payload.id);
       if ( ( req != null ) && ( req.state?.code == 'IDLE' ) ) {
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently IDLE - transition to VALIDATED");
@@ -55,7 +57,28 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("THe current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
       }
     }
+  }
+
+  /**
+   * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
+   * up to 5 times.
+   */
+  public PatronRequest delayedGet(String pr_id) {
+    PatronRequest result = null;
+    int retries = 0;
+    while ( ( result == null ) && (retries < MAX_RETRIES) ) {
+      result = PatronRequest.get(pr_id)
+      if ( result == null ) {
+        Thread.sleep(2000);
+        retries++;
+      }
+    }
+    return result;
   }
 }

@@ -26,7 +26,9 @@ public class EventPublicationService {
   public void publishAsJSON(String topic, String key, Map data) {
     if ( key == null )
       key = new Random().nextLong()
+
     String compoundMessage = groovy.json.JsonOutput.toJson(data)
+
     log.debug("Send key:${key}, compoundMessage: ${compoundMessage}");
     producer.send(
             new ProducerRecord<String, String>(topic, key, compoundMessage),
