@@ -41,15 +41,21 @@ public class ReshareApplicationEventHandlerService {
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
-    def req = PatronRequest.get(eventData.payload.id)
-    if ( ( req != null ) && ( req.state?.code == 'IDLE' ) ) {
-      log.debug("Got request ${req}");
-      log.debug(" -> Request is currently IDLE - transition to VALIDATED");
-      req.state = Status.lookup('PatronRequest', 'VALIDATED');
-      req.save(flush:true, failOnError:true)
-    }
-    else {
-      log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = PatronRequest.get(eventData.payload.id)
+      if ( ( req != null ) && ( req.state?.code == 'IDLE' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently IDLE - transition to VALIDATED");
+        req.state = Status.lookup('PatronRequest', 'VALIDATED');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+      }
     }
   }
 }
