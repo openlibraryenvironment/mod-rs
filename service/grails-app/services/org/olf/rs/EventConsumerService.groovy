@@ -10,9 +10,19 @@ import grails.events.annotation.Subscriber
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import static grails.async.Promises.*
 import grails.async.Promise
+import groovy.json.JsonSlurper
+import grails.events.EventPublisher
 
-
-public class EventConsumerService {
+/**
+ * Listen to configured KAFKA topics and react to them.
+ * consume messages with topic TENANT_mod_rs_PatronRequestEvents for each TENANT activated - we do this as an explicit list rather
+ * than as a regex subscription - so that we never consume a message for a tenant that we don't know about.
+ * If the message parses, emit an asynchronous grails event.
+ * This class is essentially the bridge between whatever event communication system we want to use and our internal method of
+ * reacting to application events. Whatever implementation is used, it ultimately needs to call notify('PREventIndication',DATA) in order
+ * for 
+ */
+public class EventConsumerService implements EventPublisher {
 
   private KafkaConsumer consumer = null;
   private boolean running = true;
@@ -53,14 +63,26 @@ public class EventConsumerService {
         else
           topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() }
        
-        log.debug("Listening out for ${topics}");
+        log.debug("Listening out for topics : ${topics}");
         tenant_list_updated = false;
         consumer.subscribe(topics)
         while ( ( tenant_list_updated == false ) && ( running == true ) ) {
           log.debug("poll queue");
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
-            println "Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}"
+            try {
+              log.debug("EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              // Convert the JSON payload string to a map 
+              def jsonSlurper = new JsonSlurper()
+              def data = jsonSlurper.parseText(record.value)
+              if ( data.event != null ) {
+                notify('PREventIndication', data)
+              }
+            }
+            catch(Exception e) {
+              log.error("problem processing event notification",e);
+            }
+
           }
           consumer.commitAsync();
         }

@@ -35,6 +35,7 @@ public class AppListenerService implements ApplicationListener {
     if ( event.entityObject instanceof PatronRequest ) {
       PatronRequest pr = (PatronRequest) event.entityObject;
       String tenant = Tenants.currentId(event.source);
+      log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} dirtyProps:${event?.entityObject?.dirtyPropertyNames}");
 
       String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
@@ -44,6 +45,7 @@ public class AppListenerService implements ApplicationListener {
         null,             // key
         [
           event:'NewPatronRequest_ind',
+          tenant: tenant,
           oid:'org.olf.rs.PatronRequest:'+pr.id,
           payload:[
             id: pr.id,
@@ -57,7 +59,7 @@ public class AppListenerService implements ApplicationListener {
   // https://www.codota.com/code/java/methods/org.hibernate.event.spi.PostUpdateEvent/getPersister
   void afterUpdate(PostUpdateEvent event) {
     if ( event.entityObject instanceof PatronRequest ) {
-      log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name}");
+      log.debug("afterUpdate ${event} ${event?.entityObject?.class?.name} dirtyProps:${event?.entityObject?.dirtyPropertyNames}");
       // Stuff to do after update of a patron request which need access
       // to the spring boot infrastructure
       // PatronRequest pr = (PatronRequest) event.entityObject;
