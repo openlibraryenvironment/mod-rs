@@ -67,12 +67,12 @@ public class EventConsumerService implements EventPublisher {
         tenant_list_updated = false;
         consumer.subscribe(topics)
         while ( ( tenant_list_updated == false ) && ( running == true ) ) {
-          log.debug("poll queue");
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              log.debug("EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
-              // Convert the JSON payload string to a map
+              log.debug("KAFAK_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              // Convert the JSON payload string to a map 
+
               def jsonSlurper = new JsonSlurper()
               def data = jsonSlurper.parseText(record.value)
               if ( data.event != null ) {

@@ -25,6 +25,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
+
   // A string representing the institution of the requesting patron
   // resolvable in the directory.
   String requestingInstitutionSymbol
@@ -104,7 +105,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   /** Lets us know the if the system has updated the record, as we do not want validation on the pendingAction field to happen as it has already happened */
   boolean systemUpdate = false;
-  static transients = ['systemUpdate'];
+
+  // This is a transient property used to communicate between the onUpdate handler in this class
+  // and the GORM event handler applicationEventListenerService
+  boolean stateHasChanged = false;
+
+  static transients = ['systemUpdate', 'stateHasChanged'];
 
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [
@@ -244,7 +250,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     // Status needs to be set to idle
     state = Status.lookup('PatronRequest', 'IDLE');
+  }
 
+  def beforeUpdate() {
+    if ( this.state != this.getPersistentValue('state') ) {
+      stateHasChanged=true
+    }
   }
 
 }

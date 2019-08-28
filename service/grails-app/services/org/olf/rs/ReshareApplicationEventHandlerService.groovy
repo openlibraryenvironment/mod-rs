@@ -23,6 +23,9 @@ public class ReshareApplicationEventHandlerService {
   private static Map<String,Closure> handlers = [
     'NewPatronRequest_ind':{ service, eventData ->
       service.handleNewPatronRequestIndication(eventData);
+    },
+    'STATUS_VALIDATED_ind': { service, eventData ->
+      service.log.debug("handle VALIDATED state change");
     }
   ]
 
@@ -64,7 +67,6 @@ public class ReshareApplicationEventHandlerService {
       }
     }
   }
-  
 
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
