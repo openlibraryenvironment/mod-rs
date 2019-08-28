@@ -114,8 +114,8 @@ class RSLifecycleSpec extends GebSpec {
 
     where:
     tenant_id | entry
-    'TestTenantG' | [ id:'RS-T-D-0001', name: 'A Test entry' ]
-
+    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', symbols: [ [ authority:'OCLC', symbol:'AVL', priority:'a'] ] ]
+    'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [ [ authority:'OCLC', symbol:'ZMU', priority:'a'] ] ]
   }
 
   void "Create a new request"(tenant_id, p_title, p_patron_id) {
