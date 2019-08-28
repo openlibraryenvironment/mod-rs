@@ -70,7 +70,7 @@ public class EventConsumerService implements EventPublisher {
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              log.debug("KAFAK_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
               // Convert the JSON payload string to a map 
 
               def jsonSlurper = new JsonSlurper()

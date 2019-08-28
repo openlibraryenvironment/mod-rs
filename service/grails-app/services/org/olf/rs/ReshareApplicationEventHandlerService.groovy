@@ -26,11 +26,15 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_VALIDATED_ind': { service, eventData ->
       service.sourcePatronRequest(eventData);
+      
     },
     'STATUS_SOURCING_ITEM_ind': { service, eventData ->
-      service.log.debug("handle SOURCING_ITEM state change");
-    }
-    
+     service.log.debug("SOURCING_ITEM state should now be SUPPLIER_IDENTIFIED");
+    },
+    'STATUS_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
+      service.sendToNextLender(eventData);
+     }
+
   ]
 
   @Subscriber('PREventIndication')
@@ -71,8 +75,8 @@ public class ReshareApplicationEventHandlerService {
       }
     }
   }
-  
-  // This takes a request with the state of VALIDATED and changes the state to SOURCING_ITEM
+
+  // This takes a request with the state of VALIDATED and changes the state to SOURCING_ITEM, and then on to SUPPLIER_IDENTIFIED
   public void sourcePatronRequest(eventData) {
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
@@ -86,7 +90,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug(" -> Request is currently VALIDATED - transition to SOURCING_ITEM");
         req.state = Status.lookup('PatronRequest', 'SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
-        
+
         if(req.rota.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently SOURCING_ITEM - transition to SUPPLIER_IDENTIFIED");
@@ -95,9 +99,9 @@ public class ReshareApplicationEventHandlerService {
         } else {
           log.error("Unable to identify a rota for ID ${eventData.payload.id}")
         }
-        
-        
-        
+
+
+
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
@@ -108,6 +112,33 @@ public class ReshareApplicationEventHandlerService {
       }
     }
   }
+
+
+  // This takes a request with the state of SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
+  public void sendToNextLender(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'SUPPLIER_IDENTIFIED' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
+        req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+
 
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
