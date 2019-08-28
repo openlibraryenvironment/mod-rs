@@ -212,10 +212,8 @@ class RSLifecycleSpec extends GebSpec {
             final_state = r[0].state.code
           }
         }
-
         final_state == 'REQUEST_COMPLETE'
       }
-
     }
 
     then:"Check the return value"
