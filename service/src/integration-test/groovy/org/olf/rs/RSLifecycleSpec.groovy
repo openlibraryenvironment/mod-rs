@@ -118,9 +118,10 @@ class RSLifecycleSpec extends GebSpec {
     'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [ [ authority:'OCLC', symbol:'ZMU', priority:'a'] ] ]
   }
 
-  void "Create a new request"(tenant_id, p_title, p_patron_id) {
+  void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_patron_id) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
+
     def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
       header 'X-Okapi-Tenant', tenant_id
       contentType 'application/json; charset=UTF-8'
@@ -129,6 +130,10 @@ class RSLifecycleSpec extends GebSpec {
       json {
         title=p_title
         patronReference=p_patron_id
+        // This gives us an unprocessable entity error
+        rota=[
+          [ directoryId:'RS-T-D-0001', rotaPosition:"0" ]
+        ]
       }
     }
     logger.debug("Response: RESP:${resp} JSON:${resp.json}");
