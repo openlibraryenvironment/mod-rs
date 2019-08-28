@@ -23,6 +23,4 @@
 
 ## Event Sequence Diagram
 
-
-I assume the below image will need to be in an assets folder or something.
-![Sequence Diagram](./sequencediag.jpg)
+![Sequence Diagram](sequencediag.jpg)
