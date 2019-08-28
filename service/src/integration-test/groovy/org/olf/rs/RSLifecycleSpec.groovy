@@ -114,7 +114,15 @@ class RSLifecycleSpec extends GebSpec {
 
     where:
     tenant_id | entry
-    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', symbols: [ [ authority:'OCLC', symbol:'AVL', priority:'a'] ] ]
+    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', 
+                      symbols: [ [ authority:'OCLC', symbol:'AVL', priority:'a'] ] //,
+                      // services:[
+                      //   [
+                      //     service:[ "name":"ReShare ISO18626 Service", "address":"https://localhost/reshare/iso18626", "type":"ISO18626", "businessFunction":"ILL" ],
+                      //     customProperties:[ "ILLPreferredNamespaces":["RESHARE", "PALCI", "IDS"] ]
+                      //   ]
+                      // ]
+                    ]
     'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [ [ authority:'OCLC', symbol:'ZMU', priority:'a'] ] ]
   }
 
