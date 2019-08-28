@@ -25,7 +25,7 @@
 					
 6. Reshare Application Event Handler
 
-	This service takes the event data handed to it by the Event Consumer Service, and then will eventually validate it. Right now it simply sets the status from IDLE to VALIDATED and saves the data to the database. From there it currently draws that information back out and changes the state again to SOURCING_ITEM, forcing the chain to begin again, but with the difference being that it will now begin with an *afterUpdate* call. After this a similar process happens, pushing the state through SUPPLIER_IDENTIFIED, REQUEST_SENT_TO_SUPPLIER, ITEM_SHIPPED and BORROWING_LIBRARY_RECEIVED before ending upn with a state of AWAITING_RETURN_SHIPPING.
+	This service takes the event data handed to it by the Event Consumer Service, and then will eventually validate it. Right now it simply sets the status from IDLE to VALIDATED and saves the data to the database. From there it currently draws that information back out and changes the state again to SOURCING_ITEM, forcing the chain to begin again, but with the difference being that it will now begin with an *afterUpdate* call. After this a similar process happens, pushing the state through SUPPLIER_IDENTIFIED, REQUEST_SENT_TO_SUPPLIER, ITEM_SHIPPED, BORROWING_LIBRARY_RECEIVED, AWAITING_RETURN_SHIPPING and BORROWER_RETURNED, before finally ending on a state of REQUEST_COMPLETE.
 ## Event Sequence Diagram
 
 ![Sequence Diagram](sequencediag.jpg)
