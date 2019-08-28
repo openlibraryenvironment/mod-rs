@@ -56,7 +56,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String artnum
   String ssn
   String quarter
-  
+
   String titleOfComponent
   String authorOfComponent
   String sponsor
@@ -83,7 +83,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   /** Is the this the requester or suppliers view of the request */
   Boolean isRequester;
-  
+
   // Status
   Status state
 
@@ -108,122 +108,122 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [
-          audit : PatronRequestAudit,
-          rota  : PatronRequestRota,
-          tags  : Tag];
+    audit : PatronRequestAudit,
+    rota  : PatronRequestRota,
+    tags  : Tag];
 
   static mappedBy = [
-    rota: 'patronRequest',        
+    rota: 'patronRequest',
     audit: 'patronRequest'
   ]
 
   static constraints = {
-                     
-                   dateCreated (nullable: true, bindable: false)
-                   lastUpdated (nullable: true, bindable: false)
-               patronReference (nullable: true)
-                   serviceType (nullable: true)
-                         state (nullable: true, bindable: false)
-                   isRequester (nullable: true, bindable: true)  // Should be false, only set to true for testing, shouldn't be sent in by client it should be set by the code
-               numberOfRetries (nullable: true, bindable: false)
-    delayPerformingActionUntil (nullable: true, bindable: false)
-                preErrorStatus (nullable: true, bindable: false)
-      awaitingProtocolResponse (bindable: false)
-                  rotaPosition (nullable: true, bindable: false)
-               publicationType (nullable: true)
 
-                         title (nullable: true, blank : false)
-                        author (nullable: true, blank : false)
-                      subtitle (nullable: true, blank : false)
-                sponsoringBody (nullable: true, blank : false)
-                     publisher (nullable: true, blank : false)
-            placeOfPublication (nullable: true, blank : false)
-                        volume (nullable: true, blank : false)
-                         issue (nullable: true, blank : false)
-                     startPage (nullable: true, blank : false)
-                 numberOfPages (nullable: true, blank : false)
-               publicationDate (nullable: true, blank : false)
+    dateCreated (nullable: true, bindable: false)
+    lastUpdated (nullable: true, bindable: false)
+    patronReference (nullable: true)
+    serviceType (nullable: true)
+    state (nullable: true, bindable: false)
+    isRequester (nullable: true, bindable: true)  // Should be false, only set to true for testing, shouldn't be sent in by client it should be set by the code
+    numberOfRetries (nullable: true, bindable: false)
+    delayPerformingActionUntil (nullable: true, bindable: false)
+    preErrorStatus (nullable: true, bindable: false)
+    awaitingProtocolResponse (bindable: false)
+    rotaPosition (nullable: true, bindable: false)
+    publicationType (nullable: true)
+
+    title (nullable: true, blank : false)
+    author (nullable: true, blank : false)
+    subtitle (nullable: true, blank : false)
+    sponsoringBody (nullable: true, blank : false)
+    publisher (nullable: true, blank : false)
+    placeOfPublication (nullable: true, blank : false)
+    volume (nullable: true, blank : false)
+    issue (nullable: true, blank : false)
+    startPage (nullable: true, blank : false)
+    numberOfPages (nullable: true, blank : false)
+    publicationDate (nullable: true, blank : false)
     publicationDateOfComponent (nullable: true, blank : false)
-                       edition (nullable: true, blank : false)
-                          issn (nullable: true, blank : false)
-                          isbn (nullable: true, blank : false)
-                           doi (nullable: true, blank : false)
-                         coden (nullable: true, blank : false)
-                          sici (nullable: true, blank : false)
-                          bici (nullable: true, blank : false)
-                         eissn (nullable: true, blank : false)
-                        stitle (nullable: true, blank : false)
-                          part (nullable: true, blank : false)
-                        artnum (nullable: true, blank : false)
-                           ssn (nullable: true, blank : false)
-                       quarter (nullable: true, blank : false)
- 
-              titleOfComponent (nullable: true, blank : false)
-             authorOfComponent (nullable: true, blank : false)
-                       sponsor (nullable: true, blank : false)
-             informationSource (nullable: true, blank : false)
-                 patronSurname (nullable: true, blank : false)
-               patronGivenName (nullable: true, blank : false)
-                    patronType (nullable: true, blank : false)
-                  sendToPatron (nullable: true )
-                      neededBy (nullable: true )
-   requestingInstitutionSymbol (nullable: true )
+    edition (nullable: true, blank : false)
+    issn (nullable: true, blank : false)
+    isbn (nullable: true, blank : false)
+    doi (nullable: true, blank : false)
+    coden (nullable: true, blank : false)
+    sici (nullable: true, blank : false)
+    bici (nullable: true, blank : false)
+    eissn (nullable: true, blank : false)
+    stitle (nullable: true, blank : false)
+    part (nullable: true, blank : false)
+    artnum (nullable: true, blank : false)
+    ssn (nullable: true, blank : false)
+    quarter (nullable: true, blank : false)
+
+    titleOfComponent (nullable: true, blank : false)
+    authorOfComponent (nullable: true, blank : false)
+    sponsor (nullable: true, blank : false)
+    informationSource (nullable: true, blank : false)
+    patronSurname (nullable: true, blank : false)
+    patronGivenName (nullable: true, blank : false)
+    patronType (nullable: true, blank : false)
+    sendToPatron (nullable: true )
+    neededBy (nullable: true )
+    requestingInstitutionSymbol (nullable: true )
   }
 
   static mapping = {
-                            id column : 'pr_id', generator: 'uuid2', length:36
-                       version column : 'pr_version'
-                   dateCreated column : 'pr_date_created'
-                   lastUpdated column : 'pr_last_updated'
-               patronReference column : 'pr_patron_reference'
-                   serviceType column : 'pr_service_type_fk'
-                         state column : 'pr_state_fk'
-                   isRequester column : "pr_is_requester"
-               numberOfRetries column : 'pr_number_of_retries'
+    id column : 'pr_id', generator: 'uuid2', length:36
+    version column : 'pr_version'
+    dateCreated column : 'pr_date_created'
+    lastUpdated column : 'pr_last_updated'
+    patronReference column : 'pr_patron_reference'
+    serviceType column : 'pr_service_type_fk'
+    state column : 'pr_state_fk'
+    isRequester column : "pr_is_requester"
+    numberOfRetries column : 'pr_number_of_retries'
     delayPerformingActionUntil column : 'pr_delay_performing_action_until'
-                preErrorStatus column : 'pr_pre_error_status_fk'
-      awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
-                  rotaPosition column : 'pr_rota_position'
-               publicationType column : 'pr_pub_type_fk'
+    preErrorStatus column : 'pr_pre_error_status_fk'
+    awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
+    rotaPosition column : 'pr_rota_position'
+    publicationType column : 'pr_pub_type_fk'
 
-                         title column : 'pr_title'
-                        author column : 'pr_author'
-                      subtitle column : 'pr_sub_title'
-                sponsoringBody column : 'pr_sponsoring_body'
-                     publisher column : 'pr_publisher'
-            placeOfPublication column : 'pr_place_of_pub'
-                        volume column : 'pr_volume'
-                         issue column : 'pr_issue'
-                     startPage column : 'pr_start_page'
-                 numberOfPages column : 'pr_num_pages'
-               publicationDate column : 'pr_pub_date'
+    title column : 'pr_title'
+    author column : 'pr_author'
+    subtitle column : 'pr_sub_title'
+    sponsoringBody column : 'pr_sponsoring_body'
+    publisher column : 'pr_publisher'
+    placeOfPublication column : 'pr_place_of_pub'
+    volume column : 'pr_volume'
+    issue column : 'pr_issue'
+    startPage column : 'pr_start_page'
+    numberOfPages column : 'pr_num_pages'
+    publicationDate column : 'pr_pub_date'
     publicationDateOfComponent column : 'pr_pubdate_of_component'
-                       edition column : 'pr_edition'
-                          issn column : 'pr_issn'
-                          isbn column : 'pr_isbn'
-                           doi column : 'pr_doi'
-                         coden column : 'pr_coden'
-                          sici column : 'pr_sici'
-                          bici column : 'pr_bici'
-                         eissn column : 'pr_eissn'
-                        stitle column : 'pr_stitle'
-                          part column : 'pr_part'
-                        artnum column : 'pr_artnum'
-                           ssn column : 'pr_ssn'
-                       quarter column : 'pr_quarter'
+    edition column : 'pr_edition'
+    issn column : 'pr_issn'
+    isbn column : 'pr_isbn'
+    doi column : 'pr_doi'
+    coden column : 'pr_coden'
+    sici column : 'pr_sici'
+    bici column : 'pr_bici'
+    eissn column : 'pr_eissn'
+    stitle column : 'pr_stitle'
+    part column : 'pr_part'
+    artnum column : 'pr_artnum'
+    ssn column : 'pr_ssn'
+    quarter column : 'pr_quarter'
 
-   requestingInstitutionSymbol column : 'pr_req_inst_symbol'
+    requestingInstitutionSymbol column : 'pr_req_inst_symbol'
 
-              titleOfComponent column : 'pr_title_of_component'
-             authorOfComponent column : 'pr_author_of_component'
-                       sponsor column : 'pr_sponsor'
-             informationSource column : 'pr_information_source'
+    titleOfComponent column : 'pr_title_of_component'
+    authorOfComponent column : 'pr_author_of_component'
+    sponsor column : 'pr_sponsor'
+    informationSource column : 'pr_information_source'
 
-                 patronSurname column : 'pr_patron_surname'
-               patronGivenName column : 'pr_patron_name'
-                    patronType column : 'pr_patron_type'
-                  sendToPatron column : 'pr_send_to_patron'
-                      neededBy column : 'pr_needed_by'
+    patronSurname column : 'pr_patron_surname'
+    patronGivenName column : 'pr_patron_name'
+    patronType column : 'pr_patron_type'
+    sendToPatron column : 'pr_send_to_patron'
+    neededBy column : 'pr_needed_by'
   }
 
   /**

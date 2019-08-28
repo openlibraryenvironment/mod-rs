@@ -31,11 +31,10 @@ public class EventPublicationService {
 
     log.debug("Send key:${key}, compoundMessage: ${compoundMessage}");
     producer.send(
-            new ProducerRecord<String, String>(topic, key, compoundMessage),
-            { RecordMetadata metadata, Exception e ->
-                // println "The offset of the record we just sent is: ${metadata?.offset()}"
-            }
-    )
+        new ProducerRecord<String, String>(topic, key, compoundMessage), { RecordMetadata metadata, Exception e ->
+          // println "The offset of the record we just sent is: ${metadata?.offset()}"
+        }
+        )
     // log.debug("Send returned, callback will be called once complete");
   }
 
@@ -47,5 +46,4 @@ public class EventPublicationService {
       producer = null;
     }
   }
-
 }

@@ -58,11 +58,11 @@ public class EventConsumerService implements EventPublisher {
       while ( running ) {
 
         def topics = null;
-        if ( ( tenant_list == null ) || ( tenant_list.size() == 0 ) ) 
-          topics = [ 'dummy_topic' ]
+        if ( ( tenant_list == null ) || ( tenant_list.size() == 0 ) )
+          topics = ['dummy_topic']
         else
           topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() }
-       
+
         log.debug("Listening out for topics : ${topics}");
         tenant_list_updated = false;
         consumer.subscribe(topics)
@@ -72,7 +72,7 @@ public class EventConsumerService implements EventPublisher {
           consumerRecords.each{ record ->
             try {
               log.debug("EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
-              // Convert the JSON payload string to a map 
+              // Convert the JSON payload string to a map
               def jsonSlurper = new JsonSlurper()
               def data = jsonSlurper.parseText(record.value)
               if ( data.event != null ) {

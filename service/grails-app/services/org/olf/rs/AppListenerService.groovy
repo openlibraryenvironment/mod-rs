@@ -45,18 +45,18 @@ public class AppListenerService implements ApplicationListener {
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
       eventPublicationService.publishAsJSON(
-        topic,
-        null,             // key
-        [
-          event:'NewPatronRequest_ind',
-          tenant: tenant,
-          oid:'org.olf.rs.PatronRequest:'+pr.id,
-          payload:[
-            id: pr.id,
-            title: pr.title
+          topic,
+          null,             // key
+          [
+            event:'NewPatronRequest_ind',
+            tenant: tenant,
+            oid:'org.olf.rs.PatronRequest:'+pr.id,
+            payload:[
+              id: pr.id,
+              title: pr.title
+            ]
           ]
-        ]
-      );
+          );
     }
   }
 
