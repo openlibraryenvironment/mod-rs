@@ -191,7 +191,7 @@ class RSLifecycleSpec extends GebSpec {
   }
 
   
-  void "Wait for the new request to have state REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
+  void "Wait for the new request to have state AWAITING_RETURN_SHIPPING"(tenant_id, ref) {
 
     boolean completed = false;
     String final_state = null;
@@ -213,13 +213,13 @@ class RSLifecycleSpec extends GebSpec {
           }
         }
 
-        final_state == 'REQUEST_SENT_TO_SUPPLIER'
+        final_state == 'AWAITING_RETURN_SHIPPING'
       }
 
     }
 
     then:"Check the return value"
-    assert final_state == "REQUEST_SENT_TO_SUPPLIER"
+    assert final_state == "AWAITING_RETURN_SHIPPING"
 
     //      completed == true
 

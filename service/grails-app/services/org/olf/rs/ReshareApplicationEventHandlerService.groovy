@@ -26,14 +26,23 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_VALIDATED_ind': { service, eventData ->
       service.sourcePatronRequest(eventData);
-      
+
     },
     'STATUS_SOURCING_ITEM_ind': { service, eventData ->
-     service.log.debug("SOURCING_ITEM state should now be SUPPLIER_IDENTIFIED");
+      service.log.debug("SOURCING_ITEM state should now be SUPPLIER_IDENTIFIED");
     },
     'STATUS_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
-     }
+    },
+    'STATUS_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
+      service.shipToLender(eventData);
+    },
+    'STATUS_ITEM_SHIPPED_ind': { service, eventData ->
+      service.lenderReceived(eventData);
+    },
+    'STATUS_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
+      service.lenderFinishedWithItem(eventData);
+    }
 
   ]
 
@@ -139,6 +148,85 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+
+  // This takes a request with the state of REQUEST_SENT_TO_SUPPLIER and changes the state to ITEM_SHIPPED
+  public void shipToLender(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::shipToLender(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'REQUEST_SENT_TO_SUPPLIER' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently REQUEST_SENT_TO_SUPPLIER - transition to ITEM_SHIPPED");
+        req.state = Status.lookup('PatronRequest', 'ITEM_SHIPPED');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+
+
+
+
+  // This takes a request with the state of ITEM_SHIPPED and changes the state to BORROWING_LIBRARY_RECEIVED
+  public void lenderReceived(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::lenderReceived(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'ITEM_SHIPPED' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently ITEM_SHIPPED - transition to BORROWING_LIBRARY_RECEIVED");
+        req.state = Status.lookup('PatronRequest', 'BORROWING_LIBRARY_RECEIVED');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+
+
+  // This takes a request with the state of BORROWING_LIBRARY_RECEIVED and changes the state to AWAITING_RETURN_SHIPPING
+  public void lenderFinishedWithItem(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::lenderFinishedWithItem(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'BORROWING_LIBRARY_RECEIVED' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently BORROWING_LIBRARY_RECEIVED - transition to AWAITING_RETURN_SHIPPING");
+        req.state = Status.lookup('PatronRequest', 'AWAITING_RETURN_SHIPPING');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
 
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
