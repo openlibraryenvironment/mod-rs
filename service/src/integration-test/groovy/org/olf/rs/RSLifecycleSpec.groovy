@@ -151,7 +151,7 @@ class RSLifecycleSpec extends GebSpec {
     'TestTenantG' | 'Brain of the firm' | '1234-5678'
   }
 
-  void "Wait for the new request to become validated"(tenant_id, ref) {
+  void "Wait for the new request to have state SOURCING_ITEM"(tenant_id, ref) {
 
     boolean completed = false;
     String final_state = null;
@@ -173,13 +173,13 @@ class RSLifecycleSpec extends GebSpec {
           }
         }
 
-        final_state == 'VALIDATED'
+        final_state == 'SOURCING_ITEM'
       }
 
     }
 
     then:"Check the return value"
-    assert final_state == "VALIDATED"
+    assert final_state == "SOURCING_ITEM"
 
     //      completed == true
 
