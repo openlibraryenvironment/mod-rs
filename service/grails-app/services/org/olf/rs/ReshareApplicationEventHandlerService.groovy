@@ -86,6 +86,18 @@ public class ReshareApplicationEventHandlerService {
         log.debug(" -> Request is currently VALIDATED - transition to SOURCING_ITEM");
         req.state = Status.lookup('PatronRequest', 'SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
+        
+        if(req.rota.size() != 0) {
+          log.debug("Found a potential supplier for ${req}");
+          log.debug(" -> Request is currently SOURCING_ITEM - transition to SUPPLIER_IDENTIFIED");
+          req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
+          req.save(flush:true, failOnError:true)
+        } else {
+          log.error("Unable to identify a rota for ID ${eventData.payload.id}")
+        }
+        
+        
+        
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");

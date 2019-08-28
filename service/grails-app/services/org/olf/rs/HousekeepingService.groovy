@@ -51,6 +51,13 @@ public class HousekeepingService {
       Status.lookupOrCreate('PatronRequest', 'IDLE');
       Status.lookupOrCreate('PatronRequest', 'VALIDATED');
       Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
+      Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
+      Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
+      Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
+      Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
+      Status.lookupOrCreate('PatronRequest', 'AWAITING_RETURN_SHIPPING')
+      Status.lookupOrCreate('PatronRequest', 'BORROWER_RETURNED')
+      Status.lookupOrCreate('PatronRequest', 'REQUEST_COMPLETE')
       Status.lookupOrCreate('PatronRequest', 'PENDING');
       Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
       Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
