@@ -42,7 +42,14 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
       service.lenderFinishedWithItem(eventData);
+    },
+    'STATUS_AWAITING_RETURN_SHIPPING_ind': { service, eventData ->
+      service.lenderShippedReturn(eventData);
+    },
+    'STATUS_BORROWER_RETURNED_ind': { service, eventData ->
+      service.itemReturned(eventData);
     }
+    
 
   ]
 
@@ -228,6 +235,58 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+  
+  // This takes a request with the state of AWAITING_RETURN_SHIPPING and changes the state to BORROWER_RETURNED
+  public void lenderShippedReturn(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::lenderShippedReturn(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'AWAITING_RETURN_SHIPPING' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently BORROWING_LIBRARY_RECEIVED - transition to BORROWER_RETURNED");
+        req.state = Status.lookup('PatronRequest', 'BORROWER_RETURNED');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+  
+  // This takes a request with the state of BORROWER_RETURNED and changes the state to REQUEST_COMPLETE
+  public void itemReturned(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::itemReturned(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id);
+      if ( ( req != null ) && ( req.state?.code == 'BORROWER_RETURNED' ) ) {
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently BORROWER_RETURNED - transition to REQUEST_COMPLETE");
+        req.state = Status.lookup('PatronRequest', 'REQUEST_COMPLETE');
+        req.save(flush:true, failOnError:true)
+      }
+      else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+  
+  
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
    * up to 5 times.
