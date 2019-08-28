@@ -50,6 +50,7 @@ public class HousekeepingService {
     Tenants.withId(tenantId) {
       Status.lookupOrCreate('PatronRequest', 'IDLE');
       Status.lookupOrCreate('PatronRequest', 'VALIDATED');
+      Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
       Status.lookupOrCreate('PatronRequest', 'PENDING');
       Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
       Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');

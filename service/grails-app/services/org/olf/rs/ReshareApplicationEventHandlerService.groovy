@@ -26,7 +26,11 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_VALIDATED_ind': { service, eventData ->
       service.log.debug("handle VALIDATED state change");
+    },
+    'STATUS_SOURCING_ITEM_ind': { service, eventData ->
+      service.log.debug("handle SOURCING_ITEM state change");
     }
+    
   ]
 
   @Subscriber('PREventIndication')
