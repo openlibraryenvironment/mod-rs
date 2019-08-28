@@ -59,7 +59,6 @@ class RSLifecycleSpec extends GebSpec {
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
 
-<<<<<<< HEAD
     logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
 
     def resp = restBuilder().post("${baseUrl}_/tenant") {
@@ -75,53 +74,22 @@ class RSLifecycleSpec extends GebSpec {
     tenantid | name
     'TestTenantG' | 'TestTenantG'
     'TestTenantH' | 'TestTenantH'
-=======
-      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
-
-      def resp = restBuilder().post("${baseUrl}_/tenant") {
-        header 'X-Okapi-Tenant', tenantid
-        authHeaders.rehydrate(delegate, owner, thisObject)()
-      }
-
-    then:"The response is correct"
-      resp.status == CREATED.value()
-      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
-
-    where:
-      tenantid | name
-      'TestTenantG' | 'TestTenantG'
-      'TestTenantH' | 'TestTenantH'
->>>>>>> cdf02ee8a40b344533d71c243edeff03ebb74fba
   }
 
   void "Test eventing"(tenant_id, entry_id, entry_uri) {
     when:"We emit a kafka event"
-<<<<<<< HEAD
-    logger.debug("Publish ${entry_uri}");
-    eventPublicationService.publishAsJSON('modDirectory-entryChange-'+tenant_id,
-        java.util.UUID.randomUUID().toString(),
-        [ 'test': 'test' ] )
-=======
       logger.debug("Publish ${entry_uri}");
       eventPublicationService.publishAsJSON('modDirectory-entryChange-'+tenant_id,
           java.util.UUID.randomUUID().toString(),
           [ 'test': 'test' ] )
->>>>>>> cdf02ee8a40b344533d71c243edeff03ebb74fba
 
     then:"The response is correct"
 
     where:
-<<<<<<< HEAD
-    tenant_id | entry_id | entry_uri
-    'TestTenantG' | 'TNS' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/TheNewSchool.json'
-    'TestTenantG' | 'AC' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/AlleghenyCollege.json'
-    'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
-=======
       tenant_id | entry_id | entry_uri
       'TestTenantG' | 'TNS' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/TheNewSchool.json'
       'TestTenantG' | 'AC' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/AlleghenyCollege.json'
       'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
->>>>>>> cdf02ee8a40b344533d71c243edeff03ebb74fba
   }
 
 
