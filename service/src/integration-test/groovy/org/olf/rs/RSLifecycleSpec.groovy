@@ -38,6 +38,7 @@ class RSLifecycleSpec extends GebSpec {
   def grailsApplication
   EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
+  SharedDataService sharedDataService
 
   static Map request_data = [:];
 
@@ -125,6 +126,19 @@ class RSLifecycleSpec extends GebSpec {
       // ]
     ]
     'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'ZMU', priority:'a'] ]]
+  }
+
+  void "set Up Shared Data"(symbol, tenant_id) {
+    when:"We register the data mapping symbols to tenants"
+      sharedDataService.registerSymbolForTenant(symbol, tenant_id);
+      
+    then:"We are able to resolve which tenant a symbol should be routed to"
+      assert sharedDataService.getTenantForSymol(symbol) == tenant_id
+
+    where:
+      symbol|tenant_id
+      'OCLC:AVL'|'TestTenantH'
+      'OCLC:ZMU'|'TestTenantG'
   }
 
   void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_patron_id) {
