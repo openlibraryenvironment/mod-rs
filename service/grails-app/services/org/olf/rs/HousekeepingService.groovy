@@ -73,12 +73,12 @@ public class HousekeepingService {
    */
   public synchronized void ensureSharedSchema() {
     try {
-      log.debug("See if we already have a datastore for ${SHARED_SCHEMA_NAME}")
+      log.debug("See if we already have a datastore for ${SHARED_SCHEMA_NAME} (${hibernateDatastore.class.name})")
       hibernateDatastore.getDatastoreForConnection(SHARED_SCHEMA_NAME);
       log.debug("${SHARED_SCHEMA_NAME} found. all is well");
     }
     catch ( ConfigurationException ce ) {
-      log.debug("Shared schema not located - create it now");
+      log.debug("Shared schema not located in datastore - see if schema exists");
       // Not able to locate the shared schema - is that because it has not been created yet, or is it because
       // its the first time it has been accessed.
 
@@ -89,7 +89,7 @@ public class HousekeepingService {
       }
 
       if ( schemaNames.contains(SHARED_SCHEMA_NAME) ) {
-        log.debug("Found existing shared schema - use that");
+        log.debug("Found existing shared schema(${SHARED_SCHEMA_NAME}) - use that");
       }
       else {
         log.debug("Unable to locate shared schame in ${schemaNames}.. create");
@@ -98,6 +98,7 @@ public class HousekeepingService {
     }
 
     // Now run any migrations to the schema that have not been completed yet
+    log.debug("Running any migrations for the shared schema");
     updateAccountSchema(SHARED_SCHEMA_NAME,'system-level-changelog.groovy');
 
     log.debug("ensureSharedSchema completed");
@@ -154,8 +155,9 @@ public class HousekeepingService {
     // This function actually adds the schema into the hibernate list of known schemas
     // without it withTenant(x) won't work.
     try {
-      log.debug("adding tenant for ${schema_name}")
+      log.debug("adding schema for ${schema_name}")
       hibernateDatastore.addTenantForSchema(schema_name)
+      log.debug("${hibernateDatastore.resolveTenantIds()}");
     } catch (Exception e) {
       log.error("Exception adding tenant schema for ${schema_name}", e)
       throw e

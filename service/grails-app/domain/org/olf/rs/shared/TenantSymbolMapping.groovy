@@ -1,15 +1,13 @@
-package org.olf.rs.shared
+package org.olf.rs.shared;
 
 import javax.persistence.Transient
 import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 
 /**
- * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
- * requesting that reshare locate and deliver a resource from a remote partner. 
+ *
  */
-
-class TenantSymbolMapping implements MultiTenant<TenantSymbolMapping> {
+public class TenantSymbolMapping implements MultiTenant<TenantSymbolMapping> {
 
   String id
   String symbol

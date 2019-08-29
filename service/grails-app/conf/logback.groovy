@@ -40,6 +40,7 @@ logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
 logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
 logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
 logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+logger ('org.grails.datastore', WARN)
 
 
 // Uncomment below logging for output of OKAPI client http.

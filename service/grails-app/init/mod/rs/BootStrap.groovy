@@ -13,8 +13,7 @@ class BootStrap {
     housekeepingService.ensureSharedSchema();
     okapiTenantAdminService.freshenAllTenantSchemas()
     
-    //housekeepingService.ensureSharedConfig();
-
+    housekeepingService.ensureSharedConfig();
   }
 
   def destroy = {

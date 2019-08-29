@@ -145,7 +145,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Got request ${req}");
         
         //TODO - sendRequest called here, make it do stuff
-        protocolMessageService.sendRequest(eventData)
+        protocolMessageService.sendProtocolMessage(eventData)
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
         req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
         req.save(flush:true, failOnError:true)
