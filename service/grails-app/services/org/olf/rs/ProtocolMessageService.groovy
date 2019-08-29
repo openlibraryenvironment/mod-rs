@@ -24,8 +24,7 @@ class ProtocolMessageService {
    *       }
    *   }
    */
-  public void sendRequest(Map eventData) {
-
+  public void sendProtocolMessage(Map eventData) {
     def responseConfirmed = messageConfirmation(eventData, "request")
     log.debug("sendRequest called for ${eventData.payload.id}")
     //Make this create a new request in the responder's system
