@@ -78,7 +78,22 @@ public class HousekeepingService {
     }
     catch ( ConfigurationException ce ) {
       log.debug("Shared schema not located - create it now");
-      createAccountSchema(SHARED_SCHEMA_NAME);
+      // Not able to locate the shared schema - is that because it has not been created yet, or is it because
+      // its the first time it has been accessed.
+
+      ResultSet schemas = dataSource.connection.getMetaData().getSchemas()
+      Collection<String> schemaNames = []
+      while(schemas.next()) {
+        schemaNames.add(schemas.getString("TABLE_SCHEM"))
+      }
+
+      if ( schemaNames.contains(SHARED_SCHEMA_NAME) ) {
+        log.debug("Found existing shared schema - use that");
+      }
+      else {
+        log.debug("Unable to locate shared schame in ${schemaNames}.. create");
+        createAccountSchema(SHARED_SCHEMA_NAME);
+      }
     }
 
     // Now run any migrations to the schema that have not been completed yet
