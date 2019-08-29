@@ -1,15 +1,32 @@
 package org.olf.rs
 
+import org.olf.rs.shared.TenantSymbolMapping
+import grails.gorm.multitenancy.Tenants
 
 public class SharedDataService {
 
-  private static final SHARED_SCHEMA_NAME='__shared_ill_mappings';
+  
+  private static final SHARED_SCHEMA_NAME = '__shared_ill_mappings';
 
   public void registerSymbolForTenant(String symbol, String tenant_id) {
+    Tenants.withId(SHARED_SCHEMA_NAME) {
+      TenantSymbolMapping.withNewTransaction {
+        TenantSymbolMapping.findBySymbol(symbol) ?: new TenantSymbolMapping(
+          symbol:symbol,
+          tenant:tenant).save(flush:true, failOnError:true);
+      }
+    }
   }
 
-  public String getTenantForSymol(String symbol) {
-    return null;
+  public String getTenantForSymbol(String symbol) {
+    String result = null
+    
+    
+    Tenants.withId(SHARED_SCHEMA_NAME) {
+      result = TenantSymbolMapping.findBySymbol(symbol)
+      log.debug("GetTenant returns: " + result)
+    }
+      return "GetTenant returns: " + result;
   }
 
   // public void ensureSharedConfig() {
@@ -19,16 +36,7 @@ public class SharedDataService {
   //   registerTenantSymbolMapping('RESHARE:DIKUC', 'diku');
   //   registerTenantSymbolMapping('RESHARE:ACMAIN', 'diku');
   // }
-
-  // public void registerTenantSymbolMapping(String symbol, String tenant) {
-  //   Tenants.withId(SHARED_SCHEMA_NAME) {
-  //     TenantSymbolMapping.withNewTransaction {
-  //       TenantSymbolMapping.findBySymbol(symbol) ?: new TenantSymbolMapping(
-  //                                                               symbol:symbol,
-  //                                                               tenant:tenant).save(flush:true, failOnError:true);
-  //     }
-  //   }
-  // }
+   
 
 }
 

@@ -1,18 +1,19 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants
-import grails.events.annotation.Subscriber
-import grails.gorm.multitenancy.WithoutTenant
-import grails.gorm.transactions.Transactional
-import javax.sql.DataSource
-import groovy.sql.Sql
-import grails.core.GrailsApplication
-import org.grails.orm.hibernate.HibernateDatastore
-import org.grails.datastore.mapping.core.exceptions.ConfigurationException
-import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
+import java.sql.ResultSet
 
-import org.olf.rs.shared.TenantSymbolMapping;
+import javax.sql.DataSource
+
+import org.grails.datastore.mapping.core.exceptions.ConfigurationException
+import org.grails.orm.hibernate.HibernateDatastore
+import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 import org.olf.rs.statemodel.Status;
+
+import grails.core.GrailsApplication
+import grails.events.annotation.Subscriber
+import grails.gorm.multitenancy.Tenants
+import grails.gorm.transactions.Transactional
+import groovy.sql.Sql
 
 
 

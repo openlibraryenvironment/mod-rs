@@ -131,9 +131,10 @@ class RSLifecycleSpec extends GebSpec {
   void "set Up Shared Data"(symbol, tenant_id) {
     when:"We register the data mapping symbols to tenants"
       sharedDataService.registerSymbolForTenant(symbol, tenant_id);
+
       
     then:"We are able to resolve which tenant a symbol should be routed to"
-      assert sharedDataService.getTenantForSymol(symbol) == tenant_id
+      assert sharedDataService.getTenantForSymbol(symbol) == tenant_id
 
     where:
       symbol|tenant_id
@@ -141,6 +142,8 @@ class RSLifecycleSpec extends GebSpec {
       'OCLC:ZMU'|'TestTenantG'
   }
 
+  
+  
   void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_patron_id) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");

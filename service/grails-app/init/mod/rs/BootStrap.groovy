@@ -9,9 +9,10 @@ class BootStrap {
   OkapiTenantAdminService okapiTenantAdminService
   
   def init = { servletContext ->
-
+    
+    housekeepingService.ensureSharedSchema();
     okapiTenantAdminService.freshenAllTenantSchemas()
-    //housekeepingService.ensureSharedSchema();
+    
     //housekeepingService.ensureSharedConfig();
 
   }
