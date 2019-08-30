@@ -1,5 +1,7 @@
 package org.olf.rs
 
+
+import java.util.UUID
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
  * provide the requesting and responding symbol and the content of the message, this service works out
@@ -37,7 +39,7 @@ class ProtocolMessageService {
     // tenant in this system. If so, we can simply call handleIncomingMessage
 
     return [
-      confirmationId:confirmation;
+      confirmationId:confirmation
     ]
   }
 
@@ -52,7 +54,7 @@ class ProtocolMessageService {
     // called - this method should not do any work beyond understanding what event needs to be dispatched for the 
     // particular message coming in.
     return [
-      confirmationId:new java.util.UUID.randomUUID().toString();
+      confirmationId: UUID.randomUUID().toString()
     ]
   }
 

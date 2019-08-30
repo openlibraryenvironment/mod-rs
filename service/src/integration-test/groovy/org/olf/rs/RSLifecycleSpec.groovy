@@ -158,7 +158,7 @@ class RSLifecycleSpec extends GebSpec {
       json {
         title=p_title
         patronReference=p_patron_id
-        isRequester=true
+//        isRequester=true
         // This gives us an unprocessable entity error
         rota=[[ directoryId:'OCLC:ZMU', rotaPosition:"0" ]]
       }
