@@ -150,6 +150,8 @@ class RSLifecycleSpec extends GebSpec {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
+
+    // update this in accordance with https://stackoverflow.com/questions/34402270/grails-restbuilder-sending-weird-json
     def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
       header 'X-Okapi-Tenant', tenant_id
       contentType 'application/json; charset=UTF-8'
