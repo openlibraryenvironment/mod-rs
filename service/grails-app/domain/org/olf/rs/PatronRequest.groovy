@@ -238,11 +238,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   def beforeInsert() {
     // Are we a requester
     if (isRequester) {
-      if ( tags == null ) {
-        tags = [];
-      }
-
-      tags.add('PATRON_REQUEST_CHECK_NEEDED');
+      // This doesn't work in beforeInsert - the conversion of Strings to tag objects is a databinding
+      // thing, this will cause the system to explode!
+      // if ( tags == null ) {
+      //   tags = [];
+      // }
+      // tags.add('PATRON_REQUEST_CHECK_NEEDED');
     }
 
     // Set the rota position to 0, so that it is always set

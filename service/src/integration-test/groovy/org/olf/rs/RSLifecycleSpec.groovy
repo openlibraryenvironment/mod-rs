@@ -154,6 +154,7 @@ class RSLifecycleSpec extends GebSpec {
     def req_json_data = [
       title: p_title,
       patronReference:p_patron_id,
+      isRequester:true,
       rota:[
         [directoryId:'OCLC:ZMU', rotaPosition:"0"]
       ]
@@ -161,7 +162,6 @@ class RSLifecycleSpec extends GebSpec {
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
 
-    // update this in accordance with https://stackoverflow.com/questions/34402270/grails-restbuilder-sending-weird-json
     RestResponse resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
       header 'X-Okapi-Tenant', tenant_id
       contentType 'application/json; charset=UTF-8'
@@ -169,7 +169,7 @@ class RSLifecycleSpec extends GebSpec {
       authHeaders.rehydrate(delegate, owner, thisObject)()
       json json_payload
     }
-    logger.debug("Response: RESP:${resp} JSON:${resp.text}");
+    logger.debug("CreateReqTest1 -- Response: RESP:${resp} JSON:${resp.json.id}");
 
     // Stash the ID
     this.request_data['test case 1'] = resp.json.id
@@ -192,6 +192,7 @@ class RSLifecycleSpec extends GebSpec {
 
     def req_json_data = [
       title: p_title,
+      isRequester:true,
       patronReference:p_patron_id,
       rota:[]
     ]
