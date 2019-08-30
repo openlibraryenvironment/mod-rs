@@ -14,6 +14,7 @@ import grails.events.annotation.Subscriber
 import grails.gorm.multitenancy.Tenants
 import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
+import com.k_int.okapi.OkapiTenantAdminService
 
 
 
@@ -23,12 +24,9 @@ import groovy.sql.Sql
 @Transactional
 public class HousekeepingService {
 
-  HibernateDatastore hibernateDatastore
-  DataSource dataSource
-  GrailsApplication grailsApplication
-
-  private static final SHARED_SCHEMA_NAME='__shared_ill_mappings';
-
+  // This was DataSource but I think this is actually a HibernateDataSource
+        GrailsApplication grailsApplication
+  OkapiTenantAdminService okapiTenantAdminService
 
   /**
    * This is called by the eventing mechanism - There is no web request context
@@ -72,99 +70,11 @@ public class HousekeepingService {
    *  we register symbol -> tenant mappings.
    */
   public synchronized void ensureSharedSchema() {
-    try {
-      log.debug("See if we already have a datastore for ${SHARED_SCHEMA_NAME} (${hibernateDatastore.class.name})")
-      hibernateDatastore.getDatastoreForConnection(SHARED_SCHEMA_NAME);
-      log.debug("${SHARED_SCHEMA_NAME} found. all is well");
-    }
-    catch ( ConfigurationException ce ) {
-      log.debug("Shared schema not located in datastore - see if schema exists");
-      // Not able to locate the shared schema - is that because it has not been created yet, or is it because
-      // its the first time it has been accessed.
-
-      ResultSet schemas = dataSource.connection.getMetaData().getSchemas()
-      Collection<String> schemaNames = []
-      while(schemas.next()) {
-        schemaNames.add(schemas.getString("TABLE_SCHEM"))
-      }
-
-      if ( schemaNames.contains(SHARED_SCHEMA_NAME) ) {
-        log.debug("Found existing shared schema(${SHARED_SCHEMA_NAME}) - use that");
-      }
-      else {
-        log.debug("Unable to locate shared schame in ${schemaNames}.. create");
-        createAccountSchema(SHARED_SCHEMA_NAME);
-      }
-    }
-
-    // Now run any migrations to the schema that have not been completed yet
-    log.debug("Running any migrations for the shared schema");
-    updateAccountSchema(SHARED_SCHEMA_NAME,'system-level-changelog.groovy');
-
     log.debug("ensureSharedSchema completed");
+    okapiTenantAdminService.enableTenant('__global',[:])
   }
 
   public void ensureSharedConfig() {
-  }
-
-  /**
-   * Create a schema in the supplied DB
-   */
-  private synchronized void createAccountSchema(String schema_name) {
-    Sql sql = null
-    try {
-      sql = new Sql(dataSource as DataSource)
-      sql.withTransaction {
-        log.debug("Execute -- create schema ${schema_name}");
-        sql.execute("create schema ${schema_name}" as String)
-      }
-    } finally {
-        sql?.close()
-    }
-  }
-
-
-  /**
-   * Synchronize a DB schema with a liquibase defintion.
-   * this function is inspired by the grails-okapi module grails-app/services/com/k_int/okapi/OkapiTenantAdminService.groovy
-   * It's job is to run a liquibase migration file against a given schema. 
-   */
-  void updateAccountSchema(String schema_name, String migration_file) {
-
-    log.debug("updateAccountSchema(${schema_name},${migration_file})")
-    // Now try create the tables for the schema
-    try {
-      GrailsLiquibase gl = new GrailsLiquibase(grailsApplication.mainContext)
-      gl.dataSource = dataSource
-      gl.dropFirst = false
-      gl.changeLog = migration_file; // 'module-tenant-changelog.groovy'
-      gl.contexts = []
-      gl.labels = []
-      gl.defaultSchema = schema_name
-      gl.databaseChangeLogTableName = 'tenant_changelog'
-      gl.databaseChangeLogLockTableName = 'tenant_changelog_lock'
-      gl.afterPropertiesSet() // this runs the update command
-    } catch (Exception e) {
-      log.error("Exception trying to create new account schema tables for $schema_name", e)
-      throw e
-    }
-    finally {
-      log.debug("Database migration completed")
-    }
-
-    // This function actually adds the schema into the hibernate list of known schemas
-    // without it withTenant(x) won't work.
-    try {
-      log.debug("adding schema for ${schema_name}")
-      hibernateDatastore.addTenantForSchema(schema_name)
-      log.debug("${hibernateDatastore.resolveTenantIds()}");
-    } catch (Exception e) {
-      log.error("Exception adding tenant schema for ${schema_name}", e)
-      throw e
-    }
-    finally {
-      log.debug("added schema")
-    }
   }
 
 

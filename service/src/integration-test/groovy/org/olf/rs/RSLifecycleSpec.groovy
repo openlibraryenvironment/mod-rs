@@ -19,13 +19,8 @@ import grails.databinding.SimpleMapDataBindingSource
 import grails.web.databinding.GrailsWebDataBinder
 import org.olf.okapi.modules.directory.DirectoryEntry
 import grails.gorm.multitenancy.Tenants
-
-// Added for conditions.eventually
-// def conditions = new PollingConditions(timeout: 30)
-// conditions.eventually { assert c1 == c2 }
-import spock.util.concurrent.PollingConditions
-
-
+import javax.sql.DataSource
+import org.grails.orm.hibernate.HibernateDatastore
 
 @Slf4j
 @Integration
@@ -39,6 +34,8 @@ class RSLifecycleSpec extends GebSpec {
   def grailsApplication
   EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
+  HibernateDatastore hibernateDatastore
+  DataSource dataSource
   GlobalConfigService globalConfigService
 
   static Map request_data = [:];
@@ -137,7 +134,7 @@ class RSLifecycleSpec extends GebSpec {
      globalConfigService.registerSymbolForTenant(symbol, tenant_id);
       
     then:"We are able to resolve which tenant a symbol should be routed to"
-      assert globalConfigService.getTenantForSymbol(symbol) == tenant_id
+      assert tenant_id == globalConfigService.getTenantForSymbol(symbol)
 
     where:
       symbol|tenant_id
