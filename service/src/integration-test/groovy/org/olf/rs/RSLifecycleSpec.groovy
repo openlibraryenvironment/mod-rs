@@ -133,12 +133,10 @@ class RSLifecycleSpec extends GebSpec {
     logger.debug("Set up shared data");
 
     when:"We register the data mapping symbols to tenants"
-      Tenants.withId('__shared_ill_mappings') {
-        // globalConfigService.registerSymbolForTenant(symbol, tenant_id);
-      }
+     globalConfigService.registerSymbolForTenant(symbol, tenant_id);
       
     then:"We are able to resolve which tenant a symbol should be routed to"
-      assert 1==1
+      assert globalConfigService.getTenantForSymbol(symbol) == tenant_id
 
     where:
       symbol|tenant_id
