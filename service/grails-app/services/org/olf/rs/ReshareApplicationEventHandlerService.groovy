@@ -147,11 +147,8 @@ public class ReshareApplicationEventHandlerService {
         
         //TODO - sendRequest called here, make it do stuff
         protocolMessageService.sendProtocolMessage(eventData)
-        globalConfigService.getTenantForSymbol('OCLC:AVL')
         
-        def reqrota = PatronRequestRota.executeQuery('select prr from PatronRequest as prr where prr.id = req.rota')[0];
-        log.debug("Rota (hopefully): ${reqrota}")
-        //globalConfigService.getTenantForSymbol(eventData.rota.directoryId)
+
         
         
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");

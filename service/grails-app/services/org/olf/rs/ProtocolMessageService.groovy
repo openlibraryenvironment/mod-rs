@@ -1,6 +1,6 @@
 package org.olf.rs
 
-
+import grails.gorm.multitenancy.Tenants
 import java.util.UUID
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
@@ -9,7 +9,7 @@ import java.util.UUID
  *
  */
 class ProtocolMessageService {
-
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   GlobalConfigService globalConfigService
   /**
    * @param eventData : A map structured as followed 
@@ -31,14 +31,24 @@ class ProtocolMessageService {
    */
   public Map sendProtocolMessage(Map eventData) {
     def responseConfirmed = messageConfirmation(eventData, "request")
-    log.debug("sendRequest called for ${eventData.payload.id}")
+    log.debug("sendProtocolMessage called for ${eventData.payload.id}")
     //Make this create a new request in the responder's system
     String confirmation = null;
 
     // The first thing to do is to look in the internal SharedConfig to see if the recipient is a
     // tenant in this system. If so, we can simply call handleIncomingMessage
+    def req = reshareApplicationEventHandlerService.delayedGet(eventData.payload.id);
+    log.debug("Got request in ProtocolMessageService ${req}");
+    def symbol = req.rota[0].directoryId
+    def tenant = globalConfigService.getTenantForSymbol(symbol)
+    log.debug("The tenant for that symbol is: ${tenant}")
     
-    
+    if (tenant != null) {
+      handleIncomingMessage(eventData)
+        
+    } else {
+      log.error("Tenant does not exist in the system")
+    }
     
 
     return [
@@ -52,10 +62,24 @@ class ProtocolMessageService {
    */
   public Map handleIncomingMessage(Map eventData) {
     // Recipient must be a tenant in the SharedConfig
-
+    log.debug("handleIncomingMessage called.")
+    
+    def req = reshareApplicationEventHandlerService.delayedGet(eventData.payload.id);
+    def symbol = req.rota[0].directoryId
+    def tenant = globalConfigService.getTenantForSymbol(symbol)
     // Now we issue a protcolMessageIndication event so that any handlers written for the protocol message can be 
     // called - this method should not do any work beyond understanding what event needs to be dispatched for the 
     // particular message coming in.
+    
+    if (tenant != null) {
+      switch ( eventData.messageType ) {
+        case 'request' :
+        eventPublicationService.publishAsJSON(title: req.title, isRequester: false)
+      }
+    }
+    
+    
+    
     return [
       confirmationId: UUID.randomUUID().toString()
     ]
