@@ -14,9 +14,21 @@ public class GlobalConfigService {
 
     log.debug("registerSymbolForTenant(${symbol},${tenant_id}) (${SHARED_SCHEMA_NAME})");
     Tenants.withId(SHARED_SCHEMA_NAME) {
-      TenantSymbolMapping.findBySymbol(symbol) ?: new TenantSymbolMapping(
-              symbol:symbol,
-              tenant:tenant_id).save(flush:true, failOnError:true);
+      TenantSymbolMapping tsm = TenantSymbolMapping.findBySymbol(symbol) 
+      if ( tsm == null ) {
+        tsm = new TenantSymbolMapping(
+                         symbol:symbol,
+                         tenant:tenant_id).save(flush:true, failOnError:true);
+      }
+      else {
+        if ( tsm.tenant == tenant_id ) {
+          // Nothing to do
+        }
+        else {
+          tsm.tenant = tenant_id
+          tsm.save(flush:true, failOnError:true);
+        }
+      }
     }
   }
 
