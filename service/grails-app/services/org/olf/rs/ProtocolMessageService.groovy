@@ -50,7 +50,6 @@ class ProtocolMessageService {
       log.error("Tenant does not exist in the system")
     }
     
-
     return [
       confirmationId:confirmation
     ]
