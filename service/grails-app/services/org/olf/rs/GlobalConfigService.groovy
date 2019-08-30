@@ -29,14 +29,5 @@ public class GlobalConfigService {
     return result
   }
 
-  // public void ensureSharedConfig() {
-    // This is for DEVELOPMENT ONLY - Need to find a sysadmin way to do this
-  //   registerTenantSymbolMapping('RESHARE:DIKUA', 'diku');
-  //   registerTenantSymbolMapping('RESHARE:DIKUB', 'diku');
-  //   registerTenantSymbolMapping('RESHARE:DIKUC', 'diku');
-  //   registerTenantSymbolMapping('RESHARE:ACMAIN', 'diku');
-  // }
-   
-
 }
 

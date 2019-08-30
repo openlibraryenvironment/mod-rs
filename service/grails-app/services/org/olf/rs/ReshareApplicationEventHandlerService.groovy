@@ -18,6 +18,7 @@ public class ReshareApplicationEventHandlerService {
   private static final int MAX_RETRIES = 10;
   
   ProtocolMessageService protocolMessageService
+  GlobalConfigService globalConfigService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -146,6 +147,10 @@ public class ReshareApplicationEventHandlerService {
         
         //TODO - sendRequest called here, make it do stuff
         protocolMessageService.sendProtocolMessage(eventData)
+        
+
+        
+        
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
         req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
         req.save(flush:true, failOnError:true)
