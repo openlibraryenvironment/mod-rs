@@ -7,6 +7,7 @@ import static org.springframework.http.HttpStatus.*
 import spock.lang.*
 import geb.spock.*
 import grails.plugins.rest.client.RestBuilder
+import grails.plugins.rest.client.RestResponse
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,22 +151,26 @@ class RSLifecycleSpec extends GebSpec {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
+    def req_json_data = [
+      title: p_title,
+      patronReference:p_patron_id,
+      rota:[
+        [directoryId:'OCLC:ZMU', rotaPosition:"0"]
+      ]
+    ]
+
+    String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
 
     // update this in accordance with https://stackoverflow.com/questions/34402270/grails-restbuilder-sending-weird-json
-    def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
+    RestResponse resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
       header 'X-Okapi-Tenant', tenant_id
       contentType 'application/json; charset=UTF-8'
       accept 'application/json; charset=UTF-8'
       authHeaders.rehydrate(delegate, owner, thisObject)()
-      json {
-        title=p_title
-        patronReference=p_patron_id
-//        isRequester=true
-        // This gives us an unprocessable entity error
-        rota=[[ directoryId:'OCLC:ZMU', rotaPosition:"0" ]]
-      }
+      json json_payload
     }
-    logger.debug("Response: RESP:${resp} JSON:${resp.json}");
+    logger.debug("Response: RESP:${resp} JSON:${resp.text}");
+
     // Stash the ID
     this.request_data['test case 1'] = resp.json.id
     logger.debug("${request_data['test case 1']}")
@@ -185,17 +190,20 @@ class RSLifecycleSpec extends GebSpec {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
+    def req_json_data = [
+      title: p_title,
+      patronReference:p_patron_id,
+      rota:[]
+    ]
+
+    String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
+
     def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
       header 'X-Okapi-Tenant', tenant_id
       contentType 'application/json; charset=UTF-8'
       accept 'application/json; charset=UTF-8'
       authHeaders.rehydrate(delegate, owner, thisObject)()
-      json {
-        title=p_title
-        patronReference=p_patron_id
-        // This gives us an unprocessable entity error
-        rota=[]
-      }
+      json json_payload
     }
     logger.debug("Response: RESP:${resp} JSON:${resp.json}");
     // Stash the ID
