@@ -32,6 +32,7 @@ public class GlobalConfigService {
     //   log.debug("GetTenant returns: " + result)
     // }
     // return "GetTenant returns: " + result;
+    log.debug("Data for the symbol: ${data[symbol]}")
     return data[symbol]
   }
 

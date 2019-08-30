@@ -10,7 +10,7 @@ import java.util.UUID
  */
 class ProtocolMessageService {
 
-
+  GlobalConfigService globalConfigService
   /**
    * @param eventData : A map structured as followed 
    *   event: {
@@ -37,6 +37,9 @@ class ProtocolMessageService {
 
     // The first thing to do is to look in the internal SharedConfig to see if the recipient is a
     // tenant in this system. If so, we can simply call handleIncomingMessage
+    
+    
+    
 
     return [
       confirmationId:confirmation
