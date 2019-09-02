@@ -58,6 +58,10 @@ class RSNotSuppliedSpec extends GebSpec{
   }
   
   
+  
+  
+  
+  
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
 
@@ -78,8 +82,20 @@ class RSNotSuppliedSpec extends GebSpec{
   }
   
   
-  
-  
+  void "set Up Shared Data"(symbol, tenant_id) {
+    
+        logger.debug("Set up shared data");
+    
+        when:"We register the data mapping symbols to tenants"
+         globalConfigService.registerSymbolForTenant(symbol, tenant_id);
+          
+        then:"We are able to resolve which tenant a symbol should be routed to"
+          assert tenant_id == globalConfigService.getTenantForSymbol(symbol)
+    
+        where:
+          symbol|tenant_id
+          'RESHARE:RSA'|'RSNotSuppTenantA'
+      }
   
   
   void "Create a new request with a single Rota entry"(tenant_id, p_title, p_patron_id) {
@@ -90,9 +106,7 @@ class RSNotSuppliedSpec extends GebSpec{
       title: p_title,
       isRequester:true,
       patronReference:p_patron_id,
-      rota:[]
-      
-      //TODO make a single rota entry here.
+      rota:[[directoryId:'RESHARE:RSA', rotaPosition:"0"]]
     ]
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
