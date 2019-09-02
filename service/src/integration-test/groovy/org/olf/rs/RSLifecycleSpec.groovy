@@ -150,11 +150,13 @@ class RSLifecycleSpec extends GebSpec {
 
     def req_json_data = [
       title: p_title,
-      patronReference:p_patron_id,
+      patronReference:'RS-TESTCASE-1',
+      patronIdentifier:p_patron_id,
       isRequester:true,
       rota:[
         [directoryId:'OCLC:ZMU', rotaPosition:"0"]
-      ]
+      ],
+      tags: [ 'RS-TESTCASE-1' ]
     ]
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
@@ -190,8 +192,10 @@ class RSLifecycleSpec extends GebSpec {
     def req_json_data = [
       title: p_title,
       isRequester:true,
-      patronReference:p_patron_id,
-      rota:[]
+      patronIdentifier:p_patron_id,
+      patronReference:'RS-TESTCASE-2',
+      rota:[],
+      tags: [ 'RS-TESTCASE-2' ]
     ]
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()

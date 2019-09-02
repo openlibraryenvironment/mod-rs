@@ -410,6 +410,8 @@ databaseChangeLog = {
 
             column(name: "pr_sici", type: "VARCHAR(255)")
 
+            column(name: "pr_patron_identifier", type: "VARCHAR(255)")
+
             column(name: "pr_patron_reference", type: "VARCHAR(255)")
 
             column(name: "pr_issue", type: "VARCHAR(255)")

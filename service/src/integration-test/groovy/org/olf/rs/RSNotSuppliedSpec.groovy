@@ -106,7 +106,8 @@ class RSNotSuppliedSpec extends GebSpec{
       title: p_title,
       isRequester:true,
       patronReference:p_patron_id,
-      rota:[[directoryId:'RESHARE:RSA', rotaPosition:"0"]]
+      rota:[[directoryId:'RESHARE:RSA', rotaPosition:"0"]],
+      tags: [ 'RS-TESTCASE-2' ]
     ]
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()

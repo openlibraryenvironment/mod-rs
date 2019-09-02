@@ -63,7 +63,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String sponsor
   String informationSource
 
-  // Patron reference (EG Barcode)
+  // The identifier of the patron
+  String patronIdentifier
+  // A reference the patron may wish this request to be known as
   String patronReference
   String patronSurname
   String patronGivenName
@@ -127,6 +129,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
+    patronIdentifier (nullable: true)
     patronReference (nullable: true)
     serviceType (nullable: true)
     state (nullable: true, bindable: false)
@@ -181,6 +184,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     version column : 'pr_version'
     dateCreated column : 'pr_date_created'
     lastUpdated column : 'pr_last_updated'
+    patronIdentifier column : 'pr_patron_identifier'
     patronReference column : 'pr_patron_reference'
     serviceType column : 'pr_service_type_fk'
     state column : 'pr_state_fk'
