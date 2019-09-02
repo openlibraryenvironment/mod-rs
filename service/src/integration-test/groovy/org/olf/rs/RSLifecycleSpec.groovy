@@ -170,7 +170,7 @@ class RSLifecycleSpec extends GebSpec {
 
     // Stash the ID
     this.request_data['test case 1'] = resp.json.id
-    logger.debug("${request_data['test case 1']}")
+    logger.debug("Created new request for with-rota test case 1. ID is : ${request_data['test case 1']}")
 
 
     then:"Check the return value"
@@ -206,7 +206,7 @@ class RSLifecycleSpec extends GebSpec {
     logger.debug("Response: RESP:${resp} JSON:${resp.json}");
     // Stash the ID
     this.request_data['test case 2'] = resp.json.id
-    logger.debug("${request_data['test case 2']}")
+    logger.debug("Created new request for empty rota test - ID is ${request_data['test case 2']}")
 
 
     then:"Check the return value"
@@ -238,6 +238,7 @@ class RSLifecycleSpec extends GebSpec {
             // Explicitly call refresh - GORM will cache the object and not re-read the state otherwise
             r[0].refresh();
             final_state = r[0].state.code
+            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_COMPLETE. Currently ${r[0].state.code}")
           }
         }
         final_state == 'REQUEST_COMPLETE'
@@ -267,7 +268,6 @@ class RSLifecycleSpec extends GebSpec {
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
       waitFor(5, 1) {
         PatronRequest.withNewTransaction {
-          logger.debug("request id: ${request_data['test case 2']}")
           //        def r = PatronRequest.executeQuery('select pr.id, pr.title, pr.state.code from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 2']]);
           def r = PatronRequest.executeQuery('select pr from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 2']]);
 
@@ -276,6 +276,7 @@ class RSLifecycleSpec extends GebSpec {
             r[0].refresh();
             final_state = r[0].state.code
           }
+          logger.debug("request id: ${request_data['test case 2']} - waiting for final state SOURCING_ITEM. Currently ${r[0].state.code}")
         }
 
         final_state == 'SOURCING_ITEM'

@@ -739,6 +739,8 @@ databaseChangeLog = {
             column(name: "tsm_tenant", type: "VARCHAR(255)") {
                 constraints(nullable: "false")
             }
+
+            column(name: "tsm_block_loopback", type: "BOOLEAN")
         }
     }
 
