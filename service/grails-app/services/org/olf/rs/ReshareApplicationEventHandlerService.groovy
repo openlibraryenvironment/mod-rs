@@ -52,8 +52,10 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_BORROWER_RETURNED_ind': { service, eventData ->
       service.itemReturned(eventData);
+    },
+    'MESSAGE_REQUEST_ind': { service, eventData ->
+      service.handleRequestMessage(eventData);
     }
-    
 
   ]
 
@@ -158,8 +160,38 @@ public class ReshareApplicationEventHandlerService {
       if ( ( req != null ) && ( req.state?.code == 'SUPPLIER_IDENTIFIED' ) ) {
         log.debug("Got request ${req}");
         
-        //TODO - sendRequest called here, make it do stuff
-        protocolMessageService.sendProtocolMessage(eventData)
+        //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
+        Map request_message_request = [
+          messageType:'REQUEST',
+          request: [
+            title: req.title
+          ]
+        ]
+
+        if ( req.rota.size() > 0 ) {
+          if ( req.rotaPosition?:-1 < req.rota.size() ) {
+            // We have rota entries left, work out the next one
+            req.rotaPosition = (req.rotaPosition!=null ? req.rotaPosition+1 : 0 )
+
+            // get the responder
+            PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } )
+            if ( prr != null ) {
+              String next_responder = req.rota[req.rotaPosition].directoryId
+              // send the message
+              protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
+            }
+            else {
+              log.error("Unable to find rota entry at position ${req.rotaPosition}");
+            }
+
+          }
+          else {
+            log.debug("Reached end of rota (${req.rotaPosition}/${req.rota.size()})");
+          }
+        }
+        else {
+          log.warn("Annot send to next lender - rota is empty");
+        }
         
 
         
@@ -321,6 +353,16 @@ public class ReshareApplicationEventHandlerService {
   }
   
   
+  /**
+   * A new request has been received from a peer institution. We will need to create a request where isRequester==false
+   */
+  public void handleRequestMessage(Map eventData) {
+    log.debug("==================================================")
+    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
+    log.debug("Create new request");
+    log.debug("==================================================")
+  }
+
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
    * up to 5 times.

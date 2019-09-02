@@ -71,12 +71,15 @@ public class EventConsumerService implements EventPublisher {
           consumerRecords.each{ record ->
             try {
               log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
-              // Convert the JSON payload string to a map 
 
+              // Convert the JSON payload string to a map 
               def jsonSlurper = new JsonSlurper()
               def data = jsonSlurper.parseText(record.value)
               if ( data.event != null ) {
                 notify('PREventIndication', data)
+              }
+              else {
+                log.debug("No handlers registered for event ${data.event}");
               }
             }
             catch(Exception e) {
