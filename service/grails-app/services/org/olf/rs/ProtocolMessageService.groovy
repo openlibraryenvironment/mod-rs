@@ -31,7 +31,7 @@ class ProtocolMessageService {
    */
   public Map sendProtocolMessage(String peer_symbol, Map eventData) {
     def responseConfirmed = messageConfirmation(eventData, "request")
-    log.debug("sendProtocolMessage called for ${eventData.payload.id}")
+    log.debug("sendProtocolMessage called for ${peer_symbol},${eventData}");
     //Make this create a new request in the responder's system
     String confirmation = null;
 

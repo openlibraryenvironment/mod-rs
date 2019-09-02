@@ -131,13 +131,10 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Result of shared index lookup : ${sia}");
           log.error("Unable to identify a rota for ID ${eventData.payload.id}")
         }
-
-
-
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        lsendToNextLenderog.debug("The current request IDs are")
+        log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
         }
@@ -176,7 +173,7 @@ public class ReshareApplicationEventHandlerService {
             // get the responder
             PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } )
             if ( prr != null ) {
-              String next_responder = req.rota[req.rotaPosition].directoryId
+              String next_responder = prr.directoryId
               // send the message
               protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
             }
@@ -382,7 +379,7 @@ public class ReshareApplicationEventHandlerService {
           retries++;
         } else {
           log.debug("Result found")
-          result.reload()
+          result.refresh()
         }
       }
     }
