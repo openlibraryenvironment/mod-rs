@@ -382,6 +382,7 @@ public class ReshareApplicationEventHandlerService {
           retries++;
         } else {
           log.debug("Result found")
+          result.reload()
         }
       }
     }
