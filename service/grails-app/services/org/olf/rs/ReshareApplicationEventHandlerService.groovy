@@ -19,6 +19,7 @@ public class ReshareApplicationEventHandlerService {
   
   ProtocolMessageService protocolMessageService
   GlobalConfigService globalConfigService
+  SharedIndexService sharedIndexService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -107,12 +108,13 @@ public class ReshareApplicationEventHandlerService {
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      def req = delayedGet(eventData.payload.id);
+      PatronRequest req = delayedGet(eventData.payload.id);
       if ( ( req != null ) && ( req.state?.code == 'VALIDATED' ) ) {
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently VALIDATED - transition to SOURCING_ITEM");
         req.state = Status.lookup('PatronRequest', 'SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
+
 
         if(req.rota.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
@@ -120,6 +122,11 @@ public class ReshareApplicationEventHandlerService {
           req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
           req.save(flush:true, failOnError:true)
         } else {
+          // NO rota supplied - see if we can use the shared index service to locate appropriate copies
+          // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
+          // here in the test environments.
+          SharedIndexAvailability sia = sharedIndexService.findAppropriateCopies([title:req.title])
+          log.debug("Result of shared index lookup : ${sia}");
           log.error("Unable to identify a rota for ID ${eventData.payload.id}")
         }
 
