@@ -72,6 +72,7 @@ public class ReshareApplicationEventHandlerService {
 
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   public void handleNewPatronRequestIndication(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -93,10 +94,12 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
   // This takes a request with the state of VALIDATED and changes the state to SOURCING_ITEM, and then on to SUPPLIER_IDENTIFIED
   public void sourcePatronRequest(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -130,11 +133,13 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
 
   // This takes a request with the state of SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -163,11 +168,13 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
 
   // This takes a request with the state of REQUEST_SENT_TO_SUPPLIER and changes the state to ITEM_SHIPPED
   public void shipToLender(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::shipToLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -189,6 +196,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
 
@@ -196,6 +204,7 @@ public class ReshareApplicationEventHandlerService {
 
   // This takes a request with the state of ITEM_SHIPPED and changes the state to BORROWING_LIBRARY_RECEIVED
   public void lenderReceived(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::lenderReceived(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -217,11 +226,13 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
 
   // This takes a request with the state of BORROWING_LIBRARY_RECEIVED and changes the state to AWAITING_RETURN_SHIPPING
   public void lenderFinishedWithItem(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::lenderFinishedWithItem(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -243,11 +254,13 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
 
   
   // This takes a request with the state of AWAITING_RETURN_SHIPPING and changes the state to BORROWER_RETURNED
   public void lenderShippedReturn(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::lenderShippedReturn(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -269,10 +282,12 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
   
   // This takes a request with the state of BORROWER_RETURNED and changes the state to REQUEST_COMPLETE
   public void itemReturned(eventData) {
+    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::itemReturned(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -294,6 +309,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    log.debug("==================================================")
   }
   
   

@@ -290,7 +290,7 @@ class RSLifecycleSpec extends GebSpec {
 
     where:
     tenant_id|ref
-    'TestTenantH' | 'RS-T-D-0001'
+    'TestTenantH' | 'RS-T-D-0003'
   }
 
 
