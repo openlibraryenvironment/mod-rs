@@ -62,6 +62,7 @@ public class ReshareApplicationEventHandlerService {
     Closure c = handlers[eventData.event]
     if ( c != null ) {
       // System has a closure registered for event, call it
+      log.debug("Found closure for event ${eventData.event}. Calling");
       if ( eventData.tenant ) {
         Tenants.withId(eventData.tenant) {
           c.call(this, eventData);
