@@ -3,7 +3,7 @@ mod-rs - Providing Resource Sharing Capabilities
 
 # Developer Info
 
-## Vagrant container with rabbitmq and resource_sharing_message_services
+## Vagrant container with Kafka 
 
 This module is developed and tested in a vagrant container projectreshare/development - see
 https://app.vagrantup.com/projectreshare/boxes/development.
