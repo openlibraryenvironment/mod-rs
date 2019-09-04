@@ -50,7 +50,7 @@ class ProtocolMessageService {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
       // and then 
       log.debug("ProtocolMessageService::sendProtocolMessage(${peer_symbol},...) identified peer as a tenant in this system - loopback");
-      eventData.tenant = tenant;
+      eventData.tenant = tenant.toLowerCase()+'_mod_rs'
       eventData.event = mapToEvent(eventData.messageType)
       handleIncomingMessage(eventData)
     } else {
@@ -93,7 +93,7 @@ class ProtocolMessageService {
     if (eventData.tenant != null) {
       switch ( eventData.messageType ) {
         case 'REQUEST' :
-          String topic = "${eventData.tenant}_mod_rs_PatronRequestEvents".toString()
+          String topic = "${eventData.tenant}_PatronRequestEvents".toString()
           String key = UUID.randomUUID().toString();
           log.debug("publishEvent(${topic},${key},...");
           eventPublicationService.publishAsJSON(topic, key, eventData)

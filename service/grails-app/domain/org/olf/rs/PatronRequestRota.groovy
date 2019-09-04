@@ -58,7 +58,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           (nullable : false) // unique['patronRequest'] if you wanted to - but I don't know why you would.
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
-    state                  (nullable : true,  blank: false);
+    state                  (nullable : true)
   }
 
   static mapping = {

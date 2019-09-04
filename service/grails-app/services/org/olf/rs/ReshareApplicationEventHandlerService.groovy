@@ -366,6 +366,7 @@ public class ReshareApplicationEventHandlerService {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
     log.debug("Create new request");
+    PatronRequest pr = new PatronRequest()
     log.debug("==================================================")
   }
 
