@@ -168,7 +168,8 @@ public class ReshareApplicationEventHandlerService {
         Map request_message_request = [
           messageType:'REQUEST',
           request: [
-            title: req.title
+            title: req.title,
+            patronReference: req.patronReference
           ]
         ]
 
@@ -365,8 +366,14 @@ public class ReshareApplicationEventHandlerService {
   public void handleRequestMessage(Map eventData) {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
-    log.debug("Create new request");
-    PatronRequest pr = new PatronRequest()
+    if ( eventData.request != null ) {
+      log.debug("Create new request");
+      PatronRequest pr = new PatronRequest(eventData.request)
+    }
+    else {
+      log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
+    }
+
     log.debug("==================================================")
   }
 
