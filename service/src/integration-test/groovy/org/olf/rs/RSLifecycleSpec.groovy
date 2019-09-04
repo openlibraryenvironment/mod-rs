@@ -148,6 +148,29 @@ class RSLifecycleSpec extends GebSpec {
     tenant_id | p_title | p_patron_id
     'TestTenantG' | 'Brain of the firm' | '1234-5678'
   }
+
+  /**
+   *  Make sure that a reciprocal request has been created in TestTenantH
+   */
+  void "Ensure TestTenantH (OCLC:AVL) now contains a request with patronReference 'RS-TESTCASE-1'"() {
+
+    def pr = null;
+
+    when:
+      Tenants.withId('testtenanth_mod_rs') {
+        waitFor(5, 1) {
+          PatronRequest.withNewTransaction {
+            pr = PatronRequest.findByPatronReference('RS-TESTCASE-1')
+          }
+
+          pr != null
+        }
+      }
+      log.debug("Found patron request ${pr} in TestTenantH");
+
+    then:
+      assert pr != null;
+  }
   
   
   void "Create a new request with an empty Rota"(tenant_id, p_title, p_patron_id) {
