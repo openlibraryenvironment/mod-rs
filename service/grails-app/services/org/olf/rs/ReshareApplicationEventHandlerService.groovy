@@ -72,6 +72,9 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
+    else {
+      log.warn("Event ${eventData.event} no handler found");
+    }
   }
 
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
@@ -157,6 +160,7 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
+      req.lock()
       if ( ( req != null ) && ( req.state?.code == 'SUPPLIER_IDENTIFIED' ) ) {
         log.debug("Got request ${req}");
         

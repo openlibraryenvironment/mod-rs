@@ -10,6 +10,8 @@ import java.util.UUID
  */
 class ProtocolMessageService {
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  EventPublicationService eventPublicationService
+
   GlobalConfigService globalConfigService
   /**
    * @param eventData : A map structured as followed 
@@ -47,6 +49,7 @@ class ProtocolMessageService {
     if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
       // and then 
+      log.debug("ProtocolMessageService::sendProtocolMessage(${peer_symbol},...) identified peer as a tenant in this system - loopback");
       eventData.tenant = tenant;
       eventData.event = mapToEvent(eventData.messageType)
       handleIncomingMessage(eventData)
@@ -64,7 +67,7 @@ class ProtocolMessageService {
 
     switch ( messageType ) {
       case 'REQUEST':
-        result = 'MESSAGE_request_ind'
+        result = 'MESSAGE_REQUEST_ind'
         break;
     }
 
@@ -82,17 +85,21 @@ class ProtocolMessageService {
    */
   public Map handleIncomingMessage(Map eventData) {
     // Recipient must be a tenant in the SharedConfig
-    log.debug("handleIncomingMessage called.")
+    log.debug("handleIncomingMessage called. (eventData.messageType:${eventData.messageType})")
     
     // Now we issue a protcolMessageIndication event so that any handlers written for the protocol message can be 
     // called - this method should not do any work beyond understanding what event needs to be dispatched for the 
     // particular message coming in.
     if (eventData.tenant != null) {
       switch ( eventData.messageType ) {
-        case 'request' :
-          String topic = "${tenant}_mod_rs_PatronRequestEvents".toString()
+        case 'REQUEST' :
+          String topic = "${eventData.tenant}_mod_rs_PatronRequestEvents".toString()
           String key = UUID.randomUUID().toString();
+          log.debug("publishEvent(${topic},${key},...");
           eventPublicationService.publishAsJSON(topic, key, eventData)
+          break;
+        default:
+          log.warn("Unhandled message tyoe in eventData : ${eventData}");
           break;
       }
     }

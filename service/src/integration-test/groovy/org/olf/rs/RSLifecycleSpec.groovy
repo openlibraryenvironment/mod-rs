@@ -119,7 +119,7 @@ class RSLifecycleSpec extends GebSpec {
       patronIdentifier:p_patron_id,
       isRequester:true,
       rota:[
-        [directoryId:'OCLC:ZMU', rotaPosition:"0"]
+        [directoryId:'OCLC:AVL', rotaPosition:"0"]
       ],
       tags: [ 'RS-TESTCASE-1' ]
     ]
