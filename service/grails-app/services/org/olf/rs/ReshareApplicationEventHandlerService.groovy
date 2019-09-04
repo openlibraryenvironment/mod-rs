@@ -112,6 +112,9 @@ public class ReshareApplicationEventHandlerService {
 
       PatronRequest req = delayedGet(eventData.payload.id);
       if ( ( req != null ) && ( req.state?.code == 'VALIDATED' ) ) {
+
+        req.lock();
+
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently VALIDATED - transition to SOURCING_ITEM");
         req.state = Status.lookup('PatronRequest', 'SOURCING_ITEM');
@@ -219,6 +222,7 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
+      req.lock()
       if ( ( req != null ) && ( req.state?.code == 'REQUEST_SENT_TO_SUPPLIER' ) ) {
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently REQUEST_SENT_TO_SUPPLIER - transition to ITEM_SHIPPED");
@@ -249,6 +253,7 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
+      req.lock();
       if ( ( req != null ) && ( req.state?.code == 'ITEM_SHIPPED' ) ) {
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently ITEM_SHIPPED - transition to BORROWING_LIBRARY_RECEIVED");
