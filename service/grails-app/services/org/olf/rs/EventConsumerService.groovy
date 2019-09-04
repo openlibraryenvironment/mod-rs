@@ -24,6 +24,8 @@ import grails.events.EventPublisher
  */
 public class EventConsumerService implements EventPublisher {
 
+  def grailsApplication
+
   private KafkaConsumer consumer = null;
   private boolean running = true;
   private boolean tenant_list_updated = false;
@@ -32,6 +34,10 @@ public class EventConsumerService implements EventPublisher {
   @javax.annotation.PostConstruct
   public void init() {
     log.debug("Configuring event consumer service");
+
+    // String bootstrap_servers = grailsApplication.config.getProperty('kafka.bootstrapservers')
+    // String zj_connect = grailsApplication.config.getProperty('zookeeper.connect')
+
     Properties props = new Properties()
     props.put('zk.connect', 'localhost:2181')
     props.put('bootstrap.servers', 'localhost:9092') // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
