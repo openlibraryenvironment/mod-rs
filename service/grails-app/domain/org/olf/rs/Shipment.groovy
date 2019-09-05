@@ -2,6 +2,8 @@ package org.olf.rs
 
 import org.olf.okapi.modules.directory.DirectoryEntry
 import com.k_int.web.toolkit.refdata.RefdataValue
+import grails.gorm.multitenancy.Tenants;
+import grails.gorm.MultiTenant
 import java.time.LocalDateTime
 
 class Shipment {

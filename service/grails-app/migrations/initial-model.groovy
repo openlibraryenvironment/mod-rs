@@ -651,7 +651,10 @@ databaseChangeLog = {
             column(name: "sh_version", type: "BIGINT") {
                 constraints(nullable: "false")
             }
-
+            column(name: "sh_date_created", type: "timestamp")
+        
+            column(name: "sh_last_updated", type: "timestamp")
+                        
             column(name: "sh_received_date_fk", type: "BYTEA")
 
             column(name: "sh_shipment_method_fk", type: "VARCHAR(36)")
@@ -695,6 +698,9 @@ databaseChangeLog = {
             column(name: "sm_version", type: "BIGINT") {
                 constraints(nullable: "false")
             }
+            column(name: "si_date_created", type: "timestamp")
+            
+            column(name: "si_last_updated", type: "timestamp")
 
             column(name: "sm_name", type: "VARCHAR(255)")
 
