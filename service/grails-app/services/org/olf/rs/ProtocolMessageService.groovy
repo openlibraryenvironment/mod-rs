@@ -49,6 +49,7 @@ class ProtocolMessageService {
       // and then 
       eventData.tenant = tenant;
       eventData.event = mapToEvent(eventData.messageType)
+      log.debug("Direct call ${tenant} as loopback for ${eventData}");
       handleIncomingMessage(eventData)
     } else {
       log.error("Tenant does not exist in the system. TODO: call real messaging here")
@@ -92,6 +93,7 @@ class ProtocolMessageService {
         case 'request' :
           String topic = "${tenant}_mod_rs_PatronRequestEvents".toString()
           String key = UUID.randomUUID().toString();
+          log.debug("Issue ${topic} ${eventData}");
           eventPublicationService.publishAsJSON(topic, key, eventData)
           break;
       }
