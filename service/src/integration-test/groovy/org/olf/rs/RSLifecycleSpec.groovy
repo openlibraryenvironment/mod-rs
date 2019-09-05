@@ -186,7 +186,6 @@ class RSLifecycleSpec extends GebSpec {
     tenant_id | p_title | p_patron_id
     'TestTenantH' | 'Brain of the firm' | '1234-5678'
   }
-
   
   void "Wait for the new request to have state REQUEST_COMPLETE"(tenant_id, ref) {
 

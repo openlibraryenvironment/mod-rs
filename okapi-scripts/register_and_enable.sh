@@ -1,4 +1,5 @@
 BASEDIR=$(dirname "$0")
+echo $BASEDIR
 pushd "$BASEDIR/../service"
 
 DIR="$BASEDIR/../"
