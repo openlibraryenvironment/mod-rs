@@ -10,8 +10,6 @@ class UrlMappings {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
     }
 
-    "/chas/$action" ( controller: "Chas")
-
     // Call /rs/refdata to list all refdata categories
     '/rs/refdata'(resources: 'refdata') {
       collection {
@@ -21,6 +19,10 @@ class UrlMappings {
 
     // Call /rs/custprop  to list all custom properties
     '/rs/custprops'(resources: 'customPropertyDefinition')
+
+    "/kiwt/config/$extended?" (controller: 'config' , action: "resources")
+    "/kiwt/config/schema/$type" (controller: 'config' , action: "schema")
+    "/kiwt/config/schema/embedded/$type" (controller: 'config' , action: "schemaEmbedded")
 
 
     "500"(view: '/error')
