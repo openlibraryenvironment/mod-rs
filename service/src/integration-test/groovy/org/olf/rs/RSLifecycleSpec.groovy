@@ -119,7 +119,7 @@ class RSLifecycleSpec extends GebSpec {
       patronIdentifier:p_patron_id,
       isRequester:true,
       rota:[
-        [directoryId:'OCLC:ZMU', rotaPosition:"0"]
+        [directoryId:'OCLC:AVL', rotaPosition:"0"]
       ],
       tags: [ 'RS-TESTCASE-1' ]
     ]
@@ -147,6 +147,31 @@ class RSLifecycleSpec extends GebSpec {
     where:
     tenant_id | p_title | p_patron_id
     'TestTenantG' | 'Brain of the firm' | '1234-5678'
+  }
+
+  /**
+   *  Make sure that a reciprocal request has been created in TestTenantH
+   */
+  void "Ensure TestTenantH (OCLC:AVL) now contains a request with patronReference 'RS-TESTCASE-1'"() {
+
+    def pr = null;
+
+    when:
+      Tenants.withId('testtenanth_mod_rs') {
+        waitFor(8, 1) {
+          PatronRequest.withNewTransaction {
+            logger.debug("Current requests for PatronRequest in testtenanth");
+            logger.debug("${PatronRequest.list()}");
+            pr = PatronRequest.findByPatronReference('RS-TESTCASE-1')
+          }
+
+          pr != null
+        }
+      }
+      log.debug("Found patron request ${pr} in TestTenantH");
+
+    then:
+      assert pr != null;
   }
   
   
@@ -186,9 +211,8 @@ class RSLifecycleSpec extends GebSpec {
     tenant_id | p_title | p_patron_id
     'TestTenantH' | 'Brain of the firm' | '1234-5678'
   }
-
   
-  void "Wait for the new request to have state REQUEST_COMPLETE"(tenant_id, ref) {
+  void "Wait for the new request to have state REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
 
     boolean completed = false;
     String final_state = null;
@@ -207,15 +231,15 @@ class RSLifecycleSpec extends GebSpec {
             // Explicitly call refresh - GORM will cache the object and not re-read the state otherwise
             r[0].refresh();
             final_state = r[0].state.code
-            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_COMPLETE. Currently ${r[0].state.code}")
+            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. Currently ${r[0].state.code}")
           }
         }
-        final_state == 'REQUEST_COMPLETE'
+        final_state == 'REQUEST_SENT_TO_SUPPLIER'
       }
     }
 
     then:"Check the return value"
-    assert final_state == "REQUEST_COMPLETE"
+    assert final_state == "REQUEST_SENT_TO_SUPPLIER"
 
     //      completed == true
 
