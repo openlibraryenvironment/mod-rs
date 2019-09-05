@@ -1,9 +1,14 @@
 package org.olf.rs
 
-class ShipmentItem {
+import grails.gorm.MultiTenant
+
+
+class ShipmentItem implements MultiTenant<ShipmentItem> {
+
   String id
+
   //This will be used to track whether an item is being shipped out on loan or back as a return
-  boolean isReturning
+  Boolean isReturning
   
   Date dateCreated
   Date lastUpdated

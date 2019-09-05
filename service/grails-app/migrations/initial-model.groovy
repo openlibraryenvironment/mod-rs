@@ -655,7 +655,7 @@ databaseChangeLog = {
         
             column(name: "sh_last_updated", type: "timestamp")
                         
-            column(name: "sh_received_date_fk", type: "BYTEA")
+            column(name: "sh_received_date", type: "BYTEA")
 
             column(name: "sh_shipment_method_fk", type: "VARCHAR(36)")
 
@@ -663,7 +663,7 @@ databaseChangeLog = {
 
             column(name: "sh_status_fk", type: "VARCHAR(36)")
 
-            column(name: "sh_ship_date_fk", type: "BYTEA")
+            column(name: "sh_ship_date", type: "BYTEA")
         }
     }
 
@@ -686,6 +686,10 @@ databaseChangeLog = {
             column(name: "si_patron_request_fk", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
+
+            column(name: "si_date_created", type: "timestamp")
+            
+            column(name: "si_last_updated", type: "timestamp")
         }
     }
 
@@ -698,9 +702,6 @@ databaseChangeLog = {
             column(name: "sm_version", type: "BIGINT") {
                 constraints(nullable: "false")
             }
-            column(name: "si_date_created", type: "timestamp")
-            
-            column(name: "si_last_updated", type: "timestamp")
 
             column(name: "sm_name", type: "VARCHAR(255)")
 

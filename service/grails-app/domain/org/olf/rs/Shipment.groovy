@@ -5,8 +5,11 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import java.time.LocalDateTime
+import grails.gorm.MultiTenant
 
-class Shipment {
+
+class Shipment implements MultiTenant<Shipment> {
+
   String id
   DirectoryEntry directoryEntry
   RefdataValue shipmentMethod
@@ -18,6 +21,10 @@ class Shipment {
   Date lastUpdated
   
   static hasMany = [shipmentItems: ShipmentItem];
+
+  static mappedBy = [
+    shipmentItems: 'shipment'
+  ]
 
   static constraints = {
     dateCreated (nullable: true, bindable: false)
@@ -38,7 +45,7 @@ class Shipment {
     directoryEntry column : 'sh_directory_entry_fk'
     shipmentMethod column : 'sh_shipment_method_fk'
     status column : 'sh_status_fk'
-    shipDate column : 'sh_ship_date_fk'
-    receivedDate column : 'sh_received_date_fk'
+    shipDate column : 'sh_ship_date'
+    receivedDate column : 'sh_received_date'
   }
 }

@@ -41,17 +41,17 @@ class ShipmentSpec extends GebSpec {
   
   final static Logger logger = LoggerFactory.getLogger(ShipmentSpec.class);
   
-    def setup() {
-    }
+  def setup() {
+  }
 
-    def cleanup() {
-    }
+  def cleanup() {
+  }
     
     
     
-    //Set up a tenant to run shipping tests on
-    void "Set up test tenants "(tenantid, name) {
-      when:"We post a new tenant request to the OKAPI controller"
+  //Set up a tenant to run shipping tests on
+  void "Set up test tenants "(tenantid, name) {
+    when:"We post a new tenant request to the OKAPI controller"
   
       logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
   
@@ -60,17 +60,17 @@ class ShipmentSpec extends GebSpec {
         authHeaders.rehydrate(delegate, owner, thisObject)()
       }
   
-      then:"The response is correct"
+    then:"The response is correct"
       resp.status == CREATED.value()
       logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
   
-      where:
+    where:
       tenantid | name
       'RSShipTenantA' | 'RSShipTenantA'
-    }
+  }
         
     
-    void "Create a new request to test shipping on"(tenant_id, p_title, p_patron_id) {
+  void "Create a new request to test shipping on"(tenant_id, p_title, p_patron_id) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
@@ -115,23 +115,24 @@ class ShipmentSpec extends GebSpec {
     
     when:
       logger.debug("Creating a new shipment for tenant:${tenant_id}, patron request: ${p_ref}");
-      new Shipment(
-        id: '00001',
-        shipDate: currentTime
-        ).save(flush:true)
+
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+
+        def s = new Shipment(
+          shipDate: currentTime
+          ).save(flush:true, failOnError:true)
         logger.debug("New shipment created");
 
         logger.debug("Creating a new shipment item for patron request: ${p_ref}");
-        new ShipmentItem(
-          id: '01189998819991',
+        def si = new ShipmentItem(
           isReturning: false,
           patronRequest: PatronRequest.findByPatronReference('SHIP-TESTCASE-1'),
-          shipment: Shipment.findById('00001')
-          ).save(flush: true)
+          shipment: s
+          ).save(flush: true, failOnError:true)
           logger.debug("New shipment item created");
+      }
       
     then:
-    //TODO Check nothing crashes
       1==1
     where:
       tenant_id | p_ref
