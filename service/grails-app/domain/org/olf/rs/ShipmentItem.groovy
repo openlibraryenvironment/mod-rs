@@ -5,6 +5,8 @@ class ShipmentItem {
   //This will be used to track whether an item is being shipped out on loan or back as a return
   boolean isReturning
   
+  Date dateCreated
+  Date lastUpdated
   
   static belongsTo = [
     shipment: Shipment,

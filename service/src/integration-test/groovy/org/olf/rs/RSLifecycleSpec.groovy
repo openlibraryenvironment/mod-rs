@@ -54,7 +54,6 @@ class RSLifecycleSpec extends GebSpec {
   def cleanup() {
   }
 
-  // Set up a new tenant called RSTestTenantA
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
 

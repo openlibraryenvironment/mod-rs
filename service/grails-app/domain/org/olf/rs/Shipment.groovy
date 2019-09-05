@@ -12,7 +12,8 @@ class Shipment {
   LocalDateTime shipDate
   LocalDateTime receivedDate
   
-  
+  Date dateCreated
+  Date lastUpdated
   
   static hasMany = [shipmentItems: ShipmentItem];
 
