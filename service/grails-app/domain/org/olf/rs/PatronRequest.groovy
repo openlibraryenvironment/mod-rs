@@ -78,6 +78,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Date lastUpdated
 
   Date neededBy
+  
+  
 
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
