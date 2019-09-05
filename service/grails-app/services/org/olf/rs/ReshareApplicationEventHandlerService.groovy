@@ -39,21 +39,17 @@ public class ReshareApplicationEventHandlerService {
       service.sendToNextLender(eventData);
     },
     'STATUS_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
-      service.shipToLender(eventData);
     },
     'STATUS_ITEM_SHIPPED_ind': { service, eventData ->
-      service.lenderReceived(eventData);
     },
     'STATUS_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
-      service.lenderFinishedWithItem(eventData);
     },
     'STATUS_AWAITING_RETURN_SHIPPING_ind': { service, eventData ->
-      service.lenderShippedReturn(eventData);
     },
     'STATUS_BORROWER_RETURNED_ind': { service, eventData ->
-      service.itemReturned(eventData);
     },
     'MESSAGE_REQUEST_ind': { service, eventData ->
+      // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
       service.handleRequestMessage(eventData);
     }
 
@@ -67,8 +63,14 @@ public class ReshareApplicationEventHandlerService {
       // System has a closure registered for event, call it
       log.debug("Found closure for event ${eventData.event}. Calling");
       if ( eventData.tenant ) {
-        Tenants.withId(eventData.tenant) {
-          c.call(this, eventData);
+        try {
+          Tenants.withId(eventData.tenant) {
+            c.call(this, eventData);
+          }
+        }
+        catch ( Exception e ) {
+          log.error("Problem trying to invoke event handler for ${eventData.event}",e)
+          throw e;
         }
       }
     }
@@ -198,9 +200,6 @@ public class ReshareApplicationEventHandlerService {
           log.warn("Annot send to next lender - rota is empty");
         }
         
-
-        
-        
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
         req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
         req.save(flush:true, failOnError:true)
@@ -217,149 +216,6 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
-  // This takes a request with the state of REQUEST_SENT_TO_SUPPLIER and changes the state to ITEM_SHIPPED
-  public void shipToLender(eventData) {
-    log.debug("==================================================")
-    log.debug("ReshareApplicationEventHandlerService::shipToLender(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id);
-      req.lock()
-      if ( ( req != null ) && ( req.state?.code == 'REQUEST_SENT_TO_SUPPLIER' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently REQUEST_SENT_TO_SUPPLIER - transition to ITEM_SHIPPED");
-        req.state = Status.lookup('PatronRequest', 'ITEM_SHIPPED');
-        req.save(flush:true, failOnError:true)
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
-      }
-    }
-    log.debug("==================================================")
-  }
-
-
-
-
-  // This takes a request with the state of ITEM_SHIPPED and changes the state to BORROWING_LIBRARY_RECEIVED
-  public void lenderReceived(eventData) {
-    log.debug("==================================================")
-    log.debug("ReshareApplicationEventHandlerService::lenderReceived(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id);
-      req.lock();
-      if ( ( req != null ) && ( req.state?.code == 'ITEM_SHIPPED' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently ITEM_SHIPPED - transition to BORROWING_LIBRARY_RECEIVED");
-        req.state = Status.lookup('PatronRequest', 'BORROWING_LIBRARY_RECEIVED');
-        req.save(flush:true, failOnError:true)
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
-      }
-    }
-    log.debug("==================================================")
-  }
-
-
-  // This takes a request with the state of BORROWING_LIBRARY_RECEIVED and changes the state to AWAITING_RETURN_SHIPPING
-  public void lenderFinishedWithItem(eventData) {
-    log.debug("==================================================")
-    log.debug("ReshareApplicationEventHandlerService::lenderFinishedWithItem(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'BORROWING_LIBRARY_RECEIVED' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently BORROWING_LIBRARY_RECEIVED - transition to AWAITING_RETURN_SHIPPING");
-        req.state = Status.lookup('PatronRequest', 'AWAITING_RETURN_SHIPPING');
-        req.save(flush:true, failOnError:true)
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
-      }
-    }
-    log.debug("==================================================")
-  }
-
-  
-  // This takes a request with the state of AWAITING_RETURN_SHIPPING and changes the state to BORROWER_RETURNED
-  public void lenderShippedReturn(eventData) {
-    log.debug("==================================================")
-    log.debug("ReshareApplicationEventHandlerService::lenderShippedReturn(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'AWAITING_RETURN_SHIPPING' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently BORROWING_LIBRARY_RECEIVED - transition to BORROWER_RETURNED");
-        req.state = Status.lookup('PatronRequest', 'BORROWER_RETURNED');
-        req.save(flush:true, failOnError:true)
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
-      }
-    }
-    log.debug("==================================================")
-  }
-  
-  // This takes a request with the state of BORROWER_RETURNED and changes the state to REQUEST_COMPLETE
-  public void itemReturned(eventData) {
-    log.debug("==================================================")
-    log.debug("ReshareApplicationEventHandlerService::itemReturned(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'BORROWER_RETURNED' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently BORROWER_RETURNED - transition to REQUEST_COMPLETE");
-        req.state = Status.lookup('PatronRequest', 'REQUEST_COMPLETE');
-        req.save(flush:true, failOnError:true)
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
-      }
-    }
-    log.debug("==================================================")
-  }
-  
-  
   /**
    * A new request has been received from a peer institution. We will need to create a request where isRequester==false
    */

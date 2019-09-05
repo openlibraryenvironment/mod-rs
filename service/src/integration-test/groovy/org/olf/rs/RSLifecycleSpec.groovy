@@ -213,7 +213,7 @@ class RSLifecycleSpec extends GebSpec {
   }
 
   
-  void "Wait for the new request to have state REQUEST_COMPLETE"(tenant_id, ref) {
+  void "Wait for the new request to have state REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
 
     boolean completed = false;
     String final_state = null;
@@ -232,15 +232,15 @@ class RSLifecycleSpec extends GebSpec {
             // Explicitly call refresh - GORM will cache the object and not re-read the state otherwise
             r[0].refresh();
             final_state = r[0].state.code
-            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_COMPLETE. Currently ${r[0].state.code}")
+            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. Currently ${r[0].state.code}")
           }
         }
-        final_state == 'REQUEST_COMPLETE'
+        final_state == 'REQUEST_SENT_TO_SUPPLIER'
       }
     }
 
     then:"Check the return value"
-    assert final_state == "REQUEST_COMPLETE"
+    assert final_state == "REQUEST_SENT_TO_SUPPLIER"
 
     //      completed == true
 
