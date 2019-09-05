@@ -11,13 +11,17 @@ import static groovy.json.JsonOutput.*
 public class EventPublicationService {
 
   private KafkaProducer producer = null;
+  def grailsApplication
 
   @javax.annotation.PostConstruct
   public void init() {
     log.debug("Configuring event publication service");
+    String bootstrap_servers = grailsApplication.config.getProperty('kafka.bootstrapservers', String, 'localhost:9092')
+    String zk_connect = grailsApplication.config.getProperty('zookeeper.connect', String, 'localhost:2181')
+
     Properties props = new Properties()
-    props.put('zk.connect', 'localhost:2181')
-    props.put('bootstrap.servers', 'localhost:9092') // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
+    props.put('zk.connect', zk_connect);
+    props.put('bootstrap.servers', bootstrap_servers) // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
     props.put('key.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
     props.put('value.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
     producer = new KafkaProducer(props)
@@ -29,7 +33,7 @@ public class EventPublicationService {
 
     String compoundMessage = groovy.json.JsonOutput.toJson(data)
 
-    log.debug("Send key:${key}, compoundMessage: ${compoundMessage}");
+    log.debug("publishAsJSON(topic:${topic} key:${key}, compoundMessage: ${compoundMessage})");
     producer.send(
         new ProducerRecord<String, String>(topic, key, compoundMessage), { RecordMetadata metadata, Exception e ->
           // println "The offset of the record we just sent is: ${metadata?.offset()}"

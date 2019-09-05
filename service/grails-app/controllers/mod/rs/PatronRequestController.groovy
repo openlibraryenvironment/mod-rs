@@ -13,11 +13,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
   public static final String POSSIBLE_ACTIONS_QUERY='select distinct st.action from StateTransition as st where st.fromStatus = :fromstate'
 
-  /** Inject reShareMessage service - 
-   * see https://github.com/openlibraryenvironment/mod-rs/blob/master/grails-app/services/org/olf/rs/workflow/ReShareMessageService.groovy
-   */
-  def reShareMessageService
-
   PatronRequestController() {
     super(PatronRequest)
   }
@@ -33,8 +28,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
   def performAction() {
     if ( request.method=='POST' ) {
       log.debug("PatronRequestController::performAction(${request.JSON})");
-
-      // use reShareMessageService to action each identified request
     }
   }
 
