@@ -367,8 +367,8 @@ public class ReshareApplicationEventHandlerService {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
     if ( eventData.request != null ) {
-      log.debug("Create new request");
-      PatronRequest pr = new PatronRequest(eventData.request)
+      log.debug("*** Create new request***");
+      PatronRequest pr = new PatronRequest(eventData.request).save(flush:true, failOnError:true)
     }
     else {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");

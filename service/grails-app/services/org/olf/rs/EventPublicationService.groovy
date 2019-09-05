@@ -11,6 +11,7 @@ import static groovy.json.JsonOutput.*
 public class EventPublicationService {
 
   private KafkaProducer producer = null;
+  def grailsApplication
 
   @javax.annotation.PostConstruct
   public void init() {

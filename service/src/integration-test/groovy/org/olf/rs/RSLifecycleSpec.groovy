@@ -158,8 +158,10 @@ class RSLifecycleSpec extends GebSpec {
 
     when:
       Tenants.withId('testtenanth_mod_rs') {
-        waitFor(5, 1) {
+        waitFor(8, 1) {
           PatronRequest.withNewTransaction {
+            logger.debug("Current requests for PatronRequest in testtenanth");
+            logger.debug("${PatronRequest.list()}");
             pr = PatronRequest.findByPatronReference('RS-TESTCASE-1')
           }
 
