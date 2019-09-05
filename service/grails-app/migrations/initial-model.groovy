@@ -420,7 +420,7 @@ databaseChangeLog = {
 
             column(name: "pr_quarter", type: "VARCHAR(255)")
 
-            column(name: "pr_system_item_id", type: "VARCHAR(255)")
+            column(name: "pr_system_instance_id", type: "VARCHAR(255)")
 
             column(name: "pr_sub_title", type: "VARCHAR(255)")
         }
