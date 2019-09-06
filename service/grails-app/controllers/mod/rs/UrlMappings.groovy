@@ -12,6 +12,8 @@ class UrlMappings {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
     }
 
+    "/rs/shipments" (resources: 'shipment' )
+
     // Call /rs/refdata to list all refdata categories
     '/rs/refdata'(resources: 'refdata') {
       collection {
