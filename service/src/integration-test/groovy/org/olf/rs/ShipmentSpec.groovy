@@ -118,6 +118,7 @@ class ShipmentSpec extends GebSpec {
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
 
       def s = new Shipment(
+          id: '00001',
           shipDate: currentTime
           ).save(flush:true, failOnError:true)
       logger.debug("New shipment created");
@@ -147,6 +148,47 @@ class ShipmentSpec extends GebSpec {
   }
 
 
+  
+  void "Create a new shipment with some shipment items through HTML requests"(tenant_id) {
+    def currentTime = LocalDateTime.now()
+    
+    
+    when:"post new request"
+    logger.debug("Create a new shipment ${tenant_id}");
+
+    def ship_json_data = [
+      id: '00002',
+      shipDate: currentTime,
+//      shipmentItems: [{si1},{si2}]
+     ]
+
+    String json_payload = new groovy.json.JsonBuilder(ship_json_data).toString()
+
+    def resp = restBuilder().post("${baseUrl}/rs/shipment") {
+      header 'X-Okapi-Tenant', tenant_id
+      contentType 'application/json; charset=UTF-8'
+      accept 'application/json; charset=UTF-8'
+      authHeaders.rehydrate(delegate, owner, thisObject)()
+      json json_payload
+    }
+    logger.debug("Response: RESP:${resp} JSON:${resp.json}");
+    // Stash the ID
+    this.request_data['shipping test case 2'] = resp.json.id
+    logger.debug("Created new shipment for tenant: ${tenant_id}. ID is ${request_data['shipping test case 2']}")
+
+
+    then:"Check the return value"
+    resp.status == CREATED.value()
+    assert request_data['shipping test case 2'] != null;
+
+    where:
+    tenant_id = 'RSShipTenantA'
+  }
+  
+  
+  
+  
+  
 
 
 
