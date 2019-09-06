@@ -150,7 +150,6 @@ class ShipmentSpec extends GebSpec {
   
   void "Create a new shipment with some shipment items through HTML requests"(tenant_id, note) {
 
-    def currentTime = LocalDateTime.now()
 
     when:"post new request"
       logger.debug("Create a new shipment ${tenant_id}");
@@ -177,9 +176,9 @@ class ShipmentSpec extends GebSpec {
 
     then:"Check the return value"
       logger.debug("Checking the shipment made it to the database")
-      assert resp.status == CREATED.value()
       logger.debug("resp status: ${resp.status}")
       logger.debug("CREATED value: ${CREATED.value()}")
+      assert resp.status == CREATED.value()
       assert request_data['shipping test case 2'] != null;
 
     where:
