@@ -507,6 +507,8 @@ databaseChangeLog = {
             column(name: "prr_shelfmark", type: "VARCHAR(255)")
 
             column(name: "prr_available_from", type: "timestamp")
+
+            column(name: "prr_peer_fk", type: "VARCHAR(36)")
         }
     }
 

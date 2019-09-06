@@ -5,6 +5,7 @@ import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.Status
+import org.olf.okapi.modules.directory.Symbol;
 
 /**
  * Handle application events.
@@ -185,6 +186,19 @@ public class ReshareApplicationEventHandlerService {
             if ( prr != null ) {
               String next_responder = prr.directoryId
               // send the message
+
+              // Fill out the directory entry reference if it's not currently set.
+              if (prr.peer == null ) {
+                String name_compnents = prr.directoryId.split(':')
+                if ( name_compnents.size() == 2 ) {
+                  def peer_list = Symbol.executeQuery('select s from Symbol as s where s.authority.val = :authority and s.symbol = :symbol',
+                                                      [authority:name_compnents[0], symbol:name_compnents[1]]);
+                  if ( peer_list.size() == 1 ) {
+                    prr.peer = peer_list[0].owner
+                  }
+                }
+              }
+
               protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
             }
             else {

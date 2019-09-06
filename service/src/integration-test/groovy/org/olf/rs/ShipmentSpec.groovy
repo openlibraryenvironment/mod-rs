@@ -148,21 +148,21 @@ class ShipmentSpec extends GebSpec {
 
 
   
-  void "Create a new shipment with some shipment items through HTML requests"(tenant_id) {
+  void "Create a new shipment with some shipment items through HTML requests"(tenant_id, note) {
 
     def currentTime = LocalDateTime.now()
 
     when:"post new request"
       logger.debug("Create a new shipment ${tenant_id}");
-      String str_current_time = '2019-01-01'
+      String str_current_time = '2019-01-01T00:00:00.000'
 
       def ship_json_data = [
-        shipDate: str_current_time
+    //    shipDate: str_current_time
       ]
 
       String json_payload = new groovy.json.JsonBuilder(ship_json_data).toString()
 
-      def resp = restBuilder().post("${baseUrl}/rs/shipment") {
+      def resp = restBuilder().post("${baseUrl}/rs/shipments") {
         header 'X-Okapi-Tenant', tenant_id
         contentType 'application/json; charset=UTF-8'
         accept 'application/json; charset=UTF-8'
@@ -177,26 +177,16 @@ class ShipmentSpec extends GebSpec {
 
     then:"Check the return value"
       logger.debug("Checking the shipment made it to the database")
-      //resp.status == CREATED.value()
+      assert resp.status == CREATED.value()
       logger.debug("resp status: ${resp.status}")
       logger.debug("CREATED value: ${CREATED.value()}")
-      1==1
-
-
-      
       assert request_data['shipping test case 2'] != null;
 
     where:
-      tenant_id = 'RSShipTenantA'
+      tenant_id|note
+      'RSShipTenantA'|''
   }
   
-  
-  
-  
-  
-
-
-
   void "Delete the tenants"(tenant_id, note) {
 
     expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"

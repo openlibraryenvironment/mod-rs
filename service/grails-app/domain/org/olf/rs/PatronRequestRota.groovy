@@ -2,6 +2,7 @@ package org.olf.rs
 
 import grails.gorm.MultiTenant;
 import org.olf.rs.statemodel.Status;
+import org.olf.okapi.modules.directory.DirectoryEntry
 
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
@@ -46,6 +47,8 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    */
   Status state
 
+  DirectoryEntry peer
+
   static constraints = {
     availability           (nullable : true,  blank: false)
     availableFrom          (nullable : true)
@@ -59,6 +62,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
     state                  (nullable : true)
+    peer                   (nullable : true)
   }
 
   static mapping = {
@@ -76,5 +80,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     shelfmark              column : "prr_shelfmark"
     systemIdentifier       column : "prr_system_identifier"
     state                  column : "prr_state_fk"
+    peer                   column : "prr_peer_fk"
   }
 }
