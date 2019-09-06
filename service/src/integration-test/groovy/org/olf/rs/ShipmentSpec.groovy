@@ -157,8 +157,7 @@ class ShipmentSpec extends GebSpec {
     logger.debug("Create a new shipment ${tenant_id}");
 
     def ship_json_data = [
-      id: '00002',
-      shipDate: currentTime,
+      // shipDate: currentTime,
 //      shipmentItems: [{si1},{si2}]
      ]
 
