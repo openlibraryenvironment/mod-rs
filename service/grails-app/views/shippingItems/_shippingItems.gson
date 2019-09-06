@@ -1,0 +1,10 @@
+import groovy.transform.*
+import org.olf.rs.ShippingItems;
+
+@Field ShippingItems shippingItems
+json g.render(shippingItems, [expand: ['id',
+                                        'isReturning',
+                                        'dateCreated',
+                                        'lastUpdated'
+                                        ],
+                              excludes: ['shipping']])

@@ -118,7 +118,6 @@ class ShipmentSpec extends GebSpec {
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
 
       def s = new Shipment(
-          id: '00001',
           shipDate: currentTime
           ).save(flush:true, failOnError:true)
       logger.debug("New shipment created");
@@ -157,7 +156,6 @@ class ShipmentSpec extends GebSpec {
     logger.debug("Create a new shipment ${tenant_id}");
 
     def ship_json_data = [
-      id: '00002',
       shipDate: currentTime,
 //      shipmentItems: [{si1},{si2}]
      ]
