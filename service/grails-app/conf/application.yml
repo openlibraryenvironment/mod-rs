@@ -100,10 +100,13 @@ grails:
               filters: 'JOINED_FILTERS,-securityContextPersistenceFilter,-rememberMeAuthenticationFilter,-basicAuthenticationFilter'
     databinding:
         dateFormats:
-          - 'yyyy-MM-dd HH:mm:ss.S'
-          - "yyyy-MM-dd'T'hh:mm:ss'Z'"
-          - 'yyyy-mm-dd'
-
+          - "yyyy-MM-dd'T'HH:mm:ssX"
+          - "yyyy-MM-dd'T'HH:mm:ss.SSSX"
+          - "yyyy-MM-dd'T'HH:mm:ss'Z'"
+          - "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          - "yyyy-MM-dd'T'HH:mm:ss"
+          - "yyyy-MM-dd'T'HH:mm:ss.SSS"
+          - 'yyyy-MM-dd'
     server:
         host: 10.0.2.2
         port: 8081
