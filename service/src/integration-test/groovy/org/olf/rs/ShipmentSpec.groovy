@@ -162,7 +162,7 @@ class ShipmentSpec extends GebSpec {
 
       String json_payload = new groovy.json.JsonBuilder(ship_json_data).toString()
 
-      def resp = restBuilder().post("${baseUrl}/rs/shipment") {
+      def resp = restBuilder().post("${baseUrl}/rs/shipments") {
         header 'X-Okapi-Tenant', tenant_id
         contentType 'application/json; charset=UTF-8'
         accept 'application/json; charset=UTF-8'
@@ -177,10 +177,10 @@ class ShipmentSpec extends GebSpec {
 
     then:"Check the return value"
       logger.debug("Checking the shipment made it to the database")
-      //resp.status == CREATED.value()
-      logger.debug("resp status: ${resp.status}")
+      resp.status == CREATED.value()
+      /* logger.debug("resp status: ${resp.status}")
       logger.debug("CREATED value: ${CREATED.value()}")
-      1==1
+      1==1 */
 
 
       
