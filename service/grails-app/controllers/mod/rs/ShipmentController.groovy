@@ -14,7 +14,7 @@ import org.olf.rs.workflow.*;
 
 class ShipmentController extends OkapiTenantAwareController<Shipment> {
   
-	static responseFormats = ['json', 'xml']
+  static responseFormats = ['json', 'xml']
   
   ShipmentController() {
     super(Shipment)
