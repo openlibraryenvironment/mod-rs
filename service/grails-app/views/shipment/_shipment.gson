@@ -3,6 +3,11 @@ import org.olf.rs.Shipment;
 
 @Field Shipment shipment
 json g.render(shipment, [expand: ['id',
-                                       'shipDate'
-                                       ],
-                              excludes: ['audit']])
+                                  'directoryEntry',
+                                  'shipmentMethod',
+                                  'status',
+                                  'receivedDate',
+                                  'shipDate',
+                                  'dateCreated',
+                                  'lastUpdated'
+                                       ]])
