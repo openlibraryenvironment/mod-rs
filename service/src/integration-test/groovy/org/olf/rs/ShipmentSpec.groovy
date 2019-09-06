@@ -150,11 +150,10 @@ class ShipmentSpec extends GebSpec {
   
   void "Create a new shipment with some shipment items through HTML requests"(tenant_id) {
 
-    def currentTime = LocalDateTime.now()
 
     when:"post new request"
       logger.debug("Create a new shipment ${tenant_id}");
-      String str_current_time = '2019-01-01'
+      String str_current_time = '2019-09-06T10:15:30Z'
 
       def ship_json_data = [
         shipDate: str_current_time
