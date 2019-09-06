@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 @Stepwise
 class ShipmentSpec extends GebSpec {
 
-  
+
   static Map request_data = [:];
 
   final Closure authHeaders = {
@@ -38,38 +38,38 @@ class ShipmentSpec extends GebSpec {
     header OkapiHeaders.USER_ID, 'dummy'
     header OkapiHeaders.PERMISSIONS, '[ "rs.admin", "rs.user", "rs.own.read", "rs.any.read"]'
   }
-  
+
   final static Logger logger = LoggerFactory.getLogger(ShipmentSpec.class);
-  
+
   def setup() {
   }
 
   def cleanup() {
   }
-    
-    
-    
+
+
+
   //Set up a tenant to run shipping tests on
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
-  
-      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
-  
-      def resp = restBuilder().post("${baseUrl}_/tenant") {
-        header 'X-Okapi-Tenant', tenantid
-        authHeaders.rehydrate(delegate, owner, thisObject)()
-      }
-  
+
+    logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
+
+    def resp = restBuilder().post("${baseUrl}_/tenant") {
+      header 'X-Okapi-Tenant', tenantid
+      authHeaders.rehydrate(delegate, owner, thisObject)()
+    }
+
     then:"The response is correct"
-      resp.status == CREATED.value()
-      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
-  
+    resp.status == CREATED.value()
+    logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
+
     where:
-      tenantid | name
-      'RSShipTenantA' | 'RSShipTenantA'
+    tenantid | name
+    'RSShipTenantA' | 'RSShipTenantA'
   }
-        
-    
+
+
   void "Create a new request to test shipping on"(tenant_id, p_title, p_patron_id) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
@@ -79,8 +79,7 @@ class ShipmentSpec extends GebSpec {
       patronReference:'SHIP-TESTCASE-1',
       patronIdentifier:p_patron_id,
       isRequester:true,
-      tags: [ 'SHIP-TESTCASE-1' ]
-    ]
+      tags: ['SHIP-TESTCASE-1' ]]
 
     String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
 
@@ -106,69 +105,77 @@ class ShipmentSpec extends GebSpec {
     tenant_id | p_title | p_patron_id
     'RSShipTenantA' | 'The Arithmetic of Elliptic Curves' | '0123-9999'
   }
-    
-    
-  
-  
-  void "Test creation of shipping item for request"(tenant_id, p_ref) {
+
+
+
+
+  void "Test creation of shipping item for request through domain classes"(tenant_id, p_ref) {
     def currentTime = LocalDateTime.now()
-    
+
     when:
-      logger.debug("Creating a new shipment for tenant:${tenant_id}, patron request: ${p_ref}");
+    logger.debug("Creating a new shipment for tenant:${tenant_id}, patron request: ${p_ref}");
 
-      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
 
-        def s = new Shipment(
+      def s = new Shipment(
           shipDate: currentTime
           ).save(flush:true, failOnError:true)
-        logger.debug("New shipment created");
+      logger.debug("New shipment created");
 
-        logger.debug("Creating a new shipment item for patron request: ${p_ref}");
-        def si = new ShipmentItem(
+      logger.debug("Creating a new shipment item for patron request: ${p_ref}");
+      def si = new ShipmentItem(
           isReturning: false,
           patronRequest: PatronRequest.findByPatronReference('SHIP-TESTCASE-1'),
           shipment: s
           ).save(flush: true, failOnError:true)
-          logger.debug("New shipment item created");
-      }
-      
+      logger.debug("New shipment item created");
+    }
+
     then:
-      1==1
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        logger.debug("Check that that actually created items")
+        logger.debug("There are ${ShipmentItem.count()} shipment items in the system.")
+        ShipmentItem.count() == 1
+        logger.debug("There are ${Shipment.count()} shipments in the system.")
+        Shipment.count() == 1
+      }
+
+
     where:
-      tenant_id | p_ref
-      'RSShipTenantA' | 'SHIP-TESTCASE-1'
+    tenant_id | p_ref
+    'RSShipTenantA' | 'SHIP-TESTCASE-1'
   }
-    
-    
-    
-    
-    
-    void "Delete the tenants"(tenant_id, note) {
-  
-      expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
-      // Snooze
-      try {
-        Thread.sleep(1000);
-      }
-      catch ( Exception e ) {
-        e.printStackTrace()
-      }
-  
-      def resp = restBuilder().delete("$baseUrl/_/tenant") {
-        header 'X-Okapi-Tenant', tenant_id
-        authHeaders.rehydrate(delegate, owner, thisObject)()
-      }
-  
-      logger.debug("completed DELETE request on ${tenant_id}");
-      resp.status == NO_CONTENT.value()
-  
-      where:
-      tenant_id | note
-      'RSShipTenantA' | 'note'
+
+
+
+
+
+  void "Delete the tenants"(tenant_id, note) {
+
+    expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
+    // Snooze
+    try {
+      Thread.sleep(1000);
     }
-    
-    RestBuilder restBuilder() {
-      new RestBuilder()
+    catch ( Exception e ) {
+      e.printStackTrace()
     }
-  
+
+    def resp = restBuilder().delete("$baseUrl/_/tenant") {
+      header 'X-Okapi-Tenant', tenant_id
+      authHeaders.rehydrate(delegate, owner, thisObject)()
+    }
+
+    logger.debug("completed DELETE request on ${tenant_id}");
+    resp.status == NO_CONTENT.value()
+
+    where:
+    tenant_id | note
+    'RSShipTenantA' | 'note'
+  }
+
+  RestBuilder restBuilder() {
+    new RestBuilder()
+  }
+
 }
