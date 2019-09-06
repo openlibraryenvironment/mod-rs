@@ -16,4 +16,8 @@ class ShipmentController extends OkapiTenantAwareController<Shipment> {
   
 	static responseFormats = ['json', 'xml']
   
+  ShipmentController() {
+    super(Shipment)
+  }
+  
 }
