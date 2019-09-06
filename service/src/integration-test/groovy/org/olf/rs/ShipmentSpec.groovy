@@ -156,7 +156,7 @@ class ShipmentSpec extends GebSpec {
       String str_current_time = '2019-01-01T00:00:00.000'
 
       def ship_json_data = [
-    //    shipDate: str_current_time
+        shipDate: str_current_time
       ]
 
       String json_payload = new groovy.json.JsonBuilder(ship_json_data).toString()
