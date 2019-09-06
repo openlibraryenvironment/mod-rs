@@ -133,6 +133,7 @@ public class ReshareApplicationEventHandlerService {
           req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
           req.save(flush:true, failOnError:true)
         } else {
+          log.debug("No rota supplied - call SharedIndexAvailability to find appropriate copies");
           // NO rota supplied - see if we can use the shared index service to locate appropriate copies
           // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
           // here in the test environments.
@@ -188,14 +189,24 @@ public class ReshareApplicationEventHandlerService {
               // send the message
 
               // Fill out the directory entry reference if it's not currently set.
-              if (prr.peer == null ) {
-                String name_compnents = prr.directoryId.split(':')
-                if ( name_compnents.size() == 2 ) {
-                  def peer_list = Symbol.executeQuery('select s from Symbol as s where s.authority.val = :authority and s.symbol = :symbol',
+              if ( ( next_responder != null ) && (prr.peer == null ) ) {
+                String[] name_compnents = next_responder.split(':')
+                if ( name_compnents.length == 2 ) {
+                  log.debug("Attempting to locate Symbol ${name_compnents}");
+                  def peer_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
                                                       [authority:name_compnents[0], symbol:name_compnents[1]]);
-                  if ( peer_list.size() == 1 ) {
-                    prr.peer = peer_list[0].owner
+                  if ( ( peer_list.size() == 1 ) &&
+                       ( peer_list[0].owner != null ) ) {
+                    // prr.lock();
+                    // prr.peer = peer_list[0].owner
+                    // prr.save(flush:true, failOnError:true)
                   }
+                  else {
+                    log.warn("Unable to set peer institution");
+                  }
+                }
+                else {
+                  log.warn("Cannot understand symbol ${next_responder}");
                 }
               }
 
@@ -265,8 +276,7 @@ public class ReshareApplicationEventHandlerService {
           Thread.sleep(900);
           retries++;
         } else {
-          log.debug("Result found")
-          result.refresh()
+          log.debug("Result found for ${pr_id}. Refresh")
         }
       }
     }

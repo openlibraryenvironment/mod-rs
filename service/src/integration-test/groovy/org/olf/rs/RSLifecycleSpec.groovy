@@ -67,6 +67,7 @@ class RSLifecycleSpec extends GebSpec {
     then:"The response is correct"
     resp.status == CREATED.value()
     logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
+    Thread.sleep(2000);
 
     where:
     tenantid | name
@@ -173,44 +174,6 @@ class RSLifecycleSpec extends GebSpec {
       assert pr != null;
   }
   
-  
-  void "Create a new request with an empty Rota"(tenant_id, p_title, p_patron_id) {
-    when:"post new request"
-    logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
-
-    def req_json_data = [
-      title: p_title,
-      isRequester:true,
-      patronIdentifier:p_patron_id,
-      patronReference:'RS-TESTCASE-2',
-      rota:[],
-      tags: [ 'RS-TESTCASE-2' ]
-    ]
-
-    String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
-
-    def resp = restBuilder().post("${baseUrl}/rs/patronrequests") {
-      header 'X-Okapi-Tenant', tenant_id
-      contentType 'application/json; charset=UTF-8'
-      accept 'application/json; charset=UTF-8'
-      authHeaders.rehydrate(delegate, owner, thisObject)()
-      json json_payload
-    }
-    logger.debug("Response: RESP:${resp} JSON:${resp.json}");
-    // Stash the ID
-    this.request_data['test case 2'] = resp.json.id
-    logger.debug("Created new request for empty rota test - ID is ${request_data['test case 2']}")
-
-
-    then:"Check the return value"
-    resp.status == CREATED.value()
-    assert request_data['test case 2'] != null;
-
-    where:
-    tenant_id | p_title | p_patron_id
-    'TestTenantH' | 'Brain of the firm' | '1234-5678'
-  }
-  
   void "Wait for the new request to have state REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
 
     boolean completed = false;
@@ -218,75 +181,32 @@ class RSLifecycleSpec extends GebSpec {
 
     when:"post new request"
 
-    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
 
-      waitFor(5, 1) {
-        PatronRequest.withNewTransaction {
-          logger.debug("request id: ${request_data['test case 1']}")
-          //        def r = PatronRequest.executeQuery('select pr.id, pr.title, pr.state.code from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 1']]);
-          def r = PatronRequest.executeQuery('select pr from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 1']]);
-
-          if(r.size() == 1) {
-            // Explicitly call refresh - GORM will cache the object and not re-read the state otherwise
-            r[0].refresh();
-            final_state = r[0].state.code
-            logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. Currently ${r[0].state.code}")
+        waitFor(10, 1) {
+          PatronRequest.withNewTransaction {
+            logger.debug("waiting for request id: ${request_data['test case 1']} to have state REQUEST_SENT_TO_SUPPLIER")
+            def r = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr where pr.id = :rid and pr.state.code = :rsts', 
+                                                [rid: this.request_data['test case 1'], rsts: 'REQUEST_SENT_TO_SUPPLIER'])[0];
+  
+            if(r == 1) {
+              final_state = 'REQUEST_SENT_TO_SUPPLIER'
+            }
+            else {
+              logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. ${r} matches");
+            }
           }
+          final_state == 'REQUEST_SENT_TO_SUPPLIER'
         }
-        final_state == 'REQUEST_SENT_TO_SUPPLIER'
       }
-    }
 
     then:"Check the return value"
-    assert final_state == "REQUEST_SENT_TO_SUPPLIER"
-
-    //      completed == true
+      assert final_state == 'REQUEST_SENT_TO_SUPPLIER'
 
     where:
-    tenant_id|ref
-    'TestTenantG' | 'RS-T-D-0001'
+      tenant_id|ref
+      'TestTenantG' | 'RS-T-D-0001'
   }
-
-
-
-
-  void "Check that the request doesn't change state when rota is empty"(tenant_id, ref) {
-
-    boolean completed = false;
-    String final_state = null;
-
-    when:"post new request"
-
-    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
-      waitFor(5, 1) {
-        PatronRequest.withNewTransaction {
-          //        def r = PatronRequest.executeQuery('select pr.id, pr.title, pr.state.code from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 2']]);
-          def r = PatronRequest.executeQuery('select pr from PatronRequest as pr where pr.id = :rid', [rid: this.request_data['test case 2']]);
-
-          if(r.size() == 1) {
-            // Explicitly call refresh - GORM will cache the object and not re-read the state otherwise
-            r[0].refresh();
-            final_state = r[0].state.code
-          }
-          logger.debug("request id: ${request_data['test case 2']} - waiting for final state SOURCING_ITEM. Currently ${r[0].state.code}")
-        }
-
-        final_state == 'SOURCING_ITEM'
-      }
-
-    }
-
-    then:"Check state is still SOURCING_ITEM"
-    assert final_state == "SOURCING_ITEM"
-
-    //      completed == true
-
-    where:
-    tenant_id|ref
-    'TestTenantH' | 'RS-T-D-0003'
-  }
-
-
 
   void "Delete the tenants"(tenant_id, note) {
 

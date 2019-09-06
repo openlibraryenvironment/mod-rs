@@ -24,6 +24,8 @@ public class EventPublicationService {
     props.put('bootstrap.servers', bootstrap_servers) // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
     props.put('key.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
     props.put('value.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
+
+    log.debug("Configure producer ${props}");
     producer = new KafkaProducer(props)
   }
 

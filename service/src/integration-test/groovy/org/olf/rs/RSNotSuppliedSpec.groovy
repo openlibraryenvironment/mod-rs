@@ -26,9 +26,6 @@ import grails.plugins.rest.client.RestBuilder
 @Slf4j
 @Integration
 @Stepwise
-
-
-
 class RSNotSuppliedSpec extends GebSpec{
   @Shared
   private Map test_info = [:]

@@ -44,6 +44,7 @@ public class EventConsumerService implements EventPublisher {
     props.put('key.deserializer', 'org.apache.kafka.common.serialization.StringDeserializer')
     props.put('value.deserializer', 'org.apache.kafka.common.serialization.StringDeserializer')
     props.put('group.id', 'ModRSConsumer')
+    log.debug("Configure consumer ${props}");
     consumer = new KafkaConsumer(props)
     Promise p = task {
       consumePatronRequestEvents();

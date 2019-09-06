@@ -71,7 +71,13 @@ dependencies {
   compile "org.grails.plugins:hibernate5"
   compile "org.grails.plugins:views-json"
   compile "org.springframework.boot:spring-boot-starter-undertow"
-  compile "org.hibernate:hibernate-core:5.1.16.Final"
+  
+  
+  compile 'org.grails.plugins:grails-java8'
+  
+  compile "org.hibernate:hibernate-java8:5.1.17.Final"
+  compile "org.hibernate:hibernate-core:5.1.17.Final"
+  
   compile "org.postgresql:postgresql:42.2.5"
   compile "org.grails.plugins:spring-security-core:3.2.3"
   compile "org.grails.plugins:database-migration:3.0.4"
@@ -79,7 +85,7 @@ dependencies {
   compile "com.ibm.icu:icu4j:62.1"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
 
-  compile 'com.k_int.grails:web-toolkit:3.6.3'
+  compile 'com.k_int.grails:web-toolkit:3.6.2'
   compile 'com.k_int.okapi:grails-okapi:3.6.7'
   compile 'org.apache.kafka:kafka-clients:2.3.0'
 

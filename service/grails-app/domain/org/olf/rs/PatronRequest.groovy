@@ -79,7 +79,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Date neededBy
   
-  
+  Set rota = []
 
   // serviceType - added here as an example refdata item - more to show how than
   // arising from analysis and design
@@ -126,6 +126,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   static mappedBy = [
     rota: 'patronRequest',
     audit: 'patronRequest'
+  ]
+
+  static fetchMode = [
+    rota:"eager"
   ]
 
   static constraints = {
