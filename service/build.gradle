@@ -49,6 +49,7 @@ repositories {
   maven { url "http://nexus.k-int.com/content/groups/public" }
   maven { url "http://maven.k-int.com/content/repositories/releases" }
   maven { url "https://repo.grails.org/grails/core" }
+  maven { url "http://maven.k-int.com/content/repositories/snapshots" }
 }
 
 dependencies {
@@ -78,8 +79,7 @@ dependencies {
   compile "com.ibm.icu:icu4j:62.1"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
 
-  // compile 'com.k_int.grails:web-toolkit-ce:3.5.5'
-  compile 'com.k_int.grails:web-toolkit:3.5.5'
+  compile 'com.k_int.grails:web-toolkit:3.6.3'
   compile 'com.k_int.okapi:grails-okapi:3.6.7'
   compile 'org.apache.kafka:kafka-clients:2.3.0'
 
