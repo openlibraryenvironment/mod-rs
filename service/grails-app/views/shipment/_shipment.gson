@@ -9,5 +9,5 @@ json g.render(shipment, [expand: ['id',
                                   'receivedDate',
                                   'shipDate',
                                   'dateCreated',
-                                  'lastUpdated'
-                                       ]])
+                                  'lastUpdated' ],
+                         excludes: ['shipmentItems','directoryEntry'] ])
