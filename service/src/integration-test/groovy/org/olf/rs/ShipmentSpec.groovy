@@ -1,28 +1,25 @@
 package org.olf.rs
 
 
-import grails.testing.mixin.integration.Integration
-import grails.transaction.*
 import static grails.web.http.HttpHeaders.*
 import static org.springframework.http.HttpStatus.*
-import spock.lang.*
+
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import com.k_int.okapi.OkapiHeaders
+
 import geb.spock.*
+import grails.gorm.multitenancy.Tenants
 import grails.plugins.rest.client.RestBuilder
 import grails.plugins.rest.client.RestResponse
+import grails.testing.mixin.integration.Integration
+import grails.transaction.*
 import groovy.util.logging.Slf4j
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.k_int.okapi.OkapiHeaders
-import spock.lang.Shared
-import grails.gorm.multitenancy.Tenants
-
-import grails.databinding.SimpleMapDataBindingSource
-import grails.web.databinding.GrailsWebDataBinder
-import org.olf.okapi.modules.directory.DirectoryEntry
-import grails.gorm.multitenancy.Tenants
-import javax.sql.DataSource
-import org.grails.orm.hibernate.HibernateDatastore
-import java.time.LocalDateTime
+import spock.lang.*
 
 @Integration
 @Rollback
@@ -149,12 +146,12 @@ class ShipmentSpec extends GebSpec {
 
   
   void "Create a new shipment with some shipment items through HTML requests"(tenant_id) {
-
+    
     def currentTime = LocalDateTime.now()
 
     when:"post new request"
       logger.debug("Create a new shipment ${tenant_id}");
-      String str_current_time = '2019-01-01'
+      String str_current_time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(currentTime)
 
       def ship_json_data = [
         shipDate: str_current_time
