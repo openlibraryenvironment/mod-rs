@@ -21,6 +21,10 @@
         {
           "methods": ["GET"],
           "pathPattern": "/rs/kiwt*"
+        },
+        {
+          "methods": ["GET", "POST"],
+          "pathPattern": "/rs/settings/*"
         }
       ]
     },{

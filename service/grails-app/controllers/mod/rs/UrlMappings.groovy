@@ -25,6 +25,8 @@ class UrlMappings {
     "/rs/kiwt/config/schema/embedded/$type" (controller: 'reshareConfig' , action: "schemaEmbedded")
     "/rs/kiwt/raml" (controller: 'reshareConfig' , action: "raml")
 
+    "/rs/settings/tenantSymbols" (controller: 'reshareSettings', action: 'tenantSymbols');
+
 
     // Call /rs/custprop  to list all custom properties
     '/rs/custprops'(resources: 'customPropertyDefinition')

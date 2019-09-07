@@ -13,8 +13,4 @@ class ApplicationController implements PluginManagerAware {
         [grailsApplication: grailsApplication, pluginManager: pluginManager]
     }
 
-  def raml() {
-    def result = [ 'one':'two' ]
-    render result as JSON
-  }
 }

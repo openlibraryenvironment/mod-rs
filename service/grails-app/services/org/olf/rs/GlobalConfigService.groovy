@@ -41,5 +41,16 @@ public class GlobalConfigService {
     return result
   }
 
+  public List<String> getSymbolsForTenant(String tenant) {
+    List<String> result = new ArrayList<String>();
+    Tenants.withId(SHARED_SCHEMA_NAME) {
+      def symbols_for_tenant = TenantSymbolMapping.findAllByTenant(tenant)
+      symbols_for_tenant.each { tsm ->
+        result.add(tsm.symbol);
+      }
+    }
+    return result;
+  }
+
 }
 

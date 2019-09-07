@@ -46,6 +46,12 @@ types:
         description: Update a specific patron request
   /refdata:
     description: List all refdata categories currently known
+  /settings:
+    /tenantSymbols
+      get:
+        description: Retrieve the library symbols registered for this tenant
+      post:
+        description: Register a symbol as "Belonging" to this tenant.
 '''
 
   def raml() {
