@@ -13,12 +13,12 @@ interface can often hide information from clients and provide a sensible boundar
 Since our interface arises out of the domain model, rather than having the external interface dictate the internal storage model the RAML and JsonSchema
 descriptions of this module are made available through the API itself at the following endpoints
 
-| Artefact | Call URL | Notes
----------
-| RAML Description | /rs/kiwt/raml | human maintained in service/grails-app/controllers/mod/rs/RSConfigurationController
-| All Schema Objects | /rs/kiwt/config/schema | All schema objects
-| Stand Alone Schema - Patron request | /rs/kiwt/config/schema/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema
-| Embedded Schema | /rs/kiwt/config/schema/embedded/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema
+| Artefact | Call URL | Notes |
+|---|---|---|
+| RAML Description | /rs/kiwt/raml | human maintained in service/grails-app/controllers/mod/rs/RSConfigurationController |
+| All Schema Objects | /rs/kiwt/config/schema | All schema objects |
+| Stand Alone Schema - Patron request | /rs/kiwt/config/schema/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema |
+| Embedded Schema | /rs/kiwt/config/schema/embedded/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema |
 
 All the basic object types can be listed as stand-alone objects or as embedded structures
 
