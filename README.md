@@ -1,6 +1,6 @@
 mod-rs - Providing Resource Sharing Capabilities
 
-# I'm a front end developer - what resources do this module provide
+# I'm a front end developer - what resources are available
 
 mod-rs is not a document-storage oriented RMB module, it is a hibernate / ORM based object/relational app. Although this arrangement
 requires more effort to add properties (Although all the primary domain objects support an extensible document-like customProperties structure)
