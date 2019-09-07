@@ -155,7 +155,7 @@ class RSLifecycleSpec extends GebSpec {
   /**
    *  Make sure that a reciprocal request has been created in TestTenantH
    */
-  void "Ensure TestTenantH (OCLC:AVL) now contains a request with patronReference 'RS-TESTCASE-1'"() {
+  void "Ensure TestTenantH (OCLC:AVL) now contains a request with patronReference 'RS-LIFECYCLE-TEST-00001'"() {
 
     def pr = null;
 
@@ -165,7 +165,7 @@ class RSLifecycleSpec extends GebSpec {
           PatronRequest.withNewTransaction {
             logger.debug("Current requests for PatronRequest in testtenanth");
             logger.debug("${PatronRequest.list()}");
-            pr = PatronRequest.findByPatronReference('RS-TESTCASE-1')
+            pr = PatronRequest.findByPatronReference('RS-LIFECYCLE-TEST-00001')
           }
 
           pr != null
@@ -214,26 +214,27 @@ class RSLifecycleSpec extends GebSpec {
   void "Delete the tenants"(tenant_id, note) {
 
     expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
-    // Snooze
-    try {
-      Thread.sleep(1000);
-    }
-    catch ( Exception e ) {
-      e.printStackTrace()
-    }
+      // Snooze
+      try {
+        Thread.sleep(2000);
+      }
+      catch ( Exception e ) {
+        e.printStackTrace()
+      }
 
-    def resp = restBuilder().delete("$baseUrl/_/tenant") {
-      header 'X-Okapi-Tenant', tenant_id
-      authHeaders.rehydrate(delegate, owner, thisObject)()
-    }
+      def resp = restBuilder().delete("$baseUrl/_/tenant") {
+        header 'X-Okapi-Tenant', tenant_id
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+      }
 
-    logger.debug("completed DELETE request on ${tenant_id}");
-    resp.status == NO_CONTENT.value()
+      logger.debug("completed DELETE request on ${tenant_id}");
+      resp.status == NO_CONTENT.value()
+      Thread.sleep(2000);
 
     where:
-    tenant_id | note
-    'TestTenantG' | 'note'
-    'TestTenantH' | 'note'
+      tenant_id | note
+      'TestTenantG' | 'note'
+      'TestTenantH' | 'note'
   }
 
   RestBuilder restBuilder() {
