@@ -60,6 +60,7 @@ class ShipmentSpec extends GebSpec {
     then:"The response is correct"
     resp.status == CREATED.value()
     logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
+    Thread.sleep(2000);
 
     where:
     tenantid | name

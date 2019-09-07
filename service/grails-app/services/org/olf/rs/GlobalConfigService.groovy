@@ -12,10 +12,11 @@ public class GlobalConfigService {
 
   public void registerSymbolForTenant(String symbol, String tenant_id) {
 
-    log.debug("registerSymbolForTenant(${symbol},${tenant_id}) (${SHARED_SCHEMA_NAME})");
+    log.debug("registerSymbolForTenant(symbol:${symbol},tenant:${tenant_id}) in_schema:(${SHARED_SCHEMA_NAME})");
     Tenants.withId(SHARED_SCHEMA_NAME) {
       TenantSymbolMapping tsm = TenantSymbolMapping.findBySymbol(symbol) 
       if ( tsm == null ) {
+        log.debug("No tsm for ${symbol} so register a new one against tenant ${tenant_id}");
         tsm = new TenantSymbolMapping(
                          symbol:symbol,
                          tenant:tenant_id).save(flush:true, failOnError:true);
@@ -23,8 +24,10 @@ public class GlobalConfigService {
       else {
         if ( tsm.tenant == tenant_id ) {
           // Nothing to do
+          log.debug("tenant symbol mapping for that tuple already exists.");
         }
         else {
+	  log.debug("Update existing mapping...");
           tsm.tenant = tenant_id
           tsm.save(flush:true, failOnError:true);
         }
@@ -49,6 +52,8 @@ public class GlobalConfigService {
         result.add(tsm.symbol);
       }
     }
+    log.debug("getSymbolsForTenant(${tenant}) returns ${result}");
+
     return result;
   }
 

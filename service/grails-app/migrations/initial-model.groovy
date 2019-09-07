@@ -668,7 +668,7 @@ databaseChangeLog = {
 
             column(name: "sh_last_updated", type: "timestamp")
 
-            column(name: "sh_received_date", type: "BYTEA")
+            column(name: "sh_received_date", type: "timestamp")
 
             column(name: "sh_shipment_method_fk", type: "VARCHAR(36)")
 
@@ -676,7 +676,7 @@ databaseChangeLog = {
 
             column(name: "sh_status_fk", type: "VARCHAR(36)")
 
-            column(name: "sh_ship_date", type: "BYTEA")
+            column(name: "sh_ship_date", type: "timestamp")
         }
     }
 

@@ -108,6 +108,32 @@ class RSLifecycleSpec extends GebSpec {
       'OCLC:ZMU'|'TestTenantG'
   }
 
+  void "test settings interface - set symbol RESHARE:wibble for tenant TestTenantH"() {
+    when:
+      String json_payload = '{ "symbol": "RESHARE:wibble" }'
+
+      RestResponse post_resp = restBuilder().post("${baseUrl}/rs/settings/tenantSymbols") {
+        header 'X-Okapi-Tenant', 'TestTenantH'
+        contentType 'application/json; charset=UTF-8'
+        accept 'application/json; charset=UTF-8'
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+        json json_payload
+      }
+      logger.debug("post response: ${post_resp}");
+
+    then:
+      RestResponse get_resp = restBuilder().get("${baseUrl}/rs/settings/tenantSymbols") {
+        header 'X-Okapi-Tenant', 'TestTenantH'
+        contentType 'application/json; charset=UTF-8'
+        accept 'application/json; charset=UTF-8'
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+      }
+      logger.debug("get response as json: ${get_resp.json}");
+
+      // Assert that the list of symbols for TestTenantH that we get back includes the newly registered one
+      assert get_resp.json.symbols.contains('RESHARE:wibble');
+  }
+
   
   
   void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_author, p_systemInstanceIdentifier, p_patron_id, p_patron_reference) {
