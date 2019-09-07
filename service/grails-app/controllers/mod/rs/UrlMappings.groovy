@@ -23,7 +23,7 @@ class UrlMappings {
     "/rs/kiwt/config/$extended?" (controller: 'reshareConfig' , action: "resources")
     "/rs/kiwt/config/schema/$type" (controller: 'reshareConfig' , action: "schema")
     "/rs/kiwt/config/schema/embedded/$type" (controller: 'reshareConfig' , action: "schemaEmbedded")
-    "/rs/raml" (controller: 'reshareConfig' , action: "raml")
+    "/rs/kiwt/raml" (controller: 'reshareConfig' , action: "raml")
 
 
     // Call /rs/custprop  to list all custom properties

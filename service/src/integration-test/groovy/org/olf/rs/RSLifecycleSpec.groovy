@@ -110,13 +110,15 @@ class RSLifecycleSpec extends GebSpec {
 
   
   
-  void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_patron_id) {
+  void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_author, p_systemInstanceIdentifier, p_patron_id, p_patron_reference) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
     def req_json_data = [
       title: p_title,
-      patronReference:'RS-TESTCASE-1',
+      author: p_author,
+      systemInstanceIdentifier: p_systemInstanceIdentifier,
+      patronReference:p_patron_reference,
       patronIdentifier:p_patron_id,
       isRequester:true,
       rota:[
@@ -137,17 +139,17 @@ class RSLifecycleSpec extends GebSpec {
     logger.debug("CreateReqTest1 -- Response: RESP:${resp} JSON:${resp.json.id}");
 
     // Stash the ID
-    this.request_data['test case 1'] = resp.json.id
-    logger.debug("Created new request for with-rota test case 1. ID is : ${request_data['test case 1']}")
+    this.request_data['RS-LIFECYCLE-TEST-00001'] = resp.json.id
+    logger.debug("Created new request for with-rota test case 1. ID is : ${request_data['RS-LIFECYCLE-TEST-00001']}")
 
 
     then:"Check the return value"
     resp.status == CREATED.value()
-    assert request_data['test case 1'] != null;
+    assert request_data['RS-LIFECYCLE-TEST-00001'] != null;
 
     where:
-    tenant_id | p_title | p_patron_id
-    'TestTenantG' | 'Brain of the firm' | '1234-5678'
+    tenant_id | p_title | p_author | p_systemInstanceIdentifier | p_patron_id | p_patron_reference
+    'TestTenantG' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566' | '1234-5678' | 'RS-LIFECYCLE-TEST-00001'
   }
 
   /**
@@ -186,15 +188,15 @@ class RSLifecycleSpec extends GebSpec {
 
         waitFor(10, 1) {
           PatronRequest.withNewTransaction {
-            logger.debug("waiting for request id: ${request_data['test case 1']} to have state REQUEST_SENT_TO_SUPPLIER")
+            logger.debug("waiting for request id: ${request_data['RS-LIFECYCLE-TEST-00001']} to have state REQUEST_SENT_TO_SUPPLIER")
             def r = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr where pr.id = :rid and pr.state.code = :rsts', 
-                                                [rid: this.request_data['test case 1'], rsts: 'REQUEST_SENT_TO_SUPPLIER'])[0];
+                                                [rid: this.request_data['RS-LIFECYCLE-TEST-00001'], rsts: 'REQUEST_SENT_TO_SUPPLIER'])[0];
   
             if(r == 1) {
               final_state = 'REQUEST_SENT_TO_SUPPLIER'
             }
             else {
-              logger.debug("request id: ${request_data['test case 1']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. ${r} matches");
+              logger.debug("request id: ${request_data['RS-LIFECYCLE-TEST-00001']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. ${r} matches");
             }
           }
           final_state == 'REQUEST_SENT_TO_SUPPLIER'

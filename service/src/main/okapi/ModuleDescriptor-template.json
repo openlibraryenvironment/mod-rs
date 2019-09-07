@@ -17,6 +17,10 @@
         {
           "methods": ["GET", "POST"],
           "pathPattern": "/rs/custprops*"
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/rs/kiwt*"
         }
       ]
     },{

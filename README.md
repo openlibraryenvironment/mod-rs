@@ -1,5 +1,27 @@
 mod-rs - Providing Resource Sharing Capabilities
 
+# I'm a front end developer - what resources do this module provide
+
+mod-rs is not a document-storage oriented RMB module, it is a hibernate / ORM based object/relational app. Although this arrangement
+requires more effort to add properties (Although all the primary domain objects support an extensible document-like customProperties structure)
+it has the advantage of being queryable in response to changing and evolving domain model requirements in a way that document stores often 
+are not particularly hen dealing with highly relational data.
+
+Because of this, RAML and Json Schema are not used to define out private internal storage model - they arise out of it. This means mod-rs
+interface can often hide information from clients and provide a sensible boundary between callers and business/storage logic.
+
+Since our interface arises out of the domain model, rather than having the external interface dictate the internal storage model the RAML and JsonSchema
+descriptions of this module are made available through the API itself at the following endpoints
+
+| Artefact | Call URL | Notes
+---------
+| RAML Description | /rs/kiwt/raml | human maintained in service/grails-app/controllers/mod/rs/RSConfigurationController
+| All Schema Objects | /rs/kiwt/config/schema | All schema objects
+| Stand Alone Schema - Patron request | /rs/kiwt/config/schema/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema
+| Embedded Schema | /rs/kiwt/config/schema/embedded/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema
+
+All the basic object types can be listed as stand-alone objects or as embedded structures
+
 
 # Developer Info
 
