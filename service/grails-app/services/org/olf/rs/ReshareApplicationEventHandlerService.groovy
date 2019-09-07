@@ -197,9 +197,9 @@ public class ReshareApplicationEventHandlerService {
                                                       [authority:name_compnents[0], symbol:name_compnents[1]]);
                   if ( ( peer_list.size() == 1 ) &&
                        ( peer_list[0].owner != null ) ) {
-                    // prr.lock();
-                    // prr.peer = peer_list[0].owner
-                    // prr.save(flush:true, failOnError:true)
+                    prr.lock();
+                    prr.peer = peer_list[0].owner
+                    prr.save(flush:true, failOnError:true)
                   }
                   else {
                     log.warn("Unable to set peer institution");
