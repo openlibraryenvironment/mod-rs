@@ -3,9 +3,9 @@ mod-rs - Providing Resource Sharing Capabilities
 # I'm a front end developer - what resources are available
 
 mod-rs is not a document-storage oriented RMB module, it is a hibernate / ORM based object/relational app. Although this arrangement
-requires more effort to add properties (Although all the primary domain objects support an extensible document-like customProperties structure)
-it has the advantage of being queryable in response to changing and evolving domain model requirements in a way that document stores often 
-are not particularly hen dealing with highly relational data.
+requires more effort to add properties (Note though that all the primary domain objects support an extensible document-like customProperties structure)
+it has the advantage of being dynamically tuned and queryable in response to changing and evolving domain model requirements in a way that document stores often 
+are not, particularly when dealing with highly relational data. This is expecially true when filtering on joined collections.
 
 Because of this, RAML and Json Schema are not used to define out private internal storage model - they arise out of it. This means mod-rs
 interface can often hide information from clients and provide a sensible boundary between callers and business/storage logic.
@@ -21,7 +21,6 @@ descriptions of this module are made available through the API itself at the fol
 | Embedded Schema | /rs/kiwt/config/schema/embedded/PatronRequest | The schema for PatronRequest with all it's sub-objects embedded in a single schema
 
 All the basic object types can be listed as stand-alone objects or as embedded structures
-
 
 # Developer Info
 
