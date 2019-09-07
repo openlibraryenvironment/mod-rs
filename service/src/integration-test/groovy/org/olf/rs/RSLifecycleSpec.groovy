@@ -56,23 +56,24 @@ class RSLifecycleSpec extends GebSpec {
 
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
-
-    logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
-
-    def resp = restBuilder().post("${baseUrl}_/tenant") {
-      header 'X-Okapi-Tenant', tenantid
-      authHeaders.rehydrate(delegate, owner, thisObject)()
-    }
+      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
+      def resp = restBuilder().post("${baseUrl}_/tenant") {
+        header 'X-Okapi-Tenant', tenantid
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+      }
 
     then:"The response is correct"
-    resp.status == CREATED.value()
-    logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
-    Thread.sleep(2000);
+      resp.status == CREATED.value()
+      logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant completed");
+      // The tenant initiation step can take a few moments to complete... So wait.
+      // Ideally this will be replaced with a DB op to check the DB changelog and look for completion
+      Thread.sleep(5000);
+      logger.debug("Done waiting for tenant initiation.. continue");
 
     where:
-    tenantid | name
-    'TestTenantG' | 'TestTenantG'
-    'TestTenantH' | 'TestTenantH'
+      tenantid | name
+      'TestTenantG' | 'TestTenantG'
+      'TestTenantH' | 'TestTenantH'
   }
 
   void "Test eventing"(tenant_id, entry_id, entry_uri) {
