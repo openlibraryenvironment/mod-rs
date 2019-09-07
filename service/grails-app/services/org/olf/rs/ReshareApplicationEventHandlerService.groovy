@@ -178,7 +178,11 @@ public class ReshareApplicationEventHandlerService {
         ]
 
         if ( req.rota.size() > 0 ) {
-          if ( req.rotaPosition?:-1 < req.rota.size() ) {
+          boolean request_sent = false;
+
+          // There may be problems with entries in the lending string, so we loop through the rota
+          // until we reach the end, or we find a potential lender we can talk to
+          while ( ( !request_sent ) && ( req.rotaPosition?:-1 < req.rota.size() ) ) {
             // We have rota entries left, work out the next one
             req.rotaPosition = (req.rotaPosition!=null ? req.rotaPosition+1 : 0 )
 
@@ -208,25 +212,37 @@ public class ReshareApplicationEventHandlerService {
                 else {
                   log.warn("Cannot understand symbol ${next_responder}");
                 }
-              }
 
-              protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
+                // Probably need a lender_is_valid check here
+                protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
+                request_sent = true;
+              }
+              else {
+                log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
+              }
             }
             else {
-              log.error("Unable to find rota entry at position ${req.rotaPosition}");
+              log.error("Unable to find rota entry at position ${req.rotaPosition}. Try next");
             }
+          }
 
+          // Did we send a request?
+          if ( request_sent ) {
+            log.debug("sendToNextLender sent to next lender.....");
+            req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
           }
           else {
-            log.debug("Reached end of rota (${req.rotaPosition}/${req.rota.size()})");
+            // END OF ROTA
+            log.warn("sendToNextLender reached the end of the lending string.....");
+            req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
           }
         }
         else {
           log.warn("Annot send to next lender - rota is empty");
+          req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
         }
         
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
-        req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
         req.save(flush:true, failOnError:true)
       }
       else {
