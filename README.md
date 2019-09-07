@@ -22,6 +22,14 @@ descriptions of this module are made available through the API itself at the fol
 
 All the basic object types can be listed as stand-alone objects or as embedded structures
 
+## Some advice for front end developers
+
+mod-rs is functional - it's not a dumb store. Clients do not "Set" the state of a request - you can ask mod-rs to perform a "Shipped" action against a request,
+and a side effect of that action might be to set the status of a request to "SHIPPED". This convention reaches down to the different protocol stacks involved
+in interlending. When you "Ship" an item, there are standards based protocol messages that need to be exchanged before the state can be changed (This is 
+particularly true when performing operations like cancel). Please don't treat mod-rs like a dumb store - it's absolutely doing work, and you should consider
+it an application level "service" rather than a dumb data storage tool.
+
 # I'm a backend developer, where should I start
 
 ## Probably with the domain model
