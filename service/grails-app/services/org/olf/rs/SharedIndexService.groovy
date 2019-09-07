@@ -1,5 +1,7 @@
 package org.olf.rs;
 
+import grails.gorm.multitenancy.Tenants
+
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
@@ -14,6 +16,9 @@ public class SharedIndexService {
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
   public SharedIndexAvailability findAppropriateCopies(Map description) {
+
+    log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
+
     // Return an empty list
     return new SharedIndexAvailability([]);
   }
