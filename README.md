@@ -30,6 +30,8 @@ The [domain model](https://github.com/openlibraryenvironment/mod-rs/service/grai
 start there. The domain model also imports the shared [directory model](https://github.com/openlibraryenvironment/dm-directory) and a number of classes 
 for refdata, custom properties, tags and other common structures from this [utility library](https://github.com/k-int/web-toolkit-ce).
 
+## And the event model
+
 mod-rs is slightly unusual in that it often mediates messages passed between tenants in an okapi environment. These events are passed over a kafka substrate
 and the majority of the work is done in [services]((https://github.com/openlibraryenvironment/mod-rs/service/grails-app/services). In particular, the 
 service ReshareApplicationEventHandlerService.groovy is responsible for handling application level events. This service will receive an "STATUS_XXX_ind" whenever 
