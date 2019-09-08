@@ -92,7 +92,8 @@ class RSLifecycleSpec extends GebSpec {
     'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
   }
 
-  void "Bootstrap directory data for integration tests"(tenant_id, entry) {
+
+  void "Bootstrap directory data for integration tests"(String tenant_id, Map entry) {
     when:"Load the default directory"
 
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
