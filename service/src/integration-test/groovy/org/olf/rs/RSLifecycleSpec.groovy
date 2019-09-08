@@ -100,6 +100,8 @@ class RSLifecycleSpec extends GebSpec {
       def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
       DirectoryEntry de = new DirectoryEntry()
       grailsWebDataBinder.bind(de, source)
+
+      logger.debug("Before save, ${de}, services:${de.services}");
       de.save(flush:true, failOnError:true)
       logger.debug("Result of bind: ${de} ${de.id}");
     }
@@ -111,15 +113,20 @@ class RSLifecycleSpec extends GebSpec {
     tenant_id | entry
     'TestTenantH' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College',
       symbols: [
-        [ authority:'OCLC', symbol:'AVL', priority:'a'] ] //,
+        [ authority:'OCLC', symbol:'AVL', priority:'a'] 
+      ]
+      // Job for steve - whack this through the debugger and see why the BindUsing annotation seems to be choking on it
+      // ,
       // services:[
-      //   [
-      //     service:[ "name":"ReShare ISO18626 Service", "address":"https://localhost/reshare/iso18626", "type":"ISO18626", "businessFunction":"ILL" ],
-      //     customProperties:[ "ILLPreferredNamespaces":["RESHARE", "PALCI", "IDS"] ]
-      //   ]
-      // ]
+      //  [
+      //    service:[ 'name':'ReShare ISO18626 Service', 'address':'https://localhost/reshare/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+      //    customProperties:[ 'ILLPreferredNamespaces':['RESHARE', 'PALCI', 'IDS'] ]
+      //  ]
+      //]
     ]
     'TestTenantH' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
+    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', symbols: [[ authority:'OCLC', symbol:'AVL', priority:'a'] ]]
+    'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
   }
 
   void "set Up Shared Data"(symbol, tenant_id) {
