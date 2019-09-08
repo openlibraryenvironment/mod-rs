@@ -20,7 +20,7 @@ public class SharedIndexService {
     log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
 
     // Return an empty list
-    return new SharedIndexAvailability([]);
+    return new SharedIndexAvailability(['OCLC:AVL']);
   }
 }
 

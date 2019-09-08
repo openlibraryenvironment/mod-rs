@@ -30,8 +30,11 @@ public class ReshareApplicationEventHandlerService {
       service.handleNewPatronRequestIndication(eventData);
     },
     'STATUS_VALIDATED_ind': { service, eventData ->
+      // This isn't really right - if we are a responder, we don't ever want to locate other responders.
+      // This should be refactored to handleValidated which checks to see if we are a responder and then
+      // acts accordingly. This close to all hands demo, I've changed service.sourcePatronRequest itself
+      // to check for isRequester and do nothing in that case.
       service.sourcePatronRequest(eventData);
-
     },
     'STATUS_SOURCING_ITEM_ind': { service, eventData ->
       service.log.debug("SOURCING_ITEM state should now be SUPPLIER_IDENTIFIED");
@@ -91,10 +94,17 @@ public class ReshareApplicationEventHandlerService {
 
       def req = delayedGet(eventData.payload.id);
       if ( ( req != null ) && ( req.state?.code == 'IDLE' ) ) {
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently IDLE - transition to VALIDATED");
-        req.state = Status.lookup('PatronRequest', 'VALIDATED');
-        req.save(flush:true, failOnError:true)
+
+        // If the role is requester then validate the request and set the state to validated
+        if ( req.isRequester == true ) {
+          log.debug("Got request ${req}");
+          log.debug(" -> Request is currently IDLE - transition to VALIDATED");
+          req.state = Status.lookup('PatronRequest', 'VALIDATED');
+          req.save(flush:true, failOnError:true)
+        }
+        else {
+          log.debug("No action to take as a responder (yet)");
+        }
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
@@ -117,7 +127,7 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       PatronRequest req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'VALIDATED' ) ) {
+      if ( ( req.isRequester == true ) && ( req != null ) && ( req.state?.code == 'VALIDATED' ) ) {
 
         req.lock();
 
@@ -138,8 +148,19 @@ public class ReshareApplicationEventHandlerService {
           // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
           // here in the test environments.
           SharedIndexAvailability sia = sharedIndexService.findAppropriateCopies([title:req.title])
-          log.debug("Result of shared index lookup : ${sia}");
-          log.error("Unable to identify a rota for ID ${eventData.payload.id}")
+          log.debug("Result of shared index lookup : ${sia?.symbols}");
+          int ctr = 0;
+          if (  sia?.symbols.size() > 0 ) {
+            sia?.symbols?.each { sym ->
+              req.addToRota (new PatronRequestRota(patronRequest:req,rotaPosition:ctr++, directoryId:sym))
+            }
+            req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
+          }
+          else {
+            log.error("Unable to identify a rota for ID ${eventData.payload.id}")
+            req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+          }
+          req.save(flush:true, failOnError:true)
         }
       }
       else {
