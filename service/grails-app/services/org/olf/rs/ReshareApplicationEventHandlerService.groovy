@@ -6,6 +6,8 @@ import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.Status
 import org.olf.okapi.modules.directory.Symbol;
+import groovy.json.JsonOutput;
+import java.time.LocalDateTime;
 
 /**
  * Handle application events.
@@ -100,6 +102,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Got request ${req}");
           log.debug(" -> Request is currently IDLE - transition to VALIDATED");
           req.state = Status.lookup('PatronRequest', 'VALIDATED');
+          auditEntry(req, Status.lookup('PatronRequest', 'IDLE'), Status.lookup('PatronRequest', 'VALIDATED'), 'Request Validated', null);
           req.save(flush:true, failOnError:true)
         }
         else {
@@ -141,6 +144,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently SOURCING_ITEM - transition to SUPPLIER_IDENTIFIED");
           req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
+          auditEntry(req, Status.lookup('PatronRequest', 'VALIDATED'), Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
           log.debug("No rota supplied - call SharedIndexAvailability to find appropriate copies");
@@ -155,16 +159,21 @@ public class ReshareApplicationEventHandlerService {
               req.addToRota (new PatronRequestRota(patronRequest:req,rotaPosition:ctr++, directoryId:sym))
             }
             req.state = Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED');
+            auditEntry(req, Status.lookup('PatronRequest', 'VALIDATED'), Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED'), 
+                       'Lending String calculated from shared index', null);
+            req.save(flush:true, failOnError:true)
           }
           else {
             log.error("Unable to identify a rota for ID ${eventData.payload.id}")
             req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+            auditEntry(req, Status.lookup('PatronRequest', 'VALIDATED'), Status.lookup('PatronRequest', 'END_OF_ROTA'), 
+                       'Unable to locate lenders', null);
+            req.save(flush:true, failOnError:true)
           }
-          req.save(flush:true, failOnError:true)
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != VALIDATED (${req?.state?.code})");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
@@ -251,23 +260,29 @@ public class ReshareApplicationEventHandlerService {
           if ( request_sent ) {
             log.debug("sendToNextLender sent to next lender.....");
             req.state = Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER');
+            auditEntry(req, Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER'), 
+                       'Sent to next lender', null);
+            req.save(flush:true, failOnError:true)
           }
           else {
             // END OF ROTA
             log.warn("sendToNextLender reached the end of the lending string.....");
             req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+            auditEntry(req, Status.lookup('PatronRequest', 'SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'END_OF_ROTA'), 
+                       'End of rota', null);
+            req.save(flush:true, failOnError:true)
           }
         }
         else {
           log.warn("Annot send to next lender - rota is empty");
           req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+          req.save(flush:true, failOnError:true)
         }
         
         log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
-        req.save(flush:true, failOnError:true)
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != SUPPLIER_IDENTIFIED (${req?.state?.code})");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
@@ -286,7 +301,10 @@ public class ReshareApplicationEventHandlerService {
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
     if ( eventData.request != null ) {
       log.debug("*** Create new request***");
-      PatronRequest pr = new PatronRequest(eventData.request).save(flush:true, failOnError:true)
+      PatronRequest pr = new PatronRequest(eventData.request)
+      pr.isRequester=false;
+      auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
+      pr.save(flush:true, failOnError:true)
     }
     else {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
@@ -321,5 +339,21 @@ public class ReshareApplicationEventHandlerService {
       log.error("Problem", e)
     }
     return result;
+  }
+
+  private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+
+    String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
+    LocalDateTime ts = LocalDateTime.now();
+    log.debug("add audit entry at ${ts}");
+
+    pr.addToAudit( new PatronRequestAudit(
+      patronRequest: pr,
+      dateCreated:ts,
+      fromStatus:from,
+      toStatus:to,
+      duration:null,
+      message: message,
+      auditData: json_data))
   }
 }

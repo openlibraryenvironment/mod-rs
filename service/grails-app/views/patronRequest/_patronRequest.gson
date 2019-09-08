@@ -6,7 +6,8 @@ json g.render(patronRequest, [expand: ['state',
                                        'serviceType',
                                        'publicationType',
                                        'rota',
-                                       'tags'
+                                       'tags',
+                                       'audit'
                                        ],
-                              excludes: ['audit']])
+                              excludes: []])
 
