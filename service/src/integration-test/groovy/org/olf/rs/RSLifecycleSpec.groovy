@@ -92,6 +92,36 @@ class RSLifecycleSpec extends GebSpec {
     'TestTenantG' | 'DIKU' | 'https://raw.githubusercontent.com/openlibraryenvironment/mod-directory/master/seed_data/DIKU.json'
   }
 
+  void "Bootstrap directory data for integration tests"(tenant_id, entry) {
+    when:"Load the default directory"
+
+    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+      logger.debug("Sync directory entry ${entry}")
+      def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
+      DirectoryEntry de = new DirectoryEntry()
+      grailsWebDataBinder.bind(de, source)
+      de.save(flush:true, failOnError:true)
+      logger.debug("Result of bind: ${de} ${de.id}");
+    }
+
+    then:"Test directory entries are present"
+    1==1
+
+    where:
+    tenant_id | entry
+    'TestTenantH' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College',
+      symbols: [
+        [ authority:'OCLC', symbol:'AVL', priority:'a'] ] //,
+      // services:[
+      //   [
+      //     service:[ "name":"ReShare ISO18626 Service", "address":"https://localhost/reshare/iso18626", "type":"ISO18626", "businessFunction":"ILL" ],
+      //     customProperties:[ "ILLPreferredNamespaces":["RESHARE", "PALCI", "IDS"] ]
+      //   ]
+      // ]
+    ]
+    'TestTenantH' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
+  }
+
   void "set Up Shared Data"(symbol, tenant_id) {
 
     logger.debug("Set up shared data");
