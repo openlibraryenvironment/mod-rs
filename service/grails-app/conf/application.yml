@@ -130,6 +130,29 @@ dataSource:
   url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
 
+events:
+  consumer:
+    zk:
+      connect: 'localhost:2181'
+    bootstrap:
+      servers: 'localhost:9092'
+    key:
+      deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value:
+      deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    group:
+      id: ModRSConsumer
+      
+  publisher:
+    zk:
+      connect: 'localhost:2181'
+    bootstrap:
+      servers: 'localhost:9092'
+    key:
+      serializer: org.apache.kafka.common.serialization.StringSerializer
+    value:
+      serializer: org.apache.kafka.common.serialization.StringSerializer
+
 ##
 # The settings below are loaded per environment. i.e. Anything declared under 'environments.production' will override
 # values at the root when that particular profile is active.

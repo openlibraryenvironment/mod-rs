@@ -1,17 +1,15 @@
 package org.olf.rs;
 
-import org.apache.kafka.clients.producer.Callback
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.producer.RecordMetadata
-import java.util.Properties
-import static groovy.json.JsonOutput.*
-import grails.events.annotation.Subscriber
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import static grails.async.Promises.*
+import static groovy.json.JsonOutput.*
+
+import org.apache.kafka.clients.consumer.KafkaConsumer
+
 import grails.async.Promise
-import groovy.json.JsonSlurper
+import grails.core.GrailsApplication
 import grails.events.EventPublisher
+import grails.events.annotation.Subscriber
+import groovy.json.JsonSlurper
 
 /**
  * Listen to configured KAFKA topics and react to them.
@@ -24,7 +22,7 @@ import grails.events.EventPublisher
  */
 public class EventConsumerService implements EventPublisher {
 
-  def grailsApplication
+  GrailsApplication grailsApplication
 
   private KafkaConsumer consumer = null;
   private boolean running = true;
@@ -33,18 +31,9 @@ public class EventConsumerService implements EventPublisher {
 
   @javax.annotation.PostConstruct
   public void init() {
-    log.debug("Configuring event consumer service");
-
-    String bootstrap_servers = grailsApplication.config.getProperty('kafka.bootstrapservers', String, 'localhost:9092')
-    String zk_connect = grailsApplication.config.getProperty('zookeeper.connect', String, 'localhost:2181')
-
-    Properties props = new Properties()
-    props.put('zk.connect', zk_connect);
-    props.put('bootstrap.servers', bootstrap_servers) // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
-    props.put('key.deserializer', 'org.apache.kafka.common.serialization.StringDeserializer')
-    props.put('value.deserializer', 'org.apache.kafka.common.serialization.StringDeserializer')
-    props.put('group.id', 'ModRSConsumer')
-    log.debug("Configure consumer ${props}");
+    log.debug("Configuring event consumer service")
+    Properties props = grailsApplication.config.events.consumer.toProperties()
+    log.debug("Configure consumer ${props}")
     consumer = new KafkaConsumer(props)
     Promise p = task {
       consumePatronRequestEvents();
