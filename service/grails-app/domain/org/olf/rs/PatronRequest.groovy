@@ -260,7 +260,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     }
 
     // Status needs to be set to idle
-    state = Status.lookup('PatronRequest', 'IDLE');
+    state = Status.lookup('PatronRequest', 'REQ_IDLE');
   }
 
   def beforeUpdate() {

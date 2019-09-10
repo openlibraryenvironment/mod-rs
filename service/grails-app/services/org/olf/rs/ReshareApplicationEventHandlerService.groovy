@@ -39,7 +39,7 @@ public class ReshareApplicationEventHandlerService {
       service.sourcePatronRequest(eventData);
     },
     'STATUS_REQ_SOURCING_ITEM_ind': { service, eventData ->
-      service.log.debug("SOURCING_ITEM state should now be SUPPLIER_IDENTIFIED");
+      service.log.debug("REQ_SOURCING_ITEM state should now be REQ_SUPPLIER_IDENTIFIED");
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -95,12 +95,12 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'IDLE' ) ) {
+      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) ) {
 
         // If the role is requester then validate the request and set the state to validated
         if ( req.isRequester == true ) {
           log.debug("Got request ${req}");
-          log.debug(" -> Request is currently IDLE - transition to REQ_VALIDATED");
+          log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
           req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
           auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           req.save(flush:true, failOnError:true)
@@ -110,7 +110,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != IDLE (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
@@ -120,7 +120,7 @@ public class ReshareApplicationEventHandlerService {
     log.debug("==================================================")
   }
 
-  // This takes a request with the state of VALIDATED and changes the state to SOURCING_ITEM, and then on to SUPPLIER_IDENTIFIED
+  // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, and then on to REQ_SUPPLIER_IDENTIFIED
   public void sourcePatronRequest(eventData) {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
@@ -184,7 +184,7 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
-  // This takes a request with the state of SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
+  // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
@@ -267,7 +267,7 @@ public class ReshareApplicationEventHandlerService {
           else {
             // END OF ROTA
             log.warn("sendToNextLender reached the end of the lending string.....");
-            req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+            req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 
                        'End of rota', null);
             req.save(flush:true, failOnError:true)
@@ -275,11 +275,11 @@ public class ReshareApplicationEventHandlerService {
         }
         else {
           log.warn("Annot send to next lender - rota is empty");
-          req.state = Status.lookup('PatronRequest', 'END_OF_ROTA');
+          req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
         }
         
-        log.debug(" -> Request is currently SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
+        log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_SUPPLIER_IDENTIFIED (${req?.state?.code})");
