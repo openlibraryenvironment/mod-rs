@@ -56,6 +56,7 @@ class RSLifecycleSpec extends GebSpec {
 
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
+      Thread.sleep(2000);
       logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
       def resp = restBuilder().post("${baseUrl}_/tenant") {
         header 'X-Okapi-Tenant', tenantid
@@ -241,7 +242,7 @@ class RSLifecycleSpec extends GebSpec {
       assert pr != null;
   }
   
-  void "Wait for the new request to have state REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
+  void "Wait for the new request to have state REQ_REQUEST_SENT_TO_SUPPLIER"(tenant_id, ref) {
 
     boolean completed = false;
     String final_state = null;
@@ -252,23 +253,23 @@ class RSLifecycleSpec extends GebSpec {
 
         waitFor(10, 1) {
           PatronRequest.withNewTransaction {
-            logger.debug("waiting for request id: ${request_data['RS-LIFECYCLE-TEST-00001']} to have state REQUEST_SENT_TO_SUPPLIER")
+            logger.debug("waiting for request id: ${request_data['RS-LIFECYCLE-TEST-00001']} to have state REQ_REQUEST_SENT_TO_SUPPLIER")
             def r = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr where pr.id = :rid and pr.state.code = :rsts', 
-                                                [rid: this.request_data['RS-LIFECYCLE-TEST-00001'], rsts: 'REQUEST_SENT_TO_SUPPLIER'])[0];
+                                                [rid: this.request_data['RS-LIFECYCLE-TEST-00001'], rsts: 'REQ_REQUEST_SENT_TO_SUPPLIER'])[0];
   
             if(r == 1) {
-              final_state = 'REQUEST_SENT_TO_SUPPLIER'
+              final_state = 'REQ_REQUEST_SENT_TO_SUPPLIER'
             }
             else {
-              logger.debug("request id: ${request_data['RS-LIFECYCLE-TEST-00001']} - waiting for final state REQUEST_SENT_TO_SUPPLIER. ${r} matches");
+              logger.debug("request id: ${request_data['RS-LIFECYCLE-TEST-00001']} - waiting for final state REQ_REQUEST_SENT_TO_SUPPLIER. ${r} matches");
             }
           }
-          final_state == 'REQUEST_SENT_TO_SUPPLIER'
+          final_state == 'REQ_REQUEST_SENT_TO_SUPPLIER'
         }
       }
 
     then:"Check the return value"
-      assert final_state == 'REQUEST_SENT_TO_SUPPLIER'
+      assert final_state == 'REQ_REQUEST_SENT_TO_SUPPLIER'
 
     where:
       tenant_id|ref
