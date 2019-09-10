@@ -1,18 +1,18 @@
 BASEDIR=$(dirname "$0")
+echo $BASEDIR
+pushd "$BASEDIR/../service"
 
 DIR="$BASEDIR/../"
 
 echo "Using directory $DIR"
 
-# echo Please make sure you have run ./gradlew clean generateDescriptors before starting this script
-pushd "$DIR"
-
 # Check for decriptor target directory.
 
-DESCRIPTORDIR="build/resources/main/okapi"
+DESCRIPTORDIR="../service/build/resources/main/okapi"
 
 if [ ! -d "$DESCRIPTORDIR" ]; then
     echo "No descriptors found. Let's try building them."
+    
     ./gradlew generateDescriptors
 fi
 
@@ -35,4 +35,3 @@ curl -XPOST http://localhost:9130/_/discovery/modules -d "$DEP_DESC"
 echo Activate for tenant diku
 curl -XPOST http://localhost:9130/_/proxy/tenants/diku/modules -d `echo $DEP_DESC | jq -rc '{id: .srvcId}'`
 popd
-
