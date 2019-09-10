@@ -18,7 +18,13 @@ public class EventPublicationService {
   public void init() {
     log.debug("Configuring event publication service")
     
-    Properties props = grailsApplication.config.events.publisher.toProperties()
+    Properties props = new Properties()
+    props.put('zk.connect', grailsApplication.config.getProperty('events.consumer.zk.connect'));
+    props.put('bootstrap.servers', grailsApplication.config.getProperty('events.consumer.bootstrap.servers'))
+    props.put('key.serializer', grailsApplication.config.getProperty('events.consumer.key.serializer'));
+    props.put('value.serializer', grailsApplication.config.getProperty('events.consumer.value.serializer'));
+    log.debug("Configure consumer ${props}")
+
     producer = new KafkaProducer(props)
   }
 

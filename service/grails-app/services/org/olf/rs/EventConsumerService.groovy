@@ -32,9 +32,16 @@ public class EventConsumerService implements EventPublisher {
   @javax.annotation.PostConstruct
   public void init() {
     log.debug("Configuring event consumer service")
-    Properties props = grailsApplication.config.events.consumer.toProperties()
+
+    Properties props = new Properties()
+    props.put('zk.connect', grailsApplication.config.getProperty('events.consumer.zk.connect'));
+    props.put('bootstrap.servers', grailsApplication.config.getProperty('events.consumer.bootstrap.servers'))
+    props.put('key.serializer', grailsApplication.config.getProperty('events.consumer.key.serializer'));
+    props.put('value.serializer', grailsApplication.config.getProperty('events.consumer.value.serializer'));
+    props.put('group.id', grailsApplication.config.getProperty('events.consumer.group.id'));
     log.debug("Configure consumer ${props}")
     consumer = new KafkaConsumer(props)
+
     Promise p = task {
       consumePatronRequestEvents();
     }
