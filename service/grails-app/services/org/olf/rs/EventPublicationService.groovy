@@ -1,31 +1,24 @@
 package org.olf.rs;
 
-import org.apache.kafka.clients.producer.Callback
+import static groovy.json.JsonOutput.*
+
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
-import java.util.Properties
-import static groovy.json.JsonOutput.*
+
+import grails.core.GrailsApplication
 
 
 public class EventPublicationService {
 
   private KafkaProducer producer = null;
-  def grailsApplication
+  GrailsApplication grailsApplication
 
   @javax.annotation.PostConstruct
   public void init() {
-    log.debug("Configuring event publication service");
-    String bootstrap_servers = grailsApplication.config.getProperty('kafka.bootstrapservers', String, 'localhost:9092')
-    String zk_connect = grailsApplication.config.getProperty('zookeeper.connect', String, 'localhost:2181')
-
-    Properties props = new Properties()
-    props.put('zk.connect', zk_connect);
-    props.put('bootstrap.servers', bootstrap_servers) // ,<kafka-broker 2>:9092,<kafka-broker 3>:9092')
-    props.put('key.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
-    props.put('value.serializer', 'org.apache.kafka.common.serialization.StringSerializer')
-
-    log.debug("Configure producer ${props}");
+    log.debug("Configuring event publication service")
+    
+    Properties props = grailsApplication.config.events.publisher.toProperties()
     producer = new KafkaProducer(props)
   }
 
