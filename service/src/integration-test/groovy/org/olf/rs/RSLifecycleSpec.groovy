@@ -56,6 +56,7 @@ class RSLifecycleSpec extends GebSpec {
 
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
+      Thread.sleep(2000);
       logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
       def resp = restBuilder().post("${baseUrl}_/tenant") {
         header 'X-Okapi-Tenant', tenantid
