@@ -60,6 +60,27 @@ public class HousekeepingService {
       Status.lookupOrCreate('PatronRequest', 'PENDING');
       Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
       Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
+
+      // Requester / Borrower State Model
+      Status.lookupOrCreate('PatronRequest', 'REQ_IDLE');
+      Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED');
+      Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM')
+      Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED')
+      Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER')
+      Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED')
+      Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED')
+      Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING')
+      Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED')
+      Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE')
+      Status.lookupOrCreate('PatronRequest', 'REQ_PENDING');
+      Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY');
+      Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA');
+
+      // Responder / Lender State Model
+      Status.lookupOrCreate('Responder', 'RES_IDLE');
+      Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
+      Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
+      Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
     }
   }
 
