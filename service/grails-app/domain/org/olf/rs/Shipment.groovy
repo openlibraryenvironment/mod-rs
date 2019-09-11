@@ -11,8 +11,10 @@ import grails.gorm.MultiTenant
 class Shipment implements MultiTenant<Shipment> {
 
   String id
-  DirectoryEntry directoryEntry
+  DirectoryEntry shippingLibrary
+  DirectoryEntry receivingLibrary
   RefdataValue shipmentMethod
+  String trackingNumber
   RefdataValue status
   LocalDateTime shipDate
   LocalDateTime receivedDate
@@ -29,8 +31,10 @@ class Shipment implements MultiTenant<Shipment> {
   static constraints = {
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
-    directoryEntry (nullable: true)
+    shippingLibrary (nullable: true)
+    receivingLibrary (nullable: true)
     shipmentMethod (nullable: true)
+    trackingNumber (nullable: true)
     status (nullable: true)
     shipDate (nullable: true)
     receivedDate(nullable: true)
@@ -42,8 +46,10 @@ class Shipment implements MultiTenant<Shipment> {
     version column : 'sh_version'
     dateCreated column : 'sh_date_created'
     lastUpdated column : 'sh_last_updated'
-    directoryEntry column : 'sh_directory_entry_fk'
+    shippingLibrary column : 'sh_shipping_library_fk'
+    receivingLibrary column : 'sh_receiving_library_fk'
     shipmentMethod column : 'sh_shipment_method_fk'
+    trackingNumber column : 'sh_tracking_number'
     status column : 'sh_status_fk'
     shipDate column : 'sh_ship_date'
     receivedDate column : 'sh_received_date'
