@@ -5,7 +5,7 @@ mod-rs - Providing Resource Sharing Capabilities
 mod-rs is not a document-storage oriented RMB module, it is a hibernate / ORM based object/relational app. Although this arrangement
 requires more effort to add properties (Note though that all the primary domain objects support an extensible document-like customProperties structure)
 it has the advantage of being dynamically tuned and queryable in response to changing and evolving domain model requirements in a way that document stores often 
-are not, particularly when dealing with highly relational data. This is expecially true when filtering on joined collections.
+are not, particularly when dealing with highly relational data. This is especially true when filtering on joined collections.
 
 Because of this, RAML and Json Schema are not used to define our private internal storage model - they arise out of it. This means mod-rs
 interface can often [hide information](https://en.wikipedia.org/wiki/Information_hiding) from clients and provide a sensible boundary between callers and business/storage logic.
