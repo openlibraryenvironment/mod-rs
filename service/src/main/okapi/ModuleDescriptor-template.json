@@ -24,6 +24,10 @@
         },
         {
           "methods": ["GET", "POST"],
+          "pathPattern": "/rs/shipments*"
+        },
+        {
+          "methods": ["GET", "POST"],
           "pathPattern": "/rs/settings/*"
         }
       ]
