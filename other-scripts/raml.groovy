@@ -46,8 +46,26 @@ import org.ini4j.*;
 Wini ini = new Wini(new File(System.getProperty("user.home")+'/.folio/credentials'));
 
 String config_id = 'kidemo'
+String url = ini.get(config_id, 'url', String.class);
 String tenant = ini.get(config_id, 'tenant', String.class);
 String password = ini.get(config_id, 'password', String.class);
 String username = ini.get(config_id, 'username', String.class);
 
 println("${tenant} ${username} ${password}");
+def cli = new CliBuilder(usage: 'raml.groovy -h -c config')
+// Create the list of options.
+cli.with {
+        h longOpt: 'help', 'Show usage information'
+        c longOpt: 'config', args: 1, argName: 'config', 'Config Id', required:true
+}
+
+def options = cli.parse(args)
+if (!options) {
+  println("No options");
+  return
+}
+else {
+  println(options.config)
+}
+
+def ebsco_api = new HTTPBuilder('https://sandbox.ebsco.io');
