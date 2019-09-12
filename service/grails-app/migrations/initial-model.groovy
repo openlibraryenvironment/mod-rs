@@ -1159,4 +1159,18 @@ databaseChangeLog = {
     changeSet(author: "ianibbo (generated)", id: "1567949522352-120") {
         addForeignKeyConstraint(baseColumnNames: "tag_id", baseTableName: "directory_entry_tag", constraintName: "FKt8qbn40lvi5a2hi726uqc5igv", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "tag")
     }
+
+    changeSet(author: "ethanfreestone (manual)", id: "2019-09-11-955-001") {
+        addColumn(tableName: "shipment") {
+            column(name: "sh_shipping_library_fk", type: "VARCHAR(36)")
+            column(name: "sh_receiving_library_fk", type: "VARCHAR(36)")
+            column(name: "sh_tracking_number", type: "VARCHAR(36)")
+        }
+        dropColumn(tableName: "shipment", columnName: "sh_directory_entry_fk")
+        addForeignKeyConstraint(baseColumnNames: "sh_shipping_library_fk", baseTableName: "shipment", constraintName: "FK_shipping_library_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "de_id", referencedTableName: "directory_entry")
+        addForeignKeyConstraint(baseColumnNames: "sh_receiving_library_fk", baseTableName: "shipment", constraintName: "FK_receiving_library_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "de_id", referencedTableName: "directory_entry")
+
+    }
+
+
 }
