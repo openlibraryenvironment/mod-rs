@@ -1173,4 +1173,11 @@ databaseChangeLog = {
     }
 
 
+    changeSet(author: "ianibbo (manual)", id: "2019-09-13-0906-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: "prr_instance_identifier", type: "VARCHAR(256)")
+            column(name: "prr_copy_identifier", type: "VARCHAR(256)")
+        }
+    }
+
 }

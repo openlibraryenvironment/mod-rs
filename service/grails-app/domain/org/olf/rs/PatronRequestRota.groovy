@@ -49,6 +49,9 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
   DirectoryEntry peer
 
+  String instanceIdentifier
+  String copyIdentifier
+
   static constraints = {
     availability           (nullable : true,  blank: false)
     availableFrom          (nullable : true)
@@ -63,6 +66,8 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     systemIdentifier       (nullable : true,  blank: false)
     state                  (nullable : true)
     peer                   (nullable : true)
+    instanceIdentifier     (nullable : true)
+    copyIdentifier         (nullable : true)
   }
 
   static mapping = {
@@ -81,5 +86,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     systemIdentifier       column : "prr_system_identifier"
     state                  column : "prr_state_fk"
     peer                   column : "prr_peer_fk"
+    instanceIdentifier     column : "prr_instance_identifier"
+    copyIdentifier         column : "prr_copy_identifier"
   }
 }

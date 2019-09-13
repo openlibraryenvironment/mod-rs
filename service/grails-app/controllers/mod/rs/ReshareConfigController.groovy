@@ -52,6 +52,14 @@ types:
         description: Retrieve the library symbols registered for this tenant
       post:
         description: Register a symbol as "Belonging" to this tenant.
+  /shipments:
+    get:
+      description: List current shipments
+    post:
+      description: Submit new or updated shipment - post without an ID to create new, with ID to update/patch
+      body:
+        application/json:
+          type: Shipment
 '''
 
   def raml() {
