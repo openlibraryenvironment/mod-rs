@@ -147,16 +147,23 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
-          log.debug("No rota supplied - call SharedIndexAvailability to find appropriate copies");
+          log.debug("No rota supplied - call sharedIndexService.findAppropriateCopies to find appropriate copies");
           // NO rota supplied - see if we can use the shared index service to locate appropriate copies
           // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
           // here in the test environments.
-          SharedIndexAvailability sia = sharedIndexService.findAppropriateCopies([title:req.title])
-          log.debug("Result of shared index lookup : ${sia?.symbols}");
+          List<AvailabilityStatement> sia = sharedIndexService.findAppropriateCopies([title:req.title])
+          log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
-          if (  sia?.symbols.size() > 0 ) {
-            sia?.symbols?.each { sym ->
-              req.addToRota (new PatronRequestRota(patronRequest:req,rotaPosition:ctr++, directoryId:sym))
+          if (  sia.size() > 0 ) {
+            sia?.each { av_stmt ->
+              if ( av_stmt.symbol != null ) {
+                req.addToRota (new PatronRequestRota(
+                                                     patronRequest:req,
+                                                     rotaPosition:ctr++, 
+                                                     directoryId:av_stmt.symbol,
+                                                     instanceIdentifier:av_stmt.instanceIdentifier,
+                                                     copyIdentifier:av_stmt.copyIdentifier))
+              }
             }
             req.state = Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 

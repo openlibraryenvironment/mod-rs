@@ -1,9 +1,13 @@
 package org.olf.rs;
 
+import groovy.util.logging.*
+
+
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
  */
+@Log4j
 public class MockSharedIndexImpl extends SharedIndexService {
 
   /**
@@ -13,9 +17,12 @@ public class MockSharedIndexImpl extends SharedIndexService {
    *                         title - the title of the item
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
-  public SharedIndexAvailability findAppropriateCopies(Map description) {
-    println("MockSharedIndexImpl::findAppropriateCopies(${description})");
-    return new SharedIndexAvailability([]);
+  public List<AvailabilityStatement> findAppropriateCopies(Map description) {
+    log.debug("MockSharedIndexImpl::findAppropriateCopies(${description})");
+    List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
+    result.add(new AvailabilityStatement(symbol:'OCLC:AVL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));
+    log.debug("findAppropriateCopies returns ${result}");
+    return result;
   }
 }
 

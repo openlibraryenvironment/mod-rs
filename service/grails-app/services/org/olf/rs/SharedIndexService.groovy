@@ -15,12 +15,15 @@ public class SharedIndexService {
    *                         title - the title of the item
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
-  public SharedIndexAvailability findAppropriateCopies(Map description) {
+  public List<AvailabilityStatement> findAppropriateCopies(Map description) {
+
+    List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
 
     log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
+    result.add(new AvailabilityStatement(symbol:'OCLC:AVL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));
 
     // Return an empty list
-    return new SharedIndexAvailability(['OCLC:AVL']);
+    return result;
   }
 }
 
