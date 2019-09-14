@@ -17,7 +17,6 @@ public class EventPublicationService {
   @javax.annotation.PostConstruct
   public void init() {
     log.debug("Configuring event publication service")
-    
     Properties props = new Properties()
     grailsApplication.config.events.publisher.toProperties().each { final String key, final String value ->
       // Directly access each entry to cause lookup from env
@@ -33,12 +32,12 @@ public class EventPublicationService {
 
     String compoundMessage = groovy.json.JsonOutput.toJson(data)
 
-    log.debug("publishAsJSON(topic:${topic} key:${key}, compoundMessage: ${compoundMessage})");
+    // log.debug("publishAsJSON(topic:${topic} key:${key}, compoundMessage: ${compoundMessage})");
     producer.send(
         new ProducerRecord<String, String>(topic, key, compoundMessage), { RecordMetadata metadata, Exception e ->
           // println "The offset of the record we just sent is: ${metadata?.offset()}"
         }
-        )
+    )
     // log.debug("Send returned, callback will be called once complete");
   }
 

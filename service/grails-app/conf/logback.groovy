@@ -22,26 +22,24 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
+logger ('com.k_int', DEBUG)
+logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
+logger ('com.k_int.okapi', WARN)
+logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
+// logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+// logger ('com.k_int.okapi.OkapiClient', WARN)
+// logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
+logger ('folio', DEBUG)
 logger ('grails.app.init', DEBUG)
 logger ('grails.app.controllers', DEBUG)
 logger ('grails.app.domains', DEBUG)
 logger ('grails.app.jobs', DEBUG)
 logger ('grails.app.services', DEBUG)
-logger ('com.k_int', DEBUG)
-logger ('okapi', INFO)
-logger ('folio', DEBUG)
 logger ('mod.rs', DEBUG)
-logger ('org.olf', DEBUG)
-logger ('org.olf.rs',DEBUG)
-logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
-logger ('com.k_int.okapi.OkapiClient', WARN)
-logger ('org.olf.rs.workflow.ReShareMessageService', WARN)
-logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
-logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
-logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
-logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+logger ('okapi', INFO)
 logger ('org.grails.datastore', WARN)
-
+logger ('org.olf', DEBUG)
+logger ('org.olf.rs.EventConsumerService', WARN)
 
 // Uncomment below logging for output of OKAPI client http.
 //logger 'groovy.net.http.JavaHttpBuilder', DEBUG

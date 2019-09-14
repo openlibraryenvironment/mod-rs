@@ -72,7 +72,7 @@ public class EventConsumerService implements EventPublisher {
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              // log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
 
               // Convert the JSON payload string to a map 
               def jsonSlurper = new JsonSlurper()
@@ -81,7 +81,7 @@ public class EventConsumerService implements EventPublisher {
                 notify('PREventIndication', data)
               }
               else {
-                log.debug("No handlers registered for event ${data.event}");
+                log.debug("No event specified in payoad: ${record.value}");
               }
             }
             catch(Exception e) {
