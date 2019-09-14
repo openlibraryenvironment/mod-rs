@@ -36,6 +36,9 @@ public class OkapiClient {
   private String password;
   private String username;
 
+  private HTTPBuilder httpclient = null;
+
+
 
   private OkapiClient() {
   }
@@ -53,6 +56,7 @@ public class OkapiClient {
 
   public boolean connect() {
     println("Connected...");
+    httpclient = new HTTPBuilder(url);
     return true;
   }
 
@@ -61,5 +65,8 @@ public class OkapiClient {
     return true;
   }
 
-
+  private login() {
+    // Post to https://okapi-reshare.apps.k-int.com/bl-users/login?expandPermissions=true&fullPermissions=true
+    // { username:x password:y }
+  }
 }
