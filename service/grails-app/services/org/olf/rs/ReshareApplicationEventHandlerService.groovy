@@ -218,8 +218,11 @@ public class ReshareApplicationEventHandlerService {
           boolean request_sent = false;
 
           // There may be problems with entries in the lending string, so we loop through the rota
-          // until we reach the end, or we find a potential lender we can talk to
-          while ( ( !request_sent ) && ( req.rotaPosition?:-1 < req.rota.size() ) ) {
+          // until we reach the end, or we find a potential lender we can talk to. The request must
+          // also explicitly state a requestingInstitutionSymbol
+          while ( ( !request_sent ) && 
+                  ( req.rotaPosition?:-1 < req.rota.size() ) && 
+                  ( req.requestingInstitutionSymbol != null ) ) {
             // We have rota entries left, work out the next one
             req.rotaPosition = (req.rotaPosition!=null ? req.rotaPosition+1 : 0 )
 
@@ -251,7 +254,7 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 // Probably need a lender_is_valid check here
-                protocolMessageService.sendProtocolMessage(next_responder, request_message_request)
+                protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
                 request_sent = true;
               }
               else {

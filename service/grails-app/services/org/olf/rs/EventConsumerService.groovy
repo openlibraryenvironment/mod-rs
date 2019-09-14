@@ -113,7 +113,6 @@ public class EventConsumerService implements EventPublisher {
   @Subscriber('okapi:tenant_list_updated')
   public void onTenantListUpdated(event) {
     log.debug("onTenantListUpdated(${event}) data:${event.data} -- Class is ${event.class.name}");
-
     tenant_list = event.data
     tenant_list_updated = true;
   }

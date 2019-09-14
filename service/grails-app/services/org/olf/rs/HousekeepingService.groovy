@@ -47,42 +47,44 @@ public class HousekeepingService {
     log.info("HousekeepingService::setupData(${tenantName},${tenantId})");
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
-      Status.lookupOrCreate('PatronRequest', 'IDLE');
-      Status.lookupOrCreate('PatronRequest', 'VALIDATED');
-      Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
-      Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
-      Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
-      Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
-      Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
-      Status.lookupOrCreate('PatronRequest', 'AWAITING_RETURN_SHIPPING')
-      Status.lookupOrCreate('PatronRequest', 'BORROWER_RETURNED')
-      Status.lookupOrCreate('PatronRequest', 'REQUEST_COMPLETE')
-      Status.lookupOrCreate('PatronRequest', 'PENDING');
-      Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
-      Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
+      Status.withNewTransaction { status ->
+        Status.lookupOrCreate('PatronRequest', 'IDLE');
+        Status.lookupOrCreate('PatronRequest', 'VALIDATED');
+        Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
+        Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
+        Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
+        Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
+        Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
+        Status.lookupOrCreate('PatronRequest', 'AWAITING_RETURN_SHIPPING')
+        Status.lookupOrCreate('PatronRequest', 'BORROWER_RETURNED')
+        Status.lookupOrCreate('PatronRequest', 'REQUEST_COMPLETE')
+        Status.lookupOrCreate('PatronRequest', 'PENDING');
+        Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
+        Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
-      // Requester / Borrower State Model
-      Status.lookupOrCreate('PatronRequest', 'REQ_IDLE');
-      Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED');
-      Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM')
-      Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED')
-      Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER')
-      Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED')
-      Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED')
-      Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING')
-      Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED')
-      Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE')
-      Status.lookupOrCreate('PatronRequest', 'REQ_PENDING');
-      Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY');
-      Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA');
+        // Requester / Borrower State Model
+        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE');
+        Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED');
+        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM')
+        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED')
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER')
+        Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED')
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED')
+        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING')
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED')
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE')
+        Status.lookupOrCreate('PatronRequest', 'REQ_PENDING');
+        Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY');
+        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA');
 
-      // Responder / Lender State Model
-      Status.lookupOrCreate('Responder', 'RES_IDLE');
-      // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
+        // Responder / Lender State Model
+        Status.lookupOrCreate('Responder', 'RES_IDLE');
+        // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
 
-      Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
-      Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
-      Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
+        Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
+        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
+        Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
+      }
 
     }
   }

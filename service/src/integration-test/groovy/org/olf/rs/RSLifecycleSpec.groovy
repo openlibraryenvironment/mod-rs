@@ -179,7 +179,9 @@ class RSLifecycleSpec extends GebSpec {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
+    // Create a request from OCLC:PPPA TO OCLC:AVL
     def req_json_data = [
+      requestingInstitutionSymbol:'OCLC:PPPA',
       title: p_title,
       author: p_author,
       systemInstanceIdentifier: p_systemInstanceIdentifier,
@@ -187,7 +189,7 @@ class RSLifecycleSpec extends GebSpec {
       patronIdentifier:p_patron_id,
       isRequester:true,
       rota:[
-        [directoryId:'OCLC:AVL', rotaPosition:"0"]
+        [directoryId:'OCLC:AVL', rotaPosition:"0", 'instanceIdentifier': '001TagFromMarc', 'copyIdentifier':'COPYBarcode from 9xx']
       ],
       tags: [ 'RS-TESTCASE-1' ]
     ]

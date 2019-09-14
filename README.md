@@ -1,5 +1,7 @@
 mod-rs - Providing Resource Sharing Capabilities
 
+** Notice ** Found an issue with the integration test runner where the hibernate session is not cleanly shut down. Please run integraiton tests one-by-one as in the Integration Tests section below until this is resolved.
+
 # I'm a front end developer - what resources are available?
 
 mod-rs is not a document-storage oriented RMB module, it is a hibernate / ORM based object/relational app. Although this arrangement
@@ -71,6 +73,15 @@ section if you notice discrepancies)
 mod-rs contains a lot of behaviour. It's really important you update and use the integration tests. PLEASE run grails test-app before committing changes. Failed tests
 leave the database state intact so you can investigate what went wrong, but this can mess up your next round of testing, so it's ideal if you "Vagrant destroy", 
 "Vagrant up" before running your test suite. Remember that the mod-rs vagrant image also includes a kafka setup.
+
+HOWEVER
+
+The tenant handling can be conusing for the integration test runner, so developers are advised to run the integraiton tests seperately as follows
+
+    grails test-app *ProtocolPeerSpec*
+    grails test-app *RSNotSuppliedSpec*
+    grails test-app *RSLifecycleSpec*
+    grails test-app *ShipmentSpec*
 
 
 ## Vagrant container with Kafka 

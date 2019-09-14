@@ -31,9 +31,10 @@ class ProtocolMessageService {
    * @return a map containing properties including any confirmationId the underlying protocol implementation provides us
    *
    */
-  public Map sendProtocolMessage(String peer_symbol, Map eventData) {
+  public Map sendProtocolMessage(String message_sender_symbol, String peer_symbol, Map eventData) {
+
     def responseConfirmed = messageConfirmation(eventData, "request")
-    log.debug("sendProtocolMessage called for ${peer_symbol},${eventData}");
+    log.debug("sendProtocolMessage called for ${message_sender_symbol}, ${peer_symbol},${eventData}");
     //Make this create a new request in the responder's system
     String confirmation = null;
 
@@ -49,8 +50,10 @@ class ProtocolMessageService {
     if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
       // and then 
-      log.debug("ProtocolMessageService::sendProtocolMessage(${peer_symbol},...) identified peer as a tenant in this system - loopback");
+      log.debug("ProtocolMessageService::sendProtocolMessage(${message_sender_symbol},${peer_symbol},...) identified peer as a tenant in this system - loopback");
       eventData.tenant = tenant.toLowerCase()+'_mod_rs'
+      eventData.sender = message_sender_symbol
+      eventData.recipient = peer_symbol
       eventData.event = mapToEvent(eventData.messageType)
       log.debug("Direct call ${tenant} as loopback for ${eventData}");
       handleIncomingMessage(eventData)

@@ -92,6 +92,7 @@ class RSNotSuppliedSpec extends GebSpec{
         where:
           symbol|tenant_id
           'RESHARE:RSA'|'RSNotSuppTenantA'
+          'RESHARE:RSB'|'RSNotSuppTenantA'
       }
   
   
@@ -101,6 +102,7 @@ class RSNotSuppliedSpec extends GebSpec{
 
     def req_json_data = [
       title: p_title,
+      requestingInstitutionSymbol:'RESHARE:RSB',
       isRequester:true,
       patronReference:p_patron_id,
       rota:[[directoryId:'RESHARE:RSA', rotaPosition:"0"]],

@@ -74,6 +74,7 @@ class ShipmentSpec extends GebSpec {
 
     def req_json_data = [
       title: p_title,
+      requestingInstitutionSymbol:'RESHARE:SH1A',
       patronReference:'SHIP-TESTCASE-1',
       patronIdentifier:p_patron_id,
       isRequester:true,

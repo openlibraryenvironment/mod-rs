@@ -44,10 +44,27 @@ traits:
           description: "OK"
     post:
       is: [ okapiService ]
-      description: Submit a new patron request
+      description: |
+        Submit a new patron request. Normally a rota is NOT specified as the shared index service will generate a rota. One CAN be supplied however.
+        RequestingInstitutionSymbol must be set for protocol messages to be sent. N.B. Tags and Refdata values can be specified as simple strings
+        As a convenience, but this is not representative of the underlying domain model.
       body:
         application/json:
           type: PatronRequest
+          example: |
+          {
+            "requestingInstitutionSymbol:'OCLC:PPPA',
+            "title": "Brain of the firm",
+            "author": "Beer, Stafford, A",
+            "systemInstanceIdentifier": "01234",
+            "patronReference":"Ian's test request",
+            "patronIdentifier":"IANBARCODE",
+            "isRequester":true,
+            "rota":[
+              {"directoryId":'OCLC:AVL', "rotaPosition":"0", "instanceIdentifier": "001TagFromMarc", "copyIdentifier":"COPYBarcode from 9xx"}
+            ],
+            "tags": [ 'RS-TESTCASE-1' ]
+          }
     /{requestId}:
       get:
         is: [ okapiService ]
