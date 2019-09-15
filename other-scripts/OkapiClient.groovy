@@ -91,4 +91,23 @@ public class OkapiClient {
     }
   }
 
+  def addTenantSymbol(String symbol) {
+    def postBody=['symbol': symbol];
+    this.getClient().request( POST, JSON) { req ->
+      uri.path= '/rs/settings/tenantSymbols'
+      uri.query=[expandPermissions:true,fullPermissions:true]
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      body= postBody
+      response.success = { resp, json ->
+        println("Symbol Registered");
+        session_ctx.auth = json;
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+        System.exit(1);
+      }
+    }
+  }
 }
