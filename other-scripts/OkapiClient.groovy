@@ -76,11 +76,12 @@ public class OkapiClient {
     this.getClient().request( POST, JSON) { req ->
       uri.path= '/bl-users/login'
       uri.query=[expandPermissions:true,fullPermissions:true]
+      headers.'X-Okapi-Tenant'=this.tenant;
       headers.'accept'='application/json'
       headers.'Content-Type'='application/json'
       body= postBody
       response.success = { resp, json ->
-        println("Login completed ${json}")
+        println("Login completed");
         session_ctx.auth = json;
       }
       response.failure = { resp ->
