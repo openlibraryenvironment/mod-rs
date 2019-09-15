@@ -72,6 +72,13 @@ mod-rs contains a lot of behaviour. It's really important you update and use the
 leave the database state intact so you can investigate what went wrong, but this can mess up your next round of testing, so it's ideal if you "Vagrant destroy", 
 "Vagrant up" before running your test suite. Remember that the mod-rs vagrant image also includes a kafka setup.
 
+Run tests individually with
+
+ grails test-app *ShipmentSpec*
+ grails test-app *RSLifecycleSpec*
+ grails test-app *ProtocolPeerSpec*
+ grails test-app *RSNotSuppliedSpec*
+
 ## Vagrant container with Kafka 
 
 This module is developed and tested in a vagrant container projectreshare/development - see
