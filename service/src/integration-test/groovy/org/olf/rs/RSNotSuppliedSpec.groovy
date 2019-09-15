@@ -54,10 +54,6 @@ class RSNotSuppliedSpec extends GebSpec{
   def cleanup() {
   }
   
-  
-  
-  
-  
   // Set up a new tenant called RSTestTenantA
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
@@ -137,27 +133,27 @@ class RSNotSuppliedSpec extends GebSpec{
   
   void "Delete the tenants"(tenant_id, note) {
     
-        expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
-        // Snooze
-        try {
-          Thread.sleep(1000);
-        }
-        catch ( Exception e ) {
-          e.printStackTrace()
-        }
-    
-        def resp = restBuilder().delete("$baseUrl/_/tenant") {
-          header 'X-Okapi-Tenant', tenant_id
-          authHeaders.rehydrate(delegate, owner, thisObject)()
-        }
-    
-        logger.debug("completed DELETE request on ${tenant_id}");
-        resp.status == NO_CONTENT.value()
-    
-        where:
-        tenant_id | note
-        'RSNotSuppTenantA' | 'note'
+    expect:"post delete request to the OKAPI controller for "+tenant_id+" results in OK and deleted tennant"
+      // Snooze
+      try {
+        Thread.sleep(1000);
       }
+      catch ( Exception e ) {
+        e.printStackTrace()
+      }
+    
+      def resp = restBuilder().delete("$baseUrl/_/tenant") {
+        header 'X-Okapi-Tenant', tenant_id
+        authHeaders.rehydrate(delegate, owner, thisObject)()
+      }
+    
+      logger.debug("completed DELETE request on ${tenant_id}");
+      resp.status == NO_CONTENT.value()
+    
+    where:
+      tenant_id | note
+      'RSNotSuppTenantA' | 'note'
+  }
     
       RestBuilder restBuilder() {
         new RestBuilder()

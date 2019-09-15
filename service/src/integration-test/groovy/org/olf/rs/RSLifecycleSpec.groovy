@@ -145,6 +145,8 @@ class RSLifecycleSpec extends GebSpec {
       symbol|tenant_id
       'OCLC:AVL'|'TestTenantH'
       'OCLC:ZMU'|'TestTenantG'
+      'RESHARE:TU01'|'TestTenantG'
+      'RESHARE:TU01'|'TestTenantG'
   }
 
   void "test settings interface - set symbol RESHARE:wibble for tenant TestTenantH"() {
@@ -173,8 +175,6 @@ class RSLifecycleSpec extends GebSpec {
       assert get_resp.json.symbols.contains('RESHARE:wibble');
   }
 
-  
-  
   void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_author, p_systemInstanceIdentifier, p_patron_id, p_patron_reference) {
     when:"post new request"
     logger.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
