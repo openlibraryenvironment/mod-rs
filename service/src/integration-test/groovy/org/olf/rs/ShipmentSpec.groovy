@@ -22,7 +22,6 @@ import groovy.util.logging.Slf4j
 import spock.lang.*
 
 @Integration
-@Rollback
 @Slf4j
 @Stepwise
 class ShipmentSpec extends GebSpec {
