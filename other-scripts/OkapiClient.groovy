@@ -125,4 +125,32 @@ public class OkapiClient {
       }
     }
   }
+
+  def createRequest(Map citation) {
+
+    if ( citation.containsKey('title') &&
+         citation.containsKey('requestingInstitutionSymbol') ) {
+
+      String postBody = JsonOutput.toJson(citation)
+
+      this.getClient().request( POST, JSON) { req ->
+        uri.path= '/rs/patronrequests'
+        headers.'X-Okapi-Tenant'=this.tenant;
+        headers.'accept'='application/json'
+        headers.'Content-Type'='application/json'
+        body=postBody
+        response.success = { resp, json ->
+          println("Symbol Registered");
+          session_ctx.auth = json;
+        }
+        response.failure = { resp ->
+          println("Error: ${resp.status}");
+          System.exit(1);
+        }
+      }
+    }
+    else {
+      println("Citation must at least contain a title and requestingInstitutionSymbol");
+    }
+  }
 }
