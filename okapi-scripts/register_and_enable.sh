@@ -34,6 +34,6 @@ curl -XPOST http://localhost:9130/_/discovery/modules -d "$DEP_DESC"
 
 echo Activate for tenant diku
 # curl -XPOST http://localhost:9130/_/proxy/tenants/diku/modules -d `echo $DEP_DESC | jq -rc '{id: .srvcId}'`
-curl -XPOST 'http://localhost:9130/_/proxy/tenants/diku/install?tenantParameters=loadReference%3Dother' -d `echo $DEP_DESC | jq -c '[{id: .srvcId, action: "enable"}]'`
+curl -XPOST 'http://localhost:9130/_/proxy/tenants/diku/install?tenantParameters=loadSample%3Dtrue,loadReference%3Dtrue' -d `echo $DEP_DESC | jq -c '[{id: .srvcId, action: "enable"}]'`
 
 popd
