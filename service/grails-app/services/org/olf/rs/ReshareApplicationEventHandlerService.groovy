@@ -44,6 +44,13 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
+    'STATUS_RESPONDER_ERROR_ind': { service, eventData ->
+      // There was an error from the responder - log and move to next lending string 
+      // or end of rota.
+    },
+    'STATUS_RESPONDER_NOT_SUPPLIED_ind': { service, eventData ->
+      // Responder sent back a negative response - next lending string entry or end of rota.
+    },
     'STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
     },
     'STATUS_REQ_ITEM_SHIPPED_ind': { service, eventData ->
@@ -120,7 +127,8 @@ public class ReshareApplicationEventHandlerService {
     log.debug("==================================================")
   }
 
-  // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, and then on to REQ_SUPPLIER_IDENTIFIED
+  // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
+  // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
   public void sourcePatronRequest(eventData) {
     log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
@@ -290,7 +298,8 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 // Probably need a lender_is_valid check here
-                protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
+                def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
+
                 request_sent = true;
               }
               else {
@@ -302,6 +311,7 @@ public class ReshareApplicationEventHandlerService {
             }
           }
 
+          // ToDo - there are three possible states here,not two - Send, End of Rota, Error
           // Did we send a request?
           if ( request_sent ) {
             log.debug("sendToNextLender sent to next lender.....");

@@ -20,7 +20,7 @@ class ProtocolMessageService {
    *       sender:{
    *         symbol:''
    *       }
-   *       recipient:{
+          recipient:{
    *         symbol:''
    *       }
    *       messageType:''
@@ -32,6 +32,8 @@ class ProtocolMessageService {
    *
    */
   public Map sendProtocolMessage(String message_sender_symbol, String peer_symbol, Map eventData) {
+
+    Map result = [:]
 
     def responseConfirmed = messageConfirmation(eventData, "request")
     log.debug("sendProtocolMessage called for ${message_sender_symbol}, ${peer_symbol},${eventData}");
@@ -57,13 +59,16 @@ class ProtocolMessageService {
       eventData.event = mapToEvent(eventData.messageType)
       log.debug("Direct call ${tenant} as loopback for ${eventData}");
       handleIncomingMessage(eventData)
+      result.status='SENT'
     } else {
       log.error("Tenant does not exist in the system. TODO: call real messaging here")
+      // If the symbol exists in the directory and we have a protocol address, send a message,
+      // otherwise, mark as failed and skip to the next rota entry.
+      // update the request status - set the 
+      result.status='ERROR'
     }
     
-    return [
-      confirmationId:confirmation
-    ]
+    return result;
   }
 
   private String mapToEvent(String messageType) {

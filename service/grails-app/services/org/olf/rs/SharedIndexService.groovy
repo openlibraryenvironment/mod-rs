@@ -20,7 +20,8 @@ public class SharedIndexService {
     List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
 
     log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
-    result.add(new AvailabilityStatement(symbol:'OCLC:AVL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));
+    result.add(new AvailabilityStatement(symbol:'OCLC:AVL',instanceIdentifier:'MOCK_INSTANCE_ID_00002',copyIdentifier:'MOCK_COPY_ID_00002'));
+    // result.add(new AvailabilityStatement(symbol:'RESHARE:LOCALSYMBOL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));
 
     // Return an empty list
     return result;

@@ -52,6 +52,8 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'VALIDATED');
         Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
         Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
+        Status.lookupOrCreate('PatronRequest', 'RESPONDER_ERROR')            // Unspecified error from responder
+        Status.lookupOrCreate('PatronRequest', 'RESPONDER_NOT_SUPPLIED')     // Responder won't supply
         Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
         Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
         Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
