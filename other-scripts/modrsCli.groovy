@@ -1,6 +1,7 @@
 // Use this file by starting up a groovy shell (groovysh) and then issuing :load ./modrsCli.groovy - the colon is important!
 
 import groovy.grape.Grape
+
 Grape.addResolver(name:'mvnRepository', root:'http://central.maven.org/maven2/')
 Grape.addResolver(name:'kint', root:'http://nexus.k-int.com/content/repositories/releases')
 Grape.grab(group:'org.slf4j', module:'slf4j-api', version:'1.7.25')

@@ -110,4 +110,19 @@ public class OkapiClient {
       }
     }
   }
+
+  def listTenantSymbols() {
+    this.getClient().request( GET, JSON) { req ->
+      uri.path= '/rs/settings/tenantSymbols'
+      uri.query=[expandPermissions:true,fullPermissions:true]
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      response.success = { resp, json ->
+        println("Result ${json}");
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+      }
+    }
+  }
 }
