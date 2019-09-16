@@ -58,9 +58,16 @@ class RSLifecycleSpec extends GebSpec {
     when:"We post a new tenant request to the OKAPI controller"
       Thread.sleep(2000);
       logger.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
+
+      def json_payload='{"parameters":[{"key":"loadReference","value":true},{"key":"loadSample", "value":true}]}';
+
       def resp = restBuilder().post("${baseUrl}_/tenant") {
+        // parameters:[[value:true, key:loadSample], [value:true, key:loadReference]], module_from:mod-rs-1.2.0])
         header 'X-Okapi-Tenant', tenantid
         authHeaders.rehydrate(delegate, owner, thisObject)()
+        contentType 'application/json; charset=UTF-8'
+        accept 'application/json; charset=UTF-8'
+        json json_payload
       }
 
     then:"The response is correct"
