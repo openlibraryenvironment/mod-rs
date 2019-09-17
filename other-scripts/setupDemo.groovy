@@ -7,3 +7,4 @@ okapi.listTenantSymbols()
 // okapi.addTenantSymbol('OCLC:PPU');
 // okapi.addTenantSymbol('RESHARE:LOCALSYMBOL01');
 // okapi.addTenantSymbol('RESHARE:KNOWINT');
+okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
