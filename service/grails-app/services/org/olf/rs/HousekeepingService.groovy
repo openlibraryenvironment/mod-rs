@@ -48,21 +48,21 @@ public class HousekeepingService {
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
       Status.withNewTransaction { status ->
-        Status.lookupOrCreate('PatronRequest', 'IDLE');
-        Status.lookupOrCreate('PatronRequest', 'VALIDATED');
-        Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
-        Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
-        Status.lookupOrCreate('PatronRequest', 'RESPONDER_ERROR')            // Unspecified error from responder
-        Status.lookupOrCreate('PatronRequest', 'RESPONDER_NOT_SUPPLIED')     // Responder won't supply
-        Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
-        Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
-        Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
-        Status.lookupOrCreate('PatronRequest', 'AWAITING_RETURN_SHIPPING')
-        Status.lookupOrCreate('PatronRequest', 'BORROWER_RETURNED')
-        Status.lookupOrCreate('PatronRequest', 'REQUEST_COMPLETE')
-        Status.lookupOrCreate('PatronRequest', 'PENDING');
-        Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
-        Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
+        // Status.lookupOrCreate('PatronRequest', 'IDLE');
+        // Status.lookupOrCreate('PatronRequest', 'VALIDATED');
+        // Status.lookupOrCreate('PatronRequest', 'SOURCING_ITEM')
+        // Status.lookupOrCreate('PatronRequest', 'SUPPLIER_IDENTIFIED')
+        // Status.lookupOrCreate('PatronRequest', 'RESPONDER_ERROR')            // Unspecified error from responder
+        // Status.lookupOrCreate('PatronRequest', 'RESPONDER_NOT_SUPPLIED')     // Responder won't supply
+        // Status.lookupOrCreate('PatronRequest', 'REQUEST_SENT_TO_SUPPLIER')
+        // Status.lookupOrCreate('PatronRequest', 'ITEM_SHIPPED')
+        // Status.lookupOrCreate('PatronRequest', 'BORROWING_LIBRARY_RECEIVED')
+        // Status.lookupOrCreate('PatronRequest', 'AWAITING_RETURN_SHIPPING')
+        // Status.lookupOrCreate('PatronRequest', 'BORROWER_RETURNED')
+        // Status.lookupOrCreate('PatronRequest', 'REQUEST_COMPLETE')
+        // Status.lookupOrCreate('PatronRequest', 'PENDING');
+        // Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
+        // Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
         // Requester / Borrower State Model
         Status.lookupOrCreate('PatronRequest', 'REQ_IDLE');
@@ -83,6 +83,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_IDLE');
         // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
 
+        Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP');
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');

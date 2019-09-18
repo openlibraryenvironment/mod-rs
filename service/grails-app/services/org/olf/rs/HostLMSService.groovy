@@ -24,6 +24,11 @@ public class HostLMSService {
     result
   }
 
+  String[] determineBestLocation(String instanceIdentifier) {
+    log.debug("determineBestLocation(${instanceIdentifier})");
+    String[] result = [ 'MAIN' ]
+    return result;
+  }
   
 
 }

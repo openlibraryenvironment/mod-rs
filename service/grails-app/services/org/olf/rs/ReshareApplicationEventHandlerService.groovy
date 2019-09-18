@@ -421,8 +421,15 @@ public class ReshareApplicationEventHandlerService {
   private void autoRespond(PatronRequest pr) {
     log.debug("autoRespond....");
     if ( pr.systemInstanceIdentifier != null ) {
-      log.debug("Patron request has a systemInstanceIdentifier - place hold");
-      hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+
+      // Use the hostLMSService to determine the best locations to send a pull-slip to
+      String[] locations = hostLMSService.determineBestLocation(pr.systemInstanceIdentifier)
+
+      if ( locations.length > 0 ) {
+        auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+loc, null);
+        log.debug("Patron request has a systemInstanceIdentifier - place hold");
+        hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+      }
     }
     else {
       log.debug("No system instance identifier present - need to search");
