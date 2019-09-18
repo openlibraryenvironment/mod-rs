@@ -131,6 +131,8 @@ public class OkapiClient {
     if ( citation.containsKey('title') &&
          citation.containsKey('requestingInstitutionSymbol') ) {
 
+      citation.isRequester=true;
+
       String postBody = JsonOutput.toJson(citation)
 
       this.getClient().request( POST, JSON) { req ->

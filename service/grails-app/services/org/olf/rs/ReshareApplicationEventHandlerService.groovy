@@ -137,10 +137,8 @@ public class ReshareApplicationEventHandlerService {
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      PatronRequest req = delayedGet(eventData.payload.id);
+      PatronRequest req = delayedGet(eventData.payload.id, true);
       if ( ( req.isRequester == true ) && ( req != null ) && ( req.state?.code == 'REQ_VALIDATED' ) ) {
-
-        req.lock();
 
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently VALIDATED - transition to REQ_SOURCING_ITEM");
@@ -208,8 +206,7 @@ public class ReshareApplicationEventHandlerService {
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      def req = delayedGet(eventData.payload.id);
-      req.lock()
+      def req = delayedGet(eventData.payload.id, true);
       if ( ( req != null ) && ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ) {
         log.debug("Got request ${req}");
         
@@ -373,14 +370,19 @@ public class ReshareApplicationEventHandlerService {
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
    * up to 5 times.
    */
-  public PatronRequest delayedGet(String pr_id) {
+  public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
     log.debug("PatronRequest called")
     PatronRequest result = null;
     int retries = 0;
 
     try {
       while ( ( result == null ) && (retries < MAX_RETRIES) ) {
-        result = PatronRequest.get(pr_id)
+        if ( wth_lock ) {
+          result = PatronRequest.lock(pr_id)
+        }
+        else {
+          result = PatronRequest.get(pr_id)
+        }
         if ( result == null ) {
           log.debug("Waiting to see if request has become available: Try ${retries}")
           //Thread.sleep(2000);
