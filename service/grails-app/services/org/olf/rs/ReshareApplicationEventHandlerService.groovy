@@ -146,7 +146,7 @@ public class ReshareApplicationEventHandlerService {
         req.save(flush:true, failOnError:true)
 
 
-        if(req.rota.size() != 0) {
+        if(req.rota?.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently REQ_SOURCING_ITEM - transition to REQ_SUPPLIER_IDENTIFIED");
           req.state = Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
