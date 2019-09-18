@@ -12,10 +12,10 @@ okapi.listTenantSymbols()
 
 okapi.createRequest([
                      title:'The Heart of Enterprise',
-                     patronIdentifier: "PI",
-                     patronReference: "PR",
-                     patronSurname: "PS",
-                     patronGivenName: 'PGN",
+                     patronIdentifier: 'PI',
+                     patronReference: 'PR',
+                     patronSurname: 'PS',
+                     patronGivenName: 'PGN',
                      patronType:'PT',
                      requestingInstitutionSymbol:'RESHARE:KNOWINT']);
 

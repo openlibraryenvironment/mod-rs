@@ -23,6 +23,7 @@ public class ReshareApplicationEventHandlerService {
   ProtocolMessageService protocolMessageService
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
+  HostLMSService hostLMSService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -102,19 +103,18 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) ) {
+      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) && ( req.isRequester == true) ) {
 
         // If the role is requester then validate the request and set the state to validated
-        if ( req.isRequester == true ) {
-          log.debug("Got request ${req}");
-          log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-          req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
-          auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
-          req.save(flush:true, failOnError:true)
-        }
-        else {
-          log.debug("No action to take as a responder (yet)");
-        }
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+        req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
+        auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+        req.save(flush:true, failOnError:true)
+      }
+      else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
+        log.debug("Launch auto responder for request");
+        autoRespond(req)
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
@@ -294,6 +294,9 @@ public class ReshareApplicationEventHandlerService {
                   log.warn("Cannot understand symbol ${next_responder}");
                 }
 
+                // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
+                request_message_request.systemInstanceIdentifier = prr.instanceIdentifier;
+
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
 
@@ -413,5 +416,16 @@ public class ReshareApplicationEventHandlerService {
       duration:null,
       message: message,
       auditData: json_data))
+  }
+
+  private void autoRespond(PatronRequest pr) {
+    log.debug("autoRespond....");
+    if ( pr.systemInstanceIdentifier != null ) {
+      log.debug("Patron request has a systemInstanceIdentifier - place hold");
+      hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+    }
+    else {
+      log.debug("No system instance identifier present - need to search");
+    }
   }
 }
