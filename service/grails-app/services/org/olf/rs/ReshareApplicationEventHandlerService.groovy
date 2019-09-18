@@ -95,7 +95,6 @@ public class ReshareApplicationEventHandlerService {
 
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   public void handleNewPatronRequestIndication(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -118,19 +117,13 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title} ${it.state?.code}");
-        }
       }
     }
-    log.debug("==================================================")
   }
 
   // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
   // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
   public void sourcePatronRequest(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -193,13 +186,11 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
-    log.debug("==================================================")
   }
 
 
   // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -345,7 +336,6 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
-    log.debug("==================================================")
   }
 
 
@@ -353,7 +343,6 @@ public class ReshareApplicationEventHandlerService {
    * A new request has been received from a peer institution. We will need to create a request where isRequester==false
    */
   public void handleRequestMessage(Map eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
     if ( eventData.request != null ) {
       log.debug("*** Create new request***");
@@ -366,7 +355,6 @@ public class ReshareApplicationEventHandlerService {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
     }
 
-    log.debug("==================================================")
   }
 
   /**
@@ -400,6 +388,13 @@ public class ReshareApplicationEventHandlerService {
       log.error("Problem", e)
     }
     return result;
+  }
+
+  private void error(PatronRequest pr, String message) {
+    Status old_state = pr.state;
+    Status new_state = pr.isRequester ? Status.lookup('PatronRequest', 'REQ_ERROR') : Status.lookup('Responder', 'RES_ERROR');
+    pr.state = new_state;
+    auditEntry(pr, old_state, new_state, message, null);
   }
 
   private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {

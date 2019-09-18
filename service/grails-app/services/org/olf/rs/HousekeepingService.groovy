@@ -78,6 +78,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_PENDING');
         Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY');
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA');
+        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR');
 
         // Responder / Lender State Model
         Status.lookupOrCreate('Responder', 'RES_IDLE');
@@ -87,6 +88,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
+        Status.lookupOrCreate('Responder', 'RES_ERROR');
       }
 
     }
