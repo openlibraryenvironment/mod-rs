@@ -26,6 +26,7 @@ class UrlMappings {
     "/rs/kiwt/raml" (controller: 'reshareConfig' , action: "raml")
 
     "/rs/settings/tenantSymbols" (controller: 'reshareSettings', action: 'tenantSymbols');
+    "/rs/settings/worker" (controller: 'reshareSettings', action: 'worker');
 
 
     // Call /rs/custprop  to list all custom properties

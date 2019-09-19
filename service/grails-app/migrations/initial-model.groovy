@@ -1180,4 +1180,17 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "2019-09-19-0940-001") {
+        createTable(tableName: "host_lms_location") {
+            column(name: "hll_id", type: "VARCHAR(36)") { constraints(nullable: "false") } 
+            column(name: "hll_version", type: "BIGINT") { constraints(nullable: "false") }
+            column(name: "hll_code", type: "VARCHAR(255)") { constraints(nullable: "false") }
+            column(name: "hll_last_completed", type: "BIGINT")
+            column(name: "hll_ical_rrule", type: "VARCHAR(255)")
+            column(name: "hll_date_created", type: "timestamp")
+            column(name: "hll_last_updated", type: "timestamp")
+
+        }
+    }
+
 }

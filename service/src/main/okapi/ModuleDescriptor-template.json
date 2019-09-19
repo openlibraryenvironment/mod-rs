@@ -28,6 +28,10 @@
         },
         {
           "methods": ["GET", "POST"],
+          "pathPattern": "/rs/settings/worker"
+        },
+        {
+          "methods": ["GET", "POST"],
           "pathPattern": "/rs/settings/*"
         }
       ]
@@ -41,6 +45,18 @@
         }, {
          "methods" : [ "POST" ],
          "pathPattern" : "/_/tenant/disable"
+        }
+      ]
+    }, {
+      "id": "_timer",
+      "version": "1.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/settings/worker",
+          "unit": "minute",
+          "delay": "5"
         }
       ]
     }
