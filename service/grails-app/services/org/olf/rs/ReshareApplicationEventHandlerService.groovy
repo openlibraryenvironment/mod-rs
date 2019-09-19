@@ -94,6 +94,7 @@ public class ReshareApplicationEventHandlerService {
   }
 
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
+  // Called when a new patron request indication happens - usually
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
@@ -286,7 +287,7 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
-                request_message_request.systemInstanceIdentifier = prr.instanceIdentifier;
+                request_message_request.request.systemInstanceIdentifier = prr.instanceIdentifier;
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
