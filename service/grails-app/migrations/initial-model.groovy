@@ -1193,8 +1193,8 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "ianibbo (manual)", id: "2019-09-19-0940-002") {
-        addColumn(tableName: "patron_request_rota") {
+    changeSet(author: "ianibbo (manual)", id: "2019-09-19-0940-003") {
+        addColumn(tableName: "patron_request") {
             column(name: "pr_local_call_number", type: "VARCHAR(256)")
         }
     }

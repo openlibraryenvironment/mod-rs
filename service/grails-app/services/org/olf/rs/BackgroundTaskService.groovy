@@ -20,6 +20,11 @@ public class BackgroundTaskService {
     log.debug("checkPullSlips()");
     HostLMSLocation.list().each { loc ->
       log.debug("Check pull slips fro ${loc}");
+      checkPullSlipsFor(loc.code);
     }
+  }
+
+  private void checkPullSlipsFor(String location) {
+    log.debug("checkPullSlipsFor(${location})");
   }
 }
