@@ -23,6 +23,7 @@ public class ReshareApplicationEventHandlerService {
   ProtocolMessageService protocolMessageService
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
+  HostLMSService hostLMSService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -94,7 +95,6 @@ public class ReshareApplicationEventHandlerService {
 
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   public void handleNewPatronRequestIndication(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -102,45 +102,36 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) ) {
+      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) && ( req.isRequester == true) ) {
 
         // If the role is requester then validate the request and set the state to validated
-        if ( req.isRequester == true ) {
-          log.debug("Got request ${req}");
-          log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-          req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
-          auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
-          req.save(flush:true, failOnError:true)
-        }
-        else {
-          log.debug("No action to take as a responder (yet)");
-        }
+        log.debug("Got request ${req}");
+        log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+        req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
+        auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+        req.save(flush:true, failOnError:true)
+      }
+      else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
+        log.debug("Launch auto responder for request");
+        autoRespond(req)
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title} ${it.state?.code}");
-        }
       }
     }
-    log.debug("==================================================")
   }
 
   // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
   // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
   public void sourcePatronRequest(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      PatronRequest req = delayedGet(eventData.payload.id);
+      PatronRequest req = delayedGet(eventData.payload.id, true);
       if ( ( req.isRequester == true ) && ( req != null ) && ( req.state?.code == 'REQ_VALIDATED' ) ) {
-
-        req.lock();
 
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently VALIDATED - transition to REQ_SOURCING_ITEM");
@@ -195,21 +186,18 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
-    log.debug("==================================================")
   }
 
 
   // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      def req = delayedGet(eventData.payload.id);
-      req.lock()
+      def req = delayedGet(eventData.payload.id, true);
       if ( ( req != null ) && ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ) {
         log.debug("Got request ${req}");
         
@@ -297,6 +285,9 @@ public class ReshareApplicationEventHandlerService {
                   log.warn("Cannot understand symbol ${next_responder}");
                 }
 
+                // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
+                request_message_request.systemInstanceIdentifier = prr.instanceIdentifier;
+
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
 
@@ -345,7 +336,6 @@ public class ReshareApplicationEventHandlerService {
         }
       }
     }
-    log.debug("==================================================")
   }
 
 
@@ -353,7 +343,6 @@ public class ReshareApplicationEventHandlerService {
    * A new request has been received from a peer institution. We will need to create a request where isRequester==false
    */
   public void handleRequestMessage(Map eventData) {
-    log.debug("==================================================")
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
     if ( eventData.request != null ) {
       log.debug("*** Create new request***");
@@ -366,21 +355,25 @@ public class ReshareApplicationEventHandlerService {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
     }
 
-    log.debug("==================================================")
   }
 
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
    * up to 5 times.
    */
-  public PatronRequest delayedGet(String pr_id) {
+  public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
     log.debug("PatronRequest called")
     PatronRequest result = null;
     int retries = 0;
 
     try {
       while ( ( result == null ) && (retries < MAX_RETRIES) ) {
-        result = PatronRequest.get(pr_id)
+        if ( wth_lock ) {
+          result = PatronRequest.lock(pr_id)
+        }
+        else {
+          result = PatronRequest.get(pr_id)
+        }
         if ( result == null ) {
           log.debug("Waiting to see if request has become available: Try ${retries}")
           //Thread.sleep(2000);
@@ -397,6 +390,13 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+  private void error(PatronRequest pr, String message) {
+    Status old_state = pr.state;
+    Status new_state = pr.isRequester ? Status.lookup('PatronRequest', 'REQ_ERROR') : Status.lookup('Responder', 'RES_ERROR');
+    pr.state = new_state;
+    auditEntry(pr, old_state, new_state, message, null);
+  }
+
   private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
 
     String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
@@ -411,5 +411,23 @@ public class ReshareApplicationEventHandlerService {
       duration:null,
       message: message,
       auditData: json_data))
+  }
+
+  private void autoRespond(PatronRequest pr) {
+    log.debug("autoRespond....");
+    if ( pr.systemInstanceIdentifier != null ) {
+
+      // Use the hostLMSService to determine the best locations to send a pull-slip to
+      String[] locations = hostLMSService.determineBestLocation(pr.systemInstanceIdentifier)
+
+      if ( locations.length > 0 ) {
+        auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+loc, null);
+        log.debug("Patron request has a systemInstanceIdentifier - place hold");
+        hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+      }
+    }
+    else {
+      log.debug("No system instance identifier present - need to search");
+    }
   }
 }
