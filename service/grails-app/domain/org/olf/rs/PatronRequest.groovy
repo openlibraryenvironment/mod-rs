@@ -189,7 +189,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     neededBy (nullable: true )
     requestingInstitutionSymbol (nullable: true )
 
-    localCallNumber (nullable: true )
+    localCallNumber (nullable: true)
   }
 
   static mapping = {
