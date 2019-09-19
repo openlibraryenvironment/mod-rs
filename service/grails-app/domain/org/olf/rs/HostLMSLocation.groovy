@@ -29,7 +29,8 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   static constraints = {
     code (nullable: false)
-    icalRrule (nullable: false)
+    icalRrule (nullable: true)
+    lastCompleted (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
   }
@@ -43,6 +44,10 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     lastCompleted column : 'hll_last_completed'
       dateCreated column : 'hll_date_created'
       lastUpdated column : 'hll_last_updated'
+  }
+
+  public String toString() {
+    return "HostLMSLocation: ${code}".toString()
   }
 }
 

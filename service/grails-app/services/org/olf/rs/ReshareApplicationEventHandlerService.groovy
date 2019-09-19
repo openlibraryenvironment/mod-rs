@@ -423,6 +423,8 @@ public class ReshareApplicationEventHandlerService {
       if ( locations.length > 0 ) {
         auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+loc, null);
         log.debug("Patron request has a systemInstanceIdentifier - place hold");
+
+        // set localCallNumber to whatever we managed to look up
         hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       }
     }

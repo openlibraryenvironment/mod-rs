@@ -78,6 +78,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Date lastUpdated
 
   Date neededBy
+
+  // A property for responders - what we think the local call number is
+  String localCallNumber
   
   Set rota = []
 
@@ -185,6 +188,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     sendToPatron (nullable: true )
     neededBy (nullable: true )
     requestingInstitutionSymbol (nullable: true )
+
+    localCallNumber (nullable: true )
   }
 
   static mapping = {
@@ -243,6 +248,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronType column : 'pr_patron_type'
     sendToPatron column : 'pr_send_to_patron'
     neededBy column : 'pr_needed_by'
+
+    localCallNumber column : 'pr_local_call_number'
   }
 
   /**
