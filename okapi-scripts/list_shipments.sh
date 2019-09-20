@@ -12,7 +12,6 @@ elif [ -f $HOME/.okapirc ]; then
 fi
 
 
-
 #  serviceType:"Loan",
 curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X GET ${OKAPI}/rs/shipments
   

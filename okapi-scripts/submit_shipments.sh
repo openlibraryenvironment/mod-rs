@@ -12,16 +12,16 @@ elif [ -f $HOME/.okapirc ]; then
 fi
 
 
-response1=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dMain%20branch&stats=true"`
+response1=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dUT%20Austin:%20Main%20Branch&stats=true"`
 id1=`echo $response1|jq -r ".results[0].id" | tr -d '\r'`
 
-response2=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dLaw%20Library&stats=true"`
+response2=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dNew%20School:%20Law%20Library&stats=true"`
 id2=`echo $response2|jq -r ".results[0].id" | tr -d '\r'`
 
-response3=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dThe%20IC&stats=true"`
+response3=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dUniversity%20of%20Sheffield:%20The%20IC&stats=true"`
 id3=`echo $response3|jq -r ".results[0].id" | tr -d '\r'`
 
-response4=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dBrotherton%20Library&stats=true"`
+response4=`curl -sSL --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: $AUTH_TOKEN" -H "Content-Type: application/json" -X GET "http://localhost:9130/rs/directoryEntry?filters=name%3dUniversity%20of%20Leeds:%20Brotherton%20Library&stats=true"`
 id4=`echo $response4|jq -r ".results[0].id" | tr -d '\r'`
 
 #  serviceType:"Shipment",
@@ -42,7 +42,7 @@ SHIP_2=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKE
   shippingLibrary: {id: "'"$id3"'"},
   receivingLibrary:{id: "'"$id4"'"},
   shipDate:"2019-09-19T15:08:59",
-  receivedDate:"2019-09-19T15:09:00",
+  receivedDate:"2019-09-19T15:09:00", 
   trackingNumber: "1234-5678-0002",
   systemInstanceIdentifier:"893475987348974"
 }
