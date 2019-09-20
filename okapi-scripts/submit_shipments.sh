@@ -13,14 +13,14 @@ fi
 
 
 
-#  serviceType:"Loan",
+#  serviceType:"Shipment",
 SHIP_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/shipments -d ' {
   id:"000001",
-  shippingLibrary:"Ethan2",
-  receivingLibrary:"Ethan4",
+  shippingLibrary:{id: "Ethan2"},
+  receivingLibrary:{id: "Ethan4"},
   shipDate:"1925-01-01T12:30:00",
   receivedDate:"2019-09-19T15:09:00",
-  trackingNumber: "9999-9999-0001",
+  trackingNumber: "1234-5678-0001",
   notARealProperty:"Test that this is ignored in accordance with Postels law",
   systemInstanceIdentifier:"893475987348973",
 }
@@ -28,11 +28,11 @@ SHIP_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKE
 
 SHIP_2=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/shipments -d ' {
   id:"000002",
-  shippingLibrary:"Ethan6",
-  receivingLibrary:"Ethan8",
+  shippingLibrary: {id: "Ethan6"},
+  receivingLibrary:{id: "Ethan8"},
   shipDate:"2019-09-19T15:08:59",
   receivedDate:"2019-09-19T15:09:00",
-  trackingNumber: "9999-9999-0002",
+  trackingNumber: "1234-5678-0002",
   systemInstanceIdentifier:"893475987348974",
 }
 '`
