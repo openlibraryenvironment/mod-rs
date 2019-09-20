@@ -17,7 +17,7 @@ DirectoryEntry dm1 = DirectoryEntry.findById('Ethan1') ?: new DirectoryEntry(
 
 DirectoryEntry dm2 = DirectoryEntry.findById('Ethan2') ?: new DirectoryEntry(
                                                                         id: 'Ethan2',
-                                                                        name: 'Main branch',
+                                                                        name: 'UT Austin · Main Branch',
                                                                         parent: dm1).save(flush:true, failOnError:true);
 
 DirectoryEntry dm3 = DirectoryEntry.findById('Ethan3') ?: new DirectoryEntry(
@@ -27,25 +27,25 @@ DirectoryEntry dm3 = DirectoryEntry.findById('Ethan3') ?: new DirectoryEntry(
 
 DirectoryEntry dm4 = DirectoryEntry.findById('Ethan4') ?: new DirectoryEntry(
                                                                         id: 'Ethan4',
-                                                                        name: 'Law Library',
+                                                                        name: 'New School · Law Library',
                                                                         parent: dm3).save(flush:true, failOnError:true);
 
 DirectoryEntry dm5 = DirectoryEntry.findById('Ethan5') ?: new DirectoryEntry(
                                                                         id: 'Ethan5',
-                                                                        name: 'The University of Sheffield').save(flush:true, failOnError:true);
+                                                                        name: 'University of Sheffield').save(flush:true, failOnError:true);
 
 
 DirectoryEntry dm6 = DirectoryEntry.findById('Ethan6') ?: new DirectoryEntry(
                                                                         id: 'Ethan6',
-                                                                        name: 'The IC',
+                                                                        name: 'University of Sheffield · The IC',
                                                                         parent: dm5).save(flush:true, failOnError:true);
 
 DirectoryEntry dm7 = DirectoryEntry.findById('Ethan7') ?: new DirectoryEntry(
                                                                         id: 'Ethan7',
-                                                                        name: 'The University of Leeds').save(flush:true, failOnError:true);
+                                                                        name: 'University of Leeds').save(flush:true, failOnError:true);
 
 
 DirectoryEntry dm8 = DirectoryEntry.findById('Ethan8') ?: new DirectoryEntry(
                                                                         id: 'Ethan8',
-                                                                        name: 'Brotherton Library',
+                                                                        name: 'University of Leeds · Brotherton Library',
                                                                         parent: dm7).save(flush:true, failOnError:true);
