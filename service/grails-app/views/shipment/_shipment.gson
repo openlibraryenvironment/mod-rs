@@ -6,5 +6,7 @@ json g.render(shipment, [expand: ['directoryEntry',
                                   'shipmentMethod',
                                   'status',
                                   'dateCreated',
-                                  'lastUpdated' ],
+                                  'lastUpdated',
+                                  'shippingLibrary',
+                                  'receivingLibrary' ],
                          excludes: ['shipmentItems'] ])
