@@ -107,7 +107,7 @@ dependencies {
   compile 'org.w3c.css:sac:1.3'
 
   // Domain model for directory
-  compile 'org.olf.reshare.dm.directory:dm-directory:0.0.27'
+  compile 'org.olf.reshare.dm.directory:dm-directory:0.0.10'
   compile 'org.scala-saddle:google-rfc-2445:20110304'
 }
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
