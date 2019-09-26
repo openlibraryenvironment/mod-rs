@@ -63,7 +63,8 @@ public class EventConsumerService implements EventPublisher {
         if ( ( tenant_list == null ) || ( tenant_list.size() == 0 ) )
           topics = ['dummy_topic']
         else
-          topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() }
+          topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() } +
+                   tenant_list.collect { "${it}_mod_directory_DirectoryEntryUpdate".toString() }
 
         log.debug("Listening out for topics : ${topics}");
         tenant_list_updated = false;
@@ -72,16 +73,24 @@ public class EventConsumerService implements EventPublisher {
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              // log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
 
-              // Convert the JSON payload string to a map 
-              def jsonSlurper = new JsonSlurper()
-              def data = jsonSlurper.parseText(record.value)
-              if ( data.event != null ) {
-                notify('PREventIndication', data)
+              if ( record.topic.contains('_mod_rs_PatronRequestEvents') ) {
+                // Convert the JSON payload string to a map 
+                def jsonSlurper = new JsonSlurper()
+                def data = jsonSlurper.parseText(record.value)
+                if ( data.event != null ) {
+                  notify('PREventIndication', data)
+                }
+                else {
+                  log.debug("No event specified in payoad: ${record.value}");
+                }
+              }
+              else if ( record.topic.contains('_mod_directory_DirectoryEntryUpdate') ) {
+                log.debug("Process updated directory entry ${record.value}");
               }
               else {
-                log.debug("No event specified in payoad: ${record.value}");
+                log.debug("Not handling event for topic ${record.topic}");
               }
             }
             catch(Exception e) {

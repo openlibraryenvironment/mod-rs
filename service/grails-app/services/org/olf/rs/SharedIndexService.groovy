@@ -41,7 +41,7 @@ public class SharedIndexService {
 
     List<String> lendingStrings = new ArrayList<String>();
     for ( int i=0; i<num_responders; i++ ) {
-      lendingStrings.add(all_libs.remove(ThreadLocalRandom.current().nextInt(0,all_libs.size());
+      lendingStrings.add(all_libs.remove(ThreadLocalRandom.current().nextInt(0,all_libs.size())));
     }
 
     log.debug("Decded these are the lenders: ${lendingStrings}");
