@@ -132,8 +132,9 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     tenant_list_updated = true;
   }
 
+  // We don't want to be doing these updates on top of eachother
   @Subscriber('DirectoryUpdate')
-  public void processDirectoryUpdate(event) {
+  public synchronized  void processDirectoryUpdate(event) {
     log.debug("processDirectoryUpdate(${event})");
 
     def data = event.data;
@@ -141,27 +142,33 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     try {
       if ( data?.tenant ) {
         Tenants.withId(data.tenant+'_mod_rs') {
-          log.debug("Process directory entry inside ${data.tenant}_mod_rs");
-          if ( data.payload.id ) {
-            log.debug("Trying to load DirectoryEntry ${data.payload.id}");
-            DirectoryEntry de = DirectoryEntry.get(data.payload.id)
-            if ( de == null ) {
-              log.debug("Create new directory entry");
-              de = new DirectoryEntry();
+          DirectoryEntry.withTransaction { status ->
+            log.debug("Process directory entry inside ${data.tenant}_mod_rs");
+            if ( data.payload.slug ) {
+              log.debug("Trying to load DirectoryEntry ${data.payload.slug}");
+              DirectoryEntry de = DirectoryEntry.findBySlug(data.payload.slug)
+              if ( de == null ) {
+                log.debug("Create new directory entry ${data.payload.slug} : ${data.payload}");
+                de = new DirectoryEntry();
+              }
+              else {
+                de.lock()
+                log.debug("Update directory entry ${data.payload.slug} : ${data.payload}");
+              }
+              bindData(de, data.payload);
+              log.debug("Binding complete - ${de}");
+              de.save(flush:true, failOnError:true);
             }
-            else {
-            }
-            bindData(de, data.payload);
-            de.save(flush:true, failOnError:true);
           }
         }
+
       }
     }
     catch ( Exception e ) {
       log.error("Problem processing directory update",e);
     }
     finally {
-      log.debug("Directory update processing complete");
+      log.debug("Directory update processing complete (${event})");
     }
   }
 }
