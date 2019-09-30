@@ -126,6 +126,7 @@ class RSLifecycleSpec extends GebSpec {
       ],
       services:[
         [
+          slug:'Allegheny_College_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'https://localhost/reshare/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['RESHARE', 'PALCI', 'IDS'] ]
         ]
