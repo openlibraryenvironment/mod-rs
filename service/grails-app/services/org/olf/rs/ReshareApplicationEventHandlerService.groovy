@@ -162,7 +162,8 @@ public class ReshareApplicationEventHandlerService {
                                                      rotaPosition:ctr++, 
                                                      directoryId:av_stmt.symbol,
                                                      instanceIdentifier:av_stmt.instanceIdentifier,
-                                                     copyIdentifier:av_stmt.copyIdentifier))
+                                                     copyIdentifier:av_stmt.copyIdentifier,
+                                                     state: Status.lookup('PatronRequest', 'REQ_IDLE')))
               }
             }
             req.state = Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
@@ -291,6 +292,8 @@ public class ReshareApplicationEventHandlerService {
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
+
+                prr.state = Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
 
                 request_sent = true;
               }
