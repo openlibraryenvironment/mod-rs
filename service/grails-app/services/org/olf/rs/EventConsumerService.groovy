@@ -10,6 +10,10 @@ import grails.core.GrailsApplication
 import grails.events.EventPublisher
 import grails.events.annotation.Subscriber
 import groovy.json.JsonSlurper
+import grails.web.databinding.DataBinder
+import org.olf.okapi.modules.directory.DirectoryEntry;
+import grails.gorm.multitenancy.Tenants
+
 
 /**
  * Listen to configured KAFKA topics and react to them.
@@ -20,7 +24,7 @@ import groovy.json.JsonSlurper
  * reacting to application events. Whatever implementation is used, it ultimately needs to call notify('PREventIndication',DATA) in order
  * for 
  */
-public class EventConsumerService implements EventPublisher {
+public class EventConsumerService implements EventPublisher, DataBinder {
 
   GrailsApplication grailsApplication
 
@@ -63,7 +67,8 @@ public class EventConsumerService implements EventPublisher {
         if ( ( tenant_list == null ) || ( tenant_list.size() == 0 ) )
           topics = ['dummy_topic']
         else
-          topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() }
+          topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() } +
+                   tenant_list.collect { "${it}_mod_directory_DirectoryEntryUpdate".toString() }
 
         log.debug("Listening out for topics : ${topics}");
         tenant_list_updated = false;
@@ -74,14 +79,24 @@ public class EventConsumerService implements EventPublisher {
             try {
               // log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
 
-              // Convert the JSON payload string to a map 
-              def jsonSlurper = new JsonSlurper()
-              def data = jsonSlurper.parseText(record.value)
-              if ( data.event != null ) {
-                notify('PREventIndication', data)
+              if ( record.topic.contains('_mod_rs_PatronRequestEvents') ) {
+                // Convert the JSON payload string to a map 
+                def jsonSlurper = new JsonSlurper()
+                def data = jsonSlurper.parseText(record.value)
+                if ( data.event != null ) {
+                  notify('PREventIndication', data)
+                }
+                else {
+                  log.debug("No event specified in payoad: ${record.value}");
+                }
+              }
+              else if ( record.topic.contains('_mod_directory_DirectoryEntryUpdate') ) {
+                def jsonSlurper = new JsonSlurper()
+                def data = jsonSlurper.parseText(record.value)
+                notify('DirectoryUpdate', data)
               }
               else {
-                log.debug("No event specified in payoad: ${record.value}");
+                log.debug("Not handling event for topic ${record.topic}");
               }
             }
             catch(Exception e) {
@@ -115,5 +130,45 @@ public class EventConsumerService implements EventPublisher {
     log.debug("onTenantListUpdated(${event}) data:${event.data} -- Class is ${event.class.name}");
     tenant_list = event.data
     tenant_list_updated = true;
+  }
+
+  // We don't want to be doing these updates on top of eachother
+  @Subscriber('DirectoryUpdate')
+  public synchronized  void processDirectoryUpdate(event) {
+    log.debug("processDirectoryUpdate(${event})");
+
+    def data = event.data;
+
+    try {
+      if ( data?.tenant ) {
+        Tenants.withId(data.tenant+'_mod_rs') {
+          DirectoryEntry.withTransaction { status ->
+            log.debug("Process directory entry inside ${data.tenant}_mod_rs");
+            if ( data.payload.slug ) {
+              log.debug("Trying to load DirectoryEntry ${data.payload.slug}");
+              DirectoryEntry de = DirectoryEntry.findBySlug(data.payload.slug)
+              if ( de == null ) {
+                log.debug("Create new directory entry ${data.payload.slug} : ${data.payload}");
+                de = new DirectoryEntry();
+              }
+              else {
+                de.lock()
+                log.debug("Update directory entry ${data.payload.slug} : ${data.payload}");
+              }
+              bindData(de, data.payload);
+              log.debug("Binding complete - ${de}");
+              de.save(flush:true, failOnError:true);
+            }
+          }
+        }
+
+      }
+    }
+    catch ( Exception e ) {
+      log.error("Problem processing directory update",e);
+    }
+    finally {
+      log.debug("Directory update processing complete (${event})");
+    }
   }
 }

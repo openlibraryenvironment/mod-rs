@@ -142,6 +142,8 @@ events:
       deserializer: org.apache.kafka.common.serialization.StringDeserializer
     group:
       id: ModRSConsumer
+    'auto.offset.reset': 'earliest'
+
       
   publisher:
     zk:
