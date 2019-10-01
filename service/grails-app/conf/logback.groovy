@@ -42,7 +42,7 @@ logger ('mod.rs', DEBUG)
 logger ('okapi', INFO)
 logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
-logger ('org.olf.rs.EventConsumerService', WARN)
+logger ('org.olf.rs.EventConsumerService', DEBUG)
 
 // Uncomment below logging for output of OKAPI client http.
 //logger 'groovy.net.http.JavaHttpBuilder', DEBUG

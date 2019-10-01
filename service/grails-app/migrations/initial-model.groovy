@@ -1226,4 +1226,22 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20190926-1407-001") {
+
+        addColumn(tableName: "group_member") {
+            column(name: "version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "custom_properties_id", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+        }
+
+        addColumn(tableName: "directory_entry") {
+            column(name: "de_entry_url", type: "VARCHAR(255)")
+        }
+
+    }
+
 }
