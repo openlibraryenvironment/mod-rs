@@ -1198,4 +1198,32 @@ databaseChangeLog = {
             column(name: "pr_local_call_number", type: "VARCHAR(256)")
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20190921-1002-001") {
+        addColumn(tableName: "service_account") {
+            column(name: "sa_slug", type: "VARCHAR(255)");
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20190924-0943-001") {
+        createTable(tableName: "group_member") {
+            column(name: "gm_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "gm_group_fk", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "gm_member_fk", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+        }
+
+        addPrimaryKey(columnNames: "gm_id", constraintName: "GroupMemberPK", tableName: "group_member")
+
+
+        addColumn(tableName: "directory_entry") {
+            column(name: "de_lms_location_code", type: "VARCHAR(255)");
+        }
+    }
+
 }
