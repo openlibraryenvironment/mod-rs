@@ -435,7 +435,15 @@ public class ReshareApplicationEventHandlerService {
 
         // set localCallNumber to whatever we managed to look up
         // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
-        routeRequestToLocation(pr, location)
+        if ( routeRequestToLocation(pr, location) ) {
+          sendWillSupply(pr);
+        }
+        else {
+          sendUnfilled(pr);
+        }
+      }
+      else {
+        sendUnfilled(pr);
       }
     }
     else {
@@ -443,7 +451,16 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private routeRequestToLocation(PatronRequest pr, ItemLocation location) {
+  private boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
+    return true;
+  }
+
+  private void sendUnfilled(PatronRequest pr) {
+    log.debug("sendUnfilled(....)");
+  }
+
+  private void sendWillSupply(PatronRequest pr) {
+    log.debug("sendWillSupply(....)");
   }
 }
