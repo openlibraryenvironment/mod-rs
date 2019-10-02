@@ -428,7 +428,7 @@ public class ReshareApplicationEventHandlerService {
     if ( pr.systemInstanceIdentifier != null ) {
 
       // Use the hostLMSService to determine the best location to send a pull-slip to
-      String location = hostLMSService.determineBestLocation(pr)
+      ItemLocation location = hostLMSService.determineBestLocation(pr)
 
       if ( location != null ) {
         auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
@@ -443,7 +443,7 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private routeRequestToLocation(PatronRequest pr, String location) {
+  private routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
   }
 }

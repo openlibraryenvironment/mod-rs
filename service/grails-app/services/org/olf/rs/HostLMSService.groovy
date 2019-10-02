@@ -2,6 +2,7 @@ package org.olf.rs;
 
 import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
+import org.olf.rs.ItemLocation;
 
 
 /**
@@ -37,10 +38,11 @@ public class HostLMSService {
     result
   }
 
-  String determineBestLocation(PatronRequest pr) {
+  ItemLocation determineBestLocation(PatronRequest pr) {
+
     log.debug("determineBestLocation(${pr})");
 
-    String location = null;
+    ItemLocation location = null;
     Iterator i = lookup_strategies.iterator();
     
     while ( ( location==null ) && ( i.hasNext() ) ) {
@@ -58,15 +60,16 @@ public class HostLMSService {
     return location;
   }
   
-  public String z3950ItemByIdentifier(PatronRequest pr) {
+  public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
 
-    String result = null;
+    ItemLocation result = null;
 
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
     // TNS: tcp:aleph.library.nyu.edu:9992/TNSEZB
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=water&maximumRecords=1%27
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=4%20%22Head%20Cases:%20stories%20of%20brain%20injury%20and%20its%20aftermath%22&maximumRecords=1%27
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
 
     def z_response = HttpBuilder.configure {
       request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
@@ -88,8 +91,12 @@ public class HostLMSService {
         log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
         if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
           log.debug("Available now");
-          result = hld.localLocation
-          availability_summary[hld.localLocation] = ( availability_summary[hld.localLocation] ?: 0 ) + 1;
+          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+
+          if ( result == null ) 
+            result = il;
+
+          availability_summary[hld.localLocation] = il;
         }
       }
 
