@@ -104,7 +104,6 @@ public class ReshareApplicationEventHandlerService {
 
       def req = delayedGet(eventData.payload.id);
       if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) && ( req.isRequester == true) ) {
-
         // If the role is requester then validate the request and set the state to validated
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
@@ -257,6 +256,7 @@ public class ReshareApplicationEventHandlerService {
           while ( ( !request_sent ) && 
                   ( req.rotaPosition?:-1 < req.rota.size() ) && 
                   ( req.requestingInstitutionSymbol != null ) ) {
+
             // We have rota entries left, work out the next one
             req.rotaPosition = (req.rotaPosition!=null ? req.rotaPosition+1 : 0 )
 
@@ -292,14 +292,20 @@ public class ReshareApplicationEventHandlerService {
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
-
-                prr.state = Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
-
-                request_sent = true;
+                if ( send_result.status=='SENT' ) {
+                  prr.state = Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
+                  request_sent = true;
+                }
+                else {
+                  prr.state = Status.lookup('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                }
               }
               else {
                 log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
+                prr.state = Status.lookup('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
               }
+
+              prr.save(flush:true, failOnError:true);
             }
             else {
               log.error("Unable to find rota entry at position ${req.rotaPosition}. Try next");
@@ -319,8 +325,7 @@ public class ReshareApplicationEventHandlerService {
             // END OF ROTA
             log.warn("sendToNextLender reached the end of the lending string.....");
             req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 
-                       'End of rota', null);
+            auditEntry(req, Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
             req.save(flush:true, failOnError:true)
           }
         }
@@ -351,6 +356,7 @@ public class ReshareApplicationEventHandlerService {
     if ( eventData.request != null ) {
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.request)
+      pr.state = Status.lookup('Responder', 'RES_IDLE')
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
       pr.save(flush:true, failOnError:true)
@@ -421,19 +427,23 @@ public class ReshareApplicationEventHandlerService {
     log.debug("autoRespond....");
     if ( pr.systemInstanceIdentifier != null ) {
 
-      // Use the hostLMSService to determine the best locations to send a pull-slip to
-      String[] locations = hostLMSService.determineBestLocation(pr.systemInstanceIdentifier)
+      // Use the hostLMSService to determine the best location to send a pull-slip to
+      String location = hostLMSService.determineBestLocation(pr)
 
-      if ( locations.length > 0 ) {
-        auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+loc, null);
-        log.debug("Patron request has a systemInstanceIdentifier - place hold");
+      if ( location != null ) {
+        auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
 
         // set localCallNumber to whatever we managed to look up
-        hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+        // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+        routeRequestToLocation(pr, location)
       }
     }
     else {
       log.debug("No system instance identifier present - need to search");
     }
+  }
+
+  private routeRequestToLocation(PatronRequest pr, String location) {
+    log.debug("routeRequestToLocation(${pr},${location})");
   }
 }

@@ -256,23 +256,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * If this is a requester request we are inserting then set the pending action to be VALIDATE
    */
   def beforeInsert() {
-    // Are we a requester
-    if (isRequester) {
-      // This doesn't work in beforeInsert - the conversion of Strings to tag objects is a databinding
-      // thing, this will cause the system to explode!
-      // if ( tags == null ) {
-      //   tags = [];
-      // }
-      // tags.add('PATRON_REQUEST_CHECK_NEEDED');
-    }
-
-    // Status needs to be set to idle
-    if ( state == null ) {
-      if ( isRequester ) {
-        state = Status.lookup('PatronRequest', 'REQ_IDLE');
+    if ( this.state == null ) {
+      if ( this.isRequester ) {
+        this.state = Status.lookup('PatronRequest', 'REQ_IDLE');
       }
       else {
-        state = Status.lookup('PatronRequest', 'RES_IDLE');
+        this.state = Status.lookup('Responder', 'RES_IDLE');
       }
     }
   }

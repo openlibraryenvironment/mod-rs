@@ -1245,7 +1245,7 @@ databaseChangeLog = {
     }
 
     changeSet(author: "ianibbo (manual)", id: "20191002-1038-001") {
-        createTable(tableName: "group_member") {
+        createTable(tableName: "setting") {
             column(name: "st_id", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
@@ -1257,7 +1257,7 @@ databaseChangeLog = {
             column(name: 'st_setting_type', type: "VARCHAR(255)")
             column(name: 'st_vocab', type: "VARCHAR(255)")
             column(name: 'st_default_value', type: "VARCHAR(255)")
-            column(name: 'st_value", type: "VARCHAR(255)")
+            column(name: 'st_value', type: "VARCHAR(255)")
         }
     }
 }
