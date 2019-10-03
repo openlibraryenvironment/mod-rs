@@ -4,14 +4,14 @@ package mod.rs
 import grails.rest.*
 import grails.converters.*
 
-import AppSetting from com.k_int.web.toolkit.settings
+import com.k_int.web.toolkit.settings.AppSetting
 
 import com.k_int.okapi.OkapiTenantAwareController
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
 import org.olf.rs.workflow.*;
 
-class SettingController extends OkapiTenantAwareController<Setting> {
+class SettingController extends OkapiTenantAwareController<AppSetting> {
   
   static responseFormats = ['json', 'xml']
   
