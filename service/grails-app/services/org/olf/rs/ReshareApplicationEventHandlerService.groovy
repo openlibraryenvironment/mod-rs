@@ -426,29 +426,26 @@ public class ReshareApplicationEventHandlerService {
 
   private void autoRespond(PatronRequest pr) {
     log.debug("autoRespond....");
-    if ( pr.systemInstanceIdentifier != null ) {
 
-      // Use the hostLMSService to determine the best location to send a pull-slip to
-      ItemLocation location = hostLMSService.determineBestLocation(pr)
+    // Use the hostLMSService to determine the best location to send a pull-slip to
+    ItemLocation location = hostLMSService.determineBestLocation(pr)
 
-      if ( location != null ) {
-        auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
+    log.debug("result of hostLMSService.determineBestLocation = ${location}");
 
-        // set localCallNumber to whatever we managed to look up
-        // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
-        if ( routeRequestToLocation(pr, location) ) {
-          sendWillSupply(pr);
-        }
-        else {
-          sendUnfilled(pr);
-        }
+    if ( location != null ) {
+      auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
+
+      // set localCallNumber to whatever we managed to look up
+      // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
+      if ( routeRequestToLocation(pr, location) ) {
+        sendWillSupply(pr);
       }
       else {
         sendUnfilled(pr);
       }
     }
     else {
-      log.debug("No system instance identifier present - need to search");
+      sendUnfilled(pr);
     }
   }
 

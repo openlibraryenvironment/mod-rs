@@ -47,7 +47,7 @@ class ProtocolMessageService {
     // The first thing to do is to look in the internal SharedConfig to see if the recipient is a
     // tenant in this system. If so, we can simply call handleIncomingMessage
     def tenant = globalConfigService.getTenantForSymbol(peer_symbol)
-    log.debug("The tenant for that symbol is: ${tenant}")
+    log.debug("The tenant for that symbol(${peer_symbol}) is: ${tenant}")
     
     if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
@@ -61,7 +61,7 @@ class ProtocolMessageService {
       handleIncomingMessage(eventData)
       result.status='SENT'
     } else {
-      log.error("Tenant does not exist in the system. TODO: call real messaging here")
+      log.error("Tenant ${peer_symbol} does not exist in the system. TODO: call real messaging here")
       // If the symbol exists in the directory and we have a protocol address, send a message,
       // otherwise, mark as failed and skip to the next rota entry.
       // update the request status - set the 
