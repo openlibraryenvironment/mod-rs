@@ -19,6 +19,7 @@ okapi.listTenantSymbols()
 // okapi.addTenantSymbol('RESHARE:TestInst08')
 // okapi.addTenantSymbol('RESHARE:TestInst09')
 // okapi.addTenantSymbol('RESHARE:TestInst10')
+// okapi.addTenantSymbol('RESHARE:idVuFind')
 
 okapi.listTenantSymbols()
 
