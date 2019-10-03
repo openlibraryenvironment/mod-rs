@@ -21,7 +21,6 @@ import com.k_int.okapi.OkapiTenantAdminService
 /**
  * This service works at the module level, it's often called without a tenant context.
  */
-@Transactional
 public class HousekeepingService {
 
   // This was DataSource but I think this is actually a HibernateDataSource
