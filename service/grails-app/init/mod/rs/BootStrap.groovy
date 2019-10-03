@@ -9,6 +9,8 @@ class BootStrap {
   OkapiTenantAdminService okapiTenantAdminService
   
   def init = { servletContext ->
+
+    Thread.sleep(2000);
     
     housekeepingService.ensureSharedSchema();
     okapiTenantAdminService.freshenAllTenantSchemas()

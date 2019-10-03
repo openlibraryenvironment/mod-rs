@@ -120,7 +120,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // For a RESPONDER/SUPPLIER/LENDER - which local LMS location will the item be picked from, the shelving location and the call number
   HostLMSLocation pickLocation;
-  String pickShelvingLocation
+  String pickShelvingLocation;
 
   static transients = ['systemUpdate', 'stateHasChanged'];
 
@@ -191,12 +191,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronType (nullable: true, blank : false)
     sendToPatron (nullable: true )
     neededBy (nullable: true )
-    requestingInstitutionSymbol (nullable: true )
+    requestingInstitutionSymbol (nullable: true)
 
     pickLocation(nullable: true)
-    pickShelvingLocation(nullable: true)
-
-    localCallNumber (nullable: true)
+    pickShelvingLocation(nullable: true, blank:false)
+    localCallNumber (nullable: true, blank:false)
   }
 
   static mapping = {
