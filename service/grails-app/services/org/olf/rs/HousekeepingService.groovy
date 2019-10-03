@@ -102,8 +102,9 @@ public class HousekeepingService {
    *  we register symbol -> tenant mappings.
    */
   public synchronized void ensureSharedSchema() {
-    log.debug("ensureSharedSchema completed");
+    log.debug("make sure __global tenant is present");
     okapiTenantAdminService.enableTenant('__global',[:])
+    log.debug("ensureSharedSchema completed");
   }
 
   public void ensureSharedConfig() {
