@@ -12,7 +12,7 @@ class UrlMappings {
     }
 
     "/rs/shipments" (resources: 'shipment' )
-    "/rs/settings" (resources: 'settings')
+    "/rs/settings" (resources: 'setting')
 
     // Call /rs/refdata to list all refdata categories
     '/rs/refdata'(resources: 'refdata') {
