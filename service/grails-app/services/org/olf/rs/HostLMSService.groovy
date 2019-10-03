@@ -16,7 +16,13 @@ public class HostLMSService {
       name:'Local_identifier_By_Z3950',
       precondition: { pr -> return ( pr.systemInstanceIdentifier != null ) },
       stragegy: { pr, service -> return service.z3950ItemByIdentifier(pr) }
-    ]
+    ],
+    [ 
+      name:'Local_identifier_By_Title',
+      precondition: { pr -> return ( pr.title != null ) },
+      stragegy: { pr, service -> return service.z3950ItemByTitle(pr) }
+    ],
+
   ]
 
   void validatePatron(String patronIdentifier) {
@@ -106,5 +112,39 @@ public class HostLMSService {
     return result;
   }
 
+  public ItemLocation z3950ItemByTitle(PatronRequest pr) {
+    def z_response = HttpBuilder.configure {
+      request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+    }.get {
+        request.uri.path = '/'
+        request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+                             'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
+                             'maximumRecords':'3' ]
+    }
+
+    log.debug("Got Z3950 response: ${z_response}");
+
+    if ( z_response?.numberOfRecords == 1 ) {
+      // Got exactly 1 record
+      Map availability_summary = [:]
+      z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
+        log.debug("${hld}");
+        log.debug("${hld.circulations?.circulation?.availableNow}");
+        log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+        if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+          log.debug("Available now");
+          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+
+          if ( result == null ) 
+            result = il;
+
+          availability_summary[hld.localLocation] = il;
+        }
+      }
+
+      log.debug("At end, availability summary: ${availability_summary}");
+      return result;
+    }
+  }
 }
 
