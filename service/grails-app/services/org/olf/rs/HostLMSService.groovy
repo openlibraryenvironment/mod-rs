@@ -113,6 +113,9 @@ public class HostLMSService {
   }
 
   public ItemLocation z3950ItemByTitle(PatronRequest pr) {
+
+    ItemLocation result = null;
+
     def z_response = HttpBuilder.configure {
       request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
     }.get {
