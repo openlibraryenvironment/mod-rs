@@ -1260,4 +1260,16 @@ databaseChangeLog = {
             column(name: 'st_value', type: "VARCHAR(255)")
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191003-0931-001") {
+
+        addColumn(tableName: "host_lms_location") {
+            column(name: "hll_name", type: "VARCHAR(255)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_pick_location_fk', type: "VARCHAR(36)") 
+            column(name:'pr_pick_shelving_location', type: "VARCHAR(255)") 
+        }
+    }
 }

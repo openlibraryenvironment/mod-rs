@@ -118,6 +118,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // and the GORM event handler applicationEventListenerService
   boolean stateHasChanged = false;
 
+  // For a RESPONDER/SUPPLIER/LENDER - which local LMS location will the item be picked from, the shelving location and the call number
+  HostLMSLocation pickLocation;
+  String pickShelvingLocation
+
   static transients = ['systemUpdate', 'stateHasChanged'];
 
   // The audit of what has happened to this request and tags that are associated with the request */
@@ -189,6 +193,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     neededBy (nullable: true )
     requestingInstitutionSymbol (nullable: true )
 
+    pickLocation(nullable: true)
+    pickShelvingLocation(nullable: true)
+
     localCallNumber (nullable: true)
   }
 
@@ -249,6 +256,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     sendToPatron column : 'pr_send_to_patron'
     neededBy column : 'pr_needed_by'
 
+    pickLocation column: 'pr_pick_location_fk'
+    pickShelvingLocation column: 'pr_pick_shelving_location'
     localCallNumber column : 'pr_local_call_number'
   }
 

@@ -254,7 +254,8 @@ public class ReshareApplicationEventHandlerService {
           // until we reach the end, or we find a potential lender we can talk to. The request must
           // also explicitly state a requestingInstitutionSymbol
           while ( ( !request_sent ) && 
-                  ( req.rotaPosition?:-1 < req.rota.size() ) && 
+                  ( req.rota.size() > 0 ) &&
+                  ( ( req.rotaPosition?:-1 ) < req.rota.size() ) && 
                   ( req.requestingInstitutionSymbol != null ) ) {
 
             // We have rota entries left, work out the next one
@@ -308,7 +309,7 @@ public class ReshareApplicationEventHandlerService {
               prr.save(flush:true, failOnError:true);
             }
             else {
-              log.error("Unable to find rota entry at position ${req.rotaPosition}. Try next");
+              log.error("Unable to find rota entry at position ${req.rotaPosition} (Size=${req.rota.size()}) ${( req.rotaPosition?:-1 < req.rota.size() )}. Try next");
             }
           }
 
@@ -453,7 +454,24 @@ public class ReshareApplicationEventHandlerService {
 
   private boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
-    return true;
+    boolean result = false;
+
+    // Only proceed if there is location
+    if ( location && location.location ) {
+      // We've been given a specific location, make sure we have a record for that location
+      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(location.location,location.location) ?: new HostLMSLocation(
+                                                                        code:location.location,
+                                                                        name:location.location,
+                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+      pr.localCallNumber = location.callNumber
+      pr.pickLocation = loc
+      pr.pickShelvingLocation = location.shelvingLocation
+      pr.save(flush:true, failOnError:true);
+
+      result = true;
+    }
+
+    return result;
   }
 
   private void sendUnfilled(PatronRequest pr) {

@@ -2,14 +2,6 @@ import org.olf.rs.HostLMSLocation
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Address
 
-HostLMSLocation loc1 = HostLMSLocation.findByCode('MAIN') ?: new HostLMSLocation(
-                                                                        code:'MAIN', 
-                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
-
-HostLMSLocation loc2 = HostLMSLocation.findByCode('ANNEX') ?: new HostLMSLocation(
-                                                                        code:'ANNEX', 
-                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=30;WKST=MO').save(flush:true, failOnError:true);
-
 DirectoryEntry dm1 = DirectoryEntry.findById('Ethan1') ?: new DirectoryEntry(
                                                                         id: 'Ethan1',
                                                                         name: 'UT Austin',
