@@ -1244,4 +1244,32 @@ databaseChangeLog = {
 
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20191002-1038-001") {
+        createTable(tableName: "setting") {
+            column(name: "st_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "st_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+            column(name: 'st_section', type: "VARCHAR(255)")
+            column(name: 'st_key', type: "VARCHAR(255)")
+            column(name: 'st_setting_type', type: "VARCHAR(255)")
+            column(name: 'st_vocab', type: "VARCHAR(255)")
+            column(name: 'st_default_value', type: "VARCHAR(255)")
+            column(name: 'st_value', type: "VARCHAR(255)")
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20191003-0931-001") {
+
+        addColumn(tableName: "host_lms_location") {
+            column(name: "hll_name", type: "VARCHAR(255)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_pick_location_fk', type: "VARCHAR(36)") 
+            column(name:'pr_pick_shelving_location', type: "VARCHAR(255)") 
+        }
+    }
 }

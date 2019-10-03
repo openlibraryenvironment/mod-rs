@@ -15,7 +15,7 @@ fi
 
 #  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/patronrequests -d ' {
-  requestingInstitutionSymbol:"OCLC:PPPA",
+  requestingInstitutionSymbol:"RESHARE:KNOWINT01",
   title:"Platform for Change",
   author:"Beer, Stafford A",
   subtitle:"A message from Stafford Beer",

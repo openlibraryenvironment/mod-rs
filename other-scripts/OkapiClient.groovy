@@ -155,4 +155,19 @@ public class OkapiClient {
       println("Citation must at least contain a title and requestingInstitutionSymbol");
     }
   }
+
+  def walkFoafGraph() {
+    this.getClient().request( GET, JSON) { req ->
+      uri.path='/directory/settings/foaf'
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      response.success = { resp, json ->
+        println("Foaf triggered");
+      }
+      response.failure = { resp ->
+          println("Error: ${resp.status}");
+      }
+    }
+  }
 }

@@ -70,6 +70,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM')
         Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED')
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER')
+        Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER')
         Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED')
         Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED')
         Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING')

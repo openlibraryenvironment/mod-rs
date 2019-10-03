@@ -11,6 +11,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   String id
   String code
+  String name
 
   // The iCal recurrence rule (https://www.kanzaki.com/docs/ical/rrule.html) that defines how
   // often pull slip batching happens for this location.
@@ -29,6 +30,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   static constraints = {
     code (nullable: false)
+    name (nullable: true)
     icalRrule (nullable: true)
     lastCompleted (nullable: true)
     dateCreated (nullable: true, bindable: false)
@@ -40,6 +42,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
                id column : 'hll_id', generator: 'uuid2', length:36
           version column : 'hll_version'
              code column : 'hll_code'
+             name column : 'hll_name'
         icalRrule column : 'hll_ical_rrule'
     lastCompleted column : 'hll_last_completed'
       dateCreated column : 'hll_date_created'

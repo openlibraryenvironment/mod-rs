@@ -44,11 +44,12 @@ public class SharedIndexService {
       lendingStrings.add(all_libs.remove(ThreadLocalRandom.current().nextInt(0,all_libs.size())));
     }
 
-    log.debug("Decded these are the lenders: ${lendingStrings}");
+    log.debug("Decded these are the lenders: Num lenders: ${num_responders} ${lendingStrings}");
 
     lendingStrings.each { ls ->
-      String instance_id = java.util.UUID.randomUUID().toString();
-      String copy_id = java.util.UUID.randomUUID().toString();
+      String instance_id = null; // java.util.UUID.randomUUID().toString();
+      // String instance_id = '000026460'
+      String copy_id = null; // java.util.UUID.randomUUID().toString();
       result.add(new AvailabilityStatement(symbol:ls,instanceIdentifier:instance_id,copyIdentifier:copy_id));
     }
     // result.add(new AvailabilityStatement(symbol:'RESHARE:LOCALSYMBOL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));

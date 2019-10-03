@@ -28,6 +28,10 @@
         },
         {
           "methods": ["GET", "POST"],
+          "pathPattern": "/rs/directoryEntry*"
+        },
+        {
+          "methods": ["GET", "POST"],
           "pathPattern": "/rs/settings/worker"
         },
         {

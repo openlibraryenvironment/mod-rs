@@ -14,6 +14,8 @@ class UrlMappings {
     "/rs/shipments" (resources: 'shipment' )
     "/rs/settings" (resources: 'setting')
 
+    "/rs/directoryEntry" (resources: 'directoryEntry' )
+
     // Call /rs/refdata to list all refdata categories
     '/rs/refdata'(resources: 'refdata') {
       collection {
