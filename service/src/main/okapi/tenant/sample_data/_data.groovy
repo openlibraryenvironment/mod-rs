@@ -5,6 +5,6 @@ import com.k_int.web.toolkit.settings.AppSetting
 
 AppSetting Z3950 = AppSetting.findByKey('z3950') ?: new AppSetting(
   version: 0,
-  key: 'z3950'
+  key: 'z3950',
   value: '',
 );.save(flush:true, failOnError: true);
