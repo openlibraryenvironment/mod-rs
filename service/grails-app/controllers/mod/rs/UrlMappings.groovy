@@ -12,6 +12,7 @@ class UrlMappings {
     }
 
     "/rs/shipments" (resources: 'shipment' )
+    "/rs/settings" (resources: 'setting')
 
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 
