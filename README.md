@@ -74,10 +74,10 @@ leave the database state intact so you can investigate what went wrong, but this
 
 Run tests individually with
 
- grails test-app *ShipmentSpec*
- grails test-app *RSLifecycleSpec*
- grails test-app *ProtocolPeerSpec*
- grails test-app *RSNotSuppliedSpec*
+    grails test-app *ShipmentSpec*
+    grails test-app *RSLifecycleSpec*
+    grails test-app *ProtocolPeerSpec*
+    grails test-app *RSNotSuppliedSpec*
 
 ## Vagrant container with Kafka 
 
