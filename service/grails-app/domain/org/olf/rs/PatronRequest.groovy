@@ -30,6 +30,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // resolvable in the directory.
   String requestingInstitutionSymbol
 
+  // This property is ONLY used when isRequester=false. For requester rows, this will be defined by the
+  // rota.
+  String supplyingInstitutionSymbol
+
+  // How our peer identifies this request
+  String peerRequestIdentifier
+
   // Bibliographic descriptive fields
   // Title of the item requested
   String title
@@ -192,6 +199,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     sendToPatron (nullable: true )
     neededBy (nullable: true )
     requestingInstitutionSymbol (nullable: true)
+    supplyingInstitutionSymbol (nullable: true)
+    peerRequestIdentifier (nullable: true)
 
     pickLocation(nullable: true)
     pickShelvingLocation(nullable: true, blank:false)
@@ -243,6 +252,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     systemInstanceIdentifier column: 'pr_system_instance_id'
 
     requestingInstitutionSymbol column : 'pr_req_inst_symbol'
+    supplyingInstitutionSymbol column : 'pr_sup_inst_symbol'
+    peerRequestIdentifier column : 'pr_peer_request_identifier'
 
     titleOfComponent column : 'pr_title_of_component'
     authorOfComponent column : 'pr_author_of_component'

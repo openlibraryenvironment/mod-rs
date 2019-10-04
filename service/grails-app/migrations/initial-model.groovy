@@ -1272,4 +1272,11 @@ databaseChangeLog = {
             column(name:'pr_pick_shelving_location', type: "VARCHAR(255)") 
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191004-1035-001") {
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_sup_inst_symbol', type: "VARCHAR(255)") 
+            column(name:'pr_peer_request_identifier', type: "VARCHAR(255)") 
+       }
+    }
 }
