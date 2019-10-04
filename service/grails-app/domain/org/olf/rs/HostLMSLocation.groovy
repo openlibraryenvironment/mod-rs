@@ -6,7 +6,6 @@ import grails.gorm.MultiTenant
 import java.time.LocalDateTime
 import grails.gorm.MultiTenant
 
-
 class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   String id
@@ -27,6 +26,8 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   Date dateCreated
   Date lastUpdated
+
+  
 
   static constraints = {
     code (nullable: false)
