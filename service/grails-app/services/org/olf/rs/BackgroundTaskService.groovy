@@ -14,6 +14,7 @@ public class BackgroundTaskService {
     Tenants.withId(tenant) {
       checkPullSlips();
     }
+    log.debug("BackgroundTaskService::performReshareTasks exiting");
   }
 
   private void checkPullSlips() {

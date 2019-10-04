@@ -65,6 +65,9 @@ public class ReshareApplicationEventHandlerService {
     'MESSAGE_REQUEST_ind': { service, eventData ->
       // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
       service.handleRequestMessage(eventData);
+    },
+    'SUPPLYING_AGENCY_MESSAGE_ind': { service, eventData ->
+      service.handleSupplyingAgencyMessage(eventData);
     }
 
   ]
@@ -290,6 +293,7 @@ public class ReshareApplicationEventHandlerService {
 
                 // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
                 request_message_request.request.systemInstanceIdentifier = prr.instanceIdentifier;
+                request_message_request.request.supplyingInstitutionSymbol = next_responder;
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
@@ -366,6 +370,10 @@ public class ReshareApplicationEventHandlerService {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
     }
 
+  }
+
+  public void handleSupplyingAgencyMessage(Map eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
   }
 
   /**
@@ -473,6 +481,33 @@ public class ReshareApplicationEventHandlerService {
 
   private void sendUnfilled(PatronRequest pr) {
     log.debug("sendUnfilled(....)");
+    if ( ( pr.supplyingInstitutionSymbol != null ) && ( pr.requestingInstitutionSymbol != null ) ) {
+      Map unfilled_message_request = [
+          messageType:'SUPPLYING_AGENCY_MESSAGE',
+          request: [
+            header:[
+              supplyingAgencyId:'',
+              requestingAgencyId:'',
+              requestingAgencyRequestId:'',
+              supplyingAgencyRequestId:pr.id
+            ],
+            messageInfo:[
+              reasonForMessage:'RequestResponse',
+              answerYesNo:'N',
+              reasonUnfilled:[
+                value:'NotHeld'
+              ]
+            ]
+          ]
+      ]
+
+      def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
+                                                                   pr.requestingInstitutionSymbol, 
+                                                                   unfilled_message_request);
+    }
+    else {
+      log.error("Unable to send protocol message - sender or recipient is null for PatronRequest ${pr.id}");
+    }
   }
 
   private void sendWillSupply(PatronRequest pr) {

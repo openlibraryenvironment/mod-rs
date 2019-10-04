@@ -1,9 +1,16 @@
 import org.olf.rs.HostLMSLocation
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Address
-/* import com.k_int.web.toolkit.settings.AppSetting
+import com.k_int.web.toolkit.settings.AppSetting
 
-AppSetting Z3950 = AppSetting.findByKey('z3950') ?: new AppSetting(
-  key: 'z3950',
-  value: '',
-).save(flush:true, failOnError: true); */
+
+try {
+  println("Create z3950 server address");
+  AppSetting z3950_address = AppSetting.findByKey('z3950_server_address') ?: new AppSetting(
+   key: 'z3950_server_address'
+  ).save(flush:true, failOnError: true);
+  println("DONE Create z3950 server address");
+}
+catch ( Exception e ) {
+  e.printStackTrace();
+}

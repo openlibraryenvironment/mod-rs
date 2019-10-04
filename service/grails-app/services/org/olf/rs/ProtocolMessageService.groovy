@@ -78,6 +78,12 @@ class ProtocolMessageService {
       case 'REQUEST':
         result = 'MESSAGE_REQUEST_ind'
         break;
+      case 'SUPPLYING_AGENCY_MESSAGE':
+        result = 'SUPPLYING_AGENCY_MESSAGE_ind'
+        break;
+      default:
+        log.error("Unhandled event type on incoming protocol message: ${messageType}");
+        break;
     }
 
     assert result != null;

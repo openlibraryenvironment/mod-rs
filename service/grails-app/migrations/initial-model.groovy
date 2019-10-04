@@ -1244,8 +1244,27 @@ databaseChangeLog = {
 
     }
 
-    changeSet(author: "ianibbo (manual)", id: "20191002-1038-001") {
-        createTable(tableName: "setting") {
+    changeSet(author: "ianibbo (manual)", id: "20191003-0931-001") {
+
+        addColumn(tableName: "host_lms_location") {
+            column(name: "hll_name", type: "VARCHAR(255)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_pick_location_fk', type: "VARCHAR(36)") 
+            column(name:'pr_pick_shelving_location', type: "VARCHAR(255)") 
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20191004-1035-001") {
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_sup_inst_symbol', type: "VARCHAR(255)") 
+            column(name:'pr_peer_request_identifier', type: "VARCHAR(255)") 
+       }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20191004-1451-001") {
+        createTable(tableName: "app_setting") {
             column(name: "st_id", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
@@ -1261,15 +1280,4 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "ianibbo (manual)", id: "20191003-0931-001") {
-
-        addColumn(tableName: "host_lms_location") {
-            column(name: "hll_name", type: "VARCHAR(255)")
-        }
-
-        addColumn(tableName: "patron_request") {
-            column(name:'pr_pick_location_fk', type: "VARCHAR(36)") 
-            column(name:'pr_pick_shelving_location', type: "VARCHAR(255)") 
-        }
-    }
 }
