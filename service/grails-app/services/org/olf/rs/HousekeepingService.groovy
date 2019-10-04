@@ -21,7 +21,6 @@ import com.k_int.okapi.OkapiTenantAdminService
 /**
  * This service works at the module level, it's often called without a tenant context.
  */
-@Transactional
 public class HousekeepingService {
 
   // This was DataSource but I think this is actually a HibernateDataSource
@@ -102,8 +101,9 @@ public class HousekeepingService {
    *  we register symbol -> tenant mappings.
    */
   public synchronized void ensureSharedSchema() {
-    log.debug("ensureSharedSchema completed");
+    log.debug("make sure __global tenant is present");
     okapiTenantAdminService.enableTenant('__global',[:])
+    log.debug("ensureSharedSchema completed");
   }
 
   public void ensureSharedConfig() {
