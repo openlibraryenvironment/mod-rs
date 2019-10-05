@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequest;
 json g.render(patronRequest, [expand: ['state',
                                        'serviceType',
                                        'publicationType',
+                                       'pickLocation',
                                        'rota',
                                        'tags',
                                        'audit'
