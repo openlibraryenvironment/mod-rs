@@ -501,6 +501,7 @@ public class ReshareApplicationEventHandlerService {
                                                                         code:location.location,
                                                                         name:location.location,
                                                                         icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+      pr.state=Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc
       pr.pickShelvingLocation = location.shelvingLocation
