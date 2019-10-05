@@ -106,12 +106,44 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id);
-      if ( ( req != null ) && ( req.state?.code == 'REQ_IDLE' ) && ( req.isRequester == true) ) {
-        // If the role is requester then validate the request and set the state to validated
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-        req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
-        auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+
+      // If the role is requester then validate the request and set the state to validated
+      if ( ( req != null ) && 
+           ( req.state?.code == 'REQ_IDLE' ) && 
+           ( req.isRequester == true) ) {
+
+        if ( req.requestingInstitutionSymbol != null ) {
+          // We need to validate the requsting location - and check that we can act as requester for that symbol
+          Symbol s = null;
+        
+          List<Symbol> symbol_list = null;
+          String[] name_components = req.requestingInstitutionSymbol.split(':');
+          if ( name_components.length == 2 ) {
+            symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
+                                                      [authority:name_components[0], symbol:name_components[1]]);
+          }
+
+          if ( symbol_list.size() == 1 ) {
+            req.resolvedRequester = symbol_list[0];
+
+            log.debug("Got request ${req}");
+            log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+            req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
+            auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+          }
+          else {
+            req.state = Status.lookup('PatronRequest', 'REQ_ERROR');
+            auditEntry(req, 
+                       Status.lookup('PatronRequest', 'REQ_IDLE'), 
+                       Status.lookup('PatronRequest', 'REQ_ERROR'), 
+                       'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
+          }
+        }
+        else {
+          req.state = Status.lookup('PatronRequest', 'REQ_ERROR');
+          auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+        }
+
         req.save(flush:true, failOnError:true)
       }
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
@@ -446,14 +478,15 @@ public class ReshareApplicationEventHandlerService {
       // set localCallNumber to whatever we managed to look up
       // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
+        sendResponse(pr, null, null, 'ExpectToSupply')
         sendWillSupply(pr);
       }
       else {
-        sendUnfilled(pr);
+        sendResponse(pr, null, null, 'Unfilled', 'No copy');
       }
     }
     else {
-      sendUnfilled(pr);
+      sendResponse(pr, null, null, 'Unfilled', 'No copy');
     }
   }
 
@@ -479,8 +512,81 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void sendUnfilled(PatronRequest pr) {
-    log.debug("sendUnfilled(....)");
+
+  /**
+   *  Send an ILL Request to a possible lender
+   */
+  private Map sendRequest(PatronRequest req, Symbol requester, Symbol responder) {
+    Map send_result = null;
+
+        //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
+        Map request_message_request = [
+          messageType:'REQUEST',
+          request: [
+            publicationType: req.publicationType?.value,
+            title: req.title,
+            requestingInstitutionSymbol: req.requestingInstitutionSymbol,
+            author: req.author,
+            subtitle: req.subtitle,
+            sponsoringBody: req.sponsoringBody,
+            publisher: req.publisher,
+            placeOfPublication: req.placeOfPublication,
+            volume: req.volume,
+            issue: req.issue,
+            startPage: req.startPage,
+            numberOfPages: req.numberOfPages,
+            publicationDate: req.publicationDate,
+            publicationDateOfComponent: req.publicationDateOfComponent,
+            edition: req.edition,
+            issn: req.issn,
+            isbn: req.isbn,
+            doi: req.doi,
+            coden: req.coden,
+            sici: req.sici,
+            bici: req.bici,
+            eissn: req.eissn,
+            stitle : req.stitle ,
+            part: req.part,
+            artnum: req.artnum,
+            ssn: req.ssn,
+            quarter: req.quarter,
+            systemInstanceIdentifier: req.systemInstanceIdentifier,
+            titleOfComponent: req.titleOfComponent,
+            authorOfComponent: req.authorOfComponent,
+            sponsor: req.sponsor,
+            informationSource: req.informationSource,
+            patronIdentifier: req.patronIdentifier,
+            patronReference: req.patronReference,
+            patronSurname: req.patronSurname,
+            patronGivenName: req.patronGivenName,
+            patronType: req.patronType,
+            serviceType: req.serviceType?.value
+          ]
+        ]
+
+    send_result = null; // protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
+
+    return send_result;
+  }
+
+
+  // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
+  // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
+  // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
+  // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
+  private void sendResponse(PatronRequest pr, 
+                            Symbol requester,
+                            Symbol supplier,
+                            String status, 
+                            String reasonUnfilled = null) {
+
+    log.debug("sendResponse(....)");
+
+    // pr.requestingInstitutionSymbol
+    def supplyingAgencyId = [ agencyIdType:'', agencyIdValue:'' ]
+
+    // pr.supplyingInstitutionSymbol
+    // pr.peerRequestIdentifier
     if ( ( pr.supplyingInstitutionSymbol != null ) && ( pr.requestingInstitutionSymbol != null ) ) {
       Map unfilled_message_request = [
           messageType:'SUPPLYING_AGENCY_MESSAGE',
@@ -493,13 +599,16 @@ public class ReshareApplicationEventHandlerService {
             ],
             messageInfo:[
               reasonForMessage:'RequestResponse',
-              answerYesNo:'N',
-              reasonUnfilled:[
-                value:'NotHeld'
-              ]
+            ],
+            statusInfo:[
+              status:status
             ]
           ]
       ]
+
+      if ( reasonUnfilled ) {
+        unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
+      }
 
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
                                                                    pr.requestingInstitutionSymbol, 
