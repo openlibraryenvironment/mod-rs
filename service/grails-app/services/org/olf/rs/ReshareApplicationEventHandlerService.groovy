@@ -114,18 +114,10 @@ public class ReshareApplicationEventHandlerService {
 
         if ( req.requestingInstitutionSymbol != null ) {
           // We need to validate the requsting location - and check that we can act as requester for that symbol
-          Symbol s = null;
+          Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
         
-          List<Symbol> symbol_list = null;
-          String[] name_components = req.requestingInstitutionSymbol.split(':');
-          if ( name_components.length == 2 ) {
-            symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                      [authority:name_components[0], symbol:name_components[1]]);
-          }
-
-          if ( symbol_list.size() == 1 ) {
-            req.resolvedRequester = symbol_list[0];
-
+          if ( s != null ) {
+            req.resolvedRequester = s
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
@@ -317,15 +309,12 @@ public class ReshareApplicationEventHandlerService {
 
               // Fill out the directory entry reference if it's not currently set.
               if ( ( next_responder != null ) && (prr.peer == null ) ) {
-                String[] name_compnents = next_responder.split(':')
-                if ( name_compnents.length == 2 ) {
-                  log.debug("Attempting to locate Symbol ${name_compnents}");
-                  def peer_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                      [authority:name_compnents[0], symbol:name_compnents[1]]);
-                  if ( ( peer_list.size() == 1 ) &&
-                       ( peer_list[0].owner != null ) ) {
+
+                Symbol s = resolveCombinedSymbol(next_responder);
+                if ( s != null ) {
+                  if  ( s.owner != null ) {
                     prr.lock();
-                    prr.peer = peer_list[0].owner
+                    prr.peer = s.owner
                     prr.save(flush:true, failOnError:true)
                   }
                   else {
@@ -339,6 +328,7 @@ public class ReshareApplicationEventHandlerService {
                 // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
                 request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
+
                 request_message_request.header.supplyingAgencyId = [
                   agencyIdType:prr.peer?.authority?.symbol,
                   agencyIdValue:prr.peer?.symbol,
@@ -407,9 +397,23 @@ public class ReshareApplicationEventHandlerService {
    */
   public void handleRequestMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
-    if ( eventData.bibliographicInfo != null ) {
+
+    // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
+    if ( ( eventData.bibliographicInfo != null ) &&
+         ( eventData.header != null ) ) {
+
+      Map header = eventData.header;
+
+      Symbol resolvedRequestingAgency = resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue)
+      Symbol resolvedSupplyingAgency = resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue)
+
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
+      pr.requestingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
+      pr.supplyingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
+      pr.resolvedRequester = resolvedRequestingAgency;
+      pr.resolvedSupplier = resolvedSupplyingAgency;
+
       pr.state = Status.lookup('Responder', 'RES_IDLE')
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
@@ -650,4 +654,27 @@ public class ReshareApplicationEventHandlerService {
   private void sendWillSupply(PatronRequest pr) {
     log.debug("sendWillSupply(....)");
   }
+
+  private Symbol resolveSymbol(String authorty, String symbol) {
+    Symbol result = null;
+    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
+                                                   [authority:authorty, symbol:symbol]);
+    if ( symbol_list.size() == 1 ) {
+      result = symbol_list.get(0);
+    }
+
+    return result;
+  }
+
+  private Symbol resolveCombinedSymbol(String combinedString) {
+    Symbol result = null;
+    if ( combinedString != null ) {
+      String[] name_components = combinedString.split(':');
+      if ( name_components.length == 2 ) {
+        result = resolveSymbol(name_components[0], name_components[1]);
+      }
+    }
+    return result;
+  }
+
 }
