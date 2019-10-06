@@ -14,11 +14,11 @@ public class GlobalConfigService {
 
     log.debug("registerSymbolForTenant(symbol:${symbol},tenant:${tenant_id}) in_schema:(${SHARED_SCHEMA_NAME})");
     Tenants.withId(SHARED_SCHEMA_NAME) {
-      TenantSymbolMapping tsm = TenantSymbolMapping.findBySymbol(symbol) 
+      TenantSymbolMapping tsm = TenantSymbolMapping.findBySymbol(symbol.toUpperCase()) 
       if ( tsm == null ) {
         log.debug("No tsm for ${symbol} so register a new one against tenant ${tenant_id}");
         tsm = new TenantSymbolMapping(
-                         symbol:symbol,
+                         symbol:symbol.toUpperCase(),
                          tenant:tenant_id).save(flush:true, failOnError:true);
       }
       else {

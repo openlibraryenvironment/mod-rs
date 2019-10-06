@@ -1,5 +1,6 @@
 package org.olf.rs;
 
+
 import grails.events.annotation.Subscriber
 import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
@@ -124,6 +125,7 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
+            log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
             req.state = Status.lookup('PatronRequest', 'REQ_ERROR');
             auditEntry(req, 
                        Status.lookup('PatronRequest', 'REQ_IDLE'), 
@@ -198,7 +200,7 @@ public class ReshareApplicationEventHandlerService {
             req.save(flush:true, failOnError:true)
           }
           else {
-            log.error("Unable to identify a rota for ID ${eventData.payload.id}")
+            log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 
                        'Unable to locate lenders', null);
@@ -308,31 +310,31 @@ public class ReshareApplicationEventHandlerService {
               // send the message
 
               // Fill out the directory entry reference if it's not currently set.
-              if ( ( next_responder != null ) && (prr.peer == null ) ) {
+              if ( ( next_responder != null ) && (prr.peerSymbol == null ) ) {
 
+                log.debug("Attempt to resolve symbol \"${next_responder}\"");
                 Symbol s = resolveCombinedSymbol(next_responder);
+                log.debug("Resolved to symbol ${s}");
+
                 if ( s != null ) {
-                  if  ( s.owner != null ) {
-                    prr.lock();
-                    prr.peer = s.owner
-                    prr.save(flush:true, failOnError:true)
-                  }
-                  else {
-                    log.warn("Unable to set peer institution");
-                  }
+                  prr.lock();
+                  prr.peerSymbol = s
+                  prr.save(flush:true, failOnError:true)
+
+                  request_message_request.header.supplyingAgencyId = [
+                    agencyIdType:s.authority?.symbol,
+                    agencyIdValue:s.symbol,
+                  ]
+
                 }
                 else {
-                  log.warn("Cannot understand symbol ${next_responder}");
+                  log.warn("Cannot understand or resolve symbol ${next_responder}");
                 }
 
                 // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
                 request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
 
-                request_message_request.header.supplyingAgencyId = [
-                  agencyIdType:prr.peer?.authority?.symbol,
-                  agencyIdValue:prr.peer?.symbol,
-                ]
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
@@ -413,6 +415,7 @@ public class ReshareApplicationEventHandlerService {
       pr.supplyingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
       pr.resolvedRequester = resolvedRequestingAgency;
       pr.resolvedSupplier = resolvedSupplyingAgency;
+      log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
       pr.state = Status.lookup('Responder', 'RES_IDLE')
       pr.isRequester=false;
@@ -499,15 +502,14 @@ public class ReshareApplicationEventHandlerService {
       // set localCallNumber to whatever we managed to look up
       // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
-        sendResponse(pr, null, null, 'ExpectToSupply')
-        sendWillSupply(pr);
+        sendResponse(pr, 'ExpectToSupply')
       }
       else {
-        sendResponse(pr, null, null, 'Unfilled', 'No copy');
+        sendResponse(pr, 'Unfilled', 'No copy');
       }
     }
     else {
-      sendResponse(pr, null, null, 'Unfilled', 'No copy');
+      sendResponse(pr, 'Unfilled', 'No copy');
     }
   }
 
@@ -609,24 +611,27 @@ public class ReshareApplicationEventHandlerService {
   // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
   private void sendResponse(PatronRequest pr, 
-                            Symbol requester,
-                            Symbol supplier,
                             String status, 
                             String reasonUnfilled = null) {
 
     log.debug("sendResponse(....)");
 
-    // pr.requestingInstitutionSymbol
-    def supplyingAgencyId = [ agencyIdType:'', agencyIdValue:'' ]
-
     // pr.supplyingInstitutionSymbol
     // pr.peerRequestIdentifier
-    if ( ( pr.supplyingInstitutionSymbol != null ) && ( pr.requestingInstitutionSymbol != null ) ) {
+    if ( ( pr.resolvedSupplier != null ) && 
+         ( pr.resolvedRequester != null ) ) {
+
       Map unfilled_message_request = [
           messageType:'SUPPLYING_AGENCY_MESSAGE',
           header:[
-            supplyingAgencyId:'',
-            requestingAgencyId:'',
+            supplyingAgencyId:[
+              agencyIdType:pr.resolvedSupplier?.authority?.symbol,
+              agencyIdValue:pr.resolvedSupplier?.symbol,
+            ],
+            requestingAgencyId:[
+              agencyIdType:pr.resolvedRequester?.authority?.symbol,
+              agencyIdValue:pr.resolvedRequester?.symbol,
+            ],
             requestingAgencyRequestId:'',
             supplyingAgencyRequestId:pr.id
           ],
@@ -647,18 +652,14 @@ public class ReshareApplicationEventHandlerService {
                                                                    unfilled_message_request);
     }
     else {
-      log.error("Unable to send protocol message - sender or recipient is null for PatronRequest ${pr.id}");
+      log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}");
     }
-  }
-
-  private void sendWillSupply(PatronRequest pr) {
-    log.debug("sendWillSupply(....)");
   }
 
   private Symbol resolveSymbol(String authorty, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                   [authority:authorty, symbol:symbol]);
+                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
     if ( symbol_list.size() == 1 ) {
       result = symbol_list.get(0);
     }

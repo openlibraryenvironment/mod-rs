@@ -10,17 +10,17 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SharedIndexService {
 
   public static def mockData = [
-    [ symbol: 'RESHARE:DIKU' ],
+    [ symbol: 'RESHARE:DIKUA' ],
     [ symbol: 'RESHARE:KINT' ],
-    [ symbol: 'RESHARE:TestInst01' ],
-    [ symbol: 'RESHARE:TestInst02' ],
-    [ symbol: 'RESHARE:TestInst03' ],
-    [ symbol: 'RESHARE:TestInst04' ],
-    [ symbol: 'RESHARE:TestInst05' ],
-    [ symbol: 'RESHARE:TestInst06' ],
-    [ symbol: 'RESHARE:TestInst07' ],
-    [ symbol: 'RESHARE:TestInst09' ],
-    [ symbol: 'RESHARE:TestInst10' ]
+    [ symbol: 'RESHARE:TESTINST01' ],
+    [ symbol: 'RESHARE:TESTINST02' ],
+    [ symbol: 'RESHARE:TESTINST03' ],
+    [ symbol: 'RESHARE:TESTINST04' ],
+    [ symbol: 'RESHARE:TESTINST05' ],
+    [ symbol: 'RESHARE:TESTINST06' ],
+    [ symbol: 'RESHARE:TESTINST07' ],
+    [ symbol: 'RESHARE:TESTINST09' ],
+    [ symbol: 'RESHARE:TESTINST10' ]
   ]
 
   /**

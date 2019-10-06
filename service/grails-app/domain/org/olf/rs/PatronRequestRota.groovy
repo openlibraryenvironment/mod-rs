@@ -2,7 +2,7 @@ package org.olf.rs
 
 import grails.gorm.MultiTenant;
 import org.olf.rs.statemodel.Status;
-import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.Symbol
 
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
@@ -47,7 +47,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    */
   Status state
 
-  DirectoryEntry peer
+  Symbol peerSymbol
 
   String instanceIdentifier
   String copyIdentifier
@@ -65,7 +65,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
     state                  (nullable : true)
-    peer                   (nullable : true)
+    peerSymbol             (nullable : true)
     instanceIdentifier     (nullable : true)
     copyIdentifier         (nullable : true)
   }
@@ -85,7 +85,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     shelfmark              column : "prr_shelfmark"
     systemIdentifier       column : "prr_system_identifier"
     state                  column : "prr_state_fk"
-    peer                   column : "prr_peer_fk"
+    peerSymbol             column : "prr_peer_symbol_fk"
     instanceIdentifier     column : "prr_instance_identifier"
     copyIdentifier         column : "prr_copy_identifier"
   }

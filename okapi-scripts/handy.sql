@@ -18,3 +18,8 @@ select pr_id,
        pr_date_created 
 from patron_request 
 order by pr_date_created;
+
+
+select sym_id, na_symbol, sym_symbol
+from symbol, naming_authority
+where sym_authority_fk=na_id

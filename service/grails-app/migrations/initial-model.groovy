@@ -1287,4 +1287,9 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20191006-1440-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: 'prr_peer_symbol_fk', type: 'VARCHAR(36)')
+        }
+    }
 }
