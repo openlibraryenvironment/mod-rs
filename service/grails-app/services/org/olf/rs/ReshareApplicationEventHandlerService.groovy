@@ -240,7 +240,20 @@ public class ReshareApplicationEventHandlerService {
         //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
         Map request_message_request = [
           messageType:'REQUEST',
-          request: [
+          header:[
+              // Filled out later
+              // supplyingAgencyId:[
+              //   agencyIdType:,
+              //   agencyIdValue:,
+              // ],
+              requestingAgencyId:[
+                agencyIdType:req.resolvedRequester?.authority?.symbol,
+                agencyIdValue:req.resolvedRequester?.symbol
+              ],
+              requestingAgencyRequestId:'',
+              supplyingAgencyRequestId:req.id
+          ],
+          bibliographicInfo:[
             publicationType: req.publicationType?.value,
             title: req.title,
             requestingInstitutionSymbol: req.requestingInstitutionSymbol,
@@ -324,8 +337,12 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
-                request_message_request.request.systemInstanceIdentifier = prr.instanceIdentifier;
-                request_message_request.request.supplyingInstitutionSymbol = next_responder;
+                request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
+                request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
+                request_message_request.header.supplyingAgencyId = [
+                  agencyIdType:prr.peer?.authority?.symbol,
+                  agencyIdValue:prr.peer?.symbol,
+                ]
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
@@ -390,9 +407,9 @@ public class ReshareApplicationEventHandlerService {
    */
   public void handleRequestMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
-    if ( eventData.request != null ) {
+    if ( eventData.bibliographicInfo != null ) {
       log.debug("*** Create new request***");
-      PatronRequest pr = new PatronRequest(eventData.request)
+      PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
       pr.state = Status.lookup('Responder', 'RES_IDLE')
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
@@ -523,7 +540,19 @@ public class ReshareApplicationEventHandlerService {
         //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
         Map request_message_request = [
           messageType:'REQUEST',
-          request: [
+          header:[
+              supplyingAgencyId:[
+                agencyIdType:responder?.authority?.symbol,
+                agencyIdValue:responder?.symbol,
+              ],
+              requestingAgencyId:[
+                agencyIdType:requester?.authority?.symbol,
+                agencyIdValue:requester?.symbol,
+              ],
+              requestingAgencyRequestId:req.id,
+              supplyingAgencyRequestId:null
+          ],
+          bibliographicInfo:[
             publicationType: req.publicationType?.value,
             title: req.title,
             requestingInstitutionSymbol: req.requestingInstitutionSymbol,
@@ -591,19 +620,17 @@ public class ReshareApplicationEventHandlerService {
     if ( ( pr.supplyingInstitutionSymbol != null ) && ( pr.requestingInstitutionSymbol != null ) ) {
       Map unfilled_message_request = [
           messageType:'SUPPLYING_AGENCY_MESSAGE',
-          request: [
-            header:[
-              supplyingAgencyId:'',
-              requestingAgencyId:'',
-              requestingAgencyRequestId:'',
-              supplyingAgencyRequestId:pr.id
-            ],
-            messageInfo:[
-              reasonForMessage:'RequestResponse',
-            ],
-            statusInfo:[
-              status:status
-            ]
+          header:[
+            supplyingAgencyId:'',
+            requestingAgencyId:'',
+            requestingAgencyRequestId:'',
+            supplyingAgencyRequestId:pr.id
+          ],
+          messageInfo:[
+            reasonForMessage:'RequestResponse',
+          ],
+          statusInfo:[
+            status:status
           ]
       ]
 
