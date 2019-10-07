@@ -11,7 +11,7 @@ public class SharedIndexService {
 
   public static def mockData = [
     [ symbol: 'RESHARE:DIKUA' ],
-    [ symbol: 'RESHARE:KINT' ],
+    [ symbol: 'RESHARE:KNOWINT01' ],
     [ symbol: 'RESHARE:TESTINST01' ],
     [ symbol: 'RESHARE:TESTINST02' ],
     [ symbol: 'RESHARE:TESTINST03' ],

@@ -143,6 +143,7 @@ public class ReshareApplicationEventHandlerService {
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
         log.debug("Launch auto responder for request");
         autoRespond(req)
+        req.save(flush:true, failOnError:true);
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
@@ -244,8 +245,8 @@ public class ReshareApplicationEventHandlerService {
                 agencyIdType:req.resolvedRequester?.authority?.symbol,
                 agencyIdValue:req.resolvedRequester?.symbol
               ],
-              requestingAgencyRequestId:'',
-              supplyingAgencyRequestId:req.id
+              requestingAgencyRequestId:req.id,
+              supplyingAgencyRequestId:null
           ],
           bibliographicInfo:[
             publicationType: req.publicationType?.value,
@@ -415,6 +416,8 @@ public class ReshareApplicationEventHandlerService {
       pr.supplyingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
       pr.resolvedRequester = resolvedRequestingAgency;
       pr.resolvedSupplier = resolvedSupplyingAgency;
+      pr.peerRequestIdentifier = header.requestingAgencyRequestId
+
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
       pr.state = Status.lookup('Responder', 'RES_IDLE')
@@ -428,8 +431,65 @@ public class ReshareApplicationEventHandlerService {
 
   }
 
+  /**
+   * An incoming message to the requesting agency FROM the supplying agency - so we look in 
+   * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
+   */
   public void handleSupplyingAgencyMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
+
+    try {
+      if ( eventData.header?.requestingAgencyRequestId == null )
+        throw new Exception("requestingAgencyRequestId missing");
+
+      PatronRequest pr = PatronRequest.get(eventData.header.requestingAgencyRequestId)
+      if ( pr == null )
+        throw new Exception("Unable to locate PatronRequest corresponding to requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+
+      // Awesome - managed to look up patron request - see if we can action
+      if ( eventData.messageInfo?.reasonForMessage != null ) {
+        switch ( eventData.messageInfo?.reasonForMessage ) {
+          case 'RequestResponse':
+            break;
+          default:
+            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+            break;
+        }
+      }
+      else {
+        throw new Exception("No reason for message");
+      }
+
+      if ( eventData.statusInfo != null ) {
+        handleStatusChange(pr, eventData.statusInfo, eventData.header.supplyingAgencyRequestId);
+      }
+
+      pr.save(flush:true, failOnError:true);
+    }
+    catch ( Exception e ) {
+      log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
+    }
+    
+  }
+
+  private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {
+    log.debug("handleStatusChange(${pr.id},${statusInfo})");
+
+    // Get the rota entry for the current peer
+    PatronRequestRota prr = pr.rota.find( { it.rotaPosition == pr.rotaPosition } )
+
+    if ( statusInfo.status ) {
+      switch ( statusInfo.status ) {
+        case 'ExpectToSupply':
+          pr.state=Status.lookup('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
+          if ( prr != null ) prr.state = Status.lookup('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+          break;
+        case 'Unfilled':
+          pr.state=Status.lookup('PatronRequest', 'REQ_UNFILLED')
+          if ( prr != null ) prr.state = Status.lookup('PatronRequest', 'REQ_UNFILLED');
+          break;
+      }
+    }
   }
 
   /**
@@ -505,10 +565,12 @@ public class ReshareApplicationEventHandlerService {
         sendResponse(pr, 'ExpectToSupply')
       }
       else {
+        pr.state=Status.lookup('Responder', 'RES_UNFILLED')
         sendResponse(pr, 'Unfilled', 'No copy');
       }
     }
     else {
+      pr.state=Status.lookup('Responder', 'RES_UNFILLED')
       sendResponse(pr, 'Unfilled', 'No copy');
     }
   }
@@ -632,7 +694,7 @@ public class ReshareApplicationEventHandlerService {
               agencyIdType:pr.resolvedRequester?.authority?.symbol,
               agencyIdValue:pr.resolvedRequester?.symbol,
             ],
-            requestingAgencyRequestId:'',
+            requestingAgencyRequestId:pr.peerRequestIdentifier,
             supplyingAgencyRequestId:pr.id
           ],
           messageInfo:[
