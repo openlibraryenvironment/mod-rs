@@ -6,6 +6,7 @@ import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.Status
+import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
@@ -121,21 +122,21 @@ public class ReshareApplicationEventHandlerService {
             req.resolvedRequester = s
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-            req.state = Status.lookup('PatronRequest', 'REQ_VALIDATED');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+            req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
             log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
-            req.state = Status.lookup('PatronRequest', 'REQ_ERROR');
+            req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
             auditEntry(req, 
-                       Status.lookup('PatronRequest', 'REQ_IDLE'), 
-                       Status.lookup('PatronRequest', 'REQ_ERROR'), 
+                       lookupStatus('PatronRequest', 'REQ_IDLE'), 
+                       lookupStatus('PatronRequest', 'REQ_ERROR'), 
                        'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
           }
         }
         else {
-          req.state = Status.lookup('PatronRequest', 'REQ_ERROR');
-          auditEntry(req, Status.lookup('PatronRequest', 'REQ_IDLE'), Status.lookup('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
         req.save(flush:true, failOnError:true)
@@ -170,15 +171,15 @@ public class ReshareApplicationEventHandlerService {
 
         log.debug("Got request ${req}");
         log.debug(" -> Request is currently VALIDATED - transition to REQ_SOURCING_ITEM");
-        req.state = Status.lookup('PatronRequest', 'REQ_SOURCING_ITEM');
+        req.state = lookupStatus('PatronRequest', 'REQ_SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
 
 
         if(req.rota?.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently REQ_SOURCING_ITEM - transition to REQ_SUPPLIER_IDENTIFIED");
-          req.state = Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-          auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
+          req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
           log.debug("No rota supplied - call sharedIndexService.findAppropriateCopies to find appropriate copies");
@@ -197,18 +198,18 @@ public class ReshareApplicationEventHandlerService {
                                                      directoryId:av_stmt.symbol,
                                                      instanceIdentifier:av_stmt.instanceIdentifier,
                                                      copyIdentifier:av_stmt.copyIdentifier,
-                                                     state: Status.lookup('PatronRequest', 'REQ_IDLE')))
+                                                     state: lookupStatus('PatronRequest', 'REQ_IDLE')))
               }
             }
-            req.state = Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+            req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                        'Lending String calculated from shared index', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
-            req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_VALIDATED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 
+            req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
                        'Unable to locate lenders', null);
             req.save(flush:true, failOnError:true)
           }
@@ -345,16 +346,16 @@ public class ReshareApplicationEventHandlerService {
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
                 if ( send_result.status=='SENT' ) {
-                  prr.state = Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
+                  prr.state = lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
                   request_sent = true;
                 }
                 else {
-                  prr.state = Status.lookup('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                  prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
                 }
               }
               else {
                 log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
-                prr.state = Status.lookup('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
               }
 
               prr.save(flush:true, failOnError:true);
@@ -368,22 +369,22 @@ public class ReshareApplicationEventHandlerService {
           // Did we send a request?
           if ( request_sent ) {
             log.debug("sendToNextLender sent to next lender.....");
-            req.state = Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER'), 
+            req.state = lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER'), 
                        'Sent to next lender', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             // END OF ROTA
             log.warn("sendToNextLender reached the end of the lending string.....");
-            req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, Status.lookup('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), Status.lookup('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
+            req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
             req.save(flush:true, failOnError:true)
           }
         }
         else {
           log.warn("Annot send to next lender - rota is empty");
-          req.state = Status.lookup('PatronRequest', 'REQ_END_OF_ROTA');
+          req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
         }
         
@@ -425,7 +426,7 @@ public class ReshareApplicationEventHandlerService {
 
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-      pr.state = Status.lookup('Responder', 'RES_IDLE')
+      pr.state = lookupStatus('Responder', 'RES_IDLE')
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
       pr.save(flush:true, failOnError:true)
@@ -486,12 +487,12 @@ public class ReshareApplicationEventHandlerService {
     if ( statusInfo.status ) {
       switch ( statusInfo.status ) {
         case 'ExpectToSupply':
-          pr.state=Status.lookup('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          if ( prr != null ) prr.state = Status.lookup('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+          pr.state=lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
           break;
         case 'Unfilled':
-          pr.state=Status.lookup('PatronRequest', 'REQ_UNFILLED')
-          if ( prr != null ) prr.state = Status.lookup('PatronRequest', 'REQ_UNFILLED');
+          pr.state=lookupStatus('PatronRequest', 'REQ_UNFILLED')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_UNFILLED');
           break;
       }
     }
@@ -532,7 +533,7 @@ public class ReshareApplicationEventHandlerService {
 
   private void error(PatronRequest pr, String message) {
     Status old_state = pr.state;
-    Status new_state = pr.isRequester ? Status.lookup('PatronRequest', 'REQ_ERROR') : Status.lookup('Responder', 'RES_ERROR');
+    Status new_state = pr.isRequester ? lookupStatus('PatronRequest', 'REQ_ERROR') : lookupStatus('Responder', 'RES_ERROR');
     pr.state = new_state;
     auditEntry(pr, old_state, new_state, message, null);
   }
@@ -562,7 +563,7 @@ public class ReshareApplicationEventHandlerService {
     log.debug("result of hostLMSService.determineBestLocation = ${location}");
 
     if ( location != null ) {
-      auditEntry(pr, Status.lookup('Responder', 'RES_IDLE'), Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
+      auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
 
       // set localCallNumber to whatever we managed to look up
       // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
@@ -571,12 +572,12 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         sendResponse(pr, 'Unfilled', 'No copy');
-        pr.state=Status.lookup('Responder', 'RES_UNFILLED')
+        pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
     }
     else {
       sendResponse(pr, 'Unfilled', 'No copy');
-      pr.state=Status.lookup('Responder', 'RES_UNFILLED')
+      pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }
   }
 
@@ -591,7 +592,7 @@ public class ReshareApplicationEventHandlerService {
                                                                         code:location.location,
                                                                         name:location.location,
                                                                         icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
-      pr.state=Status.lookup('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+      pr.state=lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc
       pr.pickShelvingLocation = location.shelvingLocation
@@ -744,5 +745,15 @@ public class ReshareApplicationEventHandlerService {
     }
     return result;
   }
+
+  public Status lookupStatus(String model, String code) {
+    Status result = null;
+    List<Status> qr = Status.executeQuery('select s from Status as s where s.owner.shortcode=:model and s.code=:code',[model:model, code:code]);
+    if ( qr.size() == 1 ) {
+      result = qr.get(0);
+    }
+    return result;
+  }
+
 
 }
