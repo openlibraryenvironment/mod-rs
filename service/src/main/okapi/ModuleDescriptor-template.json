@@ -37,7 +37,7 @@
         {
           "methods": ["GET", "POST"],
           "pathPattern": "/rs/settings/worker"
-        },
+        }
       ]
     },{
       "id" : "_tenant",
