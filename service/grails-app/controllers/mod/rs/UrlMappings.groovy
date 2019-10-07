@@ -12,7 +12,6 @@ class UrlMappings {
     }
 
     "/rs/shipments" (resources: 'shipment' )
-    "/rs/settings" (resources: 'setting')
 
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 
@@ -30,7 +29,7 @@ class UrlMappings {
 
     "/rs/settings/tenantSymbols" (controller: 'reshareSettings', action: 'tenantSymbols');
     "/rs/settings/worker" (controller: 'reshareSettings', action: 'worker');
-
+    "rs/settings/appSettings/$id?" (resources: 'setting')
 
     // Call /rs/custprop  to list all custom properties
     '/rs/custprops'(resources: 'customPropertyDefinition')
