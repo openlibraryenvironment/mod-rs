@@ -106,7 +106,7 @@ public class ReshareApplicationEventHandlerService {
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
-      def req = delayedGet(eventData.payload.id);
+      def req = delayedGet(eventData.payload.id, true);
 
       // If the role is requester then validate the request and set the state to validated
       if ( ( req != null ) && 
@@ -141,9 +141,14 @@ public class ReshareApplicationEventHandlerService {
         req.save(flush:true, failOnError:true)
       }
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
-        log.debug("Launch auto responder for request");
-        autoRespond(req)
-        req.save(flush:true, failOnError:true);
+        try {
+          log.debug("Launch auto responder for request");
+          autoRespond(req)
+          req.save(flush:true, failOnError:true);
+        }
+        catch ( Exception e ) {
+          log.error("Problem in auto respond",e);
+        }
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
@@ -565,13 +570,13 @@ public class ReshareApplicationEventHandlerService {
         sendResponse(pr, 'ExpectToSupply')
       }
       else {
-        pr.state=Status.lookup('Responder', 'RES_UNFILLED')
         sendResponse(pr, 'Unfilled', 'No copy');
+        pr.state=Status.lookup('Responder', 'RES_UNFILLED')
       }
     }
     else {
-      pr.state=Status.lookup('Responder', 'RES_UNFILLED')
       sendResponse(pr, 'Unfilled', 'No copy');
+      pr.state=Status.lookup('Responder', 'RES_UNFILLED')
     }
   }
 
