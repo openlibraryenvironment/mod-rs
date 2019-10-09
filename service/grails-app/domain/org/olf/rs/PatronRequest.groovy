@@ -10,6 +10,7 @@ import com.k_int.web.toolkit.refdata.CategoryId
 import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.tags.Tag
+import org.olf.okapi.modules.directory.Symbol;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -29,10 +30,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // A string representing the institution of the requesting patron
   // resolvable in the directory.
   String requestingInstitutionSymbol
+  Symbol resolvedRequester
 
-  // This property is ONLY used when isRequester=false. For requester rows, this will be defined by the
-  // rota.
+  // These two properties are ONLY used when isRequester=false. For requester rows, the peer is be defined by the
+  // rota entry for each potential supplier.
   String supplyingInstitutionSymbol
+  Symbol resolvedSupplier
 
   // How our peer identifies this request
   String peerRequestIdentifier
@@ -198,8 +201,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronType (nullable: true, blank : false)
     sendToPatron (nullable: true )
     neededBy (nullable: true )
+
     requestingInstitutionSymbol (nullable: true)
+    resolvedRequester(nullable: true)
+
     supplyingInstitutionSymbol (nullable: true)
+    resolvedSupplier(nullable: true)
+
     peerRequestIdentifier (nullable: true)
 
     pickLocation(nullable: true)
@@ -252,7 +260,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     systemInstanceIdentifier column: 'pr_system_instance_id'
 
     requestingInstitutionSymbol column : 'pr_req_inst_symbol'
+    resolvedRequester column : 'pr_resolved_req_inst_symbol_fk'
+
     supplyingInstitutionSymbol column : 'pr_sup_inst_symbol'
+    resolvedSupplier column : 'pr_resolved_sup_inst_symbol_fk'
+
     peerRequestIdentifier column : 'pr_peer_request_identifier'
 
     titleOfComponent column : 'pr_title_of_component'

@@ -1280,4 +1280,16 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20191005-1141-001") {
+        addColumn(tableName: "patron_request") {
+            column(name:'pr_resolved_req_inst_symbol_fk', type: "VARCHAR(36)") 
+            column(name:'pr_resolved_sup_inst_symbol_fk', type: "VARCHAR(36)") 
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20191006-1440-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: 'prr_peer_symbol_fk', type: 'VARCHAR(36)')
+        }
+    }
 }

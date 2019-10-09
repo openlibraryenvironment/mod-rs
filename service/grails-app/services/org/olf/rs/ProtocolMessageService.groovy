@@ -108,13 +108,14 @@ class ProtocolMessageService {
     if (eventData.tenant != null) {
       switch ( eventData.messageType ) {
         case 'REQUEST' :
+        case 'SUPPLYING_AGENCY_MESSAGE':
           String topic = "${eventData.tenant}_PatronRequestEvents".toString()
           String key = UUID.randomUUID().toString();
           log.debug("publishEvent(${topic},${key},...");
           eventPublicationService.publishAsJSON(topic, key, eventData)
           break;
         default:
-          log.warn("Unhandled message tyoe in eventData : ${eventData}");
+          log.warn("Unhandled message type in eventData : ${eventData}");
           break;
       }
     }
