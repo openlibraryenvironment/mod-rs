@@ -11,6 +11,8 @@ import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.tags.Tag
 import org.olf.okapi.modules.directory.Symbol;
+import java.time.LocalDate;
+
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -87,7 +89,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
-  Date neededBy
+  LocalDate neededBy
 
   // A property for responders - what we think the local call number is
   String localCallNumber
