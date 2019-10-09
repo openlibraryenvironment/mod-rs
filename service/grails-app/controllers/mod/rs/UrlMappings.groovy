@@ -30,6 +30,8 @@ class UrlMappings {
     "/rs/settings/tenantSymbols" (controller: 'reshareSettings', action: 'tenantSymbols');
     "/rs/settings/worker" (controller: 'reshareSettings', action: 'worker');
 
+    "/rs/iso18626" (controller: 'iso18626', action: 'index');
+
 
     // Call /rs/custprop  to list all custom properties
     '/rs/custprops'(resources: 'customPropertyDefinition')
