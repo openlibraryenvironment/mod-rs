@@ -1,0 +1,29 @@
+<ISO18626Message xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://illtransactions.org/2013/iso18626"
+                 xmlns:ill="http://illtransactions.org/2013/iso18626"
+                 xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd"
+                 ill:version="1.0" >
+  <request>
+    <header>
+      <supplyingAgencyId>
+        <agencyIdType>ISIL</agencyIdType><agencyIdValue>DK-710100</agencyIdValue>
+      </supplyingAgencyId>
+      <requestingAgencyId>
+        <agencyIdType>ISIL</agencyIdType>
+        <agencyIdValue>DK-820010</agencyIdValue>
+      </requestingAgencyId>
+      <timestamp>2014-03-17T09:30:47.0Z</timestamp>
+      <requestingAgencyRequestId>49837539</requestingAgencyRequestId>
+    </header>
+    <bibliographicInfo>
+      <supplierUniqueRecordId>27345786</supplierUniqueRecordId>
+    </bibliographicInfo>
+    <serviceInfo>
+      <serviceType>Loan</serviceType>
+      <serviceLevel>Normal</serviceLevel>
+      <needBeforeDate>2014-05-01T00:00:00.0Z</needBeforeDate>
+      <anyEdition>Y</anyEdition>
+    </serviceInfo>
+  </request>
+</ISO18626Message>
+
