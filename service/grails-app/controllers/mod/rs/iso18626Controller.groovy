@@ -5,11 +5,14 @@ import grails.plugins.*
 import grails.converters.JSON
 import org.olf.rs.GlobalConfigService
 import org.olf.rs.BackgroundTaskService;
+import org.olf.rs.ReshareApplicationEventHandlerService
+import grails.gorm.multitenancy.Tenants
 
 class iso18626Controller {
 
   GrailsApplication grailsApplication
   GlobalConfigService globalConfigService
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
 
   def index() {
     def result=[status:'ok']
@@ -28,6 +31,11 @@ class iso18626Controller {
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
+          Tenants.withId(tenant+'_mod_rs') {
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.request);
+            def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+            log.debug("result of req_request ${req_result}");
+          }
         }
       }
       else if ( iso18626_msg.supplyingAgencyMessage != null ) {

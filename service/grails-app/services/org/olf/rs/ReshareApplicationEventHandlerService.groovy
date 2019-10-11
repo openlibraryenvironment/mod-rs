@@ -404,7 +404,10 @@ public class ReshareApplicationEventHandlerService {
   /**
    * A new request has been received from a peer institution. We will need to create a request where isRequester==false
    */
-  public void handleRequestMessage(Map eventData) {
+  def handleRequestMessage(Map eventData) {
+
+    def result = [:]
+
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
 
     // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
@@ -430,11 +433,15 @@ public class ReshareApplicationEventHandlerService {
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
       pr.save(flush:true, failOnError:true)
+
+      result.status = 'OK'
+      result.newRequestId = pr.id;
     }
     else {
       log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
     }
 
+    return result;
   }
 
   /**
