@@ -6,11 +6,11 @@
   <request>
     <header>
       <supplyingAgencyId>
-        <agencyIdType>ISIL</agencyIdType><agencyIdValue>DK-710100</agencyIdValue>
+        <agencyIdType>RESHARE</agencyIdType><agencyIdValue>KNOWINT01</agencyIdValue>
       </supplyingAgencyId>
       <requestingAgencyId>
-        <agencyIdType>ISIL</agencyIdType>
-        <agencyIdValue>DK-820010</agencyIdValue>
+        <agencyIdType>RESHARE</agencyIdType>
+        <agencyIdValue>TESTINST01</agencyIdValue>
       </requestingAgencyId>
       <timestamp>2014-03-17T09:30:47.0Z</timestamp>
       <requestingAgencyRequestId>49837539</requestingAgencyRequestId>
