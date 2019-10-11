@@ -34,7 +34,16 @@ class iso18626Controller {
           Tenants.withId(tenant+'_mod_rs') {
             org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.request);
             def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+
             log.debug("result of req_request ${req_result}");
+            render( contentType:"text/xml" ) {
+              vxml( version:'2.1' ) {
+                param( name:'hi' ) {
+                  sub('hello')
+                }
+              }
+            }
+
           }
         }
       }
@@ -46,6 +55,12 @@ class iso18626Controller {
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
         }
+
+        render( contentType:"text/xml" ) {
+          vxml( version:'2.1' ) {
+            var( name:'hi', expr:call.message )
+          }
+        }
       }
       else if ( iso10626_msg.requestingAgencyMessageConfirmation != null ) {
         log.debug("Process inbound requestingAgencyMessage message");
@@ -55,6 +70,12 @@ class iso18626Controller {
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
         }
+
+        render( contentType:"text/xml" ) {
+          vxml( version:'2.1' ) {
+            var( name:'hi', expr:call.message )
+          }
+        }
       }
 
     }
@@ -62,7 +83,6 @@ class iso18626Controller {
       e.printStackTrace()
     }
 
-    render result as JSON
   }
 
   def symbol() {
@@ -81,5 +101,39 @@ class iso18626Controller {
     }
     log.debug("Returning symbol : ${result}");
     return result;
+  }
+
+  def requestConfirmation(String supIdType, 
+                          String supId, 
+                          String reqAgencyIdType, 
+                          String reqAgencyId, 
+                          String reqId, 
+                          String status) {
+    return [
+      requestConfirmation:[
+        confirmationHeader:confirmationHeader(supIdType,supId,reqAgencyIdType,reqAgencyId,reqId,status),
+        errorData:[
+        ]
+      ]
+    ]
+  }
+
+  def confirmationHeader(String supIdType, String supId, String reqAgencyIdType, String reqAgencyId, String reqId, String status) {
+    // status OK | ERROR
+    return [
+      supplyingAgencyId:[
+        agencyIdType:supIdType,
+        agencyIdValue:supId
+      ],
+      requestingAgencyId:[
+        agencyIdType:reqAgencyIdType,
+        agencyIdValue:reqAgencyId
+      ],
+      timestamp:null,
+      requestingAgencyRequestId:reqId,
+      multipleItemRequestId:null,
+      timestampReceived:null,
+      messageStatus:status
+    ]
   }
 }
