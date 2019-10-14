@@ -25,6 +25,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUT
   patronType: "Faculty Staff",
   sendToPatron: true,
   isRequester:true,
+  neededBy:"2019-10-28"
 }
 '`
 
