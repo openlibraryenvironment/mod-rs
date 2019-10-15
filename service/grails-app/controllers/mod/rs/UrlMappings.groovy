@@ -29,6 +29,9 @@ class UrlMappings {
 
     "/rs/settings/tenantSymbols" (controller: 'reshareSettings', action: 'tenantSymbols');
     "/rs/settings/worker" (controller: 'reshareSettings', action: 'worker');
+    "/rs/settings/appSettings" (resources: 'setting');
+/*     "/rs/settings/appSettings/$id?" (resources: 'setting');
+ */
 
     "/rs/iso18626" (controller: 'iso18626', action: 'index');
 
