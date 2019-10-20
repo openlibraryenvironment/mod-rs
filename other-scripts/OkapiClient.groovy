@@ -170,4 +170,21 @@ public class OkapiClient {
       }
     }
   }
+
+  def freshen() {
+    this.getClient().request( GET, JSON) { req ->
+      uri.path='/directory/application/freshen'
+      uri.query=[republish:'Y']
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      response.success = { resp, json ->
+        println("Foaf triggered");
+      }
+      response.failure = { resp ->
+          println("Error: ${resp.status}");
+      }
+    }
+  
+  }
 }
