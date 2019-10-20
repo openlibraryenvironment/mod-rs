@@ -3,6 +3,8 @@ package org.olf.rs;
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.HostLMSLocation 
 
+import org.olf.okapi.modules.directory.Symbol;
+
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
@@ -13,6 +15,10 @@ public class BackgroundTaskService {
     log.debug("performReshareTasks(${tenant})");
     Tenants.withId(tenant) {
       checkPullSlips();
+
+      Symbol.list().each { sym ->
+        log.debug("symbol ${id}: ${sym.authority.symbol}:${sym.symbol}");
+      }
     }
     log.debug("BackgroundTaskService::performReshareTasks exiting");
   }
