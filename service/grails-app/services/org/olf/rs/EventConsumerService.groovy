@@ -39,7 +39,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     Properties props = new Properties()
     grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
       // Directly access each entry to cause lookup from env
-    
+      log.debug("Configuring event consumer service :: ${key} ${value}");
       String prop = grailsApplication.config.getProperty("events.consumer.${key}")
       props.setProperty(key, prop)
     }
@@ -57,6 +57,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     p.onComplete { result ->
       log.debug("Consumer exited cleanly");
     }
+
+    log.debug("EventConsumerService::init() returning");
   }
 
   private void consumePatronRequestEvents() {
