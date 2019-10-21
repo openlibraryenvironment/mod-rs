@@ -78,7 +78,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              // log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
 
               if ( record.topic.contains('_mod_rs_PatronRequestEvents') ) {
                 // Convert the JSON payload string to a map 
