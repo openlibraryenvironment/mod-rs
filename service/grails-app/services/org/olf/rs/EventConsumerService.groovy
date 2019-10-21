@@ -40,8 +40,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     try {
       grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
         // Directly access each entry to cause lookup from env
-        log.debug("Configuring event consumer service :: ${key} ${value}");
         String prop = grailsApplication.config.getProperty("events.consumer.${key}")
+        log.debug("Configuring event consumer service :: key:${key} value:${value} prop:${prop}");
         props.setProperty(key, prop)
       }
       log.debug("Configure consumer ${props}")
