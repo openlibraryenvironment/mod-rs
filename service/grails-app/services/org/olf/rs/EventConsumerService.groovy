@@ -39,6 +39,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     Properties props = new Properties()
     grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
       // Directly access each entry to cause lookup from env
+    
       String prop = grailsApplication.config.getProperty("events.consumer.${key}")
       props.setProperty(key, prop)
     }
@@ -102,14 +103,16 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             catch(Exception e) {
               log.error("problem processing event notification",e);
             }
-
+            finally {
+              log.debug("Completed processing of directory entry event");
+            }
           }
           consumer.commitAsync();
         }
       }
     }
     catch ( Exception e ) {
-      // log.error("Problem in consumer",e);
+      log.error("Problem in consumer",e);
     }
     finally {
       consumer.close()
