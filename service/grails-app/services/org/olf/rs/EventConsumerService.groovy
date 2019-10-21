@@ -37,13 +37,19 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   public void init() {
     log.debug("Configuring event consumer service")
     Properties props = new Properties()
-    grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
-      // Directly access each entry to cause lookup from env
-      log.debug("Configuring event consumer service :: ${key} ${value}");
-      String prop = grailsApplication.config.getProperty("events.consumer.${key}")
-      props.setProperty(key, prop)
+    try {
+      grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
+        // Directly access each entry to cause lookup from env
+        log.debug("Configuring event consumer service :: ${key} ${value}");
+        String prop = grailsApplication.config.getProperty("events.consumer.${key}")
+        props.setProperty(key, prop)
+      }
+      log.debug("Configure consumer ${props}")
     }
-    log.debug("Configure consumer ${props}")
+    catch ( Exception e ) {
+      log.error("Problem assembling props for consume",e);
+    }
+
     consumer = new KafkaConsumer(props)
 
     Promise p = task {
