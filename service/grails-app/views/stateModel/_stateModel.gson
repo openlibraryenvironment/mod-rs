@@ -1,0 +1,6 @@
+import groovy.transform.*
+import org.olf.rs.statemodel.StateModel
+
+@Field StateModel stateModel
+
+json g.render(stateModel)
