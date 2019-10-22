@@ -20,7 +20,7 @@ public class BackgroundTaskService {
 
       log.debug("Currently ${sl.size()} symbols in the system");
       sl.each { sym ->
-        log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol}");
+        log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol} (Owner: ${sym.owner.name})");
       }
     }
     log.debug("BackgroundTaskService::performReshareTasks exiting");
