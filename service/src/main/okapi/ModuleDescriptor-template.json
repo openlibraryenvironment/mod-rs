@@ -37,6 +37,10 @@
         {
           "methods": ["GET", "POST"],
           "pathPattern": "/rs/settings/worker"
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/rs/status"
         }
       ]
     },{
