@@ -314,13 +314,15 @@ public class ReshareApplicationEventHandlerService {
             PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } )
             if ( prr != null ) {
               String next_responder = prr.directoryId
-              // send the message
 
-              // Fill out the directory entry reference if it's not currently set.
-              if ( ( next_responder != null ) && (prr.peerSymbol == null ) ) {
+              Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
+
+              // Fill out the directory entry reference if it's not currently set, and try to send.
+              if ( ( next_responder != null ) && 
+                   ( s != null ) &&
+                   ( prr.peerSymbol == null ) ) {
 
                 log.debug("Attempt to resolve symbol \"${next_responder}\"");
-                Symbol s = resolveCombinedSymbol(next_responder);
                 log.debug("Resolved to symbol ${s}");
 
                 if ( s != null ) {
