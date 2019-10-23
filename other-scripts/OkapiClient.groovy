@@ -159,6 +159,7 @@ public class OkapiClient {
   def walkFoafGraph() {
     this.getClient().request( GET, JSON) { req ->
       uri.path='/directory/settings/foaf'
+      uri.query=[force:'Y']
       headers.'X-Okapi-Tenant'=this.tenant;
       headers.'accept'='application/json'
       headers.'Content-Type'='application/json'
