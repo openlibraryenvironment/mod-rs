@@ -21,6 +21,8 @@ class UrlMappings {
         "/$domain/$property" (controller: 'refdata', action: 'lookup')
       }
     }
+    
+    '/rs/status'(resources: 'status', excludes: ['update', 'patch', 'save', 'create', 'edit', 'delete'])
 
     "/rs/kiwt/config/$extended?" (controller: 'reshareConfig' , action: "resources")
     "/rs/kiwt/config/schema/$type" (controller: 'reshareConfig' , action: "schema")
