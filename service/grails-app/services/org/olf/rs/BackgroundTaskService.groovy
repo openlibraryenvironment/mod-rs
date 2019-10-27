@@ -16,8 +16,11 @@ public class BackgroundTaskService {
     Tenants.withId(tenant) {
       checkPullSlips();
 
-      Symbol.list().each { sym ->
-        log.debug("symbol ${id}: ${sym.authority.symbol}:${sym.symbol}");
+      def sl = Symbol.list();
+
+      log.debug("Currently ${sl.size()} symbols in the system");
+      sl.each { sym ->
+        log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol} (Owner: ${sym.owner.name})");
       }
     }
     log.debug("BackgroundTaskService::performReshareTasks exiting");

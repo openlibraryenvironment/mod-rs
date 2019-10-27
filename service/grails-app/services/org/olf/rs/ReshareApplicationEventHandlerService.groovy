@@ -314,13 +314,15 @@ public class ReshareApplicationEventHandlerService {
             PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } )
             if ( prr != null ) {
               String next_responder = prr.directoryId
-              // send the message
 
-              // Fill out the directory entry reference if it's not currently set.
-              if ( ( next_responder != null ) && (prr.peerSymbol == null ) ) {
+              Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
+
+              // Fill out the directory entry reference if it's not currently set, and try to send.
+              if ( ( next_responder != null ) && 
+                   ( s != null ) &&
+                   ( prr.peerSymbol == null ) ) {
 
                 log.debug("Attempt to resolve symbol \"${next_responder}\"");
-                Symbol s = resolveCombinedSymbol(next_responder);
                 log.debug("Resolved to symbol ${s}");
 
                 if ( s != null ) {
@@ -413,13 +415,15 @@ public class ReshareApplicationEventHandlerService {
 
       Map header = eventData.header;
 
-      Symbol resolvedRequestingAgency = resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue)
-      Symbol resolvedSupplyingAgency = resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue)
+      Symbol resolvedSupplyingAgency = resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue)
+      Symbol resolvedRequestingAgency = resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue)
 
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
-      pr.requestingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
-      pr.supplyingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
+      pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
+      pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
+
+      //  ToDo - is this right?
       pr.resolvedRequester = resolvedRequestingAgency;
       pr.resolvedSupplier = resolvedSupplyingAgency;
       pr.peerRequestIdentifier = header.requestingAgencyRequestId
@@ -429,6 +433,8 @@ public class ReshareApplicationEventHandlerService {
       pr.state = lookupStatus('Responder', 'RES_IDLE')
       pr.isRequester=false;
       auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
+
+      log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
       pr.save(flush:true, failOnError:true)
     }
     else {
@@ -568,14 +574,17 @@ public class ReshareApplicationEventHandlerService {
       // set localCallNumber to whatever we managed to look up
       // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
+        log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
         sendResponse(pr, 'ExpectToSupply')
       }
       else {
+        log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
         sendResponse(pr, 'Unfilled', 'No copy');
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
     }
     else {
+        log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
       sendResponse(pr, 'Unfilled', 'No copy');
       pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }
@@ -599,6 +608,9 @@ public class ReshareApplicationEventHandlerService {
       pr.save(flush:true, failOnError:true);
 
       result = true;
+    }
+    else {
+      log.debug("unable to reoute request as local responding location absent");
     }
 
     return result;
@@ -715,6 +727,7 @@ public class ReshareApplicationEventHandlerService {
         unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
       }
 
+      log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
                                                                    pr.requestingInstitutionSymbol, 
                                                                    unfilled_message_request);

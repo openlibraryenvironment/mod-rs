@@ -37,12 +37,19 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   public void init() {
     log.debug("Configuring event consumer service")
     Properties props = new Properties()
-    grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
-      // Directly access each entry to cause lookup from env
-      String prop = grailsApplication.config.getProperty("events.consumer.${key}")
-      props.setProperty(key, prop)
+    try {
+      grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
+        // Directly access each entry to cause lookup from env
+        String prop = grailsApplication.config.getProperty("events.consumer.${key}")
+        log.debug("Configuring event consumer service :: key:${key} value:${value} prop:${prop}");
+        props.setProperty(key, prop)
+      }
+      log.debug("Configure consumer ${props}")
     }
-    log.debug("Configure consumer ${props}")
+    catch ( Exception e ) {
+      log.error("Problem assembling props for consume",e);
+    }
+
     consumer = new KafkaConsumer(props)
 
     Promise p = task {
@@ -56,6 +63,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     p.onComplete { result ->
       log.debug("Consumer exited cleanly");
     }
+
+    log.debug("EventConsumerService::init() returning");
   }
 
   private void consumePatronRequestEvents() {
@@ -77,7 +86,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
           def consumerRecords = consumer.poll(1000)
           consumerRecords.each{ record ->
             try {
-              // log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
+              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
 
               if ( record.topic.contains('_mod_rs_PatronRequestEvents') ) {
                 // Convert the JSON payload string to a map 
@@ -102,14 +111,16 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             catch(Exception e) {
               log.error("problem processing event notification",e);
             }
-
+            finally {
+              log.debug("Completed processing of directory entry event");
+            }
           }
           consumer.commitAsync();
         }
       }
     }
     catch ( Exception e ) {
-      // log.error("Problem in consumer",e);
+      log.error("Problem in consumer",e);
     }
     finally {
       consumer.close()
