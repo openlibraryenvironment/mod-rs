@@ -1292,4 +1292,27 @@ databaseChangeLog = {
             column(name: 'prr_peer_symbol_fk', type: 'VARCHAR(36)')
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191027-1005-001") {
+        createTable(tableName: "state_transition") {
+            column(name: "str_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "str_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+            column(name: "str_model" type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "str_fromState", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "str_actionCode", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+            column(name: "str_toState", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }

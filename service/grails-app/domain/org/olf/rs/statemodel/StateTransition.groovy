@@ -26,12 +26,12 @@ class StateTransition implements MultiTenant<StateTransition> {
   }
 
   static mapping = {
-                     id column : 'st_id', generator: 'uuid2', length:36
-                version column : 'st_version'
-                  model column : 'st_model'
-              fromState column : 'st_fromState'
-             actionCode column : 'st_actionCode'
-                toState column : 'st_toState'
+                     id column : 'str_id', generator: 'uuid2', length:36
+                version column : 'str_version'
+                  model column : 'str_model'
+              fromState column : 'str_fromState'
+             actionCode column : 'str_actionCode'
+                toState column : 'str_toState'
   }
 
 }
