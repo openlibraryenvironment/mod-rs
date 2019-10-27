@@ -1304,10 +1304,10 @@ databaseChangeLog = {
             column(name: "str_model", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
-            column(name: "str_fromState", type: "VARCHAR(36)") {
+            column(name: "str_from_state", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
-            column(name: "str_actionCode", type: "VARCHAR(255)") {
+            column(name: "str_action_code", type: "VARCHAR(255)") {
                 constraints(nullable: "false")
             }
         }

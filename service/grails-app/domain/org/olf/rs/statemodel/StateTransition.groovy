@@ -27,12 +27,12 @@ class StateTransition implements MultiTenant<StateTransition> {
                      id column : 'str_id', generator: 'uuid2', length:36
                 version column : 'str_version'
                   model column : 'str_model'
-              fromState column : 'str_fromState'
-             actionCode column : 'str_actionCode'
+              fromState column : 'str_from_state'
+             actionCode column : 'str_action_code'
   }
 
 
-  public StateTransition ensure(String model, String state, String action) {
+  public static StateTransition ensure(String model, String state, String action) {
 
     StateTransition result = null;
 

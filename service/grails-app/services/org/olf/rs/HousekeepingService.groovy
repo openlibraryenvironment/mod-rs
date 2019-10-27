@@ -8,6 +8,7 @@ import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StateTransition;
 
 import grails.core.GrailsApplication
 import grails.events.annotation.Subscriber
