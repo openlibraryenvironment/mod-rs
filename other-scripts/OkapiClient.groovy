@@ -188,4 +188,25 @@ public class OkapiClient {
     }
   
   }
+
+  def listRequests() {
+    printf('%-2s %-36s %-30s %-5s\n', '#', 'id', 'title', 'isReq');
+    this.getClient().request( GET, JSON) { req ->
+      uri.path='/rs/patronrequests'
+      uri.query=[stats:'true']
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      response.success = { resp, json ->
+        int i=0;
+        // println("List patron requests result: ${json}");
+        json.results.each { pr ->
+          printf('%-2d %-36s %-30s %-5b %-10s\n', i++, pr.id, pr.title, pr.isRequester, pr.state.code);
+        }
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+      }
+    }
+  }
 }
