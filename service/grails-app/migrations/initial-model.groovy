@@ -1310,9 +1310,6 @@ databaseChangeLog = {
             column(name: "str_actionCode", type: "VARCHAR(255)") {
                 constraints(nullable: "false")
             }
-            column(name: "str_toState", type: "VARCHAR(36)") {
-                constraints(nullable: "false")
-            }
         }
     }
 }

@@ -87,11 +87,18 @@ public class HousekeepingService {
         // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
 
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP');
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING');
+        Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE');
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
         Status.lookupOrCreate('Responder', 'RES_UNFILLED');
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
         Status.lookupOrCreate('Responder', 'RES_ERROR');
+
+
+        StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
+        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
+        StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
       }
 
     }

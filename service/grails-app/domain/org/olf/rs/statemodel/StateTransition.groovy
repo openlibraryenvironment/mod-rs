@@ -16,13 +16,11 @@ class StateTransition implements MultiTenant<StateTransition> {
   StateModel model
   Status fromState
   String actionCode
-  Status toState
 
   static constraints = {
              model (nullable: false, blank:false)
          fromState (nullable: false, blank:false)
         actionCode (nullable: false, blank:false)
-           toState (nullable: false, blank:false)
   }
 
   static mapping = {
@@ -31,9 +29,24 @@ class StateTransition implements MultiTenant<StateTransition> {
                   model column : 'str_model'
               fromState column : 'str_fromState'
              actionCode column : 'str_actionCode'
-                toState column : 'str_toState'
   }
 
+
+  public StateTransition ensure(String model, String state, String action) {
+
+    StateTransition result = null;
+
+    StateModel sm = StateModel.findByShortcode(model);
+    if ( sm ) {
+      Status s = Status.findByOwnerAndCode(sm, state);
+      if ( s ) {
+        result = StateTransition.findByModelAndFromStateAndActionCode(sm,s,action) ?: 
+                      new StateTransition(model:sm, fromState:s, actionCode:action).save(flush:true, failOnError:true);
+      }
+    }
+    return result;
+
+  }
 }
 
 
