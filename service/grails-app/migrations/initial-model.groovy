@@ -1301,7 +1301,7 @@ databaseChangeLog = {
             column(name: "str_version", type: "BIGINT") {
                 constraints(nullable: "false")
             }
-            column(name: "str_model" type: "VARCHAR(36)") {
+            column(name: "str_model", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
             column(name: "str_fromState", type: "VARCHAR(36)") {
