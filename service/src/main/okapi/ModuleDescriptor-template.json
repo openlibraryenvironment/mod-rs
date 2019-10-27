@@ -41,6 +41,14 @@
         {
           "methods": ["GET"],
           "pathPattern": "/rs/status"
+        },
+        {
+          "methods": ["GET", "POST"],
+          "pathPattern": "/rs/settings/*"
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/rs/iso18626"
         }
       ]
     },{

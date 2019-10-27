@@ -41,6 +41,9 @@ class UrlMappings {
     // Call /rs/custprop  to list all custom properties
     '/rs/custprops'(resources: 'customPropertyDefinition')
 
+    '/rs/iso18626'(controller:'iso18626', action:'index')
+    "/rs/status/$symbol"(controller:'iso18626', action:'status')
+
     "500"(view: '/error')
     "404"(view: '/notFound')
   }
