@@ -34,6 +34,10 @@ if ( 1==2 ) {
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
 } 
 
-if ( 1== 1 ) {
+if ( 1==2 ) {
   okapi.walkFoafGraph()
+}
+
+if ( 1==1 ) {
+  okapi.listRequests();
 }
