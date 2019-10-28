@@ -209,4 +209,75 @@ public class OkapiClient {
     }
     return result;
   }
+
+  def validActions(String pr_id) {
+    def result = null;
+    this.getClient().request( GET, JSON) { req ->
+      uri.path="/rs/patronrequests/${pr_id}/validActions".toString()
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      response.success = { resp, json ->
+        result = json;
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+      }
+    }
+    return result;
+  }
+
+  def actionPrintedPullSlip(String pr_id) {
+    def result = null;
+
+    def postBody = [
+      target:[
+        singleRequest:pr_id
+      ],
+      action:'supplierPrintPullSlip'
+    ]
+    
+    this.getClient().request( POST, JSON) { req ->
+      uri.path="/rs/patronrequests/${pr_id}/performAction".toString()
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      body = postBody
+      response.success = { resp, json ->
+        result = json;
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+      }
+    }
+    return result;
+  }
+
+  def actionReshareCheckin(String pr_id) {
+    def result = null;
+
+    def postBody = [
+      target:[
+      ],
+      action:[
+      ],
+      actionParams:[
+      ]
+    ]
+    
+    this.getClient().request( POST, JSON) { req ->
+      uri.path="/rs/patronrequests/${pr_id}/performAction".toString()
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      headers.'Content-Type'='application/json'
+      body = postBody
+      response.success = { resp, json ->
+        result = json;
+      }
+      response.failure = { resp ->
+        println("Error: ${resp.status}");
+      }
+    }
+    return result;
+  }
 }

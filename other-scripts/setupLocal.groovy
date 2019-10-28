@@ -47,11 +47,16 @@ if (initial_setup) {
 }
 
 
-printf('%-2s %-36s %-30s %-5s\n', '#', 'id', 'title', 'isReq');
+printf('%-2s %-36s %-30s %-9s %-20s\n', '#', 'id', 'title', 'role', 'Current State');
 i=0;
 lr = okapi.listRequests()
 lr.results.each { pr ->
-  printf('%-2d %-36s %-30s %-5b %-10s\n', i++, pr.id, pr.title, pr.isRequester, pr.state.code);
+  printf('%-2d %-36s %-30s %-9s %-20s\n', i++, pr.id, pr.title, ( pr.isRequester ? 'Requester' : 'Responder' ), pr.state.code);
+  printf("    -> ${pr.validActions}\n");
+  // printf("    -> ${pr}");
+  // printf("    -> ${okapi.validActions(pr.id)}\n");
 }
+
+// okapi.actionPrintedPullSlip('');
 
 return 'OK'

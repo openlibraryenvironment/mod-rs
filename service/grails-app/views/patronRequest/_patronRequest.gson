@@ -10,5 +10,7 @@ json g.render(patronRequest, [expand: ['state',
                                        'tags',
                                        'audit'
                                        ],
-                              excludes: []])
+                              excludes: []]) {
+  validActions patronRequest.getValidActions()
+}
 
