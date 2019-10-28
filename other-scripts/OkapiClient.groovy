@@ -112,18 +112,21 @@ public class OkapiClient {
   }
 
   def listTenantSymbols() {
+    def result = null;
     this.getClient().request( GET, JSON) { req ->
       uri.path= '/rs/settings/tenantSymbols'
       uri.query=[expandPermissions:true,fullPermissions:true]
       headers.'X-Okapi-Tenant'=this.tenant;
       headers.'accept'='application/json'
       response.success = { resp, json ->
-        println("Result ${json}");
+        // println("Result ${json}");
+        result = json;
       }
       response.failure = { resp ->
         println("Error: ${resp.status}");
       }
     }
+    return result;
   }
 
   def createRequest(Map citation) {
@@ -190,7 +193,7 @@ public class OkapiClient {
   }
 
   def listRequests() {
-    printf('%-2s %-36s %-30s %-5s\n', '#', 'id', 'title', 'isReq');
+    def result = null;
     this.getClient().request( GET, JSON) { req ->
       uri.path='/rs/patronrequests'
       uri.query=[stats:'true']
@@ -198,15 +201,12 @@ public class OkapiClient {
       headers.'accept'='application/json'
       headers.'Content-Type'='application/json'
       response.success = { resp, json ->
-        int i=0;
-        // println("List patron requests result: ${json}");
-        json.results.each { pr ->
-          printf('%-2d %-36s %-30s %-5b %-10s\n', i++, pr.id, pr.title, pr.isRequester, pr.state.code);
-        }
+        result = json;
       }
       response.failure = { resp ->
         println("Error: ${resp.status}");
       }
     }
+    return result;
   }
 }

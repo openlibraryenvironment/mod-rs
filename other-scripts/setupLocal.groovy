@@ -1,9 +1,20 @@
+:set verbosity QUIET
 :load ./modrsCli.groovy
 okapi=new OkapiClient('local')
 rsclient = new RSClient(okapi);
-okapi.listTenantSymbols()
 
-if (1==2) {
+println('to force a walk of the FOAF graph, call okapi.walkFoafGraph()');
+
+symbols_resp = okapi.listTenantSymbols()
+println symbols_resp
+initial_setup = false;
+
+if ( !symbols_resp.symbols.contains('OCLC:ZMU') ) {
+  println('OCLC:ZMU not found in list of registered symbols... do setup')
+  initial_setup = true
+}
+
+if (initial_setup) {
   okapi.addTenantSymbol('OCLC:ZMU');
   okapi.addTenantSymbol('OCLC:PPU');
   okapi.addTenantSymbol('OCLC:PPPA');
@@ -30,14 +41,17 @@ if (1==2) {
   okapi.listTenantSymbols()
 }
 
-if ( 1==2 ) {
+if (initial_setup) {
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
-} 
-
-if ( 1==2 ) {
-  okapi.walkFoafGraph()
+  okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
-if ( 1==1 ) {
-  okapi.listRequests();
+
+printf('%-2s %-36s %-30s %-5s\n', '#', 'id', 'title', 'isReq');
+i=0;
+lr = okapi.listRequests()
+lr.results.each { pr ->
+  printf('%-2d %-36s %-30s %-5b %-10s\n', i++, pr.id, pr.title, pr.isRequester, pr.state.code);
 }
+
+return 'OK'
