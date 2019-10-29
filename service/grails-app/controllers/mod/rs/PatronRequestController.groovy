@@ -20,11 +20,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
   /**
    *  Controller action that takes a POST containing a json payload with the following parameters
    *   {
-   *     target:{
-   *       singleRequest:'1233-4534-3345-2232',
-   *       requestList:[uuid-123,uuid-456,uuid-788], // NOT IMPLEMENTED YET
-   *       query:"title=%"  // NOT IMPLEMENTED YET
-   *     }
    *     action:"StartRota",
    *     actionParams:{}
    *   }
@@ -35,15 +30,29 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
     if ( request.method=='POST' ) {
       log.debug("PatronRequestController::performAction(${request.JSON})");
-      if ( request.JSON.target.singleRequest ) {
-        log.debug("Apply action ${request.JSON.action} to ${request.JSON.target.singleRequest}");
-      }
-      else if ( request.JSON.target.requestList ) {
-        request.JSON.target.requestList.each { prid ->
-          log.debug("Apply action ${request.JSON.action} to ${prid}");
+      if ( params.patronRequestId ) {
+        def patron_request = PatronRequest.get(params.patronRequestId)
+        if ( patron_request ) {
+          log.debug("Apply action ${request.JSON.action} to ${patron_request}");
         }
       }
     }
+    render result as JSON;
+  }
+
+  /**
+   *  Controller action that takes a POST containing a json payload with the following parameters
+   *   {
+   *     target:{
+   *       requestList:[uuid-123,uuid-456,uuid-788], // NOT IMPLEMENTED YET
+   *       query:"title=%"  // NOT IMPLEMENTED YET
+   *     }
+   *     action:"StartRota",
+   *     actionParams:{}
+   *   }
+   */
+  def bulkAction() {
+    def result = [:]
     render result as JSON;
   }
 

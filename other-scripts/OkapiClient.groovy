@@ -231,9 +231,6 @@ public class OkapiClient {
     def result = null;
 
     def postBody = [
-      target:[
-        singleRequest:pr_id
-      ],
       action:'supplierPrintPullSlip'
     ]
     
@@ -257,10 +254,7 @@ public class OkapiClient {
     def result = null;
 
     def postBody = [
-      target:[
-      ],
-      action:[
-      ],
+      action:'supplierCheckInToReshare',
       actionParams:[
       ]
     ]
