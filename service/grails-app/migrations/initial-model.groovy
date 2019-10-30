@@ -1312,4 +1312,11 @@ databaseChangeLog = {
             }
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191030-1034-001") {
+        addColumn(tableName: "status") {
+            column(name: 'st_presentation_sequence', type: 'VARCHAR(10)')
+            column(name: 'st_visible', type: 'BOOLEAN')
+        }
+    }
 }

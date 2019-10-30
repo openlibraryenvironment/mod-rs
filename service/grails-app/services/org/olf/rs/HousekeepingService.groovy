@@ -65,36 +65,36 @@ public class HousekeepingService {
         // Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
         // Requester / Borrower State Model
-        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE');
-        Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED');
-        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM')
-        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED')
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER')
+        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED', '0010', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER')
-        Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED')
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED')
-        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING')
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED')
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE')
-        Status.lookupOrCreate('PatronRequest', 'REQ_PENDING');
-        Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY');
-        Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
-        Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED');
-        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA');
-        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR');
+        Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED', '0035', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_PENDING', '0060', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
 
         // Responder / Lender State Model
-        Status.lookupOrCreate('Responder', 'RES_IDLE');
+        Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
         // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
 
-        Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP');
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING');
-        Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-        Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED');
-        Status.lookupOrCreate('Responder', 'RES_UNFILLED');
-        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED');
-        Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED');
-        Status.lookupOrCreate('Responder', 'RES_ERROR');
+        Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
+        Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
+        Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
+        Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
+        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true);
+        Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
+        Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')

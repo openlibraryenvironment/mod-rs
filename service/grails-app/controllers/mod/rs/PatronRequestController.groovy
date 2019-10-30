@@ -8,10 +8,13 @@ import groovy.util.logging.Slf4j
 import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
+import org.olf.rs.ReshareActionService;
 
 @Slf4j
 @CurrentTenant
 class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
+
+  ReshareActionService reshareActionService
 
   PatronRequestController() {
     super(PatronRequest)
@@ -34,6 +37,17 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
         def patron_request = PatronRequest.get(params.patronRequestId)
         if ( patron_request ) {
           log.debug("Apply action ${request.JSON.action} to ${patron_request}");
+          switch ( request.JSON.action ) {
+            case 'supplierPrintPullSlip':
+              result.status = reshareActionService.notiftyPullSlipPrinted(patron_request);
+              break;
+            case 'supplierCheckInToReshare':
+              result.status = reshareActionService.checkInToReshare(patron_request);
+              break;
+            default:
+              log.warn("unhandled patron request action: ${request.JSON.action}");
+              break;
+          }
         }
       }
     }

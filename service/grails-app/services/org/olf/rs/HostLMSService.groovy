@@ -3,6 +3,7 @@ package org.olf.rs;
 import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
 import org.olf.rs.ItemLocation;
+import org.olf.rs.statemodel.Status;
 
 
 /**
@@ -149,5 +150,6 @@ public class HostLMSService {
       return result;
     }
   }
+
 }
 
