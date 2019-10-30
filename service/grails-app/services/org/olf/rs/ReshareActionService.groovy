@@ -23,20 +23,32 @@ public class ReshareActionService {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
     Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-    if ( s && pr.state.value=='RES_AWAIT_PICKING') {
+    if ( s && pr.state.code=='RES_AWAIT_PICKING') {
       pr.state = s;
       pr.save(flush:true, failOnError:true);
       result = true;
     }
     else {
-      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.value})");
+      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
     }
 
     return result;
   }
 
   public boolean notiftyPullSlipPrinted(PatronRequest pr) {
-    return true;
+    log.debug("notiftyPullSlipPrinted(${pr})");
+    boolean result = false;
+    Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
+    if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
+      pr.state = s;
+      pr.save(flush:true, failOnError:true);
+      result = true;
+    }
+    else {
+      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+    }
+
+    return result;
   }
 
 }
