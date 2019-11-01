@@ -51,4 +51,20 @@ public class ReshareActionService {
     return result;
   }
 
+  public boolean notifySupplierShip(PatronRequest pr) {
+    log.debug("notifySupplierShip(${pr})");
+    boolean result = false;
+    Status s = Status.lookup('Responder', 'RES_ITEM_SHIPPED');
+    if ( s && pr.state.code=='RES_AWAIT_SHIP') {
+      pr.state = s;
+      pr.save(flush:true, failOnError:true);
+      result = true;
+    }
+    else {
+      log.warn("Unable to locate RES_AWAIT_SHIP OR request not currently RES_AWAIT_SHIP(${pr.state.code})");
+    }
+
+    return result;
+  }
+
 }
