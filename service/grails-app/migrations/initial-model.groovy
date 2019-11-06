@@ -1319,4 +1319,13 @@ databaseChangeLog = {
             column(name: 'st_visible', type: 'BOOLEAN')
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191105-1113-001") {
+        createSequence(sequenceName:'pr_hrid_seq')
+
+        addColumn(tableName: "patron_request") {
+            column(name: 'pr_hrid', type: 'VARCHAR(32)', defaultValueSequenceNext:'pr_hrid_seq');
+        }
+
+    }
 }

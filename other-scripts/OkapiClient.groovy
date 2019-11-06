@@ -150,7 +150,6 @@ public class OkapiClient {
         }
         response.failure = { resp ->
           println("Error: ${resp.status}");
-          System.exit(1);
         }
       }
     }

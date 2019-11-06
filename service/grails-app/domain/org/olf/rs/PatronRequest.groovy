@@ -96,6 +96,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // A property for responders - what we think the local call number is
   String localCallNumber
+
+  String hrid;
   
   Set rota = []
 
@@ -218,6 +220,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickLocation(nullable: true)
     pickShelvingLocation(nullable: true, blank:false)
     localCallNumber (nullable: true, blank:false)
+    // hrid (nullable: true, blank:false)
   }
 
   static mapping = {
@@ -286,6 +289,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickLocation column: 'pr_pick_location_fk'
     pickShelvingLocation column: 'pr_pick_shelving_location'
     localCallNumber column : 'pr_local_call_number'
+
+    // hrid column : 'pr_hrid'
+    hrid formula: 'pr_hrid'
   }
 
   /**
