@@ -123,6 +123,8 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
+            log.debug("req.hrit=${generateHrid()}");
+
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
@@ -778,4 +780,9 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
+  private String generateHrid() {
+    String result = null;
+    log.debug("Generate hrid");
+    return result;
+  }
 }
