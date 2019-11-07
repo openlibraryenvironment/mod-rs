@@ -251,7 +251,8 @@ public class ReshareApplicationEventHandlerService {
                 agencyIdType:req.resolvedRequester?.authority?.symbol,
                 agencyIdValue:req.resolvedRequester?.symbol
               ],
-              requestingAgencyRequestId:req.id,
+              // requestingAgencyRequestId:req.id,
+              requestingAgencyRequestId:req.hrid,
               supplyingAgencyRequestId:null
           ],
           bibliographicInfo:[
@@ -461,9 +462,10 @@ public class ReshareApplicationEventHandlerService {
       if ( eventData.header?.requestingAgencyRequestId == null )
         throw new Exception("requestingAgencyRequestId missing");
 
-      PatronRequest pr = PatronRequest.get(eventData.header.requestingAgencyRequestId)
+      // PatronRequest pr = PatronRequest.get(eventData.header.requestingAgencyRequestId)
+      PatronRequest pr = PatronRequest.findByHrid(eventData.header.requestingAgencyRequestId)
       if ( pr == null )
-        throw new Exception("Unable to locate PatronRequest corresponding to requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+        throw new Exception("Unable to locate PatronRequest corresponding to hrid requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null ) {
