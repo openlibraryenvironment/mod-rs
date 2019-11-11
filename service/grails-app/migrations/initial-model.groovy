@@ -1324,7 +1324,8 @@ databaseChangeLog = {
         createSequence(sequenceName:'pr_hrid_seq')
 
         addColumn(tableName: "patron_request") {
-            column(name: 'pr_hrid', type: 'VARCHAR(32)', defaultValueSequenceNext:'pr_hrid_seq');
+            // column(name: 'pr_hrid', type: 'VARCHAR(32)', defaultValueSequenceNext:'pr_hrid_seq');
+            column(name: 'pr_hrid', type: 'VARCHAR(32)')
         }
 
     }
