@@ -1,4 +1,4 @@
-package org.olf.rs;
+ackage org.olf.rs;
 
 
 import grails.events.annotation.Subscriber
@@ -123,6 +123,8 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
+            log.debug("req.hrit=${generateHrid()}");
+
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
@@ -252,6 +254,7 @@ public class ReshareApplicationEventHandlerService {
                 agencyIdValue:req.resolvedRequester?.symbol
               ],
               requestingAgencyRequestId:req.id,
+              // requestingAgencyRequestId:req.hrid,
               supplyingAgencyRequestId:null
           ],
           bibliographicInfo:[
@@ -462,8 +465,9 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("requestingAgencyRequestId missing");
 
       PatronRequest pr = PatronRequest.get(eventData.header.requestingAgencyRequestId)
+      // PatronRequest pr = PatronRequest.findByHrid(eventData.header.requestingAgencyRequestId)
       if ( pr == null )
-        throw new Exception("Unable to locate PatronRequest corresponding to requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+        throw new Exception("Unable to locate PatronRequest corresponding to hrid requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null ) {
@@ -776,4 +780,9 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
+  private String generateHrid() {
+    String result = null;
+    log.debug("Generate hrid");
+    return result;
+  }
 }
