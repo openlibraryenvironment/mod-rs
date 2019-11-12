@@ -27,7 +27,6 @@ public class ReshareApplicationEventHandlerService {
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
   HostLMSService hostLMSService
-  def sessionFactory
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -789,12 +788,12 @@ public class ReshareApplicationEventHandlerService {
     String result = null;
 
     // Use this to make sessionFactory.currentSession work as expected
-    Tenants.withCurrent {
+    PatronRequest.withSession { session ->
       log.debug("Generate hrid");
-      def sql = new Sql(sessionFactory.currentSession.connection())
-      def query_result = sql.rows('select pr_hrid_seq.nextval');
+      def sql = new Sql(session.connection())
+      def query_result = sql.rows("select nextval('pr_hrid_seq')".toString());
       log.debug("Query result: ${query_result.toString()}");
-      result = query_result.getAt(0)?.toString();
+      result = query_result[0].get('nextval')?.toString();
     }
     return result;
   }

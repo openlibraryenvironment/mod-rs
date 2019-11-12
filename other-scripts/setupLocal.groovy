@@ -43,6 +43,9 @@ if (initial_setup) {
 
 if (initial_setup) {
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+}
+
+if ( !initial_setup) {
   okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
