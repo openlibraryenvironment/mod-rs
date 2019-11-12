@@ -787,11 +787,15 @@ public class ReshareApplicationEventHandlerService {
 
   private String generateHrid() {
     String result = null;
-    log.debug("Generate hrid");
-    def sql = new Sql(sessionFactory.currentSession.connection())
-    def query_result = sql.rows('select pr_hrid_seq.nextval');
-    log.debug("Query result: ${query_result.toString()}");
-    result = query_result.getAt(0)?.toString();
+
+    // Use this to make sessionFactory.currentSession work as expected
+    Tenants.withCurrent {
+      log.debug("Generate hrid");
+      def sql = new Sql(sessionFactory.currentSession.connection())
+      def query_result = sql.rows('select pr_hrid_seq.nextval');
+      log.debug("Query result: ${query_result.toString()}");
+      result = query_result.getAt(0)?.toString();
+    }
     return result;
   }
 }

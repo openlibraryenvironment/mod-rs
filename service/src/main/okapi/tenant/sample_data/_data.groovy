@@ -29,7 +29,7 @@ try {
                                   key: 'borrower_check'
                                   ).save(flush:true, failOnError: true);
 
-  AppSetting z3950_address = AppSetting.findByKey('request_id_prefix') ?: new AppSetting( 
+  AppSetting request_id_prefix = AppSetting.findByKey('request_id_prefix') ?: new AppSetting( 
                                   section:'requests',
                                   settingType:'String',
                                   key: 'request_id_prefix',
