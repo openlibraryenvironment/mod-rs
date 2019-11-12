@@ -35,7 +35,7 @@ try {
                                   key: 'request_id_prefix',
                                   ).save(flush:true, failOnError: true);
 
-  AppSetting z3950_address = AppSetting.findByKey('default_request_symbol') ?: new AppSetting( 
+  AppSetting default_request_symbol = AppSetting.findByKey('default_request_symbol') ?: new AppSetting( 
                                   section:'requests',
                                   settingType:'String',
                                   key: 'default_request_symbol',

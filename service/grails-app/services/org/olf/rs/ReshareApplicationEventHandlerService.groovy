@@ -1,4 +1,4 @@
-ackage org.olf.rs;
+package org.olf.rs;
 
 
 import grails.events.annotation.Subscriber
@@ -10,6 +10,7 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
+import groovy.sql.Sql
 
 /**
  * Handle application events.
@@ -26,6 +27,7 @@ public class ReshareApplicationEventHandlerService {
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
   HostLMSService hostLMSService
+  def sessionFactory
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -98,8 +100,11 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+  // Notify us of a new patron request in the database - regardless of role
+  //
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   // Called when a new patron request indication happens - usually
+  // New patron requests must have a  req.requestingInstitutionSymbol
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
@@ -123,7 +128,7 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-            log.debug("req.hrit=${generateHrid()}");
+            log.debug("req.hrid=${generateHrid()}");
 
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
@@ -783,6 +788,10 @@ public class ReshareApplicationEventHandlerService {
   private String generateHrid() {
     String result = null;
     log.debug("Generate hrid");
+    def sql = new Sql(sessionFactory.currentSession.connection())
+    def query_result = sql.rows('select pr_hrid_seq.nextval');
+    log.debug("Query result: ${query_result.toString()}");
+    result = query_result.getAt(0)?.toString();
     return result;
   }
 }
