@@ -220,7 +220,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickLocation(nullable: true)
     pickShelvingLocation(nullable: true, blank:false)
     localCallNumber (nullable: true, blank:false)
-    // hrid (nullable: true, blank:false)
+    hrid (nullable: true, blank:false)
   }
 
   static mapping = {
@@ -290,8 +290,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickShelvingLocation column: 'pr_pick_shelving_location'
     localCallNumber column : 'pr_local_call_number'
 
-    // hrid column : 'pr_hrid'
-    hrid formula: 'pr_hrid'
+    hrid column : 'pr_hrid'
   }
 
   /**

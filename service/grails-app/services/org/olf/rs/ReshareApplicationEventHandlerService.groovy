@@ -11,6 +11,7 @@ import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
 import groovy.sql.Sql
+import com.k_int.web.toolkit.settings.AppSetting
 
 /**
  * Handle application events.
@@ -118,6 +119,10 @@ public class ReshareApplicationEventHandlerService {
            ( req.state?.code == 'REQ_IDLE' ) && 
            ( req.isRequester == true) ) {
 
+        // If valid - generate a human readabe ID to use
+        req.hrid=generateHrid()
+        log.debug("Updated req.hrid to ${req.hrid}");
+
         if ( req.requestingInstitutionSymbol != null ) {
           // We need to validate the requsting location - and check that we can act as requester for that symbol
           Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
@@ -127,8 +132,6 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-            log.debug("req.hrid=${generateHrid()}");
-
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
@@ -787,13 +790,18 @@ public class ReshareApplicationEventHandlerService {
   private String generateHrid() {
     String result = null;
 
+    AppSetting prefix_setting = AppSetting.findByKey('request_id_prefix')
+    log.debug("Got app setting ${prefix_setting} ${prefix_setting?.value} ${prefix_setting?.defValue}");
+
+    String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: ''
+
     // Use this to make sessionFactory.currentSession work as expected
     PatronRequest.withSession { session ->
       log.debug("Generate hrid");
       def sql = new Sql(session.connection())
       def query_result = sql.rows("select nextval('pr_hrid_seq')".toString());
       log.debug("Query result: ${query_result.toString()}");
-      result = query_result[0].get('nextval')?.toString();
+      result = hrid_prefix + query_result[0].get('nextval')?.toString();
     }
     return result;
   }
