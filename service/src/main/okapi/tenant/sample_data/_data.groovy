@@ -40,6 +40,26 @@ try {
                                   settingType:'String',
                                   key: 'default_request_symbol',
                                   ).save(flush:true, failOnError: true);
+
+  AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
+                                  section:'shared_index',
+                                  settingType:'String',
+                                  key: 'shared_index_base_url',
+                                  defValue: 'http://shared-index.reshare-dev.indexdata.com:9130'
+                                  ).save(flush:true, failOnError: true);
+
+  AppSetting shared_index_user = AppSetting.findByKey('shared_index_user') ?: new AppSetting( 
+                                  section:'shared_index',
+                                  settingType:'String',
+                                  key: 'shared_index_user',
+                                  defValue: 'diku_admin'
+
+  AppSetting shared_index_pass = AppSetting.findByKey('shared_index_pass') ?: new AppSetting( 
+                                  section:'shared_index',
+                                  settingType:'String',
+                                  key: 'shared_index_pass',
+                                  defValue: ''
+
 }
 catch ( Exception e ) {
   e.printStackTrace();
