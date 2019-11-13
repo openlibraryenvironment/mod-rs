@@ -51,7 +51,7 @@ if ( 1==1 ) {
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
-if ( 1== 2 ) {
+if ( 1== 1 ) {
   okapi.walkFoafGraph()
 }
 
