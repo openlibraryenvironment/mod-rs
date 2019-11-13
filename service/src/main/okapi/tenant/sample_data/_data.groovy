@@ -52,13 +52,13 @@ try {
                                   section:'shared_index',
                                   settingType:'String',
                                   key: 'shared_index_user',
-                                  defValue: 'diku_admin'
+                                  defValue: 'diku_admin').save(flush:true, failOnError: true);
 
   AppSetting shared_index_pass = AppSetting.findByKey('shared_index_pass') ?: new AppSetting( 
                                   section:'shared_index',
                                   settingType:'String',
                                   key: 'shared_index_pass',
-                                  defValue: ''
+                                  defValue: '').save(flush:true, failOnError: true);
 
 }
 catch ( Exception e ) {
