@@ -148,6 +148,10 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
+        if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
+          req.bibRecord = fetchSharedIndexRecord(req.systemInstanceIdentifier)
+        }
+
         req.save(flush:true, failOnError:true)
       }
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
@@ -804,5 +808,24 @@ public class ReshareApplicationEventHandlerService {
       result = hrid_prefix + query_result[0].get('nextval')?.toString();
     }
     return result;
+  }
+
+  private String fetchSharedIndexRecord(String id) {
+    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
+    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
+    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
+
+    String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
+    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
+    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
+
+    if ( ( shared_index_base_url != null ) && 
+         ( shared_index_user != null ) &&
+         ( shared_index_pass != null ) ) {
+      log.debug("Attempt to retrieve shared index record ${id}");
+    }
+    else {
+      log.debug("Unable to contact shared index - no url/user/pass");
+    }
   }
 }
