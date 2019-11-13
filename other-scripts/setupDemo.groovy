@@ -25,12 +25,12 @@ if ( 1==2 ) {
   okapi.addTenantSymbol('RESHARE:IDVUFIND')
 }
 
-if ( 1==2 ) {
+if ( 1==1 ) {
   //okapi.walkFoafGraph()
   okapi.listTenantSymbols()
 }
 
-if ( 1==2 ) {
+if ( 1==1 ) {
   // okapi.createRequest([
   //                      title:'The Heart of Enterprise',
   //                      patronIdentifier: 'PI',
@@ -41,10 +41,17 @@ if ( 1==2 ) {
   //                      requestingInstitutionSymbol:'RESHARE:KNOWINT']);
 
   //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
-  okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
+  okapi.createRequest([
+                       title:'Temeraire', 
+                       patronIdentifier: 'PI',
+                       patronReference: 'PR',
+                       patronSurname: 'PS',
+                       patronGivenName: 'PGN',
+                       patronType:'PT',
+                       requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
-if ( 1== 1 ) {
+if ( 1== 2 ) {
   okapi.walkFoafGraph()
 }
 
