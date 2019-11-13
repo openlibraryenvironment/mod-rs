@@ -12,6 +12,8 @@ import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
+import static groovyx.net.http.HttpBuilder.configure
+
 
 /**
  * Handle application events.
@@ -811,6 +813,9 @@ public class ReshareApplicationEventHandlerService {
   }
 
   private String fetchSharedIndexRecord(String id) {
+
+    String result = null;
+
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
     AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
@@ -818,14 +823,39 @@ public class ReshareApplicationEventHandlerService {
     String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
     String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
     String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
+    String shared_index_tenant = 'diku'
 
     if ( ( shared_index_base_url != null ) && 
          ( shared_index_user != null ) &&
          ( shared_index_pass != null ) ) {
       log.debug("Attempt to retrieve shared index record ${id}");
+      def r1 = configure {
+         request.headers['X-Okapi-Tenant'] = shared_index_tenant;
+         request.headers['X-Okapi-Token'] = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
+        request.uri = shared_index_base_url+'/inventory/instances/491fe34f-ea1b-4338-ad20-30b8065a7b46'
+      }.get()
+      log.debug("Got result: ${result}");
     }
     else {
       log.debug("Unable to contact shared index - no url/user/pass");
     }
+ 
+    return result;
+  }
+
+  private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
+    String r1 = null;
+    log.debug("getOkapiToken(${baseUrl},${user},..,${tenant})");
+    def postBody = [username: user, password: pass]
+    def result = configure {
+      request.headers['X-Okapi-Tenant'] = tenant
+      request.headers['accept'] = 'application/json'
+      request.contentType = 'application/json'
+      request.uri = shared_index_base_url+'/bl-users/login'
+      request.query = [expandPermissions:true,fullPermissions:true]
+      request.body = postBody
+    }.get()
+    log.debug("Result of okapi login: ${result}");
+    return r1;
   }
 }
