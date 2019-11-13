@@ -46,7 +46,14 @@ if (initial_setup) {
 }
 
 if ( !initial_setup) {
-  okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
+  okapi.createRequest([
+                       title:'Temeraire', 
+                       patronIdentifier: 'PI',
+                       patronReference: 'PR',
+                       patronSurname: 'PS',
+                       patronGivenName: 'PGN',
+                       patronType:'PT',
+                       requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
 

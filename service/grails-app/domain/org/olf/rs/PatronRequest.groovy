@@ -14,7 +14,6 @@ import com.k_int.web.toolkit.tags.Tag
 import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
 
-
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
  * requesting that reshare locate and deliver a resource from a remote partner. 
