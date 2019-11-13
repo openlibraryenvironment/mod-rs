@@ -1329,4 +1329,10 @@ databaseChangeLog = {
         }
 
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191112-1700-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: 'pr_bib_record', type: 'jsonb')
+        }
+    }
 }

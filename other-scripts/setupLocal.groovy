@@ -43,6 +43,9 @@ if (initial_setup) {
 
 if (initial_setup) {
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+}
+
+if ( !initial_setup) {
   okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
@@ -51,7 +54,7 @@ printf('%-2s %-36s %-30s %-9s %-20s\n', '#', 'id', 'title', 'role', 'Current Sta
 i=0;
 lr = okapi.listRequests()
 lr.results.each { pr ->
-  printf('%-2d %-36s %-30s %-9s %-20s\n', i++, pr.id, pr.title, ( pr.isRequester ? 'Requester' : 'Responder' ), pr.state.code);
+  printf('%-2d %-36s %-20s %-30s %-9s %-20s\n', i++, pr.id, pr.hrid, pr.title, ( pr.isRequester ? 'Requester' : 'Responder' ), pr.state.code);
   printf("    -> ${pr.validActions}\n");
   // printf("    -> ${pr}");
   // printf("    -> ${okapi.validActions(pr.id)}\n");

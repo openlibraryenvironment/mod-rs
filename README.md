@@ -116,3 +116,8 @@ the above won't be able to find your database. Try:
     grails -Dgrails.env=vagrant-db dbm-generate-gorm-changelog my-new-changelog.groovy
 
 
+
+
+Links:
+http://shared-index.reshare-dev.indexdata.com/inventory?sort=Title
+http://vufind.aws.indexdata.com/vufindfolio/Search/Results?lookfor=&type=AllFields&limit=20

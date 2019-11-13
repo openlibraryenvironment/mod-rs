@@ -88,6 +88,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String patronType
   Boolean sendToPatron
 
+  // A json blob containing the response to a lookup in the shared index.
+  String bibRecord
+
   // These 2 dates are maintained by the framework for us
   Date dateCreated
   Date lastUpdated
@@ -207,6 +210,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronGivenName (nullable: true, blank : false)
     patronType (nullable: true, blank : false)
     sendToPatron (nullable: true )
+    bibRecord (nullable: true )
     neededBy (nullable: true )
 
     requestingInstitutionSymbol (nullable: true)
@@ -220,7 +224,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickLocation(nullable: true)
     pickShelvingLocation(nullable: true, blank:false)
     localCallNumber (nullable: true, blank:false)
-    // hrid (nullable: true, blank:false)
+    hrid (nullable: true, blank:false)
   }
 
   static mapping = {
@@ -284,14 +288,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronGivenName column : 'pr_patron_name'
     patronType column : 'pr_patron_type'
     sendToPatron column : 'pr_send_to_patron'
+    bibRecord column: 'pr_bib_record'
     neededBy column : 'pr_needed_by'
 
     pickLocation column: 'pr_pick_location_fk'
     pickShelvingLocation column: 'pr_pick_shelving_location'
     localCallNumber column : 'pr_local_call_number'
 
-    // hrid column : 'pr_hrid'
-    hrid formula: 'pr_hrid'
+    hrid column : 'pr_hrid'
   }
 
   /**

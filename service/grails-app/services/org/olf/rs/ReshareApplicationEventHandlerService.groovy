@@ -1,4 +1,4 @@
-ackage org.olf.rs;
+package org.olf.rs;
 
 
 import grails.events.annotation.Subscriber
@@ -10,6 +10,8 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
+import groovy.sql.Sql
+import com.k_int.web.toolkit.settings.AppSetting
 
 /**
  * Handle application events.
@@ -98,8 +100,11 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+  // Notify us of a new patron request in the database - regardless of role
+  //
   // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
   // Called when a new patron request indication happens - usually
+  // New patron requests must have a  req.requestingInstitutionSymbol
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
@@ -114,6 +119,10 @@ public class ReshareApplicationEventHandlerService {
            ( req.state?.code == 'REQ_IDLE' ) && 
            ( req.isRequester == true) ) {
 
+        // If valid - generate a human readabe ID to use
+        req.hrid=generateHrid()
+        log.debug("Updated req.hrid to ${req.hrid}");
+
         if ( req.requestingInstitutionSymbol != null ) {
           // We need to validate the requsting location - and check that we can act as requester for that symbol
           Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
@@ -123,8 +132,6 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Got request ${req}");
             log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
             req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-            log.debug("req.hrit=${generateHrid()}");
-
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
           }
           else {
@@ -782,7 +789,20 @@ public class ReshareApplicationEventHandlerService {
 
   private String generateHrid() {
     String result = null;
-    log.debug("Generate hrid");
+
+    AppSetting prefix_setting = AppSetting.findByKey('request_id_prefix')
+    log.debug("Got app setting ${prefix_setting} ${prefix_setting?.value} ${prefix_setting?.defValue}");
+
+    String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: ''
+
+    // Use this to make sessionFactory.currentSession work as expected
+    PatronRequest.withSession { session ->
+      log.debug("Generate hrid");
+      def sql = new Sql(session.connection())
+      def query_result = sql.rows("select nextval('pr_hrid_seq')".toString());
+      log.debug("Query result: ${query_result.toString()}");
+      result = hrid_prefix + query_result[0].get('nextval')?.toString();
+    }
     return result;
   }
 }
