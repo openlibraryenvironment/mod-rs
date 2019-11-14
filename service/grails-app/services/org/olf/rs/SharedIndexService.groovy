@@ -4,6 +4,8 @@ import grails.gorm.multitenancy.Tenants
 import java.util.concurrent.ThreadLocalRandom;
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
+import groovy.json.JsonOutput;
+
 
 
 /**
@@ -128,5 +130,7 @@ public class SharedIndexService {
     return result;
   }
 
+
+  // https://github.com/folio-org/mod-graphql/blob/master/doc/example-queries.md#using-curl-from-the-command-line
 }
 
