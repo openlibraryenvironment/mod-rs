@@ -39,6 +39,14 @@ public class SharedIndexService {
 
     List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
 
+    try {
+      log.debug("Try graphql")
+      // sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46');
+    }
+    catch ( Exception e ) {
+      log.error("Graphql failed",e);
+    }
+
     log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
 
     List<String> all_libs = mockData.collect { it.symbol };
@@ -132,5 +140,52 @@ public class SharedIndexService {
 
 
   // https://github.com/folio-org/mod-graphql/blob/master/doc/example-queries.md#using-curl-from-the-command-line
+
+  private void sharedIndexHoldings(String id) {
+
+    String query="""
+{
+  query: "query {
+    item_storage_items_SINGLE(itemId: "${id}") {
+      holdingsRecord2 { holdingsInstance { title } }
+    }
+  }"
+}""".toString()
+
+    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
+    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
+    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
+
+    String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
+    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
+    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
+    String shared_index_tenant = 'diku'
+
+    if ( ( shared_index_base_url != null ) &&
+         ( shared_index_user != null ) &&
+         ( shared_index_pass != null ) ) {
+      log.debug("Attempt to retrieve shared index record ${id}");
+      String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
+      if ( token ) {
+        def r1 = configure {
+          request.headers['X-Okapi-Tenant'] = shared_index_tenant;
+          request.headers['X-Okapi-Token'] = token
+          request.uri = shared_index_base_url+'/graphql'
+          request.contentType = 'application/json'
+          request.body = query
+        }.get()
+        if ( r1 ) {
+          result = JsonOutput.toJson(r1);
+        }
+      }
+      else {
+        log.warn("Unable to login to remote shared index");
+      }
+    }
+    else {
+      log.debug("Unable to contact shared index - no url/user/pass");
+    }
+
+  }
 }
 
