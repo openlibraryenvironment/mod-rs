@@ -148,7 +148,7 @@ public class SharedIndexService {
     String query='''{
   "query": "query($id: String!) { item_storage_items_SINGLE(itemId: $id) { holdingsRecord2 { holdingsInstance { title } } } }",
   "variables":{
-    "id":"491fe34f-ea1b-4338-ad20-30b8065a7b46"
+    "id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779"
   }
 }'''
 
