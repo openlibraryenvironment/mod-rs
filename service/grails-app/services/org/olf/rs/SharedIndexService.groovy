@@ -41,7 +41,7 @@ public class SharedIndexService {
 
     try {
       log.debug("Try graphql")
-      // sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46');
+      sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46');
     }
     catch ( Exception e ) {
       log.error("Graphql failed",e);
@@ -143,14 +143,19 @@ public class SharedIndexService {
 
   private void sharedIndexHoldings(String id) {
 
-    String query="""
+    String query='''
 {
-  query: "query {
-    item_storage_items_SINGLE(itemId: "${id}") {
+  "query": "query($id: String!) {
+    item_storage_items_SINGLE(itemId: $id) {
       holdingsRecord2 { holdingsInstance { title } }
     }
+  },
+  variables:{
+    "id":"491fe34f-ea1b-4338-ad20-30b8065a7b46"
   }"
-}""".toString()
+}'''
+
+    log.debug("Sending json ${query}");
 
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
