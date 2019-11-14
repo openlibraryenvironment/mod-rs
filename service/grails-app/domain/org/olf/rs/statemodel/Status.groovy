@@ -19,7 +19,7 @@ class Status implements MultiTenant<Status> {
                owner (nullable: false)
                code (nullable: false, blank:false)
             presSeq (nullable: true, blank:false)
-            visible (nullable: true, blank:false)
+            visible (nullable: true)
   }
 
   static mapping = {

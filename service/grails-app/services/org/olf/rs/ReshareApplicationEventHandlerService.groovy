@@ -820,9 +820,6 @@ public class ReshareApplicationEventHandlerService {
     log.debug("fetchSharedIndexRecord(${id})");
 
     String result = null;
-    // Switching off for now
-    if ( false ) {
-
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
     AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
@@ -836,34 +833,52 @@ public class ReshareApplicationEventHandlerService {
          ( shared_index_user != null ) &&
          ( shared_index_pass != null ) ) {
       log.debug("Attempt to retrieve shared index record ${id}");
-      def r1 = configure {
-         request.headers['X-Okapi-Tenant'] = shared_index_tenant;
-         request.headers['X-Okapi-Token'] = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
-        request.uri = shared_index_base_url+'/inventory/instances/491fe34f-ea1b-4338-ad20-30b8065a7b46'
-      }.get()
-      log.debug("Got result: ${result}");
+      String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
+      if ( token ) {
+        def r1 = configure {
+           request.headers['X-Okapi-Tenant'] = shared_index_tenant;
+           request.headers['X-Okapi-Token'] = token
+          request.uri = shared_index_base_url+'/inventory/instances/491fe34f-ea1b-4338-ad20-30b8065a7b46'
+        }.get()
+        if ( r1 ) {
+          result = JsonOutput.toJson(r1);
+        }
+      }
+      else {
+        log.warn("Unable to login to remote shared index");
+      }
     }
     else {
       log.debug("Unable to contact shared index - no url/user/pass");
-    }
     }
  
     return result;
   }
 
   private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
-    String r1 = null;
+    String result = null;
     log.debug("getOkapiToken(${baseUrl},${user},..,${tenant})");
     def postBody = [username: user, password: pass]
-    def result = configure {
+    def r1 = configure {
       request.headers['X-Okapi-Tenant'] = tenant
       request.headers['accept'] = 'application/json'
       request.contentType = 'application/json'
       request.uri = baseUrl+'/bl-users/login'
       request.uri.query = [expandPermissions:true,fullPermissions:true]
       request.body = postBody
-    }.get()
-    // log.debug("Result of okapi login: ${result}");
-    return r1;
+    }.get() {
+      response.success { resp ->
+        def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
+        if ( tok_header ) {
+          result = tok_header.value;
+        }
+        else {
+          log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
+        }
+      }
+    }
+
+    log.debug("Result of okapi login: ${result}");
+    return result;
   }
 }
