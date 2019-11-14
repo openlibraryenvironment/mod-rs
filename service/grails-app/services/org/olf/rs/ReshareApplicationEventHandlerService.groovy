@@ -151,7 +151,11 @@ public class ReshareApplicationEventHandlerService {
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
+          log.debug("calling fetchSharedIndexRecord");
           req.bibRecord = fetchSharedIndexRecord(req.systemInstanceIdentifier)
+        }
+        else {
+          log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
         }
 
         req.save(flush:true, failOnError:true)
@@ -813,8 +817,11 @@ public class ReshareApplicationEventHandlerService {
   }
 
   private String fetchSharedIndexRecord(String id) {
+    log.debug("fetchSharedIndexRecord(${id})");
 
     String result = null;
+    // Switching off for now
+    if ( false ) {
 
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
@@ -839,6 +846,7 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.debug("Unable to contact shared index - no url/user/pass");
     }
+    }
  
     return result;
   }
@@ -851,11 +859,11 @@ public class ReshareApplicationEventHandlerService {
       request.headers['X-Okapi-Tenant'] = tenant
       request.headers['accept'] = 'application/json'
       request.contentType = 'application/json'
-      request.uri = shared_index_base_url+'/bl-users/login'
-      request.query = [expandPermissions:true,fullPermissions:true]
+      request.uri = baseUrl+'/bl-users/login'
+      request.uri.query = [expandPermissions:true,fullPermissions:true]
       request.body = postBody
     }.get()
-    log.debug("Result of okapi login: ${result}");
+    // log.debug("Result of okapi login: ${result}");
     return r1;
   }
 }

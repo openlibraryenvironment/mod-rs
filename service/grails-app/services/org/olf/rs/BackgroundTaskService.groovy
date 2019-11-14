@@ -16,11 +16,14 @@ public class BackgroundTaskService {
     Tenants.withId(tenant) {
       checkPullSlips();
 
-      def sl = Symbol.list();
-
-      log.debug("Currently ${sl.size()} symbols in the system");
-      sl.each { sym ->
-        log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol} (Owner: ${sym.owner.name})");
+      // def sl = Symbol.list();
+      // log.debug("Currently ${sl.size()} symbols in the system");
+      // sl.each { sym ->
+      //   log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol} (Owner: ${sym.owner.name})");
+      // }
+      def duplicate_symbols = Symbol.executeQuery('select distinct s.symbol, s.authority.symbol from Symbol as s group by s.symbol, s.authority.symbol having count(*) > 1')
+      duplicate_symbols.each { ds ->
+        log.warn("WARNING: Duplicate symbols detected. This should not be possible. ${ds}");
       }
     }
     log.debug("BackgroundTaskService::performReshareTasks exiting");

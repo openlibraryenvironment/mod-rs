@@ -53,6 +53,7 @@ if ( !initial_setup) {
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
+                       systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
