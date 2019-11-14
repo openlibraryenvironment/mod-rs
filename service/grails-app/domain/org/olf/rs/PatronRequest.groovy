@@ -72,6 +72,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String ssn
   String quarter
   String systemInstanceIdentifier
+  String selectedItemBarcode
 
   String titleOfComponent
   String authorOfComponent
@@ -200,6 +201,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     ssn (nullable: true, blank : false)
     quarter (nullable: true, blank : false)
     systemInstanceIdentifier (nullable: true, blank : false)
+    selectedItemBarcode (nullable: true, blank : false)
 
     titleOfComponent (nullable: true, blank : false)
     authorOfComponent (nullable: true, blank : false)
@@ -269,6 +271,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     ssn column : 'pr_ssn'
     quarter column : 'pr_quarter'
     systemInstanceIdentifier column: 'pr_system_instance_id'
+    selectedItemBarcode column: 'pr_selected_item_barcode'
 
     requestingInstitutionSymbol column : 'pr_req_inst_symbol'
     resolvedRequester column : 'pr_resolved_req_inst_symbol_fk'

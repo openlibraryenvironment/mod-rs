@@ -1335,4 +1335,10 @@ databaseChangeLog = {
             column(name: 'pr_bib_record', type: 'TEXT')
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20191114-1200-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: 'pr_selected_item_barcode', type: 'VARCHAR(255)')
+        }
+    }
 }
