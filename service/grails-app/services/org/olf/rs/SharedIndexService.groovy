@@ -145,8 +145,9 @@ public class SharedIndexService {
 
     String result
 
+  // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
-  "query": "query($id: String!) { item_storage_items_SINGLE(itemId: $id) { holdingsRecord2 { holdingsInstance { title } } } }",
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocationId holdingsStatements { note statement } } } }",
   "variables":{
     "id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779"
   }
