@@ -143,12 +143,10 @@ public class SharedIndexService {
 
   private void sharedIndexHoldings(String id) {
 
+    String result
+
     String query='''{
-  "query": "query($id: String!) {
-    item_storage_items_SINGLE(itemId: $id) {
-      holdingsRecord2 { holdingsInstance { title } }
-    }
-  }",
+  "query": "query($id: String!) { item_storage_items_SINGLE(itemId: $id) { holdingsRecord2 { holdingsInstance { title } } } }",
   "variables":{
     "id":"491fe34f-ea1b-4338-ad20-30b8065a7b46"
   }
@@ -190,6 +188,7 @@ public class SharedIndexService {
       log.debug("Unable to contact shared index - no url/user/pass");
     }
 
+    log.debug("Result: ${result}");
   }
 }
 
