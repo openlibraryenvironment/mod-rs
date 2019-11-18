@@ -28,7 +28,9 @@ public class SharedIndexService {
     [ symbol: 'RESHARE:TESTINST10' ]
   ]
 
-  /**
+
+
+ /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
    * @param description A Map of properies that describe the item. Currently understood properties:
@@ -36,6 +38,24 @@ public class SharedIndexService {
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
   public List<AvailabilityStatement> findAppropriateCopies(Map description) {
+
+    List<AvailabilityStatement> result = []
+
+    // Use the shared index to try and obtain a list of locations
+    try {
+      log.debug("Try graphql")
+      sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46').each { ls ->
+        result.add(new AvailabilityStatement(symbol:ls, instanceIdentifier:null, copyIdentifier:null));
+      }
+    }
+    catch ( Exception e ) {
+      log.error("Graphql failed",e);
+    }
+
+    return result;
+  }
+
+  public List<AvailabilityStatement> createRandomRota(Map description) {
 
     List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
 
@@ -141,9 +161,9 @@ public class SharedIndexService {
 
   // https://github.com/folio-org/mod-graphql/blob/master/doc/example-queries.md#using-curl-from-the-command-line
 
-  private void sharedIndexHoldings(String id) {
+  private List<String> sharedIndexHoldings(String id) {
 
-    String result
+    List<String> result = []
 
   // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
@@ -178,7 +198,24 @@ public class SharedIndexService {
           request.body = query
         }.get()
         if ( r1 ) {
-          result = JsonOutput.toJson(r1);
+          // We got a response from the GraphQL service - example {"data":
+          // {"instance_storage_instances_SINGLE":
+          //     {"id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779","title":"A history of the twentieth century in 100 maps",
+          //      "holdingsRecords2":[
+          //         {"id":"d045fd86-fdcf-455f-8f42-e7bbaaf5ddd6","callNumber":" GA793.7.A1 ","permanentLocationId":"87038e41-0990-49ea-abd9-1ad00a786e45","holdingsStatements":[]}
+          //      ]}}}
+          r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
+            log.debug("Process holdings record ${hr}");
+            String location = hr.permanentLocation.code
+            String[] split_location = location.split('/')
+            if ( split_location.length == 4 ) {
+              // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
+              if ( ! result.contains(split_location[0]) ) {
+                // And we don't already have the location
+                result.add(split_location[0])
+              }
+            }
+          }
         }
       }
       else {
@@ -190,6 +227,7 @@ public class SharedIndexService {
     }
 
     log.debug("Result: ${result}");
+    return result;
   }
 }
 
