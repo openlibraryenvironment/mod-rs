@@ -38,6 +38,7 @@ if (initial_setup) {
   okapi.addTenantSymbol('RESHARE:TESTINST10')
   okapi.addTenantSymbol('RESHARE:KNOWINT01')
   okapi.addTenantSymbol('RESHARE:IDVUFIND')
+  okapi.addTenantSymbol('RESHARE:TEMPLEI')
   okapi.listTenantSymbols()
 }
 
@@ -46,17 +47,26 @@ if (initial_setup) {
 }
 
 if ( !initial_setup) {
+  // okapi.createRequest([
+  //                      title:'Temeraire', 
+  //                      patronIdentifier: 'PI',
+  //                      patronReference: 'PR',
+  //                      patronSurname: 'PS',
+  //                      patronGivenName: 'PGN',
+  //                      patronType:'PT',
+  //                      systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
+  //                      requestingInstitutionSymbol:'OCLC:ZMU']);
+
   okapi.createRequest([
-                       title:'Temeraire', 
+                       title:'10,000 Teachers, 10 Million Minds Science and Math Scholarship Act : report (to accompany H.R. 362) (including cost estimate of the Congressional Budget Office)', 
                        patronIdentifier: 'PI',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
-                       systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
+                       systemInstanceIdentifier:'491fe34f-ea1b-4338-ad20-30b8065a7b46',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
-
 
 printf('%-2s %-36s %-30s %-9s %-20s\n', '#', 'id', 'title', 'role', 'Current State');
 i=0;

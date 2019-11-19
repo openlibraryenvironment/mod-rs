@@ -40,12 +40,18 @@ public class SharedIndexService {
   public List<AvailabilityStatement> findAppropriateCopies(Map description) {
 
     List<AvailabilityStatement> result = []
+    log.debug("findAppropriateCopies(${description})");
 
     // Use the shared index to try and obtain a list of locations
     try {
       log.debug("Try graphql")
-      sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46').each { ls ->
-        result.add(new AvailabilityStatement(symbol:ls, instanceIdentifier:null, copyIdentifier:null));
+      if ( description?.systemInstanceIdentifier != null ) {
+        sharedIndexHoldings(description?.systemInstanceIdentifier).each { ls ->
+          result.add(new AvailabilityStatement(symbol:ls, instanceIdentifier:null, copyIdentifier:null));
+        }
+      }
+      else {
+        log.warn("No shared index identifier for record. Cannot use shared index");
       }
     }
     catch ( Exception e ) {
@@ -80,8 +86,7 @@ public class SharedIndexService {
     log.debug("Decded these are the lenders: Num lenders: ${num_responders} ${lendingStrings}");
 
     lendingStrings.each { ls ->
-      String instance_id = null; // java.util.UUID.randomUUID().toString();
-      // String instance_id = '000026460'
+      String instance_id = null;
       String copy_id = null; // java.util.UUID.randomUUID().toString();
       result.add(new AvailabilityStatement(symbol:ls,instanceIdentifier:instance_id,copyIdentifier:copy_id));
     }
@@ -210,9 +215,9 @@ public class SharedIndexService {
             String[] split_location = location.split('/')
             if ( split_location.length == 4 ) {
               // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
-              if ( ! result.contains(split_location[0]) ) {
+              if ( ! result.contains('RESHARE:'+split_location[0]) ) {
                 // And we don't already have the location
-                result.add(split_location[0])
+                result.add('RESHARE:'+split_location[0])
               }
             }
           }

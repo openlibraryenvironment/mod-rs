@@ -142,7 +142,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   HostLMSLocation pickLocation;
   String pickShelvingLocation;
 
-  static transients = ['systemUpdate', 'stateHasChanged'];
+  static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [
@@ -322,6 +322,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   def getValidActions() {
     return StateTransition.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state])
+  }
+
+  public Map getDescriptiveMetadata() {
+    return [
+      'title': this.title,
+      'systemInstanceIdentifier': this.systemInstanceIdentifier
+    ]
   }
 
 }
