@@ -87,15 +87,14 @@ if ( !initial_setup) {
                        patronType:'PT',
                        systemInstanceIdentifier:'491fe34f-ea1b-4338-ad20-30b8065a7b46',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
-
   okapi.createRequest([
-                       title:'Medieval households',
+                       title:'Arthur Koestler : a collection of critical essays', 
                        patronIdentifier: 'PI',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
-                       systemInstanceIdentifier:'593bca64-d19e-4d0d-95e0-219d0c36a3d1',
+                       systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 

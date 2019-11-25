@@ -1,7 +1,6 @@
 :load ./modrsCli.groovy
 okapi=new OkapiClient('reshare')
 rsclient = new RSClient(okapi);
-okapi.listTenantSymbols()
 
 if ( 1==2 ) {
   okapi.addTenantSymbol('OCLC:ZMU');
@@ -42,16 +41,17 @@ if ( 1==1 ) {
 
   //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
   okapi.createRequest([
-                       title:'Temeraire', 
+                       title:'Temeraire',
                        patronIdentifier: 'PI',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
+                       systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
-if ( 1== 1 ) {
+if ( 1== 2 ) {
   okapi.walkFoafGraph()
 }
 
