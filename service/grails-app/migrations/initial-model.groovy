@@ -1341,4 +1341,14 @@ databaseChangeLog = {
             column(name: 'pr_selected_item_barcode', type: 'VARCHAR(255)')
         }
     }
+
+   changeSet(author: "ianibbo (manual)", id: "20191115-1348-001") {
+        addColumn(tableName: "directory_entry") {
+            column(name: "de_phone_number", type: "VARCHAR(255)");
+            column(name: "de_email_address", type: "VARCHAR(255)");
+            column(name: "de_contact_name", type: "VARCHAR(255)");
+        }
+
+    }
+
 }

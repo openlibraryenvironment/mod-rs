@@ -28,7 +28,9 @@ public class SharedIndexService {
     [ symbol: 'RESHARE:TESTINST10' ]
   ]
 
-  /**
+
+
+ /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
    * @param description A Map of properies that describe the item. Currently understood properties:
@@ -37,7 +39,39 @@ public class SharedIndexService {
    */
   public List<AvailabilityStatement> findAppropriateCopies(Map description) {
 
+    List<AvailabilityStatement> result = []
+    log.debug("findAppropriateCopies(${description})");
+
+    // Use the shared index to try and obtain a list of locations
+    try {
+      log.debug("Try graphql")
+      if ( description?.systemInstanceIdentifier != null ) {
+        sharedIndexHoldings(description?.systemInstanceIdentifier).each { ls ->
+          result.add(new AvailabilityStatement(symbol:ls, instanceIdentifier:null, copyIdentifier:null));
+        }
+      }
+      else {
+        log.warn("No shared index identifier for record. Cannot use shared index");
+      }
+    }
+    catch ( Exception e ) {
+      log.error("Graphql failed",e);
+    }
+
+    return result;
+  }
+
+  public List<AvailabilityStatement> createRandomRota(Map description) {
+
     List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
+
+    try {
+      log.debug("Try graphql")
+      sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46');
+    }
+    catch ( Exception e ) {
+      log.error("Graphql failed",e);
+    }
 
     log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
 
@@ -52,8 +86,7 @@ public class SharedIndexService {
     log.debug("Decded these are the lenders: Num lenders: ${num_responders} ${lendingStrings}");
 
     lendingStrings.each { ls ->
-      String instance_id = null; // java.util.UUID.randomUUID().toString();
-      // String instance_id = '000026460'
+      String instance_id = null;
       String copy_id = null; // java.util.UUID.randomUUID().toString();
       result.add(new AvailabilityStatement(symbol:ls,instanceIdentifier:instance_id,copyIdentifier:copy_id));
     }
@@ -132,5 +165,74 @@ public class SharedIndexService {
 
 
   // https://github.com/folio-org/mod-graphql/blob/master/doc/example-queries.md#using-curl-from-the-command-line
+
+  private List<String> sharedIndexHoldings(String id) {
+
+    List<String> result = []
+
+  // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
+    String query='''{
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocation { name code } holdingsStatements { note statement } holdingsItems { id barcode enumeration } } } }",
+  "variables":{
+    "id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779"
+  }
+}'''
+
+    log.debug("Sending json ${query}");
+
+    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
+    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
+    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
+
+    String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
+    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
+    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
+    String shared_index_tenant = 'diku'
+
+    if ( ( shared_index_base_url != null ) &&
+         ( shared_index_user != null ) &&
+         ( shared_index_pass != null ) ) {
+      log.debug("Attempt to retrieve shared index record ${id}");
+      String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
+      if ( token ) {
+        def r1 = configure {
+          request.headers['X-Okapi-Tenant'] = shared_index_tenant;
+          request.headers['X-Okapi-Token'] = token
+          request.uri = shared_index_base_url+'/graphql'
+          request.contentType = 'application/json'
+          request.body = query
+        }.get()
+        if ( r1 ) {
+          // We got a response from the GraphQL service - example {"data":
+          // {"instance_storage_instances_SINGLE":
+          //     {"id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779","title":"A history of the twentieth century in 100 maps",
+          //      "holdingsRecords2":[
+          //         {"id":"d045fd86-fdcf-455f-8f42-e7bbaaf5ddd6","callNumber":" GA793.7.A1 ","permanentLocationId":"87038e41-0990-49ea-abd9-1ad00a786e45","holdingsStatements":[]}
+          //      ]}}}
+          r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
+            log.debug("Process holdings record ${hr}");
+            String location = hr.permanentLocation.code
+            String[] split_location = location.split('/')
+            if ( split_location.length == 4 ) {
+              // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
+              if ( ! result.contains('RESHARE:'+split_location[0]) ) {
+                // And we don't already have the location
+                result.add('RESHARE:'+split_location[0])
+              }
+            }
+          }
+        }
+      }
+      else {
+        log.warn("Unable to login to remote shared index");
+      }
+    }
+    else {
+      log.debug("Unable to contact shared index - no url/user/pass");
+    }
+
+    log.debug("Result: ${result}");
+    return result;
+  }
 }
 

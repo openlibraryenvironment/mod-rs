@@ -41,15 +41,6 @@ if ( 1==1 ) {
 
   //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
   okapi.createRequest([
-                       title:'Temeraire', 
-                       patronIdentifier: 'PI',
-                       patronReference: 'PR',
-                       patronSurname: 'PS',
-                       patronGivenName: 'PGN',
-                       patronType:'PT',
-                       requestingInstitutionSymbol:'OCLC:ZMU']);
-
-  okapi.createRequest([
                        title:'Temeraire',
                        patronIdentifier: 'PI',
                        patronReference: 'PR',

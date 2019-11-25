@@ -145,7 +145,7 @@ public class OkapiClient {
         headers.'Content-Type'='application/json'
         body=postBody
         response.success = { resp, json ->
-          println("Symbol Registered");
+          println("Request Created");
           session_ctx.auth = json;
         }
         response.failure = { resp ->
