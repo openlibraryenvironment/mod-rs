@@ -473,7 +473,7 @@ public class ReshareApplicationEventHandlerService {
    * @Param  id - a UUID OR a HRID String
    */
   PatronRequest lookupPatronRequest(String id) {
-    return PatronRequest.findByIdOrHrid(id);
+    return PatronRequest.findByIdOrHrid(id,id);
   }
 
   /**
