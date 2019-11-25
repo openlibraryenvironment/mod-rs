@@ -55,6 +55,16 @@ if ( !initial_setup) {
                        patronType:'PT',
                        systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
+
+  okapi.createRequest([
+                       title:'Arthur Koestler : a collection of critical essays', 
+                       patronIdentifier: 'PI',
+                       patronReference: 'PR',
+                       patronSurname: 'PS',
+                       patronGivenName: 'PGN',
+                       patronType:'PT',
+                       systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
+                       requestingInstitutionSymbol:'OCLC:ZMU']);
 }
 
 

@@ -111,9 +111,6 @@ public class ReshareApplicationEventHandlerService {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
       def req = delayedGet(eventData.payload.id, true);
 
       // If the role is requester then validate the request and set the state to validated
@@ -270,8 +267,8 @@ public class ReshareApplicationEventHandlerService {
                 agencyIdType:req.resolvedRequester?.authority?.symbol,
                 agencyIdValue:req.resolvedRequester?.symbol
               ],
-              requestingAgencyRequestId:req.id,
-              // requestingAgencyRequestId:req.hrid,
+              // requestingAgencyRequestId:req.id,
+              requestingAgencyRequestId:req.hrid,
               supplyingAgencyRequestId:null
           ],
           bibliographicInfo:[
@@ -470,6 +467,15 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+  /** We aren't yet sure how human readable IDs will pan out in the system and there is a desire to use
+   * HRIDs as the requesting agency ID instead of a UUID. For now, isolating all the request lookup functionality
+   * in this method - which will try both approaches to give us some flexibility in adapting to different schemes.
+   * @Param  id - a UUID OR a HRID String
+   */
+  PatronRequest lookupPatronRequest(String id) {
+    return PatronRequest.findByIdOrHrid(id);
+  }
+
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
@@ -481,10 +487,9 @@ public class ReshareApplicationEventHandlerService {
       if ( eventData.header?.requestingAgencyRequestId == null )
         throw new Exception("requestingAgencyRequestId missing");
 
-      PatronRequest pr = PatronRequest.get(eventData.header.requestingAgencyRequestId)
-      // PatronRequest pr = PatronRequest.findByHrid(eventData.header.requestingAgencyRequestId)
+      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId)
       if ( pr == null )
-        throw new Exception("Unable to locate PatronRequest corresponding to hrid requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+        throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null ) {
