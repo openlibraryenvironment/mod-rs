@@ -19,6 +19,18 @@ select pr_id,
 from patron_request 
 order by pr_date_created;
 
+select pr_id, 
+       pr_req_inst_symbol, 
+       pr_is_requester, 
+       pr_hrid,
+       pr_peer_request_identifier,
+       pr_pick_location_fk, 
+       st_code 
+from patron_request, 
+     status 
+where pr_state_fk=st_id;
+
+
 
 select sym_id, na_symbol, sym_symbol
 from symbol, naming_authority
