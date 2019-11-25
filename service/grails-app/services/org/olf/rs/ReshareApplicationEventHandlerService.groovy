@@ -252,7 +252,7 @@ public class ReshareApplicationEventHandlerService {
 
       def req = delayedGet(eventData.payload.id, true);
       if ( ( req != null ) && ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ) {
-        log.debug("Got request ${req}");
+        log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
         //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
         Map request_message_request = [
@@ -268,7 +268,7 @@ public class ReshareApplicationEventHandlerService {
                 agencyIdValue:req.resolvedRequester?.symbol
               ],
               // requestingAgencyRequestId:req.id,
-              requestingAgencyRequestId:req.hrid,
+              requestingAgencyRequestId:req.hrid ?: req.id,
               supplyingAgencyRequestId:null
           ],
           bibliographicInfo:[

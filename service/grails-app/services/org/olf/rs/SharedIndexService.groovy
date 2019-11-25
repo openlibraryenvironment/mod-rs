@@ -174,11 +174,9 @@ public class SharedIndexService {
     String query='''{
   "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocation { name code } holdingsStatements { note statement } holdingsItems { id barcode enumeration } } } }",
   "variables":{
-    "id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779"
-  }
-}'''
+    "id":"'''+id+'''" } }'''
 
-    log.debug("Sending json ${query}");
+    log.debug("Sending graphql to get holdings for (${id}) \n${query}\n");
 
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
@@ -192,9 +190,9 @@ public class SharedIndexService {
     if ( ( shared_index_base_url != null ) &&
          ( shared_index_user != null ) &&
          ( shared_index_pass != null ) ) {
-      log.debug("Attempt to retrieve shared index record ${id}");
       String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
       if ( token ) {
+        log.debug("Attempt to retrieve shared index record ${id}");
         def r1 = configure {
           request.headers['X-Okapi-Tenant'] = shared_index_tenant;
           request.headers['X-Okapi-Token'] = token
@@ -209,6 +207,9 @@ public class SharedIndexService {
           //      "holdingsRecords2":[
           //         {"id":"d045fd86-fdcf-455f-8f42-e7bbaaf5ddd6","callNumber":" GA793.7.A1 ","permanentLocationId":"87038e41-0990-49ea-abd9-1ad00a786e45","holdingsStatements":[]}
           //      ]}}}
+
+          log.debug("Response for holdings on ${id}\n\n${r1.data}\n\n");
+
           r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
             log.debug("Process holdings record ${hr}");
             String location = hr.permanentLocation.code

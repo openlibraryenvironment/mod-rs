@@ -39,6 +39,8 @@ if (initial_setup) {
   okapi.addTenantSymbol('RESHARE:KNOWINT01')
   okapi.addTenantSymbol('RESHARE:IDVUFIND')
   okapi.addTenantSymbol('RESHARE:TEMPLEI')
+  okapi.addTenantSymbol('RESHARE:MILL')
+  okapi.addTenantSymbol('RESHARE:VILL')
   okapi.listTenantSymbols()
 }
 
@@ -78,15 +80,15 @@ if ( !initial_setup) {
   // cb173644-b00a-46ec-93db-eaba47896ed1 | The Oxford dictionary of Popes
 
 
-  okapi.createRequest([
-                       title:'10,000 Teachers, 10 Million Minds Science and Math Scholarship Act : report (to accompany H.R. 362) (including cost estimate of the Congressional Budget Office)', 
-                       patronIdentifier: 'PI',
-                       patronReference: 'PR',
-                       patronSurname: 'PS',
-                       patronGivenName: 'PGN',
-                       patronType:'PT',
-                       systemInstanceIdentifier:'491fe34f-ea1b-4338-ad20-30b8065a7b46',
-                       requestingInstitutionSymbol:'OCLC:ZMU']);
+  // okapi.createRequest([
+  //                      title:'10,000 Teachers, 10 Million Minds Science and Math Scholarship Act : report (to accompany H.R. 362) (including cost estimate of the Congressional Budget Office)', 
+  //                      patronIdentifier: 'PI',
+  //                      patronReference: 'PR',
+  //                      patronSurname: 'PS',
+  //                      patronGivenName: 'PGN',
+  //                      patronType:'PT',
+  //                      systemInstanceIdentifier:'491fe34f-ea1b-4338-ad20-30b8065a7b46',
+  //                      requestingInstitutionSymbol:'OCLC:ZMU']);
   okapi.createRequest([
                        title:'Arthur Koestler : a collection of critical essays', 
                        patronIdentifier: 'PI',
