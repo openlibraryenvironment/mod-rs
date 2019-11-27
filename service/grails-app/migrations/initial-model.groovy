@@ -1351,4 +1351,12 @@ databaseChangeLog = {
 
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20191127-1847-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_patron_email", type: "VARCHAR(255)");
+            column(name: "pr_patron_note", type: "VARCHAR(255)");
+            column(name: "pr_pref_service_point", type: "VARCHAR(255)");
+        }
+    }
+
 }
