@@ -47,6 +47,9 @@ if ( 1==1 ) {
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
+                       patronEmail:'patron@institution',
+                       patronNote:'Please dont shoot the messenger',
+                       pickupLocation:'A string',
                        systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }
