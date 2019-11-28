@@ -56,7 +56,7 @@ public class HostLMSService {
       def next_strategy = i.next();
       log.debug("Next lookup strategy: ${next_strategy.name}");
       if ( next_strategy.precondition(pr) == true ) {
-        log.debug("Strategy passed precondition");
+        log.debug("Strategy ${next_strategy.name} passed precondition");
         location = next_strategy.stragegy(pr, this);
       }
       else {
@@ -78,11 +78,15 @@ public class HostLMSService {
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
 
+    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
+    log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
+
     def z_response = HttpBuilder.configure {
-      request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+      request.uri = z3950_proxy
     }.get {
         request.uri.path = '/'
-        request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+        // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+        request.uri.query = ['x-target': 'http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST',
                              'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
                              'maximumRecords':'1' ]
     }
@@ -117,11 +121,13 @@ public class HostLMSService {
 
     ItemLocation result = null;
 
+
     def z_response = HttpBuilder.configure {
       request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
     }.get {
         request.uri.path = '/'
-        request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+        // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+        request.uri.query = ['x-target': 'http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST',
                              'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
                              'maximumRecords':'3' ]
     }
@@ -148,6 +154,9 @@ public class HostLMSService {
 
       log.debug("At end, availability summary: ${availability_summary}");
       return result;
+    }
+    else {
+      log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
     }
   }
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ISO18626Message ill:version="1.0" 
+                 xmlns="http://illtransactions.org/2013/iso18626" 
+                 xmlns:ill="http://illtransactions.org/2013/iso18626" 
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                 xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd">
+  <request>
+    <header>
+      <supplyingAgencyId>
+        <agencyIdType>RESHARE</agencyIdType>
+        <agencyIdValue>TEMPLEI</agencyIdValue>
+      </supplyingAgencyId>
+      <requestingAgencyId>
+        <agencyIdType>RESHARE</agencyIdType>
+        <agencyIdValue>MILL</agencyIdValue>
+      </requestingAgencyId>
+      <timestamp>2014-03-17T09:30:47.0Z</timestamp>
+      <requestingAgencyRequestId>49837539</requestingAgencyRequestId>
+    </header>
+    <bibliographicInfo>
+      <supplierUniqueRecordId>27345786</supplierUniqueRecordId>
+    </bibliographicInfo>
+    <serviceInfo>
+      <serviceType>Loan</serviceType>
+      <serviceLevel>Normal</serviceLevel>
+      <needBeforeDate>2014-05-01T00:00:00.0Z</needBeforeDate>
+      <anyEdition>Y</anyEdition>
+    </serviceInfo>
+  </request>
+</ISO18626Message>
