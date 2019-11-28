@@ -96,6 +96,9 @@ if ( !initial_setup) {
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        patronType:'PT',
+                       patronEmail:'patron@institution',
+                       patronNote:'Please dont shoot the messenger',
+                       pickupLocation:'A string',
                        systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
 }

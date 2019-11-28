@@ -87,6 +87,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String patronGivenName
   String patronType
   Boolean sendToPatron
+  String patronEmail
+  String patronNote
+  String pickupLocation
+
 
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
@@ -226,6 +230,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickShelvingLocation(nullable: true, blank:false)
     localCallNumber (nullable: true, blank:false)
     hrid (nullable: true, blank:false)
+
+    patronEmail (nullable: true, blank:false)
+    patronNote (nullable: true, blank:false)
+    pickupLocation (nullable: true, blank:false)
   }
 
   static mapping = {
@@ -298,6 +306,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     localCallNumber column : 'pr_local_call_number'
 
     hrid column : 'pr_hrid'
+
+    patronEmail column : 'pr_patron_email'
+    patronNote column : 'pr_patron_note'
+    pickupLocation column : 'pr_pref_service_point'
   }
 
   /**
