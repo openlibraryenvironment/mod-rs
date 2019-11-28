@@ -1,11 +1,34 @@
 import groovy.xml.StreamingMarkupBuilder 
+import static groovyx.net.http.HttpBuilder.configure
+import static groovyx.net.http.ContentTypes.XML
+import groovyx.net.http.*
 
 public class Iso18626Client {
+
+
   void sendNewRequest(Map args) {
+
+    StreamingMarkupBuilder smb = new StreamingMarkupBuilder()
+    smb.bind(makeRequest(args));
+
+    def iso18626_response = configure {
+      request.uri = args.service
+      request.contentType = 'application/xml'
+    }.post {
+      request.body = smb;
+    }
+  }
+    
+  void dumpRequest(Map args) {
+    System.out << new StreamingMarkupBuilder().bind(makeRequest(args))
+  }
+
+  // Return a closure that describes the XML for a request
+  def makeRequest(Map args) {
     String[] sup_info = args.supplier.split(':');
     String[] req_info = args.requester.split(':');
-  
-    System.out << new StreamingMarkupBuilder().bind {
+
+    return{
       ISO18626Message( 'ill:version':'1.0',
                        'xmlns':'http://illtransactions.org/2013/iso18626',
                        'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
