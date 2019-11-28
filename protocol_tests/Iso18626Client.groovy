@@ -8,14 +8,15 @@ public class Iso18626Client {
 
   void sendNewRequest(Map args) {
 
-    StreamingMarkupBuilder smb = new StreamingMarkupBuilder()
-    smb.bind(makeRequest(args));
+    StringWriter sw = new StringWriter();
+    sw << new StreamingMarkupBuilder().bind(makeRequest(args))
+    String req_as_str = sw.toString();
 
     def iso18626_response = configure {
       request.uri = args.service
-      request.contentType = 'application/xml'
+      request.contentType = XML[0]
     }.post {
-      request.body = smb;
+      request.body = req_as_str
     }
   }
     
