@@ -2,6 +2,8 @@ package org.olf.rs
 
 import grails.gorm.multitenancy.Tenants
 import java.util.UUID
+import org.olf.okapi.modules.directory.ServiceAccount
+
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
  * provide the requesting and responding symbol and the content of the message, this service works out
@@ -48,6 +50,8 @@ class ProtocolMessageService {
     // tenant in this system. If so, we can simply call handleIncomingMessage
     def tenant = globalConfigService.getTenantForSymbol(peer_symbol)
     log.debug("The tenant for that symbol(${peer_symbol}) is: ${tenant}")
+
+    def ill_services_for_peer = findIllServices(peer_symbol)
     
     if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
@@ -133,5 +137,12 @@ class ProtocolMessageService {
   public messageConfirmation(eventData, messageType) {
     //TODO make this able to return a confirmation message if request/supplying agency message/requesting agency message are successful,
     //and returning error messages if not
+  }
+
+  /**
+   * Return a prioroty order list of service accounts this symbol can accept
+   */
+  def findIllServices(String symbol) {
+    List<ServiceAccount> result = ServiceAccount.list()
   }
 }

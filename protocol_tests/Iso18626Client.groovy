@@ -16,6 +16,7 @@ public class Iso18626Client {
       request.uri = args.service
       request.contentType = XML[0]
     }.post {
+      // request.body = xml ( makeRequest(args) )
       request.body = req_as_str
     }
   }
