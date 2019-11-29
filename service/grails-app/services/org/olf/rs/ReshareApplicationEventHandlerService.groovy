@@ -205,6 +205,7 @@ public class ReshareApplicationEventHandlerService {
           List<AvailabilityStatement> sia = sharedIndexService.findAppropriateCopies(req.getDescriptiveMetadata());
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
+
           if (  sia.size() > 0 ) {
             sia?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
@@ -223,6 +224,8 @@ public class ReshareApplicationEventHandlerService {
             req.save(flush:true, failOnError:true)
           }
           else {
+            // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
+
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
@@ -617,7 +620,7 @@ public class ReshareApplicationEventHandlerService {
       }
     }
     else {
-        log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
+      log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
       sendResponse(pr, 'Unfilled', 'No copy');
       pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }
