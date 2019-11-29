@@ -149,11 +149,7 @@ class ProtocolMessageService {
 where sa.accountHolder.symbols.symbol=:sym 
 and sa.accountHolder.symbols.authority.symboli=:auth
 and sa.service.businessFunction.value=:ill
-<<<<<<< HEAD
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0]] );
-=======
 ''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] );
->>>>>>> 3bf74240ba19d058a4c7dc9dd31cc7716580f6aa
 
     log.debug("Got service accounts: ${result}");
 
