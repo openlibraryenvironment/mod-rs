@@ -143,6 +143,16 @@ class ProtocolMessageService {
    * Return a prioroty order list of service accounts this symbol can accept
    */
   def findIllServices(String symbol) {
-    List<ServiceAccount> result = ServiceAccount.list()
+    String symbol_components = symbol.split(':');
+
+    List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
+where sa.accountHolder.symbols.symbol=:sym 
+and sa.accountHolder.symbols.authority.symboli=:auth
+and sa.service.businessFunction.value=:ill
+''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] );
+
+    log.debug("Got service accounts: ${result}");
+
+    return result;
   }
 }
