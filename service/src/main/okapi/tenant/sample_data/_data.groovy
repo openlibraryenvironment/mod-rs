@@ -60,6 +60,12 @@ try {
                                   key: 'shared_index_pass',
                                   defValue: '').save(flush:true, failOnError: true);
 
+  AppSetting last_resort_lenders = AppSetting.findByKey('last_resort_lenders') ?: new AppSetting( 
+                                  section:'requests',
+                                  settingType:'String',
+                                  key: 'last_resort_lenders',
+                                  defValue: '').save(flush:true, failOnError: true);
+
 }
 catch ( Exception e ) {
   e.printStackTrace();
