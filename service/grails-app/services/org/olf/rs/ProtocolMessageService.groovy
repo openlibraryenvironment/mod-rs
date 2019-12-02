@@ -52,8 +52,9 @@ class ProtocolMessageService {
     log.debug("The tenant for that symbol(${peer_symbol}) is: ${tenant}")
 
     def ill_services_for_peer = findIllServices(peer_symbol)
-    
-    if (tenant != null) {
+    log.debug("ILL Services for peer: ${ill_services_for_peer}")
+
+    /* if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
       // and then 
       log.debug("ProtocolMessageService::sendProtocolMessage(${message_sender_symbol},${peer_symbol},...) identified peer as a tenant in this system - loopback");
@@ -70,7 +71,20 @@ class ProtocolMessageService {
       // otherwise, mark as failed and skip to the next rota entry.
       // update the request status - set the 
       result.status='ERROR'
-    }
+    } */
+    log.debug("Will send an ISO18626 message to ILL service")
+
+    log.debug("====================================================================")
+    log.debug("Event Data: ${eventData}")
+    log.debug("Service: ${ill_services_for_peer.service.address}")
+
+    Map req_data = [service:ill_services_for_peer.service.address,
+                supplier:[message_sender_symbol, eventData.bibliographicInfo.supplyingInstitutionSymbol],
+                requester:[peer_symbol, eventData.bibliographicInfo.requestingInstitutionSymbol],
+                title:eventData.bibliographicInfo.title]
+
+    log.debug("Req Data: ${req_data}")
+    log.debug("====================================================================")
     
     return result;
   }
@@ -151,10 +165,52 @@ join sa.accountHolder.symbols as symbol
 where symbol.symbol=:sym 
 and symbol.authority.symbol=:auth
 and sa.service.businessFunction.value=:ill
-''', [ ill:'ILL', sym:symbol_components[1], auth:symbol_components[0] ] );
+''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] ); 
 
     log.debug("Got service accounts: ${result}");
 
     return result;
   }
+
+  def makeISO18626Request(Map args) {
+    String[] sup_info = args.supplier.split(':');
+    String[] req_info = args.requester.split(':');
+
+    return{
+      ISO18626Message( 'ill:version':'1.0',
+                       'xmlns':'http://illtransactions.org/2013/iso18626',
+                       'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
+                       'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                       'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
+        request {
+          header {
+            supplyingAgencyId {
+              agencyIdType(sup_info[0])
+              agencyIdValue(sup_info[1])
+            }
+            requestingAgencyId {
+              agencyIdType(req_info[0])
+              agencyIdValue(req_info[1])
+            }
+            timestamp('2014-03-17T09:30:47.0Z')
+            requestingAgencyRequestId('1234')
+          }
+          bibliographicInfo {
+            supplierUniqueRecordId('1234')
+            title(args.title)
+          }
+          serviceInfo {
+            serviceType('Loan')
+            serviceLevel('Loan')
+            needBeforeDate('2014-05-01T00:00:00.0Z')
+            anyEdition('Y')
+          }
+        }
+      }
+    }
+  }
+
+
+
+
 }
