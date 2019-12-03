@@ -166,10 +166,10 @@ public class SharedIndexService {
         
         }
       }
-      catch ( Exception e ) {
+    }
+    catch ( Exception e ) {
         log.error("problem trying to obtain auth token for shared index",e);
       }
-    }
 
     log.debug("Result of okapi login: ${result}");
     return result;
