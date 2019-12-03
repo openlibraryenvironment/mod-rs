@@ -149,13 +149,20 @@ public class SharedIndexService {
       request.body = postBody
     }.get() {
       response.success { resp ->
-        def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
-        if ( tok_header ) {
-          result = tok_header.value;
+        if ( resp == null ) {
+          log.error("Response null from http post");
         }
         else {
-          log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
+          log.debug("Try to extract token - ${resp} ${resp?.headers}");
+          def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
+          if ( tok_header ) {
+            result = tok_header.value;
+          }
+          else {
+            log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
+          }
         }
+        
       }
     }
 
