@@ -138,8 +138,8 @@ public class SharedIndexService {
 
   private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
     String result = null;
-    log.debug("getOkapiToken(${baseUrl},${user},..,${tenant})");
     def postBody = [username: user, password: pass]
+    log.debug("getOkapiToken(${baseUrl},${postBody},..,${tenant})");
     def r1 = configure {
       request.headers['X-Okapi-Tenant'] = tenant
       request.headers['accept'] = 'application/json'
