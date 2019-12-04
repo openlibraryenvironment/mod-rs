@@ -5,6 +5,9 @@ import java.util.UUID
 import org.olf.okapi.modules.directory.ServiceAccount
 import groovy.xml.StreamingMarkupBuilder
 import java.text.SimpleDateFormat
+import static groovyx.net.http.HttpBuilder.configure
+import static groovyx.net.http.ContentTypes.XML
+import groovyx.net.http.*
 
 
 /**
