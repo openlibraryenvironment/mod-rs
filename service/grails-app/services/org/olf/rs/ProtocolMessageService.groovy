@@ -88,12 +88,14 @@ class ProtocolMessageService {
                 requestingAgencyRequestId: eventData.header.requestingAgencyRequestId]
 
     log.debug("Req Data: ${req_data}")
-
-    StringWriter sw = new StringWriter();
-    sw << new StreamingMarkupBuilder().bind(makeISO18626Request(req_data))
-    String message = sw.toString();
-
-    log.debug("ISO18626 Message: ${message}")
+    log.debug("Will now send ISO18626 request")
+    try {
+      sendISO18626Request(req_data)
+      log.debug("ISO18626 request sent")
+    } catch(Exception e) {
+      log.debug("ISO18626 request failed to send.")
+      log.error("ISO18626 stacktrace: ${e}")
+    }
     log.debug("====================================================================")
     
     return result;
@@ -183,6 +185,7 @@ and sa.service.businessFunction.value=:ill
   }
 
   def makeISO18626Request(Map args) {
+    log.debug("Creating ISO18626 Message")
     String[] sup_info = args.supplier.split(':');
     String[] req_info = args.requester.split(':');
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -221,7 +224,17 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
-
-
-
+  def sendISO18626Request(Map args) {
+    log.debug("Sending ISO18626 Message")
+    StringWriter sw = new StringWriter();
+    sw << new StreamingMarkupBuilder().bind(makeISO18626Request(args))
+    String message = sw.toString();
+    log.debug("ISO18626 Message: ${message}")
+    def iso18626_response = configure {
+      request.uri = args.service
+      request.contentType = XML[0]
+    }.post {
+      request.body = message
+    }
+  }
 }
