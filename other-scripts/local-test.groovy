@@ -5,7 +5,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import static groovyx.net.http.HttpBuilder.configure
 import groovy.json.JsonOutput;
 
-getOkapiToken("http://localhost:9130", "diku_admin", "admin", "diku")
+// getOkapiToken("http://localhost:9130", "diku_admin", "admin", "diku")
+getOkapiToken("http://shared-index.reshare-dev.indexdata.com:9130", "diku_admin", "admin", "diku")
 
 
 String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
@@ -17,10 +18,10 @@ String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
         request.headers['X-Okapi-Tenant'] = tenant
         request.headers['accept'] = 'application/json'
         request.contentType = 'application/json'
-        request.uri = baseUrl+'/bl-users/login'
+        request.uri = baseUrl+'/authn/login'
         request.uri.query = [expandPermissions:true,fullPermissions:true]
         request.body = postBody
-      }.get() {
+      }.post() {
         response.success { resp ->
           if ( resp == null ) {
             println("Response null from http post");
