@@ -255,7 +255,17 @@ public class SharedIndexService {
       }
     }
     else {
-      log.debug("Unable to contact shared index - no url/user/pass");
+      def missingSettings = [];
+      if( shared_index_base_url == null ) {
+        missingSettings += "url";
+      }
+      if( shared_index_user == null ) {
+        missingSettings += "user";
+      }
+      if( shared_index_pass == null ) {
+        missingSettings += "password";
+      }
+      log.debug("Unable to contact shared index - Missing settings: ${missingSettings}");
     }
 
     log.debug("Result: ${result}");

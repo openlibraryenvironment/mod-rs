@@ -3,6 +3,9 @@ package org.olf.rs
 import grails.gorm.multitenancy.Tenants
 import java.util.UUID
 import org.olf.okapi.modules.directory.ServiceAccount
+import groovy.xml.StreamingMarkupBuilder
+import java.text.SimpleDateFormat
+
 
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
@@ -79,11 +82,18 @@ class ProtocolMessageService {
     log.debug("Service: ${ill_services_for_peer.service.address}")
 
     Map req_data = [service:ill_services_for_peer.service.address,
-                supplier:[message_sender_symbol, eventData.bibliographicInfo.supplyingInstitutionSymbol],
-                requester:[peer_symbol, eventData.bibliographicInfo.requestingInstitutionSymbol],
-                title:eventData.bibliographicInfo.title]
+                supplier: eventData.bibliographicInfo.supplyingInstitutionSymbol,
+                requester: eventData.bibliographicInfo.requestingInstitutionSymbol,
+                title: eventData.bibliographicInfo.title,
+                requestingAgencyRequestId: eventData.header.requestingAgencyRequestId]
 
     log.debug("Req Data: ${req_data}")
+
+    StringWriter sw = new StringWriter();
+    sw << new StreamingMarkupBuilder().bind(makeISO18626Request(req_data))
+    String message = sw.toString();
+
+    log.debug("ISO18626 Message: ${message}")
     log.debug("====================================================================")
     
     return result;
@@ -175,6 +185,7 @@ and sa.service.businessFunction.value=:ill
   def makeISO18626Request(Map args) {
     String[] sup_info = args.supplier.split(':');
     String[] req_info = args.requester.split(':');
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     return{
       ISO18626Message( 'ill:version':'1.0',
@@ -192,17 +203,17 @@ and sa.service.businessFunction.value=:ill
               agencyIdType(req_info[0])
               agencyIdValue(req_info[1])
             }
-            timestamp('2014-03-17T09:30:47.0Z')
-            requestingAgencyRequestId('1234')
+            timestamp(dateFormatter.format(new Date())) // Current time
+            requestingAgencyRequestId(args.requestingAgencyRequestId) 
           }
           bibliographicInfo {
-            supplierUniqueRecordId('1234')
+            //supplierUniqueRecordId('1234')
             title(args.title)
           }
           serviceInfo {
             serviceType('Loan')
             serviceLevel('Loan')
-            needBeforeDate('2014-05-01T00:00:00.0Z')
+            //needBeforeDate('2014-05-01T00:00:00.0Z')
             anyEdition('Y')
           }
         }
