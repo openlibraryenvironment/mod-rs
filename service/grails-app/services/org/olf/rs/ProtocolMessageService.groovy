@@ -91,13 +91,12 @@ class ProtocolMessageService {
                 requestingAgencyRequestId: eventData.header.requestingAgencyRequestId]
 
     log.debug("Req Data: ${req_data}")
-    log.debug("Will now send ISO18626 request")
     try {
+      log.debug("Sending ISO18626 request")
       sendISO18626Request(req_data)
       log.debug("ISO18626 request sent")
     } catch(Exception e) {
-      log.debug("ISO18626 request failed to send.")
-      log.error("ISO18626 stacktrace: ${e}")
+      log.debug("ISO18626 request failed to send.\n Exception: ${e}")
     }
     log.debug("====================================================================")
     
@@ -225,10 +224,10 @@ and sa.service.businessFunction.value=:ill
         }
       }
     }
+    log.debug("ISO18626 message created")
   }
 
   def sendISO18626Request(Map args) {
-    log.debug("Sending ISO18626 Message")
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind(makeISO18626Request(args))
     String message = sw.toString();
