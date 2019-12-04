@@ -165,6 +165,9 @@ public class SharedIndexService {
           }
         
         }
+        response.failure { resp -> 
+          log.error("RESP ERROR: ${resp.getStatusCode()}, ${resp.getMessage()}, ${resp.getHeaders()}")
+        }
       }
     }
     catch ( Exception e ) {
