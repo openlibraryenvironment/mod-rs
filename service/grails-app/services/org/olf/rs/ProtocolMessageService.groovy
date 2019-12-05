@@ -82,7 +82,8 @@ class ProtocolMessageService {
 
     log.debug("====================================================================")
     log.debug("Event Data: ${eventData}")
-    log.debug("Service: ${ill_services_for_peer.service.address}")
+    //log.debug("Service: ${ill_services_for_peer.service.address}")
+    log.debug("Service: http://localhost:8081/rs/iso18626")
 
     Map req_data = [service:ill_services_for_peer.service.address,
                 supplier: eventData.bibliographicInfo.supplyingInstitutionSymbol,
@@ -233,7 +234,9 @@ and sa.service.businessFunction.value=:ill
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
     def iso18626_response = configure {
-      request.uri = args.service
+      // For now send to localhost
+      //request.uri = args.service
+      request.uri = "http://localhost:8081/rs/iso18626"
       request.contentType = XML[0]
     }.post {
       request.body = message
