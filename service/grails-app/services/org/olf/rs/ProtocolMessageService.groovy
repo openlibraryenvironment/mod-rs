@@ -85,7 +85,7 @@ class ProtocolMessageService {
     log.debug("Service: ${ill_services_for_peer.service.address}")
     //log.debug("Service: http://localhost:8081/rs/iso18626")
 
-    Map req_data = [service:ill_services_for_peer.service.address,
+    /* Map req_data = [service:ill_services_for_peer.service.address,
                 supplier: eventData.bibliographicInfo.supplyingInstitutionSymbol,
                 requester: eventData.bibliographicInfo.requestingInstitutionSymbol,
                 title: eventData.bibliographicInfo.title,
@@ -127,10 +127,11 @@ class ProtocolMessageService {
                 serviceType: eventData.bibliographicInfo.serviceType,
                 requestingAgencyRequestId: eventData.header.requestingAgencyRequestId]
 
-    log.debug("Req Data: ${req_data}")
+    log.debug("Req Data: ${req_data}") */
+
     try {
       log.debug("Sending ISO18626 request")
-      sendISO18626Request(req_data)
+      sendISO18626Message(eventData)
       log.debug("ISO18626 request sent")
     } catch(Exception e) {
       log.debug("ISO18626 request failed to send.\n Exception: ${e}")
@@ -223,10 +224,24 @@ and sa.service.businessFunction.value=:ill
     return result;
   }
 
-  def makeISO18626Request(Map args) {
+
+  def makeISO18626Message(Map eventData) {
+
+    // eventData is expected to have a header with structure:
+    /*header:[
+      supplyingAgencyId: [
+        agencyIdType:RESHARE,
+        agencyIdValue:VLA
+      ],
+      requestingAgencyId:[
+        agencyIdType:OCLC,
+        agencyIdValue:ZMU
+      ],
+      requestingAgencyRequestId:16,
+      supplyingAgencyRequestId:8f41a3a4-daa5-4734-9f4f-32578838ff66]
+    */
+
     log.debug("Creating ISO18626 Message")
-    String[] sup_info = args.supplier.split(':');
-    String[] req_info = args.requester.split(':');
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     return{
@@ -238,55 +253,20 @@ and sa.service.businessFunction.value=:ill
         request {
           header {
             supplyingAgencyId {
-              agencyIdType(sup_info[0])
-              agencyIdValue(sup_info[1])
+              agencyIdType(eventData.header.supplyingAgencyId.agencyIdType)
+              agencyIdValue(eventData.header.supplyingAgencyId.agencyIdValue)
             }
             requestingAgencyId {
-              agencyIdType(req_info[0])
-              agencyIdValue(req_info[1])
+              agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
+              agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
             }
             timestamp(dateFormatter.format(new Date())) // Current time
-            requestingAgencyRequestId(args.requestingAgencyRequestId) 
+            requestingAgencyRequestId(eventData.header.requestingAgencyRequestId) 
           }
+          
           bibliographicInfo {
             //supplierUniqueRecordId('1234')
-            title(args.title)
-            subtitle(args.subtitle),
-            author: (args.author),
-            publicationType(args.publicationType),
-            sponsoringBody(args.sponsoringBody),
-            publisher(args.publisher),
-            placeOfPublication(args.placeOfPublication),
-            volume(args.volume),
-            issue(args.issue),
-            startPage(args.startPage),
-            numberOfPages(args.numberOfPages),
-            publicationDate(args.publicationDate),
-            publicationDateOfComponent(args.publicationDateOfComponent),
-            edition(args.edition),
-            issn(args.issn),
-            isbn(args.isbn),
-            doi(args.doi),
-            coden(args.coden),
-            sici(args.sici),
-            bici(args.bici),
-            eissn(args.eissn),
-            stitle(args.stitle),
-            part(args.part),
-            artnum(args.artnum),
-            ssn(args.ssn),
-            quarter(args.quarter),
-            systemInstanceIdentifier(args.systemInstanceIdentifier),
-            titleOfComponent(args.titleOfComponent),
-            authorOfComponent(args.authorOfComponent),
-            sponsor(args.sponsor),
-            informationSource(args.informationSource),
-            patronIdentifier(args.patronIdentifier),
-            patronReference(args.patronReference),
-            patronSurname(args.patronSurname),
-            patronGivenName(args.patronGivenName),
-            patronType(args.patronType),
-            serviceType(args.serviceType)
+            title("Test Title")
           }
           serviceInfo {
             serviceType('Loan')
@@ -300,9 +280,9 @@ and sa.service.businessFunction.value=:ill
     log.debug("ISO18626 message created")
   }
 
-  def sendISO18626Request(Map args) {
+  def sendISO18626Message(Map args) {
     StringWriter sw = new StringWriter();
-    sw << new StreamingMarkupBuilder().bind(makeISO18626Request(args))
+    sw << new StreamingMarkupBuilder().bind(makeISO18626Message(args))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
     def iso18626_response = configure {
@@ -315,3 +295,45 @@ and sa.service.businessFunction.value=:ill
     }
   }
 }
+
+/* def formBibliographicInfo(Map args) {
+  return {
+    title(args.title)
+    subtitle(args.subtitle)
+    author(args.author)
+    publicationType(args.publicationType)
+    sponsoringBody(args.sponsoringBody)
+    publisher(args.publisher)
+    placeOfPublication(args.placeOfPublication)
+    volume(args.volume)
+    issue(args.issue)
+    startPage(args.startPage)
+    numberOfPages(args.numberOfPages)
+    publicationDate(args.publicationDate)
+    publicationDateOfComponent(args.publicationDateOfComponent)
+    edition(args.edition)
+    issn(args.issn)
+    isbn(args.isbn)
+    doi(args.doi)
+    coden(args.coden)
+    sici(args.sici)
+    bici(args.bici)
+    eissn(args.eissn)
+    stitle(args.stitle)
+    part(args.part)
+    artnum(args.artnum)
+    ssn(args.ssn)
+    quarter(args.quarter)
+    systemInstanceIdentifier(args.systemInstanceIdentifier)
+    titleOfComponent(args.titleOfComponent)
+    authorOfComponent(args.authorOfComponent)
+    sponsor(args.sponsor)
+    informationSource(args.informationSource)
+    patronIdentifier(args.patronIdentifier)
+    patronReference(args.patronReference)
+    patronSurname(args.patronSurname)
+    patronGivenName(args.patronGivenName)
+    patronType(args.patronType)
+    serviceType(args.serviceType)
+  }
+} */
