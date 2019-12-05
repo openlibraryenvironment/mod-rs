@@ -41,6 +41,9 @@ if (initial_setup) {
   okapi.addTenantSymbol('RESHARE:TEMPLEI')
   okapi.addTenantSymbol('RESHARE:MILL')
   okapi.addTenantSymbol('RESHARE:VILL')
+  okapi.addTenantSymbol('RESHARE:VLA')
+  okapi.addTenantSymbol('RESHARE:MVS')
+  okapi.addTenantSymbol('RESHARE:TEU')
   okapi.listTenantSymbols()
 }
 

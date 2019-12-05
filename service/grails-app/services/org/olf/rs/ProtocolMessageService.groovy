@@ -234,10 +234,10 @@ and sa.service.businessFunction.value=:ill
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
     def iso18626_response = configure {
-      // For now send to localhost
-      //request.uri = args.service
-      request.uri = "http://localhost:8081/rs/iso18626"
+      request.uri = args.service
+      //request.uri = "http://localhost:8081/rs/iso18626"
       request.contentType = XML[0]
+      request.headers['accept'] = 'application/xml'
     }.post {
       request.body = message
     }

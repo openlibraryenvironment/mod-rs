@@ -44,6 +44,16 @@ class iso18626Controller {
               }
             }
           }
+        } else {
+          log.warn("Tenant not found.")
+          // TODO send back error response.
+          render( contentType:"text/xml" ) {
+            vxml( version:'2.1' ) {
+              param( name:'hi' ) {
+                sub('error')
+              }
+            }
+          }
         }
       }
       else if ( iso18626_msg.supplyingAgencyMessage != null ) {
