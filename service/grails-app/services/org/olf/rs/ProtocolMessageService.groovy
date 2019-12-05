@@ -82,56 +82,16 @@ class ProtocolMessageService {
 
     log.debug("====================================================================")
     log.debug("Event Data: ${eventData}")
-    log.debug("Service: ${ill_services_for_peer.service.address}")
-    //log.debug("Service: http://localhost:8081/rs/iso18626")
+    // For now we want to be able to switch between local and actual addresses
+    
+    def serviceAddress = ill_services_for_peer.service.address
+    //def serviceAddress = "http://localhost:8081/rs/iso18626"
 
-    /* Map req_data = [service:ill_services_for_peer.service.address,
-                supplier: eventData.bibliographicInfo.supplyingInstitutionSymbol,
-                requester: eventData.bibliographicInfo.requestingInstitutionSymbol,
-                title: eventData.bibliographicInfo.title,
-                subtitle: eventData.bibliographicInfo.subtitle,
-                author: eventData.bibliographicInfo.author,
-                publicationType: eventData.bibliographicInfo.publicationType,
-                sponsoringBody: eventData.bibliographicInfo.sponsoringBody,
-                publisher: eventData.bibliographicInfo.publisher,
-                placeOfPublication: eventData.bibliographicInfo.placeOfPublication,
-                volume: eventData.bibliographicInfo.volume,
-                issue: eventData.bibliographicInfo.issue,
-                startPage: eventData.bibliographicInfo.startPage,
-                numberOfPages: eventData.bibliographicInfo.numberOfPages,
-                publicationDate: eventData.bibliographicInfo.publicationDate,
-                publicationDateOfComponent: eventData.bibliographicInfo.publicationDateOfComponent,
-                edition: eventData.bibliographicInfo.edition,
-                issn: eventData.bibliographicInfo.issn,
-                isbn: eventData.bibliographicInfo.isbn,
-                doi: eventData.bibliographicInfo.doi,
-                coden: eventData.bibliographicInfo.coden,
-                sici: eventData.bibliographicInfo.sici,
-                bici: eventData.bibliographicInfo.bici,
-                eissn: eventData.bibliographicInfo.eissn,
-                stitle: eventData.bibliographicInfo.stitle,
-                part: eventData.bibliographicInfo.part,
-                artnum: eventData.bibliographicInfo.artnum,
-                ssn: eventData.bibliographicInfo.ssn,
-                quarter: eventData.bibliographicInfo.quarter,
-                systemInstanceIdentifier: eventData.bibliographicInfo.systemInstanceIdentifier,
-                titleOfComponent: eventData.bibliographicInfo.titleOfComponent,
-                authorOfComponent: eventData.bibliographicInfo.authorOfComponent,
-                sponsor: eventData.bibliographicInfo.sponsor,
-                informationSource: eventData.bibliographicInfo.informationSource,
-                patronIdentifier: eventData.bibliographicInfo.patronIdentifier,
-                patronReference: eventData.bibliographicInfo.patronReference,
-                patronSurname: eventData.bibliographicInfo.patronSurname,
-                patronGivenName: eventData.bibliographicInfo.patronGivenName,
-                patronType: eventData.bibliographicInfo.patronType,
-                serviceType: eventData.bibliographicInfo.serviceType,
-                requestingAgencyRequestId: eventData.header.requestingAgencyRequestId]
-
-    log.debug("Req Data: ${req_data}") */
+    log.debug("Service: ${serviceAddress}")
 
     try {
       log.debug("Sending ISO18626 request")
-      sendISO18626Message(eventData)
+      sendISO18626Message(eventData, serviceAddress)
       log.debug("ISO18626 request sent")
     } catch(Exception e) {
       log.debug("ISO18626 request failed to send.\n Exception: ${e}")
@@ -179,18 +139,18 @@ class ProtocolMessageService {
       switch ( eventData.messageType ) {
         case 'REQUEST' :
         case 'SUPPLYING_AGENCY_MESSAGE':
-          String topic = "${eventData.tenant}_PatronRequestEvents".toString()
+          String topic = "${eventData.tenant}_PatronRequestEvents"
           String key = UUID.randomUUID().toString();
           log.debug("publishEvent(${topic},${key},...");
           eventPublicationService.publishAsJSON(topic, key, eventData)
           break;
         default:
-          log.warn("Unhandled message type in eventData : ${eventData}");
+          log.warn("Unhandled message type in eventData : ${eventData}")
           break;
       }
     }
     else {
-      log.warn("NO tenant in incoming protocol message - don't know how to route it");
+      log.warn("NO tenant in incoming protocol message - don't know how to route it")
     }
     
     
@@ -243,7 +203,7 @@ and sa.service.businessFunction.value=:ill
 
     log.debug("Creating ISO18626 Message")
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+    log.debug("Message Type: ${eventData.messageType}")
     return{
       ISO18626Message( 'ill:version':'1.0',
                        'xmlns':'http://illtransactions.org/2013/iso18626',
@@ -263,11 +223,59 @@ and sa.service.businessFunction.value=:ill
             timestamp(dateFormatter.format(new Date())) // Current time
             requestingAgencyRequestId(eventData.header.requestingAgencyRequestId) 
           }
-          
-          bibliographicInfo {
-            //supplierUniqueRecordId('1234')
-            title("Test Title")
+
+          if (eventData.messageType == "REQUEST") {
+            log.debug("This is a requesting message, so needs bib info")
+            makeBibliographicInfo(delegate, eventData)
           }
+
+          //If the method doesn't work, do it explicitly
+
+          /* if (eventData.messageType == "REQUEST") {
+            bibliographicInfo {
+              supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
+              requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
+              title(eventData.bibliographicInfo.title)
+              subtitle(eventData.bibliographicInfo.subtitle)
+              author(eventData.bibliographicInfo.author)
+              publicationType(eventData.bibliographicInfo.publicationType)
+              sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
+              publisher(eventData.bibliographicInfo.publisher)
+              placeOfPublication(eventData.bibliographicInfo.placeOfPublication)
+              volume(eventData.bibliographicInfo.volume)
+              issue(eventData.bibliographicInfo.issue)
+              startPage(eventData.bibliographicInfo.startPage)
+              numberOfPages(eventData.bibliographicInfo.numberOfPages)
+              publicationDate(eventData.bibliographicInfo.publicationDate)
+              publicationDateOfComponent(eventData.bibliographicInfo.publicationDateOfComponent)
+              edition(eventData.bibliographicInfo.edition)
+              issn(eventData.bibliographicInfo.issn)
+              isbn(eventData.bibliographicInfo.isbn)
+              doi(eventData.bibliographicInfo.doi)
+              coden(eventData.bibliographicInfo.coden)
+              sici(eventData.bibliographicInfo.sici)
+              bici(eventData.bibliographicInfo.bici)
+              eissn(eventData.bibliographicInfo.eissn)
+              stitle(eventData.bibliographicInfo.stitle)
+              part(eventData.bibliographicInfo.part)
+              artnum(eventData.bibliographicInfo.artnum)
+              ssn(eventData.bibliographicInfo.ssn)
+              quarter(eventData.bibliographicInfo.quarter)
+              systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
+              titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
+              authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
+              sponsor(eventData.bibliographicInfo.sponsor)
+              informationSource(eventData.bibliographicInfo.informationSource)
+              patronIdentifier(eventData.bibliographicInfo.patronIdentifier)
+              patronReference(eventData.bibliographicInfo.patronReference)
+              patronSurname(eventData.bibliographicInfo.patronSurname)
+              patronGivenName(eventData.bibliographicInfo.patronGivenName)
+              patronType(eventData.bibliographicInfo.patronType)
+              serviceType(eventData.bibliographicInfo.serviceType)
+              requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+            }
+          } */
+          
           serviceInfo {
             serviceType('Loan')
             serviceLevel('Loan')
@@ -280,60 +288,68 @@ and sa.service.businessFunction.value=:ill
     log.debug("ISO18626 message created")
   }
 
-  def sendISO18626Message(Map args) {
+  def sendISO18626Message(Map eventData, String address) {
     StringWriter sw = new StringWriter();
-    sw << new StreamingMarkupBuilder().bind(makeISO18626Message(args))
+    sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
     def iso18626_response = configure {
-      request.uri = args.service
-      //request.uri = "http://localhost:8081/rs/iso18626"
+      request.uri = address
       request.contentType = XML[0]
       request.headers['accept'] = 'application/xml'
     }.post {
       request.body = message
     }
   }
-}
 
-/* def formBibliographicInfo(Map args) {
-  return {
-    title(args.title)
-    subtitle(args.subtitle)
-    author(args.author)
-    publicationType(args.publicationType)
-    sponsoringBody(args.sponsoringBody)
-    publisher(args.publisher)
-    placeOfPublication(args.placeOfPublication)
-    volume(args.volume)
-    issue(args.issue)
-    startPage(args.startPage)
-    numberOfPages(args.numberOfPages)
-    publicationDate(args.publicationDate)
-    publicationDateOfComponent(args.publicationDateOfComponent)
-    edition(args.edition)
-    issn(args.issn)
-    isbn(args.isbn)
-    doi(args.doi)
-    coden(args.coden)
-    sici(args.sici)
-    bici(args.bici)
-    eissn(args.eissn)
-    stitle(args.stitle)
-    part(args.part)
-    artnum(args.artnum)
-    ssn(args.ssn)
-    quarter(args.quarter)
-    systemInstanceIdentifier(args.systemInstanceIdentifier)
-    titleOfComponent(args.titleOfComponent)
-    authorOfComponent(args.authorOfComponent)
-    sponsor(args.sponsor)
-    informationSource(args.informationSource)
-    patronIdentifier(args.patronIdentifier)
-    patronReference(args.patronReference)
-    patronSurname(args.patronSurname)
-    patronGivenName(args.patronGivenName)
-    patronType(args.patronType)
-    serviceType(args.serviceType)
+  void exec ( def del, Closure c ) {
+    c.rehydrate(del, c.owner, c.thisObject)()
+  } 
+  
+  void makeBibliographicInfo(def del, eventData) {
+    exec(del) {
+      bibliographicInfo {
+        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
+        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
+        title(eventData.bibliographicInfo.title)
+        subtitle(eventData.bibliographicInfo.subtitle)
+        author(eventData.bibliographicInfo.author)
+        publicationType(eventData.bibliographicInfo.publicationType)
+        sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
+        publisher(eventData.bibliographicInfo.publisher)
+        placeOfPublication(eventData.bibliographicInfo.placeOfPublication)
+        volume(eventData.bibliographicInfo.volume)
+        issue(eventData.bibliographicInfo.issue)
+        startPage(eventData.bibliographicInfo.startPage)
+        numberOfPages(eventData.bibliographicInfo.numberOfPages)
+        publicationDate(eventData.bibliographicInfo.publicationDate)
+        publicationDateOfComponent(eventData.bibliographicInfo.publicationDateOfComponent)
+        edition(eventData.bibliographicInfo.edition)
+        issn(eventData.bibliographicInfo.issn)
+        isbn(eventData.bibliographicInfo.isbn)
+        doi(eventData.bibliographicInfo.doi)
+        coden(eventData.bibliographicInfo.coden)
+        sici(eventData.bibliographicInfo.sici)
+        bici(eventData.bibliographicInfo.bici)
+        eissn(eventData.bibliographicInfo.eissn)
+        stitle(eventData.bibliographicInfo.stitle)
+        part(eventData.bibliographicInfo.part)
+        artnum(eventData.bibliographicInfo.artnum)
+        ssn(eventData.bibliographicInfo.ssn)
+        quarter(eventData.bibliographicInfo.quarter)
+        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
+        titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
+        authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
+        sponsor(eventData.bibliographicInfo.sponsor)
+        informationSource(eventData.bibliographicInfo.informationSource)
+        patronIdentifier(eventData.bibliographicInfo.patronIdentifier)
+        patronReference(eventData.bibliographicInfo.patronReference)
+        patronSurname(eventData.bibliographicInfo.patronSurname)
+        patronGivenName(eventData.bibliographicInfo.patronGivenName)
+        patronType(eventData.bibliographicInfo.patronType)
+        serviceType(eventData.bibliographicInfo.serviceType)
+        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+      }
+    }
   }
-} */
+}
