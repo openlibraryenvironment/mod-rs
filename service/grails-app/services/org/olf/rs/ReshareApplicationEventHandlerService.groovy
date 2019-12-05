@@ -271,6 +271,7 @@ public class ReshareApplicationEventHandlerService {
               // requestingAgencyRequestId:req.id,
               requestingAgencyRequestId:req.hrid ?: req.id,
               supplyingAgencyRequestId:null
+              errordata: null
           ],
         ]
   }
