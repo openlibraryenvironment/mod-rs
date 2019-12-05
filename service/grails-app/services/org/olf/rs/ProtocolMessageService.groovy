@@ -60,6 +60,16 @@ class ProtocolMessageService {
     def ill_services_for_peer = findIllServices(peer_symbol)
     log.debug("ILL Services for peer: ${ill_services_for_peer}")
 
+
+    // If the system can't resolve that symbol, it needs to return a protocol error message -- THIS NEEDS TO BE IN REQUEST CONFIRMATION MESSAGE -- not sure this is being done yet.
+    /* if (ill_services_for_peer == null) {
+      // TODO add code here to build error data and incorporate in confirmation message
+      result.status='ERROR'
+    } */
+
+
+
+
     /* if (tenant != null) {
       // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
       // and then 
@@ -90,11 +100,11 @@ class ProtocolMessageService {
     log.debug("Service: ${serviceAddress}")
 
     try {
-      log.debug("Sending ISO18626 request")
+      log.debug("Sending ISO18626 message")
       sendISO18626Message(eventData, serviceAddress)
-      log.debug("ISO18626 request sent")
+      log.debug("ISO18626 message sent")
     } catch(Exception e) {
-      log.debug("ISO18626 request failed to send.\n Exception: ${e}")
+      log.debug("ISO18626 message failed to send.\n Exception: ${e}")
     }
     log.debug("====================================================================")
     
@@ -224,64 +234,19 @@ and sa.service.businessFunction.value=:ill
             requestingAgencyRequestId(eventData.header.requestingAgencyRequestId) 
           }
 
+          // Bib info and Service Info only apply to REQUESTS
           if (eventData.messageType == "REQUEST") {
             log.debug("This is a requesting message, so needs bib info")
             makeBibliographicInfo(delegate, eventData)
-          }
 
-          //If the method doesn't work, do it explicitly
-
-          /* if (eventData.messageType == "REQUEST") {
-            bibliographicInfo {
-              supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
-              requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
-              title(eventData.bibliographicInfo.title)
-              subtitle(eventData.bibliographicInfo.subtitle)
-              author(eventData.bibliographicInfo.author)
-              publicationType(eventData.bibliographicInfo.publicationType)
-              sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
-              publisher(eventData.bibliographicInfo.publisher)
-              placeOfPublication(eventData.bibliographicInfo.placeOfPublication)
-              volume(eventData.bibliographicInfo.volume)
-              issue(eventData.bibliographicInfo.issue)
-              startPage(eventData.bibliographicInfo.startPage)
-              numberOfPages(eventData.bibliographicInfo.numberOfPages)
-              publicationDate(eventData.bibliographicInfo.publicationDate)
-              publicationDateOfComponent(eventData.bibliographicInfo.publicationDateOfComponent)
-              edition(eventData.bibliographicInfo.edition)
-              issn(eventData.bibliographicInfo.issn)
-              isbn(eventData.bibliographicInfo.isbn)
-              doi(eventData.bibliographicInfo.doi)
-              coden(eventData.bibliographicInfo.coden)
-              sici(eventData.bibliographicInfo.sici)
-              bici(eventData.bibliographicInfo.bici)
-              eissn(eventData.bibliographicInfo.eissn)
-              stitle(eventData.bibliographicInfo.stitle)
-              part(eventData.bibliographicInfo.part)
-              artnum(eventData.bibliographicInfo.artnum)
-              ssn(eventData.bibliographicInfo.ssn)
-              quarter(eventData.bibliographicInfo.quarter)
-              systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
-              titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
-              authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
-              sponsor(eventData.bibliographicInfo.sponsor)
-              informationSource(eventData.bibliographicInfo.informationSource)
-              patronIdentifier(eventData.bibliographicInfo.patronIdentifier)
-              patronReference(eventData.bibliographicInfo.patronReference)
-              patronSurname(eventData.bibliographicInfo.patronSurname)
-              patronGivenName(eventData.bibliographicInfo.patronGivenName)
-              patronType(eventData.bibliographicInfo.patronType)
-              serviceType(eventData.bibliographicInfo.serviceType)
-              requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+            serviceInfo {
+              serviceType('Loan')
+              serviceLevel('Loan')
+              //needBeforeDate('2014-05-01T00:00:00.0Z')
+              anyEdition('Y')
             }
-          } */
-          
-          serviceInfo {
-            serviceType('Loan')
-            serviceLevel('Loan')
-            //needBeforeDate('2014-05-01T00:00:00.0Z')
-            anyEdition('Y')
           }
+          
         }
       }
     }
