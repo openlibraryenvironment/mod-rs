@@ -244,39 +244,6 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-// We will need a process to send a confirmation that a request has been recieved, or that a Supplying Agency Message has been received
-// NOT CURRENTLY IN USE
-  /* public void sendConfirmationMessage(eventData, confirmationType) {
-    def messageType
-    if (confirmationType == "request_confirmation") {
-      messageType = "REQUEST_CONFIRMATION"
-    } else if (confirmationType == "supplying_agency_message_confirmation") {
-      messageType = "REQUEST_CONFIRMATION"
-    } else {
-      log.error("Improper confirmation type received")
-    }
-    // TODO Allow for possibilities of ErrorData
-    Map confirmation_message_payload = [
-          messageType: messageType,
-          header:[
-              // Filled out later
-              // supplyingAgencyId:[
-              //   agencyIdType:,
-              //   agencyIdValue:,
-              // ],
-              requestingAgencyId:[
-                agencyIdType:req.resolvedRequester?.authority?.symbol,
-                agencyIdValue:req.resolvedRequester?.symbol
-              ],
-              // requestingAgencyRequestId:req.id,
-              requestingAgencyRequestId:req.hrid ?: req.id,
-              supplyingAgencyRequestId:null
-              errordata: null
-          ],
-        ]
-        log.debug("Confirmation Message Payload: ${confirmation_message_payload}")
-  } */
-
   // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
