@@ -2,7 +2,7 @@
 okapi=new OkapiClient('reshare')
 rsclient = new RSClient(okapi);
 
-if ( 1==1 ) {
+if ( 1==2 ) {
   okapi.addTenantSymbol('OCLC:ZMU');
   okapi.addTenantSymbol('OCLC:PPU');
   okapi.addTenantSymbol('RESHARE:LOCALSYMBOL01');
@@ -28,11 +28,14 @@ if ( 1==1 ) {
 }
 
 if ( 1==1 ) {
-  okapi.walkFoafGraph()
-  okapi.listTenantSymbols()
+  // okapi.walkFoafGraph()
+  println("Symbols....");
+  okapi.listTenantSymbols().each {  it ->
+    println(it.toString());
+  }
 }
 
-if ( 1==1 ) {
+if ( 1==2 ) {
   // okapi.createRequest([
   //                      title:'The Heart of Enterprise',
   //                      patronIdentifier: 'PI',

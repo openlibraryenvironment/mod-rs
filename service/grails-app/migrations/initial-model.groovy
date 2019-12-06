@@ -1359,4 +1359,9 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20191206-0947-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: "prr_note", type: "TEXT");
+        }
+    }
 }
