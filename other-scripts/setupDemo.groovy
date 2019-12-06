@@ -2,7 +2,7 @@
 okapi=new OkapiClient('reshare')
 rsclient = new RSClient(okapi);
 
-if ( 1==2 ) {
+if ( 1==1 ) {
   okapi.addTenantSymbol('OCLC:ZMU');
   okapi.addTenantSymbol('OCLC:PPU');
   okapi.addTenantSymbol('RESHARE:LOCALSYMBOL01');
@@ -22,10 +22,13 @@ if ( 1==2 ) {
   okapi.addTenantSymbol('RESHARE:TESTINST09')
   okapi.addTenantSymbol('RESHARE:TESTINST10')
   okapi.addTenantSymbol('RESHARE:IDVUFIND')
+  okapi.addTenantSymbol('RESHARE:VLA')
+  okapi.addTenantSymbol('RESHARE:MVS')
+  okapi.addTenantSymbol('RESHARE:TEU')
 }
 
 if ( 1==1 ) {
-  //okapi.walkFoafGraph()
+  okapi.walkFoafGraph()
   okapi.listTenantSymbols()
 }
 
@@ -52,9 +55,14 @@ if ( 1==1 ) {
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
-}
 
-if ( 1== 2 ) {
-  okapi.walkFoafGraph()
-}
+  okapi.createRequest([
+                       title:'The darkening land',
+                       patronIdentifier: 'PI',
+                       patronReference: 'PR',
+                       patronSurname: 'PS',
+                       patronGivenName: 'PGN',
+                       systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
+                       requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
 
+}
