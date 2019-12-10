@@ -49,6 +49,8 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
   Symbol peerSymbol
 
+  String note
+
   String instanceIdentifier
   String copyIdentifier
 
@@ -68,6 +70,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     peerSymbol             (nullable : true)
     instanceIdentifier     (nullable : true)
     copyIdentifier         (nullable : true)
+    note                   (nullable : true)
   }
 
   static mapping = {
@@ -88,5 +91,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     peerSymbol             column : "prr_peer_symbol_fk"
     instanceIdentifier     column : "prr_instance_identifier"
     copyIdentifier         column : "prr_copy_identifier"
+    note                   column : "prr_note"
   }
 }

@@ -372,11 +372,13 @@ public class ReshareApplicationEventHandlerService {
                 }
                 else {
                   prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                  prr.note = "Result of send : ${send_result.status}"
                 }
               }
               else {
                 log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
                 prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                prr.note = "Result of send : ${send_result.status} - Unable to resolve symbol for : ${next_responder}";
               }
 
               prr.save(flush:true, failOnError:true);
