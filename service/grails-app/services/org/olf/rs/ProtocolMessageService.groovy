@@ -105,7 +105,7 @@ class ProtocolMessageService {
       log.warn("Unable to find ILL service address for ${peer_symbol}");
     }
 
-    // THIS IS IMPORTANT - use -DisoOverRide="http://localhost:8081/rs/iso18626" to force all request messages onto the
+    // THIS IS IMPORTANT - use --isoOverRide="http://localhost:8081/rs/iso18626" to force all request messages onto the
     // loopback address - useful for developers and integration testing 
     if ( grailsApplication.config.getProperty('isoOverRide') != null ) {
       serviceAddress = grailsApplication.config.getProperty('isoOverRide')
