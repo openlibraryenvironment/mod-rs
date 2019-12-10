@@ -67,6 +67,7 @@ public class HousekeepingService {
         // Requester / Borrower State Model
         Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED', '0010', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_INVALID_PATRON', '0011', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true)

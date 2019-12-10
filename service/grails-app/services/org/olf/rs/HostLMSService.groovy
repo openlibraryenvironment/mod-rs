@@ -4,7 +4,9 @@ import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
 import org.olf.rs.ItemLocation;
 import org.olf.rs.statemodel.Status;
-
+import com.k_int.web.toolkit.settings.AppSetting
+import groovy.xml.StreamingMarkupBuilder
+import static groovyx.net.http.HttpBuilder.configure
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -160,5 +162,73 @@ public class HostLMSService {
     }
   }
 
-}
+  public Map lookupPatron(String patron_id) {
+    log.debug("lookupPatron(${patron_id})");
+    Map result = null;
+    AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
+    if ( borrower_check_setting ) {
+      String borrower_check = borrower_check_setting?.value ?: borrower_check_setting?.defValue;
+      switch ( borrower_check ) {
+        case 'ncip2':
+          result = ncip2LookupPatron(patron_id)
+          break;
+      }
+    }
+    return result
+  }
 
+  def ncip2LookupPatron(String patron_id) {
+    def result = null;
+    log.debug("ncip2LookupPatron(${patron_id})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    String ncip_server_address = ncip_server_address_setting.value
+
+    if ( ncip_server_address ) {
+      log.debug("Request patron from ${ncip_server_address}");
+
+      StringWriter sw = new StringWriter();
+      sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW','905808497'))
+      String message = sw.toString();
+
+      log.debug("NCIP Request: ${message}");
+
+      result = HttpBuilder.configure {
+        request.uri = ncip_server_address
+        request.contentType = XML[0]
+        request.headers['accept'] = 'application/xml'
+      }.post {
+        request.body = message
+      }
+    }
+
+    return result
+  }
+
+
+  def makeNCIPLookupUserRequest(String agency, String application_profile, String user_id) {
+    return {
+      NCIPMessage( 'version':'http://www.niso.org/schemas/ncip/v2_02/ncip_v2_02.xsd',
+                       'xmlns':'http://www.niso.org/2008/ncip') {
+        LookupUser {
+          InitiationHeader {
+            FromAgencyId {
+              AgencyId(agency)
+            }
+            ToAgencyId {
+              AgencyId(agency)
+            }
+            ApplicationProfileType(application_profile)
+          }
+          UserId {
+            UserIdentifierValue(user_id)
+          }
+          UserElementType('User Address Information')
+          UserElementType('Block Or Trap')
+          UserElementType('Name Information')
+          UserElementType('User Privilege')
+          UserElementType('User ID')
+        }
+      }
+    }
+  }
+}
