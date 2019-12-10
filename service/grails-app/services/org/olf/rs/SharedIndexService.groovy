@@ -14,22 +14,6 @@ import groovy.json.JsonOutput;
  */
 public class SharedIndexService {
 
-  public static def mockData = [
-    [ symbol: 'RESHARE:DIKUA' ],
-    [ symbol: 'RESHARE:KNOWINT01' ],
-    [ symbol: 'RESHARE:TESTINST01' ],
-    [ symbol: 'RESHARE:TESTINST02' ],
-    [ symbol: 'RESHARE:TESTINST03' ],
-    [ symbol: 'RESHARE:TESTINST04' ],
-    [ symbol: 'RESHARE:TESTINST05' ],
-    [ symbol: 'RESHARE:TESTINST06' ],
-    [ symbol: 'RESHARE:TESTINST07' ],
-    [ symbol: 'RESHARE:TESTINST09' ],
-    [ symbol: 'RESHARE:TESTINST10' ]
-  ]
-
-
-
  /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
@@ -58,41 +42,9 @@ public class SharedIndexService {
       log.error("Graphql failed",e);
     }
 
-    return result;
-  }
+    // See if we have an app setting for lender of last resort
+    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
 
-  public List<AvailabilityStatement> createRandomRota(Map description) {
-
-    List<AvailabilityStatement> result = new ArrayList<AvailabilityStatement>()
-
-    try {
-      log.debug("Try graphql")
-      sharedIndexHoldings('491fe34f-ea1b-4338-ad20-30b8065a7b46');
-    }
-    catch ( Exception e ) {
-      log.error("Graphql failed",e);
-    }
-
-    log.debug("findAppropriateCopies(${description}) - tenant is ${Tenants.currentId()}");
-
-    List<String> all_libs = mockData.collect { it.symbol };
-    int num_responders = ThreadLocalRandom.current().nextInt(0, 5 + 1);
-
-    List<String> lendingStrings = new ArrayList<String>();
-    for ( int i=0; i<num_responders; i++ ) {
-      lendingStrings.add(all_libs.remove(ThreadLocalRandom.current().nextInt(0,all_libs.size())));
-    }
-
-    log.debug("Decded these are the lenders: Num lenders: ${num_responders} ${lendingStrings}");
-
-    lendingStrings.each { ls ->
-      String instance_id = null;
-      String copy_id = null; // java.util.UUID.randomUUID().toString();
-      result.add(new AvailabilityStatement(symbol:ls,instanceIdentifier:instance_id,copyIdentifier:copy_id));
-    }
-    // result.add(new AvailabilityStatement(symbol:'RESHARE:LOCALSYMBOL',instanceIdentifier:'MOCK_INSTANCE_ID_00001',copyIdentifier:'MOCK_COPY_ID_00001'));
-
-    // Return an empty list
     return result;
   }
 
