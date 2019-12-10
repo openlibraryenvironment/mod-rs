@@ -56,7 +56,7 @@ try {
 
   AppSetting shared_index_pass = AppSetting.findByKey('shared_index_pass') ?: new AppSetting( 
                                   section:'shared_index',
-                                  settingType:'String',
+                                  settingType:'Password',
                                   key: 'shared_index_pass',
                                   defValue: '').save(flush:true, failOnError: true);
 
