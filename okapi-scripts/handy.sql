@@ -44,4 +44,8 @@ update app_setting set st_value = 'TESTINST01,TESTINST02' where st_key = 'last_r
 update app_setting set st_value = 'http://shared-index.reshare-dev.indexdata.com:9130' where st_key = 'shared_index_base_url';
 update app_setting set st_value = 'diku_admin' where st_key = 'shared_index_user';
 
+select * from refdata_value where rdv_value = 'ncip2';
+
+update app_setting set st_value = '...' where st_key = 'borrower_check';
+select st_key, st_value from app_setting ;
 

@@ -123,7 +123,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Updated req.hrid to ${req.hrid}");
         String patron_id = null;
 
-        patron_details = hostLMSService.lookupPatron(patron_id)
+        def patron_details = hostLMSService.lookupPatron(patron_id)
 
         if ( isValidPatron(patron_details) ) {
           if ( req.requestingInstitutionSymbol != null ) {
@@ -426,7 +426,7 @@ public class ReshareApplicationEventHandlerService {
               else {
                 log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
                 prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
-                prr.note = "Result of send : ${send_result.status} - Unable to resolve symbol for : ${next_responder}";
+                prr.note = "Send not attempted: Unable to resolve symbol for : ${next_responder}";
               }
 
               prr.save(flush:true, failOnError:true);

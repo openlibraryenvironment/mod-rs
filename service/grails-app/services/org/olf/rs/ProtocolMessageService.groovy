@@ -17,8 +17,10 @@ import groovyx.net.http.*
  *
  */
 class ProtocolMessageService {
+
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   EventPublicationService eventPublicationService
+  def grailsApplication
 
   GlobalConfigService globalConfigService
   /**
@@ -58,7 +60,7 @@ class ProtocolMessageService {
     def tenant = globalConfigService.getTenantForSymbol(peer_symbol)
     log.debug("The tenant for that symbol(${peer_symbol}) is: ${tenant}")
 
-    def ill_services_for_peer = findIllServices(peer_symbol)
+    List<ServiceAccount> ill_services_for_peer = findIllServices(peer_symbol)
     log.debug("ILL Services for peer: ${ill_services_for_peer}")
 
 
@@ -95,17 +97,27 @@ class ProtocolMessageService {
     log.debug("Event Data: ${eventData}")
     // For now we want to be able to switch between local and actual addresses
     
-    def serviceAddress = ill_services_for_peer.service.address
-    //def serviceAddress = "http://localhost:8081/rs/iso18626"
+    def serviceAddress = null;
+    if ( ill_services_for_peer.size() > 0 ) {
+      serviceAddress = ill_services_for_peer[0].service.address
+    }
+    else {
+      log.warn("Unable to find ILL service address for ${peer_symbol}");
+    }
 
-    log.debug("Service: ${serviceAddress}")
+    // THIS IS IMPORTANT - use -DisoOverRide="http://localhost:8081/rs/iso18626" to force all request messages onto the
+    // loopback address - useful for developers and integration testing 
+    if ( grailsApplication.config.getProperty('isoOverRide') != null ) {
+      serviceAddress = grailsApplication.config.getProperty('isoOverRide')
+      log.warn("isoOverRide IS SET ${serviceAddress}");
+    }
 
     try {
-      log.debug("Sending ISO18626 message")
+      log.debug("Sending ISO18626 message to ${serviceAddress}")
       sendISO18626Message(eventData, serviceAddress)
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
-      log.debug("ISO18626 message failed to send.\n Exception: ${e}")
+      log.error("ISO18626 message failed to send.\n ${e.message}",e)
     }
     log.debug("====================================================================")
     
@@ -179,7 +191,7 @@ class ProtocolMessageService {
   /**
    * Return a prioroty order list of service accounts this symbol can accept
    */
-  def findIllServices(String symbol) {
+  public List<ServiceAccount> findIllServices(String symbol) {
     String[] symbol_components = symbol.split(':');
 
     log.debug("symbol: ${symbol}, symbol components: ${symbol_components}");

@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
 import groovy.json.JsonOutput;
-
+import groovyx.net.http.FromServer;
 
 
 /**
@@ -75,16 +75,21 @@ public class SharedIndexService {
          ( shared_index_pass != null ) && 
          ( id != null ) &&
          ( id.length() > 0 ) ) {
-      log.debug("Attempt to retrieve shared index record ${id}");
+      log.debug("Attempt to retrieve shared index record ${id} from ${shared_index_base_url} ${shared_index_user}/${shared_index_pass}");
       String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
       if ( token ) {
         def r1 = configure {
            request.headers['X-Okapi-Tenant'] = shared_index_tenant;
            request.headers['X-Okapi-Token'] = token
-          request.uri = shared_index_base_url+'/'+(id.trim());
-        }.get()
-        if ( r1 ) {
-          result = JsonOutput.toJson(r1);
+          request.uri = shared_index_base_url+'/inventory/instances/'+(id.trim());
+        }.get() {
+          response.success { FromServer fs, Object body ->
+            log.debug("Success respoinse from shared index");
+            result = JsonOutput.toJson(body);
+          }
+          response.failure { FromServer fs ->
+            log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to GET ${id}");
+          }
         }
       }
       else {
@@ -179,31 +184,41 @@ public class SharedIndexService {
             request.uri = shared_index_base_url+'/graphql'
             request.contentType = 'application/json'
             request.body = query
-          }.get()
-
-          if ( ( r1 != null ) &&
-               ( r1.data != null ) ) {
-            // We got a response from the GraphQL service - example {"data":
-            // {"instance_storage_instances_SINGLE":
-            //     {"id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779","title":"A history of the twentieth century in 100 maps",
-            //      "holdingsRecords2":[
-            //         {"id":"d045fd86-fdcf-455f-8f42-e7bbaaf5ddd6","callNumber":" GA793.7.A1 ","permanentLocationId":"87038e41-0990-49ea-abd9-1ad00a786e45","holdingsStatements":[]}
-            //      ]}}}
-  
-            log.debug("Response for holdings on ${id}\n\n${r1.data}\n\n");
-  
-            r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
-              log.debug("Process holdings record ${hr}");
-              String location = hr.permanentLocation.code
-              String[] split_location = location.split('/')
-              if ( split_location.length == 4 ) {
-                // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
-                if ( ! result.contains('RESHARE:'+split_location[0]) ) {
-                  // And we don't already have the location
-                  result.add('RESHARE:'+split_location[0])
+          }.get() {
+            response.success { FromServer fs, Object r1 ->
+              if ( ( r1 != null ) &&
+                   ( r1.data != null ) ) {
+                // We got a response from the GraphQL service - example {"data":
+                // {"instance_storage_instances_SINGLE":
+                //     {"id":"5be100af-1b0a-43fe-bcd6-09a67fb9c779","title":"A history of the twentieth century in 100 maps",
+                //      "holdingsRecords2":[
+                //         {"id":"d045fd86-fdcf-455f-8f42-e7bbaaf5ddd6","callNumber":" GA793.7.A1 ","permanentLocationId":"87038e41-0990-49ea-abd9-1ad00a786e45","holdingsStatements":[]}
+                //      ]}}}
+    
+                log.debug("Response for holdings on ${id}\n\n${r1.data}\n\n");
+    
+                r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
+                  log.debug("Process holdings record ${hr}");
+                  String location = hr.permanentLocation.code
+                  String[] split_location = location.split('/')
+                  if ( split_location.length == 4 ) {
+                    // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
+                    if ( ! result.contains('RESHARE:'+split_location[0]) ) {
+                      // And we don't already have the location
+                      result.add('RESHARE:'+split_location[0])
+                    }
+                  }
                 }
               }
+              else {
+                log.error("Unexpected data back from shared index");
+              }
             }
+
+            response.failure { FromServer fs ->
+              log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to send Graphql to ${shared_index_base_url}/graphql - query: ${query}");
+            }
+
           }
         }
         else {
