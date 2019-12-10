@@ -111,14 +111,16 @@ public class SharedIndexService {
 
     if ( ( shared_index_base_url != null ) &&
          ( shared_index_user != null ) &&
-         ( shared_index_pass != null ) ) {
+         ( shared_index_pass != null ) && 
+         ( id != null ) &&
+         ( id.length() > 0 ) ) {
       log.debug("Attempt to retrieve shared index record ${id}");
       String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
       if ( token ) {
         def r1 = configure {
            request.headers['X-Okapi-Tenant'] = shared_index_tenant;
            request.headers['X-Okapi-Token'] = token
-          request.uri = shared_index_base_url+'/inventory/instances/491fe34f-ea1b-4338-ad20-30b8065a7b46'
+          request.uri = shared_index_base_url+'/'+(id.trim());
         }.get()
         if ( r1 ) {
           result = JsonOutput.toJson(r1);
@@ -138,26 +140,41 @@ public class SharedIndexService {
 
   private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
     String result = null;
-    log.debug("getOkapiToken(${baseUrl},${user},..,${tenant})");
     def postBody = [username: user, password: pass]
-    def r1 = configure {
-      request.headers['X-Okapi-Tenant'] = tenant
-      request.headers['accept'] = 'application/json'
-      request.contentType = 'application/json'
-      request.uri = baseUrl+'/bl-users/login'
-      request.uri.query = [expandPermissions:true,fullPermissions:true]
-      request.body = postBody
-    }.get() {
-      response.success { resp ->
-        def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
-        if ( tok_header ) {
-          result = tok_header.value;
+    log.debug("getOkapiToken(${baseUrl},${postBody},..,${tenant})");
+    try {
+      def r1 = configure {
+        request.headers['X-Okapi-Tenant'] = tenant
+        request.headers['accept'] = 'application/json'
+        request.contentType = 'application/json'
+        request.uri = baseUrl+'/authn/login'
+        request.uri.query = [expandPermissions:true,fullPermissions:true]
+        request.body = postBody
+      }.get() {
+        response.success { resp ->
+          if ( resp == null ) {
+            log.error("Response null from http post");
+          }
+          else {
+            log.debug("Try to extract token - ${resp} ${resp?.headers}");
+            def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
+            if ( tok_header ) {
+              result = tok_header.value;
+            }
+            else {
+              log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
+            }
+          }
+        
         }
-        else {
-          log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
+        response.failure { resp -> 
+          log.error("RESP ERROR: ${resp.getStatusCode()}, ${resp.getMessage()}, ${resp.getHeaders()}")
         }
       }
     }
+    catch ( Exception e ) {
+        log.error("problem trying to obtain auth token for shared index",e);
+      }
 
     log.debug("Result of okapi login: ${result}");
     return result;
@@ -172,7 +189,7 @@ public class SharedIndexService {
 
   // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
-  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocation { name code } holdingsStatements { note statement } holdingsItems { id barcode enumeration } } } }",
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
   "variables":{
     "id":"'''+id+'''" } }'''
 
@@ -240,7 +257,17 @@ public class SharedIndexService {
       }
     }
     else {
-      log.debug("Unable to contact shared index - no url/user/pass");
+      def missingSettings = [];
+      if( shared_index_base_url == null ) {
+        missingSettings += "url";
+      }
+      if( shared_index_user == null ) {
+        missingSettings += "user";
+      }
+      if( shared_index_pass == null ) {
+        missingSettings += "password";
+      }
+      log.debug("Unable to contact shared index - Missing settings: ${missingSettings}");
     }
 
     log.debug("Result: ${result}");

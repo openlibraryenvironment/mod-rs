@@ -205,6 +205,7 @@ public class ReshareApplicationEventHandlerService {
           List<AvailabilityStatement> sia = sharedIndexService.findAppropriateCopies(req.getDescriptiveMetadata());
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
+
           if (  sia.size() > 0 ) {
             sia?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
@@ -223,6 +224,8 @@ public class ReshareApplicationEventHandlerService {
             req.save(flush:true, failOnError:true)
           }
           else {
+            // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
+
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
@@ -241,6 +244,38 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+// We will need a process to send a confirmation that a request has been recieved, or that a Supplying Agency Message has been received
+// NOT CURRENTLY IN USE
+  /* public void sendConfirmationMessage(eventData, confirmationType) {
+    def messageType
+    if (confirmationType == "request_confirmation") {
+      messageType = "REQUEST_CONFIRMATION"
+    } else if (confirmationType == "supplying_agency_message_confirmation") {
+      messageType = "REQUEST_CONFIRMATION"
+    } else {
+      log.error("Improper confirmation type received")
+    }
+    // TODO Allow for possibilities of ErrorData
+    Map confirmation_message_payload = [
+          messageType: messageType,
+          header:[
+              // Filled out later
+              // supplyingAgencyId:[
+              //   agencyIdType:,
+              //   agencyIdValue:,
+              // ],
+              requestingAgencyId:[
+                agencyIdType:req.resolvedRequester?.authority?.symbol,
+                agencyIdValue:req.resolvedRequester?.symbol
+              ],
+              // requestingAgencyRequestId:req.id,
+              requestingAgencyRequestId:req.hrid ?: req.id,
+              supplyingAgencyRequestId:null
+              errordata: null
+          ],
+        ]
+        log.debug("Confirmation Message Payload: ${confirmation_message_payload}")
+  } */
 
   // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
   public void sendToNextLender(eventData) {
@@ -370,11 +405,13 @@ public class ReshareApplicationEventHandlerService {
                 }
                 else {
                   prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                  prr.note = "Result of send : ${send_result.status}"
                 }
               }
               else {
                 log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
                 prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+                prr.note = "Result of send : ${send_result.status} - Unable to resolve symbol for : ${next_responder}";
               }
 
               prr.save(flush:true, failOnError:true);
@@ -617,7 +654,7 @@ public class ReshareApplicationEventHandlerService {
       }
     }
     else {
-        log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
+      log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
       sendResponse(pr, 'Unfilled', 'No copy');
       pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }

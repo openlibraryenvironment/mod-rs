@@ -22,14 +22,20 @@ if ( 1==2 ) {
   okapi.addTenantSymbol('RESHARE:TESTINST09')
   okapi.addTenantSymbol('RESHARE:TESTINST10')
   okapi.addTenantSymbol('RESHARE:IDVUFIND')
+  okapi.addTenantSymbol('RESHARE:VLA')
+  okapi.addTenantSymbol('RESHARE:MVS')
+  okapi.addTenantSymbol('RESHARE:TEU')
 }
 
 if ( 1==1 ) {
-  //okapi.walkFoafGraph()
-  okapi.listTenantSymbols()
+  // okapi.walkFoafGraph()
+  println("Symbols....");
+  okapi.listTenantSymbols().each {  it ->
+    println(it.toString());
+  }
 }
 
-if ( 1==1 ) {
+if ( 1==2 ) {
   // okapi.createRequest([
   //                      title:'The Heart of Enterprise',
   //                      patronIdentifier: 'PI',
@@ -52,9 +58,14 @@ if ( 1==1 ) {
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
                        requestingInstitutionSymbol:'OCLC:ZMU']);
-}
 
-if ( 1== 2 ) {
-  okapi.walkFoafGraph()
-}
+  okapi.createRequest([
+                       title:'The darkening land',
+                       patronIdentifier: 'PI',
+                       patronReference: 'PR',
+                       patronSurname: 'PS',
+                       patronGivenName: 'PGN',
+                       systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
+                       requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
 
+}
