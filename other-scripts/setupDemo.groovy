@@ -35,7 +35,7 @@ if ( 1==1 ) {
   }
 }
 
-if ( 1==2 ) {
+if ( 1==1 ) {
   // okapi.createRequest([
   //                      title:'The Heart of Enterprise',
   //                      patronIdentifier: 'PI',

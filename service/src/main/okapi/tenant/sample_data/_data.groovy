@@ -56,8 +56,14 @@ try {
 
   AppSetting shared_index_pass = AppSetting.findByKey('shared_index_pass') ?: new AppSetting( 
                                   section:'shared_index',
-                                  settingType:'String',
+                                  settingType:'Password',
                                   key: 'shared_index_pass',
+                                  defValue: '').save(flush:true, failOnError: true);
+
+  AppSetting last_resort_lenders = AppSetting.findByKey('last_resort_lenders') ?: new AppSetting( 
+                                  section:'requests',
+                                  settingType:'String',
+                                  key: 'last_resort_lenders',
                                   defValue: '').save(flush:true, failOnError: true);
 
 }

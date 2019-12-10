@@ -121,30 +121,39 @@ public class ReshareApplicationEventHandlerService {
         // If valid - generate a human readabe ID to use
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
+        String patron_id = null;
 
-        if ( req.requestingInstitutionSymbol != null ) {
-          // We need to validate the requsting location - and check that we can act as requester for that symbol
-          Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
+        patron_details = hostLMSService.lookupPatron(patron_id)
+
+        if ( isValidPatron(patron_details) ) {
+          if ( req.requestingInstitutionSymbol != null ) {
+            // We need to validate the requsting location - and check that we can act as requester for that symbol
+            Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
         
-          if ( s != null ) {
-            req.resolvedRequester = s
-            log.debug("Got request ${req}");
-            log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-            req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+            if ( s != null ) {
+              req.resolvedRequester = s
+              log.debug("Got request ${req}");
+              log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+              req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
+              auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+            }
+            else {
+              log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
+              req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+              auditEntry(req, 
+                         lookupStatus('PatronRequest', 'REQ_IDLE'), 
+                         lookupStatus('PatronRequest', 'REQ_ERROR'), 
+                         'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
+            }
           }
           else {
-            log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
             req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-            auditEntry(req, 
-                       lookupStatus('PatronRequest', 'REQ_IDLE'), 
-                       lookupStatus('PatronRequest', 'REQ_ERROR'), 
-                       'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
           }
         }
         else {
-          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+            req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${patron_id}\"".toString(), null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
@@ -172,6 +181,12 @@ public class ReshareApplicationEventHandlerService {
       }
     }
   }
+
+  public boolean isValidPatron(Map patron_record) {
+    log.debug("Check isValidPatron: ${patron_record}");
+    return true;
+  }
+
 
   // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
   // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
