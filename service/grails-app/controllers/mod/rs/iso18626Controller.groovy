@@ -7,6 +7,7 @@ import org.olf.rs.GlobalConfigService
 import org.olf.rs.BackgroundTaskService;
 import org.olf.rs.ReshareApplicationEventHandlerService
 import grails.gorm.multitenancy.Tenants
+import java.text.SimpleDateFormat
 
 class iso18626Controller {
 
@@ -122,31 +123,32 @@ class iso18626Controller {
   } 
 
 
-def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, String reqId, String timeRec, String status) {
-  SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-  def currentTime = dateFormatter.format(new Date())
-  return {
-    exec(del) {
-      ISO18626Message( 'ill:version':'1.0',
-                       'xmlns':'http://illtransactions.org/2013/iso18626',
-                       'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
-                       'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                       'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
-        request {
-          header {
-          supplyingAgencyId {
-            agencyIdType(supIdType)
-            agencyIdValue(supId)
-          }
-          requestingAgencyId {
-            agencyIdType(reqAgencyIdType)
-            agencyIdValue(reqAgencyId)
-          }
-          timestamp(currentTime)
-          requestingAgencyRequestId(reqId)
-          multipleItemRequestId(null)
-          timestampReceived(timeRec)
-          messageStatus(status)
+  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, String reqId, String timeRec, String status) {
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    def currentTime = dateFormatter.format(new Date())
+    return {
+      exec(del) {
+        ISO18626Message( 'ill:version':'1.0',
+                        'xmlns':'http://illtransactions.org/2013/iso18626',
+                        'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
+                        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
+          request {
+            header {
+            supplyingAgencyId {
+              agencyIdType(supIdType)
+              agencyIdValue(supId)
+            }
+            requestingAgencyId {
+              agencyIdType(reqAgencyIdType)
+              agencyIdValue(reqAgencyId)
+            }
+            timestamp(currentTime)
+            requestingAgencyRequestId(reqId)
+            multipleItemRequestId(null)
+            timestampReceived(timeRec)
+            messageStatus(status)
+            }
           }
         }
       }
