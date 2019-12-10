@@ -14,7 +14,7 @@ try {
                                   ).save(flush:true, failOnError: true);
 
   AppSetting ncip_address = AppSetting.findByKey('ncip_server_address') ?: new AppSetting( 
-                                  section:'Local NCIP',
+                                  section:'localNCIP',
                                   settingType:'String',
                                   key: 'ncip_server_address'
                                   ).save(flush:true, failOnError: true);
@@ -23,7 +23,7 @@ try {
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP2');
 
   AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting( 
-                                  section:'Requester Validation',
+                                  section:'requesterValidation',
                                   settingType:'Refdata',
                                   vocab:'BorrowerCheckMethod',
                                   key: 'borrower_check'
@@ -42,20 +42,20 @@ try {
                                   ).save(flush:true, failOnError: true);
 
   AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
-                                  section:'shared_index',
+                                  section:'sharedIndex',
                                   settingType:'String',
                                   key: 'shared_index_base_url',
                                   defValue: 'http://shared-index.reshare-dev.indexdata.com:9130'
                                   ).save(flush:true, failOnError: true);
 
   AppSetting shared_index_user = AppSetting.findByKey('shared_index_user') ?: new AppSetting( 
-                                  section:'shared_index',
+                                  section:'sharedIndex',
                                   settingType:'String',
                                   key: 'shared_index_user',
                                   defValue: 'diku_admin').save(flush:true, failOnError: true);
 
   AppSetting shared_index_pass = AppSetting.findByKey('shared_index_pass') ?: new AppSetting( 
-                                  section:'shared_index',
+                                  section:'sharedIndex',
                                   settingType:'Password',
                                   key: 'shared_index_pass',
                                   defValue: '').save(flush:true, failOnError: true);
