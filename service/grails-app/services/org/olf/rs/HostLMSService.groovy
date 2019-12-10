@@ -59,13 +59,23 @@ public class HostLMSService {
       log.debug("Next lookup strategy: ${next_strategy.name}");
       if ( next_strategy.precondition(pr) == true ) {
         log.debug("Strategy ${next_strategy.name} passed precondition");
-        location = next_strategy.stragegy(pr, this);
+        try {
+          location = next_strategy.stragegy(pr, this);
+        }
+        catch ( Exception e ) {
+          log.error("Problem attempting strategy ${next_strategy.name}",e);
+        }
+        finally {
+          log.debug("Completed strategt ${next_strategy.name}");
+        }
+     
       }
       else {
         log.debug("Strategy did not pass precondition");
       }
     }
     
+    log.debug("determineBestLocation returns ${location}");
     return location;
   }
   

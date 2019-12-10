@@ -480,7 +480,7 @@ public class ReshareApplicationEventHandlerService {
       result.newRequestId = pr.id;
     }
     else {
-      log.error("A REQUEST indicaiton must contain a request key with properties defining the sought item - eg request.title");
+      log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");
     }
 
     return result;
