@@ -259,6 +259,10 @@ and sa.service.businessFunction.value=:ill
               anyEdition('Y')
             }
           }
+          else {
+            log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
+            throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
+          }
           
         }
       }
