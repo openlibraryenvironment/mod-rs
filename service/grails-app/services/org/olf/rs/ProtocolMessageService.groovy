@@ -34,6 +34,7 @@ class ProtocolMessageService {
    *       messageType:''
    *       messageBody:{
    *       }
+   *     }
    *   }
    *
    * @return a map containing properties including any confirmationId the underlying protocol implementation provides us
@@ -318,3 +319,4 @@ and sa.service.businessFunction.value=:ill
     }
   }
 }
+

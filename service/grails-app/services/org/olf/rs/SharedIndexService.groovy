@@ -63,14 +63,16 @@ public class SharedIndexService {
 
     if ( ( shared_index_base_url != null ) &&
          ( shared_index_user != null ) &&
-         ( shared_index_pass != null ) ) {
+         ( shared_index_pass != null ) && 
+         ( id != null ) &&
+         ( id.length() > 0 ) ) {
       log.debug("Attempt to retrieve shared index record ${id}");
       String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
       if ( token ) {
         def r1 = configure {
            request.headers['X-Okapi-Tenant'] = shared_index_tenant;
            request.headers['X-Okapi-Token'] = token
-          request.uri = shared_index_base_url+'/inventory/instances/491fe34f-ea1b-4338-ad20-30b8065a7b46'
+          request.uri = shared_index_base_url+'/'+(id.trim());
         }.get()
         if ( r1 ) {
           result = JsonOutput.toJson(r1);
