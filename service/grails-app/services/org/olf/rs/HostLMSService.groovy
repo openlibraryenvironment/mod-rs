@@ -211,7 +211,7 @@ public class HostLMSService {
       sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW','905808497'))
       String message = sw.toString();
 
-      log.debug("NCIP Request: ${message}");
+      // log.debug("NCIP Request: ${message}");
 
       result = HttpBuilder.configure {
         request.uri = ncip_server_address
@@ -221,7 +221,14 @@ public class HostLMSService {
         request.body = message
 
         response.success { FromServer fs, Object body ->
-            log.debug("Success retrieving user details: ${body} ");
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
+            result=[
+              userid: mr.LookupUserResponse?.UserId?.UserIdentifierValue,
+              givenName: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.GivenName,
+              surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
+              status: 'OK'
+            ]
+            log.debug("Result of user lookup: ${result}");
             // result = JsonOutput.toJson(body);
         }
         response.failure { FromServer fs ->
