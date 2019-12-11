@@ -7,6 +7,10 @@ import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.xml.StreamingMarkupBuilder
 import static groovyx.net.http.HttpBuilder.configure
+import groovyx.net.http.FromServer;
+import com.k_int.web.toolkit.refdata.RefdataValue
+import static groovyx.net.http.ContentTypes.XML
+
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -176,15 +180,19 @@ public class HostLMSService {
     log.debug("lookupPatron(${patron_id})");
     Map result = null;
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
-    if ( borrower_check_setting ) {
-      String borrower_check = borrower_check_setting?.value ?: borrower_check_setting?.defValue;
-      switch ( borrower_check ) {
-        case 'ncip2':
-          result = ncip2LookupPatron(patron_id)
-          break;
-        default:
-          log.debug("Borrower check - no action, config ${borrower_check}");
-          break;
+    if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
+      RefdataValue rdv = RefdataValue.get( borrower_check_setting.value )
+
+      if ( rdv ) {
+        String borrower_check = rdv.value;
+        switch ( borrower_check ) {
+          case 'ncip2':
+            result = ncip2LookupPatron(patron_id)
+            break;
+          default:
+            log.debug("Borrower check - no action, config ${borrower_check}");
+            break;
+        }
       }
     }
     return result
@@ -211,6 +219,15 @@ public class HostLMSService {
         request.headers['accept'] = 'application/xml'
       }.post {
         request.body = message
+
+        response.success { FromServer fs, Object body ->
+            log.debug("Success retrieving user details: ${body} ");
+            // result = JsonOutput.toJson(body);
+        }
+        response.failure { FromServer fs ->
+          log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
+        }
+
       }
     }
 

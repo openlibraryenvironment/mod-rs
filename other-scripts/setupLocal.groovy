@@ -51,7 +51,7 @@ if (initial_setup) {
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
   okapi.createRequest([
                        title:'The darkening land',
-                       patronIdentifier: 'PI',
+                       patronIdentifier: '905808497',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
@@ -92,9 +92,10 @@ if ( !initial_setup) {
   //                      patronType:'PT',
   //                      systemInstanceIdentifier:'491fe34f-ea1b-4338-ad20-30b8065a7b46',
   //                      requestingInstitutionSymbol:'OCLC:ZMU']);
+  // 905808497 - is a valid patron ID for a user at Temple
   okapi.createRequest([
                        title:'Arthur Koestler : a collection of critical essays', 
-                       patronIdentifier: 'PI',
+                       patronIdentifier: '905808497',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',

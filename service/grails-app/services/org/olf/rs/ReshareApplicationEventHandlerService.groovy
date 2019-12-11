@@ -121,9 +121,8 @@ public class ReshareApplicationEventHandlerService {
         // If valid - generate a human readabe ID to use
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
-        String patron_id = null;
 
-        def patron_details = hostLMSService.lookupPatron(patron_id)
+        def patron_details = hostLMSService.lookupPatron(req.patronIdentifier)
 
         if ( isValidPatron(patron_details) ) {
           if ( req.requestingInstitutionSymbol != null ) {
@@ -153,7 +152,7 @@ public class ReshareApplicationEventHandlerService {
         }
         else {
             req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${patron_id}\"".toString(), null);
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {

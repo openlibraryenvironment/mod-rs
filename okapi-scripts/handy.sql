@@ -25,7 +25,8 @@ select pr_id,
        pr_hrid,
        pr_peer_request_identifier,
        pr_pick_location_fk, 
-       st_code 
+       st_code,
+       pr_patron_identifier
 from patron_request, 
      status 
 where pr_state_fk=st_id;
