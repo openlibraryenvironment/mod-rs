@@ -195,11 +195,13 @@ public class HostLMSService {
         }
       }
     }
+
+    log.debug("HostLMSService::lookupPatron(${patron_id}) returns ${result}");
     return result
   }
 
-  def ncip2LookupPatron(String patron_id) {
-    def result = null;
+  private Map ncip2LookupPatron(String patron_id) {
+    Map result = null;
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     String ncip_server_address = ncip_server_address_setting.value
@@ -213,7 +215,7 @@ public class HostLMSService {
 
       // log.debug("NCIP Request: ${message}");
 
-      result = HttpBuilder.configure {
+      HttpBuilder.configure {
         request.uri = ncip_server_address
         request.contentType = XML[0]
         request.headers['accept'] = 'application/xml'

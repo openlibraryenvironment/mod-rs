@@ -1364,4 +1364,41 @@ databaseChangeLog = {
             column(name: "prr_note", type: "TEXT");
         }
     }
+
+   changeSet(author: "ianibbo (generated)", id: "20191211-1508-001") {
+        createTable(tableName: "patron") {
+            column(name: "pat_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pat_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pat_date_created", type: "timestamp")
+
+            column(name: "pat_last_updated", type: "timestamp") {
+                constraints(nullable: "true")
+            }
+
+
+            column(name: "pat_host_system_identifier", type: "VARCHAR(255)") {
+                constraints(nullable: "true")
+            }
+
+            column(name: "pat_given_name", type: "VARCHAR(255)") {
+                constraints(nullable: "true")
+            }
+
+            column(name: "pat_surame", type: "VARCHAR(255)") {
+                constraints(nullable: "true")
+            }
+        }
+    }
+
+   changeSet(author: "ianibbo (generated)", id: "20191211-1519-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_resolved_patron_fk", type: "VARCHAR(36)");
+        }
+   }
 }
