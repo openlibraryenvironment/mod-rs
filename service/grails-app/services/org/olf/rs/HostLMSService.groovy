@@ -182,6 +182,9 @@ public class HostLMSService {
         case 'ncip2':
           result = ncip2LookupPatron(patron_id)
           break;
+        default:
+          log.debug("Borrower check - no action, config ${borrower_check}");
+          break;
       }
     }
     return result
