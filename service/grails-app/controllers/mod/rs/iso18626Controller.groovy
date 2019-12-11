@@ -22,6 +22,8 @@ class iso18626Controller {
     try {
       log.debug("XML: ${request.XML}");
       def iso18626_msg = request.XML;
+      org.grails.databinding.xml.GPathResultMap messageGpathXml = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.request);
+      log.debug("MESSAGE: ${messageGpathXml}")
       String recipient;
       String tenant;
 

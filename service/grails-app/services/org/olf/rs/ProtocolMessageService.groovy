@@ -244,30 +244,60 @@ and sa.service.businessFunction.value=:ill
               agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
             }
             timestamp(dateFormatter.format(new Date())) // Current time
-            requestingAgencyRequestId(eventData.header.requestingAgencyRequestId) 
+            requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+            if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+              supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
+            }
           }
 
           // Bib info and Service Info only apply to REQUESTS
-          if (eventData.messageType == "REQUEST") {
-            log.debug("This is a requesting message, so needs bib info")
-            makeBibliographicInfo(delegate, eventData)
+          switch (eventData.messageType) {
+            case "REQUEST":
+              log.debug("This is a requesting message, so needs BibliographicInfo")
+              if (eventData.bibliographicInfo != null) {
+                makeBibliographicInfo(delegate, eventData)
+              } else {
+                log.warn("No bibliographicInfo found")
+              }
+              serviceInfo {
+                serviceType('Loan')
+                serviceLevel('Loan')
+                //needBeforeDate('2014-05-01T00:00:00.0Z')
+                anyEdition('Y')
+              }
+              break;
+            case "SUPPLYING_AGENCY_MESSAGE":
+              log.debug("This is a supplying agency message, so we need MessageInfo, StatusInfo, DeliveryInfo")
 
-            serviceInfo {
-              serviceType('Loan')
-              serviceLevel('Loan')
-              //needBeforeDate('2014-05-01T00:00:00.0Z')
-              anyEdition('Y')
-            }
+              if (eventData.messageInfo != null) {
+                makeMessageInfo(delegate, eventData)
+              } else {
+                log.warn("No messageInfo found")
+              }
+              if (eventData.statusInfo != null) {
+                makeStatusInfo(delegate, eventData)
+              } else {
+                log.warn("No statusInfo found")
+              }
+              if (eventData.deliveryInfo != null) {
+                makeDeliveryInfo(delegate, eventData)
+              } else {
+                log.warn("No deliveryInfo found")
+              }
+              if (eventData.returnInfo != null) {
+                makeReturnInfo(delegate, eventData)
+              } else {
+                log.warn("No returnInfo found")
+              }
+              break;
+            default:
+              log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
+              throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
           }
-          else {
-            log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
-            throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
-          }
-          
         }
       }
+      log.debug("ISO18626 message created")
     }
-    log.debug("ISO18626 message created")
   }
 
   def sendISO18626Message(Map eventData, String address) {
@@ -334,5 +364,54 @@ and sa.service.businessFunction.value=:ill
       }
     }
   }
-}
 
+  void makeMessageInfo(def del, eventData) {
+    exec(del) {
+      messageInfo {
+        reasonForMessage(eventData.messageInfo.reasonForMessage)
+        answerYesNo(eventData.messageInfo.answerYesNo)
+        note(eventData.messageInfo.note)
+        reasonUnfilled(eventData.messageInfo.reasonUnfilled)
+        reasonRetry(eventData.messageInfo.reasonRetry)
+        offeredCosts(eventData.messageInfo.offeredCosts)
+        retryAfter(eventData.messageInfo.retryAfter)
+        retryBefore(eventData.messageInfo.retryBefore)
+      }
+    }
+  }
+
+  void makeStatusInfo(def del, eventData) {
+    exec(del) {
+      statusInfo {
+        status(eventData.statusInfo.status)
+        expectedDeliveryDate(eventData.statusInfo.expectedDeliverydate)
+        dueDate(eventData.statusInfo.dueDate)
+        lastChange(eventData.statusInfo.lastChange)
+      }
+    }
+  }
+
+  void makeDeliveryInfo(def del, eventData) {
+    exec(del) {
+      deliveryInfo {
+        dateSent(eventData.deliveryInfo.dateSent)
+        itemId(eventData.deliveryInfo.itemId)
+        sentVia(eventData.deliveryInfo.sentVia)
+        sentToPatron(eventData.deliveryInfo.sentToPatron)
+        loanCondition(eventData.deliveryInfo.loanCondition)
+        deliveredFormat(eventData.deliveryInfo.deliveredFormat)
+        deliveryCosts(eventData.deliveryInfo.deliveryCosts)
+      }
+    }
+  }
+
+  void makeReturnInfo(def del, eventData) {
+    exec(del) {
+      returnInfo {
+        returnAgencyId(eventData.returnInfo.returnAgencyId)
+        name(eventData.returnInfo.name)
+        physicalAddress(eventData.returnInfo.physicalAddress)
+      }
+    }
+  }
+}
