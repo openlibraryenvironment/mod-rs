@@ -7,6 +7,10 @@ import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.xml.StreamingMarkupBuilder
 import static groovyx.net.http.HttpBuilder.configure
+import groovyx.net.http.FromServer;
+import com.k_int.web.toolkit.refdata.RefdataValue
+import static groovyx.net.http.ContentTypes.XML
+
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -176,22 +180,28 @@ public class HostLMSService {
     log.debug("lookupPatron(${patron_id})");
     Map result = null;
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
-    if ( borrower_check_setting ) {
-      String borrower_check = borrower_check_setting?.value ?: borrower_check_setting?.defValue;
-      switch ( borrower_check ) {
-        case 'ncip2':
-          result = ncip2LookupPatron(patron_id)
-          break;
-        default:
-          log.debug("Borrower check - no action, config ${borrower_check}");
-          break;
+    if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
+      RefdataValue rdv = RefdataValue.get( borrower_check_setting.value )
+
+      if ( rdv ) {
+        String borrower_check = rdv.value;
+        switch ( borrower_check ) {
+          case 'ncip2':
+            result = ncip2LookupPatron(patron_id)
+            break;
+          default:
+            log.debug("Borrower check - no action, config ${borrower_check}");
+            break;
+        }
       }
     }
+
+    log.debug("HostLMSService::lookupPatron(${patron_id}) returns ${result}");
     return result
   }
 
-  def ncip2LookupPatron(String patron_id) {
-    def result = null;
+  private Map ncip2LookupPatron(String patron_id) {
+    Map result = null;
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     String ncip_server_address = ncip_server_address_setting.value
@@ -203,14 +213,30 @@ public class HostLMSService {
       sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW','905808497'))
       String message = sw.toString();
 
-      log.debug("NCIP Request: ${message}");
+      // log.debug("NCIP Request: ${message}");
 
-      result = HttpBuilder.configure {
+      HttpBuilder.configure {
         request.uri = ncip_server_address
         request.contentType = XML[0]
         request.headers['accept'] = 'application/xml'
       }.post {
         request.body = message
+
+        response.success { FromServer fs, Object body ->
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
+            result=[
+              userid: mr.LookupUserResponse?.UserId?.UserIdentifierValue,
+              givenName: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.GivenName,
+              surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
+              status: 'OK'
+            ]
+            log.debug("Result of user lookup: ${result}");
+            // result = JsonOutput.toJson(body);
+        }
+        response.failure { FromServer fs ->
+          log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
+        }
+
       }
     }
 

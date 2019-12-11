@@ -121,11 +121,15 @@ public class ReshareApplicationEventHandlerService {
         // If valid - generate a human readabe ID to use
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
-        String patron_id = null;
 
-        def patron_details = hostLMSService.lookupPatron(patron_id)
+        def patron_details = hostLMSService.lookupPatron(req.patronIdentifier)
 
         if ( isValidPatron(patron_details) ) {
+
+          if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+            req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+          }
+
           if ( req.requestingInstitutionSymbol != null ) {
             // We need to validate the requsting location - and check that we can act as requester for that symbol
             Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
@@ -153,7 +157,7 @@ public class ReshareApplicationEventHandlerService {
         }
         else {
             req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${patron_id}\"".toString(), null);
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
@@ -183,7 +187,13 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public boolean isValidPatron(Map patron_record) {
+    boolean result = true;
     log.debug("Check isValidPatron: ${patron_record}");
+    if ( patron_record != null ) {
+      if ( patron_record.status != 'OK' ) {
+        result = false;
+      }
+    }
     return true;
   }
 
@@ -840,4 +850,16 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+  private Patron lookupOrCreatePatronProxy(Map patron_details) {
+    Patron result = null;
+    if ( ( patron_details != null ) && 
+         ( patron_details.userid != null ) &&
+         ( patron_details.userid.trim().length() > 0 ) ) {
+      result = Patron.findByHostSystemIdentifier(patron_details.userid) ?: new Patron(
+                                                           hostSystemIdentifier:patron_details.userid, 
+                                                           givenname: patron_details.givenName, 
+                                                           surname: patron_details.surname).save()
+    }
+    return result;
+  }
 }

@@ -146,6 +146,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   HostLMSLocation pickLocation;
   String pickShelvingLocation;
 
+  Patron resolvedPatron
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
   // The audit of what has happened to this request and tags that are associated with the request */
@@ -234,6 +236,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronEmail (nullable: true, blank:false)
     patronNote (nullable: true, blank:false)
     pickupLocation (nullable: true, blank:false)
+
+    resolvedPatron (nullable: true)
   }
 
   static mapping = {
@@ -310,6 +314,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronEmail column : 'pr_patron_email'
     patronNote column : 'pr_patron_note'
     pickupLocation column : 'pr_pref_service_point'
+
+    resolvedPatron column : 'pr_resolved_patron_fk'
   }
 
   /**
