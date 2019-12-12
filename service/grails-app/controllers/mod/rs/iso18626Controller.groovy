@@ -38,13 +38,12 @@ class iso18626Controller {
             def mr = messageGpathXml.request
             def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
 
-            def xmlHeader = mr.header
-            def supIdType = xmlHeader.supplyingAgencyId.agencyIdType
-            def supId = xmlHeader.supplyingAgencyId.agencyIdValue
-            def reqAgencyIdType = xmlHeader.requestingAgencyId.agencyIdType
-            def reqAgencyId = xmlHeader.requestingAgencyId.agencyIdValue
-            def reqId = xmlHeader.requestingAgencyRequestId
-            def timeRec = xmlHeader.timestamp
+            def supIdType = mr.header.supplyingAgencyId.agencyIdType
+            def supId = mr.header.supplyingAgencyId.agencyIdValue
+            def reqAgencyIdType = mr.header.requestingAgencyId.agencyIdType
+            def reqAgencyId = mr.header.requestingAgencyId.agencyIdValue
+            def reqId = mr.header.requestingAgencyRequestId
+            def timeRec = mr.header.timestamp
 
             log.debug("result of req_request ${req_result}");
             render( contentType:"text/xml" ) {
@@ -74,19 +73,18 @@ class iso18626Controller {
             def msam = messageGpathXml.supplyingAgencyMessage
             def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
 
-            def xmlHeader = msam.header
-            def supIdType = xmlHeader.supplyingAgencyId.agencyIdType
-            def supId = xmlHeader.supplyingAgencyId.agencyIdValue
-            def reqAgencyIdType = xmlHeader.requestingAgencyId.agencyIdType
-            def reqAgencyId = xmlHeader.requestingAgencyId.agencyIdValue
-            def reqId = xmlHeader.requestingAgencyRequestId
-            def timeRec = xmlHeader.timestamp
-            def reasonForMessage = xmlHeader
+            def supIdType = msam.header.supplyingAgencyId.agencyIdType
+            def supId = msam.header.supplyingAgencyId.agencyIdValue
+            def reqAgencyIdType = msam.header.requestingAgencyId.agencyIdType
+            def reqAgencyId = msam.header.requestingAgencyId.agencyIdValue
+            def reqId = msam.header.requestingAgencyRequestId
+            def timeRec = msam.header.timestamp
+            def reasonForMessage = msam.messageInfo.reasonForMessage
 
             log.debug("result of req_request ${req_result}");
-            /* render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK")
-            } */
+            render( contentType:"text/xml" ) {
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, reasonForMessage, null)
+            }
           }
         } else {
           log.warn("Tenant not found.")
