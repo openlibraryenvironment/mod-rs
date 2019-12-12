@@ -233,70 +233,19 @@ and sa.service.businessFunction.value=:ill
                        'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
                        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
-        request {
-          header {
-            supplyingAgencyId {
-              agencyIdType(eventData.header.supplyingAgencyId.agencyIdType)
-              agencyIdValue(eventData.header.supplyingAgencyId.agencyIdValue)
-            }
-            requestingAgencyId {
-              agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
-              agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
-            }
-            timestamp(dateFormatter.format(new Date())) // Current time
-            requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-            if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE") {
-              supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
-            }
-          }
-
-          // Bib info and Service Info only apply to REQUESTS
-          switch (eventData.messageType) {
-            case "REQUEST":
-              log.debug("This is a requesting message, so needs BibliographicInfo")
-              if (eventData.bibliographicInfo != null) {
-                makeBibliographicInfo(delegate, eventData)
-              } else {
-                log.warn("No bibliographicInfo found")
-              }
-              serviceInfo {
-                serviceType('Loan')
-                serviceLevel('Loan')
-                //needBeforeDate('2014-05-01T00:00:00.0Z')
-                anyEdition('Y')
-              }
-              break;
-            case "SUPPLYING_AGENCY_MESSAGE":
-              log.debug("This is a supplying agency message, so we need MessageInfo, StatusInfo, DeliveryInfo")
-
-              if (eventData.messageInfo != null) {
-                makeMessageInfo(delegate, eventData)
-              } else {
-                log.warn("No messageInfo found")
-              }
-              if (eventData.statusInfo != null) {
-                makeStatusInfo(delegate, eventData)
-              } else {
-                log.warn("No statusInfo found")
-              }
-              if (eventData.deliveryInfo != null) {
-                makeDeliveryInfo(delegate, eventData)
-              } else {
-                log.warn("No deliveryInfo found")
-              }
-              if (eventData.returnInfo != null) {
-                makeReturnInfo(delegate, eventData)
-              } else {
-                log.warn("No returnInfo found")
-              }
-              break;
-            default:
-              log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
-              throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
-          }
+        switch (eventData.messageType) {
+          case "REQUEST":
+            makeRequestBody(delegate, eventData)
+            break;
+          case "SUPPLYING_AGENCY_MESSAGE":
+            makeSupplyingAgencyMessageBody(delegate, eventData)
+            break;
+          default:
+            log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
+            throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
         }
-      }
       log.debug("ISO18626 message created")
+      }
     }
   }
 
@@ -318,6 +267,78 @@ and sa.service.businessFunction.value=:ill
     c.rehydrate(del, c.owner, c.thisObject)()
   } 
   
+  void makeRequestBody(def del, eventData) {
+    exec(del) {
+      request {
+        makeHeader(delegate, eventdata)
+
+        // Bib info and Service Info only apply to REQUESTS
+        log.debug("This is a requesting message, so needs BibliographicInfo")
+        if (eventData.bibliographicInfo != null) {
+          makeBibliographicInfo(delegate, eventData)
+        } else {
+          log.warn("No bibliographicInfo found")
+        }
+        serviceInfo {
+          serviceType('Loan')
+          serviceLevel('Loan')
+          //needBeforeDate('2014-05-01T00:00:00.0Z')
+          anyEdition('Y')
+        }
+      }
+    }
+  }
+
+  void makeSupplyingAgencyMessageBody(def del, eventData) {
+    exec(del) {
+      supplyingAgencyMessage {
+        makeHeader(delegate, eventData)
+
+        log.debug("This is a supplying agency message, so we need MessageInfo, StatusInfo, DeliveryInfo")
+        if (eventData.messageInfo != null) {
+          makeMessageInfo(delegate, eventData)
+        } else {
+          log.warn("No messageInfo found")
+        }
+        if (eventData.statusInfo != null) {
+          makeStatusInfo(delegate, eventData)
+        } else {
+          log.warn("No statusInfo found")
+        }
+        if (eventData.deliveryInfo != null) {
+          makeDeliveryInfo(delegate, eventData)
+        } else {
+          log.warn("No deliveryInfo found")
+        }
+        if (eventData.returnInfo != null) {
+          makeReturnInfo(delegate, eventData)
+        } else {
+          log.warn("No returnInfo found")
+        }
+      }
+    }
+  }
+
+  void makeHeader(def del, eventData) {
+    exec(del) {
+      header {
+        supplyingAgencyId {
+          agencyIdType(eventData.header.supplyingAgencyId.agencyIdType)
+          agencyIdValue(eventData.header.supplyingAgencyId.agencyIdValue)
+        }
+        requestingAgencyId {
+          agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
+          agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
+        }
+        timestamp(dateFormatter.format(new Date())) // Current time
+        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+          supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
+        }
+      }
+    }
+  }
+
   void makeBibliographicInfo(def del, eventData) {
     exec(del) {
       bibliographicInfo {
