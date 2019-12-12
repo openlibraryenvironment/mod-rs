@@ -225,7 +225,6 @@ and sa.service.businessFunction.value=:ill
     */
 
     log.debug("Creating ISO18626 Message")
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     log.debug("Message Type: ${eventData.messageType}")
     return{
       ISO18626Message( 'ill:version':'1.0',
@@ -270,7 +269,7 @@ and sa.service.businessFunction.value=:ill
   void makeRequestBody(def del, eventData) {
     exec(del) {
       request {
-        makeHeader(delegate, eventdata)
+        makeHeader(delegate, eventData)
 
         // Bib info and Service Info only apply to REQUESTS
         log.debug("This is a requesting message, so needs BibliographicInfo")
@@ -320,6 +319,7 @@ and sa.service.businessFunction.value=:ill
   }
 
   void makeHeader(def del, eventData) {
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     exec(del) {
       header {
         supplyingAgencyId {
