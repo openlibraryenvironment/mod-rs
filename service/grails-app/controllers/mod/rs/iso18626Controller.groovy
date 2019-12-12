@@ -20,14 +20,12 @@ class iso18626Controller {
     log.debug("iso18626Controller::index(${params})");
 
     try {
-      log.debug("XML: ${request.XML}");
-      def iso18626_msg = request.XML;
-      org.grails.databinding.xml.GPathResultMap messageGpathXml = new org.grails.databinding.xml.GPathResultMap(iso18626_msg);
-      log.debug("MESSAGE: ${messageGpathXml}")
+      org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
+      log.debug("MESSAGE: ${iso18626_msg}")
       String recipient;
       String tenant;
 
-      if ( messageGpathXml.request != null ) {
+      if ( iso18626_msg.request != null ) {
         log.debug("Process inbound request message");
         // Look in request.header.supplyingAgencyId for the intended recipient
         recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
@@ -35,10 +33,10 @@ class iso18626Controller {
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            def mr = messageGpathXml.request
+            def mr = iso18626_msg.request
             def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
 
-            def xmlHeader = iso18626_msg.request.header
+            def xmlHeader = mr.request.header
             def supIdType = xmlHeader.supplyingAgencyId.agencyIdType
             def supId = xmlHeader.supplyingAgencyId.agencyIdValue
             def reqAgencyIdType = xmlHeader.requestingAgencyId.agencyIdType
@@ -48,7 +46,7 @@ class iso18626Controller {
 
             log.debug("result of req_request ${req_result}");
             render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK")
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, null)
             }
           }
         } else {
@@ -63,28 +61,50 @@ class iso18626Controller {
           }
         }
       }
-      else if ( messageGpathXml.supplyingAgencyMessage != null ) {
+      else if ( iso18626_msg.supplyingAgencyMessage != null ) {
         log.debug("Process inbound supplyingAgencyMessage message");
         // Look in request.header.requestingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.request.header.requestingAgencyId);
+        recipient = getSymbolFor(iso18626_msg.supplyingAgencyMessage.header.requestingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
-          log.debug("incoming request for ${tenant}");
-        }
+          log.debug("incoming supplying agency message for ${tenant}");
+          Tenants.withId(tenant+'_mod_rs') {
+            def msam = iso18626_msg.supplyingAgencyMessage
+            def req_result = reshareApplicationEventHandlerService.handleRequestMessage(msam);
 
-        render( contentType:"text/xml" ) {
-          vxml( version:'2.1' ) {
-            var( name:'hi', expr:call.message )
+            def xmlHeader = msam.header
+            def supIdType = xmlHeader.supplyingAgencyId.agencyIdType
+            def supId = xmlHeader.supplyingAgencyId.agencyIdValue
+            def reqAgencyIdType = xmlHeader.requestingAgencyId.agencyIdType
+            def reqAgencyId = xmlHeader.requestingAgencyId.agencyIdValue
+            def reqId = xmlHeader.requestingAgencyRequestId
+            def timeRec = xmlHeader.timestamp
+            def reasonForMessage = xmlHeader
+
+            log.debug("result of req_request ${req_result}");
+            /* render( contentType:"text/xml" ) {
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK")
+            } */
+          }
+        } else {
+          log.warn("Tenant not found.")
+          // TODO send back error response.
+          render( contentType:"text/xml" ) {
+            vxml( version:'2.1' ) {
+              param( name:'hi' ) {
+                sub('error')
+              }
+            }
           }
         }
       }
-      else if ( messageGpathXml.requestingAgencyMessage != null ) {
+      else if ( iso18626_msg.requestingAgencyMessage != null ) {
         log.debug("Process inbound requestingAgencyMessage message");
         // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
+        recipient = getSymbolFor(iso18626_msg.requestingAgencyMessage.header.supplyingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
-          log.debug("incoming request for ${tenant}");
+          log.debug("incoming requesting agency message for ${tenant}");
         }
 
         render( contentType:"text/xml" ) {
@@ -110,7 +130,7 @@ class iso18626Controller {
   private String getSymbolFor(path) {
     String result = null;
     if ( path.agencyIdType != null && path.agencyIdValue != null ) {
-      result = "${path.agencyIdType.text()}:${path.agencyIdValue.text()}".toString()
+      result = "${path.agencyIdType.toString()}:${path.agencyIdValue.toString()}".toString()
     }
     else {
       log.error("Missing agency id type or value");
@@ -124,8 +144,10 @@ class iso18626Controller {
     c.rehydrate(del, c.owner, c.thisObject)()
   } 
 
-
-  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, String reqId, String timeRec, String status) {
+  // TODO Does not currently contain ErrorData, or differentiate between message types
+  // Needs reasonForMessage for a supplyingAgencyRequestMessageConfirmation
+  // Needs action for a requestingAgencyMessageConfirmation
+  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, String reqId, String timeRec, String status, String errorData, String reasonForMessage, String action) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     def currentTime = dateFormatter.format(new Date())
     return {
@@ -137,19 +159,28 @@ class iso18626Controller {
                         'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
           request {
             header {
-            supplyingAgencyId {
-              agencyIdType(supIdType)
-              agencyIdValue(supId)
-            }
-            requestingAgencyId {
-              agencyIdType(reqAgencyIdType)
-              agencyIdValue(reqAgencyId)
-            }
-            timestamp(currentTime)
-            requestingAgencyRequestId(reqId)
-            multipleItemRequestId(null)
-            timestampReceived(timeRec)
-            messageStatus(status)
+              supplyingAgencyId {
+                agencyIdType(supIdType)
+                agencyIdValue(supId)
+              }
+              requestingAgencyId {
+                agencyIdType(reqAgencyIdType)
+                agencyIdValue(reqAgencyId)
+              }
+              timestamp(currentTime)
+              requestingAgencyRequestId(reqId)
+              multipleItemRequestId(null)
+              timestampReceived(timeRec)
+              messageStatus(status)
+              if (errorData != null) {
+                errorData(errorData)
+              }
+              if (reasonForMessage != null) {
+                reasonForMessage(reasonForMessage)
+              }
+              if (action != null) {
+                action(action)
+              }
             }
           }
         }
