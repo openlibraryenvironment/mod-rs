@@ -147,7 +147,8 @@ class iso18626Controller {
   // TODO Does not currently contain ErrorData, or differentiate between message types
   // Needs reasonForMessage for a supplyingAgencyRequestMessageConfirmation
   // Needs action for a requestingAgencyMessageConfirmation
-  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, String reqId, String timeRec, String status, String errorData, String reasonForMessage, String action) {
+  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, 
+                              String reqId, String timeRec, String status, String errorData, String reasonForMessage, String action) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     def currentTime = dateFormatter.format(new Date())
     return {
