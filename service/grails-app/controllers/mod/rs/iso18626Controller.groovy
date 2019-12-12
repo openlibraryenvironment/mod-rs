@@ -27,7 +27,7 @@ class iso18626Controller {
       String recipient;
       String tenant;
 
-      if ( iso18626_msg.request != null ) {
+      if ( messageGpathXml.request != null ) {
         log.debug("Process inbound request message");
         // Look in request.header.supplyingAgencyId for the intended recipient
         recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
@@ -35,7 +35,7 @@ class iso18626Controller {
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.request);
+            def mr = messageGpathXml.request
             def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
 
             def xmlHeader = iso18626_msg.request.header
@@ -63,7 +63,7 @@ class iso18626Controller {
           }
         }
       }
-      else if ( iso18626_msg.supplyingAgencyMessage != null ) {
+      else if ( messageGpathXml.supplyingAgencyMessage != null ) {
         log.debug("Process inbound supplyingAgencyMessage message");
         // Look in request.header.requestingAgencyId for the intended recipient
         recipient = getSymbolFor(iso18626_msg.request.header.requestingAgencyId);
@@ -78,7 +78,7 @@ class iso18626Controller {
           }
         }
       }
-      else if ( iso10626_msg.requestingAgencyMessageConfirmation != null ) {
+      else if ( messageGpathXml.requestingAgencyMessage != null ) {
         log.debug("Process inbound requestingAgencyMessage message");
         // Look in request.header.supplyingAgencyId for the intended recipient
         recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
