@@ -115,8 +115,10 @@ class ProtocolMessageService {
     try {
       log.debug("Sending ISO18626 message to ${serviceAddress}")
       sendISO18626Message(eventData, serviceAddress)
+      result.status = "SENT"
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
+      result.status = "NOT SENT"
       log.error("ISO18626 message failed to send.\n ${e.message}",e)
     }
     log.debug("====================================================================")
