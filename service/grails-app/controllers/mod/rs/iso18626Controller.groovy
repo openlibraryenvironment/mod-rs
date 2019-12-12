@@ -48,7 +48,7 @@ class iso18626Controller {
 
             log.debug("result of req_request ${req_result}");
             render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK")
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK")
             }
           }
         } else {
