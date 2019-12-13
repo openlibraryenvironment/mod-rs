@@ -65,11 +65,15 @@ class iso18626Controller {
       }
       else if ( iso18626_msg.supplyingAgencyMessage != null ) {
         log.debug("Process inbound supplyingAgencyMessage message");
-        // Look in request.header.requestingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.request.header.requestingAgencyId);
+        // Look in supplyingAgencyMessage.header.requestingAgencyId for the intended recipient
+        recipient = getSymbolFor(iso18626_msg.supplyingAgencyMessage.header.requestingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
+          Tenants.withId(tenant+'_mod_rs') {
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.supplyingAgencyMessage);
+            log.debug("Process supplying agency message ${mr}");
+          }
         }
 
         render( contentType:"text/xml" ) {
@@ -78,13 +82,16 @@ class iso18626Controller {
           }
         }
       }
-      else if ( iso10626_msg.requestingAgencyMessageConfirmation != null ) {
+      else if ( iso10626_msg.requestingAgencyMessage != null ) {
         log.debug("Process inbound requestingAgencyMessage message");
-        // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
+        // Look in request.header.requestingAgencyMessage for the intended recipient
+        recipient = getSymbolFor(iso18626_msg.requestingAgencyMessage.header.supplyingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
-          log.debug("incoming request for ${tenant}");
+          Tenants.withId(tenant+'_mod_rs') {
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(iso18626_msg.requestingAgencyMessage);
+            log.debug("Process requesting agency message ${mr}");
+          }
         }
 
         render( contentType:"text/xml" ) {
