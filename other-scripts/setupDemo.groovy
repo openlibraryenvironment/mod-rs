@@ -48,7 +48,7 @@ if ( 1==1 ) {
   //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
   okapi.createRequest([
                        title:'Temeraire',
-                       patronIdentifier: 'PI',
+                       patronIdentifier: '905808497',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
@@ -61,7 +61,7 @@ if ( 1==1 ) {
 
   okapi.createRequest([
                        title:'The darkening land',
-                       patronIdentifier: 'PI',
+                       patronIdentifier: '905808497',
                        patronReference: 'PR',
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
