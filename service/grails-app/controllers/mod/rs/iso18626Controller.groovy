@@ -20,22 +20,20 @@ class iso18626Controller {
     log.debug("iso18626Controller::index(${params})");
 
     try {
-      log.debug("XML: ${request.XML}");
-      def iso18626_msg = request.XML;
-      org.grails.databinding.xml.GPathResultMap messageGpathXml = new org.grails.databinding.xml.GPathResultMap(iso18626_msg);
-      log.debug("MESSAGE: ${messageGpathXml}")
+      org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
+      log.debug("GPATH MESSAGE: ${iso18626_msg}")
       String recipient;
       String tenant;
 
-      if ( messageGpathXml.request != null ) {
+      if ( iso18626_msg.request != null ) {
         log.debug("Process inbound request message");
         // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(messageGpathXml.request.header.supplyingAgencyId);
+        recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            def mr = messageGpathXml.request
+            def mr = iso18626_msg.request
             def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
 
             def supIdType = mr.header.supplyingAgencyId.agencyIdType
@@ -62,15 +60,15 @@ class iso18626Controller {
           }
         }
       }
-      else if ( messageGpathXml.supplyingAgencyMessage != null ) {
+      else if ( iso18626_msg.supplyingAgencyMessage != null ) {
         log.debug("Process inbound supplyingAgencyMessage message");
         // Look in request.header.requestingAgencyId for the intended recipient
-        recipient = getSymbolFor(messageGpathXml.supplyingAgencyMessage.header.requestingAgencyId);
+        recipient = getSymbolFor(iso18626_msg.supplyingAgencyMessage.header.requestingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming supplying agency message for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            def msam = messageGpathXml.supplyingAgencyMessage
+            def msam = iso18626_msg.supplyingAgencyMessage
             def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
             def supIdType = msam.header.supplyingAgencyId.agencyIdType
             def supId = msam.header.supplyingAgencyId.agencyIdValue
@@ -97,10 +95,10 @@ class iso18626Controller {
           }
         }
       }
-      else if ( messageGpathXml.requestingAgencyMessage != null ) {
+      else if ( iso18626_msg.requestingAgencyMessage != null ) {
         log.debug("Process inbound requestingAgencyMessage message");
         // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(messageGpathXml.requestingAgencyMessage.header.supplyingAgencyId);
+        recipient = getSymbolFor(iso18626_msg.requestingAgencyMessage.header.supplyingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming requesting agency message for ${tenant}");

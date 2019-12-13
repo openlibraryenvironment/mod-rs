@@ -48,6 +48,9 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_SOURCING_ITEM_ind': { service, eventData ->
       service.log.debug("REQ_SOURCING_ITEM state should now be REQ_SUPPLIER_IDENTIFIED");
     },
+    'STATUS_REQ_UNFILLED_ind': { service, eventData ->
+      service.sendToNextLender(eventData);
+    },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
