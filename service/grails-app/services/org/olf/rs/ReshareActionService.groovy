@@ -67,4 +67,11 @@ public class ReshareActionService {
     return result;
   }
 
+  public sendMessage(PatronRequest pr, Object actionParams) {
+    log.debug("actionMessage(${pr})");
+    // Sending a message does not change the state of a request 
+    boolean result = true;
+    return result;
+  }
+
 }

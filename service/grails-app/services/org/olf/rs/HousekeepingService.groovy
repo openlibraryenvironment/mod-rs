@@ -100,8 +100,13 @@ public class HousekeepingService {
 
 
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
+        StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
         StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
+        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
         StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
+        StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
+
+        StateTransition.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
       }
 
     }
