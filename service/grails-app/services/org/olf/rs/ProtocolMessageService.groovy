@@ -70,27 +70,6 @@ class ProtocolMessageService {
       result.status='ERROR'
     } */
 
-
-
-
-    /* if (tenant != null) {
-      // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
-      // and then 
-      log.debug("ProtocolMessageService::sendProtocolMessage(${message_sender_symbol},${peer_symbol},...) identified peer as a tenant in this system - loopback");
-      eventData.tenant = tenant.toLowerCase()+'_mod_rs'
-      eventData.sender = message_sender_symbol
-      eventData.recipient = peer_symbol
-      eventData.event = mapToEvent(eventData.messageType)
-      log.debug("Direct call ${tenant} as loopback for ${eventData}");
-      handleIncomingMessage(eventData)
-      result.status='SENT'
-    } else {
-      log.error("Tenant ${peer_symbol} does not exist in the system. TODO: call real messaging here")
-      // If the symbol exists in the directory and we have a protocol address, send a message,
-      // otherwise, mark as failed and skip to the next rota entry.
-      // update the request status - set the 
-      result.status='ERROR'
-    } */
     log.debug("Will send an ISO18626 message to ILL service")
 
     log.debug("====================================================================")
@@ -113,7 +92,7 @@ class ProtocolMessageService {
     }
 
     try {
-      log.debug("Sending ISO18626 message to ${serviceAddress}")
+      log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
       sendISO18626Message(eventData, serviceAddress)
       result.status = "SENT"
       log.debug("ISO18626 message sent")

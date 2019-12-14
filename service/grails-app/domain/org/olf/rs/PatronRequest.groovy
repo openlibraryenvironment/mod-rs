@@ -316,6 +316,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation column : 'pr_pref_service_point'
 
     resolvedPatron column : 'pr_resolved_patron_fk'
+
+    audit(sort:'dateCreated', order:'desc')
   }
 
   /**

@@ -181,8 +181,8 @@ public class HostLMSService {
     Map result = null;
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
+      log.debug("Resolve borrower_check_setting ${borrower_check_setting}");
       RefdataValue rdv = RefdataValue.get( borrower_check_setting.value )
-
       if ( rdv ) {
         String borrower_check = rdv.value;
         switch ( borrower_check ) {
@@ -194,6 +194,12 @@ public class HostLMSService {
             break;
         }
       }
+      else {
+        log.warn('Unable to locate borrower check setting');
+      }
+    }
+    else {
+      log.warn('borrower check not configured');
     }
 
     log.debug("HostLMSService::lookupPatron(${patron_id}) returns ${result}");
@@ -213,7 +219,7 @@ public class HostLMSService {
       sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW','905808497'))
       String message = sw.toString();
 
-      // log.debug("NCIP Request: ${message}");
+      log.debug("NCIP Request: ${message}");
 
       HttpBuilder.configure {
         request.uri = ncip_server_address
