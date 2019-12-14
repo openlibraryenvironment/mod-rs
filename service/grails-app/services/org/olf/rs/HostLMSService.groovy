@@ -222,6 +222,7 @@ public class HostLMSService {
 
         response.success { FromServer fs, Object body ->
             org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
+            log.debug("NCIP Response: ${mr}");
             result=[
               userid: mr.LookupUserResponse?.UserId?.UserIdentifierValue,
               givenName: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.GivenName,

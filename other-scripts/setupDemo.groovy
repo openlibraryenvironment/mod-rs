@@ -61,7 +61,7 @@ if ( 1==1 ) {
 
   okapi.createRequest([
                        title:'The darkening land',
-                       patronIdentifier: '905808497',
+                       patronIdentifier: '100002',
                        patronReference: 'PR',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
                        requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
