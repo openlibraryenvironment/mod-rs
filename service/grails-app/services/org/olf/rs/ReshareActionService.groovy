@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
  */
 public class ReshareActionService {
 
+  ProtocolMessageService protocolMessageService
+
   public boolean checkInToReshare(PatronRequest pr) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
@@ -67,10 +69,70 @@ public class ReshareActionService {
     return result;
   }
 
-  public sendMessage(PatronRequest pr, Object actionParams) {
+  public boolean sendMessage(PatronRequest pr, Object actionParams) {
     log.debug("actionMessage(${pr})");
-    // Sending a message does not change the state of a request 
-    boolean result = true;
+    boolean result = false;
+    // Sending a message does not change the state of a request
+
+
+    // If the actionParams does not contain a note then this method should do nothing
+    if (actionParams.isNull("note")) {
+      return false;
+    }
+
+
+    Map eventData = [header:[]];
+
+    if (pr.isRequester == true) {
+      String message_sender_symbol = pr.requestingInstitutionSymbol;
+      Long rotaPosition = pr.rotaPosition;
+      String peer_symbol = pr.rota[rotaPosition];
+
+      eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
+
+      eventData.header = [
+        supplyingAgencyId: [
+          agencyIdType:peer_symbol.split(":")[0],
+          agencyIdValue:peer_symbol.split(":")[1],
+        ],
+        requestingAgencyId:[
+          agencyIdType:message_sender_symbol.split(":")[0],
+          agencyIdValue:message_sender_symbol.split(":")[1],
+        ],
+        requestingAgencyRequestId:pr.id,
+        supplyingAgencyRequestId:pr.peerRequestIdentifier,
+      ]
+
+      eventData.activeSection = [action:"Notification", note:actionParams.note]
+
+    } else {
+      String message_sender_symbol = pr.supplyingInstitutionSymbol;
+      String peer_symbol = pr.requestingInstitutionSymbol;
+
+      eventData.messageType = 'SUPPLYING_AGENCY_MESSAGE'
+
+      eventData.header = [
+        supplyingAgencyId: [
+          agencyIdType:message_sender_symbol.split(":")[0],
+          agencyIdValue:message_sender_symbol.split(":")[1],
+        ],
+        requestingAgencyId:[
+          agencyIdType:peer_symbol.split(":")[0],
+          agencyIdValue:peer_symbol.split(":")[1],
+        ],
+        requestingAgencyRequestId:pr.id,
+        supplyingAgencyRequestId:pr.peerRequestIdentifier,
+      ]
+
+      eventData.messageInfo = [reasonForMessage:"Notification", note:actionParams.note]
+
+    }
+
+    // TODO Fill in the below fields properly and grab the returned value
+    protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
+
+    // TODO add proper checks to see if message sent ok
+    result = true;
     return result;
   }
 
