@@ -19,12 +19,13 @@ import java.time.LocalDateTime;
  */
 public class ReshareActionService {
 
-  public boolean checkInToReshare(PatronRequest pr) {
+  public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
     Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
     if ( s && pr.state.code=='RES_AWAIT_PICKING') {
       pr.state = s;
+      pr.selectedItemBarcode = actionParams?.itemBarcode;
       pr.save(flush:true, failOnError:true);
       result = true;
     }
