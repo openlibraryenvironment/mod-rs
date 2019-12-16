@@ -128,7 +128,7 @@ public class ReshareActionService {
 
     }
 
-    def send_result protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
+    def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
     if ( send_result=='SENT') {
       result = true;
