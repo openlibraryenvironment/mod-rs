@@ -128,11 +128,14 @@ public class ReshareActionService {
 
     }
 
-    // TODO Fill in the below fields properly and grab the returned value
-    protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
+    def send_result protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
-    // TODO add proper checks to see if message sent ok
-    result = true;
+    if ( send_result=='SENT') {
+      result = true;
+    }
+    else {
+      log.warn("Unable to send protocol message");
+    }
     return result;
   }
 
