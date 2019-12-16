@@ -553,6 +553,19 @@ public class ReshareApplicationEventHandlerService {
     
   }
 
+
+/**
+   * An incoming message to the supplying agency from the requesting agency - so we look in 
+   * eventData.header?.supplyingAgencyRequestId to find our own ID for the request.
+   */
+  public void handleRequestingAgencyMessage(Map eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
+
+    // TODO -- make this actually handle an incoming requesting agency message.
+
+    // Needs to look for action and try to do something with that.
+  }
+
   private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {
     log.debug("handleStatusChange(${pr.id},${statusInfo})");
 
