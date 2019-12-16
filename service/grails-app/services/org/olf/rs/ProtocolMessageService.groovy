@@ -220,6 +220,9 @@ and sa.service.businessFunction.value=:ill
           case "SUPPLYING_AGENCY_MESSAGE":
             makeSupplyingAgencyMessageBody(delegate, eventData)
             break;
+          case "REQUESTING_AGENCY_MESSAGE":
+            makeRequestingAgencyMessageBody(delegate, eventData)
+            break;
           default:
             log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
             throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
@@ -299,6 +302,21 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
+  void makeRequestingAgencyMessageBody(def del, eventData) {
+    exec(del) {
+      requestingAgencyMessage {
+        makeHeader(delegate, eventData)
+
+        log.debug("This is a requesting agency message, so we need ActiveSection")
+        if (eventData.activeSection != null) {
+          makeActiveSection(delegate, eventData)
+        } else {
+          log.warn("No activeSection found")
+        }
+      }
+    }
+  }
+
   void makeHeader(def del, eventData) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     exec(del) {
@@ -313,8 +331,11 @@ and sa.service.businessFunction.value=:ill
         }
         timestamp(dateFormatter.format(new Date())) // Current time
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
           supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
+        }
+        if (eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
+          requestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
         }
       }
     }
@@ -378,6 +399,15 @@ and sa.service.businessFunction.value=:ill
         offeredCosts(eventData.messageInfo.offeredCosts)
         retryAfter(eventData.messageInfo.retryAfter)
         retryBefore(eventData.messageInfo.retryBefore)
+      }
+    }
+  }
+
+  void makeActiveSection(def del, eventData) {
+    exec(del) {
+      activeSection {
+        action(eventData.activeSection.action)
+        note(eventData.activeSection.note)
       }
     }
   }
