@@ -134,7 +134,7 @@ public class ReshareApplicationEventHandlerService {
             if ( req.patronSurname == null )
               req.patronSurname = patron_details.surname;
             if ( req.patronGivenName == null )
-              req.patronGivenNam = patron_details.givenName;
+              req.patronGivenName = patron_details.givenName;
           }
 
           if ( req.requestingInstitutionSymbol != null ) {
@@ -551,6 +551,19 @@ public class ReshareApplicationEventHandlerService {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
     
+  }
+
+
+/**
+   * An incoming message to the supplying agency from the requesting agency - so we look in 
+   * eventData.header?.supplyingAgencyRequestId to find our own ID for the request.
+   */
+  public void handleRequestingAgencyMessage(Map eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
+
+    // TODO -- make this actually handle an incoming requesting agency message.
+
+    // Needs to look for action and try to do something with that.
   }
 
   private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {

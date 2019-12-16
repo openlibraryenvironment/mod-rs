@@ -46,25 +46,23 @@ if ( 1==1 ) {
   //                      requestingInstitutionSymbol:'RESHARE:KNOWINT']);
 
   //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
+  /*
   okapi.createRequest([
                        title:'Temeraire',
                        patronIdentifier: '905808497',
                        patronReference: 'PR',
-                       patronSurname: 'PS',
-                       patronGivenName: 'PGN',
                        patronType:'PT',
                        patronEmail:'patron@institution',
                        patronNote:'Please dont shoot the messenger',
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'8a6d65a3-709c-4ade-9ffa-043fb031fedd',
-                       requestingInstitutionSymbol:'OCLC:ZMU']);
+                       requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+  */
 
   okapi.createRequest([
                        title:'The darkening land',
                        patronIdentifier: '905808497',
                        patronReference: 'PR',
-                       patronSurname: 'PS',
-                       patronGivenName: 'PGN',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
                        requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
 

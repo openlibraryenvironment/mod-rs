@@ -70,27 +70,6 @@ class ProtocolMessageService {
       result.status='ERROR'
     } */
 
-
-
-
-    /* if (tenant != null) {
-      // The lender we wish to ask for a copy is a tenant in the same system so set the required tenant
-      // and then 
-      log.debug("ProtocolMessageService::sendProtocolMessage(${message_sender_symbol},${peer_symbol},...) identified peer as a tenant in this system - loopback");
-      eventData.tenant = tenant.toLowerCase()+'_mod_rs'
-      eventData.sender = message_sender_symbol
-      eventData.recipient = peer_symbol
-      eventData.event = mapToEvent(eventData.messageType)
-      log.debug("Direct call ${tenant} as loopback for ${eventData}");
-      handleIncomingMessage(eventData)
-      result.status='SENT'
-    } else {
-      log.error("Tenant ${peer_symbol} does not exist in the system. TODO: call real messaging here")
-      // If the symbol exists in the directory and we have a protocol address, send a message,
-      // otherwise, mark as failed and skip to the next rota entry.
-      // update the request status - set the 
-      result.status='ERROR'
-    } */
     log.debug("Will send an ISO18626 message to ILL service")
 
     log.debug("====================================================================")
@@ -113,7 +92,7 @@ class ProtocolMessageService {
     }
 
     try {
-      log.debug("Sending ISO18626 message to ${serviceAddress}")
+      log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
       sendISO18626Message(eventData, serviceAddress)
       result.status = "SENT"
       log.debug("ISO18626 message sent")
@@ -241,6 +220,9 @@ and sa.service.businessFunction.value=:ill
           case "SUPPLYING_AGENCY_MESSAGE":
             makeSupplyingAgencyMessageBody(delegate, eventData)
             break;
+          case "REQUESTING_AGENCY_MESSAGE":
+            makeRequestingAgencyMessageBody(delegate, eventData)
+            break;
           default:
             log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
             throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
@@ -320,6 +302,21 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
+  void makeRequestingAgencyMessageBody(def del, eventData) {
+    exec(del) {
+      requestingAgencyMessage {
+        makeHeader(delegate, eventData)
+
+        log.debug("This is a requesting agency message, so we need ActiveSection")
+        if (eventData.activeSection != null) {
+          makeActiveSection(delegate, eventData)
+        } else {
+          log.warn("No activeSection found")
+        }
+      }
+    }
+  }
+
   void makeHeader(def del, eventData) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     exec(del) {
@@ -334,8 +331,11 @@ and sa.service.businessFunction.value=:ill
         }
         timestamp(dateFormatter.format(new Date())) // Current time
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
           supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
+        }
+        if (eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
+          requestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
         }
       }
     }
@@ -399,6 +399,15 @@ and sa.service.businessFunction.value=:ill
         offeredCosts(eventData.messageInfo.offeredCosts)
         retryAfter(eventData.messageInfo.retryAfter)
         retryBefore(eventData.messageInfo.retryBefore)
+      }
+    }
+  }
+
+  void makeActiveSection(def del, eventData) {
+    exec(del) {
+      activeSection {
+        action(eventData.activeSection.action)
+        note(eventData.activeSection.note)
       }
     }
   }

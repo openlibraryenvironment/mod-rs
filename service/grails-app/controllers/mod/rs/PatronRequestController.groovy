@@ -44,6 +44,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'supplierCheckInToReshare':
               result.status = reshareActionService.checkInToReshare(patron_request, request.JSON.actionParams);
               break;
+            case 'message':
+              result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
+              break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
               break;
