@@ -192,17 +192,17 @@ and sa.service.businessFunction.value=:ill
   def makeISO18626Message(Map eventData) {
 
     // eventData is expected to have a header with structure:
-    /*header:[
-      supplyingAgencyId: [
-        agencyIdType:RESHARE,
-        agencyIdValue:VLA
-      ],
-      requestingAgencyId:[
-        agencyIdType:OCLC,
-        agencyIdValue:ZMU
-      ],
-      requestingAgencyRequestId:16,
-      supplyingAgencyRequestId:8f41a3a4-daa5-4734-9f4f-32578838ff66]
+    /*@param header:[
+              supplyingAgencyId: [
+                agencyIdType:RESHARE,
+                agencyIdValue:VLA
+              ],
+              requestingAgencyId:[
+                agencyIdType:OCLC,
+                agencyIdValue:ZMU
+              ],
+              requestingAgencyRequestId:16,
+              supplyingAgencyRequestId:8f41a3a4-daa5-4734-9f4f-32578838ff66]
     */
 
     log.debug("Creating ISO18626 Message")

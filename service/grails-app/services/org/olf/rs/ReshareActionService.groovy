@@ -87,7 +87,8 @@ public class ReshareActionService {
     if (pr.isRequester == true) {
       String message_sender_symbol = pr.requestingInstitutionSymbol;
       Long rotaPosition = pr.rotaPosition;
-
+      
+      // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
       if (pr.rota.isEmpty()) {
         log.error("sendMessage has been given an empty rota")
         return false;
