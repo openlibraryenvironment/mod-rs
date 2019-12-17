@@ -87,7 +87,21 @@ public class ReshareActionService {
     if (pr.isRequester == true) {
       String message_sender_symbol = pr.requestingInstitutionSymbol;
       Long rotaPosition = pr.rotaPosition;
-      String peer_symbol = pr.rota[rotaPosition];
+
+      if (pr.rota.isEmpty()) {
+        log.error("sendMessage has been given an empty rota")
+        return false;
+      }
+
+      if (!rotaPosition) {
+        log.error("sendMessage could not find current rota postition")
+        return false;
+      } else if (!pr.rota[rotaPosition]) {
+        log.error("sendMessage could not find rota entry at current position")
+        return false;
+      }
+
+      String peer_symbol = "${pr.rota[rotaPosition].peerSymbol.authority.symbol}:${pr.rota[rotaPosition].peerSymbol.symbol}"
 
       eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
