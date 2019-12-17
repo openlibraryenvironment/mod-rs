@@ -45,18 +45,15 @@ class iso18626Controller {
 
             log.debug("result of req_request ${req_result}");
             render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, null)
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, null, null)
             }
           }
         } else {
           log.warn("Tenant not found.")
           // TODO send back error response.
           render( contentType:"text/xml" ) {
-            vxml( version:'2.1' ) {
-              param( name:'hi' ) {
-                sub('error')
-              }
-            }
+            // TODO -- this might not be granular enough, what if authority name is wrong but symbol name isn't, etc? See http://biblstandard.dk/ill/dk/examples/request-confirmation-with-error.xml
+            makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnrecognisedDataValue", "RequestingAgencyId/${recipient}", null, null)
           }
         }
       }
@@ -69,7 +66,9 @@ class iso18626Controller {
           log.debug("incoming supplying agency message for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
             def msam = iso18626_msg.supplyingAgencyMessage
+            
             def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
+
             def supIdType = msam.header.supplyingAgencyId.agencyIdType
             def supId = msam.header.supplyingAgencyId.agencyIdValue
             def reqAgencyIdType = msam.header.requestingAgencyId.agencyIdType
@@ -79,19 +78,26 @@ class iso18626Controller {
             def reasonForMessage = msam.messageInfo.reasonForMessage
 
             log.debug("result of req_request ${req_result}");
-            render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, reasonForMessage, null)
+
+            // TODO - I'm sure there's a better way to do this, perhaps dynamically, perhaps not here.
+            def supportedReasons = ["RequestResponse", "Notification", "StatusChange"]
+
+            if (!supportedReasons.contains(reasonForMessage)) {
+              render( contentType:"text/xml" ) {
+                makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnsupportedReasonForMessageType", reasonForMessage, reasonForMessage, null)
+              }
+            } else {
+              render( contentType:"text/xml" ) {
+                makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, reasonForMessage, null)
+              }
             }
           }
         } else {
           log.warn("Tenant not found.")
           // TODO send back error response.
           render( contentType:"text/xml" ) {
-            vxml( version:'2.1' ) {
-              param( name:'hi' ) {
-                sub('error')
-              }
-            }
+            // TODO -- this might not be granular enough, what if authority name is wrong but symbol name isn't, etc? See http://biblstandard.dk/ill/dk/examples/request-confirmation-with-error.xml
+            makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnrecognisedDataValue", "RequestingAgencyId/${recipient}", reasonForMessage, null)
           }
         }
       }
@@ -112,7 +118,7 @@ class iso18626Controller {
       }
       else {
         render( contentType:"text/xml" ) {
-          result( 'OK' )
+          makeConfirmationMessage(delegate, null, null, null, null, null, null, "ERROR", "BadlyFormedMessage", null, null, null)
         } 
       }
 
@@ -150,7 +156,7 @@ class iso18626Controller {
   // Needs reasonForMessage for a supplyingAgencyRequestMessageConfirmation
   // Needs action for a requestingAgencyMessageConfirmation
   def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, 
-                              String reqId, String timeRec, String status, String errorData, String reasonForMessage, String action) {
+                              String reqId, String timeRec, String status, String errorType, String errorValue, String reasonForMessage, String action) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     def currentTime = dateFormatter.format(new Date())
     return {
@@ -175,8 +181,11 @@ class iso18626Controller {
               multipleItemRequestId(null)
               timestampReceived(timeRec)
               messageStatus(status)
-              if (errorData != null) {
-                errorData(errorData)
+              if (status != "OK") {
+                errorData {
+                  errorType(errorType)
+                  errorValue(errorValue)
+                }
               }
               if (reasonForMessage != null) {
                 reasonForMessage(reasonForMessage)
