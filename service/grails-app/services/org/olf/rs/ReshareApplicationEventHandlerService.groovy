@@ -458,6 +458,7 @@ public class ReshareApplicationEventHandlerService {
 
   /**
    * A new request has been received from a peer institution. We will need to create a request where isRequester==false
+   * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleRequestMessage(Map eventData) {
 
@@ -523,6 +524,7 @@ public class ReshareApplicationEventHandlerService {
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
+   * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleSupplyingAgencyMessage(Map eventData) {
 
@@ -556,6 +558,8 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
         throw new Exception("No reason for message");
       }
 
@@ -589,13 +593,18 @@ public class ReshareApplicationEventHandlerService {
 /**
    * An incoming message to the supplying agency from the requesting agency - so we look in 
    * eventData.header?.supplyingAgencyRequestId to find our own ID for the request.
+   * This should return everything that ISO18626Controller needs to build a confirmation message
    */
-  public void handleRequestingAgencyMessage(Map eventData) {
+  def handleRequestingAgencyMessage(Map eventData) {
+
+    def result = [:]
+
     log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
 
     // TODO -- make this actually handle an incoming requesting agency message.
 
     // Needs to look for action and try to do something with that.
+    return result;
   }
 
   private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {

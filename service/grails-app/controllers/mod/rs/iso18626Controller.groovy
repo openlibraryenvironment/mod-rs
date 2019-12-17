@@ -9,6 +9,8 @@ import org.olf.rs.ReshareApplicationEventHandlerService
 import grails.gorm.multitenancy.Tenants
 import java.text.SimpleDateFormat
 
+import groovy.xml.StreamingMarkupBuilder
+
 class iso18626Controller {
 
   GrailsApplication grailsApplication
@@ -27,69 +29,83 @@ class iso18626Controller {
 
       if ( iso18626_msg.request != null ) {
         log.debug("Process inbound request message");
+
+        def mr = iso18626_msg.request;
+        def req_result = makeDefaultReqResult(mr, "REQUEST");
+
         // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.request.header.supplyingAgencyId);
+        recipient = getSymbolFor(mr.header.supplyingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming request for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            def mr = iso18626_msg.request
-            def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
-
-            def supIdType = mr.header.supplyingAgencyId.agencyIdType
-            def supId = mr.header.supplyingAgencyId.agencyIdValue
-            def reqAgencyIdType = mr.header.requestingAgencyId.agencyIdType
-            def reqAgencyId = mr.header.requestingAgencyId.agencyIdValue
-            def reqId = mr.header.requestingAgencyRequestId
-            def timeRec = mr.header.timestamp
+            req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
 
             log.debug("result of req_request ${req_result}");
+
+            def confirmationMessage = makeConfirmationMessage(delegate, req_result)
+            StringWriter sw = new StringWriter();
+            sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+            String message = sw.toString();
+
+            log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+
             render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, null, null)
+              confirmationMessage
             }
+
           }
         } else {
           log.warn("Tenant not found.")
+
+          req_result.status = "ERROR"
+          req_result.errorType = "UnrecognisedDataValue"
+          req_result.errorValue = "RequestingAgencyId/${recipient}"
+
           // TODO send back error response.
           render( contentType:"text/xml" ) {
-            // TODO -- this might not be granular enough, what if authority name is wrong but symbol name isn't, etc? See http://biblstandard.dk/ill/dk/examples/request-confirmation-with-error.xml
-            makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnrecognisedDataValue", "RequestingAgencyId/${recipient}", null, null)
+            makeConfirmationMessage(delegate, req_result)
           }
         }
       }
       else if ( iso18626_msg.supplyingAgencyMessage != null ) {
         log.debug("Process inbound supplyingAgencyMessage message");
+
+        def msam = iso18626_msg.supplyingAgencyMessage;
+        def req_result = makeDefaultReqResult(msam, "SUPPLYING_AGENCY_MESSAGE");
+
         // Look in request.header.requestingAgencyId for the intended recipient
-        recipient = getSymbolFor(iso18626_msg.supplyingAgencyMessage.header.requestingAgencyId);
+        recipient = getSymbolFor(msam.header.requestingAgencyId);
         tenant = globalConfigService.getTenantForSymbol(recipient);
         if ( tenant ) {
           log.debug("incoming supplying agency message for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
-            def msam = iso18626_msg.supplyingAgencyMessage
 
-            def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
-
-            def supIdType = msam.header.supplyingAgencyId.agencyIdType
-            def supId = msam.header.supplyingAgencyId.agencyIdValue
-            def reqAgencyIdType = msam.header.requestingAgencyId.agencyIdType
-            def reqAgencyId = msam.header.requestingAgencyId.agencyIdValue
-            def reqId = msam.header.requestingAgencyRequestId
-            def timeRec = msam.header.timestamp
-            def reasonForMessage = msam.messageInfo.reasonForMessage
+            req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
 
             log.debug("result of req_request ${req_result}");
 
+            def confirmationMessage = makeConfirmationMessage(delegate, req_result)
+            StringWriter sw = new StringWriter();
+            sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+            String message = sw.toString();
+
+            log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+
             render( contentType:"text/xml" ) {
-              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, reasonForMessage, null)
+              confirmationMessage
             }
     
           }
         } else {
           log.warn("Tenant not found.")
-          // TODO send back error response.
+
+          req_result.status = "ERROR"
+          req_result.errorType = "UnrecognisedDataValue"
+          req_result.errorValue = "SupplyingAgencyId/${recipient}"
+
           render( contentType:"text/xml" ) {
-            // TODO -- this might not be granular enough, what if authority name is wrong but symbol name isn't, etc? See http://biblstandard.dk/ill/dk/examples/request-confirmation-with-error.xml
-            makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnrecognisedDataValue", "RequestingAgencyId/${recipient}", reasonForMessage, null)
+            makeConfirmationMessage(delegate, req_result)
           }
         }
       }
@@ -109,9 +125,7 @@ class iso18626Controller {
         }
       }
       else {
-        render( contentType:"text/xml" ) {
-          makeConfirmationMessage(delegate, null, null, null, null, null, null, "ERROR", "BadlyFormedMessage", null, null, null)
-        } 
+        render(status: 400, text: 'The sent request is not valid')
       }
 
     }
@@ -144,11 +158,31 @@ class iso18626Controller {
     c.rehydrate(del, c.owner, c.thisObject)()
   } 
 
-  // TODO Does not currently contain ErrorData, or differentiate between message types
-  // Needs reasonForMessage for a supplyingAgencyRequestMessageConfirmation
-  // Needs action for a requestingAgencyMessageConfirmation
-  def makeConfirmationMessage(def del, String supId, String supIdType, String reqAgencyId, String reqAgencyIdType, 
-                              String reqId, String timeRec, String status, String errorType, String errorValue, String reasonForMessage, String action) {
+
+  def makeDefaultReqResult(incomingRequest, messageType) {
+    def req_result = [:];
+    if (messageType ==! null) {
+      return req_result;
+    } else {
+      req_result.supIdType = incomingRequest.header.supplyingAgencyId.agencyIdType
+      req_result.supId = incomingRequest.header.supplyingAgencyId.agencyIdValue
+      req_result.reqAgencyIdType = incomingRequest.header.requestingAgencyId.agencyIdType
+      req_result.reqAgencyId = incomingRequest.header.requestingAgencyId.agencyIdValue
+      req_result.reqId = incomingRequest.header.requestingAgencyRequestId
+      req_result.timeRec = incomingRequest.header.timestamp
+    }
+    if (messageType == "SUPPLYING_AGENCY_MESSAGE") {
+      req_result.reasonForMessage = incomingRequest?.messageInfo?.reasonForMessage
+    }
+    if (messageType == "REQUESTING_AGENCY_MESSAGE") {
+      req_result.action = incomingRequest?.activeSection?.action
+    }
+    
+    return req_result;
+  }
+
+  // This method creates the confirmation message in the instance where the information has come from ReshareApplicationEventHandlerService
+  def makeConfirmationMessage(def del, def req_result) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     def currentTime = dateFormatter.format(new Date())
     return {
@@ -161,29 +195,29 @@ class iso18626Controller {
           request {
             header {
               supplyingAgencyId {
-                agencyIdType(supIdType)
-                agencyIdValue(supId)
+                agencyIdType(req_result.supIdType)
+                agencyIdValue(req_result.supId)
               }
               requestingAgencyId {
-                agencyIdType(reqAgencyIdType)
-                agencyIdValue(reqAgencyId)
+                agencyIdType(req_result.reqAgencyIdType)
+                agencyIdValue(req_result.reqAgencyId)
               }
               timestamp(currentTime)
-              requestingAgencyRequestId(reqId)
-              multipleItemRequestId(null)
-              timestampReceived(timeRec)
-              messageStatus(status)
-              if (status != "OK") {
+              requestingAgencyRequestId(req_result.reqId)
+              //multipleItemRequestId(null)
+              timestampReceived(req_result.timeRec)
+              messageStatus(req_result.status)
+              if (req_result.status != "OK") {
                 errorData {
-                  errorType(errorType)
-                  errorValue(errorValue)
+                  errorType(req_result.errorType)
+                  errorValue(req_result.errorValue)
                 }
               }
-              if (reasonForMessage != null) {
-                reasonForMessage(reasonForMessage)
+              if (req_result.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+                reasonForMessage(req_result.reasonForMessage)
               }
-              if (action != null) {
-                action(action)
+              if (req_result.messageType == "REQUESTING_AGENCY_MESSAGE") {
+                action(req_result.action)
               }
             }
           }
