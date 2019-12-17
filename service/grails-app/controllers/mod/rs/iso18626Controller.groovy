@@ -66,7 +66,7 @@ class iso18626Controller {
           log.debug("incoming supplying agency message for ${tenant}");
           Tenants.withId(tenant+'_mod_rs') {
             def msam = iso18626_msg.supplyingAgencyMessage
-            
+
             def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
 
             def supIdType = msam.header.supplyingAgencyId.agencyIdType
@@ -79,18 +79,10 @@ class iso18626Controller {
 
             log.debug("result of req_request ${req_result}");
 
-            // TODO - I'm sure there's a better way to do this, perhaps dynamically, perhaps not here.
-            def supportedReasons = ["RequestResponse", "Notification", "StatusChange"]
-
-            if (!supportedReasons.contains(reasonForMessage)) {
-              render( contentType:"text/xml" ) {
-                makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "ERROR", "UnsupportedReasonForMessageType", reasonForMessage, reasonForMessage, null)
-              }
-            } else {
-              render( contentType:"text/xml" ) {
-                makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, reasonForMessage, null)
-              }
+            render( contentType:"text/xml" ) {
+              makeConfirmationMessage(delegate, supId, supIdType, reqAgencyId, reqAgencyIdType, reqId, timeRec, "OK", null, null, reasonForMessage, null)
             }
+    
           }
         } else {
           log.warn("Tenant not found.")

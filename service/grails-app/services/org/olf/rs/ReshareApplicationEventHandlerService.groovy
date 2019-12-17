@@ -493,6 +493,14 @@ public class ReshareApplicationEventHandlerService {
       log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
       pr.save(flush:true, failOnError:true)
 
+      result.messageType = "REQUEST"
+      result.supIdType = header.supplyingAgencyId.agencyIdType
+      result.supId = header.supplyingAgencyId.agencyIdValue
+      result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
+      result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+      result.reqId = header.requestingAgencyRequestId
+      result.timeRec = header.timestamp
+
       result.status = 'OK'
       result.newRequestId = pr.id;
     }
@@ -516,12 +524,19 @@ public class ReshareApplicationEventHandlerService {
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
    */
-  public void handleSupplyingAgencyMessage(Map eventData) {
+  def handleSupplyingAgencyMessage(Map eventData) {
+
+    def result = [:]
+
     log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
 
     try {
-      if ( eventData.header?.requestingAgencyRequestId == null )
+      if ( eventData.header?.requestingAgencyRequestId == null ) {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
         throw new Exception("requestingAgencyRequestId missing");
+      }
+        
 
       PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId)
       if ( pr == null )
@@ -533,6 +548,9 @@ public class ReshareApplicationEventHandlerService {
           case 'RequestResponse':
             break;
           default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedReasonForMessageType"
+            result.errorValue = eventData.messageInfo.reasonForMessage
             throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
             break;
         }
@@ -550,7 +568,21 @@ public class ReshareApplicationEventHandlerService {
     catch ( Exception e ) {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
-    
+
+    if (result.status != "ERROR") {
+      result.status = "OK"
+    }
+
+    result.messageType = "SUPPLYING_AGENCY_MESSAGE"
+    result.supIdType = eventData.header.supplyingAgencyId.agencyIdType
+    result.supId = eventData.header.supplyingAgencyId.agencyIdValue
+    result.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType
+    result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
+    result.reqId = eventData.header.requestingAgencyRequestId
+    result.timeRec = eventData.header.timestamp
+    result.reasonForMessage = eventData.messageInfo.reasonForMessage
+
+    return result;
   }
 
 
