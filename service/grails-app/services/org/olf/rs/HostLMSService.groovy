@@ -202,13 +202,21 @@ public class HostLMSService {
     Map result = null;
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    String ncip_server_address = ncip_server_address_setting.value
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    if ( ncip_server_address ) {
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
+    if ( ( ncip_server_address != null ) &&
+         ( ncip_from_agency != null ) &&
+         ( ncip_app_profile != null ) ) {
       log.debug("Request patron from ${ncip_server_address}");
 
       StringWriter sw = new StringWriter();
-      sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW','905808497'))
+      // sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW',patron_id))
+      sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest(ncip_from_agency, ncip_app_profile, patron_id))
       String message = sw.toString();
 
       log.debug("NCIP Request: ${message}");
