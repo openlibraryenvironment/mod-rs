@@ -178,7 +178,7 @@ public class HostLMSService {
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = null;
+    Map result = [ status: 'OK' ];
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
@@ -199,7 +199,7 @@ public class HostLMSService {
   }
 
   private Map ncip2LookupPatron(String patron_id) {
-    Map result = null;
+    Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
@@ -243,8 +243,10 @@ public class HostLMSService {
         response.failure { FromServer fs ->
           log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
         }
-
       }
+    }
+    else {
+      log.error("MISSING CONFIGURATION FOR NCIP. Unable to perform patron lookup ${patron_id}/addr=${ncip_server_address}/from=${ncip_from_agency}/profile=${ncip_app_profile}");
     }
 
     return result
