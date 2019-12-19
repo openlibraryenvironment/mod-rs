@@ -161,6 +161,12 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               if ( de == null ) {
                 log.debug("Create new directory entry ${data.payload.slug} : ${data.payload}");
                 de = new DirectoryEntry();
+                if ( data.payload.id ) {
+                  de.id = data.payload.id;
+                }
+                else {
+                  de.id = java.util.UUID.randomUUID().toString()
+                }
               }
               else {
                 de.lock()
