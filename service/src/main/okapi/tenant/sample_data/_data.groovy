@@ -66,13 +66,13 @@ try {
                                   key: 'last_resort_lenders',
                                   defValue: '').save(flush:true, failOnError: true);
 
-  AppSetting last_resort_lenders = AppSetting.findByKey('ncip_from_agency') ?: new AppSetting( 
+  AppSetting ncip_from_agency = AppSetting.findByKey('ncip_from_agency') ?: new AppSetting( 
                                   section:'localNCIP',
                                   settingType:'String',
                                   key: 'ncip_from_agency',
                                   defValue: '').save(flush:true, failOnError: true);
 
-  AppSetting last_resort_lenders = AppSetting.findByKey('ncip_app_profile') ?: new AppSetting( 
+  AppSetting ncip_app_profile = AppSetting.findByKey('ncip_app_profile') ?: new AppSetting( 
                                   section:'localNCIP',
                                   settingType:'String',
                                   key: 'ncip_app_profile',
