@@ -489,7 +489,7 @@ public class ReshareApplicationEventHandlerService {
 
       pr.state = lookupStatus('Responder', 'RES_IDLE')
       pr.isRequester=false;
-      auditEntry(pr, null, null, 'New request (Lender role) created as a result of protocol interaction', null);
+      auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
 
       log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
       pr.save(flush:true, failOnError:true)
@@ -692,15 +692,16 @@ public class ReshareApplicationEventHandlerService {
     log.debug("result of hostLMSService.determineBestLocation = ${location}");
 
     if ( location != null ) {
-      auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
 
       // set localCallNumber to whatever we managed to look up
       // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
+        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
         sendResponse(pr, 'ExpectToSupply')
       }
       else {
+        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
         log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
         sendResponse(pr, 'Unfilled', 'No copy');
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
@@ -709,6 +710,7 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
       sendResponse(pr, 'Unfilled', 'No copy');
+      auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
       pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }
   }
