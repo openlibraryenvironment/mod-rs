@@ -24,11 +24,27 @@ public class ReshareActionService {
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
-    Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-    if ( s && pr.state.code=='RES_AWAIT_PICKING') {
-      pr.state = s;
-      pr.selectedItemBarcode = actionParams?.itemBarcode;
-      pr.save(flush:true, failOnError:true);
+
+    if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAITING_PROXY_BORROWER') {
+      // auditEntry(pr, pr.state, s, 'Checked in', null);
+      // See if we can identify a borrower proxy for the requesting location
+      String borrower_proxy_barcode = null;
+
+      if ( borrower_proxy_barcode != null ) {
+        Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+        pr.state = s;
+        pr.selectedItemBarcode = actionParams?.itemBarcode;
+        pr.save(flush:true, failOnError:true);
+      }
+      else {
+        Status s = Status.lookup('Responder', 'RES_AWAITING_PROXY_BORROWER');
+        auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
+        pr.selectedItemBarcode = actionParams?.itemBarcode;
+        pr.state = s;
+        pr.save(flush:true, failOnError:true);
+      }
+
+
       result = true;
     }
     else {
@@ -154,5 +170,22 @@ public class ReshareActionService {
     }
     return result;
   }
+
+  private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+
+    String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
+    LocalDateTime ts = LocalDateTime.now();
+    log.debug("add audit entry at ${ts}");
+
+    pr.addToAudit( new PatronRequestAudit(
+      patronRequest: pr,
+      dateCreated:ts,
+      fromStatus:from,
+      toStatus:to,
+      duration:null,
+      message: message,
+      auditData: json_data))
+  }
+
 
 }
