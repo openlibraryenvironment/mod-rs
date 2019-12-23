@@ -279,4 +279,15 @@ public class HostLMSService {
       }
     }
   }
+
+  public boolean checkoutItem(String itemBarcode, String borrowerBarcode) {
+    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode})");
+    return ncip2CheckoutItem(itemBarcode, borrowerBarcode);
+  }
+
+  public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
+    log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
+    return false;
+  }
+
 }

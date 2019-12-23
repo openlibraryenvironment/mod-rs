@@ -20,35 +20,48 @@ import java.time.LocalDateTime;
 public class ReshareActionService {
 
   ProtocolMessageService protocolMessageService
+  HostLMSService hostLMSService
 
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
 
-    if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAITING_PROXY_BORROWER') {
-      // auditEntry(pr, pr.state, s, 'Checked in', null);
-      // See if we can identify a borrower proxy for the requesting location
-      String borrower_proxy_barcode = null;
+    if ( actionParams?.itemBarcode != null ) {
+      if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
+        // auditEntry(pr, pr.state, s, 'Checked in', null);
+        // See if we can identify a borrower proxy for the requesting location
+        String borrower_proxy_barcode = null;
 
-      if ( borrower_proxy_barcode != null ) {
-        Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-        pr.state = s;
-        pr.selectedItemBarcode = actionParams?.itemBarcode;
-        pr.save(flush:true, failOnError:true);
+        if ( borrower_proxy_barcode != null ) {
+          // Attempt HostLMSService checkout
+          if ( hostLMSService.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode) ) {
+            Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+            auditEntry(pr, pr.state, s, 'Checked In', null);
+            pr.state = s;
+            pr.selectedItemBarcode = actionParams?.itemBarcode;
+            pr.save(flush:true, failOnError:true);
+          }
+          else {
+            Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+            auditEntry(pr, pr.state, s, 'Check In Failed', null);
+            pr.state = s;
+            pr.selectedItemBarcode = actionParams?.itemBarcode;
+            pr.save(flush:true, failOnError:true);
+          }
+        }
+        else {
+          Status s = Status.lookup('Responder', 'RES_AWAIT_PROXY_BORROWER');
+          auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
+          pr.selectedItemBarcode = actionParams?.itemBarcode;
+          pr.state = s;
+          pr.save(flush:true, failOnError:true);
+        }
+
+        result = true;
       }
       else {
-        Status s = Status.lookup('Responder', 'RES_AWAITING_PROXY_BORROWER');
-        auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
-        pr.selectedItemBarcode = actionParams?.itemBarcode;
-        pr.state = s;
-        pr.save(flush:true, failOnError:true);
+        log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
       }
-
-
-      result = true;
-    }
-    else {
-      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
     }
 
     return result;

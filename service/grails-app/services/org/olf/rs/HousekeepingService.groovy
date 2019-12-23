@@ -90,8 +90,9 @@ public class HousekeepingService {
 
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAITING_PROXY_BORROWER', '0016', true);
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true);
         Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_LMS_CHECKOUT', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
         Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
