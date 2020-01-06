@@ -42,8 +42,8 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
           else {
-            Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-            auditEntry(pr, pr.state, s, 'Check In Failed', null);
+            Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+            auditEntry(pr, pr.state, s, 'Check In Failed - Manual checkout needed', null);
             pr.state = s;
             pr.selectedItemBarcode = actionParams?.itemBarcode;
             pr.save(flush:true, failOnError:true);
