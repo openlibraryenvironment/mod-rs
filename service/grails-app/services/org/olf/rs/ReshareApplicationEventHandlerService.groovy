@@ -286,7 +286,10 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id, true);
-      if ( ( req != null ) && ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ) {
+      // We must have found the request, and it as to be in a state of supplier identifier or unfilled
+      if ( ( req != null ) && 
+           ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
+             ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
         //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
