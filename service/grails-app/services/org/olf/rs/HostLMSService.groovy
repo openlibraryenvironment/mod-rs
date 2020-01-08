@@ -15,12 +15,13 @@ import org.olf.rs.lms.HostLMSActions;
 
 
 /**
- * The interface between mod-rs and any host Library Management Systems
+ * Return the right HostLMSActions for the tenant config
  *
  */
 public class HostLMSService {
 
   def defaultHostLMSService
+  def manualHostLMSService
 
   public HostLMSActions getHostLMSActions() {
 
@@ -32,6 +33,12 @@ public class HostLMSService {
     log.debug("Return host lms integrations for : ${v}");
 
     switch ( v ) {
+      case 'none':
+        result = manualHostLMSService
+        break;
+      case 'alma':
+        result = defaultHostLMSService
+        break;
       default:
         result = defaultHostLMSService
         break;
