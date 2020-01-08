@@ -81,6 +81,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
 
@@ -107,6 +108,7 @@ public class HousekeepingService {
         StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
 
         StateTransition.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
+        StateTransition.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived')
       }
 
     }
