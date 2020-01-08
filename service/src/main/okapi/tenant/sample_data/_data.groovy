@@ -77,6 +77,17 @@ try {
                                   settingType:'String',
                                   key: 'ncip_app_profile',
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
+  RefdataValue.lookupOrCreate('ALMA Integration', 'ALMA');
+
+  AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
+                                  section:'HostLMSIntegration',
+                                  settingType:'Refdata',
+                                  vocab:'HostLMSIntegrationAdapter',
+                                  key: 'host_lms_integration').save(flush:true, failOnError: true);
+
+
 }
 catch ( Exception e ) {
   e.printStackTrace();

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
+import org.olf.rs.lms.ItemLocation;
 
 
 /**
@@ -125,7 +126,7 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
 
-        def patron_details = hostLMSService.lookupPatron(req.patronIdentifier)
+        def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
 
         if ( isValidPatron(patron_details) ) {
 
@@ -687,14 +688,13 @@ public class ReshareApplicationEventHandlerService {
     log.debug("autoRespond....");
 
     // Use the hostLMSService to determine the best location to send a pull-slip to
-    ItemLocation location = hostLMSService.determineBestLocation(pr)
+    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr)
 
-    log.debug("result of hostLMSService.determineBestLocation = ${location}");
+    log.debug("result of determineBestLocation = ${location}");
 
     if ( location != null ) {
 
       // set localCallNumber to whatever we managed to look up
-      // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
