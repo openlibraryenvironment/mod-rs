@@ -48,7 +48,11 @@ if (initial_setup) {
 }
 
 if (initial_setup) {
+
+  println("Running initial setup");
+
   okapi.createRequest([title:'The Heart of Enterprise',requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+
   okapi.createRequest([
                        title:'The darkening land',
                        patronIdentifier: '905808497',
@@ -56,7 +60,10 @@ if (initial_setup) {
                        patronSurname: 'PS',
                        patronGivenName: 'PGN',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc', 
-                       requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+                       requestingInstitutionSymbol:'RESHARE:KNOWINT01',
+                       rota:[
+                         [ directoryId:'RESHARE:TESTINST01', rotaPosition:'0' ]
+                       ]]);
 
 }
 
@@ -104,7 +111,10 @@ if ( !initial_setup) {
                        patronNote:'Please dont shoot the messenger',
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
-                       requestingInstitutionSymbol:'OCLC:ZMU']);
+                       requestingInstitutionSymbol:'OCLC:ZMU',
+                       rota:[
+                         [ directoryId:'RESHARE:TESTINST01', rotaPosition:'0' ]
+                       ]]);
 }
 
 printf('%-2s %-36s %-30s %-9s %-20s\n', '#', 'id', 'title', 'role', 'Current State');
