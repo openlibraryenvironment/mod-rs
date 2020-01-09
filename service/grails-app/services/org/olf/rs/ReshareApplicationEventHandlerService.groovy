@@ -181,6 +181,8 @@ public class ReshareApplicationEventHandlerService {
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
         try {
           log.debug("Launch auto responder for request");
+          // String auto_respond = AppSetting.findByKey('auto_respond')?.value
+          // if ( auto_respond == 'Yes' ) { }
           autoRespond(req)
           req.save(flush:true, failOnError:true);
         }

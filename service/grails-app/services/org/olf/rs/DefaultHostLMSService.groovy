@@ -97,39 +97,44 @@ public class DefaultHostLMSService implements HostLMSActions {
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
 
     String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
-    log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
+    String z3950_server = getZ3950Server();
 
-    def z_response = HttpBuilder.configure {
-      request.uri = z3950_proxy
-    }.get {
-        request.uri.path = '/'
-        // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-        request.uri.query = ['x-target': 'http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST',
-                             'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
-                             'maximumRecords':'1' ]
-    }
+    if ( z3950_server != null ) {
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
 
-    log.debug("Got Z3950 response: ${z_response}");
-
-    if ( z_response?.numberOfRecords == 1 ) {
-      // Got exactly 1 record
-      Map availability_summary = [:]
-      z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-        log.debug("${hld}");
-        log.debug("${hld.circulations?.circulation?.availableNow}");
-        log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-        if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-          log.debug("Available now");
-          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-
-          if ( result == null ) 
-            result = il;
-
-          availability_summary[hld.localLocation] = il;
-        }
+      def z_response = HttpBuilder.configure {
+        request.uri = z3950_proxy
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
+                               'maximumRecords':'1' ]
       }
 
-      log.debug("At end, availability summary: ${availability_summary}");
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map availability_summary = [:]
+        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
+          log.debug("${hld}");
+          log.debug("${hld.circulations?.circulation?.availableNow}");
+          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+            log.debug("Available now");
+            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+  
+            if ( result == null ) 
+              result = il;
+  
+            availability_summary[hld.localLocation] = il;
+          }
+        }
+  
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
     }
 
     return result;
@@ -139,43 +144,46 @@ public class DefaultHostLMSService implements HostLMSActions {
 
     ItemLocation result = null;
 
+    String z3950_server = getZ3950Server();
 
-    def z_response = HttpBuilder.configure {
-      request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
-    }.get {
-        request.uri.path = '/'
-        // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-        request.uri.query = ['x-target': 'http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST',
-                             'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
-                             'maximumRecords':'3' ]
-    }
-
-    log.debug("Got Z3950 response: ${z_response}");
-
-    if ( z_response?.numberOfRecords == 1 ) {
-      // Got exactly 1 record
-      Map availability_summary = [:]
-      z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-        log.debug("${hld}");
-        log.debug("${hld.circulations?.circulation?.availableNow}");
-        log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-        if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-          log.debug("Available now");
-          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-
-          if ( result == null ) 
-            result = il;
-
-          availability_summary[hld.localLocation] = il;
-        }
+    if ( z3950_server != null ) {
+      def z_response = HttpBuilder.configure {
+        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
+                               'maximumRecords':'3' ]
       }
-
-      log.debug("At end, availability summary: ${availability_summary}");
-      return result;
+  
+      log.debug("Got Z3950 response: ${z_response}");
+  
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map availability_summary = [:]
+        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
+          log.debug("${hld}");
+          log.debug("${hld.circulations?.circulation?.availableNow}");
+          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+            log.debug("Available now");
+            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+  
+            if ( result == null ) 
+              result = il;
+  
+            availability_summary[hld.localLocation] = il;
+          }
+        }
+  
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
+      else {
+        log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
+      }
     }
-    else {
-      log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
-    }
+    return result;
   }
 
   public Map lookupPatron(String patron_id) {
@@ -292,4 +300,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     return false;
   }
 
+  private String getZ3950Server() {
+    return AppSetting.findByKey('z3950_server_address')?.value
+  }
 }
