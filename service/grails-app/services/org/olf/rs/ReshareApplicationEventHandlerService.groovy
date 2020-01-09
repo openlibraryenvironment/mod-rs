@@ -181,9 +181,13 @@ public class ReshareApplicationEventHandlerService {
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
         try {
           log.debug("Launch auto responder for request");
-          // String auto_respond = AppSetting.findByKey('auto_respond')?.value
-          // if ( auto_respond == 'Yes' ) { }
-          autoRespond(req)
+          String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
+          if ( auto_respond?.startsWith('On') ) {
+            autoRespond(req)
+          }
+          else {
+            auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
+          }
           req.save(flush:true, failOnError:true);
         }
         catch ( Exception e ) {
