@@ -112,9 +112,12 @@ public class ReshareActionService {
 
 
     Map eventData = [header:[]];
+    
+    String message_sender_symbol = "unassigned_message_sender_symbol";
+    String peer_symbol = "unassigned_peer_symbol"
 
     if (pr.isRequester == true) {
-      String message_sender_symbol = pr.requestingInstitutionSymbol;
+      message_sender_symbol = pr.requestingInstitutionSymbol;
       Long rotaPosition = pr.rotaPosition;
       
       // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
@@ -131,7 +134,7 @@ public class ReshareActionService {
         return false;
       }
 
-      String peer_symbol = "${pr.rota[rotaPosition].peerSymbol.authority.symbol}:${pr.rota[rotaPosition].peerSymbol.symbol}"
+      peer_symbol = "${pr.rota[rotaPosition].peerSymbol.authority.symbol}:${pr.rota[rotaPosition].peerSymbol.symbol}"
 
       eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
@@ -151,8 +154,8 @@ public class ReshareActionService {
       eventData.activeSection = [action:"Notification", note:actionParams.note]
 
     } else {
-      String message_sender_symbol = pr.supplyingInstitutionSymbol;
-      String peer_symbol = pr.requestingInstitutionSymbol;
+      message_sender_symbol = pr.supplyingInstitutionSymbol;
+      peer_symbol = pr.requestingInstitutionSymbol;
 
       eventData.messageType = 'SUPPLYING_AGENCY_MESSAGE'
 
