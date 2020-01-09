@@ -92,7 +92,7 @@ try {
   RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
   RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
 
-  AppSetting host_lms_integration = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
+  AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
                                   section:'Auto Responder',
                                   settingType:'Refdata',
                                   vocab:'AutoResponder',
