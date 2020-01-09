@@ -4,6 +4,7 @@ import org.olf.okapi.modules.directory.Address
 import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 
+// When adding new section names into this file please make sure they are in camel case.
 
 try {
   println("Create z3950 server address");
@@ -82,7 +83,7 @@ try {
   RefdataValue.lookupOrCreate('ALMA Integration', 'ALMA');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
-                                  section:'HostLMSIntegration',
+                                  section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'HostLMSIntegrationAdapter',
                                   key: 'host_lms_integration').save(flush:true, failOnError: true);
