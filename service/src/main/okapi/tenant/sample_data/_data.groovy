@@ -80,13 +80,23 @@ try {
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
-  RefdataValue.lookupOrCreate('ALMA Integration', 'ALMA');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'HostLMSIntegrationAdapter',
                                   key: 'host_lms_integration').save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('AutoResponder', 'Off');
+  RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
+  RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
+  AppSetting host_lms_integration = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
+                                  section:'Auto Responder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder',
+                                  key: 'auto_responder_status').save(flush:true, failOnError: true);
 
 
 }
