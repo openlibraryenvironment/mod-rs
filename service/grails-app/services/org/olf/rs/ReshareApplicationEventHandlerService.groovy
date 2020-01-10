@@ -559,6 +559,12 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
             break;
+          case 'Notification':
+            Map messageData = eventData.messageInfo
+            log.debug("Patron Request: ${pr}")
+            log.debug("messageData Note: ${messageData.note}")
+            auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
+            break;
           default:
             result.status = "ERROR"
             result.errorType = "UnsupportedReasonForMessageType"

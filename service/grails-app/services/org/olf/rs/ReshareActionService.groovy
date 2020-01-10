@@ -112,7 +112,7 @@ public class ReshareActionService {
 
 
     Map eventData = [header:[]];
-    
+
     String message_sender_symbol = "unassigned_message_sender_symbol";
     String peer_symbol = "unassigned_peer_symbol"
 
@@ -168,8 +168,8 @@ public class ReshareActionService {
           agencyIdType:peer_symbol.split(":")[0],
           agencyIdValue:peer_symbol.split(":")[1],
         ],
-        requestingAgencyRequestId:pr.id,
-        supplyingAgencyRequestId:pr.peerRequestIdentifier,
+        requestingAgencyRequestId:pr.peerRequestIdentifier,
+        supplyingAgencyRequestId:pr.id,
       ]
 
       eventData.messageInfo = [reasonForMessage:"Notification", note:actionParams.note]
