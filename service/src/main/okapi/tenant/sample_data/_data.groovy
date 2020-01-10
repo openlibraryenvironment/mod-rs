@@ -61,6 +61,12 @@ try {
                                   key: 'shared_index_pass',
                                   defValue: '').save(flush:true, failOnError: true);
 
+  AppSetting shared_index_tenant = AppSetting.findByKey('shared_index_tenant') ?: new AppSetting( 
+                                  section:'sharedIndex',
+                                  settingType:'String',
+                                  key: 'shared_index_tenant',
+                                  defValue: 'diku').save(flush:true, failOnError: true);
+
   AppSetting last_resort_lenders = AppSetting.findByKey('last_resort_lenders') ?: new AppSetting( 
                                   section:'requests',
                                   settingType:'String',

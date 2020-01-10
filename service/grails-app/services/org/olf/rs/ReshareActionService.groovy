@@ -67,6 +67,12 @@ public class ReshareActionService {
     return result;
   }
 
+  public boolean supplierCannotSupply(PatronRequest pr, Map actionParams) {
+    boolean result = false;
+    log.debug("supplierCannotSupply(${pr})");
+    return result;
+  }
+
   public boolean notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     boolean result = false;

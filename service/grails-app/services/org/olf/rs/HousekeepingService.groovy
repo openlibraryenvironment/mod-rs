@@ -101,10 +101,16 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
+        StateTransition.ensure( 'Responder', 'RES_IDLE', 'respondYes')
+        StateTransition.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
+
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
+
         StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
+        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
         StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
+
         StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
         StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
 
