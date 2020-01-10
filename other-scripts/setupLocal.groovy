@@ -117,7 +117,7 @@ if ( !initial_setup) {
                        ]]);
 }
 
-printf('%-2s %-36s %-30s %-9s %-20s\n', '#', 'id', 'title', 'role', 'Current State');
+printf('%-2s %-36s %-20s %-30s %-9s %-20s\n', '#', 'id', 'hrid', 'title', 'role', 'Current State');
 i=0;
 lr = okapi.listRequests()
 lr.results.each { pr ->

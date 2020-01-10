@@ -101,6 +101,9 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
+        StateTransition.ensure( 'Responder', 'RES_IDLE', 'respondYes')
+        StateTransition.ensure( 'Responder', 'RES_IDLE', 'respondNo')
+
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
         StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
         StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
