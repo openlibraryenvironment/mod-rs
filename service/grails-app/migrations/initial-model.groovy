@@ -1401,4 +1401,26 @@ databaseChangeLog = {
             column(name: "pr_resolved_patron_fk", type: "VARCHAR(36)");
         }
    }
+
+   changeSet(author: "ianibbo (manual)", id: "20200110-1641-001") {
+        createTable(tableName: "applicable_action") {
+            column(name: "aa_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "aa_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+            column(name: "aa_model", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "aa_from_state", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "aa_action_code", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+        }
+    }
+
+
 }
