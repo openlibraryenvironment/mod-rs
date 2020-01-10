@@ -93,7 +93,7 @@ try {
   RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
 
   AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
-                                  section:'Auto Responder',
+                                  section:'autoResponder',
                                   settingType:'Refdata',
                                   vocab:'AutoResponder',
                                   key: 'auto_responder_status').save(flush:true, failOnError: true);
