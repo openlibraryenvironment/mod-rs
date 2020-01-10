@@ -101,20 +101,20 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
-        StateTransition.ensure( 'Responder', 'RES_IDLE', 'respondYes')
-        StateTransition.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
+        AvailableActon.ensure( 'Responder', 'RES_IDLE', 'respondYes')
+        AvailableActon.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
 
-        StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
-        StateTransition.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
+        AvailableActon.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
+        AvailableActon.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
 
-        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
-        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
-        StateTransition.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
+        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
+        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
+        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
 
-        StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
-        StateTransition.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
+        AvailableActon.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
+        AvailableActon.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
 
-        StateTransition.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
+        AvailableActon.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
       }
 
     }

@@ -9,7 +9,7 @@ import com.k_int.web.toolkit.custprops.CustomProperties
 import com.k_int.web.toolkit.refdata.CategoryId
 import com.k_int.web.toolkit.refdata.Defaults
 import org.olf.rs.statemodel.Status;
-import org.olf.rs.statemodel.StateTransition;
+import org.olf.rs.statemodel.AvailableAction;
 import com.k_int.web.toolkit.tags.Tag
 import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ import java.time.LocalDate;
 
 class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
-  private static final String POSSIBLE_ACTIONS_QUERY='select distinct st.actionCode from StateTransition as st where st.fromState = :fromstate'
+  private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate'
 
   // internal ID of the patron request
   String id
@@ -341,7 +341,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   def getValidActions() {
-    return StateTransition.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state])
+    return AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state])
   }
 
   public Map getDescriptiveMetadata() {
