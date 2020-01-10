@@ -1,4 +1,4 @@
-package org.olf.rs
+package org.olf.rs.lms
 
 public class ItemLocation {
 

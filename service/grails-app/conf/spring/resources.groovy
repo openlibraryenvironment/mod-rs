@@ -8,7 +8,7 @@ beans = {
   switch(Environment.current) {
     case Environment.TEST:
       sharedIndexService(MockSharedIndexImpl)
-      hostLMSService(MockHostLMSServiceImpl)
+    //   hostLMSService(MockHostLMSServiceImpl)
       break
   }
 }

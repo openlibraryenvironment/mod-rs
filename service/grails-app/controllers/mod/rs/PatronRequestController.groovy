@@ -44,6 +44,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'supplierCheckInToReshare':
               result.status = reshareActionService.checkInToReshare(patron_request, request.JSON.actionParams);
               break;
+            case 'supplierCannotSupply':
+              result.status = reshareActionService.supplierCannotSupply(patron_request, request.JSON.actionParams);
+              break;
             case 'message':
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
               break;

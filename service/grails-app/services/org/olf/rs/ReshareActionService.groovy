@@ -20,21 +20,56 @@ import java.time.LocalDateTime;
 public class ReshareActionService {
 
   ProtocolMessageService protocolMessageService
+  HostLMSService hostLMSService
 
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
-    Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-    if ( s && pr.state.code=='RES_AWAIT_PICKING') {
-      pr.state = s;
-      pr.selectedItemBarcode = actionParams?.itemBarcode;
-      pr.save(flush:true, failOnError:true);
-      result = true;
-    }
-    else {
-      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+
+    if ( actionParams?.itemBarcode != null ) {
+      if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
+        // auditEntry(pr, pr.state, s, 'Checked in', null);
+        // See if we can identify a borrower proxy for the requesting location
+        String borrower_proxy_barcode = null;
+
+        if ( borrower_proxy_barcode != null ) {
+          // Attempt HostLMSService checkout
+          if ( hostLMSService.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode) ) {
+            Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+            auditEntry(pr, pr.state, s, 'Checked In', null);
+            pr.state = s;
+            pr.selectedItemBarcode = actionParams?.itemBarcode;
+            pr.save(flush:true, failOnError:true);
+          }
+          else {
+            Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+            auditEntry(pr, pr.state, s, 'Check In Failed - Manual checkout needed', null);
+            pr.state = s;
+            pr.selectedItemBarcode = actionParams?.itemBarcode;
+            pr.save(flush:true, failOnError:true);
+          }
+        }
+        else {
+          Status s = Status.lookup('Responder', 'RES_AWAIT_PROXY_BORROWER');
+          auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
+          pr.selectedItemBarcode = actionParams?.itemBarcode;
+          pr.state = s;
+          pr.save(flush:true, failOnError:true);
+        }
+
+        result = true;
+      }
+      else {
+        log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+      }
     }
 
+    return result;
+  }
+
+  public boolean supplierCannotSupply(PatronRequest pr, Map actionParams) {
+    boolean result = false;
+    log.debug("supplierCannotSupply(${pr})");
     return result;
   }
 
@@ -84,8 +119,11 @@ public class ReshareActionService {
 
     Map eventData = [header:[]];
 
+    String message_sender_symbol = "unassigned_message_sender_symbol";
+    String peer_symbol = "unassigned_peer_symbol"
+
     if (pr.isRequester == true) {
-      String message_sender_symbol = pr.requestingInstitutionSymbol;
+      message_sender_symbol = pr.requestingInstitutionSymbol;
       Long rotaPosition = pr.rotaPosition;
       
       // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
@@ -102,7 +140,7 @@ public class ReshareActionService {
         return false;
       }
 
-      String peer_symbol = "${pr.rota[rotaPosition].peerSymbol.authority.symbol}:${pr.rota[rotaPosition].peerSymbol.symbol}"
+      peer_symbol = "${pr.rota[rotaPosition].peerSymbol.authority.symbol}:${pr.rota[rotaPosition].peerSymbol.symbol}"
 
       eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
@@ -122,8 +160,8 @@ public class ReshareActionService {
       eventData.activeSection = [action:"Notification", note:actionParams.note]
 
     } else {
-      String message_sender_symbol = pr.supplyingInstitutionSymbol;
-      String peer_symbol = pr.requestingInstitutionSymbol;
+      message_sender_symbol = pr.supplyingInstitutionSymbol;
+      peer_symbol = pr.requestingInstitutionSymbol;
 
       eventData.messageType = 'SUPPLYING_AGENCY_MESSAGE'
 
@@ -136,8 +174,8 @@ public class ReshareActionService {
           agencyIdType:peer_symbol.split(":")[0],
           agencyIdValue:peer_symbol.split(":")[1],
         ],
-        requestingAgencyRequestId:pr.id,
-        supplyingAgencyRequestId:pr.peerRequestIdentifier,
+        requestingAgencyRequestId:pr.peerRequestIdentifier,
+        supplyingAgencyRequestId:pr.id,
       ]
 
       eventData.messageInfo = [reasonForMessage:"Notification", note:actionParams.note]
@@ -154,5 +192,22 @@ public class ReshareActionService {
     }
     return result;
   }
+
+  private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+
+    String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
+    LocalDateTime ts = LocalDateTime.now();
+    log.debug("add audit entry at ${ts}");
+
+    pr.addToAudit( new PatronRequestAudit(
+      patronRequest: pr,
+      dateCreated:ts,
+      fromStatus:from,
+      toStatus:to,
+      duration:null,
+      message: message,
+      auditData: json_data))
+  }
+
 
 }

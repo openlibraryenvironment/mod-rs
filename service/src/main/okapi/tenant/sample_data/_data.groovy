@@ -4,6 +4,7 @@ import org.olf.okapi.modules.directory.Address
 import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 
+// When adding new section names into this file please make sure they are in camel case.
 
 try {
   println("Create z3950 server address");
@@ -60,6 +61,12 @@ try {
                                   key: 'shared_index_pass',
                                   defValue: '').save(flush:true, failOnError: true);
 
+  AppSetting shared_index_tenant = AppSetting.findByKey('shared_index_tenant') ?: new AppSetting( 
+                                  section:'sharedIndex',
+                                  settingType:'String',
+                                  key: 'shared_index_tenant',
+                                  defValue: 'diku').save(flush:true, failOnError: true);
+
   AppSetting last_resort_lenders = AppSetting.findByKey('last_resort_lenders') ?: new AppSetting( 
                                   section:'requests',
                                   settingType:'String',
@@ -77,6 +84,27 @@ try {
                                   settingType:'String',
                                   key: 'ncip_app_profile',
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
+
+  AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
+                                  section:'hostLMSIntegration',
+                                  settingType:'Refdata',
+                                  vocab:'HostLMSIntegrationAdapter',
+                                  key: 'host_lms_integration').save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('AutoResponder', 'Off');
+  RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
+  RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
+  AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
+                                  section:'autoResponder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder',
+                                  key: 'auto_responder_status').save(flush:true, failOnError: true);
+
+
 }
 catch ( Exception e ) {
   e.printStackTrace();

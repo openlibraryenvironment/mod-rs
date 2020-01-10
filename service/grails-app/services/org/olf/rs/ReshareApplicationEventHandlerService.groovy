@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
+import org.olf.rs.lms.ItemLocation;
 
 
 /**
@@ -125,7 +126,7 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
 
-        def patron_details = hostLMSService.lookupPatron(req.patronIdentifier)
+        def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
 
         if ( isValidPatron(patron_details) ) {
 
@@ -180,7 +181,13 @@ public class ReshareApplicationEventHandlerService {
       else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
         try {
           log.debug("Launch auto responder for request");
-          autoRespond(req)
+          String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
+          if ( auto_respond?.startsWith('On') ) {
+            autoRespond(req)
+          }
+          else {
+            auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
+          }
           req.save(flush:true, failOnError:true);
         }
         catch ( Exception e ) {
@@ -285,7 +292,10 @@ public class ReshareApplicationEventHandlerService {
       log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id, true);
-      if ( ( req != null ) && ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ) {
+      // We must have found the request, and it as to be in a state of supplier identifier or unfilled
+      if ( ( req != null ) && 
+           ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
+             ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
         //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
@@ -549,6 +559,12 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
             break;
+          case 'Notification':
+            Map messageData = eventData.messageInfo
+            log.debug("Patron Request: ${pr}")
+            log.debug("messageData Note: ${messageData.note}")
+            auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
+            break;
           default:
             result.status = "ERROR"
             result.errorType = "UnsupportedReasonForMessageType"
@@ -687,14 +703,13 @@ public class ReshareApplicationEventHandlerService {
     log.debug("autoRespond....");
 
     // Use the hostLMSService to determine the best location to send a pull-slip to
-    ItemLocation location = hostLMSService.determineBestLocation(pr)
+    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr)
 
-    log.debug("result of hostLMSService.determineBestLocation = ${location}");
+    log.debug("result of determineBestLocation = ${location}");
 
     if ( location != null ) {
 
       // set localCallNumber to whatever we managed to look up
-      // hostLMSService.placeHold(pr.systemInstanceIdentifier, null);
       if ( routeRequestToLocation(pr, location) ) {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
