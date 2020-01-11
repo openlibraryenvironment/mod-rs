@@ -7,7 +7,6 @@ import com.k_int.web.toolkit.refdata.*
 // When adding new section names into this file please make sure they are in camel case.
 
 try {
-  println("Create z3950 server address");
   AppSetting z3950_address = AppSetting.findByKey('z3950_server_address') ?: new AppSetting( 
                                   section:'z3950',
                                   settingType:'String',
@@ -105,6 +104,7 @@ try {
                                   key: 'auto_responder_status').save(flush:true, failOnError: true);
 
 
+  println("_data.groovy complete");
 }
 catch ( Exception e ) {
   e.printStackTrace();
