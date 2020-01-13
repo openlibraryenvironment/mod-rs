@@ -85,6 +85,8 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
 
@@ -103,6 +105,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
+        Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
@@ -121,6 +124,13 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
 
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'itemReturned', 'M')
+
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'supplierCheckOutOfReshare', 'M')
+
+
+
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
@@ -132,7 +142,11 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'requesterReceived', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'shippedReturn', 'M')
       }
 
     }
