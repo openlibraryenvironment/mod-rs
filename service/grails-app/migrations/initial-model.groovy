@@ -1402,8 +1402,8 @@ databaseChangeLog = {
         }
    }
 
-   changeSet(author: "ianibbo (manual)", id: "20200110-1641-001") {
-        createTable(tableName: "applicable_action") {
+   changeSet(author: "ianibbo (manual)", id: "20200113-0811-001") {
+        createTable(tableName: "available_action") {
             column(name: "aa_id", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }

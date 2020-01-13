@@ -34,7 +34,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 
   public static AvailableAction ensure(String model, String state, String action) {
 
-    StateTransition result = null;
+    AvailableAction result = null;
 
     StateModel sm = StateModel.findByShortcode(model);
     if ( sm ) {

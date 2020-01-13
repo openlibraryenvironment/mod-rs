@@ -9,6 +9,7 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StateTransition;
+import org.olf.rs.statemodel.AvailableAction;
 
 import grails.core.GrailsApplication
 import grails.events.annotation.Subscriber
@@ -102,21 +103,21 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
-        AvailableActon.ensure( 'Responder', 'RES_IDLE', 'respondYes')
-        AvailableActon.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
 
-        AvailableActon.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
-        AvailableActon.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
 
-        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
-        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
-        AvailableActon.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
 
-        AvailableActon.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
-        AvailableActon.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
 
-        AvailableActon.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
-        AvailableActon.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived')
       }
 
     }
