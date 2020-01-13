@@ -45,5 +45,6 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     messageSender column : 'prn_message_sender_fk'
     messageReceiver column : 'prn_message_receiver_fk'
     messageContent column : 'prn_message_content'
+    patronRequest column : 'prn_patron_request_fk'
   }
 }

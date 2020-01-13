@@ -1437,6 +1437,9 @@ databaseChangeLog = {
             column(name: "prn_message_sender_fk", type: "VARCHAR(36)")
             column(name: "prn_message_receiver_fk", type: "VARCHAR(36)")
             column(name: "prn_message_content", type: "VARCHAR(36)")
+            column(name: "prn_patron_request_fk", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
         }
     }
 
