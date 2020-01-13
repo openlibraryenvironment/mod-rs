@@ -39,6 +39,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
 
   static mapping = {
     id column : 'prn_id', generator: 'uuid2', length:36
+    version column : 'prn_version'
     dateCreated column : 'prn_date_created'
     timestamp column : 'prn_timestamp'
     seen column : 'prn_seen'

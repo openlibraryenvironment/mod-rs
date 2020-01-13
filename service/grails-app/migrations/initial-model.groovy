@@ -1431,6 +1431,9 @@ databaseChangeLog = {
             column(name: "prn_id", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
+            column(name: "prn_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
             column(name: "prn_date_created", type: "timestamp")
             column(name: "prn_timestamp", type: "timestamp")
             column(name: "prn_seen", type: "BOOLEAN")
