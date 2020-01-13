@@ -84,6 +84,8 @@ public class ReshareActionService {
     }
     else {
       log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+      result.code=-1; // Wrong state
+      result.message="Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr?.state?.code})"
     }
 
     return result;
