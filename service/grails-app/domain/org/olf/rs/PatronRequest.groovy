@@ -153,7 +153,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // The audit of what has happened to this request and tags that are associated with the request */
   static hasMany = [
     audit : PatronRequestAudit,
-    notifications: PatronRequestNotifications,
+    notifications: PatronRequestNotification,
     rota  : PatronRequestRota,
     tags  : Tag];
 

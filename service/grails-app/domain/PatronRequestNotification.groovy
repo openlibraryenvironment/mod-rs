@@ -1,5 +1,7 @@
 package org.olf.rs
 
+import grails.gorm.multitenancy.Tenants;
+import grails.gorm.MultiTenant
 import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
 

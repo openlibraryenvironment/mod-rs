@@ -1438,8 +1438,6 @@ databaseChangeLog = {
             column(name: "prn_message_receiver_fk", type: "VARCHAR(36)")
             column(name: "prn_message_content", type: "VARCHAR(36)")
         }
-        addForeignKeyConstraint(baseColumnNames: "prn_message_sender_fk", baseTableName: "patron_request_notification", constraintName: "FK_message_sender_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "prn_id", referencedTableName: "patron_request_notification")
-        addForeignKeyConstraint(baseColumnNames: "prn_message_receiver_fk", baseTableName: "patron_request_notification", constraintName: "FK_message_receiver_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "prn_id", referencedTableName: "patron_request_notification")
     }
 
 }
