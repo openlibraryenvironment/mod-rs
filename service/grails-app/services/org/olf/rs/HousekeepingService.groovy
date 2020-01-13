@@ -25,6 +25,8 @@ import com.k_int.okapi.OkapiTenantAdminService
  */
 public class HousekeepingService {
 
+  private static String CANCEL_ACTION_CLOSURE = '{ ga, ras, pr, aa -> ras.requestCancel(pr) }'
+
   // This was DataSource but I think this is actually a HibernateDataSource
         GrailsApplication grailsApplication
   OkapiTenantAdminService okapiTenantAdminService
@@ -90,6 +92,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
         // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
 
+
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true);
@@ -120,13 +123,20 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
 
+        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived', 'M')
       }
 
     }
   }
-
 
   /**
    *  Mod-RS needs some shared data to be able to route incoming messages to the appropriate tenant.
