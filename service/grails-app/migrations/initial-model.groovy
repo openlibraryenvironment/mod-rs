@@ -1419,6 +1419,10 @@ databaseChangeLog = {
             column(name: "aa_action_code", type: "VARCHAR(255)") {
                 constraints(nullable: "false")
             }
+
+            column(name: 'aa_trigger_type', type: "VARCHAR(10)")
+            column(name: 'aa_action_type', type: "VARCHAR(10)")
+            column(name: 'aa_action_body', type: "TEXT")
         }
     }
 

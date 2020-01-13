@@ -17,10 +17,21 @@ class AvailableAction implements MultiTenant<AvailableAction> {
   Status fromState
   String actionCode
 
+  // [S]ystem / [M]anual
+  String triggerType
+
+  // [S]ervice / [C]losure / [N]one
+  String actionType
+
+  String actionBody
+
   static constraints = {
              model (nullable: false, blank:false)
          fromState (nullable: false, blank:false)
         actionCode (nullable: false, blank:false)
+       triggerType (nullable: true, blank:false)
+        actionType (nullable: true, blank:false)
+        actionBody (nullable: true, blank:false)
   }
 
   static mapping = {
@@ -29,10 +40,13 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                   model column : 'aa_model'
               fromState column : 'aa_from_state'
              actionCode column : 'aa_action_code'
+            triggerType column : 'aa_trigger_type'
+             actionType column : 'aa_action_type'
+             actionBody column : 'aa_action_body'
   }
 
 
-  public static AvailableAction ensure(String model, String state, String action) {
+  public static AvailableAction ensure(String model, String state, String action, String triggerType=null, String actionType=null, String actionBody=null) {
 
     AvailableAction result = null;
 
@@ -44,7 +58,10 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                       new AvailableAction(
                                           model:sm, 
                                           fromState:s, 
-                                          actionCode:action).save(flush:true, failOnError:true);
+                                          actionCode:action,
+                                          triggerType: triggerType,
+                                          actionType: actionType,
+                                          actionBody: actionBody).save(flush:true, failOnError:true);
       }
     }
     return result;

@@ -103,21 +103,25 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
-        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes')
-        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
 
-        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip')
-        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message', 'M')
 
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare')
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply')
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message', 'M')
 
-        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip')
-        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'responderReceived', 'M')
       }
 
     }
