@@ -11,12 +11,12 @@ The format of each entry is
 # Requester
 
 * REQ_IDLE - A request has been received, but not yet validated
-    * validate
+    * [SYSTEM_PROCESS] validate
         * REQ_VALIDATED
         * REQ_INVALID_PATRON
 
 * REQ_VALIDATED - The request was valid
-    * sourceItem
+    * [SYSTEM_PROCESS] sourceItem
         * REQ_SOURCING_ITEM - We weren't able to automatically find a copy of this item, and there was an error we did not expect
         * REQ_SUPPLIER_IDENTIFIED - We located at least one possible supplier
         * REQ_END_OF_ROTA - We were not able to locate an item
@@ -26,7 +26,7 @@ The format of each entry is
 * REQ_SOURCING_ITEM - currently searching for the item - requests should NOT get stuck in this state
 
 * REQ_SUPPLIER_IDENTIFIED - at least one possible supplier identified
-    * sendToNextLender
+    * [SYSTEM_PROCESS] sendToNextLender
         * REQ_REQUEST_SENT_TO_SUPPLIER
         * REQ_END_OF_ROTA
 
@@ -45,7 +45,7 @@ The format of each entry is
 * REQ_WILL_SUPPLY
 * REQ_EXPECTS_TO_SUPPLY
 * REQ_UNFILLED - A supplier responded unfilled 
-    * sendToNextLender - Try the next lender in the rota, or mark END_OF_ROTA
+    * [SYSTEM_PROCESS] sendToNextLender - Try the next lender in the rota, or mark END_OF_ROTA
         * REQ_REQUEST_SENT_TO_SUPPLIER
         * REQ_END_OF_ROTA
 
@@ -73,13 +73,13 @@ The format of each entry is
         * RES_UNFILLED - Unable to locate a copy
 
 * RES_NEW_AWAIT_PULL_SLIP - An item has been located and we expect to supply, waiting to print pull slip
-    * supplierPrintPullSlip
+    * [Manual] supplierPrintPullSlip
         * RES_AWAIT_PICKING
 * message
     * RES_NEW_AWAIT_PULL_SLIP
 
 * RES_AWAIT_PICKING - Pull slip printed, waiting to be picked
-    * supplierCheckInToReshare
+    * [Manual] supplierCheckInToReshare
         * RES_CHECKED_IN_TO_RESHARE
         * RES_AWAIT_LMS_CHECKOUT
         * RES_AWAIT_PROXY_BORROWER
