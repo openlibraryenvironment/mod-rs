@@ -60,14 +60,17 @@ The format of each entry is
 # Responder / Supplier
 
 * RES_IDLE - A request has been received, but is not yet in process
-    * message
+    * [Manual] message
         * RES_IDLE
-    * respondYes
+    * [Manual] respondYes
         * RES_NEW_AWAIT_PULL_SLIP
-    * supplierCannotSupply
+    * [Manual] supplierCannotSupply
         * RES_UNFILLED
-    * dummyAction
+    * [SYSTEM_PROCESS] dummyAction
         * RES_IDLE
+    * [SYSTEM_PROCESSS] autoRespond - If configured, the system will attempt to auto respond to an incoming request
+        * RES_NEW_AWAIT_PULL_SLIP - We located a copy, updated the location and are awaitng pull-slip printing
+        * RES_UNFILLED - Unable to locate a copy
 
 * RES_NEW_AWAIT_PULL_SLIP - An item has been located and we expect to supply, waiting to print pull slip
     * supplierPrintPullSlip
