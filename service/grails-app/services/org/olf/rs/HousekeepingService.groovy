@@ -93,9 +93,6 @@ public class HousekeepingService {
 
         // Responder / Lender State Model
         Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
-        // RequestAction.lookupOrCreate('Responder', 'RES_IDLE', 'Shipped');
-
-
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true);
