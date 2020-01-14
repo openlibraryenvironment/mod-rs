@@ -15,7 +15,7 @@ The format of each entry is
         * REQ_VALIDATED
         * REQ_INVALID_PATRON
 
-*REQ_VALIDATED - The request was valid
+* REQ_VALIDATED - The request was valid
     * sourceItem
         * REQ_SOURCING_ITEM - We weren't able to automatically find a copy of this item, and there was an error we did not expect
         * REQ_SUPPLIER_IDENTIFIED - We located at least one possible supplier
