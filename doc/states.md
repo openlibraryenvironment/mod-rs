@@ -40,7 +40,11 @@ The format of each entry is
 * REQ_PENDING
 * REQ_WILL_SUPPLY
 * REQ_EXPECTS_TO_SUPPLY
-* REQ_UNFILLED
+* REQ_UNFILLED - A supplier responded unfilled 
+    * sendToNextLender - Try the next lender in the rota, or mark END_OF_ROTA
+        * REQ_REQUEST_SENT_TO_SUPPLIER
+        * REQ_END_OF_ROTA
+
 * REQ_SHIPPED
 * REQ_CHECKED_IN
 * REQ_AWAIT_RETURN_SHIPPING
