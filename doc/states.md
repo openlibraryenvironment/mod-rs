@@ -2,11 +2,11 @@
 
 The format of each entry is
 
-## INITIAL_STATE - description
-* action
-    * Possible RESULT_STATE (Given action scenario a)
-    * Possible RESULT_STATE (Given action scenario b)
-    * Possible RESULT_STATE (Given action scenario c)
+*  INITIAL_STATE - description
+    * action
+        * Possible RESULT_STATE (Given action scenario a)
+        * Possible RESULT_STATE (Given action scenario b)
+        * Possible RESULT_STATE (Given action scenario c)
 
 # Requester
 
