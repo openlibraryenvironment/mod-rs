@@ -11,24 +11,24 @@ The format of each entry is
 # Requester
 
 ## REQ_IDLE - A request has been received, but not yet validated
-### validate
-#### REQ_VALIDATED
-#### REQ_INVALID_PATRON
+* validate
+    * REQ_VALIDATED
+    * REQ_INVALID_PATRON
 
 ##REQ_VALIDATED - The request was valid
-### sourceItem
-#### REQ_SOURCING_ITEM - We weren't able to automatically find a copy of this item, and there was an error we did not expect
-#### REQ_SUPPLIER_IDENTIFIED - We located at least one possible supplier
-#### REQ_END_OF_ROTA - We were not able to locate an item
+* sourceItem
+    * REQ_SOURCING_ITEM - We weren't able to automatically find a copy of this item, and there was an error we did not expect
+    * REQ_SUPPLIER_IDENTIFIED - We located at least one possible supplier
+    * REQ_END_OF_ROTA - We were not able to locate an item
 
 ## REQ_INVALID_PATRON - Patron not valid or not in good standing
 
 ## REQ_SOURCING_ITEM - currently searching for the item - requests should NOT get stuck in this state
 
 ## REQ_SUPPLIER_IDENTIFIED - at least one possible supplier identified
-### sendToNextLender
-#### REQ_REQUEST_SENT_TO_SUPPLIER
-#### REQ_END_OF_ROTA
+* sendToNextLender
+    * REQ_REQUEST_SENT_TO_SUPPLIER
+    * REQ_END_OF_ROTA
 
 ## REQ_REQUEST_SENT_TO_SUPPLIER
 ## REQ_UNABLE_TO_CONTACT_SUPPLIER
@@ -52,26 +52,26 @@ The format of each entry is
 # Responder / Supplier
 
 ## RES_IDLE - A request has been received, but is not yet in process
-### message
-#### RES_IDLE
-### respondYes
-#### RES_NEW_AWAIT_PULL_SLIP
-### supplierCannotSupply
-#### RES_UNFILLED
-### dummyAction
-#### RES_IDLE
+* message
+    * RES_IDLE
+* respondYes
+    * RES_NEW_AWAIT_PULL_SLIP
+* supplierCannotSupply
+    * RES_UNFILLED
+* dummyAction
+    * RES_IDLE
 
 ## RES_NEW_AWAIT_PULL_SLIP - An item has been located and we expect to supply, waiting to print pull slip
-## supplierPrintPullSlip
-### RES_AWAIT_PICKING
-## message
-### RES_NEW_AWAIT_PULL_SLIP
+* supplierPrintPullSlip
+    * RES_AWAIT_PICKING
+* message
+    * RES_NEW_AWAIT_PULL_SLIP
 
 ## RES_AWAIT_PICKING - Pull slip printed, waiting to be picked
-### supplierCheckInToReshare
-#### RES_CHECKED_IN_TO_RESHARE
-#### RES_AWAIT_LMS_CHECKOUT
-#### RES_AWAIT_PROXY_BORROWER
+* supplierCheckInToReshare
+    * RES_CHECKED_IN_TO_RESHARE
+    * RES_AWAIT_LMS_CHECKOUT
+    * RES_AWAIT_PROXY_BORROWER
 
 ## RES_AWAIT_PROXY_BORROWER - Unable to complete check-in to reshare, no PROXY borrower for borrowing library
 
