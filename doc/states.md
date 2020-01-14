@@ -31,6 +31,10 @@ The format of each entry is
         * REQ_END_OF_ROTA
 
 * REQ_REQUEST_SENT_TO_SUPPLIER
+    * incomingProtocolMessage - StatusChange
+        * REQ_UNFILLED - statusInfo.status = Unfilled
+        * REQ_EXPECTS_TO_SUPPLY - statusInfo.status = ExpectToSupply
+
 * REQ_UNABLE_TO_CONTACT_SUPPLIER
 * REQ_ITEM_SHIPPED
 * REQ_BORROWING_LIBRARY_RECEIVED
