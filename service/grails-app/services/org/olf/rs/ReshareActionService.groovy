@@ -212,4 +212,7 @@ public class ReshareActionService {
   }
 
 
+  public simpleTransition(PatronRequest pr, Map params, String target_status) {
+    log.debug("request to transition ${pr} to ${target_status}");
+  }
 }

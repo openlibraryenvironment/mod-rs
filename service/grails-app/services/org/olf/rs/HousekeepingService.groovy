@@ -88,6 +88,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
 
         // Responder / Lender State Model
@@ -106,6 +107,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
+        Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
 
