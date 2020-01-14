@@ -51,22 +51,31 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
               break;
             case 'respondYes':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_NEW_AWAIT_PULL_SLIP');
               break;
             case 'supplierCannotSupply':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_UNFILLED');
               break;
             case 'supplierShip':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_ITEM_SHIPPED');
               break;
             case 'itemReturned':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWER_RETURNED');
               break;
             case 'supplierCheckOutOfReshare':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_COMPLETE');
               break;
             case 'cancel':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_CANCELLED');
               break;
             case 'requesterReceived':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWING_LIBRARY_RECEIVED');
               break;
             case 'patronReturnedItem':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWER_RETURNED');
               break;
             case 'shippedReturn':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_SHIPPED');
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
