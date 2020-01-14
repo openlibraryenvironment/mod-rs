@@ -31,7 +31,7 @@ The format of each entry is
         * REQ_END_OF_ROTA
 
 * REQ_REQUEST_SENT_TO_SUPPLIER
-    * incomingProtocolMessage - StatusChange
+    * [PROTOCOL_EVENT] incomingProtocolMessage - StatusChange
         * REQ_UNFILLED - statusInfo.status = Unfilled
         * REQ_EXPECTS_TO_SUPPLY - statusInfo.status = ExpectToSupply
 
