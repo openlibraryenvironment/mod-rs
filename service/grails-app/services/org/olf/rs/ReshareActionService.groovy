@@ -1,10 +1,10 @@
 package org.olf.rs;
 
-
 import grails.events.annotation.Subscriber
 import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
@@ -185,6 +185,17 @@ public class ReshareActionService {
     }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
+    log.debug("ResolvedSymbol: ${resolveSymbol(message_sender_symbol)}")
+    
+    def outboundMessage = new PatronRequestNotification()
+    outboundMessage.setPatronRequest(pr)
+    outboundMessage.setTimestamp(LocalDateTime.now())
+    outboundMessage.setMessageSender(resolveSymbol(message_sender_symbol))
+    outboundMessage.setMessageReceiver(resolveSymbol(peer_symbol))
+    outboundMessage.setMessageContent(actionParams.note)
+
+    log.debug("Outbound Message: ${outboundMessage}")
+    outboundMessage.save(flush:true, failOnError:true)
 
     if ( send_result=='SENT') {
       result = true;
@@ -211,5 +222,17 @@ public class ReshareActionService {
       auditData: json_data))
   }
 
+  private Symbol resolveSymbol(String symbl) {
+    def authorty = symbl.split(":")[0]
+    def symbol = symbl.split(":")[1]
+    Symbol result = null;
+    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
+                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
+    if ( symbol_list.size() == 1 ) {
+      result = symbol_list.get(0);
+    }
+
+    return result;
+  }
 
 }
