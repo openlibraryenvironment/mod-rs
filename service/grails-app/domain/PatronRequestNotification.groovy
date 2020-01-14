@@ -15,10 +15,11 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
   // Default date metadata maintained by the db
   Date dateCreated
   Date lastUpdated
-  
+
   LocalDateTime timestamp
 
   Boolean seen
+  Boolean isSender
 
   // The sender/receiver variables must be nullable, since we could have a system automated timeout notifcation etc
   Symbol messageSender
@@ -34,6 +35,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     patronRequest (nullable: true)
     timestamp (nullable: true, blank: false)
     seen (nullable: true, blank: false)
+    isSender (nullable: true, blank: false)
     messageSender (nullable: true, blank: false)
     messageReceiver (nullable: true, blank: false)
   }
@@ -45,6 +47,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     lastUpdated column : 'prn_last_updated'
     timestamp column : 'prn_timestamp'
     seen column : 'prn_seen'
+    isSender column : 'prn_isSender'
     messageSender column : 'prn_message_sender_fk'
     messageReceiver column : 'prn_message_receiver_fk'
     messageContent column : 'prn_message_content'

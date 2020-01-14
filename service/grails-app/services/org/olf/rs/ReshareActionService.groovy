@@ -192,6 +192,7 @@ public class ReshareActionService {
     outboundMessage.setTimestamp(LocalDateTime.now())
     outboundMessage.setMessageSender(resolveSymbol(message_sender_symbol))
     outboundMessage.setMessageReceiver(resolveSymbol(peer_symbol))
+    outboundMessage.setIsSender(true)
     outboundMessage.setMessageContent(actionParams.note)
 
     log.debug("Outbound Message: ${outboundMessage}")
