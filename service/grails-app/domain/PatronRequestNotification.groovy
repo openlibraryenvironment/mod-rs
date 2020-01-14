@@ -14,7 +14,8 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
 
   // Default date metadata maintained by the db
   Date dateCreated
-
+  Date lastUpdated
+  
   LocalDateTime timestamp
 
   Boolean seen
