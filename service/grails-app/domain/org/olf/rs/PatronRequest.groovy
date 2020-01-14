@@ -150,15 +150,17 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
-  // The audit of what has happened to this request and tags that are associated with the request */
+  // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
   static hasMany = [
     audit : PatronRequestAudit,
+    notifications: PatronRequestNotification,
     rota  : PatronRequestRota,
     tags  : Tag];
 
   static mappedBy = [
     rota: 'patronRequest',
-    audit: 'patronRequest'
+    audit: 'patronRequest',
+    notifications: 'patronRequest'
   ]
 
   static fetchMode = [

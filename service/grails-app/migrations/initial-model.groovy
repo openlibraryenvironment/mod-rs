@@ -1426,5 +1426,24 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200113-1658-001") {
+        createTable(tableName: "patron_request_notification") {
+            column(name: "prn_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "prn_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+            column(name: "prn_date_created", type: "timestamp")
+            column(name: "prn_timestamp", type: "timestamp")
+            column(name: "prn_seen", type: "BOOLEAN")
+            column(name: "prn_message_sender_fk", type: "VARCHAR(36)")
+            column(name: "prn_message_receiver_fk", type: "VARCHAR(36)")
+            column(name: "prn_message_content", type: "VARCHAR(36)")
+            column(name: "prn_patron_request_fk", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 
 }

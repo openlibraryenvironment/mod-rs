@@ -1,0 +1,10 @@
+import groovy.transform.*
+import org.olf.rs.PatronRequestNotification
+
+@Field PatronRequestNotification patronRequestNotification
+json g.render(patronRequestNotification, [expand: [
+                                            'id',
+                                            'messageSender',
+                                            'messageReceiver'
+                                          ],
+                                          excludes: ['patronRequest']])
