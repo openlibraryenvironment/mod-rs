@@ -615,9 +615,56 @@ public class ReshareApplicationEventHandlerService {
 
     log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
 
-    // TODO -- make this actually handle an incoming requesting agency message.
+    try {
+      if ( eventData.header?.supplyingAgencyRequestId == null ) {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
+        throw new Exception("supplyingAgencyRequestId missing");
+      }
 
-    // Needs to look for action and try to do something with that.
+      PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId)
+      if ( pr == null )
+        throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\"");
+
+      // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
+      // Needs to look for action and try to do something with that.
+
+      if ( eventData.messageInfo?.reasonForMessage != null ) {
+        switch ( eventData.messageInfo?.reasonForMessage ) {
+          case 'Notification':
+            Map messageData = eventData.messageInfo
+            auditEntry(pr, pr.state, pr.state, "Notification message recieved from requesting agency: ${messageData.note}", null)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedReasonForMessageType"
+            result.errorValue = eventData.messageInfo.reasonForMessage
+            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+            break;
+        }
+      }
+      else {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
+        throw new Exception("No reason for message");
+      }
+    } catch ( Exception e ) {
+      log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
+    }
+
+    if (result.status != "ERROR") {
+      result.status = "OK"
+    }
+
+    result.messageType = "REQUESTING_AGENCY_MESSAGE"
+    result.supIdType = eventData.header.supplyingAgencyId.agencyIdType
+    result.supId = eventData.header.supplyingAgencyId.agencyIdValue
+    result.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType
+    result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
+    result.reqId = eventData.header.requestingAgencyRequestId
+    result.timeRec = eventData.header.timestamp
+    result.reasonForMessage = eventData.messageInfo.reasonForMessage
+
     return result;
   }
 
