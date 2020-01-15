@@ -4,6 +4,7 @@ import grails.events.annotation.Subscriber
 import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestRota
 import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
@@ -124,19 +125,29 @@ public class ReshareActionService {
     String message_sender_symbol = "unassigned_message_sender_symbol";
     String peer_symbol = "unassigned_peer_symbol"
 
-
-    // This is the case where the REQUESTING AGENCY is sending a message to the SUPPLYING AGENCY
     if (pr.isRequester == true) {
       message_sender_symbol = pr.requestingInstitutionSymbol;
-      String supplyingInstitutionSymbol = pr.supplyingInstitutionSymbol;
+      Long rotaPosition = pr.rotaPosition;
       
-      // We check that it is sensible to send a message, ie that we have a currently identified supplyingAgency.
-      if (supplyingInstitutionSymbol == null) {
-        log.error("sendMessage could not find current supplying institution symbol")
+      // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
+      if (pr.rota.isEmpty()) {
+        log.error("sendMessage has been given an empty rota")
         return false;
       }
 
-      peer_symbol = supplyingInstitutionSymbol
+      if (rotaPosition == null) {
+        log.error("sendMessage could not find current rota postition")
+        return false;
+      } else if (pr.rota.empty()) {
+        log.error("sendMessage has been handed an empty rota")
+        return false;
+      }
+
+      log.debug("ROTA TYPE: ${pr.rota.getClass()}")
+      PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
+      log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
+
+      peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
 
       eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
@@ -155,8 +166,7 @@ public class ReshareActionService {
 
       eventData.activeSection = [action:"Notification", note:actionParams.note]
 
-    } // This is the case where the SUPPLYING AGENCY is sending a message to the REQUESTING AGENCY
-    else {
+    } else {
       message_sender_symbol = pr.supplyingInstitutionSymbol;
       peer_symbol = pr.requestingInstitutionSymbol;
 
