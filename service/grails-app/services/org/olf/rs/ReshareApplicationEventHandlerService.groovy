@@ -740,7 +740,7 @@ public class ReshareApplicationEventHandlerService {
     auditEntry(pr, old_state, new_state, message, null);
   }
 
-  private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+  public void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
 
     String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
     LocalDateTime ts = LocalDateTime.now();
@@ -787,7 +787,7 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
+  public boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
     boolean result = false;
 
@@ -887,7 +887,7 @@ public class ReshareApplicationEventHandlerService {
   // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
   // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
-  private void sendResponse(PatronRequest pr, 
+  public void sendResponse(PatronRequest pr, 
                             String status, 
                             String reasonUnfilled = null) {
 
@@ -934,7 +934,7 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private Symbol resolveSymbol(String authorty, String symbol) {
+  public Symbol resolveSymbol(String authorty, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
                                                    [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
@@ -945,7 +945,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private Symbol resolveCombinedSymbol(String combinedString) {
+  public Symbol resolveCombinedSymbol(String combinedString) {
     Symbol result = null;
     if ( combinedString != null ) {
       String[] name_components = combinedString.split(':');

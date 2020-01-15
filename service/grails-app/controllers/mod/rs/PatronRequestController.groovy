@@ -48,9 +48,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'supplierCheckInToReshare':
               result.status = reshareActionService.checkInToReshare(patron_request, request.JSON.actionParams);
               break;
-            case 'supplierCannotSupply':
-              result.status = reshareActionService.supplierCannotSupply(patron_request, request.JSON.actionParams);
-              break;
             case 'message':
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
               break;
@@ -76,7 +73,13 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_UNFILLED');
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy');
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
+                                    'Request manually flagged unable to supply', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
+              patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierShip':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_ITEM_SHIPPED');
