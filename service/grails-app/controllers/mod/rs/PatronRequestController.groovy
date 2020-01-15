@@ -9,12 +9,16 @@ import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.lms.ItemLocation;
+
 
 @Slf4j
 @CurrentTenant
 class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
 
   ReshareActionService reshareActionService
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
 
   PatronRequestController() {
     super(PatronRequest)
@@ -51,7 +55,25 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
               break;
             case 'respondYes':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_NEW_AWAIT_PULL_SLIP');
+              if ( request.JSON.actionParams.pickLocation != null ) {
+                ItemLocation location = new ItemLocation( location: request.JSON.actionParams.pickLocation, 
+                                                          shelvingLocation: request.JSON.actionParams.pickShelvingLocation,
+                                                          callNumber: request.JSON.actionParams.callnumber)
+
+                if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
+                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply')
+                }
+                else {
+                  response.status = 400;
+                  result.code=-2; // No location specified
+                  result.message='Failed to route request to given location'
+                }
+              }
+              else {
+                response.status = 400;
+                result.code=-1; // No location specified
+                result.message='No pick location specified. Unable to continue'
+              }
               break;
             case 'supplierCannotSupply':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_UNFILLED');
