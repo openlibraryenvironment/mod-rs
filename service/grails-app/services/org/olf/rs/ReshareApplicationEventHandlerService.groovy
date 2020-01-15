@@ -638,7 +638,7 @@ public class ReshareApplicationEventHandlerService {
       // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
       // Needs to look for action and try to do something with that.
 
-      if ( eventData.activeSection?.Action != null ) {
+      if ( eventData.activeSection?.action != null ) {
         switch ( eventData.activeSection?.action ) {
           case 'Notification':
             Map messageData = eventData.activeSection
@@ -655,7 +655,7 @@ public class ReshareApplicationEventHandlerService {
       else {
         result.status = "ERROR"
         result.errorType = "BadlyFormedMessage"
-        throw new Exception("No active section");
+        throw new Exception("No action in active section");
       }
     } catch ( Exception e ) {
       log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
