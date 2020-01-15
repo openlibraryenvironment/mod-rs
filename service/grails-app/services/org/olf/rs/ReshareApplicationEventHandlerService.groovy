@@ -5,6 +5,7 @@ import grails.events.annotation.Subscriber
 import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
@@ -566,6 +567,7 @@ public class ReshareApplicationEventHandlerService {
           case 'Notification':
             Map messageData = eventData.messageInfo
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
+            notificationEntry(pr, eventData, true)
             break;
           default:
             result.status = "ERROR"
@@ -643,6 +645,7 @@ public class ReshareApplicationEventHandlerService {
           case 'Notification':
             Map messageData = eventData.activeSection
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from requesting agency: ${messageData.note}", null)
+            notificationEntry(pr, eventData, false)
             break;
           default:
             result.status = "ERROR"
@@ -993,5 +996,28 @@ public class ReshareApplicationEventHandlerService {
                                                            surname: patron_details.surname).save()
     }
     return result;
+  }
+
+  private void notificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
+    def inboundMessage = new PatronRequestNotification()
+
+    inboundMessage.setPatronRequest(pr)
+    inboundMessage.setTimestamp(LocalDateTime.now())
+    if (isRequester) {
+      inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+    } else {
+      inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+    }
+    inboundMessage.setIsSender(false)
+    if (isRequester) {
+      inboundMessage.setMessageContent(eventData.messageInfo.note)
+    } else {
+      inboundMessage.setMessageContent(eventData.activeSection.note)
+    }
+    
+    log.debug("Inbound Message: ${inboundMessage}")
+    inboundMessage.save(flush:true, failOnError:true)
   }
 }
