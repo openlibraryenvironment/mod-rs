@@ -2,7 +2,7 @@
 okapi=new OkapiClient('reshare')
 rsclient = new RSClient(okapi);
 
-if ( 1==2 ) {
+if ( 1==1 ) {
   okapi.addTenantSymbol('OCLC:ZMU');
   okapi.addTenantSymbol('OCLC:PPU');
   okapi.addTenantSymbol('RESHARE:LOCALSYMBOL01');
@@ -11,6 +11,7 @@ if ( 1==2 ) {
   okapi.addTenantSymbol('RESHARE:DIKUB')
   okapi.addTenantSymbol('RESHARE:DIKUC')
   okapi.addTenantSymbol('RESHARE:KINT')
+  okapi.addTenantSymbol('RESHARE:KNOWINT01')
   okapi.addTenantSymbol('RESHARE:TESTINST01')
   okapi.addTenantSymbol('RESHARE:TESTINST02')
   okapi.addTenantSymbol('RESHARE:TESTINST03')
@@ -63,7 +64,11 @@ if ( 1==1 ) {
                        title:'The darkening land',
                        patronIdentifier: '905808497',
                        patronReference: 'PR',
+                       volume:'Please supply vol 1-2 of 23',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
-                       requestingInstitutionSymbol:'RESHARE:KNOWINT01']);
+                       requestingInstitutionSymbol:'RESHARE:KNOWINT01',
+                       rota:[
+                         [ directoryId:'RESHARE:KNOWINT01', rotaPosition:'0' ]
+                       ]]);
 
 }

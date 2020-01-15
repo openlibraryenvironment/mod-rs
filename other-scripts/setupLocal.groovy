@@ -61,6 +61,7 @@ if (initial_setup) {
                        patronGivenName: 'PGN',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc', 
                        requestingInstitutionSymbol:'RESHARE:KNOWINT01',
+                       volume:'Please supply vol 1 and 2 of the 24 volume set',
                        rota:[
                          [ directoryId:'RESHARE:TESTINST01', rotaPosition:'0' ]
                        ]]);
@@ -112,6 +113,7 @@ if ( !initial_setup) {
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
                        requestingInstitutionSymbol:'OCLC:ZMU',
+                       volume:'Please supply vol 1 the 100 volume set',
                        rota:[
                          [ directoryId:'RESHARE:TESTINST01', rotaPosition:'0' ]
                        ]]);
