@@ -125,6 +125,7 @@ public class ReshareActionService {
     String message_sender_symbol = "unassigned_message_sender_symbol";
     String peer_symbol = "unassigned_peer_symbol"
 
+    // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
     if (pr.isRequester == true) {
       message_sender_symbol = pr.requestingInstitutionSymbol;
       Long rotaPosition = pr.rotaPosition;
@@ -160,13 +161,14 @@ public class ReshareActionService {
           agencyIdType:message_sender_symbol.split(":")[0],
           agencyIdValue:message_sender_symbol.split(":")[1],
         ],
-        requestingAgencyRequestId:pr.id,
+        requestingAgencyRequestId:pr.hrid ?: pr.id,
         supplyingAgencyRequestId:pr.peerRequestIdentifier,
       ]
 
       eventData.activeSection = [action:"Notification", note:actionParams.note]
 
-    } else {
+    } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
+    else {
       message_sender_symbol = pr.supplyingInstitutionSymbol;
       peer_symbol = pr.requestingInstitutionSymbol;
 
@@ -190,13 +192,12 @@ public class ReshareActionService {
     }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
-    log.debug("ResolvedSymbol: ${resolveSymbol(message_sender_symbol)}")
     
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
     outboundMessage.setTimestamp(LocalDateTime.now())
-    outboundMessage.setMessageSender(resolveSymbol(message_sender_symbol))
-    outboundMessage.setMessageReceiver(resolveSymbol(peer_symbol))
+    outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
+    outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
     outboundMessage.setIsSender(true)
     outboundMessage.setMessageContent(actionParams.note)
 
@@ -228,9 +229,7 @@ public class ReshareActionService {
       auditData: json_data))
   }
 
-  private Symbol resolveSymbol(String symbl) {
-    def authorty = symbl.split(":")[0]
-    def symbol = symbl.split(":")[1]
+  private Symbol resolveSymbol(String authorty, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
                                                    [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
@@ -238,6 +237,17 @@ public class ReshareActionService {
       result = symbol_list.get(0);
     }
 
+    return result;
+  }
+
+  private Symbol resolveCombinedSymbol(String combinedString) {
+    Symbol result = null;
+    if ( combinedString != null ) {
+      String[] name_components = combinedString.split(':');
+      if ( name_components.length == 2 ) {
+        result = resolveSymbol(name_components[0], name_components[1]);
+      }
+    }
     return result;
   }
 

@@ -531,6 +531,10 @@ public class ReshareApplicationEventHandlerService {
     return PatronRequest.findByIdOrHrid(id,id);
   }
 
+  PatronRequest lookupPatronRequestByPeerId(String id) {
+    return PatronRequest.findByPeerRequestIdentifier(id);
+  }
+
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
@@ -623,30 +627,35 @@ public class ReshareApplicationEventHandlerService {
       }
 
       PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId)
-      if ( pr == null )
-        throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\"");
+      if ( pr == null ) {
+        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\"")
+        pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId)
+      }
+      if (pr == null) {
+        throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+      }
 
       // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
       // Needs to look for action and try to do something with that.
 
-      if ( eventData.messageInfo?.reasonForMessage != null ) {
-        switch ( eventData.messageInfo?.reasonForMessage ) {
+      if ( eventData.activeSection?.Action != null ) {
+        switch ( eventData.activeSection?.action ) {
           case 'Notification':
-            Map messageData = eventData.messageInfo
+            Map messageData = eventData.activeSection
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from requesting agency: ${messageData.note}", null)
             break;
           default:
             result.status = "ERROR"
-            result.errorType = "UnsupportedReasonForMessageType"
+            result.errorType = "UnsupporteActionType"
             result.errorValue = eventData.messageInfo.reasonForMessage
-            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
             break;
         }
       }
       else {
         result.status = "ERROR"
         result.errorType = "BadlyFormedMessage"
-        throw new Exception("No reason for message");
+        throw new Exception("No active section");
       }
     } catch ( Exception e ) {
       log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
@@ -663,7 +672,7 @@ public class ReshareApplicationEventHandlerService {
     result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
     result.reqId = eventData.header.requestingAgencyRequestId
     result.timeRec = eventData.header.timestamp
-    result.reasonForMessage = eventData.messageInfo.reasonForMessage
+    result.action = eventData.activeSection?.action
 
     return result;
   }
