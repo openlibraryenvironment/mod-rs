@@ -1435,8 +1435,10 @@ databaseChangeLog = {
                 constraints(nullable: "false")
             }
             column(name: "prn_date_created", type: "timestamp")
+            column(name: "prn_last_updated", type: "timestamp")
             column(name: "prn_timestamp", type: "timestamp")
             column(name: "prn_seen", type: "BOOLEAN")
+            column(name: "prn_is_sender", type: "BOOLEAN")
             column(name: "prn_message_sender_fk", type: "VARCHAR(36)")
             column(name: "prn_message_receiver_fk", type: "VARCHAR(36)")
             column(name: "prn_message_content", type: "VARCHAR(36)")

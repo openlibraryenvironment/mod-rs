@@ -5,6 +5,7 @@ import grails.events.annotation.Subscriber
 import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
@@ -531,6 +532,10 @@ public class ReshareApplicationEventHandlerService {
     return PatronRequest.findByIdOrHrid(id,id);
   }
 
+  PatronRequest lookupPatronRequestByPeerId(String id) {
+    return PatronRequest.findByPeerRequestIdentifier(id);
+  }
+
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
@@ -562,6 +567,7 @@ public class ReshareApplicationEventHandlerService {
           case 'Notification':
             Map messageData = eventData.messageInfo
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
+            notificationEntry(pr, eventData, true)
             break;
           default:
             result.status = "ERROR"
@@ -615,9 +621,62 @@ public class ReshareApplicationEventHandlerService {
 
     log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
 
-    // TODO -- make this actually handle an incoming requesting agency message.
+    try {
+      if ( eventData.header?.supplyingAgencyRequestId == null ) {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
+        throw new Exception("supplyingAgencyRequestId missing");
+      }
 
-    // Needs to look for action and try to do something with that.
+      PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId)
+      if ( pr == null ) {
+        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\"")
+        pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId)
+      }
+      if (pr == null) {
+        throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+      }
+
+      // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
+      // Needs to look for action and try to do something with that.
+
+      if ( eventData.activeSection?.action != null ) {
+        switch ( eventData.activeSection?.action ) {
+          case 'Notification':
+            Map messageData = eventData.activeSection
+            auditEntry(pr, pr.state, pr.state, "Notification message recieved from requesting agency: ${messageData.note}", null)
+            notificationEntry(pr, eventData, false)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupporteActionType"
+            result.errorValue = eventData.messageInfo.reasonForMessage
+            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
+            break;
+        }
+      }
+      else {
+        result.status = "ERROR"
+        result.errorType = "BadlyFormedMessage"
+        throw new Exception("No action in active section");
+      }
+    } catch ( Exception e ) {
+      log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
+    }
+
+    if (result.status != "ERROR") {
+      result.status = "OK"
+    }
+
+    result.messageType = "REQUESTING_AGENCY_MESSAGE"
+    result.supIdType = eventData.header.supplyingAgencyId.agencyIdType
+    result.supId = eventData.header.supplyingAgencyId.agencyIdValue
+    result.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType
+    result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
+    result.reqId = eventData.header.requestingAgencyRequestId
+    result.timeRec = eventData.header.timestamp
+    result.action = eventData.activeSection?.action
+
     return result;
   }
 
@@ -937,5 +996,28 @@ public class ReshareApplicationEventHandlerService {
                                                            surname: patron_details.surname).save()
     }
     return result;
+  }
+
+  private void notificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
+    def inboundMessage = new PatronRequestNotification()
+
+    inboundMessage.setPatronRequest(pr)
+    inboundMessage.setTimestamp(LocalDateTime.now())
+    if (isRequester) {
+      inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+    } else {
+      inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+    }
+    inboundMessage.setIsSender(false)
+    if (isRequester) {
+      inboundMessage.setMessageContent(eventData.messageInfo.note)
+    } else {
+      inboundMessage.setMessageContent(eventData.activeSection.note)
+    }
+    
+    log.debug("Inbound Message: ${inboundMessage}")
+    inboundMessage.save(flush:true, failOnError:true)
   }
 }
