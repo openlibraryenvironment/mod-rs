@@ -1039,7 +1039,7 @@ public class ReshareApplicationEventHandlerService {
     eventData.action = action
     eventData.note = note
 
-    def send_result = protocolMessageService.sendProtocolMessage(pr.message_sender_symbol, peer_symbol, eventData);
+    def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
   }
 
