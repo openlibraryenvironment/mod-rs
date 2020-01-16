@@ -990,20 +990,21 @@ public class ReshareApplicationEventHandlerService {
 
   /**
    * ToDo: Fill out.
+   * Needs to send a supplyingAgencyMessage where requestingAgencyMessage.action (typedef type_action) = 'Received'
    */
   public void sendRequesterReceived(PatronRequest pr) {
-    sendRequestingAgencyMessage(pr);
+    sendRequestingAgencyMessage(pr, 'Received', null);
   }
 
   /**
    * ToDo: Fill out.
    */
-  public void sendRequestingAgencyMessage(PatronRequest pr) {
+  public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note) {
     Map eventData = [header:[]];
 
     eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
-    //  eventData.header = [
+    eventData.header = [
     //    supplyingAgencyId: [
     //      agencyIdType:peer_symbol.split(":")[0],
     //      agencyIdValue:peer_symbol.split(":")[1],
@@ -1014,7 +1015,9 @@ public class ReshareApplicationEventHandlerService {
     //    ],
     //    requestingAgencyRequestId:pr.hrid ?: pr.id,
     //    supplyingAgencyRequestId:pr.peerRequestIdentifier,
-    //  ]
+    ]
+    eventData.action = action
+    eventData.note = note
 
 
   }
