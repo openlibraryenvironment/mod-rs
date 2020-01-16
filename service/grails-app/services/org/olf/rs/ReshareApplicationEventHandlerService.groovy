@@ -706,37 +706,37 @@ public class ReshareApplicationEventHandlerService {
       switch ( statusInfo.status ) {
         case 'ExpectToSupply':
           def new_state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
         case 'Unfilled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED', null)
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Loaned':
-          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED', null)
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
         case 'Overdue':
-          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE', null)
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Recalled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED', null)
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Cancelled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED', null)
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
