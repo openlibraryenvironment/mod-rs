@@ -574,7 +574,7 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'Notification':
             Map messageData = eventData.messageInfo
-            auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
+            auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
             notificationEntry(pr, eventData, true)
             break;
           default:
@@ -650,15 +650,20 @@ public class ReshareApplicationEventHandlerService {
 
       if ( eventData.activeSection?.action != null ) {
         switch ( eventData.activeSection?.action ) {
+          case 'Received':
+            // TODO, add handling to change state to RES_REQUESTER_RECEIVED, or whatever it is.
+            log.debug("Shipment received by requester")
+            auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+            break;
           case 'Notification':
             Map messageData = eventData.activeSection
-            auditEntry(pr, pr.state, pr.state, "Notification message recieved from requesting agency: ${messageData.note}", null)
+            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
             notificationEntry(pr, eventData, false)
             break;
           default:
             result.status = "ERROR"
-            result.errorType = "UnsupporteActionType"
-            result.errorValue = eventData.messageInfo.reasonForMessage
+            result.errorType = "UnsupportedActionType"
+            result.errorValue = eventData.activeSection.action
             throw new Exception("Unhandled action: ${eventData.activeSection.action}");
             break;
         }
@@ -701,7 +706,7 @@ public class ReshareApplicationEventHandlerService {
       switch ( statusInfo.status ) {
         case 'ExpectToSupply':
           def new_state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          auditEntry(pr, pr.state, to, 'Protocol message');
+          auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
@@ -1036,8 +1041,10 @@ public class ReshareApplicationEventHandlerService {
       requestingAgencyRequestId:pr.hrid ?: pr.id,
       supplyingAgencyRequestId:pr.peerRequestIdentifier,
     ]
-    eventData.action = action
-    eventData.note = note
+    eventData.activeSection = [
+      action: action,
+      note: note
+    ]
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
