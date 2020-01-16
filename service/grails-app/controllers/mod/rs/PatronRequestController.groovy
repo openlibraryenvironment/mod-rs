@@ -103,6 +103,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
               break;
             case 'requesterReceived':
+              reshareApplicationEventHandlerService.sendRequesterReceived(patron_request);
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED');
               break;
             case 'patronReturnedItem':

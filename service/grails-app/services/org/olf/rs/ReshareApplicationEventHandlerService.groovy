@@ -700,28 +700,43 @@ public class ReshareApplicationEventHandlerService {
     if ( statusInfo.status ) {
       switch ( statusInfo.status ) {
         case 'ExpectToSupply':
-          pr.state=lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+          def new_state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
           break;
         case 'Unfilled':
-          pr.state=lookupStatus('PatronRequest', 'REQ_UNFILLED')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_UNFILLED');
+          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
           break;
         case 'Loaned':
-          pr.state=lookupStatus('PatronRequest', 'REQ_SHIPPED')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_SHIPPED');
+          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
           break;
         case 'Overdue':
-          pr.state=lookupStatus('PatronRequest', 'REQ_OVERDUE')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_OVERDUE');
+          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
           break;
         case 'Recalled':
-          pr.state=lookupStatus('PatronRequest', 'REQ_RECALLED')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_RECALLED');
+          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
           break;
         case 'Cancelled':
-          pr.state=lookupStatus('PatronRequest', 'REQ_CANCELLED')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_CANCELLED');
+          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
+        default:
+          log.error("Unhandled statusInfo.status ${statusInfo.status}");
           break;
       }
     }
@@ -971,6 +986,37 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}");
     }
+  }
+
+  /**
+   * ToDo: Fill out.
+   */
+  public void sendRequesterReceived(PatronRequest pr) {
+    sendRequestingAgencyMessage(pr);
+  }
+
+  /**
+   * ToDo: Fill out.
+   */
+  public void sendRequestingAgencyMessage(PatronRequest pr) {
+    Map eventData = [header:[]];
+
+    eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
+
+    //  eventData.header = [
+    //    supplyingAgencyId: [
+    //      agencyIdType:peer_symbol.split(":")[0],
+    //      agencyIdValue:peer_symbol.split(":")[1],
+    //    ],
+    //    requestingAgencyId:[
+    //      agencyIdType:message_sender_symbol.split(":")[0],
+    //      agencyIdValue:message_sender_symbol.split(":")[1],
+    //    ],
+    //    requestingAgencyRequestId:pr.hrid ?: pr.id,
+    //    supplyingAgencyRequestId:pr.peerRequestIdentifier,
+    //  ]
+
+
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {
