@@ -217,10 +217,10 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     log.debug("actionMessage(${pr})");
     boolean result = false;
 
-    if (actionParams.isNull(id)){
+    if (actionParams.isNull("id")){
       return result
     }
-    if (actionParams.isNull(seenStatus)){
+    if (actionParams.isNull("seenStatus")){
       log.warn("No seen status was sent to changeMessageSeenState")
       return result
     }
