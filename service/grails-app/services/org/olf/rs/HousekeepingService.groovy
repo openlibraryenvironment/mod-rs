@@ -76,6 +76,8 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER')
         Status.lookupOrCreate('PatronRequest', 'REQ_ITEM_SHIPPED', '0035', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true)
         Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true)

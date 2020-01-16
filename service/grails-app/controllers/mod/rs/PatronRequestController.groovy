@@ -81,26 +81,35 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
               patron_request.save(flush:true, failOnError:true);
               break;
-            case 'supplierShip':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_ITEM_SHIPPED');
+            case 'supplierMarkShipped':
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned');
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    patron_request.state,
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
+                                    'Shipped', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED')
+              patron_request.save(flush:true, failOnError:true);
               break;
             case 'itemReturned':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWER_RETURNED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'Responder', 'REQ_BORROWER_RETURNED');
+              break;
+            case 'supplierManualCheckout':
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_AWAIT_SHIP');
               break;
             case 'supplierCheckOutOfReshare':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'RES_COMPLETE');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
               break;
             case 'cancel':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_CANCELLED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
               break;
             case 'requesterReceived':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWING_LIBRARY_RECEIVED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED');
               break;
             case 'patronReturnedItem':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_BORROWER_RETURNED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_BORROWER_RETURNED');
               break;
             case 'shippedReturn':
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'REQ_SHIPPED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_SHIPPED');
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");

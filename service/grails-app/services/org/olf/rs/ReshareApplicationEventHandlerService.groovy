@@ -564,6 +564,14 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
             break;
+          case 'StatusRequestResponse':
+            break;
+          case 'RenewResponse':
+            break;
+          case 'CancelResponse':
+            break;
+          case 'StatusChange':
+            break;
           case 'Notification':
             Map messageData = eventData.messageInfo
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
@@ -680,6 +688,9 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+
+  // ISO18626 states are RequestReceived ExpectToSupply WillSupply Loaned Overdue Recalled RetryPossible Unfilled CopyCompleted LoanCompleted CompletedWithoutReturn Cancelled
+
   private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {
     log.debug("handleStatusChange(${pr.id},${statusInfo})");
 
@@ -695,6 +706,22 @@ public class ReshareApplicationEventHandlerService {
         case 'Unfilled':
           pr.state=lookupStatus('PatronRequest', 'REQ_UNFILLED')
           if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_UNFILLED');
+          break;
+        case 'Loaned':
+          pr.state=lookupStatus('PatronRequest', 'REQ_SHIPPED')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_SHIPPED');
+          break;
+        case 'Overdue':
+          pr.state=lookupStatus('PatronRequest', 'REQ_OVERDUE')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_OVERDUE');
+          break;
+        case 'Recalled':
+          pr.state=lookupStatus('PatronRequest', 'REQ_RECALLED')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_RECALLED');
+          break;
+        case 'Cancelled':
+          pr.state=lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_CANCELLED');
           break;
       }
     }
@@ -883,13 +910,25 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
+  public void sendResponse(PatronRequest pr, 
+                            String status, 
+                            String reasonUnfilled = null) {
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled);
+  }
+
+  public void sendStatusChange(PatronRequest pr,
+                            String status) {
+    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null);
+  }
+
   // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
   // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
   // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
-  public void sendResponse(PatronRequest pr, 
-                            String status, 
-                            String reasonUnfilled = null) {
+  public void sendSupplyingAgencyMessage(PatronRequest pr, 
+                                         String reason_for_message,
+                                         String status, 
+                                         String reasonUnfilled = null) {
 
     log.debug("sendResponse(....)");
 
@@ -913,7 +952,7 @@ public class ReshareApplicationEventHandlerService {
             supplyingAgencyRequestId:pr.id
           ],
           messageInfo:[
-            reasonForMessage:'RequestResponse',
+            reasonForMessage:reason_for_message
           ],
           statusInfo:[
             status:status

@@ -112,10 +112,10 @@ if ( !initial_setup) {
                        patronNote:'Please dont shoot the messenger',
                        pickupLocation:'A string',
                        systemInstanceIdentifier:'08ef9430-878d-42c4-a9fa-f09951f36803',
-                       requestingInstitutionSymbol:'OCLC:ZMU',
+                       requestingInstitutionSymbol:'RESHARE:TESTINST01',
                        volume:'Please supply vol 1 the 100 volume set',
                        rota:[
-                         [ directoryId:'RESHARE:TESTINST01', rotaPosition:'0' ]
+                         [ directoryId:'RESHARE:KNOWINT01', rotaPosition:'0' ]
                        ]]);
 }
 
