@@ -213,6 +213,32 @@ public class ReshareActionService {
     return result;
   }
 
+public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
+    log.debug("actionMessage(${pr})");
+    boolean result = false;
+
+    if (actionParams.isNull(id)){
+      return result
+    }
+    if (actionParams.isNull(seenStatus)){
+      log.warn("No seen status was sent to changeMessageSeenState")
+      return result
+    }
+
+    def id = actionParams.id
+    PatronRequestNotification message = PatronRequestNotification.findById(id)
+    if ( message == null ) {
+      log.warn("Unable to locate PatronRequestNotification corresponding to ID or hrid in requestingAgencyRequestId \"${id}\"");
+      return result
+    }
+
+    message.setSeen(actionParams.seenStatus)
+    message.save(flush:true, failOnError:true)
+
+    result = true;
+    return result;
+  }
+
   private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
 
     String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
