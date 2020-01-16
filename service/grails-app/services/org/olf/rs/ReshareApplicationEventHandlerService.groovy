@@ -638,11 +638,13 @@ public class ReshareApplicationEventHandlerService {
 
       PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId)
       if ( pr == null ) {
-        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\"")
+        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\", trying to locate by peerId.")
         pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId)
       }
       if (pr == null) {
         throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+      } else {
+        log.debug("Lookup by peerID successful.")
       }
 
       // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
