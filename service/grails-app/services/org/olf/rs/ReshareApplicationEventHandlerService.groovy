@@ -1003,22 +1003,43 @@ public class ReshareApplicationEventHandlerService {
     Map eventData = [header:[]];
 
     eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
+    String message_sender_symbol = pr.requestingInstitutionSymbol;
+    Long rotaPosition = pr.rotaPosition;
+      
+    // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
+    if (pr.rota.isEmpty()) {
+      log.error("sendRequestingAgencyMessage has been given an empty rota")
+      return;
+    }
+    if (rotaPosition == null) {
+      log.error("sendRequestingAgencyMessage could not find current rota postition")
+      return;
+    } else if (pr.rota.empty()) {
+      log.error("sendRequestingAgencyMessage has been handed an empty rota")
+      return;
+    }
+
+    log.debug("ROTA TYPE: ${pr.rota.getClass()}")
+    PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
+    log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
+    String peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
 
     eventData.header = [
-    //    supplyingAgencyId: [
-    //      agencyIdType:peer_symbol.split(":")[0],
-    //      agencyIdValue:peer_symbol.split(":")[1],
-    //    ],
-    //    requestingAgencyId:[
-    //      agencyIdType:message_sender_symbol.split(":")[0],
-    //      agencyIdValue:message_sender_symbol.split(":")[1],
-    //    ],
-    //    requestingAgencyRequestId:pr.hrid ?: pr.id,
-    //    supplyingAgencyRequestId:pr.peerRequestIdentifier,
+      supplyingAgencyId: [
+        agencyIdType:peer_symbol.split(":")[0],
+        agencyIdValue:peer_symbol.split(":")[1],
+      ],
+      requestingAgencyId:[
+        agencyIdType:message_sender_symbol.split(":")[0],
+        agencyIdValue:message_sender_symbol.split(":")[1],
+      ],
+      requestingAgencyRequestId:pr.hrid ?: pr.id,
+      supplyingAgencyRequestId:pr.peerRequestIdentifier,
     ]
     eventData.action = action
     eventData.note = note
 
+    def send_result = protocolMessageService.sendProtocolMessage(pr.message_sender_symbol, peer_symbol, eventData);
 
   }
 
