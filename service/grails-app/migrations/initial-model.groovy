@@ -1448,4 +1448,10 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200116-09068-001") {
+        modifyDataType(tableName: "patron_request_notification") {
+            column(name: "prn_message_content", type: "text")
+        }
+    }
+
 }
