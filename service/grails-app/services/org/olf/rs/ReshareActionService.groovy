@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
  */
 public class ReshareActionService {
 
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ProtocolMessageService protocolMessageService
   HostLMSService hostLMSService
 
@@ -277,7 +278,21 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     return result;
   }
 
-  public simpleTransition(PatronRequest pr, Map params, String target_status) {
+  public simpleTransition(PatronRequest pr, Map params, String state_model, String target_status, String p_message=null) {
+
     log.debug("request to transition ${pr} to ${target_status}");
+    def new_state = reshareApplicationEventHandlerService.lookupStatus(state_model, target_status);
+
+    if ( ( pr != null ) && ( new_state != null ) ) {
+      String message = p_message ?: "Simple Transition ${pr.state?.code} to ${new_state.code}".toString()
+
+      reshareApplicationEventHandlerService.auditEntry(pr,
+                                      pr.state,
+                                      new_state,
+                                      message, null);
+      pr.state=new_state;
+      pr.save(flush:true, failOnError:true);
+      log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+    }
   }
 }

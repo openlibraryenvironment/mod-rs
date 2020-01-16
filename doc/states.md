@@ -35,6 +35,9 @@ The format of each entry is
         * REQ_UNFILLED - statusInfo.status = Unfilled
         * REQ_EXPECTS_TO_SUPPLY - statusInfo.status = ExpectToSupply
 
+* REQ_OVERDUE
+* REQ_RECALLED
+
 * REQ_UNABLE_TO_CONTACT_SUPPLIER
 * REQ_ITEM_SHIPPED
 * REQ_BORROWING_LIBRARY_RECEIVED
@@ -44,6 +47,9 @@ The format of each entry is
 * REQ_PENDING
 * REQ_WILL_SUPPLY
 * REQ_EXPECTS_TO_SUPPLY
+    * [PROTOCOL_EVENT] incomingProtocolMessage - StatusChange:Loaned
+        * REQ_SHIPPED
+
 * REQ_UNFILLED - A supplier responded unfilled 
     * [SYSTEM_PROCESS] sendToNextLender - Try the next lender in the rota, or mark END_OF_ROTA
         * REQ_REQUEST_SENT_TO_SUPPLIER
@@ -87,10 +93,14 @@ The format of each entry is
 * RES_AWAIT_PROXY_BORROWER - Unable to complete check-in to reshare, no PROXY borrower for borrowing library
 
 * RES_CHECKED_IN_TO_RESHARE - Item checked out of host LMS and into Re:Share
+    * supplierMarkShipped
+        * RES_ITEM_SHIPPED
 
 * RES_AWAIT_LMS_CHECKOUT - There was a problem checking the item out of the host LMS
 
 * RES_AWAIT_SHIP - Item picked and is awaiting shipping
+    * supplierMarkShipped
+        * RES_ITEM_SHIPPED
 
 * RES_HOLD_PLACED - The item was not availabe on the shelf, but a hold has been placed
 

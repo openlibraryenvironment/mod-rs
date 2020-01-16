@@ -564,6 +564,14 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
             break;
+          case 'StatusRequestResponse':
+            break;
+          case 'RenewResponse':
+            break;
+          case 'CancelResponse':
+            break;
+          case 'StatusChange':
+            break;
           case 'Notification':
             Map messageData = eventData.messageInfo
             auditEntry(pr, pr.state, pr.state, "Notification message recieved from supplying agency: ${messageData.note}", null)
@@ -680,6 +688,9 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+
+  // ISO18626 states are RequestReceived ExpectToSupply WillSupply Loaned Overdue Recalled RetryPossible Unfilled CopyCompleted LoanCompleted CompletedWithoutReturn Cancelled
+
   private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {
     log.debug("handleStatusChange(${pr.id},${statusInfo})");
 
@@ -689,12 +700,43 @@ public class ReshareApplicationEventHandlerService {
     if ( statusInfo.status ) {
       switch ( statusInfo.status ) {
         case 'ExpectToSupply':
-          pr.state=lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+          def new_state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
           break;
         case 'Unfilled':
-          pr.state=lookupStatus('PatronRequest', 'REQ_UNFILLED')
-          if ( prr != null ) prr.state = lookupStatus('PatronRequest', 'REQ_UNFILLED');
+          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
+          break;
+        case 'Loaned':
+          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
+        case 'Overdue':
+          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
+          break;
+        case 'Recalled':
+          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state;
+          break;
+        case 'Cancelled':
+          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          auditEntry(pr, pr.state, to, 'Protocol message');
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
+        default:
+          log.error("Unhandled statusInfo.status ${statusInfo.status}");
           break;
       }
     }
@@ -883,13 +925,25 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
+  public void sendResponse(PatronRequest pr, 
+                            String status, 
+                            String reasonUnfilled = null) {
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled);
+  }
+
+  public void sendStatusChange(PatronRequest pr,
+                            String status) {
+    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null);
+  }
+
   // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
   // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
   // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
-  public void sendResponse(PatronRequest pr, 
-                            String status, 
-                            String reasonUnfilled = null) {
+  public void sendSupplyingAgencyMessage(PatronRequest pr, 
+                                         String reason_for_message,
+                                         String status, 
+                                         String reasonUnfilled = null) {
 
     log.debug("sendResponse(....)");
 
@@ -913,7 +967,7 @@ public class ReshareApplicationEventHandlerService {
             supplyingAgencyRequestId:pr.id
           ],
           messageInfo:[
-            reasonForMessage:'RequestResponse',
+            reasonForMessage:reason_for_message
           ],
           statusInfo:[
             status:status
@@ -932,6 +986,40 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}");
     }
+  }
+
+  /**
+   * ToDo: Fill out.
+   * Needs to send a supplyingAgencyMessage where requestingAgencyMessage.action (typedef type_action) = 'Received'
+   */
+  public void sendRequesterReceived(PatronRequest pr) {
+    sendRequestingAgencyMessage(pr, 'Received', null);
+  }
+
+  /**
+   * ToDo: Fill out.
+   */
+  public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note) {
+    Map eventData = [header:[]];
+
+    eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
+
+    eventData.header = [
+    //    supplyingAgencyId: [
+    //      agencyIdType:peer_symbol.split(":")[0],
+    //      agencyIdValue:peer_symbol.split(":")[1],
+    //    ],
+    //    requestingAgencyId:[
+    //      agencyIdType:message_sender_symbol.split(":")[0],
+    //      agencyIdValue:message_sender_symbol.split(":")[1],
+    //    ],
+    //    requestingAgencyRequestId:pr.hrid ?: pr.id,
+    //    supplyingAgencyRequestId:pr.peerRequestIdentifier,
+    ]
+    eventData.action = action
+    eventData.note = note
+
+
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {
