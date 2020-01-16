@@ -713,26 +713,26 @@ public class ReshareApplicationEventHandlerService {
           if ( prr != null ) prr.state = new_state
           break;
         case 'Unfilled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED', null)
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Loaned':
-          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED', null)
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
         case 'Overdue':
-          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE', null)
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Recalled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED', null)
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
@@ -795,6 +795,7 @@ public class ReshareApplicationEventHandlerService {
     LocalDateTime ts = LocalDateTime.now();
     log.debug("add audit entry at ${ts}");
 
+    try {
     pr.addToAudit( new PatronRequestAudit(
       patronRequest: pr,
       dateCreated:ts,
@@ -803,6 +804,9 @@ public class ReshareApplicationEventHandlerService {
       duration:null,
       message: message,
       auditData: json_data))
+    } catch(Exception e) {
+      log.error("Problem saving audit entry", e)
+    }
   }
 
   private void autoRespond(PatronRequest pr) {
