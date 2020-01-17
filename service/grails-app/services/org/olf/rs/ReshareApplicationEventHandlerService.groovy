@@ -1057,7 +1057,7 @@ public class ReshareApplicationEventHandlerService {
       note: note
     ]
 
-    if (!actionParams.isNull("note")) {
+    if (note != null) {
       def outboundMessage = new PatronRequestNotification()
       outboundMessage.setPatronRequest(pr)
       outboundMessage.setTimestamp(LocalDateTime.now())
@@ -1065,12 +1065,12 @@ public class ReshareApplicationEventHandlerService {
       outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
       outboundMessage.setIsSender(true)
       String actionContext = ""
-      switch(actionParams.action) {
+      switch(action) {
         case 'Received':
           actionContext = "${message_sender_symbol.split(":")[1]} has received this shipment with a note: "
           break;
       }
-      outboundMessage.setMessageContent("${actionContext} ${actionParams.note}")
+      outboundMessage.setMessageContent("${actionContext} ${note}")
       outboundMessage.save(flush:true, failOnError:true)
     }
 
