@@ -654,8 +654,8 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.activeSection?.action ) {
           case 'Received':
             // TODO, add handling to change state to RES_REQUESTER_RECEIVED, or whatever it is.
-            log.debug("Shipment received by requester")
             auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+            pr.save(flush: true, failOnError: true)
             break;
           case 'Notification':
             Map messageData = eventData.activeSection
@@ -796,17 +796,19 @@ public class ReshareApplicationEventHandlerService {
     log.debug("add audit entry at ${ts}");
 
     try {
-    pr.addToAudit( new PatronRequestAudit(
-      patronRequest: pr,
-      dateCreated:ts,
-      fromStatus:from,
-      toStatus:to,
-      duration:null,
-      message: message,
-      auditData: json_data))
+      pr.addToAudit( new PatronRequestAudit(
+        patronRequest: pr,
+        dateCreated:ts,
+        fromStatus:from,
+        toStatus:to,
+        duration:null,
+        message: message,
+        auditData: json_data
+      ))
     } catch(Exception e) {
       log.error("Problem saving audit entry", e)
     }
+    log.debug("Evrything worked ok in auditEntry")
   }
 
   private void autoRespond(PatronRequest pr) {
