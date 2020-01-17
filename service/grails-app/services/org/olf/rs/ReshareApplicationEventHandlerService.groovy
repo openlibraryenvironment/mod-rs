@@ -653,7 +653,6 @@ public class ReshareApplicationEventHandlerService {
       if ( eventData.activeSection?.action != null ) {
         switch ( eventData.activeSection?.action ) {
           case 'Received':
-            // TODO, add handling to change state to RES_REQUESTER_RECEIVED, or whatever it is.
             auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
             pr.save(flush: true, failOnError: true)
             break;
