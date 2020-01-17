@@ -1004,8 +1004,12 @@ public class ReshareApplicationEventHandlerService {
    * ToDo: Fill out.
    * Needs to send a supplyingAgencyMessage where requestingAgencyMessage.action (typedef type_action) = 'Received'
    */
-  public void sendRequesterReceived(PatronRequest pr) {
-    sendRequestingAgencyMessage(pr, 'Received', null);
+  public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
+    if (!actionParams.isNull("note")) {
+      sendRequestingAgencyMessage(pr, 'Received', actionParams.note);
+    } else {
+      sendRequestingAgencyMessage(pr, 'Received', null);
+    }
   }
 
   /**
@@ -1052,6 +1056,23 @@ public class ReshareApplicationEventHandlerService {
       action: action,
       note: note
     ]
+
+    if (!actionParams.isNull("note")) {
+      def outboundMessage = new PatronRequestNotification()
+      outboundMessage.setPatronRequest(pr)
+      outboundMessage.setTimestamp(LocalDateTime.now())
+      outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
+      outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
+      outboundMessage.setIsSender(true)
+      String actionContext = ""
+      switch(actionParams.action) {
+        case 'Received':
+          actionContext = "${message_sender_symbol.split(":")[1]} has received this shipment with a note: "
+          break;
+      }
+      outboundMessage.setMessageContent("${actionContext} ${actionParams.note}")
+      outboundMessage.save(flush:true, failOnError:true)
+    }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
