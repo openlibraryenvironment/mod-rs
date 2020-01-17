@@ -65,7 +65,7 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
     },
-    'STATUS_REQ_ITEM_SHIPPED_ind': { service, eventData ->
+    'STATUS_REQ_SHIPPED_ind': { service, eventData ->
     },
     'STATUS_REQ_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
     },
