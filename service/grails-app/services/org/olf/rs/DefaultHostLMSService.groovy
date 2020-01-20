@@ -213,12 +213,12 @@ public class DefaultHostLMSService implements HostLMSActions {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    String ncip_server_address = ncip_server_address_setting?.value
-    String ncip_from_agency = ncip_from_agency_setting?.value
-    String ncip_app_profile = ncip_app_profile_setting?.value
+    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
     if ( ( ncip_server_address != null ) &&
          ( ncip_from_agency != null ) &&
