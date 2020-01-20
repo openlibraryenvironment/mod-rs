@@ -197,6 +197,7 @@ public class DefaultHostLMSService implements HostLMSActions {
           break;
         default:
           log.debug("Borrower check - no action, config ${borrower_check}");
+          // Borrower check is not configured, so return OK
           break;
       }
     }

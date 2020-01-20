@@ -57,6 +57,10 @@ public class SharedIndexService {
     return result;
   }
 
+  /**
+   * ToDo: This method should expose critical errors like 404 not found so that we can cleanly
+   * log the problem in the activity log
+   */
   public String fetchSharedIndexRecord(String id) {
     log.debug("fetchSharedIndexRecord(${id})");
 

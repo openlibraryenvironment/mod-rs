@@ -65,7 +65,7 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
     },
-    'STATUS_REQ_ITEM_SHIPPED_ind': { service, eventData ->
+    'STATUS_REQ_SHIPPED_ind': { service, eventData ->
     },
     'STATUS_REQ_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
     },
@@ -128,6 +128,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Updated req.hrid to ${req.hrid}");
 
         def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
+        log.debug("Result of patron lookup ${patron_details}");
 
         if ( isValidPatron(patron_details) ) {
 
@@ -202,14 +203,14 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public boolean isValidPatron(Map patron_record) {
-    boolean result = true;
+    boolean result = false;
     log.debug("Check isValidPatron: ${patron_record}");
     if ( patron_record != null ) {
-      if ( patron_record.status != 'OK' ) {
-        result = false;
+      if ( patron_record.status == 'OK' ) {
+        result = true;
       }
     }
-    return true;
+    return result;
   }
 
 
