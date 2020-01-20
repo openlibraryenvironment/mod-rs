@@ -939,13 +939,15 @@ public class ReshareApplicationEventHandlerService {
 
   public void sendResponse(PatronRequest pr, 
                             String status, 
-                            String reasonUnfilled = null) {
-    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled);
+                            String reasonUnfilled = null,
+                            String note = null) {
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled, note);
   }
 
   public void sendStatusChange(PatronRequest pr,
-                            String status) {
-    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null);
+                            String status,
+                            String note = null) {
+    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null, note);
   }
 
   // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
@@ -955,7 +957,8 @@ public class ReshareApplicationEventHandlerService {
   public void sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status, 
-                                         String reasonUnfilled = null) {
+                                         String reasonUnfilled = null,
+                                         String note) {
 
     log.debug("sendResponse(....)");
 
@@ -979,7 +982,8 @@ public class ReshareApplicationEventHandlerService {
             supplyingAgencyRequestId:pr.id
           ],
           messageInfo:[
-            reasonForMessage:reason_for_message
+            reasonForMessage:reason_for_message,
+            note: note
           ],
           statusInfo:[
             status:status
@@ -1056,7 +1060,8 @@ public class ReshareApplicationEventHandlerService {
       action: action,
       note: note
     ]
-
+    
+    // Whenever a note is attached to the message, create a notification with context.
     if (note != null) {
       def outboundMessage = new PatronRequestNotification()
       outboundMessage.setPatronRequest(pr)
