@@ -560,7 +560,7 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
       // Awesome - managed to look up patron request - see if we can action
-      if ( eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
+      if ( eventData.messageInfo?.reasonForMessage != null) {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
             // If there is a note, create notification entry
@@ -676,7 +676,7 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
 
             // If there's a note, create a notification entry
-            if (eventData.activeSection?.note != null && activeSection?.note != "") {
+            if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
               incomingNotificationEntry(pr, eventData, false)
             }
 
@@ -1204,13 +1204,13 @@ public class ReshareApplicationEventHandlerService {
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
     }
     inboundMessage.setIsSender(false)
-    String noteContext = ""
+    String notificationContext = ""
     if (isRequester) {
-      noteContext('supplier', "${eventData.messageInfo.reasonForMessage}")
-      inboundMessage.setMessageContent("${noteContext} ${eventData.messageInfo.note}")
+      notificationContext = noteContext('supplier', "${eventData.messageInfo.reasonForMessage}")
+      inboundMessage.setMessageContent("${notificationContext} ${eventData.messageInfo.note}")
     } else {
-      noteContext('requester', "${eventData.activeSection.action}")
-      inboundMessage.setMessageContent("${noteContext} ${eventData.activeSection.note}")
+      notificationContext = noteContext('requester', "${eventData.activeSection.action}")
+      inboundMessage.setMessageContent("${notificationContext} ${eventData.activeSection.note}")
     }
     
     
@@ -1228,14 +1228,14 @@ public class ReshareApplicationEventHandlerService {
       outboundMessage.setMessageSender(message_sender)
       outboundMessage.setMessageReceiver(message_receiver)
       outboundMessage.setIsSender(true)
-      String noteContext = ""
+      String notificationContext = ""
       if(isRequester) {
-        noteContext = noteContext('requester', context)
+        notificationContext = noteContext('requester', context)
       } else {
-        noteContext = noteContext('supplier', context)
+        notificationContext = noteContext('supplier', context)
       }
 
-      outboundMessage.setMessageContent("${noteContext} ${note}")
+      outboundMessage.setMessageContent("${notificationContext} ${note}")
       outboundMessage.save(flush:true, failOnError:true)
     
     log.debug("Outbound Message: ${outboundMessage}")
