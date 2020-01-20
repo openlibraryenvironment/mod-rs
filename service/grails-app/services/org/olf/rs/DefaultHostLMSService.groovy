@@ -196,7 +196,7 @@ public class DefaultHostLMSService implements HostLMSActions {
           result = ncip2LookupPatron(patron_id)
           break;
         default:
-          log.debug("Borrower check - no action, config ${borrower_check}");
+          log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
           // Borrower check is not configured, so return OK
           break;
       }
