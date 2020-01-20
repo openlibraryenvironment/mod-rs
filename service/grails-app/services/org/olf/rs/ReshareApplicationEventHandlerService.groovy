@@ -984,7 +984,7 @@ public class ReshareApplicationEventHandlerService {
                                          String reason_for_message,
                                          String status, 
                                          String reasonUnfilled = null,
-                                         String note) {
+                                         String note = null) {
 
     log.debug("sendResponse(....)");
 
@@ -1052,7 +1052,7 @@ public class ReshareApplicationEventHandlerService {
   /**
    * ToDo: Fill out.
    */
-  public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note) {
+  public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
     Map eventData = [header:[]];
 
     eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
