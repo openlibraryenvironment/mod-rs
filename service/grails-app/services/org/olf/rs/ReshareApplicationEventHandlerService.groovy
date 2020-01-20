@@ -588,13 +588,10 @@ public class ReshareApplicationEventHandlerService {
                 throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
               break;
             }
-          }
         } else {
           Map messageData = eventData.messageInfo
           auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
           incomingNotificationEntry(pr, eventData, true)
-        }
-          
         }
       }
       else {
