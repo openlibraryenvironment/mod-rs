@@ -990,8 +990,24 @@ public class ReshareApplicationEventHandlerService {
           ]
       ]
 
+
+
       if ( reasonUnfilled ) {
         unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
+      }
+
+      if (note != null) {
+        def outboundMessage = new PatronRequestNotification()
+        outboundMessage.setPatronRequest(pr)
+        outboundMessage.setTimestamp(LocalDateTime.now())
+        outboundMessage.setMessageSender(resolveCombinedSymbol(pr.resolvedSupplier))
+        outboundMessage.setMessageReceiver(resolveCombinedSymbol(pr.resolvedRequester))
+        outboundMessage.setIsSender(true)
+
+        String noteContext = noteContext('supplier', reason_for_message)
+
+        outboundMessage.setMessageContent("${noteContext} ${note}")
+        outboundMessage.save(flush:true, failOnError:true)
       }
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
@@ -1060,7 +1076,7 @@ public class ReshareApplicationEventHandlerService {
       action: action,
       note: note
     ]
-    
+
     // Whenever a note is attached to the message, create a notification with context.
     if (note != null) {
       def outboundMessage = new PatronRequestNotification()
@@ -1069,18 +1085,38 @@ public class ReshareApplicationEventHandlerService {
       outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
       outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
       outboundMessage.setIsSender(true)
-      String actionContext = ""
-      switch(action) {
-        case 'Received':
-          actionContext = "${message_sender_symbol.split(":")[1]} has received this shipment with a note: "
-          break;
-      }
-      outboundMessage.setMessageContent("${actionContext} ${note}")
+
+      String noteContext = noteContext('requester', action)
+
+      outboundMessage.setMessageContent("${noteContext} ${note}")
       outboundMessage.save(flush:true, failOnError:true)
     }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
+  }
+
+  private String noteContext(String subject, String context) {
+    String noteContext = ""
+    switch(subject) {
+      case 'requester':
+        switch(context) {
+          case 'Received':
+            noteContext = "The requester has received this shipment with a note: "
+            break;
+          default:
+            break;
+        }
+        break;
+      case 'supplier':
+        switch(context) {
+          default:
+            break;
+        }
+      default:
+        break;
+    }
+    return noteContext
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {
