@@ -561,48 +561,38 @@ public class ReshareApplicationEventHandlerService {
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
-        switch ( eventData.messageInfo?.reasonForMessage ) {
-          case 'RequestResponse':
-            // If there is a note, create notification entry
+
+        // First check if the message has a purpose other than Notification
+        if (eventData.messageInfo?.reasonForMessage != 'Notification') {
+
+          // If there is a note, create notification entry
             if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
               incomingNotificationEntry(pr, eventData, true)
             }
+
+            switch ( eventData.messageInfo?.reasonForMessage ) {
+          case 'RequestResponse':
             break;
           case 'StatusRequestResponse':
-            // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
             break;
           case 'RenewResponse':
-            // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
             break;
           case 'CancelResponse':
-            // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
             break;
           case 'StatusChange':
-            // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
             break;
-          case 'Notification':
-            Map messageData = eventData.messageInfo
-            auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
-            incomingNotificationEntry(pr, eventData, true)
-            break;
-          default:
+            default:
             result.status = "ERROR"
             result.errorType = "UnsupportedReasonForMessageType"
             result.errorValue = eventData.messageInfo.reasonForMessage
             throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
             break;
+        } else {
+          Map messageData = eventData.messageInfo
+          auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
+          incomingNotificationEntry(pr, eventData, true)
+        }
+          
         }
       }
       else {
@@ -671,29 +661,33 @@ public class ReshareApplicationEventHandlerService {
       // Needs to look for action and try to do something with that.
 
       if ( eventData.activeSection?.action != null ) {
-        switch ( eventData.activeSection?.action ) {
-          case 'Received':
-            auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+        
+        // First check if the message has a purpose other than Notification
+        if ( eventData.activeSection?.action != 'Notification' ) {
 
-            // If there's a note, create a notification entry
-            if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
-              incomingNotificationEntry(pr, eventData, false)
-            }
-
-            pr.save(flush: true, failOnError: true)
-            break;
-          case 'Notification':
-            Map messageData = eventData.activeSection
-            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+          // If there's a note, create a notification entry
+          if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
             incomingNotificationEntry(pr, eventData, false)
-            break;
-          default:
-            result.status = "ERROR"
-            result.errorType = "UnsupportedActionType"
-            result.errorValue = eventData.activeSection.action
-            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
-            break;
+          }
+
+          switch ( eventData.activeSection?.action ) {
+            case 'Received':
+              auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+              pr.save(flush: true, failOnError: true)
+              break;
+            default:
+              result.status = "ERROR"
+              result.errorType = "UnsupportedActionType"
+              result.errorValue = eventData.activeSection.action
+              throw new Exception("Unhandled action: ${eventData.activeSection.action}");
+              break;
+          }
+        } else {
+          Map messageData = eventData.activeSection
+          auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+          incomingNotificationEntry(pr, eventData, false)
         }
+        
       }
       else {
         result.status = "ERROR"
