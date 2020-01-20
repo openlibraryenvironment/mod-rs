@@ -571,22 +571,24 @@ public class ReshareApplicationEventHandlerService {
             }
 
             switch ( eventData.messageInfo?.reasonForMessage ) {
-          case 'RequestResponse':
-            break;
-          case 'StatusRequestResponse':
-            break;
-          case 'RenewResponse':
-            break;
-          case 'CancelResponse':
-            break;
-          case 'StatusChange':
-            break;
-            default:
-            result.status = "ERROR"
-            result.errorType = "UnsupportedReasonForMessageType"
-            result.errorValue = eventData.messageInfo.reasonForMessage
-            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
-            break;
+              case 'RequestResponse':
+                break;
+              case 'StatusRequestResponse':
+                break;
+              case 'RenewResponse':
+                break;
+              case 'CancelResponse':
+                break;
+              case 'StatusChange':
+                break;
+                default:
+                result.status = "ERROR"
+                result.errorType = "UnsupportedReasonForMessageType"
+                result.errorValue = eventData.messageInfo.reasonForMessage
+                throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+              break;
+            }
+          }
         } else {
           Map messageData = eventData.messageInfo
           auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
