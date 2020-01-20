@@ -560,17 +560,37 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
       // Awesome - managed to look up patron request - see if we can action
-      if ( eventData.messageInfo?.reasonForMessage != null ) {
+      if ( eventData.messageInfo?.note != null ) {
         switch ( eventData.messageInfo?.reasonForMessage ) {
           case 'RequestResponse':
+            // If there is a note, create notification entry
+            if (eventData.messageInfo?.note != null) {
+              incomingNotificationEntry(pr, eventData, true)
+            }
             break;
           case 'StatusRequestResponse':
+            // If there is a note, create notification entry
+            if (eventData.messageInfo?.note != null) {
+              incomingNotificationEntry(pr, eventData, true)
+            }
             break;
           case 'RenewResponse':
+            // If there is a note, create notification entry
+            if (eventData.messageInfo?.note != null) {
+              incomingNotificationEntry(pr, eventData, true)
+            }
             break;
           case 'CancelResponse':
+            // If there is a note, create notification entry
+            if (eventData.messageInfo?.note != null) {
+              incomingNotificationEntry(pr, eventData, true)
+            }
             break;
           case 'StatusChange':
+            // If there is a note, create notification entry
+            if (eventData.messageInfo?.note != null) {
+              incomingNotificationEntry(pr, eventData, true)
+            }
             break;
           case 'Notification':
             Map messageData = eventData.messageInfo
@@ -654,6 +674,12 @@ public class ReshareApplicationEventHandlerService {
         switch ( eventData.activeSection?.action ) {
           case 'Received':
             auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+
+            // If there's a note, create a notification entry
+            if (eventData.activeSection?.note != null) {
+              incomingNotificationEntry(pr, eventData, false)
+            }
+
             pr.save(flush: true, failOnError: true)
             break;
           case 'Notification':
@@ -1179,7 +1205,7 @@ public class ReshareApplicationEventHandlerService {
     }
     inboundMessage.setIsSender(false)
     if (isRequester) {
-      String noteContext('supplier', eventData.messageInfo.reason_for_message)
+      String noteContext('supplier', eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent("${noteContext} ${eventData.messageInfo.note}")
       
     } else {
