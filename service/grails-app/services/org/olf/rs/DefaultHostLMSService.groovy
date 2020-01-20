@@ -248,6 +248,13 @@ public class DefaultHostLMSService implements HostLMSActions {
               surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
               status: 'OK'
             ]
+            
+            mr.LookupUserResponse?.UserOptionalFields?.UserAddressInformation.each { uai ->
+              if ( ( uai.ElectronicAddress ) && ( uai.ElectronicAddress?.ElectronicAddressType == 'mailto' ) ) {
+                result.email = uai.ElectronicAddress.ElectronicAddressData
+              }
+            }
+
             log.debug("Result of user lookup: ${result}");
             // result = JsonOutput.toJson(body);
         }

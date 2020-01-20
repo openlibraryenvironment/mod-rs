@@ -138,6 +138,8 @@ public class ReshareApplicationEventHandlerService {
               req.patronSurname = patron_details.surname;
             if ( req.patronGivenName == null )
               req.patronGivenName = patron_details.givenName;
+            if ( req.patronEmail == null )
+              req.patronEmail = patron_details.email;
           }
 
           if ( req.requestingInstitutionSymbol != null ) {
