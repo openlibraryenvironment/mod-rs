@@ -1204,14 +1204,13 @@ public class ReshareApplicationEventHandlerService {
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
     }
     inboundMessage.setIsSender(false)
+    String noteContext = ""
     if (isRequester) {
-      String noteContext('supplier', eventData.messageInfo.reasonForMessage)
-      inboundMessage.setMessageContent("${noteContext} ${eventData.messageInfo.note}")
-      
+      noteContext('supplier', eventData.messageInfo.reasonForMessage)     
     } else {
-      String noteContext('requester', eventData.activeSection.action)
-      inboundMessage.setMessageContent("${noteContext} ${eventData.activeSection.note}")
+      noteContext('requester', eventData.activeSection.action)
     }
+    inboundMessage.setMessageContent("${noteContext} ${eventData.messageInfo.note}")
     
     log.debug("Inbound Message: ${inboundMessage}")
     inboundMessage.save(flush:true, failOnError:true)
