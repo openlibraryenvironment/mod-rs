@@ -575,7 +575,7 @@ public class ReshareApplicationEventHandlerService {
           case 'Notification':
             Map messageData = eventData.messageInfo
             auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
-            notificationEntry(pr, eventData, true)
+            incomingNotificationEntry(pr, eventData, true)
             break;
           default:
             result.status = "ERROR"
@@ -659,7 +659,7 @@ public class ReshareApplicationEventHandlerService {
           case 'Notification':
             Map messageData = eventData.activeSection
             auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
-            notificationEntry(pr, eventData, false)
+            incomingNotificationEntry(pr, eventData, false)
             break;
           default:
             result.status = "ERROR"
@@ -996,18 +996,9 @@ public class ReshareApplicationEventHandlerService {
         unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
       }
 
+      // Whenever a note is attached to the message, create a notification with context.
       if (note != null) {
-        def outboundMessage = new PatronRequestNotification()
-        outboundMessage.setPatronRequest(pr)
-        outboundMessage.setTimestamp(LocalDateTime.now())
-        outboundMessage.setMessageSender(resolveCombinedSymbol(pr.resolvedSupplier))
-        outboundMessage.setMessageReceiver(resolveCombinedSymbol(pr.resolvedRequester))
-        outboundMessage.setIsSender(true)
-
-        String noteContext = noteContext('supplier', reason_for_message)
-
-        outboundMessage.setMessageContent("${noteContext} ${note}")
-        outboundMessage.save(flush:true, failOnError:true)
+        outgoingNotificationEntry(pr, note, reason_for_message, pr.resolvedSupplier, pr.resolvedSupplier, false)
       }
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
@@ -1079,17 +1070,7 @@ public class ReshareApplicationEventHandlerService {
 
     // Whenever a note is attached to the message, create a notification with context.
     if (note != null) {
-      def outboundMessage = new PatronRequestNotification()
-      outboundMessage.setPatronRequest(pr)
-      outboundMessage.setTimestamp(LocalDateTime.now())
-      outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
-      outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
-      outboundMessage.setIsSender(true)
-
-      String noteContext = noteContext('requester', action)
-
-      outboundMessage.setMessageContent("${noteContext} ${note}")
-      outboundMessage.save(flush:true, failOnError:true)
+      outgoingNotificationEntry(pr, note, action, resolveCombinedSymbol(message_sender_symbol), resolveCombinedSymbol(peer_symbol), true)
     }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
@@ -1183,7 +1164,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void notificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
+  private void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
 
     inboundMessage.setPatronRequest(pr)
@@ -1198,12 +1179,39 @@ public class ReshareApplicationEventHandlerService {
     }
     inboundMessage.setIsSender(false)
     if (isRequester) {
-      inboundMessage.setMessageContent(eventData.messageInfo.note)
+      String noteContext('supplier', eventData.messageInfo.reason_for_message)
+      inboundMessage.setMessageContent("${noteContext} ${eventData.messageInfo.note}")
+      
     } else {
-      inboundMessage.setMessageContent(eventData.activeSection.note)
+      String noteContext('requester', eventData.activeSection.action)
+      inboundMessage.setMessageContent("${noteContext} ${eventData.activeSection.note}")
     }
     
     log.debug("Inbound Message: ${inboundMessage}")
     inboundMessage.save(flush:true, failOnError:true)
+  }
+
+
+  private void outgoingNotificationEntry(PatronRequest pr, String note, String context, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+    def inboundMessage = new PatronRequestNotification()
+
+    def outboundMessage = new PatronRequestNotification()
+      outboundMessage.setPatronRequest(pr)
+      outboundMessage.setTimestamp(LocalDateTime.now())
+      outboundMessage.setMessageSender(message_sender)
+      outboundMessage.setMessageReceiver(message_receiver)
+      outboundMessage.setIsSender(true)
+      String noteContext = ""
+      if(isRequester) {
+        noteContext = noteContext('requester', context)
+      } else {
+        noteContext = noteContext('supplier', context)
+      }
+
+      outboundMessage.setMessageContent("${noteContext} ${note}")
+      outboundMessage.save(flush:true, failOnError:true)
+    
+    log.debug("Outbound Message: ${outboundMessage}")
+    outboundMessage.save(flush:true, failOnError:true)
   }
 }
