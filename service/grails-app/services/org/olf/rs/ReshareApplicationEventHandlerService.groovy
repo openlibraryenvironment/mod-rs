@@ -500,6 +500,10 @@ public class ReshareApplicationEventHandlerService {
       pr.resolvedSupplier = resolvedSupplyingAgency;
       pr.peerRequestIdentifier = header.requestingAgencyRequestId
 
+      // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
+      // able to use that for our request.
+      pr.hrid = header.requestingAgencyRequestId
+
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
       pr.state = lookupStatus('Responder', 'RES_IDLE')
