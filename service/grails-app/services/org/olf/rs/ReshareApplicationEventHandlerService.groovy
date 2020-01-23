@@ -391,6 +391,7 @@ public class ReshareApplicationEventHandlerService {
                 log.debug("Resolved to symbol ${s}");
 
                 if ( s != null ) {
+                  req.resolvedSupplier = s;
                   prr.lock();
                   prr.peerSymbol = s
                   prr.save(flush:true, failOnError:true)
