@@ -144,6 +144,8 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'requesterReceived', 'M')
 
+        AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'requesterManualCheckIn', 'M')
+
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'shippedReturn', 'M')
