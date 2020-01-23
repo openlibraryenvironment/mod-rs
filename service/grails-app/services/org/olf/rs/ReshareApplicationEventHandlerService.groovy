@@ -406,8 +406,10 @@ public class ReshareApplicationEventHandlerService {
                   log.warn("Cannot understand or resolve symbol ${next_responder}");
                 }
 
-                // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
-                request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
+                if ( ( prr.instanceIdentifier != null ) && ( prr.instanceIdentifier.length() > 0 ) ) {
+                  // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
+                  request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
+                }
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
 
 
