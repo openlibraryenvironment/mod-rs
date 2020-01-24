@@ -118,6 +118,8 @@ The format of each entry is
 * RES_ITEM_SHIPPED - The item has been shipped to the borrowing library
 
 * RES_ITEM_RETURNED - The item has been received back from the borrowing library
+    * supplierCheckout
+        * RES_COMPLETE
 
 * RES_COMPLETE - The request is complete
 
