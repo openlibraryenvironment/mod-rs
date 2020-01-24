@@ -505,7 +505,6 @@ public class ReshareApplicationEventHandlerService {
       pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
       pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
 
-      //  ToDo - is this right?
       pr.resolvedRequester = resolvedRequestingAgency;
       pr.resolvedSupplier = resolvedSupplyingAgency;
       pr.peerRequestIdentifier = header.requestingAgencyRequestId
@@ -513,6 +512,11 @@ public class ReshareApplicationEventHandlerService {
       // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
       // able to use that for our request.
       pr.hrid = header.requestingAgencyRequestId
+
+      if ( ( pr.systemInstanceIdentifier != null ) && ( pr.systemInstanceIdentifier.length() > 0 ) ) {
+        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecord ${pr.systemInstanceIdentifier}");
+        pr.bibRecord = sharedIndexService.fetchSharedIndexRecord(pr.systemInstanceIdentifier)
+      }
 
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
