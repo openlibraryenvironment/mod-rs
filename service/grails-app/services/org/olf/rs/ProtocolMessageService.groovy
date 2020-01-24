@@ -270,14 +270,15 @@ and sa.service.businessFunction.value=:ill
         }
         requestedDeliveryInfo {
           address {
-            if ( eventData.requestedDeliveryInfo?.address?.physicalAddress != null ) {
+            if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
+                 ( eventData.requestedDeliveryInfo?.address?.physicalAddress != null ) ) {
               physicalAddress {
-                line1(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.line1)
-                line2(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.line2)
-                locality(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.locality)
-                postalCode(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.postalCode)
-                region(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.region)
-                county(eventData.requestedDeliveryInfo.addressaddress.physicalAddress.county)
+                line1(eventData.requestedDeliveryInfo.address.physicalAddress.line1)
+                line2(eventData.requestedDeliveryInfo.address.physicalAddress.line2)
+                locality(eventData.requestedDeliveryInfo.address.physicalAddress.locality)
+                postalCode(eventData.requestedDeliveryInfo.address.physicalAddress.postalCode)
+                region(eventData.requestedDeliveryInfo.address.physicalAddress.region)
+                county(eventData.requestedDeliveryInfo.address.physicalAddress.county)
               }
             }
           }

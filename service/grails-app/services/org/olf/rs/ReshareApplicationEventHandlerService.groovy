@@ -496,10 +496,12 @@ public class ReshareApplicationEventHandlerService {
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
-      if ( eventData.requestedDeliveryInfo?.address?.physicalAddress ) {
-        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-        // We join all the lines of physical address and stuff them into pickup location for now.
-        pr.pickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
+      if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
+        if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {
+          log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+          // We join all the lines of physical address and stuff them into pickup location for now.
+          pr.pickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
+        }
       }
 
       pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
