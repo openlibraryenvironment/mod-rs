@@ -358,6 +358,18 @@ public class ReshareApplicationEventHandlerService {
             patronGivenName: req.patronGivenName,
             patronType: req.patronType,
             serviceType: req.serviceType?.value
+          ],
+          requestedDeliveryInfo:[
+            address:[
+              physicalAddress:[
+                line1:req.pickupLocation,
+                line2:null,
+                locality:null,
+                postalCode:null,
+                region:null,
+                county:null
+              ]
+            ]
           ]
         ]
 
