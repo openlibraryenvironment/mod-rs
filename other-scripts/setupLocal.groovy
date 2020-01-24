@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 :set verbosity QUIET
 :load ./modrsCli.groovy
 okapi=new OkapiClient('local')
