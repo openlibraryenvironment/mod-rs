@@ -91,7 +91,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String patronNote
   String pickupLocation
 
-
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
 
