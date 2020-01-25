@@ -1083,11 +1083,17 @@ public class ReshareApplicationEventHandlerService {
    * Needs to send a supplyingAgencyMessage where requestingAgencyMessage.action (typedef type_action) = 'Received'
    */
   public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
+
+    // ToDo: understand why sendRequestingAgencyMessage(pr, 'Received', actionParams.note) is not sufficient for both cases?
     if (!actionParams.isNull("note")) {
       sendRequestingAgencyMessage(pr, 'Received', actionParams.note);
     } else {
       sendRequestingAgencyMessage(pr, 'Received', null);
     }
+  }
+
+  public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
+    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
   }
 
   /**

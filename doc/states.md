@@ -64,6 +64,9 @@ The format of each entry is
 
 * REQ_SHIPPED
 * REQ_CHECKED_IN
+    * patronReturnedItem
+        * REQ_AWAIT_RETURN_SHIPPING
+
 * REQ_AWAIT_RETURN_SHIPPING
 * REQ_END_OF_ROTA
 * REQ_CANCELLED
