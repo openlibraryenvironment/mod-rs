@@ -711,7 +711,9 @@ public class ReshareApplicationEventHandlerService {
               pr.save(flush: true, failOnError: true)
               break;
             case 'ShippedReturn':
-              auditEntry(pr, pr.state, pr.state, "Item(s) Returned by requester", null)
+              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
+              pr.state = new_state;
               pr.save(flush: true, failOnError: true)
               break;
             default:
