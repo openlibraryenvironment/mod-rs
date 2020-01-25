@@ -710,6 +710,10 @@ public class ReshareApplicationEventHandlerService {
               auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
               pr.save(flush: true, failOnError: true)
               break;
+            case 'ShippedReturn':
+              auditEntry(pr, pr.state, pr.state, "Item(s) Returned by requester", null)
+              pr.save(flush: true, failOnError: true)
+              break;
             default:
               result.status = "ERROR"
               result.errorType = "UnsupportedActionType"
@@ -1074,7 +1078,7 @@ public class ReshareApplicationEventHandlerService {
                                                                    unfilled_message_request);
     }
     else {
-      log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}");
+      log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");
     }
   }
 
@@ -1093,6 +1097,7 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
+    log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
   }
 

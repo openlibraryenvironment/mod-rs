@@ -49,6 +49,9 @@ The format of each entry is
         * REQ_CHECKED_IN
 
 * REQ_AWAITING_RETURN_SHIPPING
+    * shippedReturn
+        * 
+
 * REQ_BORROWER_RETURNED
 * REQ_REQUEST_COMPLETE
 * REQ_PENDING
