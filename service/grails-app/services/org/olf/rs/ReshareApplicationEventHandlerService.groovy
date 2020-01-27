@@ -357,9 +357,21 @@ public class ReshareApplicationEventHandlerService {
             patronSurname: req.patronSurname,
             patronGivenName: req.patronGivenName,
             patronType: req.patronType,
-            serviceType: req.serviceType?.value,
             neededBy: req.neededBy,
             patronNote: req.patronNote
+            serviceType: req.serviceType?.value
+          ],
+          requestedDeliveryInfo:[
+            address:[
+              physicalAddress:[
+                line1:req.pickupLocation,
+                line2:null,
+                locality:null,
+                postalCode:null,
+                region:null,
+                county:null
+              ]
+            ]
           ]
         ]
         //TODO This needs to not be the part building the message, and also not shoving everything into bib info.
@@ -497,10 +509,19 @@ public class ReshareApplicationEventHandlerService {
 
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
+
+      // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
+      if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
+        if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {
+          log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+          // We join all the lines of physical address and stuff them into pickup location for now.
+          pr.pickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
+        }
+      }
+
       pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
       pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
 
-      //  ToDo - is this right?
       pr.resolvedRequester = resolvedRequestingAgency;
       pr.resolvedSupplier = resolvedSupplyingAgency;
       pr.peerRequestIdentifier = header.requestingAgencyRequestId
@@ -508,6 +529,11 @@ public class ReshareApplicationEventHandlerService {
       // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
       // able to use that for our request.
       pr.hrid = header.requestingAgencyRequestId
+
+      if ( ( pr.systemInstanceIdentifier != null ) && ( pr.systemInstanceIdentifier.length() > 0 ) ) {
+        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecord ${pr.systemInstanceIdentifier}");
+        pr.bibRecord = sharedIndexService.fetchSharedIndexRecord(pr.systemInstanceIdentifier)
+      }
 
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
@@ -685,6 +711,12 @@ public class ReshareApplicationEventHandlerService {
           switch ( eventData.activeSection?.action ) {
             case 'Received':
               auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+              pr.save(flush: true, failOnError: true)
+              break;
+            case 'ShippedReturn':
+              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
+              pr.state = new_state;
               pr.save(flush: true, failOnError: true)
               break;
             default:
@@ -960,6 +992,18 @@ public class ReshareApplicationEventHandlerService {
             patronGivenName: req.patronGivenName,
             patronType: req.patronType,
             serviceType: req.serviceType?.value
+          ],
+          requestedDeliveryInfo:[
+            address:[
+              physicalAddress:[
+                line1:req.pickupLocation,
+                line2:null,
+                locality:null,
+                postalCode:null,
+                region:null,
+                county:null
+              ]
+            ]
           ]
         ]
 
@@ -1039,7 +1083,7 @@ public class ReshareApplicationEventHandlerService {
                                                                    unfilled_message_request);
     }
     else {
-      log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}");
+      log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");
     }
   }
 
@@ -1048,11 +1092,18 @@ public class ReshareApplicationEventHandlerService {
    * Needs to send a supplyingAgencyMessage where requestingAgencyMessage.action (typedef type_action) = 'Received'
    */
   public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
+
+    // ToDo: understand why sendRequestingAgencyMessage(pr, 'Received', actionParams.note) is not sufficient for both cases?
     if (!actionParams.isNull("note")) {
       sendRequestingAgencyMessage(pr, 'Received', actionParams.note);
     } else {
       sendRequestingAgencyMessage(pr, 'Received', null);
     }
+  }
+
+  public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
+    log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
+    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
   }
 
   /**

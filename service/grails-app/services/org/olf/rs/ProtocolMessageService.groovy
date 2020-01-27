@@ -268,6 +268,21 @@ and sa.service.businessFunction.value=:ill
           //needBeforeDate('2014-05-01T00:00:00.0Z')
           anyEdition('Y')
         }
+        requestedDeliveryInfo {
+          address {
+            if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
+                 ( eventData.requestedDeliveryInfo?.address?.physicalAddress != null ) ) {
+              physicalAddress {
+                line1(eventData.requestedDeliveryInfo.address.physicalAddress.line1)
+                line2(eventData.requestedDeliveryInfo.address.physicalAddress.line2)
+                locality(eventData.requestedDeliveryInfo.address.physicalAddress.locality)
+                postalCode(eventData.requestedDeliveryInfo.address.physicalAddress.postalCode)
+                region(eventData.requestedDeliveryInfo.address.physicalAddress.region)
+                county(eventData.requestedDeliveryInfo.address.physicalAddress.county)
+              }
+            }
+          }
+        }
       }
     }
   }

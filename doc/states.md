@@ -49,6 +49,9 @@ The format of each entry is
         * REQ_CHECKED_IN
 
 * REQ_AWAITING_RETURN_SHIPPING
+    * shippedReturn
+        * 
+
 * REQ_BORROWER_RETURNED
 * REQ_REQUEST_COMPLETE
 * REQ_PENDING
@@ -64,6 +67,9 @@ The format of each entry is
 
 * REQ_SHIPPED
 * REQ_CHECKED_IN
+    * patronReturnedItem
+        * REQ_AWAIT_RETURN_SHIPPING
+
 * REQ_AWAIT_RETURN_SHIPPING
 * REQ_END_OF_ROTA
 * REQ_CANCELLED
@@ -118,6 +124,8 @@ The format of each entry is
 * RES_ITEM_SHIPPED - The item has been shipped to the borrowing library
 
 * RES_ITEM_RETURNED - The item has been received back from the borrowing library
+    * supplierCheckout
+        * RES_COMPLETE
 
 * RES_COMPLETE - The request is complete
 
