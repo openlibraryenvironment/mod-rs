@@ -358,7 +358,7 @@ public class ReshareApplicationEventHandlerService {
             patronGivenName: req.patronGivenName,
             patronType: req.patronType,
             neededBy: req.neededBy,
-            patronNote: req.patronNote
+            patronNote: req.patronNote,
             serviceType: req.serviceType?.value
           ],
           requestedDeliveryInfo:[
