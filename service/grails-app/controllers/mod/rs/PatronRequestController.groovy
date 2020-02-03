@@ -43,7 +43,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
           log.debug("Apply action ${request.JSON.action} to ${patron_request}");
           switch ( request.JSON.action ) {
             case 'supplierPrintPullSlip':
-              result.status = reshareActionService.notiftyPullSlipPrinted(patron_request);
+              result = reshareActionService.notiftyPullSlipPrinted(patron_request);
               break;
             case 'supplierCheckInToReshare':
               result.status = reshareActionService.checkInToReshare(patron_request, request.JSON.actionParams);

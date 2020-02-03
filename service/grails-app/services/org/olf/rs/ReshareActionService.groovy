@@ -75,14 +75,14 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean notiftyPullSlipPrinted(PatronRequest pr) {
+  public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
-    boolean result = false;
+    Map result = [status:false];
     Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
     if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
       pr.state = s;
       pr.save(flush:true, failOnError:true);
-      result = true;
+      result.status = true;
     }
     else {
       log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
