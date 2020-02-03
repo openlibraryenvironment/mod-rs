@@ -399,6 +399,8 @@ and sa.service.businessFunction.value=:ill
         patronType(eventData.bibliographicInfo.patronType)
         serviceType(eventData.bibliographicInfo.serviceType)
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+        neededBy(eventData.bibliographicInfo.neededBy)
+        patronNote(eventData.bibliographicInfo.patronNote)
       }
     }
   }

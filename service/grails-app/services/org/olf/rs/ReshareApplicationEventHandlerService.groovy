@@ -357,6 +357,8 @@ public class ReshareApplicationEventHandlerService {
             patronSurname: req.patronSurname,
             patronGivenName: req.patronGivenName,
             patronType: req.patronType,
+            neededBy: req.neededBy,
+            patronNote: req.patronNote,
             serviceType: req.serviceType?.value
           ],
           requestedDeliveryInfo:[
@@ -372,6 +374,7 @@ public class ReshareApplicationEventHandlerService {
             ]
           ]
         ]
+        //TODO This needs to not be the part building the message, and also not shoving everything into bib info.
 
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;

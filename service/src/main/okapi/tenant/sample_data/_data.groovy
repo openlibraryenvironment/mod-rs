@@ -86,6 +86,7 @@ try {
 
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
                                   section:'hostLMSIntegration',
