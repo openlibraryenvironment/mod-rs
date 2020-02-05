@@ -1250,7 +1250,7 @@ public class ReshareApplicationEventHandlerService {
   private void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
 
-    //inboundMessage.setPatronRequest(pr)
+    inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
     inboundMessage.setTimestamp(LocalDateTime.now())
     if (isRequester) {
@@ -1278,23 +1278,21 @@ public class ReshareApplicationEventHandlerService {
 
 
   private void outgoingNotificationEntry(PatronRequest pr, String note, String context, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
-    def inboundMessage = new PatronRequestNotification()
 
     def outboundMessage = new PatronRequestNotification()
-      //outboundMessage.setPatronRequest(pr)
-      outboundMessage.setTimestamp(LocalDateTime.now())
-      outboundMessage.setMessageSender(message_sender)
-      outboundMessage.setMessageReceiver(message_receiver)
-      outboundMessage.setIsSender(true)
-      String notificationContext = ""
-      if(isRequester) {
-        notificationContext = noteContext('requester', context)
-      } else {
-        notificationContext = noteContext('supplier', context)
-      }
+    outboundMessage.setPatronRequest(pr)
+    outboundMessage.setTimestamp(LocalDateTime.now())
+    outboundMessage.setMessageSender(message_sender)
+    outboundMessage.setMessageReceiver(message_receiver)
+    outboundMessage.setIsSender(true)
+    String notificationContext = ""
+    if(isRequester) {
+      notificationContext = noteContext('requester', context)
+    } else {
+      notificationContext = noteContext('supplier', context)
+    }
 
-      outboundMessage.setMessageContent("${notificationContext} ${note}")
-      outboundMessage.save(flush:true, failOnError:true)
+    outboundMessage.setMessageContent("${notificationContext} ${note}")
     
     log.debug("Outbound Message: ${outboundMessage}")
     pr.addToNotifications(outboundMessage)
