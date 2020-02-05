@@ -1272,7 +1272,7 @@ public class ReshareApplicationEventHandlerService {
     
     
     log.debug("Inbound Message: ${inboundMessage}")
-    pr.addToPatronRequestNotifications(inboundMessage)
+    pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
@@ -1297,7 +1297,7 @@ public class ReshareApplicationEventHandlerService {
       outboundMessage.save(flush:true, failOnError:true)
     
     log.debug("Outbound Message: ${outboundMessage}")
-    pr.addToPatronRequestNotifications(outboundMessage)
+    pr.addToNotifications(outboundMessage)
     //outboundMessage.save(flush:true, failOnError:true)
   }
 }
