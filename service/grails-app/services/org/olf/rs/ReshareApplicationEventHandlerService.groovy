@@ -1250,7 +1250,7 @@ public class ReshareApplicationEventHandlerService {
   private void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
 
-    inboundMessage.setPatronRequest(pr)
+    //inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
     inboundMessage.setTimestamp(LocalDateTime.now())
     if (isRequester) {
@@ -1272,7 +1272,8 @@ public class ReshareApplicationEventHandlerService {
     
     
     log.debug("Inbound Message: ${inboundMessage}")
-    inboundMessage.save(flush:true, failOnError:true)
+    pr.addToPatronRequestNotifications(inboundMessage)
+    //inboundMessage.save(flush:true, failOnError:true)
   }
 
 
@@ -1280,7 +1281,7 @@ public class ReshareApplicationEventHandlerService {
     def inboundMessage = new PatronRequestNotification()
 
     def outboundMessage = new PatronRequestNotification()
-      outboundMessage.setPatronRequest(pr)
+      //outboundMessage.setPatronRequest(pr)
       outboundMessage.setTimestamp(LocalDateTime.now())
       outboundMessage.setMessageSender(message_sender)
       outboundMessage.setMessageReceiver(message_receiver)
@@ -1296,6 +1297,7 @@ public class ReshareApplicationEventHandlerService {
       outboundMessage.save(flush:true, failOnError:true)
     
     log.debug("Outbound Message: ${outboundMessage}")
-    outboundMessage.save(flush:true, failOnError:true)
+    pr.addToPatronRequestNotifications(outboundMessage)
+    //outboundMessage.save(flush:true, failOnError:true)
   }
 }
