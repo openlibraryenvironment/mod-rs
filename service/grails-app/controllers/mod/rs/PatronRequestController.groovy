@@ -85,7 +85,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierMarkShipped':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned');
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     patron_request.state,
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
