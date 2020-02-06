@@ -571,6 +571,18 @@ public class ReshareApplicationEventHandlerService {
     return PatronRequest.findByIdOrHrid(id,id);
   }
 
+  PatronRequest lookupPatronRequest(String id, boolean isRequester) {
+    def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
+                                                      [id:id, isreq:isRequester])
+
+    if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
+      throw RuntimeException("Could not resolve patronRequest with id ${id}")
+    } else if (patronRequestList.size() == 1) {
+      return patronRequestList[0];
+    }
+    return null;
+  }
+
   PatronRequest lookupPatronRequestByPeerId(String id) {
     return PatronRequest.findByPeerRequestIdentifier(id);
   }
@@ -594,7 +606,7 @@ public class ReshareApplicationEventHandlerService {
       }
         
 
-      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId)
+      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId, true)
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
@@ -871,7 +883,6 @@ public class ReshareApplicationEventHandlerService {
     } catch(Exception e) {
       log.error("Problem saving audit entry", e)
     }
-    log.debug("Evrything worked ok in auditEntry")
   }
 
   private void autoRespond(PatronRequest pr) {
@@ -1168,6 +1179,9 @@ public class ReshareApplicationEventHandlerService {
           case 'Received':
             noteContext = "The requester has received this shipment with a note: "
             break;
+          case 'ShippedReturn':
+            noteContext = "The requester has return shipped this with a note: "
+            break;
           default:
             break;
         }
@@ -1253,23 +1267,21 @@ public class ReshareApplicationEventHandlerService {
     inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
     inboundMessage.setTimestamp(LocalDateTime.now())
+    String notificationContext = ""
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-    } else {
-      inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
-    }
-    inboundMessage.setIsSender(false)
-    String notificationContext = ""
-    if (isRequester) {
+
       notificationContext = noteContext('supplier', "${eventData.messageInfo.reasonForMessage}")
       inboundMessage.setMessageContent("${notificationContext} ${eventData.messageInfo.note}")
     } else {
+      inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+
       notificationContext = noteContext('requester', "${eventData.activeSection.action}")
       inboundMessage.setMessageContent("${notificationContext} ${eventData.activeSection.note}")
     }
-    
+    inboundMessage.setIsSender(false)
     
     log.debug("Inbound Message: ${inboundMessage}")
     pr.addToNotifications(inboundMessage)

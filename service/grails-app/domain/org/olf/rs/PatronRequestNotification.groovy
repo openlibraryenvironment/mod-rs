@@ -18,7 +18,9 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
 
   LocalDateTime timestamp
 
+  // The 'seen/unseen' bool is now referred to as 'read/unread' in the front end
   Boolean seen
+
   Boolean isSender
 
   // The sender/receiver variables must be nullable, since we could have a system automated timeout notifcation etc
