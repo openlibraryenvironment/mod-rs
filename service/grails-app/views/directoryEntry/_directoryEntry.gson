@@ -1,0 +1,45 @@
+import groovy.transform.*
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.ServiceAccount
+
+@Field DirectoryEntry directoryEntry
+json g.render(directoryEntry, [
+        expand: [ 
+                  'tags', 
+                  'status', 
+                  'addresses' ], 
+        excludes:[ 
+                  'services', 
+                  'customProperties', 
+                  'parent', 
+                  'symbols', 
+                  'services', 
+                  'addresses', 
+                  'announcements', 
+                  'units',
+                  'friends',
+                  'members' ]]) {
+
+
+  if ( directoryEntry.members ) {
+    def memlist = directoryEntry.members?.collect {
+      [
+        id: it.memberOrg?.id,
+        name: it.memberOrg?.name
+      ]
+    }
+    members: memlist
+  }
+
+  if ( directoryEntry.parent ) {
+    parent {
+      id directoryEntry.parent?.id
+      name directoryEntry.parent?.name
+      fullyQualifiedName directoryEntry.parent?.fullyQualifiedName
+    }
+  }
+
+  tagSummary directoryEntry.getTagSummary()
+  symbolSummary directoryEntry.getSymbolSummary()
+  fullyQualifiedName directoryEntry.getFullyQualifiedName()
+}
