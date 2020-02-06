@@ -200,6 +200,7 @@ public class ReshareActionService {
     outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
     outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
     outboundMessage.setIsSender(true)
+    outboundMessage.setAttachedAction('Notification')
     outboundMessage.setMessageContent(actionParams.note)
 
     log.debug("Outbound Message: ${outboundMessage.messageContent}")
