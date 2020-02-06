@@ -711,39 +711,35 @@ public class ReshareApplicationEventHandlerService {
       // Needs to look for action and try to do something with that.
 
       if ( eventData.activeSection?.action != null ) {
-        
-        // First check if the message has a purpose other than Notification
-        if ( eventData.activeSection?.action != 'Notification' ) {
 
-          // If there's a note, create a notification entry
-          if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
-            incomingNotificationEntry(pr, eventData, false)
-          }
-
-          switch ( eventData.activeSection?.action ) {
-            case 'Received':
-              auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
-              pr.save(flush: true, failOnError: true)
-              break;
-            case 'ShippedReturn':
-              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
-              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
-              pr.state = new_state;
-              pr.save(flush: true, failOnError: true)
-              break;
-            default:
-              result.status = "ERROR"
-              result.errorType = "UnsupportedActionType"
-              result.errorValue = eventData.activeSection.action
-              throw new Exception("Unhandled action: ${eventData.activeSection.action}");
-              break;
-          }
-        } else {
-          Map messageData = eventData.activeSection
-          auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+        // If there's a note, create a notification entry
+        if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
           incomingNotificationEntry(pr, eventData, false)
         }
         
+        switch ( eventData.activeSection?.action ) {
+          case 'Received':
+            auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+            pr.save(flush: true, failOnError: true)
+            break;
+          case 'ShippedReturn':
+            def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+            auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
+            pr.state = new_state;
+            pr.save(flush: true, failOnError: true)
+            break;
+          case 'Notification':
+            Map messageData = eventData.activeSection
+            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+            pr.save(flush: true, failOnError: true)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedActionType"
+            result.errorValue = eventData.activeSection.action
+            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
+            break;
+        }
       }
       else {
         result.status = "ERROR"
@@ -1283,7 +1279,7 @@ public class ReshareApplicationEventHandlerService {
     }
     inboundMessage.setIsSender(false)
     
-    log.debug("Inbound Message: ${inboundMessage}")
+    log.debug("Inbound Message: ${inboundMessage.messageContent}")
     pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
   }
@@ -1306,7 +1302,7 @@ public class ReshareApplicationEventHandlerService {
 
     outboundMessage.setMessageContent("${notificationContext} ${note}")
     
-    log.debug("Outbound Message: ${outboundMessage}")
+    log.debug("Outbound Message: ${outboundMessage.messageContent}")
     pr.addToNotifications(outboundMessage)
     //outboundMessage.save(flush:true, failOnError:true)
   }

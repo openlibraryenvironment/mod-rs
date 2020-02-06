@@ -202,10 +202,10 @@ public class ReshareActionService {
     outboundMessage.setIsSender(true)
     outboundMessage.setMessageContent(actionParams.note)
 
-    log.debug("Outbound Message: ${outboundMessage}")
+    log.debug("Outbound Message: ${outboundMessage.messageContent}")
     outboundMessage.save(flush:true, failOnError:true)
 
-    if ( send_result=='SENT') {
+    if ( send_result.status=='SENT') {
       result = true;
     }
     else {

@@ -23,6 +23,9 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
 
   Boolean isSender
 
+  String attachedAction
+
+
   // The sender/receiver variables must be nullable, since we could have a system automated timeout notifcation etc
   Symbol messageSender
   Symbol messageReceiver
@@ -35,6 +38,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
     patronRequest (nullable: true)
+    attachedAction( nullable: true)
     timestamp (nullable: true, blank: false)
     seen (nullable: true, blank: false)
     isSender (nullable: true, blank: false)
@@ -50,6 +54,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     timestamp column : 'prn_timestamp'
     seen column : 'prn_seen'
     isSender column : 'prn_is_sender'
+    attachedAction: 'prn_attached_action'
     messageSender column : 'prn_message_sender_fk'
     messageReceiver column : 'prn_message_receiver_fk'
     messageContent column : 'prn_message_content'
