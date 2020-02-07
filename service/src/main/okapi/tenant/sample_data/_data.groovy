@@ -3,8 +3,21 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Address
 import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
+import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
+import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
+
 
 // When adding new section names into this file please make sure they are in camel case.
+CustomPropertyDefinition ensureTextProperty(String name, boolean local = true, String label = null) {
+  CustomPropertyDefinition result = CustomPropertyDefinition.findByName(name) ?: new CustomPropertyDefinition(
+                                        name:name,
+                                        type:com.k_int.web.toolkit.custprops.types.CustomPropertyText.class,
+                                        defaultInternal: local,
+                                        label:label
+                                      ).save(flush:true, failOnError:true);
+  return result;
+}
+
 
 try {
   AppSetting z3950_address = AppSetting.findByKey('z3950_server_address') ?: new AppSetting( 
@@ -109,8 +122,19 @@ try {
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
+  def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
+  def cp_url = ensureTextProperty('url', false);
+  def cp_demoprop = ensureTextProperty('demoCustprop', false);
+  def cp_test_prop = ensureTextProperty('TestParam', false);
+  def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);
+  def cp_local_institutionalPatronId = ensureTextProperty('local_institutionalPatronId', true, label='Institutional patron ID');
+  def cp_local_widget2 = ensureTextProperty('local_widget_2', true, label='Widget 2');
+  def cp_local_widget3 = ensureTextProperty('local_widget_3', true, label='Widget 3');
+  def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
   println("_data.groovy complete");
 }
 catch ( Exception e ) {
   e.printStackTrace();
 }
+
+
