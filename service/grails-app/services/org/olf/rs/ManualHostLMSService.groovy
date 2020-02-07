@@ -12,6 +12,8 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
+import org.olf.okapi.modules.directory.Symbol;
+
 
 
 /**
@@ -36,9 +38,12 @@ public class ManualHostLMSService implements HostLMSActions {
     return result
   }
 
-  public boolean checkoutItem(String itemBarcode, String borrowerBarcode) {
-    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode})");
-    return false;
+  public Map checkoutItem(String itemBarcode,
+                          String borrowerBarcode,
+                          Symbol requesterDirectorySymbol) {
+    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${}requesterDirectorySymbol)");
+    return [
+      result:false
+    ]
   }
-
 }

@@ -15,11 +15,12 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 
 
+
 /**
  * The interface between mod-rs and any host Library Management Systems
  *
  */
-public class DefaultHostLMSService implements HostLMSActions {
+public class AlmaHostLMSService implements HostLMSActions {
 
   def lookup_strategies = [
     [ 
@@ -49,7 +50,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     // For NCIP2:: issue RequestItem()
     // RequestItem takes BibliographicId(A string, or name:value pair identifying an instance) or 
     // ItemId(Item)(A String, or name:value pair identifying an item)
-    log.debug("DefaultHostLMSService::placeHold(${instanceIdentifier},${itemIdentifier}");
+    log.debug("AlmaHostLMSService::placeHold(${instanceIdentifier},${itemIdentifier}");
     result.status='HoldPlaced'
     result
   }
@@ -197,8 +198,7 @@ public class DefaultHostLMSService implements HostLMSActions {
           result = ncip2LookupPatron(patron_id)
           break;
         default:
-          log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
-          // Borrower check is not configured, so return OK
+          log.debug("Borrower check - no action, config ${borrower_check}");
           break;
       }
     }
@@ -206,7 +206,7 @@ public class DefaultHostLMSService implements HostLMSActions {
       log.warn('borrower check not configured');
     }
 
-    log.debug("DefaultHostLMSService::lookupPatron(${patron_id}) returns ${result}");
+    log.debug("AlmaHostLMSService::lookupPatron(${patron_id}) returns ${result}");
     return result
   }
 
@@ -214,12 +214,12 @@ public class DefaultHostLMSService implements HostLMSActions {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
 
     if ( ( ncip_server_address != null ) &&
          ( ncip_from_agency != null ) &&
@@ -249,13 +249,6 @@ public class DefaultHostLMSService implements HostLMSActions {
               surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
               status: 'OK'
             ]
-            
-            mr.LookupUserResponse?.UserOptionalFields?.UserAddressInformation.each { uai ->
-              if ( ( uai.ElectronicAddress ) && ( uai.ElectronicAddress?.ElectronicAddressType == 'mailto' ) ) {
-                result.email = uai.ElectronicAddress.ElectronicAddressData
-              }
-            }
-
             log.debug("Result of user lookup: ${result}");
             // result = JsonOutput.toJson(body);
         }
