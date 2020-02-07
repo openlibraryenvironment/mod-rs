@@ -1081,7 +1081,7 @@ public class ReshareApplicationEventHandlerService {
 
       // Whenever a note is attached to the message, create a notification with action.
       if (note != null) {
-        context = reason_for_message + status
+        def context = reason_for_message + status
         outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
       }
 
