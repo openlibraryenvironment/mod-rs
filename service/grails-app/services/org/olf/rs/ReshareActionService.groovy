@@ -32,12 +32,12 @@ public class ReshareActionService {
 
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
-        // auditEntry(pr, pr.state, s, 'Checked in', null);
-        // See if we can identify a borrower proxy for the requesting location
+
         pr.selectedItemBarcode = actionParams?.itemBarcode;
 
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
+          // Call the host lms to check the item out of the host system and in to reshare
           def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, 
                                                       borrower_proxy_barcode, 
                                                       pr.resolvedRequester)
@@ -47,7 +47,6 @@ public class ReshareActionService {
             Status s = Status.lookup('Responder', checkout_result?.status);
             auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
             pr.state = s;
-            pr.selectedItemBarcode = actionParams?.itemBarcode;
             pr.save(flush:true, failOnError:true);
           }
           else {
@@ -65,6 +64,13 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
         }
+        else {
+          Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+          auditEntry(pr, pr.state, s, 'HOST LMS Integration not configured. Manual checkout needed');
+          pr.state = s;
+          pr.save(flush:true, failOnError:true);
+        }
+
         result = true;
       }
       else {
