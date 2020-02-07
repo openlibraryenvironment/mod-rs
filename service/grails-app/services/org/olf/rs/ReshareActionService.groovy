@@ -34,54 +34,37 @@ public class ReshareActionService {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
         // auditEntry(pr, pr.state, s, 'Checked in', null);
         // See if we can identify a borrower proxy for the requesting location
-        String borrower_proxy_barcode = null;
+        pr.selectedItemBarcode = actionParams?.itemBarcode;
 
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
-          def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode)
-          if ( checkout_result ) {
-          }
-          else {
-            Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+          def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, 
+                                                      borrower_proxy_barcode, 
+                                                      pr.resolvedRequester)
+          // If the host_lms adapter gave us a specific status to transition to, use it
+          if ( checkout_result?.status ) {
+            // the host lms service gave us a specific status to change to
+            Status s = Status.lookup('Responder', checkout_result?.status);
             auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
             pr.state = s;
             pr.selectedItemBarcode = actionParams?.itemBarcode;
             pr.save(flush:true, failOnError:true);
           }
+          else {
+           // Otherwise, if the checkout succeeded or failed, set appropriately
+           Status s = null;
+            if ( checkout_result.result == true ) {
+              s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+              auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
+            }
+            else {
+              s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+              auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
+            }
+            pr.state = s;
+            pr.save(flush:true, failOnError:true);
+          }
         }
-        else {
-          Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-          auditEntry(pr, pr.state, s, 'HOST LMS Integraiton not configured - Check In to Reshare Failed - Manual checkout needed', null);
-          pr.state = s;
-          pr.selectedItemBarcode = actionParams?.itemBarcode;
-          pr.save(flush:true, failOnError:true);
-        }
-
-        // if ( borrower_proxy_barcode != null ) {
-          // Attempt HostLMSService checkout
-        //   if ( hostLMSService.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode) ) {
-        //     Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-        //     auditEntry(pr, pr.state, s, 'Checked In', null);
-        //     pr.state = s;
-        //     pr.selectedItemBarcode = actionParams?.itemBarcode;
-        //     pr.save(flush:true, failOnError:true);
-        //   }
-        //   else {
-        //     Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-        //     auditEntry(pr, pr.state, s, 'Check In Failed - Manual checkout needed', null);
-        //     pr.state = s;
-        //     pr.selectedItemBarcode = actionParams?.itemBarcode;
-        //     pr.save(flush:true, failOnError:true);
-        //   }
-        // }
-        // else {
-        //   Status s = Status.lookup('Responder', 'RES_AWAIT_PROXY_BORROWER');
-        //   auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
-        //   pr.selectedItemBarcode = actionParams?.itemBarcode;
-        //   pr.state = s;
-        //   pr.save(flush:true, failOnError:true);
-        // }
-
         result = true;
       }
       else {
