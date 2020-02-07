@@ -61,7 +61,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply')
+                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
                 }
                 else {
                   response.status = 400;
@@ -76,7 +76,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy');
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy', request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
@@ -85,7 +85,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierMarkShipped':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned');
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     patron_request.state,
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
