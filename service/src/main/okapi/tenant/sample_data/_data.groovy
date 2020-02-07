@@ -104,6 +104,10 @@ try {
                                   vocab:'AutoResponder',
                                   key: 'auto_responder_status').save(flush:true, failOnError: true);
 
+RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
+RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
+RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
+RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
   println("_data.groovy complete");
 }
