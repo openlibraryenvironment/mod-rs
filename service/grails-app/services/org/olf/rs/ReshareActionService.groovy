@@ -11,6 +11,8 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
+import org.olf.rs.lms.HostLMSActions;
+
 
 /**
  * Handle user events.
@@ -34,30 +36,51 @@ public class ReshareActionService {
         // See if we can identify a borrower proxy for the requesting location
         String borrower_proxy_barcode = null;
 
-        if ( borrower_proxy_barcode != null ) {
-          // Attempt HostLMSService checkout
-          if ( hostLMSService.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode) ) {
-            Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-            auditEntry(pr, pr.state, s, 'Checked In', null);
-            pr.state = s;
-            pr.selectedItemBarcode = actionParams?.itemBarcode;
-            pr.save(flush:true, failOnError:true);
+        HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+        if ( host_lms ) {
+          def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode)
+          if ( checkout_result ) {
           }
           else {
             Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-            auditEntry(pr, pr.state, s, 'Check In Failed - Manual checkout needed', null);
+            auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
             pr.state = s;
             pr.selectedItemBarcode = actionParams?.itemBarcode;
             pr.save(flush:true, failOnError:true);
           }
         }
         else {
-          Status s = Status.lookup('Responder', 'RES_AWAIT_PROXY_BORROWER');
-          auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
-          pr.selectedItemBarcode = actionParams?.itemBarcode;
+          Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+          auditEntry(pr, pr.state, s, 'HOST LMS Integraiton not configured - Check In to Reshare Failed - Manual checkout needed', null);
           pr.state = s;
+          pr.selectedItemBarcode = actionParams?.itemBarcode;
           pr.save(flush:true, failOnError:true);
         }
+
+        // if ( borrower_proxy_barcode != null ) {
+          // Attempt HostLMSService checkout
+        //   if ( hostLMSService.checkoutItem(actionParams?.itemBarcode, borrower_proxy_barcode) ) {
+        //     Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+        //     auditEntry(pr, pr.state, s, 'Checked In', null);
+        //     pr.state = s;
+        //     pr.selectedItemBarcode = actionParams?.itemBarcode;
+        //     pr.save(flush:true, failOnError:true);
+        //   }
+        //   else {
+        //     Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
+        //     auditEntry(pr, pr.state, s, 'Check In Failed - Manual checkout needed', null);
+        //     pr.state = s;
+        //     pr.selectedItemBarcode = actionParams?.itemBarcode;
+        //     pr.save(flush:true, failOnError:true);
+        //   }
+        // }
+        // else {
+        //   Status s = Status.lookup('Responder', 'RES_AWAIT_PROXY_BORROWER');
+        //   auditEntry(pr, pr.state, s, 'Unable to check-in. No Proxy borrower account for requesting location. Please set and re-check-in', null);
+        //   pr.selectedItemBarcode = actionParams?.itemBarcode;
+        //   pr.state = s;
+        //   pr.save(flush:true, failOnError:true);
+        // }
 
         result = true;
       }
