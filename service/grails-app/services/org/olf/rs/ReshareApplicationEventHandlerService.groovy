@@ -1081,7 +1081,8 @@ public class ReshareApplicationEventHandlerService {
 
       // Whenever a note is attached to the message, create a notification with action.
       if (note != null) {
-        outgoingNotificationEntry(pr, note, reason_for_message, pr.resolvedSupplier, pr.resolvedSupplier, false)
+        context = reason_for_message + status
+        outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
       }
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
@@ -1241,12 +1242,14 @@ public class ReshareApplicationEventHandlerService {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
+      inboundMessage.setMessageContent(eventData.messageInfo.note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.activeSection.action)
+      inboundMessage.setMessageContent(eventData.activeSection.note)
     }
-    inboundMessage.setMessageContent(eventData.messageInfo.note)
+    
     inboundMessage.setIsSender(false)
     
     log.debug("Inbound Message: ${inboundMessage.messageContent}")

@@ -61,7 +61,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply')
+                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
                 }
                 else {
                   response.status = 400;
@@ -76,7 +76,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy');
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy', request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
