@@ -571,6 +571,18 @@ public class ReshareApplicationEventHandlerService {
     return PatronRequest.findByIdOrHrid(id,id);
   }
 
+  PatronRequest lookupPatronRequest(String id, boolean isRequester) {
+    def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
+                                                      [id:id, isreq:isRequester])
+
+    if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
+      throw RuntimeException("Could not resolve patronRequest with id ${id}")
+    } else if (patronRequestList.size() == 1) {
+      return patronRequestList[0];
+    }
+    return null;
+  }
+
   PatronRequest lookupPatronRequestByPeerId(String id) {
     return PatronRequest.findByPeerRequestIdentifier(id);
   }
@@ -594,7 +606,7 @@ public class ReshareApplicationEventHandlerService {
       }
         
 
-      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId)
+      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId, true)
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
@@ -699,39 +711,35 @@ public class ReshareApplicationEventHandlerService {
       // Needs to look for action and try to do something with that.
 
       if ( eventData.activeSection?.action != null ) {
-        
-        // First check if the message has a purpose other than Notification
-        if ( eventData.activeSection?.action != 'Notification' ) {
 
-          // If there's a note, create a notification entry
-          if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
-            incomingNotificationEntry(pr, eventData, false)
-          }
-
-          switch ( eventData.activeSection?.action ) {
-            case 'Received':
-              auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
-              pr.save(flush: true, failOnError: true)
-              break;
-            case 'ShippedReturn':
-              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
-              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
-              pr.state = new_state;
-              pr.save(flush: true, failOnError: true)
-              break;
-            default:
-              result.status = "ERROR"
-              result.errorType = "UnsupportedActionType"
-              result.errorValue = eventData.activeSection.action
-              throw new Exception("Unhandled action: ${eventData.activeSection.action}");
-              break;
-          }
-        } else {
-          Map messageData = eventData.activeSection
-          auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+        // If there's a note, create a notification entry
+        if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
           incomingNotificationEntry(pr, eventData, false)
         }
-        
+
+        switch ( eventData.activeSection?.action ) {
+          case 'Received':
+            auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+            pr.save(flush: true, failOnError: true)
+            break;
+          case 'ShippedReturn':
+            def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+            auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
+            pr.state = new_state;
+            pr.save(flush: true, failOnError: true)
+            break;
+          case 'Notification':
+            Map messageData = eventData.activeSection
+            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+            pr.save(flush: true, failOnError: true)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedActionType"
+            result.errorValue = eventData.activeSection.action
+            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
+            break;
+        }
       }
       else {
         result.status = "ERROR"
@@ -871,7 +879,6 @@ public class ReshareApplicationEventHandlerService {
     } catch(Exception e) {
       log.error("Problem saving audit entry", e)
     }
-    log.debug("Evrything worked ok in auditEntry")
   }
 
   private void autoRespond(PatronRequest pr) {
@@ -1072,9 +1079,10 @@ public class ReshareApplicationEventHandlerService {
         unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
       }
 
-      // Whenever a note is attached to the message, create a notification with context.
+      // Whenever a note is attached to the message, create a notification with action.
       if (note != null) {
-        outgoingNotificationEntry(pr, note, reason_for_message, pr.resolvedSupplier, pr.resolvedSupplier, false)
+        def context = reason_for_message + status
+        outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
       }
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
@@ -1151,36 +1159,13 @@ public class ReshareApplicationEventHandlerService {
       note: note
     ]
 
-    // Whenever a note is attached to the message, create a notification with context.
+    // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
       outgoingNotificationEntry(pr, note, action, resolveCombinedSymbol(message_sender_symbol), resolveCombinedSymbol(peer_symbol), true)
     }
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
 
-  }
-
-  private String noteContext(String subject, String context) {
-    String noteContext = ""
-    switch(subject) {
-      case 'requester':
-        switch(context) {
-          case 'Received':
-            noteContext = "The requester has received this shipment with a note: "
-            break;
-          default:
-            break;
-        }
-        break;
-      case 'supplier':
-        switch(context) {
-          default:
-            break;
-        }
-      default:
-        break;
-    }
-    return noteContext
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {
@@ -1256,46 +1241,38 @@ public class ReshareApplicationEventHandlerService {
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
+      inboundMessage.setMessageContent(eventData.messageInfo.note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setAttachedAction(eventData.activeSection.action)
+      inboundMessage.setMessageContent(eventData.activeSection.note)
     }
+    
     inboundMessage.setIsSender(false)
-    String notificationContext = ""
-    if (isRequester) {
-      notificationContext = noteContext('supplier', "${eventData.messageInfo.reasonForMessage}")
-      inboundMessage.setMessageContent("${notificationContext} ${eventData.messageInfo.note}")
-    } else {
-      notificationContext = noteContext('requester', "${eventData.activeSection.action}")
-      inboundMessage.setMessageContent("${notificationContext} ${eventData.activeSection.note}")
-    }
     
-    
-    log.debug("Inbound Message: ${inboundMessage}")
-    inboundMessage.save(flush:true, failOnError:true)
+    log.debug("Inbound Message: ${inboundMessage.messageContent}")
+    pr.addToNotifications(inboundMessage)
+    //inboundMessage.save(flush:true, failOnError:true)
   }
 
 
-  private void outgoingNotificationEntry(PatronRequest pr, String note, String context, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
-    def inboundMessage = new PatronRequestNotification()
+  private void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     def outboundMessage = new PatronRequestNotification()
-      outboundMessage.setPatronRequest(pr)
-      outboundMessage.setTimestamp(LocalDateTime.now())
-      outboundMessage.setMessageSender(message_sender)
-      outboundMessage.setMessageReceiver(message_receiver)
-      outboundMessage.setIsSender(true)
-      String notificationContext = ""
-      if(isRequester) {
-        notificationContext = noteContext('requester', context)
-      } else {
-        notificationContext = noteContext('supplier', context)
-      }
+    outboundMessage.setPatronRequest(pr)
+    outboundMessage.setTimestamp(LocalDateTime.now())
+    outboundMessage.setMessageSender(message_sender)
+    outboundMessage.setMessageReceiver(message_receiver)
+    outboundMessage.setIsSender(true)
 
-      outboundMessage.setMessageContent("${notificationContext} ${note}")
-      outboundMessage.save(flush:true, failOnError:true)
+    outboundMessage.setAttachedAction(action)
+
+    outboundMessage.setMessageContent(note)
     
-    log.debug("Outbound Message: ${outboundMessage}")
-    outboundMessage.save(flush:true, failOnError:true)
+    log.debug("Outbound Message: ${outboundMessage.messageContent}")
+    pr.addToNotifications(outboundMessage)
+    //outboundMessage.save(flush:true, failOnError:true)
   }
 }

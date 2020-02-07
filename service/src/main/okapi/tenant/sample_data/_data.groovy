@@ -117,6 +117,10 @@ try {
                                   vocab:'AutoResponder',
                                   key: 'auto_responder_status').save(flush:true, failOnError: true);
 
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);

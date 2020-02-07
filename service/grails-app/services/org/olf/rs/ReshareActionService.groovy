@@ -212,12 +212,13 @@ public class ReshareActionService {
     outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
     outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
     outboundMessage.setIsSender(true)
+    outboundMessage.setAttachedAction('Notification')
     outboundMessage.setMessageContent(actionParams.note)
 
-    log.debug("Outbound Message: ${outboundMessage}")
+    log.debug("Outbound Message: ${outboundMessage.messageContent}")
     outboundMessage.save(flush:true, failOnError:true)
 
-    if ( send_result=='SENT') {
+    if ( send_result.status=='SENT') {
       result = true;
     }
     else {
