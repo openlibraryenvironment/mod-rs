@@ -11,8 +11,16 @@
           "pathPattern": "/rs/patronrequests*"
         },
         {
+          "methods": ["GET"],
+          "pathPattern": "/rs/refdata/*"
+        },
+        {
           "methods": ["GET", "POST"],
-          "pathPattern": "/rs/refdata*"
+          "pathPattern": "/rs/refdata"
+        },
+        {
+          "methods": ["GET", "PUT", "DELETE"],
+          "pathPattern": "/rs/refdata/{id}"
         },
         {
           "methods": ["GET", "POST"],

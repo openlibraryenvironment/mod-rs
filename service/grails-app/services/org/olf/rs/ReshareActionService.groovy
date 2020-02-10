@@ -39,7 +39,7 @@ public class ReshareActionService {
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
           def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, 
-                                                      borrower_proxy_barcode, 
+                                                      pr.patronIdentifier,
                                                       pr.resolvedRequester)
           // If the host_lms adapter gave us a specific status to transition to, use it
           if ( checkout_result?.status ) {
