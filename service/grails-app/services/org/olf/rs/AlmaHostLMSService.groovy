@@ -227,7 +227,6 @@ public class AlmaHostLMSService implements HostLMSActions {
       log.debug("Request patron from ${ncip_server_address}");
 
       StringWriter sw = new StringWriter();
-      // sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW',patron_id))
       sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest(ncip_from_agency, ncip_app_profile, patron_id))
       String message = sw.toString();
 
@@ -291,6 +290,52 @@ public class AlmaHostLMSService implements HostLMSActions {
       }
     }
   }
+
+  /**
+   * @See https://developers.exlibrisgroup.com/wp-content/uploads/alma/xml_json_samples/RequestItem.xml
+   */ 
+  def makeNCIPRequestItemRequest(String from_agency, 
+                                 String to_agency, 
+                                 String application_profile, 
+                                 String bibliographic_identifier,
+                                 String bibliographic_identifier_code,
+                                 String request_id,
+                                 String request_type,
+                                 String request_scope_type,
+                                 String need_before_date) {
+    return {
+      NCIPMessage( 'version':'http://www.niso.org/schemas/ncip/v2_02/ncip_v2_02.xsd',
+                       'xmlns':'http://www.niso.org/2008/ncip') {
+        RequestItem {
+          InitiationHeader {
+            FromAgencyId {
+              AgencyId(from_agency)
+            }
+            ToAgencyId {
+              AgencyId(to_agency)
+            }
+            ApplicationProfileType(application_profile)
+          }
+          UserId {
+            UserIdentifierValue(user_id)
+          }
+          BibliographicId {
+            BibliographicRecordId {
+              BibliographicRecordIdentifier(bibliographic_identifier)
+              BibliographicRecordIdentifierCode(bibliographic_identifier_code)
+            }
+          }
+          RequestId {
+            RequestIdentifierValue(request_id)
+          }
+          RequestType(request_type)
+          RequestScopeType(request_scope_type)
+          NeedBeforeDate(need_before_date)
+        }
+      }
+    }
+  }
+
 
   public Map checkoutItem(String itemBarcode,
                           String borrowerBarcode,
