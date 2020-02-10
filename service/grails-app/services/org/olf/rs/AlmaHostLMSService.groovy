@@ -210,6 +210,75 @@ public class AlmaHostLMSService implements HostLMSActions {
     return result
   }
 
+  /**
+   * @ToDo : pass in directory entry of peer to calculate ncip_from_agency (The requester)
+   */
+  private Map ncip2RequestItem(String patron_id,
+                               String bibliographic_identifier,
+                               String bibliographic_identifier_code,
+                               String request_id,
+                               String request_type,
+                               String request_scope_type,
+                               String need_before_date) {
+
+   Map result = [ status:'FAIL' ];
+    log.debug("ncip2RequestItem(${patron_id})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
+    if ( ( ncip_server_address != null ) &&
+         ( ncip_from_agency != null ) &&
+         ( ncip_app_profile != null ) ) {
+      log.debug("Request patron from ${ncip_server_address}");
+
+      StringWriter sw = new StringWriter();
+      sw << new StreamingMarkupBuilder().bind (makeNCIPRequestItemRequest( ncip_from_agency_setting, 
+                                                                           '', 
+                                                                           ncip_app_profile_setting, 
+                                                                           bibliographic_identifier, 
+                                                                           bibliographic_identifier_code, 
+                                                                           request_id, 
+                                                                           request_type, 
+                                                                           request_scope_type, 
+                                                                           need_before_date))
+
+      String message = sw.toString();
+
+      log.debug("NCIP Request: ${message}");
+
+      HttpBuilder.configure {
+        request.uri = ncip_server_address
+        request.contentType = XML[0]
+        request.headers['accept'] = 'application/xml'
+      }.post {
+        request.body = message
+
+        response.success { FromServer fs, Object body ->
+            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
+            log.debug("NCIP Response: ${mr}");
+            result=[
+              status: 'OK'
+            ]
+            log.debug("Result of user lookup: ${result}");
+            // result = JsonOutput.toJson(body);
+        }
+        response.failure { FromServer fs ->
+          log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
+        }
+      }
+    }
+    else {
+      log.error("MISSING CONFIGURATION FOR NCIP. Unable to perform patron lookup ${patron_id}/addr=${ncip_server_address}/from=${ncip_from_agency}/profile=${ncip_app_profile}");
+    }
+
+    return result
+  }
+
   private Map ncip2LookupPatron(String patron_id) {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
