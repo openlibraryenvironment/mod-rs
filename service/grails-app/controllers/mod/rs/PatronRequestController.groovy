@@ -76,7 +76,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', 'No copy', request.JSON.actionParams.note);
+              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams.reason, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
