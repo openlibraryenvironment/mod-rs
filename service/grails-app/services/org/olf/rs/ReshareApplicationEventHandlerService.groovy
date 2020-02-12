@@ -186,7 +186,7 @@ public class ReshareApplicationEventHandlerService {
         try {
           log.debug("Launch auto responder for request");
           String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
-          if ( auto_respond?.startsWith('On') ) {
+          if ( auto_respond?.toLowerCase().startsWith('on') ) {
             autoRespond(req)
           }
           else {
