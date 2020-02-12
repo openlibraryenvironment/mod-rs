@@ -109,6 +109,8 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
