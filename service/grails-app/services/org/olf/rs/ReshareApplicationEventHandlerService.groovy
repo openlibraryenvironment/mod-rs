@@ -1236,7 +1236,7 @@ public class ReshareApplicationEventHandlerService {
     def inboundMessage = new PatronRequestNotification()
     inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
-    inboundMessage.setTimestamp(eventData.header.timestamp)
+    inboundMessage.setTimestamp(new Date(eventData.header.timestamp))
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
