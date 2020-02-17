@@ -208,7 +208,7 @@ public class ReshareActionService {
     
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
-    outboundMessage.setTimestamp(LocalDateTime.now())
+    outboundMessage.setTimestamp(new Date())
     outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
     outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
     outboundMessage.setIsSender(true)
