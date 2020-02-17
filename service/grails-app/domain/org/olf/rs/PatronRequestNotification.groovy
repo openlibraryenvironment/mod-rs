@@ -3,6 +3,7 @@ package org.olf.rs
 import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import org.olf.okapi.modules.directory.Symbol;
+import java.time.LocalDateTime;
 
 class PatronRequestNotification implements MultiTenant<PatronRequest> {
   
@@ -15,7 +16,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
-  Date timestamp
+  LocalDateTime timestamp
 
   // The 'seen/unseen' bool is now referred to as 'read/unread' in the front end
   Boolean seen

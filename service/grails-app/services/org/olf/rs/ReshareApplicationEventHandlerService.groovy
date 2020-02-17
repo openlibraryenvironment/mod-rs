@@ -1234,9 +1234,10 @@ public class ReshareApplicationEventHandlerService {
 
   private void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
+
     inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
-    inboundMessage.setTimestamp(new Date(eventData.header.timestamp))
+    inboundMessage.setTimestamp(LocalDateTime.now())
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
@@ -1261,7 +1262,7 @@ public class ReshareApplicationEventHandlerService {
 
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
-    outboundMessage.setTimestamp(new Date())
+    outboundMessage.setTimestamp(LocalDateTime.now())
     outboundMessage.setMessageSender(message_sender)
     outboundMessage.setMessageReceiver(message_receiver)
     outboundMessage.setIsSender(true)
