@@ -11,6 +11,8 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
+import java.time.Instant;
+
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
@@ -1237,7 +1239,8 @@ public class ReshareApplicationEventHandlerService {
 
     inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
-    inboundMessage.setTimestamp(LocalDateTime.now())
+    // This line should grab timestamp from message rather than current time.
+    inboundMessage.setTimestamp(Instant.parse(eventData.header.timestamp))
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
@@ -1262,7 +1265,7 @@ public class ReshareApplicationEventHandlerService {
 
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
-    outboundMessage.setTimestamp(LocalDateTime.now())
+    outboundMessage.setTimestamp(Instant.now())
     outboundMessage.setMessageSender(message_sender)
     outboundMessage.setMessageReceiver(message_receiver)
     outboundMessage.setIsSender(true)

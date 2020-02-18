@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat
 import static groovyx.net.http.HttpBuilder.configure
 import static groovyx.net.http.ContentTypes.XML
 import groovyx.net.http.*
+import java.time.Instant
 
 
 /**
@@ -333,7 +334,6 @@ and sa.service.businessFunction.value=:ill
   }
 
   void makeHeader(def del, eventData) {
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     exec(del) {
       header {
         supplyingAgencyId {
@@ -344,7 +344,7 @@ and sa.service.businessFunction.value=:ill
           agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
           agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
         }
-        timestamp(dateFormatter.format(new Date())) // Current time
+        timestamp(Instant.now()) // Current time
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
         if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
           supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
