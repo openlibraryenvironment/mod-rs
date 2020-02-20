@@ -12,6 +12,7 @@ import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
@@ -1240,7 +1241,7 @@ public class ReshareApplicationEventHandlerService {
     inboundMessage.setPatronRequest(pr)
     inboundMessage.setSeen(false)
     // This line should grab timestamp from message rather than current time.
-    inboundMessage.setTimestamp(Instant.parse(eventData.header.timestamp))
+    inboundMessage.setTimestamp(ZonedDateTime.parse(eventData.header.timestamp).toInstant())
     if (isRequester) {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
