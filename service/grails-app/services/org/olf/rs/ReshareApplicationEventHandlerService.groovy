@@ -944,7 +944,14 @@ public class ReshareApplicationEventHandlerService {
       return;
     }
 
-    Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, action, note)
+    String message_sender_symbol = pr.requestingInstitutionSymbol;
+
+    log.debug("ROTA TYPE: ${pr.rota.getClass()}")
+    PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
+    log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
+    String peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
+
+    Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, message_sender_symbol, peer_symbol, action, note)
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
   }

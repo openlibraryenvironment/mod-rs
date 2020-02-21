@@ -139,16 +139,8 @@ class ProtocolMessageBuildingService {
   }
 
 
-  public Map buildRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+  public Map buildRequestingAgencyMessage(PatronRequest pr, Symbol message_sender_symbol, Symbol peer_symbol, String action, String note = null) {
     Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
-
-    String message_sender_symbol = pr.requestingInstitutionSymbol;
-    Long rotaPosition = pr.rotaPosition;
-
-    log.debug("ROTA TYPE: ${pr.rota.getClass()}")
-    PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
-    log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
-    String peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
 
     message.header = [
       supplyingAgencyId: [
