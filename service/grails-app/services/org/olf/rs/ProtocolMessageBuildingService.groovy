@@ -169,7 +169,14 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
-      reshareApplicationEventHandlerService.outgoingNotificationEntry(pr, note, action, resolveCombinedSymbol(message_sender_symbol), resolveCombinedSymbol(peer_symbol), true)
+      reshareApplicationEventHandlerService.outgoingNotificationEntry(
+        pr,
+        note,
+        action,
+        reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender_symbol),
+        reshareApplicationEventHandlerService.resolveCombinedSymbol(peer_symbol),
+        true
+      )
     }
 
 
