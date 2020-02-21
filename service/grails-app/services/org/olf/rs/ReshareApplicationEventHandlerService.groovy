@@ -454,7 +454,7 @@ public class ReshareApplicationEventHandlerService {
       Map serviceInfo = eventData.serviceInfo
       //TODO refdata lookup here?
       pr.serviceType = serviceInfo.serviceType
-      pr.neededBy: serviceInfo.needBeforeDate
+      pr.neededBy = serviceInfo.needBeforeDate
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
       if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
