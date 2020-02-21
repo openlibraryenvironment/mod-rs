@@ -441,6 +441,15 @@ public class ReshareApplicationEventHandlerService {
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
 
+
+      // Add publisher information to Patron Request
+      Map publicationInfo = eventData.publicationInfo
+      pr.publisher = publicationInfo.publisher
+      pr.publicationType = publicationInfo.publicationType
+      pr.publicationDate = publicationInfo.publicationDate
+      pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
+      pr.placeOfPublication = publicationInfo.placeOfPublication
+
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
       if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
         if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {

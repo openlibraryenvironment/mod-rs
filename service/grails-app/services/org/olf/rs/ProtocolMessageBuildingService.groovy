@@ -39,20 +39,15 @@ class ProtocolMessageBuildingService {
     message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
 
     message.bibliographicInfo = [
-      publicationType: req.publicationType?.value,
       title: req.title,
       requestingInstitutionSymbol: req.requestingInstitutionSymbol,
       author: req.author,
       subtitle: req.subtitle,
       sponsoringBody: req.sponsoringBody,
-      publisher: req.publisher,
-      placeOfPublication: req.placeOfPublication,
       volume: req.volume,
       issue: req.issue,
       startPage: req.startPage,
       numberOfPages: req.numberOfPages,
-      publicationDate: req.publicationDate,
-      publicationDateOfComponent: req.publicationDateOfComponent,
       edition: req.edition,
       issn: req.issn,
       isbn: req.isbn,
@@ -71,14 +66,50 @@ class ProtocolMessageBuildingService {
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
-      patronIdentifier: req.patronIdentifier,
-      patronReference: req.patronReference,
-      patronSurname: req.patronSurname,
-      patronGivenName: req.patronGivenName,
-      patronType: req.patronType,
-      serviceType: req.serviceType?.value
     ]
+    message.publicationInfo = [
+      publisher: req.publisher,
+      publicationType: req.publicationType?.value,
+      publicationDate: req.publicationDate,
+
+      //TODO what is this publicationDateOfComponent?
+      publicationDateOfComponent: req.publicationDateOfComponent,
+      placeOfPublication: req.placeOfPublication
+    ]
+    message.serviceInfo = [
+      //TODO the following fields are permitted here but not currently included:
+      /*
+       * RequestType
+       * RequestSubtype
+       * RequestingAgencyPreviousRequestId
+       * ServiceLevel
+       * PreferredFormat
+       * CopyrightCompliance
+       * AnyEdition
+       * StartDate
+       * EndDate
+       * Note
+      */
+      serviceType: req.serviceType?.value,
+
+      // Note that the internal name differs from the protocol name
+      needBeforeDate: req.neededBy
+
+    ]
+    // TODO SupplierInfo Section
+    
+    /* message.supplierInfo = [
+     * SortOrder
+     * SupplierCode
+     * SupplierDescription
+     * BibliographicRecordId
+     * CallNumber
+     * SummaryHoldings
+     * AvailabilityNote
+    ]
+     */
     message.requestedDeliveryInfo = [
+      // SortOrder
       address:[
         physicalAddress:[
           line1:req.pickupLocation,
@@ -90,6 +121,39 @@ class ProtocolMessageBuildingService {
         ]
       ]
     ]
+    // TODO Will this information be taken from the directory entry?
+    /* message.requestingAgencyInfo = [
+     * Name
+     * ContactName
+     * Address
+    ]
+     */
+     message.patronInfo = [
+      // Note that the internal names differ from the protocol name
+      patronId: req.patronIdentifier,
+      surname: req.patronSurname,
+      givenName: req.patronGivenName,
+      patronType: req.patronType,
+
+      //TODO what is this field: patronReference?
+      patronReference: req.patronReference,
+      /* Also permitted:
+       * SendToPatron
+       * Address
+      */
+     ]
+
+     /*
+      * message.billingInfo = [
+      * Permitted fields:
+      * PaymentMethod
+      * MaximumCosts
+      * BillingMethod
+      * BillingName
+      * Address
+      ]
+     */
+
     return message;
   }
 
