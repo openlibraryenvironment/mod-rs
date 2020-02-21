@@ -116,7 +116,12 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
-      def context = reason_for_message + status
+      def context = reason_for_message
+      
+      if (reason_for_message !== 'Notification') {
+        context = reason_for_message + status
+      }
+  
       reshareApplicationEventHandlerService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 

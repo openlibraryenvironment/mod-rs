@@ -886,13 +886,14 @@ public class ReshareApplicationEventHandlerService {
   // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
   // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
-  public void sendSupplyingAgencyMessage(PatronRequest pr, 
+  public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status, 
                                          String reasonUnfilled = null,
                                          String note = null) {
 
     log.debug("sendResponse(....)");
+    boolean result = false;
 
     // pr.supplyingInstitutionSymbol
     // pr.peerRequestIdentifier
@@ -905,10 +906,18 @@ public class ReshareApplicationEventHandlerService {
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
                                                                    pr.requestingInstitutionSymbol, 
                                                                    unfilled_message_request);
+      if ( send_result.status=='SENT') {
+        result = true;
+      }
+      else {
+        log.warn("Unable to send protocol message");
+      }
     }
     else {
       log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");
     }
+
+    return result;
   }
 
   /**
@@ -930,8 +939,9 @@ public class ReshareApplicationEventHandlerService {
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
   }
 
-  public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
-    
+  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+    boolean result = false;
+
     Long rotaPosition = pr.rotaPosition;
     // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
     if (pr.rota.isEmpty()) {
@@ -956,6 +966,13 @@ public class ReshareApplicationEventHandlerService {
     Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, message_sender_symbol, peer_symbol, action, note)
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
+    if ( send_result.status=='SENT') {
+      result = true;
+    }
+    else {
+      log.warn("Unable to send protocol message");
+    }
+    return result;
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {
@@ -1030,9 +1047,13 @@ public class ReshareApplicationEventHandlerService {
     // This line should grab timestamp from message rather than current time.
     inboundMessage.setTimestamp(ZonedDateTime.parse(eventData.header.timestamp).toInstant())
     if (isRequester) {
-      
+
       // We might want more specific information than the reason for message alone
-      String context = eventData.messageInfo.reasonForMessage + eventData.statusInfo.status
+
+      String context = eventData.messageInfo.reasonForMessage
+      if (eventData.messageInfo.reasonForMessage != 'Notification') {
+        context = eventData.messageInfo.reasonForMessage + eventData.statusInfo.status
+      }
 
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))

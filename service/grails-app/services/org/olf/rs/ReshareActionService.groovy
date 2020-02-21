@@ -139,92 +139,21 @@ public class ReshareActionService {
     String message_sender_symbol = "unassigned_message_sender_symbol";
     String peer_symbol = "unassigned_peer_symbol"
 
+
+    def send_result
     // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
     if (pr.isRequester == true) {
-      message_sender_symbol = pr.requestingInstitutionSymbol;
-      Long rotaPosition = pr.rotaPosition;
-      
-      // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
-      if (pr.rota.isEmpty()) {
-        log.error("sendMessage has been given an empty rota")
-        return false;
-      }
-
-      if (rotaPosition == null) {
-        log.error("sendMessage could not find current rota postition")
-        return false;
-      } else if (pr.rota.empty()) {
-        log.error("sendMessage has been handed an empty rota")
-        return false;
-      }
-
-      log.debug("ROTA TYPE: ${pr.rota.getClass()}")
-      PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
-      log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
-
-      peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
-
-      eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
-
-      eventData.header = [
-        supplyingAgencyId: [
-          agencyIdType:peer_symbol.split(":")[0],
-          agencyIdValue:peer_symbol.split(":")[1],
-        ],
-        requestingAgencyId:[
-          agencyIdType:message_sender_symbol.split(":")[0],
-          agencyIdValue:message_sender_symbol.split(":")[1],
-        ],
-        requestingAgencyRequestId:pr.hrid ?: pr.id,
-        supplyingAgencyRequestId:pr.peerRequestIdentifier,
-      ]
-
-      eventData.activeSection = [action:"Notification", note:actionParams.note]
+      result = reshareApplicationEventHandlerService.sendRequestingAgencyMessage(pr, "Notification", actionParams.note)
 
     } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
     else {
-      message_sender_symbol = pr.supplyingInstitutionSymbol;
-      peer_symbol = pr.requestingInstitutionSymbol;
-
-      eventData.messageType = 'SUPPLYING_AGENCY_MESSAGE'
-
-      eventData.header = [
-        supplyingAgencyId: [
-          agencyIdType:message_sender_symbol.split(":")[0],
-          agencyIdValue:message_sender_symbol.split(":")[1],
-        ],
-        requestingAgencyId:[
-          agencyIdType:peer_symbol.split(":")[0],
-          agencyIdValue:peer_symbol.split(":")[1],
-        ],
-        requestingAgencyRequestId:pr.peerRequestIdentifier,
-        supplyingAgencyRequestId:pr.id,
-      ]
-
-      eventData.messageInfo = [reasonForMessage:"Notification", note:actionParams.note]
-
+      result = reshareApplicationEventHandlerService.sendSupplyingAgencyMessage(pr, "Notification", null, null, actionParams.note)
     }
 
-    def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
-    
-    def outboundMessage = new PatronRequestNotification()
-    outboundMessage.setPatronRequest(pr)
-    outboundMessage.setTimestamp(Instant.now())
-    outboundMessage.setMessageSender(resolveCombinedSymbol(message_sender_symbol))
-    outboundMessage.setMessageReceiver(resolveCombinedSymbol(peer_symbol))
-    outboundMessage.setIsSender(true)
-    outboundMessage.setAttachedAction('Notification')
-    outboundMessage.setMessageContent(actionParams.note)
-
-    log.debug("Outbound Message: ${outboundMessage.messageContent}")
-    outboundMessage.save(flush:true, failOnError:true)
-
-    if ( send_result.status=='SENT') {
-      result = true;
+    if ( result == true) {
+      log.warn("Unable to send protocol notification message");
     }
-    else {
-      log.warn("Unable to send protocol message");
-    }
+
     return result;
   }
 
