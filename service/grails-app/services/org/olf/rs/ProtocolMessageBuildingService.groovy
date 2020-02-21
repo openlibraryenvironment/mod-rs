@@ -139,17 +139,20 @@ class ProtocolMessageBuildingService {
   }
 
 
-  public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender_symbol, String peer_symbol, String action, String note = null) {
+  public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note = null) {
     Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
+
+    Symbol message_sender_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender)
+    Symbol peer_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(peer)
 
     message.header = [
       supplyingAgencyId: [
-        agencyIdType:peer_symbol.split(":")[0],
-        agencyIdValue:peer_symbol.split(":")[1],
+        agencyIdType:peer_symbol?.authority?.symbol,
+        agencyIdValue:peer_symbol?.symbol,
       ],
       requestingAgencyId:[
-        agencyIdType:message_sender_symbol.split(":")[0],
-        agencyIdValue:message_sender_symbol.split(":")[1],
+        agencyIdType:message_sender_symbol?.authority?.symbol,
+        agencyIdValue:message_sender_symbol?.symbol,
       ],
       requestingAgencyRequestId:pr.hrid ?: pr.id,
       supplyingAgencyRequestId:pr.peerRequestIdentifier,
@@ -165,15 +168,27 @@ class ProtocolMessageBuildingService {
         pr,
         note,
         action,
-        reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender_symbol),
-        reshareApplicationEventHandlerService.resolveCombinedSymbol(peer_symbol),
+        message_sender_symbol,
+        peer_symbol,
         true
       )
     }
-    
     return message
   }
 
-
+/* private Map buildHeader(PatronRequest pr, boolean isRequester) {
+  Map header = [
+    supplyingAgencyId: [
+      agencyIdType:peer_symbol.split(":")[0],
+      agencyIdValue:peer_symbol.split(":")[1],
+    ],
+    requestingAgencyId:[
+      agencyIdType:message_sender_symbol.split(":")[0],
+      agencyIdValue:message_sender_symbol.split(":")[1],
+    ],
+    requestingAgencyRequestId:pr.hrid ?: pr.id,
+    supplyingAgencyRequestId:pr.peerRequestIdentifier,
+  ]
+} */
 
 }
