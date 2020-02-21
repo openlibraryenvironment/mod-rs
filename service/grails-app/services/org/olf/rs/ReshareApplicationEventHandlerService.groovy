@@ -899,40 +899,7 @@ public class ReshareApplicationEventHandlerService {
     if ( ( pr.resolvedSupplier != null ) && 
          ( pr.resolvedRequester != null ) ) {
 
-      Map unfilled_message_request = [
-          messageType:'SUPPLYING_AGENCY_MESSAGE',
-          header:[
-            supplyingAgencyId:[
-              agencyIdType:pr.resolvedSupplier?.authority?.symbol,
-              agencyIdValue:pr.resolvedSupplier?.symbol,
-            ],
-            requestingAgencyId:[
-              agencyIdType:pr.resolvedRequester?.authority?.symbol,
-              agencyIdValue:pr.resolvedRequester?.symbol,
-            ],
-            requestingAgencyRequestId:pr.peerRequestIdentifier,
-            supplyingAgencyRequestId:pr.id
-          ],
-          messageInfo:[
-            reasonForMessage:reason_for_message,
-            note: note
-          ],
-          statusInfo:[
-            status:status
-          ]
-      ]
-
-
-
-      if ( reasonUnfilled ) {
-        unfilled_message_request.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
-      }
-
-      // Whenever a note is attached to the message, create a notification with action.
-      if (note != null) {
-        def context = reason_for_message + status
-        outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
-      }
+      Map unfilled_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, reasonUnfilled, note)
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${unfilled_message_request})");
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
@@ -1081,7 +1048,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
+  public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
 
     inboundMessage.setPatronRequest(pr)
@@ -1108,7 +1075,7 @@ public class ReshareApplicationEventHandlerService {
   }
 
 
-  private void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+  public void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)

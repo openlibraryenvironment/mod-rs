@@ -21,7 +21,7 @@ class ProtocolMessageBuildingService {
 
 
 
-  def buildSkeletonMessage(String messageType) {
+  public Map buildSkeletonMessage(String messageType) {
     Map message = [
       messageType: messageType,
       header:[
@@ -34,7 +34,7 @@ class ProtocolMessageBuildingService {
   }
 
 
-  def buildRequestMessage(PatronRequest req) {
+  public Map buildRequestMessage(PatronRequest req) {
     Map message = buildSkeletonMessage('REQUEST')
 
     //message.header.supplyingAgencyId is filled out later by sendToNextLender
@@ -98,4 +98,46 @@ class ProtocolMessageBuildingService {
     ]
     return message;
   }
+
+  public Map buildSupplyingAgencyMessage(PatronRequest pr, 
+                                         String reason_for_message,
+                                         String status, 
+                                         String reasonUnfilled = null,
+                                         String note = null) {
+    Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
+    message.header = [
+      supplyingAgencyId:[
+        agencyIdType:pr.resolvedSupplier?.authority?.symbol,
+        agencyIdValue:pr.resolvedSupplier?.symbol,
+      ],
+      requestingAgencyId:[
+        agencyIdType:pr.resolvedRequester?.authority?.symbol,
+        agencyIdValue:pr.resolvedRequester?.symbol,
+      ],
+      requestingAgencyRequestId:pr.peerRequestIdentifier,
+      supplyingAgencyRequestId:pr.id
+    ]
+    message.messageInfo = [
+      reasonForMessage:reason_for_message,
+      note: note
+    ]
+    message.statusInfo = [
+      status:status
+    ]
+
+    if ( reasonUnfilled ) {
+      message.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
+    }
+
+    // Whenever a note is attached to the message, create a notification with action.
+    if (note != null) {
+      def context = reason_for_message + status
+      reshareApplicationEventHandlerService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
+    }
+
+    return message
+  }
+
+
+
 }
