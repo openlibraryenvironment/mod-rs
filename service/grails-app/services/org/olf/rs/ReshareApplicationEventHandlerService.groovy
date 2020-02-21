@@ -452,8 +452,10 @@ public class ReshareApplicationEventHandlerService {
 
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
+      
       //TODO refdata lookup here?
-      pr.serviceType = serviceInfo.serviceType
+      //TODO this is clearly broken --- fix monday
+      pr.serviceType = RefDataValue.lookup(serviceInfo.serviceType)
       pr.neededBy = serviceInfo.needBeforeDate
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
