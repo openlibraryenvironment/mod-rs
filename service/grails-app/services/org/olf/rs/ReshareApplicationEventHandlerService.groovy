@@ -931,12 +931,14 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+    
+    Long rotaPosition = pr.rotaPosition;
     // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
     if (pr.rota.isEmpty()) {
       log.error("sendRequestingAgencyMessage has been given an empty rota")
       return;
     }
-    if (pr.rotaPosition == null) {
+    if (rotaPosition == null) {
       log.error("sendRequestingAgencyMessage could not find current rota postition")
       return;
     } else if (pr.rota.empty()) {

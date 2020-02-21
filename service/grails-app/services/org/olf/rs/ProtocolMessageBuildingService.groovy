@@ -139,7 +139,7 @@ class ProtocolMessageBuildingService {
   }
 
 
-  public Map buildRequestingAgencyMessage(PatronRequest pr, Symbol message_sender_symbol, Symbol peer_symbol, String action, String note = null) {
+  public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender_symbol, String peer_symbol, String action, String note = null) {
     Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
     message.header = [
@@ -170,8 +170,8 @@ class ProtocolMessageBuildingService {
         true
       )
     }
-
-
+    
+    return message
   }
 
 
