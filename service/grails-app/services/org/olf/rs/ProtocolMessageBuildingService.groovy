@@ -18,8 +18,7 @@ class ProtocolMessageBuildingService {
 
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
-
-
+  ReshareActionService reshareActionService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -122,7 +121,7 @@ class ProtocolMessageBuildingService {
         context = reason_for_message + status
       }
   
-      reshareApplicationEventHandlerService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
+      reshareActionService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
     return message
@@ -143,7 +142,7 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
-      reshareApplicationEventHandlerService.outgoingNotificationEntry(
+      reshareActionService.outgoingNotificationEntry(
         pr,
         note,
         action,

@@ -1072,23 +1072,4 @@ public class ReshareApplicationEventHandlerService {
     pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
   }
-
-
-  public void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
-
-    def outboundMessage = new PatronRequestNotification()
-    outboundMessage.setPatronRequest(pr)
-    outboundMessage.setTimestamp(Instant.now())
-    outboundMessage.setMessageSender(message_sender)
-    outboundMessage.setMessageReceiver(message_receiver)
-    outboundMessage.setIsSender(true)
-
-    outboundMessage.setAttachedAction(action)
-
-    outboundMessage.setMessageContent(note)
-    
-    log.debug("Outbound Message: ${outboundMessage.messageContent}")
-    pr.addToNotifications(outboundMessage)
-    //outboundMessage.save(flush:true, failOnError:true)
-  }
 }
