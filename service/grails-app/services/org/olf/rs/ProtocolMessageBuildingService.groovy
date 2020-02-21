@@ -118,7 +118,7 @@ class ProtocolMessageBuildingService {
     if (note != null) {
       def context = reason_for_message
       
-      if (reason_for_message !== 'Notification') {
+      if (reason_for_message != 'Notification') {
         context = reason_for_message + status
       }
   
