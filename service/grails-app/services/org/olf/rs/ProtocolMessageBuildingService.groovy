@@ -37,13 +37,8 @@ class ProtocolMessageBuildingService {
   public Map buildRequestMessage(PatronRequest req) {
     Map message = buildSkeletonMessage('REQUEST')
 
-    //message.header.supplyingAgencyId is filled out later by sendToNextLender
-    message.header.requestingAgencyId = [
-      agencyIdType:req.resolvedRequester?.authority?.symbol,
-      agencyIdValue:req.resolvedRequester?.symbol
-    ]
-    message.header.requestingAgencyRequestId = req.hrid ?: req.id
-    message.header.supplyingAgencyRequestId = null
+    message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
+
     message.bibliographicInfo = [
       publicationType: req.publicationType?.value,
       title: req.title,
@@ -105,18 +100,8 @@ class ProtocolMessageBuildingService {
                                          String reasonUnfilled = null,
                                          String note = null) {
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
-    message.header = [
-      supplyingAgencyId:[
-        agencyIdType:pr.resolvedSupplier?.authority?.symbol,
-        agencyIdValue:pr.resolvedSupplier?.symbol,
-      ],
-      requestingAgencyId:[
-        agencyIdType:pr.resolvedRequester?.authority?.symbol,
-        agencyIdValue:pr.resolvedRequester?.symbol,
-      ],
-      requestingAgencyRequestId:pr.peerRequestIdentifier,
-      supplyingAgencyRequestId:pr.id
-    ]
+
+    message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
     message.messageInfo = [
       reasonForMessage:reason_for_message,
       note: note
@@ -145,18 +130,7 @@ class ProtocolMessageBuildingService {
     Symbol message_sender_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender)
     Symbol peer_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(peer)
 
-    message.header = [
-      supplyingAgencyId: [
-        agencyIdType:peer_symbol?.authority?.symbol,
-        agencyIdValue:peer_symbol?.symbol,
-      ],
-      requestingAgencyId:[
-        agencyIdType:message_sender_symbol?.authority?.symbol,
-        agencyIdValue:message_sender_symbol?.symbol,
-      ],
-      requestingAgencyRequestId:pr.hrid ?: pr.id,
-      supplyingAgencyRequestId:pr.peerRequestIdentifier,
-    ]
+    message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
     message.activeSection = [
       action: action,
       note: note
@@ -176,19 +150,62 @@ class ProtocolMessageBuildingService {
     return message
   }
 
-/* private Map buildHeader(PatronRequest pr, boolean isRequester) {
-  Map header = [
-    supplyingAgencyId: [
-      agencyIdType:peer_symbol.split(":")[0],
-      agencyIdValue:peer_symbol.split(":")[1],
-    ],
-    requestingAgencyId:[
-      agencyIdType:message_sender_symbol.split(":")[0],
-      agencyIdValue:message_sender_symbol.split(":")[1],
-    ],
-    requestingAgencyRequestId:pr.hrid ?: pr.id,
-    supplyingAgencyRequestId:pr.peerRequestIdentifier,
-  ]
-} */
+  private Map buildHeader(PatronRequest pr, String messageType, Symbol message_sender_symbol, Symbol peer_symbol) {
+    Map supplyingAgencyId
+    Map requestingAgencyId
+    String requestingAgencyRequestId
+    String supplyingAgencyRequestId
+
+    
+    if (messageType == 'REQUEST' || messageType == 'REQUESTING_AGENCY_MESSAGE') {
+
+      // Set the requestingAgencyId and the requestingAgencyRequestId
+      requestingAgencyId = buildHeaderRequestingAgencyId(message_sender_symbol)
+      requestingAgencyRequestId = pr.hrid ?: pr.id
+
+      if (messageType == 'REQUEST') {
+        // If this message is a request then the supplying Agency details get filled out later and the supplying request id is null
+        supplyingAgencyRequestId = null
+      } else {
+        supplyingAgencyId = buildHeaderSupplyingAgencyId(peer_symbol)
+        supplyingAgencyRequestId = pr.peerRequestIdentifier
+      }
+
+    } else {
+      // Set the AgencyIds
+      supplyingAgencyId = buildHeaderSupplyingAgencyId(message_sender_symbol)
+      requestingAgencyId = buildHeaderRequestingAgencyId(peer_symbol)
+
+      // Set the RequestIds
+      requestingAgencyRequestId = pr.peerRequestIdentifier
+      supplyingAgencyRequestId = pr.id
+    }
+
+    Map header = [
+      supplyingAgencyId: supplyingAgencyId,
+      requestingAgencyId: requestingAgencyId,
+
+      requestingAgencyRequestId:requestingAgencyRequestId,
+      supplyingAgencyRequestId:supplyingAgencyRequestId
+    ]
+
+    return header;
+  }
+
+  private Map buildHeaderSupplyingAgencyId(Symbol supplier) {
+    Map supplyingAgencyId = [
+      agencyIdType: supplier?.authority?.symbol,
+      agencyIdValue: supplier?.symbol
+    ]
+    return supplyingAgencyId;
+  }
+
+  private Map buildHeaderRequestingAgencyId(Symbol requester) {
+    Map requestingAgencyId = [
+      agencyIdType: requester?.authority?.symbol,
+      agencyIdValue: requester?.symbol
+    ]
+    return requestingAgencyId;
+  }
 
 }

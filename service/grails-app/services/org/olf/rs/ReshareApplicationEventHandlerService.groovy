@@ -1030,9 +1030,13 @@ public class ReshareApplicationEventHandlerService {
     // This line should grab timestamp from message rather than current time.
     inboundMessage.setTimestamp(ZonedDateTime.parse(eventData.header.timestamp).toInstant())
     if (isRequester) {
+      
+      // We might want more specific information than the reason for message alone
+      String context = eventData.messageInfo.reasonForMessage + eventData.statusInfo.status
+
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-      inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
+      inboundMessage.setAttachedAction(context)
       inboundMessage.setMessageContent(eventData.messageInfo.note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
