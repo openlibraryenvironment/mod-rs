@@ -133,8 +133,8 @@ class ProtocolMessageBuildingService {
       patronId: req.patronIdentifier,
       surname: req.patronSurname,
       givenName: req.patronGivenName,
-      patronType: req.patronType,
 
+      patronType: req.patronType,
       //TODO what is this field: patronReference?
       patronReference: req.patronReference,
       /* Also permitted:

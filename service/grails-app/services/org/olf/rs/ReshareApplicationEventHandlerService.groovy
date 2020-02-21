@@ -450,6 +450,12 @@ public class ReshareApplicationEventHandlerService {
       pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
       pr.placeOfPublication = publicationInfo.placeOfPublication
 
+      // Add service information to Patron Request
+      Map serviceInfo = eventData.serviceInfo
+      //TODO refdata lookup here?
+      pr.serviceType = serviceInfo.serviceType
+      pr.neededBy: serviceInfo.needBeforeDate
+
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
       if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
         if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {
@@ -458,6 +464,14 @@ public class ReshareApplicationEventHandlerService {
           pr.pickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
         }
       }
+
+      // Add patron information to Patron Request
+      Map patronInfo = eventData.patronInfo
+      pr.patronIdentifier = patronInfo.patronId
+      pr.patronSurname = patroninfo.surname
+      pr.patronGivenName = patronInfo.givenName
+      pr.patronType = patronInfo.patronType
+      pr.patronReference = patronInfo.patronReference
 
       pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
       pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
