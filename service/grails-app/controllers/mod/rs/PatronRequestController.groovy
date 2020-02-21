@@ -61,7 +61,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  reshareApplicationEventHandlerService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
+                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
                 }
                 else {
                   response.status = 400;
@@ -76,7 +76,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams.reason, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams.reason, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
@@ -85,7 +85,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierMarkShipped':
-              reshareApplicationEventHandlerService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     patron_request.state,
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
@@ -106,7 +106,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
               break;
             case 'requesterReceived':
-              reshareApplicationEventHandlerService.sendRequesterReceived(patron_request, request.JSON.actionParams);
+              reshareActionService.sendRequesterReceived(patron_request, request.JSON.actionParams);
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED');
               break;
             case 'requesterManualCheckIn':
@@ -116,7 +116,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING');
               break;
             case 'shippedReturn':
-              reshareApplicationEventHandlerService.sendRequesterShippedReturn(patron_request, request.JSON.actionParams)
+              reshareActionService.sendRequesterShippedReturn(patron_request, request.JSON.actionParams)
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER');
               break;
             default:
