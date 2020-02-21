@@ -930,22 +930,13 @@ public class ReshareApplicationEventHandlerService {
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
   }
 
-  /**
-   * ToDo: Fill out.
-   */
   public void sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
-    Map eventData = [header:[]];
-
-    eventData.messageType = 'REQUESTING_AGENCY_MESSAGE';
-    String message_sender_symbol = pr.requestingInstitutionSymbol;
-    Long rotaPosition = pr.rotaPosition;
-      
     // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
     if (pr.rota.isEmpty()) {
       log.error("sendRequestingAgencyMessage has been given an empty rota")
       return;
     }
-    if (rotaPosition == null) {
+    if (pr.rotaPosition == null) {
       log.error("sendRequestingAgencyMessage could not find current rota postition")
       return;
     } else if (pr.rota.empty()) {
@@ -953,35 +944,9 @@ public class ReshareApplicationEventHandlerService {
       return;
     }
 
-    log.debug("ROTA TYPE: ${pr.rota.getClass()}")
-    PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
-    log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
-    String peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
-
-    eventData.header = [
-      supplyingAgencyId: [
-        agencyIdType:peer_symbol.split(":")[0],
-        agencyIdValue:peer_symbol.split(":")[1],
-      ],
-      requestingAgencyId:[
-        agencyIdType:message_sender_symbol.split(":")[0],
-        agencyIdValue:message_sender_symbol.split(":")[1],
-      ],
-      requestingAgencyRequestId:pr.hrid ?: pr.id,
-      supplyingAgencyRequestId:pr.peerRequestIdentifier,
-    ]
-    eventData.activeSection = [
-      action: action,
-      note: note
-    ]
-
-    // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
-      outgoingNotificationEntry(pr, note, action, resolveCombinedSymbol(message_sender_symbol), resolveCombinedSymbol(peer_symbol), true)
-    }
+    Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, action, note)
 
     def send_result = protocolMessageService.sendProtocolMessage(message_sender_symbol, peer_symbol, eventData);
-
   }
 
   public Symbol resolveSymbol(String authorty, String symbol) {

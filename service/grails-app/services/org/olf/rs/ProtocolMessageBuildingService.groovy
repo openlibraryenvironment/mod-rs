@@ -139,5 +139,42 @@ class ProtocolMessageBuildingService {
   }
 
 
+  public Map buildRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+    Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
+
+    String message_sender_symbol = pr.requestingInstitutionSymbol;
+    Long rotaPosition = pr.rotaPosition;
+
+    log.debug("ROTA TYPE: ${pr.rota.getClass()}")
+    PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
+    log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
+    String peer_symbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}"
+
+    message.header = [
+      supplyingAgencyId: [
+        agencyIdType:peer_symbol.split(":")[0],
+        agencyIdValue:peer_symbol.split(":")[1],
+      ],
+      requestingAgencyId:[
+        agencyIdType:message_sender_symbol.split(":")[0],
+        agencyIdValue:message_sender_symbol.split(":")[1],
+      ],
+      requestingAgencyRequestId:pr.hrid ?: pr.id,
+      supplyingAgencyRequestId:pr.peerRequestIdentifier,
+    ]
+    message.activeSection = [
+      action: action,
+      note: note
+    ]
+
+    // Whenever a note is attached to the message, create a notification with action.
+    if (note != null) {
+      reshareApplicationEventHandlerService.outgoingNotificationEntry(pr, note, action, resolveCombinedSymbol(message_sender_symbol), resolveCombinedSymbol(peer_symbol), true)
+    }
+
+
+  }
+
+
 
 }
