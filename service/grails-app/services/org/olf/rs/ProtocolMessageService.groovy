@@ -389,8 +389,6 @@ and sa.service.businessFunction.value=:ill
   void makeBibliographicInfo(def del, eventData) {
     exec(del) {
       bibliographicInfo {
-        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
-        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
         title(eventData.bibliographicInfo.title)
         subtitle(eventData.bibliographicInfo.subtitle)
         author(eventData.bibliographicInfo.author)
@@ -412,17 +410,18 @@ and sa.service.businessFunction.value=:ill
         artnum(eventData.bibliographicInfo.artnum)
         ssn(eventData.bibliographicInfo.ssn)
         quarter(eventData.bibliographicInfo.quarter)
-        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
         titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
         authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
-        patronIdentifier(eventData.bibliographicInfo.patronIdentifier)
-        patronReference(eventData.bibliographicInfo.patronReference)
-        patronSurname(eventData.bibliographicInfo.patronSurname)
-        patronGivenName(eventData.bibliographicInfo.patronGivenName)
-        patronType(eventData.bibliographicInfo.patronType)
+
+        // Pretty sure this shouldn't be here
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
+        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
+        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
+
+        // Should this be here?
         patronNote(eventData.bibliographicInfo.patronNote)
       }
     }
