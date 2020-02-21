@@ -263,12 +263,31 @@ and sa.service.businessFunction.value=:ill
         } else {
           log.warn("No bibliographicInfo found")
         }
+
+        log.debug("This is a requesting message, so needs PublicationInfo")
+        if (eventData.publicationInfo != null) {
+          makePublicationInfo(delegate, eventData)
+        } else {
+          log.warn("No publicationInfo found")
+        }
+
+        //TODO Wire in proper serviceInfo here
         serviceInfo {
           serviceType('Loan')
           serviceLevel('Loan')
           //needBeforeDate('2014-05-01T00:00:00.0Z')
           anyEdition('Y')
         }
+        /* log.debug("This is a requesting message, so needs ServiceInfo")
+        if (eventData.serviceInfo != null) {
+          makeServiceInfo(delegate, eventData)
+        } else {
+          log.warn("No serviceInfo found")
+        } */
+
+        //TODO Wire in supplierInfo here
+
+        //TODO Put this logic into a maker method like the others
         requestedDeliveryInfo {
           address {
             if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
@@ -284,6 +303,17 @@ and sa.service.businessFunction.value=:ill
             }
           }
         }
+
+        //TODO Wire in requestingAgencyInfo here
+
+        log.debug("This is a requesting message, so needs PatronInfo")
+        if (eventData.patronInfo != null) {
+          makePatronInfo(delegate, eventData)
+        } else {
+          log.warn("No patronInfo found")
+        }
+
+        //TODO Wire in billingInfo here
       }
     }
   }
@@ -364,16 +394,11 @@ and sa.service.businessFunction.value=:ill
         title(eventData.bibliographicInfo.title)
         subtitle(eventData.bibliographicInfo.subtitle)
         author(eventData.bibliographicInfo.author)
-        publicationType(eventData.bibliographicInfo.publicationType)
         sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
-        publisher(eventData.bibliographicInfo.publisher)
-        placeOfPublication(eventData.bibliographicInfo.placeOfPublication)
         volume(eventData.bibliographicInfo.volume)
         issue(eventData.bibliographicInfo.issue)
         startPage(eventData.bibliographicInfo.startPage)
         numberOfPages(eventData.bibliographicInfo.numberOfPages)
-        publicationDate(eventData.bibliographicInfo.publicationDate)
-        publicationDateOfComponent(eventData.bibliographicInfo.publicationDateOfComponent)
         edition(eventData.bibliographicInfo.edition)
         issn(eventData.bibliographicInfo.issn)
         isbn(eventData.bibliographicInfo.isbn)
@@ -397,10 +422,41 @@ and sa.service.businessFunction.value=:ill
         patronSurname(eventData.bibliographicInfo.patronSurname)
         patronGivenName(eventData.bibliographicInfo.patronGivenName)
         patronType(eventData.bibliographicInfo.patronType)
-        serviceType(eventData.bibliographicInfo.serviceType)
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        neededBy(eventData.bibliographicInfo.neededBy)
         patronNote(eventData.bibliographicInfo.patronNote)
+      }
+    }
+  }
+
+  void makePublicationInfo(def del, eventData) {
+    exec(del) {
+      publicationInfo {
+        publisher(eventData.publicationInfo.publisher)
+        publicationDate(eventData.publicationInfo.publicationDate)
+        publicationDateOfComponent(eventData.publicationInfo.publicationDateOfComponent)
+        publicationType(eventData.publicationInfo.publicationType)
+        placeOfPublication(eventData.publicationInfo.placeOfPublication)
+      }
+    }
+  }
+
+    void makeServiceInfo(def del, eventData) {
+    exec(del) {
+      serviceInfo {
+        serviceType(eventData.serviceInfo.serviceType)
+        needBeforeDate(eventData.serviceInfo.needBeforeDate)
+      }
+    }
+  }
+
+  void makePatronInfo(def del, eventData) {
+    exec(del) {
+      patronInfo {
+        patronId(eventData.patronInfo.patronId)
+        surname(eventData.patronInfo.surname)
+        givenName(eventData.patronInfo.givenName)
+        patronType(eventData.patronInfo.patronType)
+        patronReference(eventData.patronInfo.patronReference)
       }
     }
   }
