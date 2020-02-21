@@ -32,6 +32,7 @@ public class ReshareApplicationEventHandlerService {
   private static final int MAX_RETRIES = 10;
   
   ProtocolMessageService protocolMessageService
+  ProtocolMessageBuildingService protocolMessageBuildingService
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
   HostLMSService hostLMSService
@@ -305,79 +306,7 @@ public class ReshareApplicationEventHandlerService {
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
-        //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
-        Map request_message_request = [
-          messageType:'REQUEST',
-          header:[
-              // Filled out later
-              // supplyingAgencyId:[
-              //   agencyIdType:,
-              //   agencyIdValue:,
-              // ],
-              requestingAgencyId:[
-                agencyIdType:req.resolvedRequester?.authority?.symbol,
-                agencyIdValue:req.resolvedRequester?.symbol
-              ],
-              // requestingAgencyRequestId:req.id,
-              requestingAgencyRequestId:req.hrid ?: req.id,
-              supplyingAgencyRequestId:null
-          ],
-          bibliographicInfo:[
-            publicationType: req.publicationType?.value,
-            title: req.title,
-            requestingInstitutionSymbol: req.requestingInstitutionSymbol,
-            author: req.author,
-            subtitle: req.subtitle,
-            sponsoringBody: req.sponsoringBody,
-            publisher: req.publisher,
-            placeOfPublication: req.placeOfPublication,
-            volume: req.volume,
-            issue: req.issue,
-            startPage: req.startPage,
-            numberOfPages: req.numberOfPages,
-            publicationDate: req.publicationDate,
-            publicationDateOfComponent: req.publicationDateOfComponent,
-            edition: req.edition,
-            issn: req.issn,
-            isbn: req.isbn,
-            doi: req.doi,
-            coden: req.coden,
-            sici: req.sici,
-            bici: req.bici,
-            eissn: req.eissn,
-            stitle : req.stitle ,
-            part: req.part,
-            artnum: req.artnum,
-            ssn: req.ssn,
-            quarter: req.quarter,
-            systemInstanceIdentifier: req.systemInstanceIdentifier,
-            titleOfComponent: req.titleOfComponent,
-            authorOfComponent: req.authorOfComponent,
-            sponsor: req.sponsor,
-            informationSource: req.informationSource,
-            patronIdentifier: req.patronIdentifier,
-            patronReference: req.patronReference,
-            patronSurname: req.patronSurname,
-            patronGivenName: req.patronGivenName,
-            patronType: req.patronType,
-            neededBy: req.neededBy,
-            patronNote: req.patronNote,
-            serviceType: req.serviceType?.value
-          ],
-          requestedDeliveryInfo:[
-            address:[
-              physicalAddress:[
-                line1:req.pickupLocation,
-                line2:null,
-                locality:null,
-                postalCode:null,
-                region:null,
-                county:null
-              ]
-            ]
-          ]
-        ]
-        //TODO This needs to not be the part building the message, and also not shoving everything into bib info.
+        Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
 
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
@@ -429,7 +358,6 @@ public class ReshareApplicationEventHandlerService {
                   request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
                 }
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
-
 
                 // Probably need a lender_is_valid check here
                 def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
@@ -940,88 +868,6 @@ public class ReshareApplicationEventHandlerService {
 
     return result;
   }
-
-
-  /**
-   *  Send an ILL Request to a possible lender
-   */
-  private Map sendRequest(PatronRequest req, Symbol requester, Symbol responder) {
-    Map send_result = null;
-
-        //TODO - sendRequest called here, make it do stuff - A request to send a protocol level resource sharing request message
-        Map request_message_request = [
-          messageType:'REQUEST',
-          header:[
-              supplyingAgencyId:[
-                agencyIdType:responder?.authority?.symbol,
-                agencyIdValue:responder?.symbol,
-              ],
-              requestingAgencyId:[
-                agencyIdType:requester?.authority?.symbol,
-                agencyIdValue:requester?.symbol,
-              ],
-              requestingAgencyRequestId:req.id,
-              supplyingAgencyRequestId:null
-          ],
-          bibliographicInfo:[
-            publicationType: req.publicationType?.value,
-            title: req.title,
-            requestingInstitutionSymbol: req.requestingInstitutionSymbol,
-            author: req.author,
-            subtitle: req.subtitle,
-            sponsoringBody: req.sponsoringBody,
-            publisher: req.publisher,
-            placeOfPublication: req.placeOfPublication,
-            volume: req.volume,
-            issue: req.issue,
-            startPage: req.startPage,
-            numberOfPages: req.numberOfPages,
-            publicationDate: req.publicationDate,
-            publicationDateOfComponent: req.publicationDateOfComponent,
-            edition: req.edition,
-            issn: req.issn,
-            isbn: req.isbn,
-            doi: req.doi,
-            coden: req.coden,
-            sici: req.sici,
-            bici: req.bici,
-            eissn: req.eissn,
-            stitle : req.stitle ,
-            part: req.part,
-            artnum: req.artnum,
-            ssn: req.ssn,
-            quarter: req.quarter,
-            systemInstanceIdentifier: req.systemInstanceIdentifier,
-            titleOfComponent: req.titleOfComponent,
-            authorOfComponent: req.authorOfComponent,
-            sponsor: req.sponsor,
-            informationSource: req.informationSource,
-            patronIdentifier: req.patronIdentifier,
-            patronReference: req.patronReference,
-            patronSurname: req.patronSurname,
-            patronGivenName: req.patronGivenName,
-            patronType: req.patronType,
-            serviceType: req.serviceType?.value
-          ],
-          requestedDeliveryInfo:[
-            address:[
-              physicalAddress:[
-                line1:req.pickupLocation,
-                line2:null,
-                locality:null,
-                postalCode:null,
-                region:null,
-                county:null
-              ]
-            ]
-          ]
-        ]
-
-    send_result = null; // protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
-
-    return send_result;
-  }
-
 
   public void sendResponse(PatronRequest pr, 
                             String status, 
