@@ -445,15 +445,21 @@ public class ReshareApplicationEventHandlerService {
 
       // Add publisher information to Patron Request
       Map publicationInfo = eventData.publicationInfo
-      pr.publisher = publicationInfo.publisher
+      if (publicationInfo.publisher) {
+        pr.publisher = publicationInfo.publisher
+      }
       if (publicationInfo.publicationType) {
         pr.setPublicationTypeFromString( publicationInfo.publicationType )
       }
-      pr.publicationDate = publicationInfo.publicationDate
-
-      pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
-      pr.placeOfPublication = publicationInfo.placeOfPublication
-
+      if (publicationInfo.publicationDate) {
+        pr.publicationDate = publicationInfo.publicationDate
+      }
+      if (publicationInfo.publicationDateOfComponent) {
+        pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
+      }
+      if (publicationInfo.placeOfPublication) {
+        pr.placeOfPublication = publicationInfo.placeOfPublication
+      }
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
       if (serviceInfo.serviceType) {
@@ -473,7 +479,7 @@ public class ReshareApplicationEventHandlerService {
       // Add patron information to Patron Request
       Map patronInfo = eventData.patronInfo
       pr.patronIdentifier = patronInfo.patronId
-      pr.patronSurname = patroninfo.surname
+      pr.patronSurname = patronInfo.surname
       pr.patronGivenName = patronInfo.givenName
       pr.patronType = patronInfo.patronType
       pr.patronReference = patronInfo.patronReference
