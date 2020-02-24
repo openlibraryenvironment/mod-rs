@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 
 import groovy.sql.Sql
 import com.k_int.web.toolkit.settings.AppSetting
+import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
 
@@ -445,17 +446,19 @@ public class ReshareApplicationEventHandlerService {
       // Add publisher information to Patron Request
       Map publicationInfo = eventData.publicationInfo
       pr.publisher = publicationInfo.publisher
-      pr.publicationType = publicationInfo.publicationType
+      if (publicationInfo.publicationType) {
+        pr.setPublicationTypeFromString( publicationInfo.publicationType )
+      }
       pr.publicationDate = publicationInfo.publicationDate
+
       pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
       pr.placeOfPublication = publicationInfo.placeOfPublication
 
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
-      
-      //TODO refdata lookup here?
-      //TODO this is clearly broken --- fix monday
-      pr.serviceType = RefDataValue.lookup(serviceInfo.serviceType)
+      if (serviceInfo.serviceType) {
+        pr.setServiceTypeFromString( serviceInfo.serviceType )
+      }
       pr.neededBy = serviceInfo.needBeforeDate
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
