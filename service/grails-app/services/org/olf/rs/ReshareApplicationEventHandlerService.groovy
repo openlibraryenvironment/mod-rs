@@ -442,14 +442,14 @@ public class ReshareApplicationEventHandlerService {
       log.debug("*** Create new request***");
       PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
 
-
       // Add publisher information to Patron Request
       Map publicationInfo = eventData.publicationInfo
       if (publicationInfo.publisher) {
         pr.publisher = publicationInfo.publisher
       }
+      pr.publicationType = pr.lookupPublicationType( publicationInfo.publicationType )
       if (publicationInfo.publicationType) {
-        pr.setPublicationTypeFromString( publicationInfo.publicationType )
+        pr.publicationType = pr.lookupPublicationType( publicationInfo.publicationType )
       }
       if (publicationInfo.publicationDate) {
         pr.publicationDate = publicationInfo.publicationDate
@@ -463,7 +463,7 @@ public class ReshareApplicationEventHandlerService {
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
       if (serviceInfo.serviceType) {
-        pr.setServiceTypeFromString( serviceInfo.serviceType )
+        pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
       }
       pr.neededBy = serviceInfo.needBeforeDate
 
