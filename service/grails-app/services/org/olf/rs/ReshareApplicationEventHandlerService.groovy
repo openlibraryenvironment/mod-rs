@@ -465,7 +465,9 @@ public class ReshareApplicationEventHandlerService {
       if (serviceInfo.serviceType) {
         pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
       }
-      pr.neededBy = serviceInfo.needBeforeDate
+      if (serviceInfo.needBeforeDate) {
+        pr.neededBy = serviceInfo.needBeforeDate
+      }
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
       if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
@@ -478,12 +480,22 @@ public class ReshareApplicationEventHandlerService {
 
       // Add patron information to Patron Request
       Map patronInfo = eventData.patronInfo
-      pr.patronIdentifier = patronInfo.patronId
-      pr.patronSurname = patronInfo.surname
-      pr.patronGivenName = patronInfo.givenName
-      pr.patronType = patronInfo.patronType
-      pr.patronReference = patronInfo.patronReference
-
+      if (patronInfo.patronId) {
+        pr.patronIdentifier = patronInfo.patronId
+      }
+      if (patronInfo.surname) {
+        pr.patronSurname = patronInfo.surname
+      }
+      if (patronInfo.givenName) {
+        pr.patronGivenName = patronInfo.givenName
+      }
+      if (patronInfo.patronType) {
+        pr.patronType = patronInfo.patronType
+      }
+      if (patronInfo.patronReference) {
+        pr.patronReference = patronInfo.patronReference
+      }
+      
       pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
       pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
 
