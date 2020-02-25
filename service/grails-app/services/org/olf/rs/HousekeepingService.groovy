@@ -128,7 +128,6 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'itemReturned', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'supplierCheckOutOfReshare', 'M')
 
