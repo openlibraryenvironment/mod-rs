@@ -10,7 +10,25 @@ import grails.converters.JSON
 class StatisticsController {
   
   def index() {
-    def result = [:]
+    def result = [
+      asAt:new Date(),
+      current:[
+        totalLoans:10,
+        totalBorrowing:5,
+        LoanToBorrowScore:2,
+        LoanToBorrowBucket:-2
+      ],
+      statisticsPeriod:'7d',
+      aggregated:[
+        requestsReceived:0,
+        respondWillSupply:0,
+        respondNotSupplied:0,
+        shipped:0,
+        requestsMade:0,
+        requestToSupplyRatio:0.1234
+      ]
+    ]
+
     render result as JSON
   }
   
