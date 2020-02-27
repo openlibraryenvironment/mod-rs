@@ -57,6 +57,10 @@
         {
           "methods": ["POST"],
           "pathPattern": "/rs/iso18626"
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/rs/statistics"
         }
       ]
     },{
