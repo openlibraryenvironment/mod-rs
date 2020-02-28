@@ -9,13 +9,16 @@ import grails.converters.JSON
 @CurrentTenant
 class StatisticsController {
   
+  long totalBorrowing=10
+  long totalLending=5
+
   def index() {
     def result = [
       asAt:new Date(),
       current:[
-        totalLoans:10,
-        totalBorrowing:5,
-        LoanToBorrowScore:2,
+        totalLoans:totalLending,
+        totalBorrowing:totalBorrowing,
+        LoanToBorrowScore:(totalLending+1)/(totalBorrowing+1),
         LoanToBorrowBucket:-2
       ],
       statisticsPeriod:'7d',
