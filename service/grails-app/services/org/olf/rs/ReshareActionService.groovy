@@ -184,6 +184,26 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     return result;
   }
 
+  public boolean markAllMessagesReadStatus(PatronRequest pr, Object actionParams) {
+    log.debug("markAllAsRead(${pr})");
+    boolean result = false;
+
+    if (actionParams.isNull("seenStatus")){
+      return result
+    }
+
+    def messages = pr.notifications
+    messages.each{message -> 
+      if (message.seen != actionParams.seenStatus) {
+        message.setSeen(actionParams.seenStatus)
+      }
+    }
+
+    pr.save(flush:true, failOnError:true)
+    result = true;
+    return result;
+  }
+
   private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
 
     String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;

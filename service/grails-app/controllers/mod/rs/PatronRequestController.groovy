@@ -54,6 +54,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'messageSeen':
               result.status = reshareActionService.changeMessageSeenState(patron_request, request.JSON.actionParams);
               break;
+            case 'messagesAllSeen':
+            result.status = reshareActionService.markAllMessagesReadStatus(patron_request, request.JSON.actionParams);
+            break;
             case 'respondYes':
               if ( request.JSON.actionParams.pickLocation != null ) {
                 ItemLocation location = new ItemLocation( location: request.JSON.actionParams.pickLocation, 
