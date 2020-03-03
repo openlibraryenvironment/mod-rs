@@ -218,8 +218,8 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
 
     def messages = pr.notifications
     messages.each{message -> 
-    // Firstly we only want to be setting messages as read/unread that aren't already
-      if (message.seen != actionParams.seenStatus) {
+    // Firstly we only want to be setting messages as read/unread that aren't already, and that we didn't send
+      if (message.seen != actionParams.seenStatus && !message.isSender) {
         // Next we check if we care about the user defined settings
         if (excluding) {
           // Find the chat_auto_read AppSetting
