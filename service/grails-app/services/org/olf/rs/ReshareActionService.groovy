@@ -187,15 +187,34 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   public boolean markAllMessagesReadStatus(PatronRequest pr, Object actionParams) {
     log.debug("markAllAsRead(${pr})");
     boolean result = false;
-
+    String excluding;
     if (actionParams.isNull("seenStatus")){
       return result
     }
 
+    if (actionParams.excludes) {
+      excluding = actionParams.excludes;
+    }
+
     def messages = pr.notifications
     messages.each{message -> 
+    // Firstly we only want to be setting messages as read/unread that aren't already
       if (message.seen != actionParams.seenStatus) {
-        message.setSeen(actionParams.seenStatus)
+        // Next we check if there are any exceptions to consider
+        if (excluding) {
+          switch(excluding) {
+            case "action":
+              if (message.attachedAction == "Notification") {
+                message.setSeen(actionParams.seenStatus)
+              }
+              break;
+            default:
+              message.setSeen(actionParams.seenStatus)
+              break;
+          }
+        } else {
+          message.setSeen(actionParams.seenStatus)
+        }
       }
     }
 
