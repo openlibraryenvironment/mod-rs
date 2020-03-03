@@ -122,6 +122,17 @@ try {
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
+  RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
+  RefdataValue.lookupOrCreate('ChatAutoRead', 'On');
+  RefdataValue.lookupOrCreate('ChatAutoRead', 'On (excluding action messages)');
+
+  AppSetting chat_auto_read = AppSetting.findByKey('chat_auto_read') ?: new AppSetting( 
+                                  section:'chat',
+                                  settingType:'Refdata',
+                                  vocab:'ChatAutoRead',
+                                  key: 'chat_auto_read',
+                                  defValue: 'on').save(flush:true, failOnError: true);
+
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
   def cp_demoprop = ensureTextProperty('demoCustprop', false);

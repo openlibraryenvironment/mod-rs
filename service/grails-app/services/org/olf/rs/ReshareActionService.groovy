@@ -13,6 +13,7 @@ import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
+import com.k_int.web.toolkit.settings.AppSetting;
 
 
 /**
@@ -184,18 +185,61 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     return result;
   }
 
-  public boolean markAllMessagesReadStatus(PatronRequest pr, Object actionParams) {
+  private void markAsReadLogic(PatronRequestNotification message, String valueKey, boolean seenStatus) {
+    switch (valueKey) {
+      case 'on':
+        message.setSeen(seenStatus)
+        break;
+      case 'on_(excluding_action_messages)':
+        if (message.attachedAction == 'Notification') {
+          message.setSeen(seenStatus)
+        }
+        break;
+      case 'off':
+        log.debug("chat setting off")
+        break;
+      default:
+        // This shouldn't ever be reached
+        log.error("Something went wrong determining auto mark as read setting")
+    }
+  }
+
+  public boolean markAllMessagesReadStatus(PatronRequest pr, Object actionParams = {}) {
     log.debug("markAllAsRead(${pr})");
     boolean result = false;
-
+    boolean excluding = false;
     if (actionParams.isNull("seenStatus")){
       return result
     }
 
+    if (actionParams.excludes) {
+      excluding = actionParams.excludes;
+    }
+
     def messages = pr.notifications
     messages.each{message -> 
+    // Firstly we only want to be setting messages as read/unread that aren't already
       if (message.seen != actionParams.seenStatus) {
-        message.setSeen(actionParams.seenStatus)
+        // Next we check if we care about the user defined settings
+        if (excluding) {
+          // Find the chat_auto_read AppSetting
+          AppSetting chat_auto_read = AppSetting.findByKey('chat_auto_read')?: null;
+
+          // If the setting does not exist then assume we want to mark all as read
+          if (!chat_auto_read) {
+            log.warn("Couldn't find chat auto mark as read setting, assuming needs to mark all as read")
+            message.setSeen(actionParams.seenStatus)
+          } else {
+            if (chat_auto_read.value) {
+              markAsReadLogic(message, chat_auto_read.value, actionParams.seenStatus)
+            } else {
+              markAsReadLogic(message, chat_auto_read.defValue, actionParams.seenStatus)
+            }
+          }
+        } else {
+          // Sometimes we want to just mark all as read without caring about the user defined setting
+          message.setSeen(actionParams.seenStatus)
+        }
       }
     }
 
