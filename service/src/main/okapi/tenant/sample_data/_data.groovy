@@ -133,6 +133,13 @@ try {
                                   key: 'chat_auto_read',
                                   defValue: 'on').save(flush:true, failOnError: true);
 
+
+  RefdataValue.lookupOrCreate('loanConditions', 'LibraryUseOnly');
+  RefdataValue.lookupOrCreate('loanConditions', 'NoReproduction');
+  RefdataValue.lookupOrCreate('loanConditions', 'SignatureRequired');
+  RefdataValue.lookupOrCreate('loanConditions', 'SpecCollSupervReq');
+  RefdataValue.lookupOrCreate('loanConditions', 'WatchLibraryUseOnly');
+
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
   def cp_demoprop = ensureTextProperty('demoCustprop', false);
