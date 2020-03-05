@@ -570,7 +570,7 @@ public class ReshareApplicationEventHandlerService {
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleSupplyingAgencyMessage(Map eventData) {
-
+    log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
     def result = [:]
 
     /* Occasionally the incoming status is not granular enough, so we deal with it separately in order
@@ -582,8 +582,6 @@ public class ReshareApplicationEventHandlerService {
       log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
       incomingStatus = "Conditional"
     }
-
-    log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
 
     try {
       if ( eventData.header?.requestingAgencyRequestId == null ) {
@@ -634,7 +632,7 @@ public class ReshareApplicationEventHandlerService {
       }
 
       if ( incomingStatus != null ) {
-        handleStatusChange(pr, eventData.statusInfo, eventData.header.supplyingAgencyRequestId);
+        handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
       }
 
       pr.save(flush:true, failOnError:true);
