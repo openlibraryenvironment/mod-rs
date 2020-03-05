@@ -589,37 +589,32 @@ public class ReshareApplicationEventHandlerService {
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
-
-        // First check if the message has a purpose other than Notification
-        if (eventData.messageInfo?.reasonForMessage != 'Notification') {
-
-          // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
-
-            switch ( eventData.messageInfo?.reasonForMessage ) {
-              case 'RequestResponse':
-                break;
-              case 'StatusRequestResponse':
-                break;
-              case 'RenewResponse':
-                break;
-              case 'CancelResponse':
-                break;
-              case 'StatusChange':
-                break;
-                default:
-                result.status = "ERROR"
-                result.errorType = "UnsupportedReasonForMessageType"
-                result.errorValue = eventData.messageInfo.reasonForMessage
-                throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
-              break;
-            }
-        } else {
-          Map messageData = eventData.messageInfo
-          auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
+        
+        // If there is a note, create notification entry
+        if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
           incomingNotificationEntry(pr, eventData, true)
+        }
+
+        switch ( eventData.messageInfo?.reasonForMessage ) {
+          case 'RequestResponse':
+            break;
+          case 'StatusRequestResponse':
+            break;
+          case 'RenewResponse':
+            break;
+          case 'CancelResponse':
+            break;
+          case 'StatusChange':
+            break;
+          case 'Notification':
+            auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedReasonForMessageType"
+            result.errorValue = eventData.messageInfo.reasonForMessage
+            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+          break;
         }
       }
       else {
