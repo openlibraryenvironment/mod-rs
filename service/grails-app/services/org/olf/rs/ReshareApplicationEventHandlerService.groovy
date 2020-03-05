@@ -576,7 +576,7 @@ public class ReshareApplicationEventHandlerService {
     /* Occasionally the incoming status is not granular enough, so we deal with it separately in order
      * to be able to cater to "in-between" statuses, such as Conditional--which actually comes in as "ExpectsToSupply"
     */
-    String incomingStatus = eventData.statusInfo;
+    Map incomingStatus = eventData.statusInfo;
 
     if (eventData?.deliveryInfo?.loanCondition) {
       log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
@@ -770,6 +770,7 @@ public class ReshareApplicationEventHandlerService {
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Conditional':
+          log.debug("Moving to state REQ_CONDITIONAL_ANSWER_RECEIVED")
           def new_state = lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED')
           auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
@@ -998,10 +999,17 @@ public class ReshareApplicationEventHandlerService {
     if (isRequester) {
 
       // We might want more specific information than the reason for message alone
+      // also sometimes the status isn't enough by itself
 
       String context = eventData.messageInfo.reasonForMessage
+      String status = eventData.statusInfo.status
+
+      if (eventData.deliveryInfo?.loanCondition) {
+        status = "Conditional"
+      }
+
       if (eventData.messageInfo.reasonForMessage != 'Notification') {
-        context = eventData.messageInfo.reasonForMessage + eventData.statusInfo.status
+        context = eventData.messageInfo.reasonForMessage + status
       }
 
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
