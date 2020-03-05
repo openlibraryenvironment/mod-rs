@@ -160,32 +160,35 @@ class ProtocolMessageBuildingService {
   public Map buildSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status, 
-                                         String reasonUnfilled = null,
-                                         String note = null) {
+                                         Map messageParams) {
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
     message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
     message.messageInfo = [
       reasonForMessage:reason_for_message,
-      note: note
+      note: messageParams?.note
     ]
     message.statusInfo = [
       status:status
     ]
 
-    if ( reasonUnfilled ) {
-      message.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
+    if ( messageParams.reason ) {
+      message.messageInfo.reasonUnfilled = [ value: messageParams?.reason ]
+    }
+
+    if ( messageParams.loanCondition ) {
+      message.deliveryInfo = [ loanCondition: [value: messageParams?.loanCondition ]]
     }
 
     // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
+    if (messageParams?.note != null) {
       def context = reason_for_message
       
       if (reason_for_message != 'Notification') {
         context = reason_for_message + status
       }
   
-      reshareActionService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
+      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
     return message

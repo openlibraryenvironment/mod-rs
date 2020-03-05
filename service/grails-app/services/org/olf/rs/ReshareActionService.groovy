@@ -149,7 +149,7 @@ public class ReshareActionService {
 
     } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
     else {
-      result = sendSupplyingAgencyMessage(pr, "Notification", null, null, actionParams.note)
+      result = sendSupplyingAgencyMessage(pr, "Notification", null, actionParams)
     }
 
     if ( result == true) {
@@ -358,14 +358,18 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   public void sendResponse(PatronRequest pr, 
                             String status, 
                             Map responseParams) {
-    log.debug("RESPONSE PARAMS ${responseParams}")
-    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams.reason, responseParams.note);
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
   }
 
   public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {
-    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null, note);
+    Map params
+    if (note) {
+      params = [note: note]
+    }
+    
+    sendSupplyingAgencyMessage(pr, 'StatusChange', status, params);
   }
 
   // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
@@ -375,8 +379,7 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status, 
-                                         String reasonUnfilled = null,
-                                         String note = null) {
+                                         Map messageParams) {
 
     log.debug("sendResponse(....)");
     boolean result = false;
@@ -386,7 +389,7 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     if ( ( pr.resolvedSupplier != null ) && 
          ( pr.resolvedRequester != null ) ) {
 
-      Map supplying_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, reasonUnfilled, note)
+      Map supplying_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, messageParams)
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplying_message_request})");
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
