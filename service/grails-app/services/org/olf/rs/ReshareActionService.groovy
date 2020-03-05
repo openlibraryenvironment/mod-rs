@@ -145,7 +145,7 @@ public class ReshareActionService {
     def send_result
     // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
     if (pr.isRequester == true) {
-      result = sendRequestingAgencyMessage(pr, "Notification", actionParams.note)
+      result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
 
     } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
     else {
@@ -304,21 +304,16 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     }
   }
     public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
-
-    // ToDo: understand why sendRequestingAgencyMessage(pr, 'Received', actionParams.note) is not sufficient for both cases?
-    if (!actionParams.isNull("note")) {
-      sendRequestingAgencyMessage(pr, 'Received', actionParams.note);
-    } else {
-      sendRequestingAgencyMessage(pr, 'Received', null);
-    }
+    sendRequestingAgencyMessage(pr, 'Received', actionParams);
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
     log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
-    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
+    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 
-  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
+    String note = messageParams?.note
     boolean result = false;
 
     Long rotaPosition = pr.rotaPosition;
