@@ -124,6 +124,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierConditionalSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
 
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
