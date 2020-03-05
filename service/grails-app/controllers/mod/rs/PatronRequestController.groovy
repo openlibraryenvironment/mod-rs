@@ -64,7 +64,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
+                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams)
                 }
                 else {
                   response.status = 400;
@@ -79,7 +79,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams.reason, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
@@ -87,6 +87,15 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
               patron_request.save(flush:true, failOnError:true);
               break;
+            case 'supplierConditionalSupply':
+              /* reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams.reason, request.JSON.actionParams.note);
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
+                                    'Request manually flagged unable to supply', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
+              patron_request.save(flush:true, failOnError:true);
+              break; */
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 

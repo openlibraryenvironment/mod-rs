@@ -357,9 +357,9 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
 
   public void sendResponse(PatronRequest pr, 
                             String status, 
-                            String reasonUnfilled = null,
-                            String note = null) {
-    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled, note);
+                            Map responseParams) {
+    log.debug("RESPONSE PARAMS ${responseParams}")
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams.reason, responseParams.note);
   }
 
   public void sendStatusChange(PatronRequest pr,
