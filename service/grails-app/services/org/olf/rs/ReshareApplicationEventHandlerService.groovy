@@ -573,6 +573,16 @@ public class ReshareApplicationEventHandlerService {
 
     def result = [:]
 
+    /* Occasionally the incoming status is not granular enough, so we deal with it separately in order
+     * to be able to cater to "in-between" statuses, such as Conditional--which actually comes in as "ExpectsToSupply"
+    */
+    String incomingStatus = eventData.statusInfo;
+
+    if (eventData?.deliveryInfo?.loanCondition) {
+      log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
+      incomingStatus = "Conditional"
+    }
+
     log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
 
     try {
@@ -589,7 +599,7 @@ public class ReshareApplicationEventHandlerService {
 
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
-        
+
         // If there is a note, create notification entry
         if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
           incomingNotificationEntry(pr, eventData, true)
@@ -623,7 +633,7 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("No reason for message");
       }
 
-      if ( eventData.statusInfo != null ) {
+      if ( incomingStatus != null ) {
         handleStatusChange(pr, eventData.statusInfo, eventData.header.supplyingAgencyRequestId);
       }
 
@@ -760,6 +770,12 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
+          break;
+        case 'Conditional':
+          def new_state = lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
           break;
         case 'Loaned':
           def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')

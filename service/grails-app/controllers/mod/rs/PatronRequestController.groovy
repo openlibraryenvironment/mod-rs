@@ -88,14 +88,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierConditionalSupply':
-              /* reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams.reason, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
-                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
-                                    'Request manually flagged unable to supply', null);
-              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
+                                    'Request responded to conditionally', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
               patron_request.save(flush:true, failOnError:true);
-              break; */
+              break;
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
