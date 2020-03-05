@@ -188,13 +188,18 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (messageParams?.note != null) {
-      def context = reason_for_message
-      
-      if (reason_for_message != 'Notification') {
-        context = reason_for_message + noteStatus
+      Map actionMap = [action: reason_for_message]
+
+      if (messageParams.loanCondition) {
+        actionMap.status = "Conditional"
+        actionMap.data = messageParams.loanCondition
+      }
+      if (messageParams.reason) {
+        actionMap.status = "Unfilled"
+        actionMap.data = messageParams.reason
       }
   
-      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
+      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
     return message
@@ -215,10 +220,11 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
+      Map actionMap = [action: action]
       reshareActionService.outgoingNotificationEntry(
         pr,
         note,
-        action,
+        actionMap,
         message_sender_symbol,
         peer_symbol,
         true

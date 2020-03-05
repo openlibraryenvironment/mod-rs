@@ -1001,20 +1001,14 @@ public class ReshareApplicationEventHandlerService {
       // We might want more specific information than the reason for message alone
       // also sometimes the status isn't enough by itself
 
-      String context = eventData.messageInfo.reasonForMessage
-      String status = eventData.statusInfo.status
-
       if (eventData.deliveryInfo?.loanCondition) {
-        status = "Conditional"
+        inboundMessage.setActionStatus("Conditional")
+        inboundMessage.setActionData(eventData.deliveryInfo.loanCondition)
       }
-
-      if (eventData.messageInfo.reasonForMessage != 'Notification') {
-        context = eventData.messageInfo.reasonForMessage + status
-      }
-
+      
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-      inboundMessage.setAttachedAction(context)
+      inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent(eventData.messageInfo.note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))

@@ -405,7 +405,11 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   }
 
   
-  public void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+  public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+
+    String attachedAction = actionMap.action
+    String actionStatus = actionMap.status
+    String actionData = actionMap.data
 
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
@@ -414,7 +418,9 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     outboundMessage.setMessageReceiver(message_receiver)
     outboundMessage.setIsSender(true)
 
-    outboundMessage.setAttachedAction(action)
+    outboundMessage.setAttachedAction(attachedAction)
+    outboundMessage.setActionStatus(actionStatus)
+    outboundMessage.setActionData(actionData)
 
     outboundMessage.setMessageContent(note)
     
