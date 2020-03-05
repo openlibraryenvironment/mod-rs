@@ -580,7 +580,7 @@ public class ReshareApplicationEventHandlerService {
 
     if (eventData?.deliveryInfo?.loanCondition) {
       log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
-      incomingStatus = "Conditional"
+      incomingStatus = [status: "Conditional"]
     }
 
     try {
