@@ -173,11 +173,11 @@ class ProtocolMessageBuildingService {
     ]
 
     if ( messageParams.reason ) {
-      message.messageInfo.reasonUnfilled = [ value: messageParams?.reason ]
+      message.messageInfo.reasonUnfilled = messageParams?.reason
     }
 
     if ( messageParams.loanCondition ) {
-      message.deliveryInfo = [ loanCondition: [value: messageParams?.loanCondition ]]
+      message.deliveryInfo = [ loanCondition: messageParams?.loanCondition ]
     }
 
     // Whenever a note is attached to the message, create a notification with action.
