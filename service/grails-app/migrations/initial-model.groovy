@@ -1463,4 +1463,13 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200305-1648-001") {
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_action_status", type: "VARCHAR(36)");
+        }
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_action_data", type: "VARCHAR(36)");
+        }
+    }
+
 }
