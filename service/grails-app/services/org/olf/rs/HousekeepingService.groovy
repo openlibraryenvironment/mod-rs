@@ -110,7 +110,12 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'message', 'M')
+
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
+
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
@@ -130,7 +135,9 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'supplierCheckOutOfReshare', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'message', 'M')
 
+        AvailableAction.ensure( 'Responder', 'RES_COMPLETE', 'message', 'M')
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
@@ -143,14 +150,23 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
 
+        AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'message', 'M')
+
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'requesterReceived', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'requesterManualCheckIn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'shippedReturn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'message', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
       }
 
     }
