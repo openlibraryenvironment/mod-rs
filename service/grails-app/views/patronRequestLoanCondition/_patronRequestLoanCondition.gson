@@ -1,0 +1,9 @@
+import groovy.transform.*
+import org.olf.rs.PatronRequestLoanCondition
+
+@Field PatronRequestLoanCondition PatronRequestLoanCondition
+json g.render(PatronRequestLoanCondition, [expand: [
+                                            'id',
+                                            'relevantSupplier'
+                                          ],
+                                          excludes: ['patronRequest']])
