@@ -39,6 +39,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
          lastUpdated column : 'prlc_last_updated'
                 code column : 'prlc_code'
                 note column : 'prlc_note'
+       patronRequest column : 'prlc_patron_request_fk'
     relevantSupplier column : 'prlc_relevant_supplier_fk'
   }
 }
