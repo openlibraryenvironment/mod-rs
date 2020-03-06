@@ -29,7 +29,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
     patronRequest (nullable: true)
     code( nullable: true)
     note( nullable: true)
-    messageSender (nullable: true, blank: false)
+    relevantSupplier (nullable: true, blank: false)
   }
 
   static mapping = {
