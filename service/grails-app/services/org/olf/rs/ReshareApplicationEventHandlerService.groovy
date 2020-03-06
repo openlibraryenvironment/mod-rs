@@ -1000,12 +1000,21 @@ public class ReshareApplicationEventHandlerService {
 
       // We might want more specific information than the reason for message alone
       // also sometimes the status isn't enough by itself
+      String status = eventData.statusInfo?.status;
+      if (status) {
+        inboundMessage.setActionStatus(status)
+        
+        if (status == "Unfilled") {
+          inboundMessage.setActionData(eventData.messageInfo.reasonunfilled)
+        }
+      }
 
+      // We overwrite the status information if there are loan conditions
       if (eventData.deliveryInfo?.loanCondition) {
         inboundMessage.setActionStatus("Conditional")
         inboundMessage.setActionData(eventData.deliveryInfo.loanCondition)
       }
-      
+
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
