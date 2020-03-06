@@ -88,13 +88,43 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierConditionalSupply':
-              reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
-              reshareApplicationEventHandlerService.auditEntry(patron_request, 
-                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
-                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
-                                    'Request responded to conditionally', null);
-              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
-              patron_request.save(flush:true, failOnError:true);
+              if ( request.JSON.actionParams.pickLocation != null ) {
+                ItemLocation location = new ItemLocation( location: request.JSON.actionParams.pickLocation, 
+                                                          shelvingLocation: request.JSON.actionParams.pickShelvingLocation,
+                                                          callNumber: request.JSON.actionParams.callnumber)
+
+                if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
+                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
+
+                  if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
+                    // The supplying agency wants to go into a holding state
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
+                                        'Request responded to conditionally, placed in hold state', null);
+                    patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
+                  } else {
+                    // The supplying agency wants to continue with the request
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 
+                                        'Request responded to conditionally, request continuing', null);
+                    patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                  }
+                  
+                  patron_request.save(flush:true, failOnError:true);
+                }
+                else {
+                  response.status = 400;
+                  result.code=-2; // No location specified
+                  result.message='Failed to route request to given location'
+                }
+              }
+              else {
+                response.status = 400;
+                result.code=-1; // No location specified
+                result.message='No pick location specified. Unable to continue'
+              }
               break;
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);

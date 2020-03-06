@@ -129,33 +129,52 @@ public class ReshareActionService {
     boolean result = false;
     // Sending a message does not change the state of a request
 
-
     // If the actionParams does not contain a note then this method should do nothing
-    if (actionParams.isNull("note")) {
-      return false;
+    if (!actionParams.isNull("note")) {
+      Map eventData = [header:[]];
+
+      String message_sender_symbol = "unassigned_message_sender_symbol";
+      String peer_symbol = "unassigned_peer_symbol"
+
+
+      // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
+      if (pr.isRequester == true) {
+        result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
+
+      } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
+      else {
+        result = sendSupplyingAgencyMessage(pr, "Notification", null, actionParams)
+      }
+
+      if ( result == true) {
+        log.warn("Unable to send protocol notification message");
+      }
     }
 
+    return result;
+  }
 
-    Map eventData = [header:[]];
+  public boolean sendLoanConditionResponse(PatronRequest pr, Object actionParams) {
+    /* This method will send a specialised notification message containing some unique human readable key at the beginning
+     * This will indicate an agreement to the loan conditions.
+    */
+    
+    log.debug("actionConditionResponse(${pr})");
+    boolean result = false;
+    String responseKey = "#ReShareLoanConditionResponse#"
 
-    String message_sender_symbol = "unassigned_message_sender_symbol";
-    String peer_symbol = "unassigned_peer_symbol"
-
-
-    def send_result
-    // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
+    if (actionParams.isNull("note")) {
+      actionParams.note = responseKey
+    } else {
+      actionParams.note = "${responseKey} ${actionParams.note}"
+    }
+    
+    // Only the requester should ever be able to send one of these messages, otherwise something has gone wrong.
     if (pr.isRequester == true) {
       result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
-
-    } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
-    else {
-      result = sendSupplyingAgencyMessage(pr, "Notification", null, actionParams)
+    } else {
+      log.warn("The supplying agency should not be able to call sendLoanConditionResponse.");
     }
-
-    if ( result == true) {
-      log.warn("Unable to send protocol notification message");
-    }
-
     return result;
   }
 
