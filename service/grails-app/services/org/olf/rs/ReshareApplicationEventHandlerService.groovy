@@ -710,7 +710,22 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'Notification':
             Map messageData = eventData.activeSection
-            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+
+            /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
+             * then we'll need to check whether or not we need to change state.
+            */
+            if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
+              // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
+              if (pr.state == "RES_PENDING_CONDITIONAL_ANSWER") {
+                def new_state = lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
+                pr.state = new_state;
+              } else {
+                auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, moving request forward", null)
+              }
+            } else {
+              auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+            }
             pr.save(flush: true, failOnError: true)
             break;
           default:
@@ -1003,7 +1018,7 @@ public class ReshareApplicationEventHandlerService {
       String status = eventData.statusInfo?.status;
       if (status) {
         inboundMessage.setActionStatus(status)
-        
+
         if (status == "Unfilled") {
           inboundMessage.setActionData(eventData.messageInfo.reasonunfilled)
         }
