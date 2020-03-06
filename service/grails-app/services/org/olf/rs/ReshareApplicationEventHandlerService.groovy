@@ -578,11 +578,6 @@ public class ReshareApplicationEventHandlerService {
     */
     Map incomingStatus = eventData.statusInfo;
 
-    if (eventData?.deliveryInfo?.loanCondition) {
-      log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
-      incomingStatus = [status: "Conditional"]
-    }
-
     try {
       if ( eventData.header?.requestingAgencyRequestId == null ) {
         result.status = "ERROR"
@@ -595,6 +590,20 @@ public class ReshareApplicationEventHandlerService {
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
+
+      if (eventData?.deliveryInfo?.loanCondition) {
+        log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
+        incomingStatus = [status: "Conditional"]
+
+        // Save the loan condition to the patron request
+        def loanCondition = new PatronRequestLoanCondition()
+        loanCondition.setPatronRequest(pr)
+        loanCondition.setCode(eventData?.deliveryInfo?.loanCondition)
+        if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
+          loanCondition.setNote(eventData.messageInfo.note)
+        }
+        loanCondition.setRelevantSupplier(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      }
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
 
