@@ -1472,4 +1472,22 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200306-1633-001") {
+        createTable(tableName: "patron_request_loan_condition") {
+            column(name: "prlc_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+            column(name: "prlc_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+            column(name: "prlc_date_created", type: "timestamp")
+            column(name: "prlc_last_updated", type: "timestamp")
+            column(name: "prlc_code", type: "VARCHAR(36)")
+            column(name: "prlc_note", type: "text")
+            column(name: "prlc_patron_request_fk", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+        }
+    }
+
 }
