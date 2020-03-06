@@ -10,6 +10,7 @@ json g.render(patronRequest, [expand: ['state',
                                        'tags',
                                        'audit',
                                        'notifications',
+                                       'conditions',
                                        'resolvedRequester',
                                        'resolvedSupplier'
                                        ],
