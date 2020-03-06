@@ -20,6 +20,8 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
 
   String note
 
+  Symbol relevantSupplier
+
 
   static constraints = {
     dateCreated (nullable: true, bindable: false)
@@ -27,14 +29,16 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
     patronRequest (nullable: true)
     code( nullable: true)
     note( nullable: true)
+    messageSender (nullable: true, blank: false)
   }
 
   static mapping = {
-             id column : 'prlc_id', generator: 'uuid2', length:36
-        version column : 'prlc_version'
-    dateCreated column : 'prlc_date_created'
-    lastUpdated column : 'prlc_last_updated'
-           code column : 'prlc_code'
-           note column : 'prlc_note'
+                  id column : 'prlc_id', generator: 'uuid2', length:36
+             version column : 'prlc_version'
+         dateCreated column : 'prlc_date_created'
+         lastUpdated column : 'prlc_last_updated'
+                code column : 'prlc_code'
+                note column : 'prlc_note'
+    relevantSupplier column : 'prlc_relevant_supplier_fk'
   }
 }

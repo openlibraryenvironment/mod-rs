@@ -1487,6 +1487,7 @@ databaseChangeLog = {
             column(name: "prlc_patron_request_fk", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
+            column(name: "prn_relevant_supplier_fk", type: "VARCHAR(36)")
         }
     }
 
