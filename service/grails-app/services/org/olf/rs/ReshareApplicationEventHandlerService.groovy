@@ -603,6 +603,7 @@ public class ReshareApplicationEventHandlerService {
           loanCondition.setNote(eventData.messageInfo.note)
         }
         loanCondition.setRelevantSupplier(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+        pr.addToConditions(loanCondition)
       }
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
