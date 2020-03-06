@@ -87,6 +87,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
               patron_request.save(flush:true, failOnError:true);
               break;
+            case 'sendLoanConditionResponse':
+              reshareActionService.sendLoanConditionResponse(patron_request, request.JSON.actionParams)
+              break;
             case 'supplierConditionalSupply':
               if ( request.JSON.actionParams.pickLocation != null ) {
                 ItemLocation location = new ItemLocation( location: request.JSON.actionParams.pickLocation, 

@@ -161,7 +161,7 @@ public class ReshareActionService {
     
     log.debug("actionConditionResponse(${pr})");
     boolean result = false;
-    String responseKey = "#ReShareLoanConditionResponse#"
+    String responseKey = "#ReShareLoanConditionAgreeResponse#"
 
     if (actionParams.isNull("note")) {
       actionParams.note = responseKey
