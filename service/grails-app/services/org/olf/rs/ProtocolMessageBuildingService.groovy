@@ -189,13 +189,13 @@ class ProtocolMessageBuildingService {
     // Whenever a note is attached to the message, create a notification with action.
     if (messageParams?.note != null) {
       Map actionMap = [action: reason_for_message]
+      actionMap.status = status
 
       if (messageParams.loanCondition) {
         actionMap.status = "Conditional"
         actionMap.data = messageParams.loanCondition
       }
       if (messageParams.reason) {
-        actionMap.status = "Unfilled"
         actionMap.data = messageParams.reason
       }
   
