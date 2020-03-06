@@ -160,6 +160,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   static mappedBy = [
     rota: 'patronRequest',
     audit: 'patronRequest',
+    conditions: 'patronRequest',
     notifications: 'patronRequest'
   ]
 
