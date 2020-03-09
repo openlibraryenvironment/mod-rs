@@ -149,8 +149,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /* We want to be able to get in and out of 'cancellation' states from a number of states in the state model,
    * so instead of having a dedicated state on the supplier side, we use a boolean to track whether a requester
    * has requested a cancellation or not. On the requesting side, we DO have a state "REQ_CANCEL_PENDING".
-   * We need to track whether this cancel is for this supplier only, in which case we then call sendToNextLender and continue the request,
-   * or whether this is actually a cancellation of the entire request, in which case the request gets closed. 
+   * We need to track whether this cancel is for this supplier only (in which case we then go to state CANCELLED_WITH_SUPPLIER,
+   * which triggers sendToNextLender and continues the request) or whether this is actually a cancellation of the entire request,
+   * in which case the request gets closed. 
    */ 
 
   // Boolean to flag whether a request is currently in the process of cancellation

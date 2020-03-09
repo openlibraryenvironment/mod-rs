@@ -76,6 +76,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCEL_PENDING', '0027', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER', '0028', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
         Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true);
