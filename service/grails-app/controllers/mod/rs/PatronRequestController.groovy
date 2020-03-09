@@ -96,11 +96,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
               break;
             case 'requesterRejectConditions':
+              reshareActionService.sendCancel(patron_request, request.JSON.actionParams)
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
-                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
-                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONS_REJECTED'), 
+                                    patron_request.state,
+                                    patron_request.state, 
                                     'Rejected loan conditions', null);
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CONDITIONS_REJECTED');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
               break;
             case 'supplierConditionalSupply':
               if ( request.JSON.actionParams.pickLocation != null ) {

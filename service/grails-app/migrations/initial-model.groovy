@@ -1499,4 +1499,12 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200309-13451602-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_request_to_continue", type: "BOOLEAN") {
+                constraints(nullable: false)
+            }
+        }
+    }
+
 }

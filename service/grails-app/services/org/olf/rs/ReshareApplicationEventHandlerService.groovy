@@ -58,7 +58,7 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
-    'STATUS_REQ_CONDITIONS_REJECTED_ind': { service, eventData ->
+    'STATUS_REQ_CANCEL_PENDING_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
@@ -307,7 +307,7 @@ public class ReshareApplicationEventHandlerService {
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
       if ( ( req != null ) && 
            ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
-             ( req.state?.code == 'REQ_CONDITIONS_REJECTED' ) ||
+             ( req.state?.code == 'REQ_CANCEL_PENDING' ) ||
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
@@ -414,7 +414,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CONDITIONS_REJECTED");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCEL_PENDING");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");

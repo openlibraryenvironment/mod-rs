@@ -356,6 +356,10 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 
+  public boolean sendCancel(PatronRequest pr, Object actionParams) {
+    sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
+  }
+
   public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
     String note = messageParams?.note
     boolean result = false;
