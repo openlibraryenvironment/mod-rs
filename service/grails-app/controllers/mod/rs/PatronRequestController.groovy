@@ -104,8 +104,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
                   reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
 
-                  log.debug("ACTIONPARAMS: ${request.JSON.actionParams}")
-
                   if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
                     // The supplying agency wants to continue with the request
                     reshareApplicationEventHandlerService.auditEntry(patron_request, 
@@ -145,6 +143,13 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED')
               patron_request.save(flush:true, failOnError:true);
               break;
+            case 'supplierMarkConditionsAgreed':
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'),
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'),
+                                    'Conditions manually marked as agreed', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+              patron_request.save(flush:true, failOnError:true);
             case 'itemReturned':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'Responder', 'REQ_AWAITING_RETURN_SHIPPING');
               break;
