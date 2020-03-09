@@ -186,17 +186,17 @@ public class ReshareActionService {
     log.debug("supplierConditionalNotification(${pr})");
     boolean result = false;
 
-    String responseKey
+    Map warningParams = [:]
 
     if (actionParams.isNull("holdingState") || actionParams.holdingState == 'no') {
-      responseKey = "#ReShareSupplierConditionsAreAssumedAgreed#"
+      warningParams.note = "#ReShareSupplierConditionsAssumedAgreed#"
     } else {
-      responseKey = "#ReShareSupplierAwaitingConditionConfirmation#"
+      warningParams.note = "#ReShareSupplierAwaitingConditionConfirmation#"
     }
     
     // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
     if (pr.isRequester == false) {
-      result = sendSupplyingAgencyMessage(pr, "Notification", actionParams)
+      result = sendSupplyingAgencyMessage(pr, "Notification", null, warningParams)
     } else {
       log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
     }
