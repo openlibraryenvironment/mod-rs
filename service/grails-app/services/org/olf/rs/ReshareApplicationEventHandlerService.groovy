@@ -740,6 +740,11 @@ public class ReshareApplicationEventHandlerService {
             }
             pr.save(flush: true, failOnError: true)
             break;
+          case 'Cancel':
+            auditEntry(pr, pr.state, pr.state, "Requester requested cancellation of the request", null)
+            pr.requesterRequestedCancellation = true;
+            pr.save(flush: true, failOnError: true)
+            break;
           default:
             result.status = "ERROR"
             result.errorType = "UnsupportedActionType"

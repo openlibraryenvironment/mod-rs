@@ -356,7 +356,20 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 
-  public boolean sendCancel(PatronRequest pr, Object actionParams) {
+  public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
+    log.debug("ACTIONPARAMS: ${actionParams}")
+    switch action {
+      case 'requesterRejectedConditions':
+        actionParams.requestToContinue = true;
+        break;
+      case 'requesterCancel':
+        actionParams.requestToContinue = false;
+        break;
+      default:
+        log.error("Action ${action} should not be able to send a cancel message")
+        break;
+    }
+    
     sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
   }
 
