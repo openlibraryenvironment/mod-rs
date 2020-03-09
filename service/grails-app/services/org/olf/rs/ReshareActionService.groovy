@@ -178,7 +178,32 @@ public class ReshareActionService {
     return result;
   }
 
-public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
+  public boolean sendSupplierConditionalWarning(PatronRequest pr, Object actionParams) {
+    /* This method will send a specialised notification message either warning the requesting agency that their request is in statis until confirmation
+     * is received that the loan conditions are agreed to, or warning that the conditions are assumed to be agreed to by default.
+    */
+    
+    log.debug("supplierConditionalNotification(${pr})");
+    boolean result = false;
+
+    String responseKey
+
+    if (actionParams.isNull("holdingState") || actionParams.holdingState == 'no') {
+      responseKey = "#ReShareSupplierConditionsAreAssumedAgreed#"
+    } else {
+      responseKey = "#ReShareSupplierAwaitingConditionConfirmation#"
+    }
+    
+    // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
+    if (pr.isRequester == false) {
+      result = sendSupplyingAgencyMessage(pr, "Notification", actionParams)
+    } else {
+      log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
+    }
+    return result;
+  }
+
+  public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     log.debug("actionMessage(${pr})");
     boolean result = false;
 

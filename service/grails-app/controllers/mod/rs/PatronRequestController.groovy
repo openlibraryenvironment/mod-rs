@@ -102,7 +102,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
+                  
                   reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
+                  reshareActionService.sendSupplierConditionalWarning(patron_request, request.JSON.actionParams);
 
                   if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
                     // The supplying agency wants to continue with the request
