@@ -595,16 +595,13 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
         incomingStatus = [status: "Conditional"]
 
-        // Save the loan condition to the patron request
-        def loanCondition = new PatronRequestLoanCondition()
-        loanCondition.setPatronRequest(pr)
-        loanCondition.setCode(eventData?.deliveryInfo?.loanCondition)
-        if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-          loanCondition.setNote(eventData.messageInfo.note)
-        }
-        loanCondition.setRelevantSupplier(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
 
-        pr.addToConditions(loanCondition)
+        // Save the loan condition to the patron request
+        String loanCondition = eventData?.deliveryInfo?.loanCondition
+        Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+        String note = eventData.messageInfo?.note
+
+        addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
       }
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
@@ -1057,5 +1054,17 @@ public class ReshareApplicationEventHandlerService {
     log.debug("Inbound Message: ${inboundMessage.messageContent}")
     pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
+  }
+
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
+    def loanCondition = new PatronRequestLoanCondition()
+    loanCondition.setPatronRequest(pr)
+    loanCondition.setCode(code)
+    if (note != null) {
+      loanCondition.setNote(note)
+    }
+    loanCondition.setRelevantSupplier(relevantSupplier)
+
+    pr.addToConditions(loanCondition)
   }
 }

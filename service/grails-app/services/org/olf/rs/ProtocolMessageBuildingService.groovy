@@ -162,10 +162,6 @@ class ProtocolMessageBuildingService {
                                          String status, 
                                          Map messageParams) {
 
-    // Sometimes status alone is not enough, ExpectsToSupply is the status both for respondYes AND for conditionalYes
-    // TODO somehow also include the actual reason/condition/whatever so that we have that information stored somewhere
-    String noteStatus = status
-
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
     message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
@@ -181,13 +177,16 @@ class ProtocolMessageBuildingService {
       message.messageInfo.reasonUnfilled = messageParams?.reason
     }
 
+    // We need to check in a couple of places whether the note is null/whether to add a note
+    String note = messageParams?.note
+
     if ( messageParams.loanCondition ) {
       message.deliveryInfo = [ loanCondition: messageParams?.loanCondition ]
-      noteStatus = "Conditional"
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
     }
 
     // Whenever a note is attached to the message, create a notification with action.
-    if (messageParams?.note != null) {
+    if (note != null) {
       Map actionMap = [action: reason_for_message]
       actionMap.status = status
 
