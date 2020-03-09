@@ -58,6 +58,9 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
+    'STATUS_REQ_CONDITIONS_REJECTED_ind': { service, eventData ->
+      service.sendToNextLender(eventData);
+    },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },

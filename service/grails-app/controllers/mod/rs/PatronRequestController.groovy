@@ -87,13 +87,20 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
               patron_request.save(flush:true, failOnError:true);
               break;
-            case 'sendLoanConditionResponse':
+            case 'requesterAgreeConditions':
               reshareActionService.sendLoanConditionResponse(patron_request, request.JSON.actionParams)
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
                                     reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY'), 
                                     'Agreed to loan conditions', null);
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+              break;
+            case 'requesterRejectConditions':
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONS_REJECTED'), 
+                                    'Rejected loan conditions', null);
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CONDITIONS_REJECTED');
               break;
             case 'supplierConditionalSupply':
               if ( request.JSON.actionParams.pickLocation != null ) {
@@ -102,7 +109,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  
+
                   reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
                   reshareActionService.sendSupplierConditionalWarning(patron_request, request.JSON.actionParams);
 

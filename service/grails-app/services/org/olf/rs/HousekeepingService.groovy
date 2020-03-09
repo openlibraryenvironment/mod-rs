@@ -75,6 +75,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONS_REJECTED', '0027', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
         Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true);
@@ -150,7 +151,8 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'message', 'M')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'sendLoanConditionResponse', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterAgreeConditions', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterRejectConditions', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
 
