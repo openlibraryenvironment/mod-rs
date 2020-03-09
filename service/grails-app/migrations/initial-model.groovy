@@ -1491,4 +1491,12 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200309-1345-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_requester_requested_cancellation", type: "BOOLEAN") {
+                constraints(nullable: false)
+            }
+        }
+    }
+
 }

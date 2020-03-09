@@ -145,6 +145,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   HostLMSLocation pickLocation;
   String pickShelvingLocation;
 
+  // We need a boolean to flag whether a request is currently in the process of cancellation
+  boolean requesterRequestedCancellation = false;
+
   Patron resolvedPatron
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
@@ -241,6 +244,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation (nullable: true, blank:false)
 
     resolvedPatron (nullable: true)
+    requesterRequestedCancellation (nullable: false, blank: false)
   }
 
   static mapping = {
@@ -319,6 +323,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation column : 'pr_pref_service_point'
 
     resolvedPatron column : 'pr_resolved_patron_fk'
+
+    requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
 
     audit(sort:'dateCreated', order:'desc')
   }
