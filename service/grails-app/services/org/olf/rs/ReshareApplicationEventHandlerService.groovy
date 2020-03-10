@@ -629,7 +629,7 @@ public class ReshareApplicationEventHandlerService {
                 // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
                 break;
               case 'N':
-                og.debug("Negative cancel response received")
+                log.debug("Negative cancel response received")
                 pr.state = lookupStatus('PatronRequest', pr.previousState)
                 pr.previousState = null
                 break;
