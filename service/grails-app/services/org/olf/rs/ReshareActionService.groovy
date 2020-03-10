@@ -444,8 +444,8 @@ public class ReshareActionService {
   }
 
 
-  public void sendResponse(PatronRequest pr, 
-                            String status, 
+  public void sendResponse(PatronRequest pr,
+                            String status,
                             Map responseParams) {
     sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
   }

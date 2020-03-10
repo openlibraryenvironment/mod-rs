@@ -623,6 +623,15 @@ public class ReshareApplicationEventHandlerService {
           case 'RenewResponse':
             break;
           case 'CancelResponse':
+            switch (eventData.messageInfo.answerYesNo) {
+              case 'Y':
+                pr.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+                break;
+              case 'N':
+                break;
+              default:
+                log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
+            }
             break;
           case 'StatusChange':
             break;
