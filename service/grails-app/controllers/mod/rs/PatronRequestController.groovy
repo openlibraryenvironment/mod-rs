@@ -176,8 +176,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 patron_request.requesterRequestedCancellation = false;
                 reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                         patron_request.state, 
-                                        patron_request.state, 
+                                        patron_request.previousState,
                                         'Cancellation denied', null);
+                patron_request.state = patron_request.previousState;
               } else {
                 patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE')
                 reshareApplicationEventHandlerService.auditEntry(patron_request, 

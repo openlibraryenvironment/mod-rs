@@ -755,6 +755,7 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'Cancel':
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
+            pr.previousState = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
             pr.requesterRequestedCancellation = true;
             pr.save(flush: true, failOnError: true)
