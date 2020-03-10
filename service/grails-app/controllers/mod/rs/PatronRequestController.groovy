@@ -171,12 +171,19 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'supplierRespondToCancel':
               reshareActionService.sendSupplierCancelResponse(patron_request, request.JSON.actionParams)
-
               // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
               if (request.JSON?.actionParams?.cancelResponse == "no") {
                 patron_request.requesterRequestedCancellation = false;
+                reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        patron_request.state, 
+                                        'Cancellation denied', null);
               } else {
                 patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE')
+                reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE'), 
+                                        'Cancellation accepted', null);
               }
 
               patron_request.save(flush:true, failOnError:true);
