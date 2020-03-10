@@ -59,7 +59,7 @@ public class ReshareApplicationEventHandlerService {
       service.sendToNextLender(eventData);
     },
     'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
-      service.handleCancelOrSendToNextLender(eventdata);
+      service.handleCancelOrSendToNextLender(eventData);
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -789,7 +789,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void handleCancelOrSendToNextLender(eventdata) {
+  private void handleCancelOrSendToNextLender(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleCancelOrSendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
@@ -802,8 +802,10 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
 
         if (req.requestToContinue == true) {
-          sendToNextLender(eventdata)
+          auditEntry(pr, pr.state, pr.state, 'Request to continue, sending to next lender', null);
+          sendToNextLender(eventData)
         } else {
+          auditEntry(pr, pr.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
           req.save(flush:true, failOnError: true)
         }
@@ -814,8 +816,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("  -> ${it.id} ${it.title}");
         }
       }
-
-
+    }
   }
 
 
