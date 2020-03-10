@@ -1493,18 +1493,16 @@ databaseChangeLog = {
 
     changeSet(author: "ethanfreestone (manual)", id: "20200309-1345-001") {
         addColumn(tableName: "patron_request") {
-            column(name: "pr_requester_requested_cancellation", type: "BOOLEAN") {
-                constraints(nullable: false)
-            }
+            column(name: "pr_requester_requested_cancellation", type: "BOOLEAN")
         }
+        addNotNullConstraint (tableName: "patron_request", columnName: "pr_requester_requested_cancellation", defaultNullValue: false )
     }
 
     changeSet(author: "ethanfreestone (manual)", id: "20200309-13451602-001") {
         addColumn(tableName: "patron_request") {
-            column(name: "pr_request_to_continue", type: "BOOLEAN") {
-                constraints(nullable: false)
-            }
+            column(name: "pr_request_to_continue", type: "BOOLEAN") 
         }
+        addNotNullConstraint (tableName: "patron_request", columnName: "pr_request_to_continue", defaultNullValue: true )
     }
 
     changeSet(author: "ethanfreestone (manual)", id: "20200310-0958-001") {
