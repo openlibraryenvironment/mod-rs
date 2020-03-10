@@ -1507,4 +1507,11 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ethanfreestone (manual)", id: "20200310-0958-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_previous_state", type: "VARCHAR(50)") {
+            }
+        }
+    }
+
 }
