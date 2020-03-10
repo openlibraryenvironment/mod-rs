@@ -59,7 +59,7 @@ public class ReshareApplicationEventHandlerService {
       service.sendToNextLender(eventData);
     },
     'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
-      service.handleCancelOrSendToNextLender(eventData);
+      service.handleCancelledWithSupplier(eventData);
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -307,7 +307,7 @@ public class ReshareApplicationEventHandlerService {
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
       if ( ( req != null ) && 
            ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
-             ( req.state?.code == 'REQ_CANCEL_PENDING' ) ||
+             ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) ||
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
@@ -414,7 +414,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCEL_PENDING");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
@@ -625,9 +625,11 @@ public class ReshareApplicationEventHandlerService {
           case 'CancelResponse':
             switch (eventData.messageInfo.answerYesNo) {
               case 'Y':
-                pr.state = lookupStatus('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER')
+                log.debug("Affirmative cancel response received")
+                // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
                 break;
               case 'N':
+                og.debug("Negative cancel response received")
                 pr.state = lookupStatus('PatronRequest', pr.previousState)
                 pr.previousState = null
                 break;
@@ -789,8 +791,8 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void handleCancelOrSendToNextLender(eventData) {
-    log.debug("ReshareApplicationEventHandlerService::handleCancelOrSendToNextLender(${eventData})");
+  private void handleCancelledWithSupplier(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleCancelledWithSupplier(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
@@ -802,13 +804,15 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
 
         if (req.requestToContinue == true) {
-          auditEntry(pr, pr.state, pr.state, 'Request to continue, sending to next lender', null);
-          sendToNextLender(eventData)
+          log.debug("Request to continue, sending to next lender")
+          auditEntry(req, req.state, req.state, 'Request to continue, sending to next lender', null);
+          req.state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
         } else {
-          auditEntry(pr, pr.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
+          log.debug("Cancelling request")
+          auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
-          req.save(flush:true, failOnError: true)
         }
+        req.save(flush:true, failOnError: true)
       } else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
         log.debug("The current request IDs are")
@@ -887,7 +891,7 @@ public class ReshareApplicationEventHandlerService {
    * up to 5 times.
    */
   public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
-    log.debug("PatronRequest called")
+    log.debug("delayedGet called (${wth_lock})")
     PatronRequest result = null;
     int retries = 0;
 
@@ -911,6 +915,9 @@ public class ReshareApplicationEventHandlerService {
     }
     catch(Exception e){
       log.error("Problem", e)
+    }
+    finally {
+      log.debug("Delayed get returning ${result}")
     }
     return result;
   }
