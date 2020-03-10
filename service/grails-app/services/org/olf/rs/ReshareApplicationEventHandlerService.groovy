@@ -628,6 +628,8 @@ public class ReshareApplicationEventHandlerService {
                 pr.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
                 break;
               case 'N':
+                pr.state = lookupStatus('PatronRequest', pr.previousState)
+                pr.previousState = null
                 break;
               default:
                 log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
@@ -836,7 +838,7 @@ public class ReshareApplicationEventHandlerService {
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Cancelled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED', null)
+          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
           auditEntry(pr, pr.state, new_state, 'Protocol message');
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
