@@ -798,13 +798,14 @@ public class ReshareApplicationEventHandlerService {
 
       def req = delayedGet(eventData.payload.id, true);
       // We must have found the request, and it as to be in a state of cancelled with supplier
-      if (( req != null ) && ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) {
+      if (( req != null ) && ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' )) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
 
         if (req.requestToContinue == true) {
           sendToNextLender(eventdata)
         } else {
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          req.save(flush:true, failOnError: true)
         }
       } else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
