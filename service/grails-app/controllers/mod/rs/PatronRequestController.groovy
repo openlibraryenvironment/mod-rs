@@ -153,7 +153,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierMarkShipped':
-              reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     patron_request.state,
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
@@ -169,10 +169,16 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
               patron_request.save(flush:true, failOnError:true);
               break;
-
-            // TODO Make this actually agree to/deny a cancellation.
             case 'supplierRespondToCancel':
-              
+              log.debug("RespondToCancel REQUEST ${request.JSON}")
+              sendSupplierCancelResponse(patron_request, request.JSON.actionParams)
+
+              // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
+              if (request.JSON?.actionParams?.cancelResponse == "no") {
+                patron_request.requesterRequestedCancellation = false;
+              } else {
+                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE')
+              }
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'itemReturned':

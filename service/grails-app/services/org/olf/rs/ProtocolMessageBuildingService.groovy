@@ -177,6 +177,14 @@ class ProtocolMessageBuildingService {
       message.messageInfo.reasonUnfilled = messageParams?.reason
     }
 
+    if ( messageParams.cancelResponse ) {
+      if (messageParams.cancelResponse == "yes") {
+        message.messageInfo.answerYesNo = "Y"
+      } else {
+        message.messageInfo.answerYesNo = "N"
+      }
+    }
+
     // We need to check in a couple of places whether the note is null/whether to add a note
     String note = messageParams?.note
 

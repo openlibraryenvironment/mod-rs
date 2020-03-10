@@ -203,6 +203,39 @@ public class ReshareActionService {
     return result;
   }
 
+  public boolean sendSupplierCancelResponse(PatronRequest pr, Object actionParams) {
+    /* This method will send a cancellation response iso18626 message */
+    
+    log.debug("sendSupplierCancelResponse(${pr})");
+    boolean result = false;
+    String status;
+
+     if (!actionParams.isNull("cancelResponse")){
+
+        switch (actionParams.cancelResponse) {
+          case 'yes':
+            status = "Cancelled"
+            break;
+          case 'no':
+            break;
+          default:
+            log.warn("sendSupplierCancelResponse received unexpected cancelResponse: ${actionParams.cancelResponse}")
+            break;
+        }
+
+        // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
+        if (pr.isRequester == false) {
+          result = sendSupplyingAgencyMessage(pr, "CancelResponse", status, actionParams)
+        } else {
+          log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
+        }
+     } else {
+      log.error("sendSupplierCancelResponse expected to receive a cancelResponse")
+     }
+
+    return result;
+  }
+
   public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     log.debug("actionMessage(${pr})");
     boolean result = false;
@@ -357,18 +390,18 @@ public class ReshareActionService {
   }
 
   public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
-    log.debug("ACTIONPARAMS: ${actionParams}")
     switch (action) {
       case 'requesterRejectedConditions':
-        actionParams.requestToContinue = true;
+        pr.requestToContinue = true;
         break;
       case 'requesterCancel':
-        actionParams.requestToContinue = false;
+        pr.requestToContinue = false;
         break;
       default:
         log.error("Action ${action} should not be able to send a cancel message")
         break;
     }
+    pr.save(flush:true, failOnError:true);
     
     sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
   }
@@ -434,7 +467,7 @@ public class ReshareActionService {
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
   public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
-                                         String status, 
+                                         String status,
                                          Map messageParams) {
 
     log.debug("sendResponse(....)");
