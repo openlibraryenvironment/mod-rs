@@ -58,6 +58,9 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
+    'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
+      service.handleCancelledWithSupplier(eventData);
+    },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
@@ -304,6 +307,7 @@ public class ReshareApplicationEventHandlerService {
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
       if ( ( req != null ) && 
            ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
+             ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) ||
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid})");
         
@@ -410,7 +414,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_SUPPLIER_IDENTIFIED (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
         log.debug("The current request IDs are")
         PatronRequest.list().each {
           log.debug("  -> ${it.id} ${it.title}");
@@ -570,10 +574,13 @@ public class ReshareApplicationEventHandlerService {
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleSupplyingAgencyMessage(Map eventData) {
-
+    log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
     def result = [:]
 
-    log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
+    /* Occasionally the incoming status is not granular enough, so we deal with it separately in order
+     * to be able to cater to "in-between" statuses, such as Conditional--which actually comes in as "ExpectsToSupply"
+    */
+    Map incomingStatus = eventData.statusInfo;
 
     try {
       if ( eventData.header?.requestingAgencyRequestId == null ) {
@@ -587,39 +594,60 @@ public class ReshareApplicationEventHandlerService {
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
+
+      if (eventData?.deliveryInfo?.loanCondition) {
+        log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
+        incomingStatus = [status: "Conditional"]
+
+
+        // Save the loan condition to the patron request
+        String loanCondition = eventData?.deliveryInfo?.loanCondition
+        Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+        String note = eventData.messageInfo?.note
+
+        addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
+      }
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
 
-        // First check if the message has a purpose other than Notification
-        if (eventData.messageInfo?.reasonForMessage != 'Notification') {
-
-          // If there is a note, create notification entry
-            if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
-              incomingNotificationEntry(pr, eventData, true)
-            }
-
-            switch ( eventData.messageInfo?.reasonForMessage ) {
-              case 'RequestResponse':
-                break;
-              case 'StatusRequestResponse':
-                break;
-              case 'RenewResponse':
-                break;
-              case 'CancelResponse':
-                break;
-              case 'StatusChange':
-                break;
-                default:
-                result.status = "ERROR"
-                result.errorType = "UnsupportedReasonForMessageType"
-                result.errorValue = eventData.messageInfo.reasonForMessage
-                throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
-              break;
-            }
-        } else {
-          Map messageData = eventData.messageInfo
-          auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${messageData.note}", null)
+        // If there is a note, create notification entry
+        if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
           incomingNotificationEntry(pr, eventData, true)
+        }
+
+        switch ( eventData.messageInfo?.reasonForMessage ) {
+          case 'RequestResponse':
+            break;
+          case 'StatusRequestResponse':
+            break;
+          case 'RenewResponse':
+            break;
+          case 'CancelResponse':
+            switch (eventData.messageInfo.answerYesNo) {
+              case 'Y':
+                log.debug("Affirmative cancel response received")
+                // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
+                break;
+              case 'N':
+                log.debug("Negative cancel response received")
+                pr.state = lookupStatus('PatronRequest', pr.previousState)
+                pr.previousState = null
+                break;
+              default:
+                log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
+            }
+            break;
+          case 'StatusChange':
+            break;
+          case 'Notification':
+            auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
+            break;
+          default:
+            result.status = "ERROR"
+            result.errorType = "UnsupportedReasonForMessageType"
+            result.errorValue = eventData.messageInfo.reasonForMessage
+            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+          break;
         }
       }
       else {
@@ -628,8 +656,8 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("No reason for message");
       }
 
-      if ( eventData.statusInfo != null ) {
-        handleStatusChange(pr, eventData.statusInfo, eventData.header.supplyingAgencyRequestId);
+      if ( incomingStatus != null ) {
+        handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
       }
 
       pr.save(flush:true, failOnError:true);
@@ -707,7 +735,27 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'Notification':
             Map messageData = eventData.activeSection
-            auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+
+            /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
+             * then we'll need to check whether or not we need to change state.
+            */
+            if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
+              // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
+              if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
+                def new_state = lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
+                pr.state = new_state;
+              } else {
+                auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
+              }
+            } else {
+              auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+            }
+            pr.save(flush: true, failOnError: true)
+            break;
+          case 'Cancel':
+            auditEntry(pr, pr.state, pr.state, "Requester requested cancellation of the request", null)
+            pr.requesterRequestedCancellation = true;
             pr.save(flush: true, failOnError: true)
             break;
           default:
@@ -743,6 +791,40 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+  private void handleCancelledWithSupplier(eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleCancelledWithSupplier(${eventData})");
+    PatronRequest.withNewTransaction { transaction_status ->
+
+      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
+      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+
+      def req = delayedGet(eventData.payload.id, true);
+      // We must have found the request, and it as to be in a state of cancelled with supplier
+      if (( req != null ) && ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' )) {
+        log.debug("Got request ${req} (HRID Is ${req.hrid})");
+
+        if (req.requestToContinue == true) {
+          log.debug("Request to continue, sending to next lender")
+          auditEntry(req, req.state, req.state, 'Request to continue, sending to next lender', null);
+          req.state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
+        } else {
+          log.debug("Cancelling request")
+          auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
+          req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+        }
+        req.save(flush:true, failOnError: true)
+      } else {
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
+        log.debug("The current request IDs are")
+        PatronRequest.list().each {
+          log.debug("  -> ${it.id} ${it.title}");
+        }
+      }
+    }
+  }
+
+
+
 
   // ISO18626 states are RequestReceived ExpectToSupply WillSupply Loaned Overdue Recalled RetryPossible Unfilled CopyCompleted LoanCompleted CompletedWithoutReturn Cancelled
 
@@ -766,6 +848,13 @@ public class ReshareApplicationEventHandlerService {
           pr.state=new_state
           if ( prr != null ) prr.state = new_state;
           break;
+        case 'Conditional':
+          log.debug("Moving to state REQ_CONDITIONAL_ANSWER_RECEIVED")
+          def new_state = lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
         case 'Loaned':
           def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
           auditEntry(pr, pr.state, new_state, 'Protocol message', null);
@@ -785,8 +874,8 @@ public class ReshareApplicationEventHandlerService {
           if ( prr != null ) prr.state = new_state;
           break;
         case 'Cancelled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED', null)
-          auditEntry(pr, pr.state, new_state, 'Protocol message');
+          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
           break;
@@ -802,7 +891,7 @@ public class ReshareApplicationEventHandlerService {
    * up to 5 times.
    */
   public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
-    log.debug("PatronRequest called")
+    log.debug("delayedGet called (${wth_lock})")
     PatronRequest result = null;
     int retries = 0;
 
@@ -826,6 +915,9 @@ public class ReshareApplicationEventHandlerService {
     }
     catch(Exception e){
       log.error("Problem", e)
+    }
+    finally {
+      log.debug("Delayed get returning ${result}")
     }
     return result;
   }
@@ -989,15 +1081,25 @@ public class ReshareApplicationEventHandlerService {
     if (isRequester) {
 
       // We might want more specific information than the reason for message alone
+      // also sometimes the status isn't enough by itself
+      String status = eventData.statusInfo?.status;
+      if (status) {
+        inboundMessage.setActionStatus(status)
 
-      String context = eventData.messageInfo.reasonForMessage
-      if (eventData.messageInfo.reasonForMessage != 'Notification') {
-        context = eventData.messageInfo.reasonForMessage + eventData.statusInfo.status
+        if (status == "Unfilled") {
+          inboundMessage.setActionData(eventData.messageInfo.reasonunfilled)
+        }
+      }
+
+      // We overwrite the status information if there are loan conditions
+      if (eventData.deliveryInfo?.loanCondition) {
+        inboundMessage.setActionStatus("Conditional")
+        inboundMessage.setActionData(eventData.deliveryInfo.loanCondition)
       }
 
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-      inboundMessage.setAttachedAction(context)
+      inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent(eventData.messageInfo.note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
@@ -1011,5 +1113,17 @@ public class ReshareApplicationEventHandlerService {
     log.debug("Inbound Message: ${inboundMessage.messageContent}")
     pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
+  }
+
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
+    def loanCondition = new PatronRequestLoanCondition()
+    loanCondition.setPatronRequest(pr)
+    loanCondition.setCode(code)
+    if (note != null) {
+      loanCondition.setNote(note)
+    }
+    loanCondition.setRelevantSupplier(relevantSupplier)
+
+    pr.addToConditions(loanCondition)
   }
 }

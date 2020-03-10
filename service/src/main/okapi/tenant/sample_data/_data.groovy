@@ -139,6 +139,7 @@ try {
   RefdataValue.lookupOrCreate('loanConditions', 'SignatureRequired');
   RefdataValue.lookupOrCreate('loanConditions', 'SpecCollSupervReq');
   RefdataValue.lookupOrCreate('loanConditions', 'WatchLibraryUseOnly');
+  RefdataValue.lookupOrCreate('loanConditions', 'Other');
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);

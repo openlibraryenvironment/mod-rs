@@ -64,7 +64,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                                           callNumber: request.JSON.actionParams.callnumber)
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
-                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', null, request.JSON.actionParams.note)
+                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams)
                 }
                 else {
                   response.status = 400;
@@ -79,7 +79,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierCannotSupply':
-              reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams.reason, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
@@ -87,13 +87,105 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
               patron_request.save(flush:true, failOnError:true);
               break;
+            case 'requesterAgreeConditions':
+              reshareActionService.sendLoanConditionResponse(patron_request, request.JSON.actionParams)
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY'), 
+                                    'Agreed to loan conditions', null);
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
+              break;
+            case 'requesterRejectConditions':
+              reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CANCEL_PENDING'), 
+                                    'Rejected loan conditions', null);
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
+              break;
+            case 'requesterCancel':
+              reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CANCEL_PENDING'), 
+                                    'Requester requesting to cancel request', null);
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
+              break;
+            case 'supplierConditionalSupply':
+              if ( request.JSON.actionParams.pickLocation != null ) {
+                ItemLocation location = new ItemLocation( location: request.JSON.actionParams.pickLocation, 
+                                                          shelvingLocation: request.JSON.actionParams.pickShelvingLocation,
+                                                          callNumber: request.JSON.actionParams.callnumber)
+
+                if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
+
+                  reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams);
+                  reshareActionService.sendSupplierConditionalWarning(patron_request, request.JSON.actionParams);
+
+                  if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
+                    // The supplying agency wants to continue with the request
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 
+                                        'Request responded to conditionally, request continuing', null);
+                    patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                  } else {
+                    // The supplying agency wants to go into a holding state
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
+                                        'Request responded to conditionally, placed in hold state', null);
+                    patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
+                  }
+                  
+                  patron_request.save(flush:true, failOnError:true);
+                }
+                else {
+                  response.status = 400;
+                  result.code=-2; // No location specified
+                  result.message='Failed to route request to given location'
+                }
+              }
+              else {
+                response.status = 400;
+                result.code=-1; // No location specified
+                result.message='No pick location specified. Unable to continue'
+              }
+              break;
             case 'supplierMarkShipped':
-              reshareActionService.sendResponse(patron_request, 'Loaned', null, request.JSON.actionParams.note);
+              reshareActionService.sendResponse(patron_request, 'Loaned', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                     patron_request.state,
                                     reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
                                     'Shipped', null);
               patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED')
+              patron_request.save(flush:true, failOnError:true);
+              break;
+            case 'supplierMarkConditionsAgreed':
+              reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'),
+                                    reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'),
+                                    'Conditions manually marked as agreed', null);
+              patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+              patron_request.save(flush:true, failOnError:true);
+              break;
+            case 'supplierRespondToCancel':
+              reshareActionService.sendSupplierCancelResponse(patron_request, request.JSON.actionParams)
+              // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
+              if (request.JSON?.actionParams?.cancelResponse == "no") {
+                patron_request.requesterRequestedCancellation = false;
+                reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        patron_request.state, 
+                                        'Cancellation denied', null);
+              } else {
+                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE')
+                reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE'), 
+                                        'Cancellation accepted', null);
+              }
+
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'itemReturned':
