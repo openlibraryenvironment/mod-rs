@@ -91,7 +91,8 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
+        // This one doesn't appear to be in use
+        // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
@@ -185,8 +186,8 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'message', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'shippedReturn', 'M')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'shippedReturn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
 
