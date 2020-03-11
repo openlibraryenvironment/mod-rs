@@ -1492,6 +1492,7 @@ databaseChangeLog = {
     }
 
     changeSet(author: "ethanfreestone (manual)", id: "20200309-1345-001") {
+        validCheckSum ("7:db3c885be8cf39cd82c93f37f8548b3a")
         addColumn(tableName: "patron_request") {
             column(name: "pr_requester_requested_cancellation", type: "BOOLEAN")
         }
@@ -1499,6 +1500,7 @@ databaseChangeLog = {
     }
 
     changeSet(author: "ethanfreestone (manual)", id: "20200309-13451602-001") {
+        validCheckSum ("7:507c3225d1ed283e90ba7a6a8c3e8d90")
         addColumn(tableName: "patron_request") {
             column(name: "pr_request_to_continue", type: "BOOLEAN") 
         }
