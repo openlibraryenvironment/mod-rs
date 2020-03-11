@@ -152,6 +152,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.message='No pick location specified. Unable to continue'
               }
               break;
+            case 'supplierAddCOndition':
+              reshareActionService.addCondition(patron_request, request.JSON.actionParams);
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
