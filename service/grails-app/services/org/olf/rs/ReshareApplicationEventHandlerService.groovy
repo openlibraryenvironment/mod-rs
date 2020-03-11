@@ -640,6 +640,7 @@ public class ReshareApplicationEventHandlerService {
           case 'StatusChange':
             break;
           case 'Notification':
+            // If this note starts with #ReShareAddLoanCondition# then we know that we have to add another loan condition to the request -- might just work automatically.
             auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
             break;
           default:

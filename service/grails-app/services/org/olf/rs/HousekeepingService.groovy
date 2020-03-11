@@ -117,11 +117,15 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierAddCondition', 'M')
+        
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
@@ -137,14 +141,18 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'supplierRespondToCancel', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierAddCondition', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
 
