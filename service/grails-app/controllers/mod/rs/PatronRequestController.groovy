@@ -153,7 +153,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierAddCondition':
-              reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
+              reshareActionService.addCondition(patron_request, request.JSON.actionParams);
               if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
                     // The supplying agency wants to continue with the request
                     reshareApplicationEventHandlerService.auditEntry(patron_request, 
