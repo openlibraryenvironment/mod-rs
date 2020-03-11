@@ -154,6 +154,21 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'supplierAddCondition':
               reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
+              if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
+                    // The supplying agency wants to continue with the request
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        patron_request.state, 
+                                        'Added loan condition to request, request continuing', null);
+                  } else {
+                    // The supplying agency wants to go into a holding state
+                    reshareApplicationEventHandlerService.auditEntry(patron_request, 
+                                        patron_request.state, 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
+                                        'Condition added to request, placed in hold state', null);
+                    patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
+                  }
+                  patron_request.save(flush:true, failOnError:true);
               break;
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', request.JSON.actionParams);
