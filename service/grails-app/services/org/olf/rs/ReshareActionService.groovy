@@ -451,23 +451,6 @@ public class ReshareActionService {
     sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
   }
 
-  public void addCondition(PatronRequest pr, Map responseParams) {
-    Map conditionParams = responseParams
-    log.debug("addCondition::(${pr})")
-
-    if (!responseParams.isNull("note")){
-      conditionParams.note = "#ReShareAddLoanCondition# ${responseParams.note}"
-    } else {
-      conditionParams.note = "#ReShareAddLoanCondition#"
-    }
-
-    if (!conditionParams.isNull("loanCondition")) {
-      sendMessage(pr, conditionParams);
-    } else {
-      log.warn("addCondition not handed any conditions")
-    }
-  }
-
   public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {

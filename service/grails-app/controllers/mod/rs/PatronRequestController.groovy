@@ -153,7 +153,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               break;
             case 'supplierAddCondition':
-              reshareActionService.addCondition(patron_request, request.JSON.actionParams);
+              reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
               break;
             case 'supplierMarkShipped':
               reshareActionService.sendResponse(patron_request, 'Loaned', request.JSON.actionParams);
