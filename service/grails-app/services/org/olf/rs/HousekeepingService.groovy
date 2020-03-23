@@ -173,7 +173,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
 
-        AvailableAction.ensure( 'Responder', 'REQ_CANCEL_PENDING', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'requesterCancel', 'M')
