@@ -199,10 +199,10 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                         'Cancellation denied', null);
                 patron_request.state = reshareApplicationEventHandlerService.lookupStatus('Responder', patron_request.previousState);
               } else {
-                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE')
+                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
                 reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                         patron_request.state, 
-                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_COMPLETE'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
                                         'Cancellation accepted', null);
                 patron_request.requesterRequestedCancellation = false;
               }
