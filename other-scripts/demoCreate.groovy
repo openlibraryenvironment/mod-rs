@@ -2,6 +2,7 @@
 okapi=new OkapiClient('reshare')
 rsclient = new RSClient(okapi);
 okapi.listTenantSymbols()
+okapi.walkFoafGraph()
 
 // okapi.createRequest([
 //                      title:'The Heart of Enterprise',
@@ -13,6 +14,6 @@ okapi.listTenantSymbols()
 //                      requestingInstitutionSymbol:'RESHARE:KNOWINT']);
 
 //okapi.createRequest([title:'The Heart of Enterprise', requestingInstitutionSymbol:'OCLC:AVL']);
-okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
+// okapi.createRequest([title:'Temeraire', requestingInstitutionSymbol:'OCLC:ZMU']);
 
 
