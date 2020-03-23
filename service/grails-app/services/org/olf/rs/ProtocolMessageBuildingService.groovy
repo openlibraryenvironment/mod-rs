@@ -160,32 +160,53 @@ class ProtocolMessageBuildingService {
   public Map buildSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status, 
-                                         String reasonUnfilled = null,
-                                         String note = null) {
+                                         Map messageParams) {
+
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
     message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
     message.messageInfo = [
       reasonForMessage:reason_for_message,
-      note: note
+      note: messageParams?.note
     ]
     message.statusInfo = [
       status:status
     ]
 
-    if ( reasonUnfilled ) {
-      message.messageInfo.reasonUnfilled = [ value: reasonUnfilled ]
+    if ( messageParams.reason ) {
+      message.messageInfo.reasonUnfilled = messageParams?.reason
+    }
+
+    if ( messageParams.cancelResponse ) {
+      if (messageParams.cancelResponse == "yes") {
+        message.messageInfo.answerYesNo = "Y"
+      } else {
+        message.messageInfo.answerYesNo = "N"
+      }
+    }
+
+    // We need to check in a couple of places whether the note is null/whether to add a note
+    String note = messageParams?.note
+
+    if ( messageParams.loanCondition ) {
+      message.deliveryInfo = [ loanCondition: messageParams?.loanCondition ]
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
     }
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
-      def context = reason_for_message
-      
-      if (reason_for_message != 'Notification') {
-        context = reason_for_message + status
+      Map actionMap = [action: reason_for_message]
+      actionMap.status = status
+
+      if (messageParams.loanCondition) {
+        actionMap.status = "Conditional"
+        actionMap.data = messageParams.loanCondition
+      }
+      if (messageParams.reason) {
+        actionMap.data = messageParams.reason
       }
   
-      reshareActionService.outgoingNotificationEntry(pr, note, context, pr.resolvedSupplier, pr.resolvedSupplier, false)
+      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
     return message
@@ -206,10 +227,11 @@ class ProtocolMessageBuildingService {
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
+      Map actionMap = [action: action]
       reshareActionService.outgoingNotificationEntry(
         pr,
         note,
-        action,
+        actionMap,
         message_sender_symbol,
         peer_symbol,
         true

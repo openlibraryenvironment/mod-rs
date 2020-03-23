@@ -145,6 +145,23 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   HostLMSLocation pickLocation;
   String pickShelvingLocation;
 
+
+  /* We want to be able to get in and out of 'cancellation' states from a number of states in the state model,
+   * so instead of having a dedicated state on the supplier side, we use a boolean to track whether a requester
+   * has requested a cancellation or not. On the requesting side, we DO have a state "REQ_CANCEL_PENDING".
+   * We need to track whether this cancel is for this supplier only (in which case we then go to state CANCELLED_WITH_SUPPLIER,
+   * which triggers sendToNextLender and continues the request) or whether this is actually a cancellation of the entire request,
+   * in which case the request gets closed. 
+   */ 
+
+  // Boolean to flag whether a request is currently in the process of cancellation
+  boolean requesterRequestedCancellation = false;
+  //Boolean to flag whether a request continues after the current cancellation with supplier
+  boolean requestToContinue = true;
+
+  // We also sometimes need to know the state that existed before heading into a pending state
+  String previousState
+
   Patron resolvedPatron
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
@@ -152,6 +169,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
   static hasMany = [
     audit : PatronRequestAudit,
+    conditions: PatronRequestLoanCondition,
     notifications: PatronRequestNotification,
     rota  : PatronRequestRota,
     tags  : Tag];
@@ -159,6 +177,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   static mappedBy = [
     rota: 'patronRequest',
     audit: 'patronRequest',
+    conditions: 'patronRequest',
     notifications: 'patronRequest'
   ]
 
@@ -239,6 +258,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation (nullable: true, blank:false)
 
     resolvedPatron (nullable: true)
+    requesterRequestedCancellation (nullable: false, blank: false)
+    requestToContinue (nullable: false, blank: false)
+
+    previousState (nullable: true)
   }
 
   static mapping = {
@@ -317,6 +340,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation column : 'pr_pref_service_point'
 
     resolvedPatron column : 'pr_resolved_patron_fk'
+
+    requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
+    requestToContinue column: 'pr_request_to_continue'
+
+    previousState column: 'pr_previous_state'
 
     audit(sort:'dateCreated', order:'desc')
   }

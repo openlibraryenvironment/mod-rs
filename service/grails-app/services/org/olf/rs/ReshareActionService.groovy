@@ -129,37 +129,114 @@ public class ReshareActionService {
     boolean result = false;
     // Sending a message does not change the state of a request
 
-
     // If the actionParams does not contain a note then this method should do nothing
-    if (actionParams.isNull("note")) {
-      return false;
-    }
+    if (!actionParams.isNull("note")) {
+      Map eventData = [header:[]];
+
+      String message_sender_symbol = "unassigned_message_sender_symbol";
+      String peer_symbol = "unassigned_peer_symbol"
 
 
-    Map eventData = [header:[]];
+      // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
+      if (pr.isRequester == true) {
+        result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
 
-    String message_sender_symbol = "unassigned_message_sender_symbol";
-    String peer_symbol = "unassigned_peer_symbol"
+      } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
+      else {
+        result = sendSupplyingAgencyMessage(pr, "Notification", null, actionParams)
+      }
 
-
-    def send_result
-    // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
-    if (pr.isRequester == true) {
-      result = sendRequestingAgencyMessage(pr, "Notification", actionParams.note)
-
-    } // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
-    else {
-      result = sendSupplyingAgencyMessage(pr, "Notification", null, null, actionParams.note)
-    }
-
-    if ( result == true) {
-      log.warn("Unable to send protocol notification message");
+      if ( result == true) {
+        log.warn("Unable to send protocol notification message");
+      }
     }
 
     return result;
   }
 
-public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
+  public boolean sendLoanConditionResponse(PatronRequest pr, Object actionParams) {
+    /* This method will send a specialised notification message containing some unique human readable key at the beginning
+     * This will indicate an agreement to the loan conditions.
+    */
+    
+    log.debug("actionConditionResponse(${pr})");
+    boolean result = false;
+    String responseKey = "#ReShareLoanConditionAgreeResponse#"
+
+    if (actionParams.isNull("note")) {
+      actionParams.note = responseKey
+    } else {
+      actionParams.note = "${responseKey} ${actionParams.note}"
+    }
+    
+    // Only the requester should ever be able to send one of these messages, otherwise something has gone wrong.
+    if (pr.isRequester == true) {
+      result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
+    } else {
+      log.warn("The supplying agency should not be able to call sendLoanConditionResponse.");
+    }
+    return result;
+  }
+
+  public boolean sendSupplierConditionalWarning(PatronRequest pr, Object actionParams) {
+    /* This method will send a specialised notification message either warning the requesting agency that their request is in statis until confirmation
+     * is received that the loan conditions are agreed to, or warning that the conditions are assumed to be agreed to by default.
+    */
+    
+    log.debug("supplierConditionalNotification(${pr})");
+    boolean result = false;
+
+    Map warningParams = [:]
+
+    if (actionParams.isNull("holdingState") || actionParams.holdingState == 'no') {
+      warningParams.note = "#ReShareSupplierConditionsAssumedAgreed#"
+    } else {
+      warningParams.note = "#ReShareSupplierAwaitingConditionConfirmation#"
+    }
+    
+    // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
+    if (pr.isRequester == false) {
+      result = sendSupplyingAgencyMessage(pr, "Notification", null, warningParams)
+    } else {
+      log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
+    }
+    return result;
+  }
+
+  public boolean sendSupplierCancelResponse(PatronRequest pr, Object actionParams) {
+    /* This method will send a cancellation response iso18626 message */
+    
+    log.debug("sendSupplierCancelResponse(${pr})");
+    boolean result = false;
+    String status;
+
+     if (!actionParams.isNull("cancelResponse")){
+
+        switch (actionParams.cancelResponse) {
+          case 'yes':
+            status = "Cancelled"
+            break;
+          case 'no':
+            break;
+          default:
+            log.warn("sendSupplierCancelResponse received unexpected cancelResponse: ${actionParams.cancelResponse}")
+            break;
+        }
+
+        // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
+        if (pr.isRequester == false) {
+          result = sendSupplyingAgencyMessage(pr, "CancelResponse", status, actionParams)
+        } else {
+          log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
+        }
+     } else {
+      log.error("sendSupplierCancelResponse expected to receive a cancelResponse")
+     }
+
+    return result;
+  }
+
+  public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     log.debug("actionMessage(${pr})");
     boolean result = false;
 
@@ -304,21 +381,34 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     }
   }
     public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
-
-    // ToDo: understand why sendRequestingAgencyMessage(pr, 'Received', actionParams.note) is not sufficient for both cases?
-    if (!actionParams.isNull("note")) {
-      sendRequestingAgencyMessage(pr, 'Received', actionParams.note);
-    } else {
-      sendRequestingAgencyMessage(pr, 'Received', null);
-    }
+    sendRequestingAgencyMessage(pr, 'Received', actionParams);
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
     log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
-    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams?.note);
+    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 
-  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, String note = null) {
+  public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
+    pr.previousState = pr.state.code
+    switch (action) {
+      case 'requesterRejectedConditions':
+        pr.requestToContinue = true;
+        break;
+      case 'requesterCancel':
+        pr.requestToContinue = false;
+        break;
+      default:
+        log.error("Action ${action} should not be able to send a cancel message")
+        break;
+    }
+    pr.save(flush:true, failOnError:true);
+    
+    sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
+  }
+
+  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
+    String note = messageParams?.note
     boolean result = false;
 
     Long rotaPosition = pr.rotaPosition;
@@ -355,17 +445,38 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   }
 
 
-  public void sendResponse(PatronRequest pr, 
-                            String status, 
-                            String reasonUnfilled = null,
-                            String note = null) {
-    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, reasonUnfilled, note);
+  public void sendResponse(PatronRequest pr,
+                            String status,
+                            Map responseParams) {
+    sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
+  }
+
+  public void addCondition(PatronRequest pr, Map responseParams) {
+    Map conditionParams = responseParams
+    log.debug("addCondition::(${pr})")
+
+    if (!responseParams.isNull("note")){
+      conditionParams.note = "#ReShareAddLoanCondition# ${responseParams.note}"
+    } else {
+      conditionParams.note = "#ReShareAddLoanCondition#"
+    }
+
+    if (!conditionParams.isNull("loanCondition")) {
+      sendMessage(pr, conditionParams);
+    } else {
+      log.warn("addCondition not handed any conditions")
+    }
   }
 
   public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {
-    sendSupplyingAgencyMessage(pr, 'StatusChange', status, null, note);
+    Map params
+    if (note) {
+      params = [note: note]
+    }
+    
+    sendSupplyingAgencyMessage(pr, 'StatusChange', status, params);
   }
 
   // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
@@ -374,9 +485,8 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
   public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
-                                         String status, 
-                                         String reasonUnfilled = null,
-                                         String note = null) {
+                                         String status,
+                                         Map messageParams) {
 
     log.debug("sendResponse(....)");
     boolean result = false;
@@ -386,7 +496,7 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     if ( ( pr.resolvedSupplier != null ) && 
          ( pr.resolvedRequester != null ) ) {
 
-      Map supplying_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, reasonUnfilled, note)
+      Map supplying_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, messageParams)
 
       log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplying_message_request})");
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
@@ -407,7 +517,11 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
   }
 
   
-  public void outgoingNotificationEntry(PatronRequest pr, String note, String action, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+  public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+
+    String attachedAction = actionMap.action
+    String actionStatus = actionMap.status
+    String actionData = actionMap.data
 
     def outboundMessage = new PatronRequestNotification()
     outboundMessage.setPatronRequest(pr)
@@ -416,7 +530,9 @@ public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
     outboundMessage.setMessageReceiver(message_receiver)
     outboundMessage.setIsSender(true)
 
-    outboundMessage.setAttachedAction(action)
+    outboundMessage.setAttachedAction(attachedAction)
+    outboundMessage.setActionStatus(actionStatus)
+    outboundMessage.setActionData(actionData)
 
     outboundMessage.setMessageContent(note)
     

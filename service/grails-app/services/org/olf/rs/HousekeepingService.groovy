@@ -71,30 +71,35 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED', '0010', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_INVALID_PATRON', '0011', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER')
-        Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true)
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true)
+        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CANCEL_PENDING', '0027', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER', '0028', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+        Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_PENDING', '0060', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
+        // This one doesn't appear to be in use
+        // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
 
         // Responder / Lender State Model
         Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
+        Status.lookupOrCreate('Responder', 'RES_PENDING_CONDITIONAL_ANSWER', '0006', true);
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true);
@@ -107,30 +112,47 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
+        Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierAddCondition', 'M')
+        
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierConditionalSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
 
+        AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierMarkConditionsAgreed', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'message', 'M')
+
+        AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'supplierRespondToCancel', 'M')
+
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierAddCondition', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
 
@@ -141,16 +163,29 @@ public class HousekeepingService {
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'requesterCancel', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterAgreeConditions', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterRejectConditions', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+        AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'requesterReceived', 'M')
@@ -161,8 +196,8 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'message', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'shippedReturn', 'M')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'shippedReturn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
 
