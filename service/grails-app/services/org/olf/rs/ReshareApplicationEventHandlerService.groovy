@@ -630,7 +630,9 @@ public class ReshareApplicationEventHandlerService {
                 break;
               case 'N':
                 log.debug("Negative cancel response received")
-                pr.state = lookupStatus('PatronRequest', pr.previousState)
+                def previousState = lookupStatus('PatronRequest', pr.previousState)
+                auditEntry(pr, pr.state, previousState, "Supplier denied cancellation.", null)
+                pr.state = previousState
                 pr.previousState = null
                 break;
               default:
