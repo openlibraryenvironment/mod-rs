@@ -237,6 +237,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
+              response.status = 422;
               break;
           }
         }
