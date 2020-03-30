@@ -207,7 +207,7 @@ public class SharedIndexService {
     
                 log.debug("Response for holdings on ${id}\n\n${r1.data}\n\n");
     
-                r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
+                r1.data.instance_storage_instances_SINGLE?.holdingsRecords2?.each { hr ->
                   log.debug("Process holdings record ${hr}");
                   String location = hr.permanentLocation.code
                   String[] split_location = location.split('/')
