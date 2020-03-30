@@ -238,6 +238,7 @@ and sa.service.businessFunction.value=:ill
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
+
     def iso18626_response = configure {
       request.uri = address
       request.contentType = XML[0]

@@ -22,138 +22,143 @@ class iso18626Controller {
     log.debug("iso18626Controller::index(${params})");
 
     try {
-      org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
-      log.debug("GPATH MESSAGE: ${iso18626_msg}")
-      String recipient;
-      String tenant;
-
-      if ( iso18626_msg.request != null ) {
-        log.debug("Process inbound request message");
-
-        def mr = iso18626_msg.request;
-        def req_result = makeDefaultReqResult(mr, "REQUEST");
-
-        // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(mr.header.supplyingAgencyId);
-        tenant = globalConfigService.getTenantForSymbol(recipient);
-        if ( tenant ) {
-          log.debug("incoming request for ${tenant}");
-          Tenants.withId(tenant+'_mod_rs') {
-            req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
-
-            log.debug("result of req_request ${req_result}");
-
-            def confirmationMessage = makeConfirmationMessage(delegate, req_result)
-            StringWriter sw = new StringWriter();
-            sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-            String message = sw.toString();
-
-            log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-
-            render( contentType:"text/xml" ) {
-              confirmationMessage
+      if ( request.XML != null ) {
+        org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
+        log.debug("GPATH MESSAGE: ${iso18626_msg}")
+        String recipient;
+        String tenant;
+  
+        if ( iso18626_msg.request != null ) {
+          log.debug("Process inbound request message");
+  
+          def mr = iso18626_msg.request;
+          def req_result = makeDefaultReqResult(mr, "REQUEST");
+  
+          // Look in request.header.supplyingAgencyId for the intended recipient
+          recipient = getSymbolFor(mr.header.supplyingAgencyId);
+          tenant = globalConfigService.getTenantForSymbol(recipient);
+          if ( tenant ) {
+            log.debug("incoming request for ${tenant}");
+            Tenants.withId(tenant+'_mod_rs') {
+              req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+  
+              log.debug("result of req_request ${req_result}");
+  
+              def confirmationMessage = makeConfirmationMessage(delegate, req_result)
+              StringWriter sw = new StringWriter();
+              sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+              String message = sw.toString();
+  
+              log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+  
+              render( contentType:"text/xml" ) {
+                confirmationMessage
+              }
+  
             }
-
-          }
-        } else {
-          log.warn("Tenant not found.")
-
-          req_result.status = "ERROR"
-          req_result.errorType = "UnrecognisedDataValue"
-          req_result.errorValue = "RequestingAgencyId/${recipient}"
-
-          // TODO send back error response.
-          render( contentType:"text/xml" ) {
-            makeConfirmationMessage(delegate, req_result)
-          }
-        }
-      }
-      else if ( iso18626_msg.supplyingAgencyMessage != null ) {
-        log.debug("Process inbound supplyingAgencyMessage message");
-
-        def msam = iso18626_msg.supplyingAgencyMessage;
-        def req_result = makeDefaultReqResult(msam, "SUPPLYING_AGENCY_MESSAGE");
-
-        // Look in request.header.requestingAgencyId for the intended recipient
-        recipient = getSymbolFor(msam.header.requestingAgencyId);
-        tenant = globalConfigService.getTenantForSymbol(recipient);
-        if ( tenant ) {
-          log.debug("incoming supplying agency message for ${tenant}");
-          Tenants.withId(tenant+'_mod_rs') {
-
-            req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
-
-            log.debug("result of req_request ${req_result}");
-
-            def confirmationMessage = makeConfirmationMessage(delegate, req_result)
-            StringWriter sw = new StringWriter();
-            sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-            String message = sw.toString();
-
-            log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-
+          } else {
+            log.warn("Tenant not found.")
+  
+            req_result.status = "ERROR"
+            req_result.errorType = "UnrecognisedDataValue"
+            req_result.errorValue = "RequestingAgencyId/${recipient}"
+  
+            // TODO send back error response.
             render( contentType:"text/xml" ) {
-              confirmationMessage
-            }
-    
-          }
-        } else {
-          log.warn("Tenant not found.")
-
-          req_result.status = "ERROR"
-          req_result.errorType = "UnrecognisedDataValue"
-          req_result.errorValue = "SupplyingAgencyId/${recipient}"
-
-          render( contentType:"text/xml" ) {
-            makeConfirmationMessage(delegate, req_result)
-          }
-        }
-      }
-      else if ( iso18626_msg.requestingAgencyMessage != null ) {
-        log.debug("Process inbound requestingAgencyMessage message");
-
-        def mram = iso18626_msg.requestingAgencyMessage;
-        def req_result = makeDefaultReqResult(mram, "REQUESTING_AGENCY_MESSAGE");
-
-        // Look in request.header.supplyingAgencyId for the intended recipient
-        recipient = getSymbolFor(mram.header.supplyingAgencyId);
-        tenant = globalConfigService.getTenantForSymbol(recipient);
-        if ( tenant ) {
-          log.debug("incoming requesting agency message for ${tenant}");
-          Tenants.withId(tenant+'_mod_rs') {
-            req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
-            log.debug("result of req_request ${req_result}");
-
-            def confirmationMessage = makeConfirmationMessage(delegate, req_result)
-            StringWriter sw = new StringWriter();
-            sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-            String message = sw.toString();
-
-            log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-
-            render( contentType:"text/xml" ) {
-              confirmationMessage
+              makeConfirmationMessage(delegate, req_result)
             }
           }
-
-
-        } else {
-          log.warn("Tenant not found.")
-
-          req_result.status = "ERROR"
-          req_result.errorType = "UnrecognisedDataValue"
-          req_result.errorValue = "RequestingAgencyId/${recipient}"
-
-          render( contentType:"text/xml" ) {
-            makeConfirmationMessage(delegate, req_result)
+        }
+        else if ( iso18626_msg.supplyingAgencyMessage != null ) {
+          log.debug("Process inbound supplyingAgencyMessage message");
+  
+          def msam = iso18626_msg.supplyingAgencyMessage;
+          def req_result = makeDefaultReqResult(msam, "SUPPLYING_AGENCY_MESSAGE");
+  
+          // Look in request.header.requestingAgencyId for the intended recipient
+          recipient = getSymbolFor(msam.header.requestingAgencyId);
+          tenant = globalConfigService.getTenantForSymbol(recipient);
+          if ( tenant ) {
+            log.debug("incoming supplying agency message for ${tenant}");
+            Tenants.withId(tenant+'_mod_rs') {
+  
+              req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
+  
+              log.debug("result of req_request ${req_result}");
+  
+              def confirmationMessage = makeConfirmationMessage(delegate, req_result)
+              StringWriter sw = new StringWriter();
+              sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+              String message = sw.toString();
+  
+              log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+  
+              render( contentType:"text/xml" ) {
+                confirmationMessage
+              }
+      
+            }
+          } else {
+            log.warn("Tenant not found.")
+  
+            req_result.status = "ERROR"
+            req_result.errorType = "UnrecognisedDataValue"
+            req_result.errorValue = "SupplyingAgencyId/${recipient}"
+  
+            render( contentType:"text/xml" ) {
+              makeConfirmationMessage(delegate, req_result)
+            }
           }
         }
-
+        else if ( iso18626_msg.requestingAgencyMessage != null ) {
+          log.debug("Process inbound requestingAgencyMessage message");
+  
+          def mram = iso18626_msg.requestingAgencyMessage;
+          def req_result = makeDefaultReqResult(mram, "REQUESTING_AGENCY_MESSAGE");
+  
+          // Look in request.header.supplyingAgencyId for the intended recipient
+          recipient = getSymbolFor(mram.header.supplyingAgencyId);
+          tenant = globalConfigService.getTenantForSymbol(recipient);
+          if ( tenant ) {
+            log.debug("incoming requesting agency message for ${tenant}");
+            Tenants.withId(tenant+'_mod_rs') {
+              req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
+              log.debug("result of req_request ${req_result}");
+  
+              def confirmationMessage = makeConfirmationMessage(delegate, req_result)
+              StringWriter sw = new StringWriter();
+              sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+              String message = sw.toString();
+  
+              log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+  
+              render( contentType:"text/xml" ) {
+                confirmationMessage
+              }
+            }
+  
+  
+          } else {
+            log.warn("Tenant not found.")
+  
+            req_result.status = "ERROR"
+            req_result.errorType = "UnrecognisedDataValue"
+            req_result.errorValue = "RequestingAgencyId/${recipient}"
+  
+            render( contentType:"text/xml" ) {
+              makeConfirmationMessage(delegate, req_result)
+            }
+          }
+  
+        }
+        else {
+          render(status: 400, text: 'The sent request is not valid')
+        }
       }
       else {
+        log.error("NO XML Supplied in request. Unable to proceed");
         render(status: 400, text: 'The sent request is not valid')
       }
-
     }
     catch ( Exception e ) {
       e.printStackTrace()
