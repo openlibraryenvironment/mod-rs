@@ -244,6 +244,11 @@ and sa.service.businessFunction.value=:ill
       request.headers['accept'] = 'application/xml'
     }.post {
       request.body = message
+
+      response.failure { FromServer fs ->
+        log.error("Failure response from remote ISO18626 servicei (${address}): ${fs.getStatusCode()} ${fs}");
+      }
+
     }
   }
 
