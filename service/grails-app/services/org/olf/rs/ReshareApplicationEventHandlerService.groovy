@@ -478,7 +478,11 @@ public class ReshareApplicationEventHandlerService {
         if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {
           log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
           // We join all the lines of physical address and stuff them into pickup location for now.
-          pr.pickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
+          String stringified_pickup_location = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
+
+          // If we've not been given any address information, don't translate that into a pickup location
+          if ( stringified_pickup_location?.trim()?.length() > 0 ) 
+            pr.pickupLocation = stringified_pickup_location
         }
       }
 

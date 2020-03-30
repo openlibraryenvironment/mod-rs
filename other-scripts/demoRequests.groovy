@@ -9,5 +9,9 @@ okapi.createRequest([
                      patronReference: 'IanTest04635',
                      patronSurname: 'Ibbotson',
                      patronGivenName: 'Ian',
+                     pickupLocation: 'Surely this is nullable?',
                      patronType:'PT',
-                     requestingInstitutionSymbol:'RESHARE:newSchool']);
+                     requestingInstitutionSymbol:'RESHARE:KNOWINT01',
+                     rota:[
+                         [ directoryId:'RESHARE:KNOWINT01', rotaPosition:'0' ]
+                     ] ]);
