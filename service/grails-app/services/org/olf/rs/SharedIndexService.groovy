@@ -164,7 +164,7 @@ public class SharedIndexService {
 
   // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
-  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber illPolicyId permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber illPolicy { name }  permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
   "variables":{
     "id":"'''+id+'''" } }'''
 
@@ -216,7 +216,7 @@ public class SharedIndexService {
                     
                     if ( result.find { it.symbol==('RESHARE:'+split_location[0]) } == null ) {
                       // And we don't already have the location
-                      result.add([symbol:'RESHARE:'+split_location[0], illPolicy:'Unknown'])
+                      result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])
                     }
                   }
                 }
