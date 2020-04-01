@@ -249,6 +249,8 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
+          def operation_data = [:]
+          operation_data.candidates=[]
           log.debug("No rota supplied - call sharedIndexService.findAppropriateCopies to find appropriate copies");
           // NO rota supplied - see if we can use the shared index service to locate appropriate copies
           // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
@@ -258,17 +260,32 @@ public class ReshareApplicationEventHandlerService {
           int ctr = 0;
 
           if (  sia.size() > 0 ) {
+
+            // Pre-process the list of candidates
             sia?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
-                req.addToRota (new PatronRequestRota(
-                                                     patronRequest:req,
-                                                     rotaPosition:ctr++, 
-                                                     directoryId:av_stmt.symbol,
-                                                     instanceIdentifier:av_stmt.instanceIdentifier,
-                                                     copyIdentifier:av_stmt.copyIdentifier,
-                                                     state: lookupStatus('PatronRequest', 'REQ_IDLE')))
+                operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
+                if ( av_stmnt.illPolicy == 'Will lend' ) {
+
+                  // Pull back any data we need from the shared index in order to sort the list of candidates
+                  req.addToRota (new PatronRequestRota(
+                                                       patronRequest:req,
+                                                       rotaPosition:ctr++, 
+                                                       directoryId:av_stmt.symbol,
+                                                       instanceIdentifier:av_stmt.instanceIdentifier,
+                                                       copyIdentifier:av_stmt.copyIdentifier,
+                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE')))
+                }
+                else {
+                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${}\""]);
+                }
               }
             }
+
+            // Done looping through candidates - sort here
+
+
+            // Procesing
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                        'Lending String calculated from shared index', null);
