@@ -66,9 +66,11 @@ if ( 1==1 ) {
                        patronReference: 'PR',
                        volume:'Please supply vol 1-2 of 23',
                        systemInstanceIdentifier:'3246e0db-6d41-442b-ae61-27f1d607a8dc',
-                       requestingInstitutionSymbol:'RESHARE:KNOWINT01',
+                       requestingInstitutionSymbol:'RESHARE:MVS',
                        rota:[
-                         [ directoryId:'RESHARE:KNOWINT01', rotaPosition:'0' ]
+                         [ directoryId:'RESHARE:TEU', rotaPosition:'0' ],
+                         [ directoryId:'RESHARE:VLA', rotaPosition:'2' ],
+                         [ directoryId:'RESHARE:KNOWINT', rotaPosition:'3' ]
                        ]]);
 
 }
