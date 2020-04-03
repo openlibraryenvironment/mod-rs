@@ -136,8 +136,8 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierMarkConditionsAgreed', 'M')
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'message', 'M')
-        
-        
+
+        AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'supplierRespondToCancel', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
@@ -172,6 +172,8 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'requesterCancel', 'M')

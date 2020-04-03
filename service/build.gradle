@@ -50,6 +50,7 @@ repositories {
   maven { url "http://maven.k-int.com/content/repositories/releases" }
   maven { url "https://repo.grails.org/grails/core" }
   maven { url "http://maven.k-int.com/content/repositories/snapshots" }
+  maven { url "https://repository.folio.org/repository/maven-folio" }
 }
 
 dependencies {
@@ -88,10 +89,11 @@ dependencies {
   compile 'com.k_int.grails:web-toolkit:3.7.1'
   compile 'com.k_int.okapi:grails-okapi:3.6.16'
   compile 'org.apache.kafka:kafka-clients:2.3.0'
-
   runtime "com.zaxxer:HikariCP:3.2.0"
-
   compile 'org.grails.plugins:rxjava'
+
+  // uncomment once we have the standalone jar version
+  // compile 'org.olf.rs:lib-ncip-client:0.3.0'
 
   console "org.grails:grails-console"
   testCompile "org.grails:grails-gorm-testing-support"
@@ -108,7 +110,7 @@ dependencies {
   compile 'org.w3c.css:sac:1.3'
 
   // Domain model for directory
-  compile 'org.olf.reshare.dm.directory:dm-directory:1.1.7'
+  compile 'org.olf.reshare.dm.directory:dm-directory:1.1.10'
   compile 'org.scala-saddle:google-rfc-2445:20110304'
 }
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/

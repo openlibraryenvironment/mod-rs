@@ -238,12 +238,18 @@ and sa.service.businessFunction.value=:ill
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
+
     def iso18626_response = configure {
       request.uri = address
       request.contentType = XML[0]
       request.headers['accept'] = 'application/xml'
     }.post {
       request.body = message
+
+      response.failure { FromServer fs ->
+        log.error("Failure response from remote ISO18626 servicei (${address}): ${fs.getStatusCode()} ${fs}");
+      }
+
     }
   }
 

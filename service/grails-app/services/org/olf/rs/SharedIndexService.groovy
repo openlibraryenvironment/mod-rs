@@ -30,8 +30,12 @@ public class SharedIndexService {
     try {
       log.debug("Try graphql")
       if ( description?.systemInstanceIdentifier != null ) {
-        sharedIndexHoldings(description?.systemInstanceIdentifier).each { ls ->
-          result.add(new AvailabilityStatement(symbol:ls, instanceIdentifier:null, copyIdentifier:null));
+        sharedIndexHoldings(description?.systemInstanceIdentifier).each { shared_index_availability ->
+          result.add(new AvailabilityStatement(
+                                               symbol:shared_index_availability.symbol, 
+                                               instanceIdentifier:null, 
+                                               copyIdentifier:null,
+                                               illPolicy:shared_index_availability.illPolicy));
         }
       }
       else {
@@ -154,13 +158,13 @@ public class SharedIndexService {
 
   // https://github.com/folio-org/mod-graphql/blob/master/doc/example-queries.md#using-curl-from-the-command-line
 
-  private List<String> sharedIndexHoldings(String id) {
+  private List<Map> sharedIndexHoldings(String id) {
 
-    List<String> result = []
+    List<Map> result = []
 
   // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
-  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber illPolicy { name }  permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
   "variables":{
     "id":"'''+id+'''" } }'''
 
@@ -203,15 +207,16 @@ public class SharedIndexService {
     
                 log.debug("Response for holdings on ${id}\n\n${r1.data}\n\n");
     
-                r1.data.instance_storage_instances_SINGLE.holdingsRecords2.each { hr ->
+                r1.data.instance_storage_instances_SINGLE?.holdingsRecords2?.each { hr ->
                   log.debug("Process holdings record ${hr}");
                   String location = hr.permanentLocation.code
                   String[] split_location = location.split('/')
                   if ( split_location.length == 4 ) {
                     // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
-                    if ( ! result.contains('RESHARE:'+split_location[0]) ) {
+                    
+                    if ( result.find { it.symbol==('RESHARE:'+split_location[0]) } == null ) {
                       // And we don't already have the location
-                      result.add('RESHARE:'+split_location[0])
+                      result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])
                     }
                   }
                 }

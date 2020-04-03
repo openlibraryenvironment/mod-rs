@@ -5,6 +5,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
 import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
+import org.olf.okapi.modules.directory.NamingAuthority;
 
 
 // When adding new section names into this file please make sure they are in camel case.
@@ -150,6 +151,14 @@ try {
   def cp_local_widget2 = ensureTextProperty('local_widget_2', true, label='Widget 2');
   def cp_local_widget3 = ensureTextProperty('local_widget_3', true, label='Widget 3');
   def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
+
+  NamingAuthority reshare = NamingAuthority.findBySymbol('RESHARE') ?: new NamingAuthority(symbol:'RESHARE').save(flush:true, failOnError:true);
+  NamingAuthority isil = NamingAuthority.findBySymbol('ISIL') ?: new NamingAuthority(symbol:'ISIL').save(flush:true, failOnError:true);
+  NamingAuthority oclc = NamingAuthority.findBySymbol('OCLC') ?: new NamingAuthority(symbol:'OCLC').save(flush:true, failOnError:true);
+  NamingAuthority exl = NamingAuthority.findBySymbol('EXL') ?: new NamingAuthority(symbol:'EXL').save(flush:true, failOnError:true);
+  NamingAuthority palci = NamingAuthority.findBySymbol('PALCI') ?: new NamingAuthority(symbol:'PALCI').save(flush:true, failOnError:true);
+
+
   println("_data.groovy complete");
 }
 catch ( Exception e ) {
