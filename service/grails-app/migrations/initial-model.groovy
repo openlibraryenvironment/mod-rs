@@ -1514,4 +1514,21 @@ databaseChangeLog = {
         }
     }
 
+    // changeSet(author: "ianibbo (generated)", id: "20200331-1432-01") {
+    //     addUniqueConstraint(columnNames: "na_symbol", constraintName: "unique_naming_authority", tableName: "naming_authority")
+    //     addUniqueConstraint(columnNames: "norm_value", constraintName: "unique_tag", tableName: "tag")
+    // }
+
+    changeSet(author: "ethanfreestone (manual)", id: "202004031014-001") {
+        addColumn(tableName: "directory_entry") {
+            column(name: "de_type_rv_fk", type: "VARCHAR(36)")
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20191115-1348-001") {
+        addColumn(tableName: "directory_entry") {
+            column(name: "de_published_last_update", type: "BIGINT");
+        }
+    }
+
 }

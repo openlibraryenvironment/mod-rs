@@ -93,7 +93,7 @@ dependencies {
   compile 'org.grails.plugins:rxjava'
 
   // uncomment once we have the standalone jar version
-  // compile 'org.olf.rs:lib-ncip-client:0.3.0'
+  compile 'org.olf.rs:lib-ncip-client:0.5.0'
 
   console "org.grails:grails-console"
   testCompile "org.grails:grails-gorm-testing-support"
