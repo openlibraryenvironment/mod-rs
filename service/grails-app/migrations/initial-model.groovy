@@ -1525,7 +1525,7 @@ databaseChangeLog = {
         }
     }
 
-    changeSet(author: "ianibbo (manual)", id: "20191115-1348-001") {
+    changeSet(author: "ianibbo (manual)", id: "20200406-0919-001") {
         addColumn(tableName: "directory_entry") {
             column(name: "de_published_last_update", type: "BIGINT");
         }
