@@ -13,6 +13,9 @@ import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.circ.client.LookupUser;
+import org.olf.rs.circ.client.NCIP2Client;
+import org.json.JSONObject;
 
 
 /**
@@ -210,7 +213,69 @@ public class DefaultHostLMSService implements HostLMSActions {
     return result
   }
 
+  /**
+   * @param patron_id - the patron to look up
+   * @return A map with the following keys {
+   *   status:'OK'|'FAIL'
+   *   userid
+   *   givenName
+   *   surname
+   *   email
+   * }
+   */
   private Map ncip2LookupPatron(String patron_id) {
+    Map result = [ status:'FAIL' ];
+    log.debug("ncip2LookupPatron(${patron_id})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+
+    if ( ( ncip_server_address != null ) &&
+         ( ncip_from_agency != null ) &&
+         ( ncip_app_profile != null ) ) {
+      log.debug("Request patron from ${ncip_server_address}");
+      NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+      LookupUser lookupUser = new LookupUser()
+                  .setUserId(patron_id)
+                  .includeUserAddressInformation()
+                  .includeUserPrivilege()
+                  .includeNameInformation()
+                  .setToAgency(ncip_from_agency_setting)
+                  .setFromAgency(ncip_from_agency_setting)
+                  .setApplicationProfileType(ncip_app_profile_setting);
+      JSONObject response = ncip2Client.send(lookupUser);
+
+      if ( ( response ) && ( response.problems == null ) ) {
+        result.status='OK'
+        result.userid=response.userid
+        result.givenName=response.firstName
+        result.surname=response.lastName
+        result.email=(response.electronicAddresses.find { it.key=='electronic mail address' })?.value
+        result.tel=(response.electronicAddresses.find { it.key=='TEL' })?.value
+      }
+      else {
+        result.problems=response.problems
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * @param patron_id - the patron to look up
+   * @return A map with the following keys {
+   *   status:'OK'|'FAIL'
+   *   userid
+   *   givenName
+   *   surname
+   *   email
+   * }
+   */
+  private Map old_ncip2LookupPatron(String patron_id) {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
