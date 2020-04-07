@@ -14,6 +14,7 @@ import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.circ.client.LookupUser;
+import org.olf.rs.circ.client.CheckoutItem;
 import org.olf.rs.circ.client.NCIP2Client;
 import org.json.JSONObject;
 
@@ -364,17 +365,38 @@ public class DefaultHostLMSService implements HostLMSActions {
     }
   }
 
-  public Map checkoutItem(String itemBarcode,
+  public Map checkoutItem(String requestId,
+                          String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     return [
-      result:ncip2CheckoutItem(itemBarcode, borrowerBarcode)
+      result:ncip2CheckoutItem(request_id,itemBarcode, borrowerBarcode)
     ]
   }
 
   public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+    CheckoutItem checkoutItem = new CheckoutItem()
+                  .setUserId(borrowerBarcode)
+                  .setItemId(itemBarcode)
+                  .setRequestId(request_id)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .setApplicationProfileType(ncip_app_profile);
+                  //.setDesiredDueDate("2020-03-18");
+
+    JSONObject response = ncip2Client.send(checkoutItem);
+    log.debug("NCIP2 checkoutItem responseL ${response}");
     return false;
   }
 

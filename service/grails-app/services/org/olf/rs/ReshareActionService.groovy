@@ -41,7 +41,8 @@ public class ReshareActionService {
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
-          def checkout_result = host_lms.checkoutItem(actionParams?.itemBarcode, 
+          def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                      actionParams?.itemBarcode, 
                                                       pr.patronIdentifier,
                                                       pr.resolvedRequester)
           // If the host_lms adapter gave us a specific status to transition to, use it

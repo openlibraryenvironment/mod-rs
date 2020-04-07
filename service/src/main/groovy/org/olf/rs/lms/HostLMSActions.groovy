@@ -23,7 +23,8 @@ public interface HostLMSActions {
    * @See https://github.com/openlibraryenvironment/dm-directory/blob/master/grails-app/domain/org/olf/okapi/modules/directory/Symbol.groovy
    * @See https://github.com/openlibraryenvironment/mod-rs/blob/master/service/grails-app/services/org/olf/rs/HousekeepingService.groovy#L97
    */
-  public Map checkoutItem(String itemBarcode, 
+  public Map checkoutItem(String requestId,
+                          String itemBarcode, 
                           String borrowerBarcode, 
                           Symbol requesterDirectorySymbol);
 

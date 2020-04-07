@@ -292,7 +292,8 @@ public class AlephHostLMSService implements HostLMSActions {
   }
 
 
-  public Map checkoutItem(String itemBarcode, 
+  public Map checkoutItem(String requestId,
+                          String itemBarcode, 
                           String borrowerBarcode, 
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
