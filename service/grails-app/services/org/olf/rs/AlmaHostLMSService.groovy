@@ -15,6 +15,8 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.CheckinItem;
+import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.NCIP2Client;
 import org.json.JSONObject;
 
@@ -451,11 +453,48 @@ public class AlmaHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
-    return false;
+    log.debug("acceptItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    AcceptItem acceptItem = new AcceptItem()
+                  .setItemId(item_id)
+                  .setRequestId(request_id)
+                  .setUserId(user_id)
+                  .setAuthor(author) 
+                  .setTitle(title)
+                  .setIsbn(isbn)
+                  .setCallNumber(call_number)
+                  .setPickupLocation(pickup_location)
+                  .setToAgency(ncip_from_agency_setting)
+                  .setFromAgency(ncip_app_profile_setting)
+                  .setRequestedActionTypeString(requested_action)
+                  .setApplicationProfileType(ncip_app_profile_setting);
+    JSONObject response = ncip2Client.send(acceptItem);
+    log.debug(response);
+    boolean  result = true;
+
+    return result;
   }
 
   public boolean checkInItem(String item_id) {
-    return false;
+    boolean  result = true;
+    log.debug("checkInItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    CheckinItem checkinItem = new CheckinItem()
+                  .setItemId(item_id)
+                  .setToAgency(ncip_from_agency_setting)
+                  .setFromAgency(ncip_from_agency_setting)
+                  .includeBibliographicDescription()
+                  .setApplicationProfileType(ncip_app_profile_setting);
+    JSONObject response = ncip2Client.send(checkinItem);
+    log.debug(response);
+    return result;
   }
 
 }
