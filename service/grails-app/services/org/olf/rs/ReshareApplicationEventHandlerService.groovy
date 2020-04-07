@@ -265,7 +265,7 @@ public class ReshareApplicationEventHandlerService {
             sia?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
                 operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
-                if ( av_stmnt.illPolicy == 'Will lend' ) {
+                if ( av_stmt.illPolicy == 'Will lend' ) {
 
                   // Pull back any data we need from the shared index in order to sort the list of candidates
                   req.addToRota (new PatronRequestRota(
