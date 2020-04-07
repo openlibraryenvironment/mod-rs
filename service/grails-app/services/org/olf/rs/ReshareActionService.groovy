@@ -381,8 +381,42 @@ public class ReshareActionService {
       log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
     }
   }
-    public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
+
+
+  public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
+
+    // Check the item in to the local LMS
+    HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+    if ( host_lms ) {
+      try {
+        // Call the host lms to check the item out of the host system and in to reshare
+        def accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+                                                pr.hrid,
+                                                pr.patronIdentifier, // user_idA
+                                                pr.author, // author,
+                                                pr.title, // title,
+                                                pr.isbn, // isbn,
+                                                pr.localCallNumber, // call_number,
+                                                pr.pickupLocation, // pickup_location,
+                                                null) // requested_action
+      }
+      catch ( Exception e ) {
+        log.error("NCIP Problem",e);
+      }
+    }
+   
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
+  }
+
+  public void handleItemReturned(PatronRequest patron_request, Map params) {
+    log.debug("handleItemReturned(${pr?.id}, ${params}");
+    try {
+      // Call the host lms to check the item out of the host system and in to reshare
+      def accept_result = host_lms.checInItem(pr.hrid)
+    }
+    catch ( Exception e ) {
+      log.error("NCIP Problem",e);
+    }
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {

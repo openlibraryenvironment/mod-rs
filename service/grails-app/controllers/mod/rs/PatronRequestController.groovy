@@ -210,6 +210,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'itemReturned':
+              reshareActionService.handleItemReturned(patron_request, request.JSON.actionParams);
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'Responder', 'REQ_AWAITING_RETURN_SHIPPING');
               break;
             case 'supplierManualCheckout':
