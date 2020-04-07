@@ -13,6 +13,10 @@ import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.circ.client.LookupUser;
+import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.NCIP2Client;
+import org.json.JSONObject;
 
 
 
@@ -283,46 +287,38 @@ public class AlmaHostLMSService implements HostLMSActions {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency_config')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    String ncip_server_address = ncip_server_address_setting?.value
-    String ncip_from_agency = ncip_from_agency_setting?.value
-    String ncip_app_profile = ncip_app_profile_setting?.value
+    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
     if ( ( ncip_server_address != null ) &&
          ( ncip_from_agency != null ) &&
          ( ncip_app_profile != null ) ) {
       log.debug("Request patron from ${ncip_server_address}");
+      NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+      LookupUser lookupUser = new LookupUser()
+                  .setUserId(patron_id)
+                  .includeUserAddressInformation()
+                  .includeUserPrivilege()
+                  .includeNameInformation()
+                  .setToAgency(ncip_from_agency_setting)
+                  .setFromAgency(ncip_from_agency_setting)
+                  .setApplicationProfileType(ncip_app_profile_setting);
+      JSONObject response = ncip2Client.send(lookupUser);
 
-      StringWriter sw = new StringWriter();
-      sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest(ncip_from_agency, ncip_app_profile, patron_id))
-      String message = sw.toString();
-
-      log.debug("NCIP Request: ${message}");
-
-      HttpBuilder.configure {
-        request.uri = ncip_server_address
-        request.contentType = XML[0]
-        request.headers['accept'] = 'application/xml'
-      }.post {
-        request.body = message
-
-        response.success { FromServer fs, Object body ->
-            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
-            log.debug("NCIP Response: ${mr}");
-            result=[
-              userid: mr.LookupUserResponse?.UserId?.UserIdentifierValue,
-              givenName: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.GivenName,
-              surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
-              status: 'OK'
-            ]
-            log.debug("Result of user lookup: ${result}");
-            // result = JsonOutput.toJson(body);
-        }
-        response.failure { FromServer fs ->
-          log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
-        }
+      if ( ( response ) && ( response.problems == null ) ) {
+        result.status='OK'
+        result.userid=response.userid
+        result.givenName=response.firstName
+        result.surname=response.lastName
+        result.email=(response.electronicAddresses.find { it.key=='electronic mail address' })?.value
+        result.tel=(response.electronicAddresses.find { it.key=='TEL' })?.value
+      }
+      else {
+        result.problems=response.problems
       }
     }
     else {
@@ -331,7 +327,6 @@ public class AlmaHostLMSService implements HostLMSActions {
 
     return result
   }
-
 
   def makeNCIPLookupUserRequest(String agency, String application_profile, String user_id) {
     return {
@@ -406,6 +401,32 @@ public class AlmaHostLMSService implements HostLMSActions {
   }
 
 
+  public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
+    log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+    CheckoutItem checkoutItem = new CheckoutItem()
+                  .setUserId(borrowerBarcode)
+                  .setItemId(itemBarcode)
+                  .setRequestId(request_id)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .setApplicationProfileType(ncip_app_profile);
+                  //.setDesiredDueDate("2020-03-18");
+
+    JSONObject response = ncip2Client.send(checkoutItem);
+    log.debug("NCIP2 checkoutItem responseL ${response}");
+    return false;
+  }
+
+
   public Map checkoutItem(String requestId,
                           String itemBarcode,
                           String borrowerBarcode,
@@ -416,12 +437,25 @@ public class AlmaHostLMSService implements HostLMSActions {
     ]
   }
 
-  public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
-    log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
-    return false;
-  }
-
   private String getZ3950Server() {
     return AppSetting.findByKey('z3950_server_address')?.value
   }
+
+
+ public boolean acceptItem(String item_id,
+                            String request_id,
+                            String user_id,
+                            String author,
+                            String title,
+                            String isbn,
+                            String call_number,
+                            String pickup_location,
+                            String requested_action) {
+    return false;
+  }
+
+  public boolean checkInItem(String item_id) {
+    return false;
+  }
+
 }

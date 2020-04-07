@@ -47,4 +47,21 @@ public class ManualHostLMSService implements HostLMSActions {
       result:false
     ]
   }
+
+  public boolean acceptItem(String item_id,
+                            String request_id,
+                            String user_id,
+                            String author,
+                            String title,
+                            String isbn,
+                            String call_number,
+                            String pickup_location,
+                            String requested_action) {
+    return false;
+  }
+
+  public boolean checkInItem(String item_id) {
+    return false;
+  }
+
 }
