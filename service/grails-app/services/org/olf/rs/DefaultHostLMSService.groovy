@@ -255,13 +255,16 @@ public class DefaultHostLMSService implements HostLMSActions {
 
       log.debug("Lookup user response: ${response}");
 
-      if ( ( response ) && ( response.get('problems') == null ) ) {
+      if ( ( response ) && ( ! response.has('problems') ) ) {
         result.status='OK'
-        result.userid=response.get('userid')
-        result.givenName=response.get('firstName')
-        result.surname=response.get('lastName')
-        result.email=(response.get('electronicAddresses')?.find { it.key=='electronic mail address' })?.value
-        result.tel=(response.get('electronicAddresses')?.find { it.key=='TEL' })?.value
+        result.userid=response.opt('userid')
+        result.givenName=response.opt('firstName')
+        result.surname=response.opt('lastName')
+        if ( response.has('electronicAddresses') ) {
+          JSONArray ea = response.getJSONArray('electronicAddresses')
+          result.email=(ea.find { it.key=='electronic mail address' })?.value
+          result.tel=(ea.find { it.key=='TEL' })?.value
+        }
       }
       else {
         result.problems=response.get('problems')
