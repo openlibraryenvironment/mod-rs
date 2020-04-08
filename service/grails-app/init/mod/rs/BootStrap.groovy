@@ -10,6 +10,8 @@ class BootStrap {
   
   def init = { servletContext ->
 
+    log.info("**mod-rs** ${grailsApplication.metadata.'info.app.version'} / ${grailsApplication.metadata.'build.time'}");
+
     Thread.sleep(2000);
     
     housekeepingService.ensureSharedSchema();
