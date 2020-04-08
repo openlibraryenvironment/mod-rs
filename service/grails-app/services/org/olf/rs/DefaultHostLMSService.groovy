@@ -20,6 +20,7 @@ import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.NCIP2Client;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 
 /**
