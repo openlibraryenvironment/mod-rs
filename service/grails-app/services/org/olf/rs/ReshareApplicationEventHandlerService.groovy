@@ -37,6 +37,7 @@ public class ReshareApplicationEventHandlerService {
   GlobalConfigService globalConfigService
   SharedIndexService sharedIndexService
   HostLMSService hostLMSService
+  ReshareActionService reshareActionService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -990,18 +991,18 @@ public class ReshareApplicationEventHandlerService {
       if ( routeRequestToLocation(pr, location) ) {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
-        sendResponse(pr, 'ExpectToSupply')
+        reshareActionService.sendResponse(pr,  'ExpectToSupply', [:])
       }
       else {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
         log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
-        sendResponse(pr, 'Unfilled', 'No copy');
+        reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
     }
     else {
       log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
-      sendResponse(pr, 'Unfilled', 'No copy');
+      reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
       auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
       pr.state=lookupStatus('Responder', 'RES_UNFILLED')
     }
