@@ -245,9 +245,9 @@ public class DefaultHostLMSService implements HostLMSActions {
                   .includeUserAddressInformation()
                   .includeUserPrivilege()
                   .includeNameInformation()
-                  .setToAgency(ncip_from_agency_setting)
-                  .setFromAgency(ncip_from_agency_setting)
-                  .setApplicationProfileType(ncip_app_profile_setting);
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .setApplicationProfileType(ncip_app_profile);
       JSONObject response = ncip2Client.send(lookupUser);
 
       if ( ( response ) && ( response.problems == null ) ) {
@@ -404,8 +404,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     return AppSetting.findByKey('z3950_server_address')?.value
   }
 
-
- public boolean acceptItem(String item_id,
+  public boolean acceptItem(String item_id,
                             String request_id,
                             String user_id,
                             String author,
@@ -414,11 +413,59 @@ public class DefaultHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
-    return false;
+    log.debug("acceptItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    AcceptItem acceptItem = new AcceptItem()
+                  .setItemId(item_id)
+                  .setRequestId(request_id)
+                  .setUserId(user_id)
+                  .setAuthor(author)
+                  .setTitle(title)
+                  .setIsbn(isbn)
+                  .setCallNumber(call_number)
+                  .setPickupLocation(pickup_location)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .setRequestedActionTypeString(requested_action)
+                  .setApplicationProfileType(ncip_app_profile);
+    JSONObject response = ncip2Client.send(acceptItem);
+    log.debug(response);
+    boolean  result = true;
+
+    return result;
   }
 
+
   public boolean checkInItem(String item_id) {
-    return false;
+    boolean  result = true;
+    log.debug("checkInItem(${itemBarcode},${borrowerBarcode})");
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    CheckinItem checkinItem = new CheckinItem()
+                  .setItemId(item_id)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .includeBibliographicDescription()
+                  .setApplicationProfileType(ncip_app_profile);
+    JSONObject response = ncip2Client.send(checkinItem);
+    log.debug(response);
+    return result;
   }
+
 
 }
