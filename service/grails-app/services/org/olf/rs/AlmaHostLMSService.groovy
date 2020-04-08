@@ -243,9 +243,9 @@ public class AlmaHostLMSService implements HostLMSActions {
       log.debug("Request patron from ${ncip_server_address}");
 
       StringWriter sw = new StringWriter();
-      sw << new StreamingMarkupBuilder().bind (makeNCIPRequestItemRequest( ncip_from_agency_setting, 
+      sw << new StreamingMarkupBuilder().bind (makeNCIPRequestItemRequest( ncip_from_agency, 
                                                                            '', 
-                                                                           ncip_app_profile_setting, 
+                                                                           ncip_app_profile, 
                                                                            bibliographic_identifier, 
                                                                            bibliographic_identifier_code, 
                                                                            request_id, 
@@ -306,9 +306,9 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .includeUserAddressInformation()
                   .includeUserPrivilege()
                   .includeNameInformation()
-                  .setToAgency(ncip_from_agency_setting)
-                  .setFromAgency(ncip_from_agency_setting)
-                  .setApplicationProfileType(ncip_app_profile_setting);
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
+                  .setApplicationProfileType(ncip_app_profile);
       JSONObject response = ncip2Client.send(lookupUser);
 
       if ( ( response ) && ( response.problems == null ) ) {
@@ -458,6 +458,10 @@ public class AlmaHostLMSService implements HostLMSActions {
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
     NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
     AcceptItem acceptItem = new AcceptItem()
                   .setItemId(item_id)
@@ -468,10 +472,10 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .setIsbn(isbn)
                   .setCallNumber(call_number)
                   .setPickupLocation(pickup_location)
-                  .setToAgency(ncip_from_agency_setting)
-                  .setFromAgency(ncip_app_profile_setting)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
                   .setRequestedActionTypeString(requested_action)
-                  .setApplicationProfileType(ncip_app_profile_setting);
+                  .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(acceptItem);
     log.debug(response);
     boolean  result = true;
@@ -485,13 +489,18 @@ public class AlmaHostLMSService implements HostLMSActions {
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+    String ncip_server_address = ncip_server_address_setting?.value
+    String ncip_from_agency = ncip_from_agency_setting?.value
+    String ncip_app_profile = ncip_app_profile_setting?.value
+
     NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
     CheckinItem checkinItem = new CheckinItem()
                   .setItemId(item_id)
-                  .setToAgency(ncip_from_agency_setting)
-                  .setFromAgency(ncip_from_agency_setting)
+                  .setToAgency(ncip_from_agency)
+                  .setFromAgency(ncip_from_agency)
                   .includeBibliographicDescription()
-                  .setApplicationProfileType(ncip_app_profile_setting);
+                  .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(checkinItem);
     log.debug(response);
     return result;
