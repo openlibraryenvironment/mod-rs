@@ -109,8 +109,8 @@ public class DefaultHostLMSService implements HostLMSActions {
     String z3950_server = getZ3950Server();
 
     if ( z3950_server != null ) {
-      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
-      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${+pr.systemInstanceIdentifier}");
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
 
       def z_response = HttpBuilder.configure {
         request.uri = z3950_proxy
