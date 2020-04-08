@@ -311,23 +311,25 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .setApplicationProfileType(ncip_app_profile);
       JSONObject response = ncip2Client.send(lookupUser);
 
-      if ( ( response ) && ( response.problems == null ) ) {
+      log.debug("Lookup user response: ${response}");
+
+      if ( ( response ) && ( ! response.has('problems') ) ) {
         result.status='OK'
-        result.userid=response.userid
-        result.givenName=response.firstName
-        result.surname=response.lastName
-        result.email=(response.electronicAddresses.find { it.key=='electronic mail address' })?.value
-        result.tel=(response.electronicAddresses.find { it.key=='TEL' })?.value
+        result.userid=response.opt('userid')
+        result.givenName=response.opt('firstName')
+        result.surname=response.opt('lastName')
+        if ( response.has('electronicAddresses') ) {
+          JSONArray ea = response.getJSONArray('electronicAddresses')
+          result.email=(ea.find { it.key=='electronic mail address' })?.value
+          result.tel=(ea.find { it.key=='TEL' })?.value
+        }
       }
       else {
-        result.problems=response.problems
+        result.problems=response.get('problems')
       }
     }
-    else {
-      log.error("MISSING CONFIGURATION FOR NCIP. Unable to perform patron lookup ${patron_id}/addr=${ncip_server_address}/from=${ncip_from_agency}/profile=${ncip_app_profile}");
-    }
 
-    return result
+    return result;
   }
 
   def makeNCIPLookupUserRequest(String agency, String application_profile, String user_id) {
