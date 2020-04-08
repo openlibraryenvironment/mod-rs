@@ -15,7 +15,10 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.CheckinItem;
+import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.NCIP2Client;
+
 import org.json.JSONObject;
 
 
