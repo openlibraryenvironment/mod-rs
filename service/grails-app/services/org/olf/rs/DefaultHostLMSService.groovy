@@ -378,13 +378,14 @@ public class DefaultHostLMSService implements HostLMSActions {
                           String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     return [
-      result:ncip2CheckoutItem(request_id,itemBarcode, borrowerBarcode)
+      result:ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
     ]
   }
 
-  public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
+  public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -398,7 +399,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     CheckoutItem checkoutItem = new CheckoutItem()
                   .setUserId(borrowerBarcode)
                   .setItemId(itemBarcode)
-                  .setRequestId(request_id)
+                  .setRequestId(requestId)
                   .setToAgency(ncip_from_agency)
                   .setFromAgency(ncip_from_agency)
                   .setApplicationProfileType(ncip_app_profile);

@@ -406,8 +406,8 @@ public class AlmaHostLMSService implements HostLMSActions {
   }
 
 
-  public boolean ncip2CheckoutItem(String itemBarcode, String borrowerBarcode) {
-    log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
+  public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+    log.debug("ncip2CheckoutItem(${requestId},${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
@@ -420,7 +420,7 @@ public class AlmaHostLMSService implements HostLMSActions {
     CheckoutItem checkoutItem = new CheckoutItem()
                   .setUserId(borrowerBarcode)
                   .setItemId(itemBarcode)
-                  .setRequestId(request_id)
+                  .setRequestId(requestId)
                   .setToAgency(ncip_from_agency)
                   .setFromAgency(ncip_from_agency)
                   .setApplicationProfileType(ncip_app_profile);
@@ -438,7 +438,7 @@ public class AlmaHostLMSService implements HostLMSActions {
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     return [
-      result:ncip2CheckoutItem(itemBarcode, borrowerBarcode)
+      result:ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
     ]
   }
 
