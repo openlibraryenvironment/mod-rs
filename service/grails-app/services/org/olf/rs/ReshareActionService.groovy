@@ -462,6 +462,7 @@ public class ReshareActionService {
 
     String message_sender_symbol = pr.requestingInstitutionSymbol;
 
+    log.debug("ROTA: ${pr.rota}")
     log.debug("ROTA TYPE: ${pr.rota.getClass()}")
     PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
     log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
