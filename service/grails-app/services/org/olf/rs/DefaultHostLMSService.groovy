@@ -424,7 +424,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     return AppSetting.findByKey('z3950_server_address')?.value
   }
 
-  public boolean acceptItem(String item_id,
+  public Map acceptItem(String item_id,
                             String request_id,
                             String user_id,
                             String author,
@@ -433,6 +433,7 @@ public class DefaultHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
+    Map result = [:]
     log.debug("acceptItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -458,14 +459,19 @@ public class DefaultHostLMSService implements HostLMSActions {
                   .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(acceptItem);
     log.debug(response);
-    boolean  result = true;
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+    }
 
     return result;
   }
 
 
-  public boolean checkInItem(String item_id) {
-    boolean  result = true;
+  public Map checkInItem(String item_id) {
+    Map result = [:]
     log.debug("checkInItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -484,6 +490,12 @@ public class DefaultHostLMSService implements HostLMSActions {
                   .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(checkinItem);
     log.debug(response);
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+    }
     return result;
   }
 

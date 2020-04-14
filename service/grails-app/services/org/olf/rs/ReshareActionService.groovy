@@ -390,7 +390,7 @@ public class ReshareActionService {
     if ( host_lms ) {
       try {
         // Call the host lms to check the item out of the host system and in to reshare
-        def accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
                                                 pr.hrid,
                                                 pr.patronIdentifier, // user_idA
                                                 pr.author, // author,
