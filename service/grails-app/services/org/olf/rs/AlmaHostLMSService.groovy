@@ -312,6 +312,7 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .setApplicationProfileType(ncip_app_profile);
       JSONObject response = ncip2Client.send(lookupUser);
 
+
       log.debug("Lookup user response: ${response}");
 
       if ( ( response ) && ( ! response.has('problems') ) ) {
