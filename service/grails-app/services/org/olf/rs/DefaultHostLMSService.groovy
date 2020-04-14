@@ -386,6 +386,8 @@ public class DefaultHostLMSService implements HostLMSActions {
 
   public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
 
+    boolean result = true;
+
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -407,7 +409,10 @@ public class DefaultHostLMSService implements HostLMSActions {
 
     JSONObject response = ncip2Client.send(checkoutItem);
     log.debug("NCIP2 checkoutItem responseL ${response}");
-    return false;
+    if ( response.has('problems') )
+      result = false;
+
+    return result;
   }
 
   private String getZ3950Server() {
