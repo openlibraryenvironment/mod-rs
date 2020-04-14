@@ -390,7 +390,7 @@ public class ReshareActionService {
     if ( host_lms ) {
       try {
         // Call the host lms to check the item out of the host system and in to reshare
-        def accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
                                                 pr.hrid,
                                                 pr.patronIdentifier, // user_idA
                                                 pr.author, // author,
@@ -462,6 +462,7 @@ public class ReshareActionService {
 
     String message_sender_symbol = pr.requestingInstitutionSymbol;
 
+    log.debug("ROTA: ${pr.rota}")
     log.debug("ROTA TYPE: ${pr.rota.getClass()}")
     PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
     log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")

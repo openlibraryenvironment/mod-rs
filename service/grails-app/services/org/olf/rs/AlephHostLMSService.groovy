@@ -311,7 +311,7 @@ public class AlephHostLMSService implements HostLMSActions {
     return AppSetting.findByKey('z3950_server_address')?.value
   }
 
- public boolean acceptItem(String item_id,
+ public Map acceptItem(String item_id,
                             String request_id,
                             String user_id,
                             String author,
@@ -320,11 +320,15 @@ public class AlephHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
-    return false;
+    return [
+      result:false
+    ];
   }
 
-  public boolean checkInItem(String item_id) {
-    return false;
+  public Map checkInItem(String item_id) {
+    return [
+      result:false
+    ];
   }
 
 }

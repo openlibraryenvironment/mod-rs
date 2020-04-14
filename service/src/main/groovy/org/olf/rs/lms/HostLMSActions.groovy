@@ -45,7 +45,7 @@ public interface HostLMSActions {
   public ItemLocation determineBestLocation(PatronRequest pr);
 
 
-  public boolean acceptItem(String item_id,
+  public Map acceptItem(String item_id,
                             String request_id,
                             String user_id,
                             String author,
@@ -55,5 +55,5 @@ public interface HostLMSActions {
                             String pickup_location,
                             String requested_action)
 
-  public boolean checkInItem(String item_id);
+  public Map checkInItem(String item_id);
 }
