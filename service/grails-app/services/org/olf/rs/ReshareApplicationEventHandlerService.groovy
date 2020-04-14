@@ -766,8 +766,9 @@ public class ReshareApplicationEventHandlerService {
             if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
               // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
               if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-                def new_state = lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                def new_state = lookupStatus('Responder', pr.previousState)
                 auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
+                pr.previousState = null;
                 pr.state = new_state;
               } else {
                 auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
@@ -901,6 +902,12 @@ public class ReshareApplicationEventHandlerService {
           break;
         case 'Cancelled':
           def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
+        case 'LoanCompleted':
+          def new_state = lookupStatus('PatronRequest', 'REQ_REQUEST_COMPLETE')
           auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
