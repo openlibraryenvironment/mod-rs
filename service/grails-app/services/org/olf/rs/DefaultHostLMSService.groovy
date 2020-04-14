@@ -379,14 +379,12 @@ public class DefaultHostLMSService implements HostLMSActions {
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-    return [
-      result:ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
-    ]
+    return ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
   }
 
-  public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+  public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
 
-    boolean result = true;
+    Map result = [:];
 
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
@@ -409,8 +407,15 @@ public class DefaultHostLMSService implements HostLMSActions {
 
     JSONObject response = ncip2Client.send(checkoutItem);
     log.debug("NCIP2 checkoutItem responseL ${response}");
-    if ( response.has('problems') )
-      result = false;
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+      result.dueDate = response.opt('dueDate');
+      result.userId = response.opt('userId')
+      result.itemId = response.opt('itemId')
+    }
 
     return result;
   }

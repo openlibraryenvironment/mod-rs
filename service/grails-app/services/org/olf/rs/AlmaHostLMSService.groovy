@@ -406,8 +406,10 @@ public class AlmaHostLMSService implements HostLMSActions {
   }
 
 
-  public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
-    boolean result = true;
+  public Map ncip2CheckoutItem(String requestId, 
+                                   String itemBarcode, 
+                                   String borrowerBarcode) {
+    Map result = [:]
     log.debug("ncip2CheckoutItem(${requestId},${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -429,8 +431,15 @@ public class AlmaHostLMSService implements HostLMSActions {
 
     JSONObject response = ncip2Client.send(checkoutItem);
     log.debug("NCIP2 checkoutItem responseL ${response}");
-    if ( response.has('problems') )
-      result = false;
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+      result.dueDate = response.opt('dueDate');
+      result.userId = response.opt('userId')
+      result.itemId = response.opt('itemId')
+    }
 
     return result;
   }
@@ -441,9 +450,7 @@ public class AlmaHostLMSService implements HostLMSActions {
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-    return [
-      result:ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
-    ]
+    return ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
   }
 
   private String getZ3950Server() {
