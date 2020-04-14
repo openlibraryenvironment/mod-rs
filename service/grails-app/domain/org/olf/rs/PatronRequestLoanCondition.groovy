@@ -16,7 +16,11 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
-  // The actual code sent along the ISO18626 message, such as "LibraryUseOnly", "SpecCollSupervReq" or "Other"
+  /* The actual code sent along the ISO18626 message, such as "LibraryUseOnly", "SpecCollSupervReq" or "Other"
+   * THIS MIGHT NOT BE HUMAN READABLE, and we might not have refdata corresponding to it in the receiver's system,
+   * so a translation lookup has to be done when displaying on the request. In cases where we know the refdata exists
+   * we can lookup that instead and use the label from there.
+   */
   String code
 
   // Note passed along with the code, human readable content for explanation of user defined codes or extension of what the code says
