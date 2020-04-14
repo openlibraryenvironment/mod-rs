@@ -289,46 +289,53 @@ public class AlmaHostLMSService implements HostLMSActions {
   private Map ncip2LookupPatron(String patron_id) {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
-
-    if ( ( ncip_server_address != null ) &&
-         ( ncip_from_agency != null ) &&
-         ( ncip_app_profile != null ) ) {
-      log.debug("Request patron from ${ncip_server_address}");
-      NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
-      LookupUser lookupUser = new LookupUser()
-                  .setUserId(patron_id)
-                  .includeUserAddressInformation()
-                  .includeUserPrivilege()
-                  .includeNameInformation()
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .setApplicationProfileType(ncip_app_profile);
-      JSONObject response = ncip2Client.send(lookupUser);
-
-
-      log.debug("Lookup user response: ${response}");
-
-      if ( ( response ) && ( ! response.has('problems') ) ) {
-        result.status='OK'
-        result.userid=response.opt('userid')
-        result.givenName=response.opt('firstName')
-        result.surname=response.opt('lastName')
-        if ( response.has('electronicAddresses') ) {
-          JSONArray ea = response.getJSONArray('electronicAddresses')
-          result.email=(ea.find { it.key=='electronic mail address' })?.value
-          result.tel=(ea.find { it.key=='TEL' })?.value
+    if ( ( patron_id != null ) && ( patron_id.length() > 0 ) ) {
+  
+      AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+      AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+      AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+  
+      String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+      String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+      String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+  
+      if ( ( ncip_server_address != null ) &&
+           ( ncip_from_agency != null ) &&
+           ( ncip_app_profile != null ) ) {
+        log.debug("Request patron from ${ncip_server_address}");
+        NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+        LookupUser lookupUser = new LookupUser()
+                    .setUserId(patron_id)
+                    .includeUserAddressInformation()
+                    .includeUserPrivilege()
+                    .includeNameInformation()
+                    .setToAgency(ncip_from_agency)
+                    .setFromAgency(ncip_from_agency)
+                    .setApplicationProfileType(ncip_app_profile);
+        JSONObject response = ncip2Client.send(lookupUser);
+  
+  
+        log.debug("Lookup user response: ${response}");
+  
+        if ( ( response ) && ( ! response.has('problems') ) ) {
+          result.status='OK'
+          result.userid=response.opt('userid')
+          result.givenName=response.opt('firstName')
+          result.surname=response.opt('lastName')
+          if ( response.has('electronicAddresses') ) {
+            JSONArray ea = response.getJSONArray('electronicAddresses')
+            result.email=(ea.find { it.key=='electronic mail address' })?.value
+            result.tel=(ea.find { it.key=='TEL' })?.value
+          }
+        }
+        else {
+          result.problems=response.get('problems')
         }
       }
-      else {
-        result.problems=response.get('problems')
-      }
+    }
+    else {
+      log.error("Skipping ncip lookup - patron id null or zero length");
     }
 
     return result;
