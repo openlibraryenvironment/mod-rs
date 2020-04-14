@@ -16,8 +16,10 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
+  // The actual code sent along the ISO18626 message, such as "LibraryUseOnly", "SpecCollSupervReq" or "Other"
   String code
 
+  // Note passed along with the code, human readable content for explanation of user defined codes or extension of what the code says
   String note
 
   Symbol relevantSupplier
