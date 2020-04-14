@@ -1,10 +1,14 @@
 buildscript {
   repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core" }
     maven { url "http://maven.k-int.com/content/repositories/releases" }
   }
   dependencies {
+    classpath "gradle.plugin.com.virgo47.gradle:ClasspathJar:1.0.0"
     classpath "org.grails:grails-gradle-plugin:$grailsVersion"
     classpath "org.grails.plugins:database-migration:3.0.4"
     classpath "com.bmuschko:gradle-docker-plugin:3.2.1"
@@ -15,6 +19,7 @@ buildscript {
 
 group "mod.rs"
 
+apply plugin: "com.virgo47.ClasspathJar"
 apply plugin: "eclipse"
 apply plugin: "org.grails.grails-web"
 apply plugin: "org.grails.plugins.views-json"

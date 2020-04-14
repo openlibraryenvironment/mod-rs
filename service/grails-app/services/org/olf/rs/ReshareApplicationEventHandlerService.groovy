@@ -144,7 +144,7 @@ public class ReshareApplicationEventHandlerService {
           if ( patron_details.userid == null )
             patron_details.userid = req.patronIdentifier
 
-          if ( patron_details != null ) && ( patron_details.userid != null ) ) {
+          if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
             req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
             if ( req.patronSurname == null )
               req.patronSurname = patron_details.surname;
