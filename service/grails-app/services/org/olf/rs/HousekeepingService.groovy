@@ -123,6 +123,10 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
 
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierMarkShipped', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierAddCondition', 'M')
+
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierAddCondition', 'M')
@@ -149,10 +153,6 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierAddCondition', 'M')
-
-        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierShip', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
 
