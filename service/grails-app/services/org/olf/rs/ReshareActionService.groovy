@@ -507,7 +507,7 @@ public class ReshareActionService {
   public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {
-    Map params
+    Map params = [:]
     if (note) {
       params = [note: note]
     }
