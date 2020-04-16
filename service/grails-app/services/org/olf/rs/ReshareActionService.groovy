@@ -399,6 +399,19 @@ public class ReshareActionService {
                                                 pr.localCallNumber, // call_number,
                                                 pr.pickupLocation, // pickup_location,
                                                 null) // requested_action
+
+        if ( accept_result?.result == true ) {
+          // Mark item as awaiting circ
+          def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+
+          reshareApplicationEventHandlerService.auditEntry(pr,
+                                          pr.state,
+                                          new_state,
+                                          message, null);
+          pr.state=new_state;
+          pr.save(flush:true, failOnError:true);
+          log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+        }
       }
       catch ( Exception e ) {
         log.error("NCIP Problem",e);
