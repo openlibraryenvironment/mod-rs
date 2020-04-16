@@ -320,13 +320,13 @@ public class AlmaHostLMSService implements HostLMSActions {
   
         if ( ( response ) && ( ! response.has('problems') ) ) {
           result.status='OK'
-          result.userid=response.opt('userid')
+          result.userid=response.opt('userId')
           result.givenName=response.opt('firstName')
           result.surname=response.opt('lastName')
           if ( response.has('electronicAddresses') ) {
             JSONArray ea = response.getJSONArray('electronicAddresses')
-            result.email=(ea.find { it.key=='electronic mail address' })?.value
-            result.tel=(ea.find { it.key=='TEL' })?.value
+            result.email=(ea.find { it.key=='mailto' })?.value
+            result.tel=(ea.find { it.key=='tel' })?.value
           }
         }
         else {
