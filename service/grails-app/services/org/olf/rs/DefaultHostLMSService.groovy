@@ -431,16 +431,16 @@ public class DefaultHostLMSService implements HostLMSActions {
   }
 
   public Map acceptItem(String item_id,
-                            String request_id,
-                            String user_id,
-                            String author,
-                            String title,
-                            String isbn,
-                            String call_number,
-                            String pickup_location,
-                            String requested_action) {
+                        String request_id,
+                        String user_id,
+                        String author,
+                        String title,
+                        String isbn,
+                        String call_number,
+                        String pickup_location,
+                        String requested_action) {
     Map result = [:]
-    log.debug("acceptItem(${itemBarcode},${borrowerBarcode})");
+    log.debug("acceptItem(${request_id},${user_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
@@ -478,7 +478,7 @@ public class DefaultHostLMSService implements HostLMSActions {
 
   public Map checkInItem(String item_id) {
     Map result = [:]
-    log.debug("checkInItem(${itemBarcode},${borrowerBarcode})");
+    log.debug("checkInItem(${request_id},${user_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
