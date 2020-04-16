@@ -449,7 +449,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     String ncip_from_agency = ncip_from_agency_setting?.value
     String ncip_app_profile = ncip_app_profile_setting?.value
 
-    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
     AcceptItem acceptItem = new AcceptItem()
                   .setItemId(item_id)
                   .setRequestId(request_id)
