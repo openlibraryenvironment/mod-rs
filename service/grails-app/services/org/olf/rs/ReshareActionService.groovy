@@ -425,7 +425,8 @@ public class ReshareActionService {
     log.debug("handleItemReturned(${pr?.id}, ${params}");
     try {
       // Call the host lms to check the item out of the host system and in to reshare
-      def accept_result = host_lms.checInItem(pr.hrid)
+      // def accept_result = host_lms.checkInItem(pr.hrid)
+      def accept_result = host_lms.checkInItem(pr.selectedItemBarcode)
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);
