@@ -421,16 +421,24 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
   }
 
-  public void handleItemReturned(PatronRequest patron_request, Map params) {
-    log.debug("handleItemReturned(${pr?.id}, ${params}");
+
+  /** 
+   * At the end of the process, check the item back into the HOST lms
+   */
+  public void checkOutOfReshare(PatronRequest patron_request, Map params) {
+    log.debug("checkOutOfReshare(${pr?.id}, ${params}");
     try {
       // Call the host lms to check the item out of the host system and in to reshare
       // def accept_result = host_lms.checkInItem(pr.hrid)
-      def accept_result = host_lms.checkInItem(pr.selectedItemBarcode)
+      def check_in_result = host_lms.checkInItem(pr.selectedItemBarcode)
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);
     }
+  }
+
+  public void handleItemReturned(PatronRequest patron_request, Map params) {
+    log.debug("handleItemReturned(${pr?.id}, ${params}");
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
