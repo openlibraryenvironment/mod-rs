@@ -1152,12 +1152,28 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
+  public String stripOutSystemCode(String string) {
+    String returnString = string
+    def systemCodes = [
+      "#ReShareAddLoanCondition#", 
+      "#ReShareLoanConditionAgreeResponse#",
+      "#ReShareSupplierConditionsAssumedAgreed#",
+      "#ReShareSupplierAwaitingConditionConfirmation#"
+      ]
+      systemCodes.each {code ->
+        if (string.contains(code)) {
+          returnString.replace(code, "")
+        }
+      }
+      return returnString
+  }
+
   public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
     def loanCondition = new PatronRequestLoanCondition()
     loanCondition.setPatronRequest(pr)
     loanCondition.setCode(code)
     if (note != null) {
-      loanCondition.setNote(note)
+      loanCondition.setNote(stripOutSystemCode(note))
     }
     loanCondition.setRelevantSupplier(relevantSupplier)
 
