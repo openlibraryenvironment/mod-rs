@@ -18,9 +18,7 @@ databaseChangeLog = {
                 constraints(nullable: "false")
             }
 
-            column(name: "owner_id", type: "VARCHAR(36)") {
-                constraints(nullable: "false")
-            }
+            column(name: "owner_id", type: "VARCHAR(36)")
         }
     }
 
