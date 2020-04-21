@@ -68,7 +68,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 
   }
 
-  private String toString() {
+  public String toString() {
     return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()
   }
 }
