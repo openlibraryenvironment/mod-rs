@@ -225,8 +225,9 @@ public class SharedIndexService {
               }
             }
 
-            response.failure { FromServer fs ->
+            response.failure { FromServer fs, Object r1 ->
               log.warn("** Failure response from shared index ${fs.getStatusCode()} when attempting to send Graphql to ${shared_index_base_url}/graphql - query: ${query}");
+              log.warn("** Response object: ${r1}");
             }
 
           }
