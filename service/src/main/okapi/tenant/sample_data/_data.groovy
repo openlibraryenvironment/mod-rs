@@ -109,14 +109,30 @@ try {
                                   key: 'host_lms_integration').save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
+
+  // Auto responder is on when an item can be found - will respond Will-Supply, when not found, left for a user to respond.
   RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
-  RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
+  // AutoResponder is ON and will automatically reply not-available if an item cannot be located
+  def ar_on = RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
 
   AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
                                   section:'autoResponder',
                                   settingType:'Refdata',
                                   vocab:'AutoResponder',
-                                  key: 'auto_responder_status').save(flush:true, failOnError: true);
+                                  key: 'auto_responder_status',
+                                  value: ar_on?.value).save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('AutoResponder_Cancel', 'Off');
+  def arc_on = RefdataValue.lookupOrCreate('AutoResponder_Cancel', 'On');
+  
+  AppSetting auto_responder_cancel = AppSetting.findByKey('auto_responder_cancel') ?: new AppSetting( 
+                                  section:'autoResponder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder_Cancel',
+                                  key: 'auto_responder_cancel',
+                                  value: arc_on?.value).save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
