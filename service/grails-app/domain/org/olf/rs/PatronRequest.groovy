@@ -131,6 +131,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Are we waiting for a protocol message to be sent  - If so, pendingAction will contain the action we are currently trying to perform */
   boolean awaitingProtocolResponse;
 
+  /** Is this item currently on loan */
+  Boolean activeLoan
+
   /** The position we are in the rota */
   Long rotaPosition;
 
@@ -262,6 +265,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     requestToContinue (nullable: false, blank: false)
 
     previousState (nullable: true)
+    activeLoan(nullable: true)
   }
 
   static mapping = {
@@ -338,13 +342,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronEmail column : 'pr_patron_email'
     patronNote column : 'pr_patron_note'
     pickupLocation column : 'pr_pref_service_point'
-
     resolvedPatron column : 'pr_resolved_patron_fk'
-
     requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
     requestToContinue column: 'pr_request_to_continue'
-
     previousState column: 'pr_previous_state'
+    activeLoan column: 'pr_active_loan'
 
     audit(sort:'dateCreated', order:'desc')
   }

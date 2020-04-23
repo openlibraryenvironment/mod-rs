@@ -28,6 +28,7 @@ public class ReshareActionService {
   ProtocolMessageService protocolMessageService
   ProtocolMessageBuildingService protocolMessageBuildingService
   HostLMSService hostLMSService
+  StatisticsService statisticsService
 
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
@@ -54,9 +55,11 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
           else {
-           // Otherwise, if the checkout succeeded or failed, set appropriately
-           Status s = null;
+            // Otherwise, if the checkout succeeded or failed, set appropriately
+            Status s = null;
             if ( checkout_result.result == true ) {
+              statisticsService.incrementCounter('/activeLoans');
+              pr.activeLoan=true
               s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
               auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
             }
@@ -431,6 +434,8 @@ public class ReshareActionService {
       // Call the host lms to check the item out of the host system and in to reshare
       // def accept_result = host_lms.checkInItem(pr.hrid)
       def check_in_result = host_lms.checkInItem(pr.selectedItemBarcode)
+      statisticsService.decrementCounter('/activeLoans');
+      patron_request.activeLoan=false
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);

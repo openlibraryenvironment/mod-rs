@@ -220,10 +220,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'supplierManualCheckout':
               reshareActionService.checkOutOfReshare(patron_request, request.JSON.actionParams);
+              // SimpleTransition does a save
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_AWAIT_SHIP');
               break;
             case 'supplierCheckOutOfReshare':
               reshareActionService.sendStatusChange(patron_request, "LoanCompleted", request.JSON.actionParams?.note)
+              // SimpleTransition does a save
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
               break;
             case 'cancel':

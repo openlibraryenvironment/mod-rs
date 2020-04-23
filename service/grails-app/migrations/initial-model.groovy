@@ -1560,4 +1560,8 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-003") {
+        addColumn(tableName: "pr_active_loan" type: "BOOLEAN")
+    }
+
 }
