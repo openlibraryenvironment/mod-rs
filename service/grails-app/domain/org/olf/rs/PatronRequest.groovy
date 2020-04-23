@@ -131,7 +131,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Are we waiting for a protocol message to be sent  - If so, pendingAction will contain the action we are currently trying to perform */
   boolean awaitingProtocolResponse;
 
-  /** Is this item currently on loan */
+  /** Supplier side property : Is this PR an item currently on loan */
   Boolean activeLoan
 
   /** The position we are in the rota */
