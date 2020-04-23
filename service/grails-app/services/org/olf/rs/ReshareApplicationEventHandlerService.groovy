@@ -88,6 +88,9 @@ public class ReshareApplicationEventHandlerService {
     },
     'SUPPLYING_AGENCY_MESSAGE_ind': { service, eventData ->
       service.handleSupplyingAgencyMessage(eventData);
+    },
+    'RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
+      service.handleCancelRequestReceived(eventData);
     }
 
   ]
@@ -783,10 +786,10 @@ public class ReshareApplicationEventHandlerService {
             pr.save(flush: true, failOnError: true)
             break;
           case 'Cancel':
+            // We cannot cancel a shipped item
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
             pr.previousState = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
-            pr.requesterRequestedCancellation = true;
             pr.save(flush: true, failOnError: true)
             break;
           default:
@@ -820,6 +823,27 @@ public class ReshareApplicationEventHandlerService {
     result.action = eventData.activeSection?.action
 
     return result;
+  }
+
+  private void handleCancelRequestReceived(eventData) {
+    PatronRequest.withNewTransaction { transaction_status ->
+      def req = delayedGet(eventData.payload.id, true);
+      String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
+      if ( auto_respond?.toLowerCase().startsWith('on') ) {
+        // System has auto-respond cancel on
+        if ( pr.state?.code=='RES_ITEM_SHIPPED' ) {
+          auditEntry(pr, pr.state, pr.state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel request", null)
+          reshareActionsService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
+        }
+        else {
+          auditEntry(pr, pr.state, pr.state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          reshareActionsService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
+        }
+      }
+      else {
+        // Set needs attention=true
+      }
+    }
   }
 
   private void handleCancelledWithSupplier(eventData) {
