@@ -1537,4 +1537,27 @@ databaseChangeLog = {
             column(name: "prr_lb_reason", type: "TEXT");
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-002") {
+        createTable(tableName: "counter") {
+            column(name: "ct_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_context", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_description", type: "VARCHAR(255)")
+
+            column(name: "ct_value", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+        }
+    }
+
 }
