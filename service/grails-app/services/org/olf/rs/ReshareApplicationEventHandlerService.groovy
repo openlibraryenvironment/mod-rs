@@ -19,6 +19,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
@@ -266,6 +267,14 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
 
+          try {
+            List<Map> enrichedRota = createRankedRota(sia)
+            log.debug("Created ranked rota: ${enrichedRota}")
+          }
+          catch ( Exception e ) {
+            log.error("Problem in createRankedRota",e);
+          }
+
           if (  sia.size() > 0 ) {
 
             // Pre-process the list of candidates
@@ -281,10 +290,12 @@ public class ReshareApplicationEventHandlerService {
                                                        directoryId:av_stmt.symbol,
                                                        instanceIdentifier:av_stmt.instanceIdentifier,
                                                        copyIdentifier:av_stmt.copyIdentifier,
-                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE')))
+                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE'),
+                                                       loadBalancingScore:0,
+                                                       loadBalancingReason:'not ranked'))
                 }
                 else {
-                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${}\""]);
+                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
                 }
               }
             }
@@ -1203,4 +1214,77 @@ public class ReshareApplicationEventHandlerService {
 
     pr.addToConditions(loanCondition)
   }
+
+  /**
+   * Take a list of availability statements and turn it into a ranked rota
+   * @param sia - List of AvailabilityStatement
+   * @return [
+   *   [
+   *     symbol:
+   *   ]
+   * ]
+   */
+  private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
+    log.debug("createRankedRota(${sia})");
+    def result = []
+    sia.each { av_stmt ->
+
+      // 1. look up the directory entry for the symbol
+      Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
+
+      if ( s != null ) {
+        // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
+        // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+        def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
+        log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
+
+        // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
+        long lbr_loan=1
+        long lbr_borrow=1
+        long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+        long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+
+        double lbr = lbr_loan/lbr_borrow
+        long target_lending = current_borrowing*lbr
+        long distance = target_lending - current_lending
+
+        def loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
+        def loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+
+        def rota_entry = [
+          symbol:av_stmt.symbol,
+          instanceIdentifier:av_stmt.instanceIdentifier,
+          copyIdentifier:av_stmt.copyIdentifier,
+          illPolicy: av_stmt.illPolicy,
+          loadBalancingScore: loadBalancingScore,
+          loadBalancingReason:loadBalancingReason
+        ]
+        result.add(rota_entry)
+      }
+      else {
+        log.debug("Unable to locate symbol ${av_stmt.symbol}");
+      }
+    }
+    
+    result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
+    log.debug("createRankedRota returns ${result}");
+    return result;
+  }
+
+  /**
+   * LoadBalancing score calculated by working out the loan to borrow ratio
+   * applying that ratio to the current borrowing
+   * working out the gap between the actual current borrowing and actual current lending
+   * the distance between our target lending level and the current lending level is the score
+   * the lower the number (Further below 0) the higher the result should be ranked
+   * positive differences are in credit and should rank low
+   */
+  private Long calculateLBScore(long lbr_loan, long lbr_borrow, long current_borrowing, long current_lending) {
+    double lbr = lbr_loan/lbr_borrow
+    long target_lending = current_borrowing*lbr
+    long distance = target_lending - current_lending
+
+    return distance;
+  }
+
 }

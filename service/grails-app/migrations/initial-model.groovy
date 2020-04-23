@@ -1531,4 +1531,10 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: "prr_lb_score", type: "BIGINT");
+            column(name: "prr_lb_reason", type: "TEXT");
+        }
+    }
 }

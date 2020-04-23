@@ -43,6 +43,16 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   Long protocolStatus;
 
   /**
+   * The load balancer will assign a score for ranking
+   */
+  Long loadBalancingScore
+
+  /**
+   * For the load balance to explain it's reasons
+   */
+  String loadBalancingReason
+
+  /**
    * a workflow state for this rota entry
    */
   Status state
@@ -71,6 +81,8 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     instanceIdentifier     (nullable : true)
     copyIdentifier         (nullable : true)
     note                   (nullable : true)
+    loadBalancingScore     (nullable : true)
+    loadBalancingReason    (nullable : true)
   }
 
   static mapping = {
@@ -92,5 +104,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     instanceIdentifier     column : "prr_instance_identifier"
     copyIdentifier         column : "prr_copy_identifier"
     note                   column : "prr_note"
+    loadBalancingScore     column : 'prr_lb_score'
+    loadBalancingReason    column : 'prr_lb_reason', type: 'text'
   }
 }
