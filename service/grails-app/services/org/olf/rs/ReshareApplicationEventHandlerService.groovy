@@ -1233,6 +1233,8 @@ public class ReshareApplicationEventHandlerService {
       Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
+        log.debug("Refine ${av_stmt}");
+
         // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
         // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
         def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
@@ -1245,8 +1247,8 @@ public class ReshareApplicationEventHandlerService {
         long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
 
         double lbr = lbr_loan/lbr_borrow
-        long target_lending = current_borrowing*lbr
-        long distance = target_lending - current_lending
+        long target_lending = current_borrowing_level*lbr
+        long distance = target_lending - current_loan_level
 
         def loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
         def loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
@@ -1269,22 +1271,6 @@ public class ReshareApplicationEventHandlerService {
     result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
     log.debug("createRankedRota returns ${result}");
     return result;
-  }
-
-  /**
-   * LoadBalancing score calculated by working out the loan to borrow ratio
-   * applying that ratio to the current borrowing
-   * working out the gap between the actual current borrowing and actual current lending
-   * the distance between our target lending level and the current lending level is the score
-   * the lower the number (Further below 0) the higher the result should be ranked
-   * positive differences are in credit and should rank low
-   */
-  private Long calculateLBScore(long lbr_loan, long lbr_borrow, long current_borrowing, long current_lending) {
-    double lbr = lbr_loan/lbr_borrow
-    long target_lending = current_borrowing*lbr
-    long distance = target_lending - current_lending
-
-    return distance;
   }
 
 }
