@@ -8,6 +8,7 @@ import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.Counter;
 import org.olf.rs.statemodel.StateTransition;
 import org.olf.rs.statemodel.AvailableAction;
 
@@ -202,6 +203,9 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
+
+        def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
+        def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)
       }
 
     }

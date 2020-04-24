@@ -26,4 +26,13 @@ class Counter implements MultiTenant<Counter> {
     description            column : 'ct_description'
     value                  column : 'ct_value'
   }
+
+  public static Long lookupValue(String context) {
+    Long result = null;
+    def ctr = Counter.findByContext(context)
+    if ( ctr ) {
+      result = ctr.value;
+    }
+    return result;
+  }
 }
