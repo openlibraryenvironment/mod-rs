@@ -267,18 +267,13 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
 
-          try {
-            List<Map> enrichedRota = createRankedRota(sia)
-            log.debug("Created ranked rota: ${enrichedRota}")
-          }
-          catch ( Exception e ) {
-            log.error("Problem in createRankedRota",e);
-          }
+          List<Map> enrichedRota = createRankedRota(sia)
+          log.debug("Created ranked rota: ${enrichedRota}")
 
-          if (  sia.size() > 0 ) {
+          if (  enrichedRota.size() > 0 ) {
 
             // Pre-process the list of candidates
-            sia?.each { av_stmt ->
+            enrichedRota?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
                 operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
                 if ( av_stmt.illPolicy == 'Will lend' ) {
@@ -291,8 +286,8 @@ public class ReshareApplicationEventHandlerService {
                                                        instanceIdentifier:av_stmt.instanceIdentifier,
                                                        copyIdentifier:av_stmt.copyIdentifier,
                                                        state: lookupStatus('PatronRequest', 'REQ_IDLE'),
-                                                       loadBalancingScore:0,
-                                                       loadBalancingReason:'not ranked'))
+                                                       loadBalancingScore:av_stmnt.loadBalancingScore,
+                                                       loadBalancingReason:av_stmnt.loadBalancingReason))
                 }
                 else {
                   operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
@@ -1240,32 +1235,39 @@ public class ReshareApplicationEventHandlerService {
         def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
         log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
 
-        // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
-        long lbr_loan=1
-        long lbr_borrow=1
-        long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
-        long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+        if ( ( entry_loan_policy == null ) ||
+             ( entry_loan_policy.value == 'Lending all types' ) ) {
 
-        double lbr = lbr_loan/lbr_borrow
-        long target_lending = current_borrowing_level*lbr
-        long distance = target_lending - current_loan_level
+          // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
+          long lbr_loan=1
+          long lbr_borrow=1
+          long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+          long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
 
-        def loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
-        def loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+          double lbr = lbr_loan/lbr_borrow
+          long target_lending = current_borrowing_level*lbr
+          long distance = target_lending - current_loan_level
 
-        def rota_entry = [
-          symbol:av_stmt.symbol,
-          instanceIdentifier:av_stmt.instanceIdentifier,
-          copyIdentifier:av_stmt.copyIdentifier,
-          illPolicy: av_stmt.illPolicy,
-          loadBalancingScore: loadBalancingScore,
-          loadBalancingReason:loadBalancingReason
-        ]
-        result.add(rota_entry)
+          def loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
+          def loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+
+          def rota_entry = [
+            symbol:av_stmt.symbol,
+            instanceIdentifier:av_stmt.instanceIdentifier,
+            copyIdentifier:av_stmt.copyIdentifier,
+            illPolicy: av_stmt.illPolicy,
+            loadBalancingScore: loadBalancingScore,
+            loadBalancingReason:loadBalancingReason
+          ]
+          result.add(rota_entry)
+        }
+        else {
+          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}");
+        }
       }
       else {
         log.debug("Unable to locate symbol ${av_stmt.symbol}");
-      }
+      } 
     }
     
     result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
