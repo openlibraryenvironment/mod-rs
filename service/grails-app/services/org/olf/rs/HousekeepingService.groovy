@@ -205,7 +205,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
-        def alc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)
+        def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)
       }
 
     }
