@@ -1,5 +1,7 @@
 package mod.rs
 
+import org.olf.okapi.modules.directory.DirectoryEntry
+
 import grails.core.GrailsApplication
 import grails.plugins.*
 import grails.converters.JSON
@@ -47,21 +49,4 @@ class externalApi {
 
     render result as JSON
   }
-
-  def directoryIndex(String tenant) {
-    def result =  [
-      status:'OK',
-      tenant: tenant
-    ] 
-    render result as JSON;
-  }
-
-  def directoryEntry(String tenant) {
-    def result =  [
-      status:'OK',
-      tenant: tenant
-    ] 
-    render result as JSON;
-  }
-
 }
