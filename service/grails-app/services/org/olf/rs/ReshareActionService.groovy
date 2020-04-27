@@ -429,11 +429,11 @@ public class ReshareActionService {
    * At the end of the process, check the item back into the HOST lms
    */
   public void checkOutOfReshare(PatronRequest patron_request, Map params) {
-    log.debug("checkOutOfReshare(${pr?.id}, ${params}");
+    log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     try {
       // Call the host lms to check the item out of the host system and in to reshare
-      // def accept_result = host_lms.checkInItem(pr.hrid)
-      def check_in_result = host_lms.checkInItem(pr.selectedItemBarcode)
+      // def accept_result = host_lms.checkInItem(patron_request.hrid)
+      def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
       statisticsService.decrementCounter('/activeLoans');
       patron_request.activeLoan=false
     }
@@ -443,7 +443,7 @@ public class ReshareActionService {
   }
 
   public void handleItemReturned(PatronRequest patron_request, Map params) {
-    log.debug("handleItemReturned(${pr?.id}, ${params}");
+    log.debug("handleItemReturned(${patron_request?.id}, ${params}");
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
