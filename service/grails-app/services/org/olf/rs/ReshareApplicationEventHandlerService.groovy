@@ -278,6 +278,8 @@ public class ReshareApplicationEventHandlerService {
                 operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
                 if ( av_stmt.illPolicy == 'Will lend' ) {
 
+                  log.debug("Adding to rota: ${av_stmt}");
+
                   // Pull back any data we need from the shared index in order to sort the list of candidates
                   req.addToRota (new PatronRequestRota(
                                                        patronRequest:req,
@@ -286,17 +288,14 @@ public class ReshareApplicationEventHandlerService {
                                                        instanceIdentifier:av_stmt.instanceIdentifier,
                                                        copyIdentifier:av_stmt.copyIdentifier,
                                                        state: lookupStatus('PatronRequest', 'REQ_IDLE'),
-                                                       loadBalancingScore:av_stmnt.loadBalancingScore,
-                                                       loadBalancingReason:av_stmnt.loadBalancingReason))
+                                                       loadBalancingScore:av_stmt.loadBalancingScore,
+                                                       loadBalancingReason:av_stmt.loadBalancingReason))
                 }
                 else {
                   operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
                 }
               }
             }
-
-            // Done looping through candidates - sort here
-
 
             // Procesing
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
