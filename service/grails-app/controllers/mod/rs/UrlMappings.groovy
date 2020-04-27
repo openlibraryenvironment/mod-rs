@@ -8,6 +8,12 @@ class UrlMappings {
     "/"(controller: 'application', action:'index')
     "/rs/statistics" (controller: 'statistics' )
 
+    "/rs/externalApi/${tenant}/statistics" (controller: 'externalApi', action:'statistics' )
+    "/rs/externalApi/${tenant}/directrory" (controller: 'externalApi', action:'directoryIndex' )
+    "/rs/externalApi/${tenant}/directrory/${slug}" (controller: 'externalApi', action:'directoryEntry' )
+    // Considring this:
+    // "/rs/externalApi/${tenant}/iso18626" (controller: 'externalApi', action:'iso18626' )
+
     "/rs/patronrequests" (resources:'patronRequest') {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
