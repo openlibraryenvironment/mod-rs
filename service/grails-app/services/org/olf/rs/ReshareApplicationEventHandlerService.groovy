@@ -1246,9 +1246,8 @@ public class ReshareApplicationEventHandlerService {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
-            long distance = target_lending - peer_stats.current_loan_level
-            loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
-            loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+            loadBalancingScore = target_lending - peer_stats.current_loan_level
+            loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance/Score=${loadBalancingScore}";
           }
           else {
             loadBalancingScore = 0;
