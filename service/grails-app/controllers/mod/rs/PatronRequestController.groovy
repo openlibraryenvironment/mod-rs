@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequest
 import com.k_int.okapi.OkapiTenantAwareController
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
+import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
@@ -34,12 +35,19 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
   def performAction() {
 
     def result = [:]
-
     if ( request.method=='POST' ) {
       log.debug("PatronRequestController::performAction(${request.JSON})");
       if ( params.patronRequestId ) {
         def patron_request = PatronRequest.get(params.patronRequestId)
         if ( patron_request ) {
+          if( request.JSON.actionParams.pickupLocationCode ) {
+            DirectoryEntry entry = ReshareApplicationEventHandlerService
+              .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode).owner;
+            if(entry != null) {
+              patron_request.resolvedPickupLocation = entry;
+              patron_request.pickupLocation = entry.name;
+            }
+          }
           log.debug("Apply action ${request.JSON.action} to ${patron_request}");
           switch ( request.JSON.action ) {
             case 'supplierPrintPullSlip':

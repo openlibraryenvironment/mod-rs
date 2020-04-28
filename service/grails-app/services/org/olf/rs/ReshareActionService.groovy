@@ -94,6 +94,7 @@ public class ReshareActionService {
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     Map result = [status:false];
+    pr
     Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
     if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
       pr.state = s;
