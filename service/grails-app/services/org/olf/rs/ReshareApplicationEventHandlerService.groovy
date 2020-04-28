@@ -300,12 +300,11 @@ public class ReshareApplicationEventHandlerService {
             // Procesing
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                       'Lending String calculated from shared index', null);
+                       'Ratio-Ranked lending string calculated from shared index', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
-
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
@@ -1240,6 +1239,7 @@ public class ReshareApplicationEventHandlerService {
              ( entry_loan_policy.value == 'Lending all types' ) ) {
 
           Map peer_stats = statisticsService.getStatsFor(av_stmt.symbol);
+
           def loadBalancingScore = null;
           def loadBalancingReason = null;
           if ( peer_stats != null ) {
