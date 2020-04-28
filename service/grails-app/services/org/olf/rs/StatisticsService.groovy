@@ -23,5 +23,14 @@ public class StatisticsService {
     c.save(flush:true, failOnError:true);
   }
 
+  /**
+   * Given a symbol, try to retrieve the stats for a symbol - if needed, refresh the cache
+   */
+  public Map<String,Object> getStatsFor(String symbol) {
+    log.debug("getStatsFor(${symbol})");
+    Map result = null;
+    return result;
+  }
+
 }
 

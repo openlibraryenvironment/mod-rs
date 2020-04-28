@@ -90,7 +90,7 @@ public class ReshareApplicationEventHandlerService {
     'SUPPLYING_AGENCY_MESSAGE_ind': { service, eventData ->
       service.handleSupplyingAgencyMessage(eventData);
     },
-    'RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
+    'STATUS_RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
       service.handleCancelRequestReceived(eventData);
     }
 
@@ -790,6 +790,7 @@ public class ReshareApplicationEventHandlerService {
             }
             pr.save(flush: true, failOnError: true)
             break;
+
           case 'Cancel':
             // We cannot cancel a shipped item
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
@@ -797,6 +798,7 @@ public class ReshareApplicationEventHandlerService {
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
             pr.save(flush: true, failOnError: true)
             break;
+
           default:
             result.status = "ERROR"
             result.errorType = "UnsupportedActionType"
@@ -1237,18 +1239,28 @@ public class ReshareApplicationEventHandlerService {
         if ( ( entry_loan_policy == null ) ||
              ( entry_loan_policy.value == 'Lending all types' ) ) {
 
-          // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
-          long lbr_loan=1
-          long lbr_borrow=1
-          long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
-          long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+          Map peer_stats = statisticsService.getStatsFor(av_stmt.symbol);
+          if ( peer_stats != null ) {
+            // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
+            long lbr_loan=1
+            long lbr_borrow=1
+            long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
+            long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
 
-          double lbr = lbr_loan/lbr_borrow
-          long target_lending = current_borrowing_level*lbr
-          long distance = target_lending - current_loan_level
+            double lbr = lbr_loan/lbr_borrow
+            long target_lending = current_borrowing_level*lbr
+            long distance = target_lending - current_loan_level
 
-          def loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
-          def loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+            def loadBalancingScore = null;
+            def loadBalancingReason = null;
+
+            loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
+            loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
+          }
+          else {
+            loadBalancingScore = 0;
+            loadBalancingReason = 'No load balancing stats available for peer'
+          }
 
           def rota_entry = [
             symbol:av_stmt.symbol,
