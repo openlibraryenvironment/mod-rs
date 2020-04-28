@@ -27,10 +27,21 @@ public class StatisticsService {
    * Given a symbol, try to retrieve the stats for a symbol - if needed, refresh the cache
    */
   public Map<String,Object> getStatsFor(String symbol) {
-    log.debug("getStatsFor(${symbol})");
-    Map result = null;
+    Map result = refreshStatsFor(symbol);
+    log.debug("getStatsFor(${symbol}) returns ${result}");
     return result;
   }
 
+  /**
+   * Dummy implementation
+   */
+  public Map<String, Object> refreshStatsFor(String symbol) {
+    return [
+      lbr_loan:1,
+      lbr_borrow:1,
+      current_loan_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1),
+      current_borrowing_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1)
+    ]
+  }
 }
 

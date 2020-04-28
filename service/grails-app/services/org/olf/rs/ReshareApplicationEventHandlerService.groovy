@@ -1240,20 +1240,13 @@ public class ReshareApplicationEventHandlerService {
              ( entry_loan_policy.value == 'Lending all types' ) ) {
 
           Map peer_stats = statisticsService.getStatsFor(av_stmt.symbol);
+          def loadBalancingScore = null;
+          def loadBalancingReason = null;
           if ( peer_stats != null ) {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
-            long lbr_loan=1
-            long lbr_borrow=1
-            long current_loan_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
-            long current_borrowing_level=ThreadLocalRandom.current().nextInt(0, 1000 + 1);
-
-            double lbr = lbr_loan/lbr_borrow
-            long target_lending = current_borrowing_level*lbr
-            long distance = target_lending - current_loan_level
-
-            def loadBalancingScore = null;
-            def loadBalancingReason = null;
-
+            double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
+            long target_lending = peer_stats.current_borrowing_level*lbr
+            long distance = target_lending - peer_stats.current_loan_level
             loadBalancingScore = current_loan_level - ( current_borrowing_level * ( lbr_loan/lbr_borrow ) )
             loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance=${distance}";
           }
