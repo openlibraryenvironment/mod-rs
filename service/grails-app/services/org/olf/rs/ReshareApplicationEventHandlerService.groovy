@@ -834,7 +834,7 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
-      if ( auto_respond?.toLowerCase().startsWith('on') ) {
+      if ( auto_cancel?.toLowerCase().startsWith('on') ) {
         // System has auto-respond cancel on
         if ( pr.state?.code=='RES_ITEM_SHIPPED' ) {
           auditEntry(pr, pr.state, pr.state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel request", null)
