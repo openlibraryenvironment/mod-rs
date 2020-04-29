@@ -207,14 +207,14 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean sendSupplierCancelResponse(PatronRequest pr, Object actionParams) {
+  public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams) {
     /* This method will send a cancellation response iso18626 message */
     
     log.debug("sendSupplierCancelResponse(${pr})");
     boolean result = false;
     String status;
 
-     if (!actionParams.isNull("cancelResponse")){
+     if (!actionParams.get('cancelResponse') != null ) {
 
         switch (actionParams.cancelResponse) {
           case 'yes':
