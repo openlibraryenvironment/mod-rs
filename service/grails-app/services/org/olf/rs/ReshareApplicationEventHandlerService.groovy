@@ -839,13 +839,13 @@ public class ReshareApplicationEventHandlerService {
         if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
           // Revert the state to it's original before the cancel request was received - previousState
           def new_state = lookupStatus('PatronRequest', req.previousState);
-          res.state=new_state
+          req.state=new_state
           auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state ", null)
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
         }
         else {
           def new_state = lookupStatus('PatronRequest', 'RES_CANCELLED')
-          res.state=new_state
+          req.state=new_state
           auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
         }
