@@ -114,6 +114,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true);
+        Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
