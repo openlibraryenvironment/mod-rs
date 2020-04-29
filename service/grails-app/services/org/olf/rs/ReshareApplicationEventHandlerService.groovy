@@ -1246,11 +1246,11 @@ public class ReshareApplicationEventHandlerService {
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
             loadBalancingScore = target_lending - peer_stats.current_loan_level
-            loadBalancingReason = "LB Ratio ${lbr_loan}:${lbr_borrow}=${lbr}. Actual Borrowing=${current_borrowing_level}. Target loans=${target_lending} Actual loans=${current_loan_level} Distance/Score=${loadBalancingScore}";
+            loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
           }
           else {
             loadBalancingScore = 0;
-            loadBalancingReason = 'No load balancing stats available for peer'
+            loadBalancingReason = 'No load balancing information available for peer'
           }
 
           def rota_entry = [
