@@ -845,8 +845,13 @@ public class ReshareApplicationEventHandlerService {
         }
         else {
           def new_state = lookupStatus('PatronRequest', 'RES_CANCELLED')
-          req.state=new_state
-          auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          if ( new_state ) {
+            req.state=new_state
+            auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          }
+          else {
+            auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
         }
       }
