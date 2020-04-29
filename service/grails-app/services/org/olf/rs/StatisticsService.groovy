@@ -50,6 +50,14 @@ public class StatisticsService {
    */
   public Map<String, Object> refreshStatsFor(Symbol symbol) {
 
+    symbol.owner.customProperties.value.each { it ->
+      log.debug("refreshStatsFor cp ${it}");
+    }
+
+    symbol.owner.services.each { it ->
+      log.debug("refreshStatsFor service ${it}");
+    }
+
     // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
     def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
     def stats_url = symbol.owner.services.find { it.service.businessFunction?.value == 'RS_STATS' }
