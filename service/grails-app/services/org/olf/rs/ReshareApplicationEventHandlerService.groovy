@@ -838,11 +838,11 @@ public class ReshareApplicationEventHandlerService {
         // System has auto-respond cancel on
         if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
           auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel request", null)
-          reshareActionsService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
+          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
         }
         else {
           auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
-          reshareActionsService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
+          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
         }
       }
       else {
