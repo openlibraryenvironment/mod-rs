@@ -5,7 +5,13 @@ import grails.gorm.multitenancy.*
 import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import org.olf.rs.Counter
+import org.olf.okapi.modules.directory.Symbol;
+import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * This service takes responsibility for assembling/aggregating all the data needed
+ * to build a ranked rota entry.
+ */
 public class StatisticsService {
 
   def grailsApplication
@@ -26,8 +32,15 @@ public class StatisticsService {
   /**
    * Given a symbol, try to retrieve the stats for a symbol - if needed, refresh the cache
    */
-  public Map<String,Object> getStatsFor(String symbol) {
-    Map result = refreshStatsFor(symbol);
+  public Map<String,Object> getStatsFor(Symbol symbol) {
+    Map result = null;
+    try {
+      result = refreshStatsFor(symbol);
+    }
+    catch ( Exception e ) {
+      log.error("problem fetching stats for ${symbol}", e);
+    }
+
     log.debug("getStatsFor(${symbol}) returns ${result}");
     return result;
   }
@@ -35,7 +48,15 @@ public class StatisticsService {
   /**
    * Dummy implementation
    */
-  public Map<String, Object> refreshStatsFor(String symbol) {
+  public Map<String, Object> refreshStatsFor(Symbol symbol) {
+
+    // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
+    def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
+    def stats_url = symbol.owner.services.find { it.service.businessFunction?.value == 'RS_STATS' }
+
+    log.debug("Loan to borrow ratio is : ${ratio}");
+    log.debug("URL for stats is : ${stats_url}");
+
     return [
       lbr_loan:1,
       lbr_borrow:1,

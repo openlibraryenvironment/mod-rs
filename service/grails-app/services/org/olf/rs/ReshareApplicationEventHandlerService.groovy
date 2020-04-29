@@ -19,8 +19,6 @@ import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
-import java.util.concurrent.ThreadLocalRandom;
-
 
 /**
  * Handle application events.
@@ -1239,7 +1237,7 @@ public class ReshareApplicationEventHandlerService {
         if ( ( entry_loan_policy == null ) ||
              ( entry_loan_policy.value == 'Lending all types' ) ) {
 
-          Map peer_stats = statisticsService.getStatsFor(av_stmt.symbol);
+          Map peer_stats = statisticsService.getStatsFor(s);
 
           def loadBalancingScore = null;
           def loadBalancingReason = null;
