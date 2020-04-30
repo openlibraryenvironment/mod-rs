@@ -91,6 +91,9 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
       service.handleCancelRequestReceived(eventData);
+    },
+    'STATUS_RES_CHECKED_IN_TO_RESHARE_ind': { service, eventData ->
+      service.handleResponderItemCheckedIn(eventData);
     }
 
   ]
@@ -1287,4 +1290,19 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
+  /**
+   * It's not clear if the system will ever need to differentiate between the status of checked in and
+   * await shipping, so for now we leave the 2 states in place and just automatically transition  between them
+   * this method exists largely as a place to put functions and workflows that diverge from that model
+   */
+  private void handleResponderItemCheckedIn(eventData) {
+    log.debug("handleResponderItemCheckedIn checked in - transition to await shipping");
+    PatronRequest.withNewTransaction { transaction_status ->
+      def req = delayedGet(eventData.payload.id, true);
+      def new_state = lookupStatus('Responder', 'RES_AWAIT_SHIP')
+      req.state=new_state
+      auditEntry(req, req.state, new_state, 'Request awaits shipping');
+      req.save(flush:true, failOnError: true)
+    }
+  }
 }
