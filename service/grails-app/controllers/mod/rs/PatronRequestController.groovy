@@ -232,8 +232,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
               break;
             case 'requesterReceived':
+              // This will trigger an NCIP acceptItem as well
               reshareActionService.sendRequesterReceived(patron_request, request.JSON.actionParams);
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED');
               break;
             case 'requesterManualCheckIn':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CHECKED_IN');
