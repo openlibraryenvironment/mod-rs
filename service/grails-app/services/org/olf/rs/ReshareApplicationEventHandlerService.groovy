@@ -26,6 +26,8 @@ import org.olf.rs.lms.ItemLocation;
  * This class is all about high level reshare events - the kind of things users want to customise and modify. Application functionality
  * that might change between implementations can be added here.
  * REMEMBER: Notifications are not automatically within a tenant scope - handlers will need to resolve that.
+ *
+ * StateModel: https://app.diagrams.net/#G1fC5Xtj5fbk_Z7dIgjqgP3flBQfTSz-1s
  */
 public class ReshareApplicationEventHandlerService {
 
