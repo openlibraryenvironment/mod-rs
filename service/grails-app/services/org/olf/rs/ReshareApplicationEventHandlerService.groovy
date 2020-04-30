@@ -1301,7 +1301,7 @@ public class ReshareApplicationEventHandlerService {
       def req = delayedGet(eventData.payload.id, true);
       def new_state = lookupStatus('Responder', 'RES_AWAIT_SHIP')
       req.state=new_state
-      auditEntry(req, req.state, new_state, 'Request awaits shipping');
+      auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
       req.save(flush:true, failOnError: true)
     }
   }
