@@ -406,11 +406,13 @@ public class ReshareActionService {
         if ( accept_result?.result == true ) {
           // Mark item as awaiting circ
           def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+          String message = 'NCIP acceptItem completed'
 
           reshareApplicationEventHandlerService.auditEntry(pr,
                                           pr.state,
                                           new_state,
-                                          message, null);
+                                          message, 
+                                          null);
           pr.state=new_state;
           pr.save(flush:true, failOnError:true);
           log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
