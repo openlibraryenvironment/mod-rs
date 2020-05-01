@@ -40,14 +40,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
       if ( params.patronRequestId ) {
         def patron_request = PatronRequest.get(params.patronRequestId)
         if ( patron_request ) {
-          if( request.JSON.actionParams.pickupLocationCode ) {
-            DirectoryEntry entry = ReshareApplicationEventHandlerService
-              .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode).owner;
-            if(entry != null) {
-              patron_request.resolvedPickupLocation = entry;
-              patron_request.pickupLocation = entry.name;
-            }
-          }
           log.debug("Apply action ${request.JSON.action} to ${patron_request}");
           switch ( request.JSON.action ) {
             case 'supplierPrintPullSlip':

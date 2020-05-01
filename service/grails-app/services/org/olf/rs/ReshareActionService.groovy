@@ -11,6 +11,7 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
+import org.olf.okapi.modules.directory.DirectoryEntry
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -94,7 +95,14 @@ public class ReshareActionService {
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     Map result = [status:false];
-    pr
+    if( pr.pickupLocationCode ) {
+      DirectoryEntry entry = ReshareApplicationEventHandlerService
+        .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode).owner;
+      if(entry != null) {
+        pr.resolvedPickupLocation = entry;
+        pr.pickupLocation = entry.name;
+      }
+    }
     Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
     if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
       pr.state = s;
