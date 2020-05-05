@@ -344,7 +344,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronNote column : 'pr_patron_note'
     pickupLocation column : 'pr_pref_service_point'
     pickupLocationCode column : 'pr_pref_service_point_code'
-    resolvedPickupLocation column : 'pr_resolved_pickup_location'
+    resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
 
     resolvedPatron column : 'pr_resolved_patron_fk'
 
