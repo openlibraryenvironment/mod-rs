@@ -309,6 +309,12 @@ public class DefaultHostLMSService implements HostLMSActions {
   
         log.debug("Lookup user response: ${response}");
   
+
+        // {"firstName":"Stacey",
+        //  "lastName":"Conrad",
+        //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
+        //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
+        //  "userId":"M00069192"}
         if ( ( response ) && ( ! response.has('problems') ) ) {
           result.status='OK'
           result.userid=response.opt('userid')
@@ -316,8 +322,8 @@ public class DefaultHostLMSService implements HostLMSActions {
           result.surname=response.opt('lastName')
           if ( response.has('electronicAddresses') ) {
             JSONArray ea = response.getJSONArray('electronicAddresses')
-            result.email=(ea.find { it.key=='electronic mail address' })?.value
-            result.tel=(ea.find { it.key=='TEL' })?.value
+            result.email=(ea.find { it.key=='mailto' })?.value
+            result.tel=(ea.find { it.key=='tel' })?.value
           }
         }
         else {
