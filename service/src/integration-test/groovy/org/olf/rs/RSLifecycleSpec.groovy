@@ -178,7 +178,7 @@ class RSLifecycleSpec extends GebSpec {
       logger.debug("get response as json: ${get_resp.json}");
 
       // Assert that the list of symbols for TestTenantH that we get back includes the newly registered one
-      assert get_resp.json.symbols.contains('RESHARE:wibble');
+      assert get_resp.json.symbols.contains('RESHARE:WIBBLE');
   }
 
   void "Create a new request with a ROTA pointing to Allegheny College"(tenant_id, p_title, p_author, p_systemInstanceIdentifier, p_patron_id, p_patron_reference) {
