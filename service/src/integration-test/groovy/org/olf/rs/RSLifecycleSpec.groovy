@@ -21,6 +21,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import grails.gorm.multitenancy.Tenants
 import javax.sql.DataSource
 import org.grails.orm.hibernate.HibernateDatastore
+import org.springframework.beans.factory.annotation.Value
 
 @Slf4j
 @Integration
@@ -101,8 +102,14 @@ class RSLifecycleSpec extends GebSpec {
   }
 
 
+  /**
+   * Pay CAREFUL attention here - the AVL symbol we are setting up loops back around to the /rs/iso18626 endpoint
+   * running on the same test instance. This is not how real life works. All nodes in the network need the same directory information.
+   * normally this comes from the network, but this function seeds that manually instead. N.B. the same data being loaded into 2 different
+   * tenants
+   */
   void "Bootstrap directory data for integration tests"(String tenant_id, Map entry) {
-    when:"Load the default directory"
+    when:"Load the default directory (test url is ${baseUrl})"
 
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
       logger.debug("Sync directory entry ${entry}")
@@ -127,13 +134,13 @@ class RSLifecycleSpec extends GebSpec {
       services:[
         [
           slug:'Allegheny_College_ISO18626',
-          service:[ 'name':'ReShare ISO18626 Service', 'address':'https://localhost/reshare/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          service:[ 'name':'ReShare ISO18626 Service', 'address':"${baseUrl}/rs/iso18626", 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['RESHARE', 'PALCI', 'IDS'] ]
         ]
       ]
     ]
     'TestTenantH' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
-    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', symbols: [[ authority:'OCLC', symbol:'AVL', priority:'a'] ]]
+    'TestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College', symbols: [[ authority:'OCLC', symbol:'AVL', priority:'a'] ], services:[ [ slug:'Allegheny_College_ISO18626', service:[ 'name':'ReShare ISO18626 Service', 'address':"${baseUrl}/rs/iso18626", 'type':'ISO18626', 'businessFunction':'ILL' ], customProperties:[ 'ILLPreferredNamespaces':['RESHARE', 'PALCI', 'IDS'] ] ] ] ]
     'TestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
   }
 

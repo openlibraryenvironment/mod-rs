@@ -98,13 +98,13 @@ class ProtocolPeerSpec extends GebSpec {
     tenant_id | entry
     'PPTestTenantG' | [ id:'RS-T-D-0001', name: 'Allegheny College', slug:'Allegheny_College',
       symbols: [
-        [ authority:'OCLC', symbol:'AVL', priority:'a'] ] //,
-      // services:[
-      //   [
-      //     service:[ "name":"ReShare ISO18626 Service", "address":"https://localhost/reshare/iso18626", "type":"ISO18626", "businessFunction":"ILL" ],
-      //     customProperties:[ "ILLPreferredNamespaces":["RESHARE", "PALCI", "IDS"] ]
-      //   ]
-      // ]
+        [ authority:'OCLC', symbol:'AVL', priority:'a'] ],
+      services:[
+        [
+          service:[ "name":"ReShare ISO18626 Service", "address":"http://localhost:8080/rs/iso18626", "type":"ISO18626", "businessFunction":"ILL" ],
+          customProperties:[ "ILLPreferredNamespaces":["RESHARE", "PALCI", "IDS"] ]
+        ]
+      ]
     ]
     'PPTestTenantG' | [ id:'RS-T-D-0002', name: 'The New School', slug:'THE_NEW_SCHOOL', symbols: [[ authority:'OCLC', symbol:'PPPA', priority:'a'] ]]
   }

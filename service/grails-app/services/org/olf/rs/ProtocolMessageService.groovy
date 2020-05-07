@@ -239,17 +239,21 @@ and sa.service.businessFunction.value=:ill
     String message = sw.toString();
     log.debug("ISO18626 Message: ${message}")
 
-    def iso18626_response = configure {
-      request.uri = address
-      request.contentType = XML[0]
-      request.headers['accept'] = 'application/xml'
-    }.post {
-      request.body = message
+    if ( address != null ) {
+      def iso18626_response = configure {
+        request.uri = address
+        request.contentType = XML[0]
+        request.headers['accept'] = 'application/xml'
+      }.post {
+        request.body = message
 
-      response.failure { FromServer fs ->
-        log.error("Failure response from remote ISO18626 servicei (${address}): ${fs.getStatusCode()} ${fs}");
+        response.failure { FromServer fs ->
+          log.error("Failure response from remote ISO18626 servicei (${address}): ${fs.getStatusCode()} ${fs}");
+        }
       }
-
+    }
+    else {
+      throw new RuntimeException("No address given for sendISO18626Message. messageData: ${eventData}");
     }
   }
 
