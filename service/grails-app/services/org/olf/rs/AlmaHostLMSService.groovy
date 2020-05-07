@@ -35,10 +35,15 @@ public class AlmaHostLMSService implements HostLMSActions {
       precondition: { pr -> return ( pr.systemInstanceIdentifier != null ) },
       stragegy: { pr, service -> return service.z3950ItemByIdentifier(pr) }
     ],
+    [
+      name:'ISBN_identifier_By_Z3950',
+      precondition: { pr -> return ( pr.isbn != null ) },
+      stragegy: { pr, service -> return service.z3950ItemByCQL(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
+    ],
     [ 
       name:'Local_identifier_By_Title',
       precondition: { pr -> return ( pr.title != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByTitle(pr) }
+      stragegy: { pr, service -> return service.z3950ItemByCQL(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
     ],
 
   ]
@@ -195,6 +200,53 @@ public class AlmaHostLMSService implements HostLMSActions {
     return result;
   }
 
+
+  public ItemLocation z3950ItemByCQL(PatronRequest pr, String cql) {
+
+    ItemLocation result = null;
+
+    String z3950_server = getZ3950Server();
+
+    if ( z3950_server != null ) {
+      def z_response = HttpBuilder.configure {
+        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+      }.get {
+          request.uri.path = '/'
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': cql,
+                               'maximumRecords':'3' ]
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map availability_summary = [:]
+        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
+          log.debug("${hld}");
+          log.debug("${hld.circulations?.circulation?.availableNow}");
+          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+            log.debug("Available now");
+            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+
+            if ( result == null )
+              result = il;
+
+            availability_summary[hld.localLocation] = il;
+          }
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
+      else {
+        log.debug("CQL lookup(${cql}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
+      }
+    }
+    return result;
+  }
+
+
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
     Map result = [ status: 'OK' ];
@@ -289,45 +341,53 @@ public class AlmaHostLMSService implements HostLMSActions {
   private Map ncip2LookupPatron(String patron_id) {
     Map result = [ status:'FAIL' ];
     log.debug("ncip2LookupPatron(${patron_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
-
-    if ( ( ncip_server_address != null ) &&
-         ( ncip_from_agency != null ) &&
-         ( ncip_app_profile != null ) ) {
-      log.debug("Request patron from ${ncip_server_address}");
-      NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
-      LookupUser lookupUser = new LookupUser()
-                  .setUserId(patron_id)
-                  .includeUserAddressInformation()
-                  .includeUserPrivilege()
-                  .includeNameInformation()
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .setApplicationProfileType(ncip_app_profile);
-      JSONObject response = ncip2Client.send(lookupUser);
-
-      log.debug("Lookup user response: ${response}");
-
-      if ( ( response ) && ( ! response.has('problems') ) ) {
-        result.status='OK'
-        result.userid=response.opt('userid')
-        result.givenName=response.opt('firstName')
-        result.surname=response.opt('lastName')
-        if ( response.has('electronicAddresses') ) {
-          JSONArray ea = response.getJSONArray('electronicAddresses')
-          result.email=(ea.find { it.key=='electronic mail address' })?.value
-          result.tel=(ea.find { it.key=='TEL' })?.value
+    if ( ( patron_id != null ) && ( patron_id.length() > 0 ) ) {
+  
+      AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+      AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+      AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+  
+      String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+      String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+      String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+  
+      if ( ( ncip_server_address != null ) &&
+           ( ncip_from_agency != null ) &&
+           ( ncip_app_profile != null ) ) {
+        log.debug("Request patron from ${ncip_server_address}");
+        NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
+        LookupUser lookupUser = new LookupUser()
+                    .setUserId(patron_id)
+                    .includeUserAddressInformation()
+                    .includeUserPrivilege()
+                    .includeNameInformation()
+                    .setToAgency(ncip_from_agency)
+                    .setFromAgency(ncip_from_agency)
+                    .setApplicationProfileType(ncip_app_profile);
+        JSONObject response = ncip2Client.send(lookupUser);
+  
+  
+        log.debug("Lookup user response: ${response}");
+  
+        if ( ( response ) && ( ! response.has('problems') ) ) {
+          result.status='OK'
+          result.userid=response.opt('userId')
+          result.givenName=response.opt('firstName')
+          result.surname=response.opt('lastName')
+          if ( response.has('electronicAddresses') ) {
+            JSONArray ea = response.getJSONArray('electronicAddresses')
+            result.email=(ea.find { it.key=='mailto' })?.value
+            result.tel=(ea.find { it.key=='tel' })?.value
+          }
+        }
+        else {
+          result.problems=response.get('problems')
         }
       }
-      else {
-        result.problems=response.get('problems')
-      }
+    }
+    else {
+      log.error("Skipping ncip lookup - patron id null or zero length");
     }
 
     return result;
@@ -406,7 +466,10 @@ public class AlmaHostLMSService implements HostLMSActions {
   }
 
 
-  public boolean ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+  public Map ncip2CheckoutItem(String requestId, 
+                                   String itemBarcode, 
+                                   String borrowerBarcode) {
+    Map result = [:]
     log.debug("ncip2CheckoutItem(${requestId},${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -428,7 +491,17 @@ public class AlmaHostLMSService implements HostLMSActions {
 
     JSONObject response = ncip2Client.send(checkoutItem);
     log.debug("NCIP2 checkoutItem responseL ${response}");
-    return false;
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+      result.dueDate = response.opt('dueDate');
+      result.userId = response.opt('userId')
+      result.itemId = response.opt('itemId')
+    }
+
+    return result;
   }
 
 
@@ -437,9 +510,7 @@ public class AlmaHostLMSService implements HostLMSActions {
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-    return [
-      result:ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
-    ]
+    return ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
   }
 
   private String getZ3950Server() {
@@ -447,7 +518,7 @@ public class AlmaHostLMSService implements HostLMSActions {
   }
 
 
- public boolean acceptItem(String item_id,
+ public Map acceptItem(String item_id,
                             String request_id,
                             String user_id,
                             String author,
@@ -456,6 +527,7 @@ public class AlmaHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
+    Map result = [:]
     log.debug("acceptItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -480,14 +552,20 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .setRequestedActionTypeString(requested_action)
                   .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(acceptItem);
-    log.debug(response);
-    boolean  result = true;
+    log.debug("acceptItem response: ${response}");
+
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+    }
 
     return result;
   }
 
-  public boolean checkInItem(String item_id) {
-    boolean  result = true;
+  public Map checkInItem(String item_id) {
+    Map result = [:];
     log.debug("checkInItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -505,7 +583,16 @@ public class AlmaHostLMSService implements HostLMSActions {
                   .includeBibliographicDescription()
                   .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(checkinItem);
-    log.debug(response);
+    log.debug("checkInItem response: ${response}");
+    result.result = true;
+
+    if ( response.has('problems') ) {
+      result.result = false;
+    }
+    else {
+      result.result = true;
+    }
+
     return result;
   }
 

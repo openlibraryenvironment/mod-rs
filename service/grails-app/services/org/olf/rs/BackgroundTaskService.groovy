@@ -34,7 +34,8 @@ public class BackgroundTaskService {
 
     try {
       Tenants.withId(tenant) {
-        checkPullSlips();
+        // We aren't doing this any longer / at the moment.
+        // checkPullSlips();
   
         // def sl = Symbol.list();
         // log.debug("Currently ${sl.size()} symbols in the system");

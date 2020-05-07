@@ -3,9 +3,36 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Address
 import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
-import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
+
+import com.k_int.web.toolkit.custprops.types.CustomPropertyRefdataDefinition
 import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
+import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
 import org.olf.okapi.modules.directory.NamingAuthority;
+
+CustomPropertyDefinition ensureRefdataProperty(String name, boolean local, String category, String label = null) {
+
+  CustomPropertyDefinition result = null;
+  def rdc = RefdataCategory.findByDesc(category);
+
+  if ( rdc != null ) {
+    result = CustomPropertyDefinition.findByName(name)
+    if ( result == null ) {
+      result = new CustomPropertyRefdataDefinition(
+                                        name:name,
+                                        defaultInternal: local,
+                                        label:label,
+                                        category: rdc)
+      // Not entirely sure why type can't be set in the above, but other bootstrap scripts do this
+      // the same way, so copying. Type doesn't work when set as a part of the definition above
+      result.type=com.k_int.web.toolkit.custprops.types.CustomPropertyRefdata.class
+      result.save(flush:true, failOnError:true);
+    }
+  }
+  else {
+    println("Unable to find category ${category}");
+  }
+  return result;
+}
 
 
 // When adding new section names into this file please make sure they are in camel case.
@@ -109,14 +136,30 @@ try {
                                   key: 'host_lms_integration').save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
+
+  // Auto responder is on when an item can be found - will respond Will-Supply, when not found, left for a user to respond.
   RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
-  RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
+  // AutoResponder is ON and will automatically reply not-available if an item cannot be located
+  def ar_on = RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+
 
   AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
                                   section:'autoResponder',
                                   settingType:'Refdata',
                                   vocab:'AutoResponder',
-                                  key: 'auto_responder_status').save(flush:true, failOnError: true);
+                                  key: 'auto_responder_status',
+                                  value: ar_on?.value).save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('AutoResponder_Cancel', 'Off');
+  def arc_on = RefdataValue.lookupOrCreate('AutoResponder_Cancel', 'On');
+  
+  AppSetting auto_responder_cancel = AppSetting.findByKey('auto_responder_cancel') ?: new AppSetting( 
+                                  section:'autoResponder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder_Cancel',
+                                  key: 'auto_responder_cancel',
+                                  value: arc_on?.value).save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
@@ -142,6 +185,15 @@ try {
   RefdataValue.lookupOrCreate('loanConditions', 'WatchLibraryUseOnly');
   RefdataValue.lookupOrCreate('loanConditions', 'Other');
 
+  RefdataValue.lookupOrCreate('YNO', 'Yes')
+  RefdataValue.lookupOrCreate('YNO', 'No')
+  RefdataValue.lookupOrCreate('YNO', 'Other')
+
+  RefdataValue.lookupOrCreate('LoanPolicy', 'Lending all types')
+  RefdataValue.lookupOrCreate('LoanPolicy', 'Not Lending')
+  RefdataValue.lookupOrCreate('LoanPolicy', 'Lendin Physical only')
+  RefdataValue.lookupOrCreate('LoanPolicy', 'Lending Electronic only')
+
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
   def cp_demoprop = ensureTextProperty('demoCustprop', false);
@@ -157,7 +209,12 @@ try {
   NamingAuthority oclc = NamingAuthority.findBySymbol('OCLC') ?: new NamingAuthority(symbol:'OCLC').save(flush:true, failOnError:true);
   NamingAuthority exl = NamingAuthority.findBySymbol('EXL') ?: new NamingAuthority(symbol:'EXL').save(flush:true, failOnError:true);
   NamingAuthority palci = NamingAuthority.findBySymbol('PALCI') ?: new NamingAuthority(symbol:'PALCI').save(flush:true, failOnError:true);
+  NamingAuthority cardinal = NamingAuthority.findBySymbol('CARDINAL') ?: new NamingAuthority(symbol:'CARDINAL').save(flush:true, failOnError:true);
 
+  def cp_accept_returns_policy = ensureRefdataProperty('policy.ill.returns', false, 'YNO', 'Accept Returns' )
+  def cp_physical_loan_policy = ensureRefdataProperty('policy.ill.loan_policy', false, 'LoanPolicy', 'ILL Loan Policy' )
+  def cp_last_resort_policy = ensureRefdataProperty('policy.ill.last_resort', false, 'YNO', 'Consider Institution As Last Resort' )
+  def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', true, label='ILL Loan To Borrow Ratio');
 
   println("_data.groovy complete");
 }

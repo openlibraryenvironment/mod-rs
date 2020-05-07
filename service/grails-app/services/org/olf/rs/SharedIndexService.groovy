@@ -164,9 +164,8 @@ public class SharedIndexService {
 
   // "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecord2 { holdingsInstance { id callNumber holdingsStatements } } } }",
     String query='''{
-  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber illPolicy { name }  permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } } } }",
-  "variables":{
-    "id":"'''+id+'''" } }'''
+  "query": "query($id: String!) { instance_storage_instances_SINGLE(instanceId: $id) { id title holdingsRecords2 { id callNumber illPolicy { name }  permanentLocation { name code } holdingsStatements { note statement } bareHoldingsItems { id barcode enumeration } }  identifiers { value identifierTypeObject { name } } } }",
+  "variables":{ "id":"'''+id+'''" } }'''
 
     log.debug("Sending graphql to get holdings for (${id}) \n${query}\n");
 
@@ -226,8 +225,9 @@ public class SharedIndexService {
               }
             }
 
-            response.failure { FromServer fs ->
-              log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to send Graphql to ${shared_index_base_url}/graphql - query: ${query}");
+            response.failure { FromServer fs, Object r1 ->
+              log.warn("** Failure response from shared index ${fs.getStatusCode()} when attempting to send Graphql to ${shared_index_base_url}/graphql - query: ${query}");
+              log.warn("** Response object: ${r1}");
             }
 
           }

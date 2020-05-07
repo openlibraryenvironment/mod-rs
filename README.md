@@ -34,7 +34,7 @@ it an application level "service" rather than a dumb data storage tool.
 
 ## Probably with the domain model
 
-The [mod-rs domain model](https://github.com/openlibraryenvironment/mod-rs/service/grails-app/domain/org/olf/rs) is the heart of the module - you should probably
+The [mod-rs domain model](https://github.com/openlibraryenvironment/mod-rs/tree/master/service/grails-app/domain/org/olf/rs) is the heart of the module - you should probably
 start there. The domain model also imports the shared [domain model for directory information](https://github.com/openlibraryenvironment/dm-directory) and a number of classes 
 for refdata, custom properties, tags and other common structures from this [utility library](https://github.com/k-int/web-toolkit-ce).
 

@@ -1543,5 +1543,40 @@ databaseChangeLog = {
       }
       addForeignKeyConstraint(baseColumnNames: "pr_resolved_pickup_location_fk", baseTableName: "patron_request", constraintName: "FK_pickup_location_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "de_id", referencedTableName: "directory_entry")
     }
+    
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-001") {
+        addColumn(tableName: "patron_request_rota") {
+            column(name: "prr_lb_score", type: "BIGINT");
+            column(name: "prr_lb_reason", type: "TEXT");
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-002") {
+        createTable(tableName: "counter") {
+            column(name: "ct_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_context", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ct_description", type: "VARCHAR(255)")
+
+            column(name: "ct_value", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+        }
+    }
+
+    changeSet(author: "ianibbo (manual)", id: "20200423-1021-003") {
+        addColumn(tableName: "patron_request") {
+            column(name:"pr_active_loan", type: "BOOLEAN")
+        }
+    }
 
 }

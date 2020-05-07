@@ -20,13 +20,14 @@ import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
 
-
 /**
  * Handle application events.
  *
  * This class is all about high level reshare events - the kind of things users want to customise and modify. Application functionality
  * that might change between implementations can be added here.
  * REMEMBER: Notifications are not automatically within a tenant scope - handlers will need to resolve that.
+ *
+ * StateModel: https://app.diagrams.net/#G1fC5Xtj5fbk_Z7dIgjqgP3flBQfTSz-1s
  */
 public class ReshareApplicationEventHandlerService {
 
@@ -38,6 +39,7 @@ public class ReshareApplicationEventHandlerService {
   SharedIndexService sharedIndexService
   HostLMSService hostLMSService
   ReshareActionService reshareActionService
+  StatisticsService statisticsService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -88,6 +90,12 @@ public class ReshareApplicationEventHandlerService {
     },
     'SUPPLYING_AGENCY_MESSAGE_ind': { service, eventData ->
       service.handleSupplyingAgencyMessage(eventData);
+    },
+    'STATUS_RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
+      service.handleCancelRequestReceived(eventData);
+    },
+    'STATUS_RES_CHECKED_IN_TO_RESHARE_ind': { service, eventData ->
+      service.handleResponderItemCheckedIn(eventData);
     }
 
   ]
@@ -140,6 +148,9 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Result of patron lookup ${patron_details}");
 
         if ( isValidPatron(patron_details) ) {
+
+          if ( patron_details.userid == null )
+            patron_details.userid = req.patronIdentifier
 
           if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
             req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
@@ -260,13 +271,18 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
 
-          if (  sia.size() > 0 ) {
+          List<Map> enrichedRota = createRankedRota(sia)
+          log.debug("Created ranked rota: ${enrichedRota}")
+
+          if (  enrichedRota.size() > 0 ) {
 
             // Pre-process the list of candidates
-            sia?.each { av_stmt ->
+            enrichedRota?.each { av_stmt ->
               if ( av_stmt.symbol != null ) {
                 operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
                 if ( av_stmt.illPolicy == 'Will lend' ) {
+
+                  log.debug("Adding to rota: ${av_stmt}");
 
                   // Pull back any data we need from the shared index in order to sort the list of candidates
                   req.addToRota (new PatronRequestRota(
@@ -275,26 +291,24 @@ public class ReshareApplicationEventHandlerService {
                                                        directoryId:av_stmt.symbol,
                                                        instanceIdentifier:av_stmt.instanceIdentifier,
                                                        copyIdentifier:av_stmt.copyIdentifier,
-                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE')))
+                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE'),
+                                                       loadBalancingScore:av_stmt.loadBalancingScore,
+                                                       loadBalancingReason:av_stmt.loadBalancingReason))
                 }
                 else {
-                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${}\""]);
+                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
                 }
               }
             }
 
-            // Done looping through candidates - sort here
-
-
             // Procesing
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                       'Lending String calculated from shared index', null);
+                       'Ratio-Ranked lending string calculated from shared index', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
-
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
@@ -767,8 +781,9 @@ public class ReshareApplicationEventHandlerService {
             if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
               // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
               if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-                def new_state = lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
+                def new_state = lookupStatus('Responder', pr.previousState)
                 auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
+                pr.previousState = null;
                 pr.state = new_state;
               } else {
                 auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
@@ -778,13 +793,15 @@ public class ReshareApplicationEventHandlerService {
             }
             pr.save(flush: true, failOnError: true)
             break;
+
           case 'Cancel':
+            // We cannot cancel a shipped item
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
             pr.previousState = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
-            pr.requesterRequestedCancellation = true;
             pr.save(flush: true, failOnError: true)
             break;
+
           default:
             result.status = "ERROR"
             result.errorType = "UnsupportedActionType"
@@ -816,6 +833,37 @@ public class ReshareApplicationEventHandlerService {
     result.action = eventData.activeSection?.action
 
     return result;
+  }
+
+  private void handleCancelRequestReceived(eventData) {
+    PatronRequest.withNewTransaction { transaction_status ->
+      def req = delayedGet(eventData.payload.id, true);
+      String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
+      if ( auto_cancel?.toLowerCase().startsWith('on') ) {
+        // System has auto-respond cancel on
+        if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
+          // Revert the state to it's original before the cancel request was received - previousState
+          def new_state = lookupStatus('PatronRequest', req.previousState);
+          req.state=new_state
+          auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state ", null)
+          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
+        }
+        else {
+          def new_state = lookupStatus('PatronRequest', 'RES_CANCELLED')
+          if ( new_state ) {
+            req.state=new_state
+            auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          }
+          else {
+            auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+          }
+          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
+        }
+      }
+      else {
+        // Set needs attention=true
+      }
+    }
   }
 
   private void handleCancelledWithSupplier(eventData) {
@@ -902,6 +950,12 @@ public class ReshareApplicationEventHandlerService {
           break;
         case 'Cancelled':
           def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER')
+          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
+          pr.state=new_state
+          if ( prr != null ) prr.state = new_state
+          break;
+        case 'LoanCompleted':
+          def new_state = lookupStatus('PatronRequest', 'REQ_REQUEST_COMPLETE')
           auditEntry(pr, pr.state, new_state, 'Protocol message', null);
           pr.state=new_state
           if ( prr != null ) prr.state = new_state
@@ -1142,15 +1196,115 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
+  public String stripOutSystemCode(String string) {
+    String returnString = string
+    def systemCodes = [
+      "#ReShareAddLoanCondition#", 
+      "#ReShareLoanConditionAgreeResponse#",
+      "#ReShareSupplierConditionsAssumedAgreed#",
+      "#ReShareSupplierAwaitingConditionConfirmation#"
+      ]
+      systemCodes.each {code ->
+        if (string.contains(code)) {
+          returnString.replace(code, "")
+        }
+      }
+      return returnString
+  }
+
   public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
     def loanCondition = new PatronRequestLoanCondition()
     loanCondition.setPatronRequest(pr)
     loanCondition.setCode(code)
     if (note != null) {
-      loanCondition.setNote(note)
+      loanCondition.setNote(stripOutSystemCode(note))
     }
     loanCondition.setRelevantSupplier(relevantSupplier)
 
     pr.addToConditions(loanCondition)
+  }
+
+  /**
+   * Take a list of availability statements and turn it into a ranked rota
+   * @param sia - List of AvailabilityStatement
+   * @return [
+   *   [
+   *     symbol:
+   *   ]
+   * ]
+   */
+  private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
+    log.debug("createRankedRota(${sia})");
+    def result = []
+    sia.each { av_stmt ->
+
+      // 1. look up the directory entry for the symbol
+      Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
+
+      if ( s != null ) {
+        log.debug("Refine ${av_stmt}");
+
+        // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
+        // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+        def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
+        log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
+
+        if ( ( entry_loan_policy == null ) ||
+             ( entry_loan_policy.value == 'Lending all types' ) ) {
+
+          Map peer_stats = statisticsService.getStatsFor(s);
+
+          def loadBalancingScore = null;
+          def loadBalancingReason = null;
+          if ( peer_stats != null ) {
+            // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
+            double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
+            long target_lending = peer_stats.current_borrowing_level*lbr
+            loadBalancingScore = target_lending - peer_stats.current_loan_level
+            loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
+          }
+          else {
+            loadBalancingScore = 0;
+            loadBalancingReason = 'No load balancing information available for peer'
+          }
+
+          def rota_entry = [
+            symbol:av_stmt.symbol,
+            instanceIdentifier:av_stmt.instanceIdentifier,
+            copyIdentifier:av_stmt.copyIdentifier,
+            illPolicy: av_stmt.illPolicy,
+            loadBalancingScore: loadBalancingScore,
+            loadBalancingReason:loadBalancingReason
+          ]
+          result.add(rota_entry)
+        }
+        else {
+          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}");
+        }
+      }
+      else {
+        log.debug("Unable to locate symbol ${av_stmt.symbol}");
+      } 
+    }
+    
+    result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
+    log.debug("createRankedRota returns ${result}");
+    return result;
+  }
+
+  /**
+   * It's not clear if the system will ever need to differentiate between the status of checked in and
+   * await shipping, so for now we leave the 2 states in place and just automatically transition  between them
+   * this method exists largely as a place to put functions and workflows that diverge from that model
+   */
+  private void handleResponderItemCheckedIn(eventData) {
+    log.debug("handleResponderItemCheckedIn checked in - transition to await shipping");
+    PatronRequest.withNewTransaction { transaction_status ->
+      def req = delayedGet(eventData.payload.id, true);
+      def new_state = lookupStatus('Responder', 'RES_AWAIT_SHIP')
+      req.state=new_state
+      auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
+      req.save(flush:true, failOnError: true)
+    }
   }
 }

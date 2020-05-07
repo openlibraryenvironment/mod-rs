@@ -29,6 +29,7 @@ public class ReshareActionService {
   ProtocolMessageService protocolMessageService
   ProtocolMessageBuildingService protocolMessageBuildingService
   HostLMSService hostLMSService
+  StatisticsService statisticsService
 
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
@@ -55,9 +56,11 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
           else {
-           // Otherwise, if the checkout succeeded or failed, set appropriately
-           Status s = null;
+            // Otherwise, if the checkout succeeded or failed, set appropriately
+            Status s = null;
             if ( checkout_result.result == true ) {
+              statisticsService.incrementCounter('/activeLoans');
+              pr.activeLoan=true
               s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
               auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
             }
@@ -213,14 +216,14 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean sendSupplierCancelResponse(PatronRequest pr, Object actionParams) {
+  public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams) {
     /* This method will send a cancellation response iso18626 message */
     
     log.debug("sendSupplierCancelResponse(${pr})");
     boolean result = false;
     String status;
 
-     if (!actionParams.isNull("cancelResponse")){
+     if (!actionParams.get('cancelResponse') != null ) {
 
         switch (actionParams.cancelResponse) {
           case 'yes':
@@ -399,7 +402,7 @@ public class ReshareActionService {
     if ( host_lms ) {
       try {
         // Call the host lms to check the item out of the host system and in to reshare
-        def accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
                                                 pr.hrid,
                                                 pr.patronIdentifier, // user_idA
                                                 pr.author, // author,
@@ -408,6 +411,21 @@ public class ReshareActionService {
                                                 pr.localCallNumber, // call_number,
                                                 pr.pickupLocation, // pickup_location,
                                                 null) // requested_action
+
+        if ( accept_result?.result == true ) {
+          // Mark item as awaiting circ
+          def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+          String message = 'NCIP acceptItem completed'
+
+          reshareApplicationEventHandlerService.auditEntry(pr,
+                                          pr.state,
+                                          new_state,
+                                          message, 
+                                          null);
+          pr.state=new_state;
+          pr.save(flush:true, failOnError:true);
+          log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+        }
       }
       catch ( Exception e ) {
         log.error("NCIP Problem",e);
@@ -417,15 +435,26 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
   }
 
-  public void handleItemReturned(PatronRequest patron_request, Map params) {
-    log.debug("handleItemReturned(${pr?.id}, ${params}");
+
+  /** 
+   * At the end of the process, check the item back into the HOST lms
+   */
+  public void checkOutOfReshare(PatronRequest patron_request, Map params) {
+    log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     try {
       // Call the host lms to check the item out of the host system and in to reshare
-      def accept_result = host_lms.checInItem(pr.hrid)
+      // def accept_result = host_lms.checkInItem(patron_request.hrid)
+      def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+      statisticsService.decrementCounter('/activeLoans');
+      patron_request.activeLoan=false
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);
     }
+  }
+
+  public void handleItemReturned(PatronRequest patron_request, Map params) {
+    log.debug("handleItemReturned(${patron_request?.id}, ${params}");
   }
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
@@ -471,6 +500,7 @@ public class ReshareActionService {
 
     String message_sender_symbol = pr.requestingInstitutionSymbol;
 
+    log.debug("ROTA: ${pr.rota}")
     log.debug("ROTA TYPE: ${pr.rota.getClass()}")
     PatronRequestRota prr = pr.rota.find({it.rotaPosition == rotaPosition})
     log.debug("ROTA at position ${pr.rotaPosition}: ${prr}")
@@ -515,7 +545,7 @@ public class ReshareActionService {
   public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {
-    Map params
+    Map params = [:]
     if (note) {
       params = [note: note]
     }
