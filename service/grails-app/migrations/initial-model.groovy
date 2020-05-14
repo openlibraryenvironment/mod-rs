@@ -1535,10 +1535,7 @@ databaseChangeLog = {
       addColumn(tableName: "patron_request") {
         column(name: "pr_pref_service_point_code", type: "VARCHAR(255)")
       }
-    }
-
-    changeSet(author: "knordstrom (manual)", id: "20200501-1024-002") {
-      addColumn(tableName: "patron_request") {
+       addColumn(tableName: "patron_request") {
         column(name: "pr_resolved_pickup_location_fk", type: "VARCHAR(36)")
       }
       addForeignKeyConstraint(baseColumnNames: "pr_resolved_pickup_location_fk", baseTableName: "patron_request", constraintName: "FK_pickup_location_constraint", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "de_id", referencedTableName: "directory_entry")

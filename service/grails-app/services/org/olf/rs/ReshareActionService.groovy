@@ -100,7 +100,7 @@ public class ReshareActionService {
     Map result = [status:false];
     if( pr.pickupLocationCode ) {
       DirectoryEntry entry = ReshareApplicationEventHandlerService
-        .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode).owner;
+        .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode)?.owner;
       if(entry != null) {
         pr.resolvedPickupLocation = entry;
         pr.pickupLocation = entry.name;
