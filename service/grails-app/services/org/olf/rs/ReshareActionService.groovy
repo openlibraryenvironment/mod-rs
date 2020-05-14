@@ -417,6 +417,15 @@ public class ReshareActionService {
           pr.save(flush:true, failOnError:true);
           log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
         }
+        else {
+          // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
+          reshareApplicationEventHandlerService.auditEntry(pr,
+                                          pr.state,
+                                          pr.state,
+                                          'NCIP accept item failed. Please recheck and try again: '+accept_result?.problem, 
+                                          null);
+          pr.save(flush:true, failOnError:true);
+        }
       }
       catch ( Exception e ) {
         log.error("NCIP Problem",e);

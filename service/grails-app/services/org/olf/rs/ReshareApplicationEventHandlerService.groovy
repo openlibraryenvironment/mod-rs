@@ -147,51 +147,57 @@ public class ReshareApplicationEventHandlerService {
         def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
         log.debug("Result of patron lookup ${patron_details}");
 
-        if ( isValidPatron(patron_details) ) {
-
-          if ( patron_details.userid == null )
-            patron_details.userid = req.patronIdentifier
-
-          if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
-            req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
-            if ( req.patronSurname == null )
-              req.patronSurname = patron_details.surname;
-            if ( req.patronGivenName == null )
-              req.patronGivenName = patron_details.givenName;
-
-            req.patronEmail = patron_details.email;
-          }
-
-          if ( req.requestingInstitutionSymbol != null ) {
-            // We need to validate the requsting location - and check that we can act as requester for that symbol
-            Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
-        
-            if ( s != null ) {
-              req.resolvedRequester = s
-              log.debug("Got request ${req}");
-              log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-              req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-              auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+        if ( patron_details.problems == null ) {
+          if ( isValidPatron(patron_details) ) {
+  
+            if ( patron_details.userid == null )
+              patron_details.userid = req.patronIdentifier
+  
+            if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+              req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+              if ( req.patronSurname == null )
+                req.patronSurname = patron_details.surname;
+              if ( req.patronGivenName == null )
+                req.patronGivenName = patron_details.givenName;
+  
+              req.patronEmail = patron_details.email;
+            }
+  
+            if ( req.requestingInstitutionSymbol != null ) {
+              // We need to validate the requsting location - and check that we can act as requester for that symbol
+              Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
+          
+              if ( s != null ) {
+                req.resolvedRequester = s
+                log.debug("Got request ${req}");
+                log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+                req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
+                auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+              }
+              else {
+                log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
+                req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+                auditEntry(req, 
+                           lookupStatus('PatronRequest', 'REQ_IDLE'), 
+                           lookupStatus('PatronRequest', 'REQ_ERROR'), 
+                           'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
+              }
             }
             else {
-              log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
               req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-              auditEntry(req, 
-                         lookupStatus('PatronRequest', 'REQ_IDLE'), 
-                         lookupStatus('PatronRequest', 'REQ_ERROR'), 
-                         'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
+              auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
             }
           }
           else {
-            req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+            req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
           }
         }
         else {
-          req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
+          // unexpected error in NCIP call
+          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), patron_details?.problems?.toString(), null);
         }
-
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecord");
           req.bibRecord = sharedIndexService.fetchSharedIndexRecord(req.systemInstanceIdentifier)
