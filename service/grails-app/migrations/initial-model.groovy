@@ -1566,4 +1566,10 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "efreestone (manual)", id: "20200514-1535-001") {
+        addColumn(tableName: "address") {
+            column(name: "addr_country_code", type: "VARCHAR(15)");
+        }
+    }
+
 }
