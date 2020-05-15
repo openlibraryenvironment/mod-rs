@@ -18,6 +18,7 @@ class UrlMappings {
     }
 
     "/rs/shipments" (resources: 'shipment' )
+    "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
 
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 
