@@ -1572,4 +1572,9 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "jskomorowski (manual)", id: "20200515-1239-001") {
+        addColumn(tableName: "status") {
+            column(name: "st_needs_attention", type: "BOOLEAN");
+        }
+    }
 }

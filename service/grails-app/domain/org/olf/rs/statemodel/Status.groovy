@@ -14,12 +14,14 @@ class Status implements MultiTenant<Status> {
   String code
   String presSeq
   Boolean visible
+  Boolean needsAttention
 
   static constraints = {
                owner (nullable: false)
                code (nullable: false, blank:false)
             presSeq (nullable: true, blank:false)
             visible (nullable: true)
+     needsAttention (nullable: false)
   }
 
   static mapping = {
@@ -29,11 +31,12 @@ class Status implements MultiTenant<Status> {
                    code column : 'st_code'
                 presSeq column : 'st_presentation_sequence'
                 visible column : 'st_visible'
+         needsAttention column : 'st_needs_attention'
   }
 
-  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null) {
+  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null, Boolean needsAttention=false) {
     StateModel sm = StateModel.findByShortcode(model) ?: new StateModel(shortcode: model).save(flush:true, failOnError:true)
-    Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code, presSeq:presSeq, visible:visible).save(flush:true, failOnError:true)
+    Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention).save(flush:true, failOnError:true)
     return s;
   }
 
