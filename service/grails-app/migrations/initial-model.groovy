@@ -1566,7 +1566,6 @@ databaseChangeLog = {
         }
     }
 
-
     changeSet(author: "ianibbo (manual)", id: "20200518-0800-001") {
         createTable(tableName: "timer") {
             column(name: "tr_id", type: "VARCHAR(36)") {
@@ -1582,6 +1581,12 @@ databaseChangeLog = {
             column(name: "tr_last_exec", type: "BIGINT")
             column(name: "tr_task_code", type: "VARCHAR(255)")
             column(name: "tr_task_config", type: "TEXT")
+        }
+    }
+
+    changeSet(author: "efreestone (manual)", id: "20200514-1535-001") {
+        addColumn(tableName: "address") {
+            column(name: "addr_country_code", type: "VARCHAR(15)");
         }
     }
 
