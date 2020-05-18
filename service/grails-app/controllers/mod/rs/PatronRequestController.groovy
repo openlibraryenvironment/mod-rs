@@ -36,7 +36,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
     def result = [:]
 
     if ( request.method=='POST' ) {
-      log.debug("PatronRequestController::performAction(${request.JSON})");
+      log.debug("PatronRequestController::performAction(${request.JSON})...");
       if ( params.patronRequestId ) {
         def patron_request = PatronRequest.get(params.patronRequestId)
         if ( patron_request ) {
@@ -257,6 +257,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
         }
       }
     }
+    log.debug("PatronRequestController::performAction exiting");
     render result as JSON;
   }
 
