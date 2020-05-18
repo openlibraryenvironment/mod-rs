@@ -213,6 +213,7 @@ public class SharedIndexService {
                   if ( split_location.length == 4 ) {
                     // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
                     
+                    // Do we already have an entry in the result for the given location? If not, Add it 
                     if ( result.find { it.symbol==('RESHARE:'+split_location[0]) } == null ) {
                       // And we don't already have the location
                       result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])

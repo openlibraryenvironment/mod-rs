@@ -18,8 +18,8 @@ class UrlMappings {
     }
 
     "/rs/shipments" (resources: 'shipment' )
+    "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
-
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 
     // Call /rs/refdata to list all refdata categories

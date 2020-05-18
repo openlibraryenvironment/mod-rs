@@ -1566,4 +1566,23 @@ databaseChangeLog = {
         }
     }
 
+
+    changeSet(author: "ianibbo (manual)", id: "20200518-0800-001") {
+        createTable(tableName: "timer") {
+            column(name: "tr_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "tr_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "tr_description", type: "TEXT")
+            column(name: "tr_rrule", type: "VARCHAR(255)")
+            column(name: "tr_last_exec", type: "BIGINT")
+            column(name: "tr_task_code", type: "VARCHAR(255)")
+            column(name: "tr_task_config", type: "TEXT")
+        }
+    }
+
 }
