@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequest
 import com.k_int.okapi.OkapiTenantAwareController
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
+import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
@@ -34,7 +35,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
   def performAction() {
 
     def result = [:]
-
     if ( request.method=='POST' ) {
       log.debug("PatronRequestController::performAction(${request.JSON})...");
       if ( params.patronRequestId ) {

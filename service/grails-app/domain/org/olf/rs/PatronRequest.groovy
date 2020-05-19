@@ -13,6 +13,7 @@ import org.olf.rs.statemodel.AvailableAction;
 import com.k_int.web.toolkit.tags.Tag
 import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
+import org.olf.okapi.modules.directory.DirectoryEntry;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -90,6 +91,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String patronEmail
   String patronNote
   String pickupLocation
+  String pickupLocationCode
+  DirectoryEntry resolvedPickupLocation
 
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
@@ -259,6 +262,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronEmail (nullable: true, blank:false)
     patronNote (nullable: true, blank:false)
     pickupLocation (nullable: true, blank:false)
+    pickupLocationCode (nullable: true)
+    resolvedPickupLocation (nullable: true)
 
     resolvedPatron (nullable: true)
     requesterRequestedCancellation (nullable: false, blank: false)
@@ -342,6 +347,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronEmail column : 'pr_patron_email'
     patronNote column : 'pr_patron_note'
     pickupLocation column : 'pr_pref_service_point'
+    pickupLocationCode column : 'pr_pref_service_point_code'
+    resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
     resolvedPatron column : 'pr_resolved_patron_fk'
     requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
     requestToContinue column: 'pr_request_to_continue'
