@@ -447,6 +447,7 @@ public class ReshareActionService {
     try {
       // Call the host lms to check the item out of the host system and in to reshare
       // def accept_result = host_lms.checkInItem(patron_request.hrid)
+      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
       def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
       statisticsService.decrementCounter('/activeLoans');
       patron_request.activeLoan=false
