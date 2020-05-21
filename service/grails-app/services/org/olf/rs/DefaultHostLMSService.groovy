@@ -558,7 +558,7 @@ public class DefaultHostLMSService implements HostLMSActions {
                   .includeBibliographicDescription()
                   .setApplicationProfileType(ncip_app_profile);
     JSONObject response = ncip2Client.send(checkinItem);
-    log.debug(response);
+    log.debug(response?.toString());
     if ( response.has('problems') ) {
       result.result = false;
     }
