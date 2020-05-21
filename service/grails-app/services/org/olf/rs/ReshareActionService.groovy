@@ -441,7 +441,8 @@ public class ReshareActionService {
   /** 
    * At the end of the process, check the item back into the HOST lms
    */
-  public void checkOutOfReshare(PatronRequest patron_request, Map params) {
+  public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
+    boolean result = true;
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     try {
       // Call the host lms to check the item out of the host system and in to reshare
@@ -452,7 +453,14 @@ public class ReshareActionService {
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);
+      reshareApplicationEventHandlerService.auditEntry(patron_request,
+                                          patron_request.state,
+                                          patron_request.state,
+                                          'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
+                                          null);
+      result = false;
     }
+    return result;
   }
 
   public void handleItemReturned(PatronRequest patron_request, Map params) {

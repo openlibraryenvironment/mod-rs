@@ -227,8 +227,11 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               // SimpleTransition does a save
               log.debug("supplierCheckOutOfReshare::send status change");
               reshareActionService.sendStatusChange(patron_request, "LoanCompleted", request.JSON.actionParams?.note)
+
+              // ToDo: Clarify what shuld happen if this returns false - complete anyway, or force the user to iterate the checkOut process
               log.debug("supplierCheckOutOfReshare::check out of reshare");
               reshareActionService.checkOutOfReshare(patron_request, request.JSON.actionParams);
+
               log.debug("supplierCheckOutOfReshare::transition");
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
               break;
