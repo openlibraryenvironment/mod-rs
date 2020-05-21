@@ -541,7 +541,7 @@ public class DefaultHostLMSService implements HostLMSActions {
 
   public Map checkInItem(String item_id) {
     Map result = [:]
-    log.debug("checkInItem(${request_id},${user_id})");
+    log.debug("checkInItem(${user_id})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
     AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
