@@ -165,10 +165,10 @@ public class ReshareApplicationEventHandlerService {
 
             // If we were supplied a pickup location code, attempt to resolve it here
             if( pr.pickupLocationCode ) {
-              DirectoryEntry entry = resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode)?.owner;
-              if(entry != null) {
-                pr.resolvedPickupLocation = entry;
-                pr.pickupLocation = entry.name;
+              Symbol pickup_symbol = resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode)
+              if(pickup_symbol != null) {
+                pr.resolvedPickupLocation = pickup_symbol.owner;
+                pr.pickupLocation = pickup_symbol.owner.name;
               }
             }
 
