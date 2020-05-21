@@ -98,14 +98,7 @@ public class ReshareActionService {
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     Map result = [status:false];
-    if( pr.pickupLocationCode ) {
-      DirectoryEntry entry = ReshareApplicationEventHandlerService
-        .resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode)?.owner;
-      if(entry != null) {
-        pr.resolvedPickupLocation = entry;
-        pr.pickupLocation = entry.name;
-      }
-    }
+
     Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
     if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
       pr.state = s;

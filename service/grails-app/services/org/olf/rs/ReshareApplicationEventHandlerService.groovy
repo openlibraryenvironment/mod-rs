@@ -162,6 +162,16 @@ public class ReshareApplicationEventHandlerService {
   
               req.patronEmail = patron_details.email;
             }
+
+            // If we were supplied a pickup location code, attempt to resolve it here
+            if( pr.pickupLocationCode ) {
+              DirectoryEntry entry = resolveCombinedSymbol(request.JSON.actionParams.pickupLocationCode)?.owner;
+              if(entry != null) {
+                pr.resolvedPickupLocation = entry;
+                pr.pickupLocation = entry.name;
+              }
+            }
+
   
             if ( req.requestingInstitutionSymbol != null ) {
               // We need to validate the requsting location - and check that we can act as requester for that symbol
