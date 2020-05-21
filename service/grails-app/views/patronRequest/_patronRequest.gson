@@ -12,7 +12,8 @@ json g.render(patronRequest, [expand: ['state',
                                        'notifications',
                                        'conditions',
                                        'resolvedRequester',
-                                       'resolvedSupplier'
+                                       'resolvedSupplier',
+                                       'resolvedPickupLocation'
                                        ],
                               excludes: []]) {
   validActions patronRequest.getValidActions()
