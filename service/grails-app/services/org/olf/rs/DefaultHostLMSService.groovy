@@ -550,7 +550,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     String ncip_from_agency = ncip_from_agency_setting?.value
     String ncip_app_profile = ncip_app_profile_setting?.value
 
-    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address_setting);
+    NCIP2Client ncip2Client = new NCIP2Client(ncip_server_address);
     CheckinItem checkinItem = new CheckinItem()
                   .setItemId(item_id)
                   .setToAgency(ncip_from_agency)
