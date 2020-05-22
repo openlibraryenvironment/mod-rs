@@ -21,7 +21,7 @@ class Status implements MultiTenant<Status> {
                code (nullable: false, blank:false)
             presSeq (nullable: true, blank:false)
             visible (nullable: true)
-     needsAttention (nullable: false)
+     needsAttention (nullable: true)
   }
 
   static mapping = {
@@ -34,7 +34,7 @@ class Status implements MultiTenant<Status> {
          needsAttention column : 'st_needs_attention'
   }
 
-  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null, Boolean needsAttention=false) {
+  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null, needsAttention=null) {
     StateModel sm = StateModel.findByShortcode(model) ?: new StateModel(shortcode: model).save(flush:true, failOnError:true)
     Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention).save(flush:true, failOnError:true)
     return s;
