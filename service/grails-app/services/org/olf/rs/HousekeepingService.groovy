@@ -69,9 +69,9 @@ public class HousekeepingService {
         // Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
         // Requester / Borrower State Model
-        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED', '0010', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_INVALID_PATRON', '0011', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_INVALID_PATRON', '0011', true, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
@@ -81,7 +81,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
         Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true);
@@ -96,16 +96,16 @@ public class HousekeepingService {
         // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true, true);
 
         // Responder / Lender State Model
         Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
         Status.lookupOrCreate('Responder', 'RES_PENDING_CONDITIONAL_ANSWER', '0006', true);
         Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true);
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true, true);
         Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_LMS_CHECKOUT', '0021', true);
+        Status.lookupOrCreate('Responder', 'RES_AWAIT_LMS_CHECKOUT', '0021', true, true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
         Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
@@ -115,7 +115,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true);
         Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
-        Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true);
+        Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'message', 'M')
