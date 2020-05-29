@@ -9,6 +9,7 @@ import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.okapi.modules.directory.DirectoryEntry;
 import groovy.json.JsonOutput;
 import java.time.LocalDateTime;
 import java.time.Instant;
@@ -165,10 +166,11 @@ public class ReshareApplicationEventHandlerService {
 
             // If we were supplied a pickup location code, attempt to resolve it here
             if( req.pickupLocationCode ) {
-              Symbol pickup_symbol = resolveCombinedSymbol(req.pickupLocationCode)
-              if(pickup_symbol != null) {
-                req.resolvedPickupLocation = pickup_symbol.owner;
-                req.pickupLocation = pickup_symbol.owner.name;
+              DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+              
+              if(pickup_loc != null) {
+                req.resolvedPickupLocation = pickup_loc;
+                req.pickupLocation = pickup_loc.name;
               }
             }
 
