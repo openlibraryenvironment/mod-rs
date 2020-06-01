@@ -170,6 +170,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Patron resolvedPatron
 
+  Boolean needsAttention
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -271,6 +273,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     previousState (nullable: true)
     activeLoan(nullable: true)
+
+    needsAttention(nullable: true)
   }
 
   static mapping = {
@@ -354,6 +358,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     requestToContinue column: 'pr_request_to_continue'
     previousState column: 'pr_previous_state'
     activeLoan column: 'pr_active_loan'
+    needsAttention column: 'pr_needs_attention'
 
     audit(sort:'dateCreated', order:'desc')
   }

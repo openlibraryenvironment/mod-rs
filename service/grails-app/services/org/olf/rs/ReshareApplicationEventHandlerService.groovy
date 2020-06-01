@@ -197,19 +197,23 @@ public class ReshareApplicationEventHandlerService {
             }
             else {
               req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+              req.needsAttention=true;
               auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
             }
           }
           else {
             req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
+            req.needsAttention=true;
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
           }
         }
         else {
           // unexpected error in NCIP call
           req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          req.needsAttention=true;
           auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'NCIP Problem in lookupPatron: '+patron_details?.problems?.toString(), null);
         }
+
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecord");
           req.bibRecord = sharedIndexService.fetchSharedIndexRecord(req.systemInstanceIdentifier)

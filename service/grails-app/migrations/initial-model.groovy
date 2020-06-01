@@ -1605,4 +1605,11 @@ databaseChangeLog = {
             column(name: "st_needs_attention", type: "BOOLEAN");
         }
     }
+
+    changeSet(author: "ianibbo (manual)", id: "20200601-0845-001") {
+        addColumn(tableName: "patron_request") {
+            column(name:"pr_needs_attention", type: "BOOLEAN")
+        }
+    }
+
 }
