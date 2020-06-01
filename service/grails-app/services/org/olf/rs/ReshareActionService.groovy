@@ -61,12 +61,14 @@ public class ReshareActionService {
             if ( checkout_result.result == true ) {
               statisticsService.incrementCounter('/activeLoans');
               pr.activeLoan=true
+              pr.needsAttention=false;
               s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
               auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
             }
             else {
               s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-              auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
+              pr.needsAttention=true;
+              auditEntry(pr, pr.state, s, 'NCIP problem in HOST LMS Integraiton. Check In to Reshare Failed - Manual checkout needed. '+checkout_result.problems?.toString(), null);
             }
             pr.state = s;
             pr.save(flush:true, failOnError:true);
@@ -75,6 +77,7 @@ public class ReshareActionService {
         else {
           Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
           auditEntry(pr, pr.state, s, 'HOST LMS Integration not configured. Manual checkout needed');
+          pr.needsAttention=true;
           pr.state = s;
           pr.save(flush:true, failOnError:true);
         }
@@ -416,6 +419,7 @@ public class ReshareActionService {
                                           message, 
                                           null);
           pr.state=new_state;
+          pr.needsAttention=false;
           pr.save(flush:true, failOnError:true);
           log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
         }
@@ -426,6 +430,7 @@ public class ReshareActionService {
                                           pr.state,
                                           'NCIP accept item failed. Please recheck and try again: '+accept_result?.problem, 
                                           null);
+          pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
         }
       }
@@ -450,10 +455,12 @@ public class ReshareActionService {
       HostLMSActions host_lms = hostLMSService.getHostLMSActions();
       def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
       statisticsService.decrementCounter('/activeLoans');
+      patron_request.needsAttention=false;
       patron_request.activeLoan=false
     }
     catch ( Exception e ) {
       log.error("NCIP Problem",e);
+      patron_request.needsAttention=true;
       reshareApplicationEventHandlerService.auditEntry(patron_request,
                                           patron_request.state,
                                           patron_request.state,
