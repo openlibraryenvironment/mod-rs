@@ -398,6 +398,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @Transient
   public int getUnreadNotificationCount() {
     // Return fast if this is not a persistent instance
+    if (!this.id) return 0
+
+    
     // Projection query
     PatronRequestNotification.createCriteria().get {
       eq 'patronRequest.id', this.id
