@@ -66,7 +66,7 @@ public class ReshareActionService {
             }
             else {
               s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-              auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
+              auditEntry(pr, pr.state, s, 'NCIP problem in HOST LMS Integraiton. Check In to Reshare Failed - Manual checkout needed. '+checkout_result.problems?.toString(), null);
             }
             pr.state = s;
             pr.save(flush:true, failOnError:true);

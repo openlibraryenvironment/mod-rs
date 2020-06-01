@@ -208,7 +208,7 @@ public class ReshareApplicationEventHandlerService {
         else {
           // unexpected error in NCIP call
           req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), patron_details?.problems?.toString(), null);
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'NCIP Problem in lookupPatron: '+patron_details?.problems?.toString(), null);
         }
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecord");

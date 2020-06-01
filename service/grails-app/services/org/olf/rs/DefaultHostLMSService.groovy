@@ -319,6 +319,7 @@ public class DefaultHostLMSService implements HostLMSActions {
           //  "userId":"M00069192"}
           if ( ( response ) && ( ! response.has('problems') ) ) {
             result.status='OK'
+            result.result=true
             result.userid=response.opt('userid')
             result.givenName=response.opt('firstName')
             result.surname=response.opt('lastName')
@@ -330,16 +331,19 @@ public class DefaultHostLMSService implements HostLMSActions {
           }
           else {
             result.problems=response.get('problems')
+            result.result=false
           }
         }
       }
       else {
         log.warn("Not calling NCIP lookup - No patron ID passed in");
         result.problems='No patron id supplied'
+        result.result=false
       }
     }
     catch ( Exception e ) {
       result.problems = "Unexpected problem in NCIP Call ${e.message}";
+      result.result=false
     }
 
     return result;
@@ -530,6 +534,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     JSONObject response = ncip2Client.send(acceptItem);
     if ( response.has('problems') ) {
       result.result = false;
+      result.problems = response.get('problems')
     }
     else {
       result.result = true;
@@ -561,6 +566,7 @@ public class DefaultHostLMSService implements HostLMSActions {
     log.debug(response?.toString());
     if ( response.has('problems') ) {
       result.result = false;
+      result.problems = response.get('problems')
     }
     else {
       result.result = true;
