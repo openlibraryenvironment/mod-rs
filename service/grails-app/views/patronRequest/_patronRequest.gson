@@ -16,6 +16,7 @@ json g.render(patronRequest, [expand: ['state',
                                        'resolvedPickupLocation'
                                        ],
                               excludes: []]) {
+  'unreadMessageCount' patronRequest.getUnreadNotificationCount()
   validActions patronRequest.getValidActions()
 }
 

@@ -14,6 +14,7 @@ import com.k_int.web.toolkit.tags.Tag
 import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
 import org.olf.okapi.modules.directory.DirectoryEntry;
+import groovy.sql.Sql;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -394,4 +395,20 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     ]
   }
 
+  @Transient
+  public int getUnreadNotificationCount() {
+    // Return fast if this is not a persistent instance
+    if (!this.id) return 0
+
+    
+    // Projection query
+    PatronRequestNotification.createCriteria().get {
+      eq 'patronRequest.id', this.id
+      eq 'seen', false
+      eq 'isSender', false
+      projections {
+        countDistinct('id')
+      }
+    }
+  }
 }
