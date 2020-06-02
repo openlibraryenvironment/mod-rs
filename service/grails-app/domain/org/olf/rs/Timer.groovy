@@ -13,6 +13,7 @@ class Timer implements MultiTenant<Timer> {
   Long lastExecution
   String taskCode
   String taskConfig
+  Boolean enabled
   
   static constraints = {
       description (nullable : true,  blank: false)
@@ -20,6 +21,7 @@ class Timer implements MultiTenant<Timer> {
     lastExecution (nullable : true, blank: false)
          taskCode (nullable : false, blank: false)
        taskConfig (nullable : true, blank: false)
+          enabled (nullable : true, blank: false)
   }
 
   static mapping = {
@@ -30,6 +32,7 @@ class Timer implements MultiTenant<Timer> {
     lastExecution          column : 'tr_last_exec'
     taskCode               column : 'tr_task_code'
     taskConfig             column : 'tr_task_config', type: 'text'
+    enabled                column : 'tr_enabled'
   }
 
 }

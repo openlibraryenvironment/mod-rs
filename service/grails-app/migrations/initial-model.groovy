@@ -1612,4 +1612,10 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "ianibbo (manual)", id: "20200602-0930-001") {
+        addColumn(tableName: "timer") {
+            column(name:"tr_enabled", type: "BOOLEAN")
+        }
+    }
+
 }
