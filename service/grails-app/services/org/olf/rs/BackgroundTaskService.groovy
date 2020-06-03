@@ -35,16 +35,12 @@ public class BackgroundTaskService {
     try {
       Tenants.withId(tenant) {
         // We aren't doing this any longer / at the moment.
-        // checkPullSlips();
+        checkPullSlips();
   
-        // def sl = Symbol.list();
-        // log.debug("Currently ${sl.size()} symbols in the system");
-        // sl.each { sym ->
-        //   log.debug("symbol ${sym.id}: ${sym.authority.symbol}:${sym.symbol} (Owner: ${sym.owner.name})");
-        // }
+        // Warn of any duplicate symbols
         def duplicate_symbols = Symbol.executeQuery('select distinct s.symbol, s.authority.symbol from Symbol as s group by s.symbol, s.authority.symbol having count(*) > 1')
         duplicate_symbols.each { ds ->
-          log.warn("WARNING: Duplicate symbols detected. This should not be possible. ${ds}");
+          log.warn("WARNING: Duplicate symbols detected. This means the symbol ${ds} appears more than once. This shoud not happen. Incoming requests for this symbol cannot be uniquely matched to an institution");
         }
   
         // Find all patron requesrs where the current state has a System action attached that can be executed.
@@ -77,10 +73,10 @@ public class BackgroundTaskService {
 
   private void checkPullSlips() {
     log.debug("checkPullSlips()");
-    HostLMSLocation.list().each { loc ->
-      log.debug("Check pull slips fro ${loc}");
-      checkPullSlipsFor(loc.code);
-    }
+    // HostLMSLocation.list().each { loc ->
+    //   log.debug("Check pull slips fro ${loc}");
+    //   checkPullSlipsFor(loc.code);
+    // }
   }
 
   private void checkPullSlipsFor(String location) {
