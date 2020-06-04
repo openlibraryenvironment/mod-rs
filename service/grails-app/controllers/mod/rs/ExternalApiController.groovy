@@ -49,4 +49,14 @@ class externalApi {
 
     render result as JSON
   }
+
+
+  // Experiment
+  def iso18626(String tenant) {
+    log.debug("externalApi::iso18626(${tenant})");
+
+    render [
+      status:'OK'
+    ] as JSON
+  }
 }

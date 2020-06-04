@@ -9,8 +9,7 @@ class UrlMappings {
     "/rs/statistics" (controller: 'statistics' )
 
     "/rs/externalApi/${tenant}/statistics" (controller: 'externalApi', action:'statistics' )
-    // Considring this:
-    // "/rs/externalApi/${tenant}/iso18626" (controller: 'externalApi', action:'iso18626' )
+    "/rs/externalApi/${tenant}/iso18626" (controller: 'externalApi', action:'iso18626' )
 
     "/rs/patronrequests" (resources:'patronRequest') {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
