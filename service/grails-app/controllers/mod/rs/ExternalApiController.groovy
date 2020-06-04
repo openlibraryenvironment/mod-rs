@@ -21,6 +21,7 @@ import org.olf.rs.Counter
  * External Read-Only APIs for resource sharing network connectivity
  */
 @Slf4j
+@CurrentTenant
 class externalApi {
 
   GrailsApplication grailsApplication
@@ -29,19 +30,16 @@ class externalApi {
   def index() {
   }
 
-  def statistics(String tenant) {
+  def statistics() {
 
     def result=[
-      getStatistics:tenant
     ]
    
     try {
-      Tenants.withId(tenant) {
-        result = [
-          asAt:new Date(),
-          current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] }
-        ]
-      }
+      result = [
+        asAt:new Date(),
+        current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] }
+      ]
     }
     catch ( Exception e ) {
       result.error=e.message;
@@ -52,7 +50,7 @@ class externalApi {
 
 
   // Experiment
-  def iso18626(String tenant) {
+  def iso18626() {
     log.debug("externalApi::iso18626(${tenant})");
 
     render [
