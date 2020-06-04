@@ -75,7 +75,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCEL_PENDING', '0027', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER', '0028', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
@@ -113,7 +113,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
-        Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true);
+        Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
         Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
 
