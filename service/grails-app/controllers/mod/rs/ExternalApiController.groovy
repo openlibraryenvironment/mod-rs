@@ -14,7 +14,7 @@ import groovy.xml.StreamingMarkupBuilder
 import grails.gorm.multitenancy.Tenants
 import groovy.util.logging.Slf4j
 import org.olf.rs.Counter
-
+import grails.gorm.multitenancy.CurrentTenant
 
 
 /**
