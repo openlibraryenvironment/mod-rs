@@ -126,6 +126,9 @@ dependencies {
   // Domain model for directory
   compile 'org.olf.reshare.dm.directory:dm-directory:1.1.17'
   compile 'org.scala-saddle:google-rfc-2445:20110304'
+
+  // For RRule processing
+  compile 'org.dmfs:lib-recur:0.11.6'
 }
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
 version="${appVersion}"
