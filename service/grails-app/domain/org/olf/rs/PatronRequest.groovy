@@ -173,6 +173,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Boolean needsAttention
 
+  int unreadMessageCount
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -279,6 +281,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   static mapping = {
+    unreadMessageCount formula: '(SELECT COUNT(*) FROM patron_request_notification AS prn INNER JOIN patron_request as pr ON prn.prn_patron_request_fk = pr.pr_id WHERE pr.pr_id = pr_id AND prn.prn_seen = false AND prn.prn_is_sender = false )'
+
     id column : 'pr_id', generator: 'uuid2', length:36
     version column : 'pr_version'
     dateCreated column : 'pr_date_created'
@@ -393,22 +397,5 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       'title': this.title,
       'systemInstanceIdentifier': this.systemInstanceIdentifier
     ]
-  }
-
-  @Transient
-  public int getUnreadNotificationCount() {
-    // Return fast if this is not a persistent instance
-    if (!this.id) return 0
-
-    
-    // Projection query
-    PatronRequestNotification.createCriteria().get {
-      eq 'patronRequest.id', this.id
-      eq 'seen', false
-      eq 'isSender', false
-      projections {
-        countDistinct('id')
-      }
-    }
   }
 }
