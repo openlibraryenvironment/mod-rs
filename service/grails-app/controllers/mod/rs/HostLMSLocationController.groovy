@@ -16,7 +16,7 @@ class HostLMSLocationController extends OkapiTenantAwareController<HostLMSLocati
   static responseFormats = ['json', 'xml']
   
   HostLMSLocationController() {
-    super(HostLMSLocationController)
+    super(HostLMSLocation)
   }
   
 }
