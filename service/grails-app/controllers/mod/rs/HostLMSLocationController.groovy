@@ -11,7 +11,7 @@ import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
 import org.olf.rs.workflow.*;
 
-class HostLMSLocationController extends OkapiTenantAwareController<HostLMSLocationController> {
+class HostLMSLocationController extends OkapiTenantAwareController<HostLMSLocation> {
   
   static responseFormats = ['json', 'xml']
   
