@@ -66,16 +66,24 @@ public class BackgroundTaskService {
         }
 
         // Process any timers for sending pull slip notification emails
-        Timer.executeQuery('select t from Timer as t').each { timer ->
+        // Refactor - lastExcecution now contains the next scheduled execution or 0
+        Timer.executeQuery('select t from Timer as t where t.lastExecution < :now', [now:System.currentTimeMillis()]).each { timer ->
           try {
+            log.debug("Timer task ${timer.id} firing....");
+            runTimer(timer);
+ 
+            // Caclulate the next due date
             RecurrenceRule rule = new RecurrenceRule(timer.rrule);
             DateTime start = DateTime.now()
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            if (rrule_iterator.hasNext() ) {
-              DateTime nextInstance = rrule_iterator.nextDateTime();
-              log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
-              log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
-            }
+            // Rule will schedule a task immediately, skip it
+            rrule_iterator.nextDateTime();
+            // And then work out when it would next fire
+            def nextInstance = rrule_iterator.nextDateTime();
+            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
+            log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
+            timer.lastExecution = nextInstance.getTimestamp();
+            timer.save(flush:true, failOnError:true)
           }
           catch ( Exception e ) {
             log.error("Unexpected error processing timer tasks",e);
@@ -91,6 +99,9 @@ public class BackgroundTaskService {
       running = false;
       log.debug("BackgroundTaskService::performReshareTasks exiting");
     }
+  }
+
+  private runTimer(Timer t) {
   }
 
   private void checkPullSlips() {
