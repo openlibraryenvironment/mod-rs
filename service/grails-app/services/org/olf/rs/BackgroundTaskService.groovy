@@ -67,13 +67,18 @@ public class BackgroundTaskService {
 
         // Process any timers for sending pull slip notification emails
         Timer.executeQuery('select t from Timer as t').each { timer ->
-          RecurrenceRule rule = new RecurrenceRule(timer.rrule);
-          DateTime start = DateTime.now()
-          RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-          if (rrule_iterator.hasNext() ) {
-            DateTime nextInstance = rrule_iterator.nextDateTime();
-            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
-            log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
+          try {
+            RecurrenceRule rule = new RecurrenceRule(timer.rrule);
+            DateTime start = DateTime.now()
+            RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
+            if (rrule_iterator.hasNext() ) {
+              DateTime nextInstance = rrule_iterator.nextDateTime();
+              log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
+              log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
+            }
+          }
+          catch ( Exception e ) {
+            log.error("Unexpected error processing timer tasks",e);
           }
         }
         
