@@ -62,6 +62,7 @@ public class ReshareActionService {
               statisticsService.incrementCounter('/activeLoans');
               pr.activeLoan=true
               pr.needsAttention=false;
+              pr.dueDateFromLMS=checkout_result?.dueDate;
               s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
               auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
             }

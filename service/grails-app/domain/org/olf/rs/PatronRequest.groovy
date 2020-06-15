@@ -175,6 +175,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   int unreadMessageCount
 
+  String dueDateFromLMS
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -276,6 +278,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     previousState (nullable: true)
     activeLoan(nullable: true)
+    dueDateFromLMS(nullable: true)
 
     needsAttention(nullable: true)
   }
@@ -364,6 +367,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     previousState column: 'pr_previous_state'
     activeLoan column: 'pr_active_loan'
     needsAttention column: 'pr_needs_attention'
+
+    dueDateFromLMS column: 'pr_due_date_from_lms'
 
     audit(sort:'dateCreated', order:'desc')
   }

@@ -1618,4 +1618,11 @@ databaseChangeLog = {
         }
     }
 
+    // due date from lms is a string of length 64 in case we get back something not-date-like
+    // from the lms, or with additional text
+    changeSet(author: "ianibbo (manual)", id: "20200615-0936-001") {
+        addColumn(tableName: "patron_request") {
+            column(name:"pr_due_date_from_lms", type: "VARCHAR(64)")
+        }
+    }
 }
