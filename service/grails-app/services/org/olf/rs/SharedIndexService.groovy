@@ -31,6 +31,8 @@ public class SharedIndexService {
       log.debug("Try graphql")
       if ( description?.systemInstanceIdentifier != null ) {
         sharedIndexHoldings(description?.systemInstanceIdentifier).each { shared_index_availability ->
+          log.debug("add shared index availability: ${ishared_index_availability}");
+
           result.add(new AvailabilityStatement(
                                                symbol:shared_index_availability.symbol, 
                                                instanceIdentifier:null, 
@@ -216,8 +218,15 @@ public class SharedIndexService {
                     // Do we already have an entry in the result for the given location? If not, Add it 
                     if ( result.find { it.symbol==('RESHARE:'+split_location[0]) } == null ) {
                       // And we don't already have the location
+                      log.debug("adding RESAHRE:${split_location[0]} - with policy ${hr.illPolicy?.name}");
                       result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])
                     }
+                    else {
+                      log.debug("Located existing entry in result for ${split_location[0]} - not adding another");
+                    }
+                  }
+                  else {
+                    log.warn("Location code does not split into 4: ${location}");
                   }
                 }
               }

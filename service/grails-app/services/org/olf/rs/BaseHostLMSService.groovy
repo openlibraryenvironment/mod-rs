@@ -301,7 +301,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
              ( ncip_from_agency != null ) &&
              ( ncip_app_profile != null ) ) {
           log.debug("Request patron from ${ncip_server_address}");
-          CirculationClient ncip2Client = getCirculationClient(ncip_server_address);
+          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
           LookupUser lookupUser = new LookupUser()
                       .setUserId(patron_id)
                       .includeUserAddressInformation()
@@ -310,7 +310,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                       .setToAgency(ncip_from_agency)
                       .setFromAgency(ncip_from_agency)
                       .setApplicationProfileType(ncip_app_profile);
-          JSONObject response = ncip2Client.send(lookupUser);
+          JSONObject response = ncip_client.send(lookupUser);
     
           log.debug("Lookup user response: ${response}");
     
@@ -472,7 +472,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
     String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
-    CirculationClient ncip2Client = getCirculationClient(ncip_server_address);
+    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
     CheckoutItem checkoutItem = new CheckoutItem()
                   .setUserId(borrowerBarcode)
                   .setItemId(itemBarcode)
@@ -482,7 +482,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                   .setApplicationProfileType(ncip_app_profile);
                   //.setDesiredDueDate("2020-03-18");
 
-    JSONObject response = ncip2Client.send(checkoutItem);
+    JSONObject response = ncip_client.send(checkoutItem);
     log.debug("NCIP2 checkoutItem responseL ${response}");
     if ( response.has('problems') ) {
       result.result = false;
@@ -520,7 +520,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String ncip_from_agency = ncip_from_agency_setting?.value
     String ncip_app_profile = ncip_app_profile_setting?.value
 
-    CirculationClient ncip2Client = getCirculationClient(ncip_server_address);
+    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
     AcceptItem acceptItem = new AcceptItem()
                   .setItemId(item_id)
                   .setRequestId(request_id)
@@ -534,7 +534,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                   .setFromAgency(ncip_from_agency)
                   .setRequestedActionTypeString(requested_action)
                   .setApplicationProfileType(ncip_app_profile);
-    JSONObject response = ncip2Client.send(acceptItem);
+    JSONObject response = ncip_client.send(acceptItem);
     if ( response.has('problems') ) {
       result.result = false;
       result.problems = response.get('problems')
@@ -558,14 +558,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String ncip_from_agency = ncip_from_agency_setting?.value
     String ncip_app_profile = ncip_app_profile_setting?.value
 
-    CirculationClient ncip2Client = getCirculationClient(ncip_server_address);
+    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
     CheckinItem checkinItem = new CheckinItem()
                   .setItemId(item_id)
                   .setToAgency(ncip_from_agency)
                   .setFromAgency(ncip_from_agency)
                   .includeBibliographicDescription()
                   .setApplicationProfileType(ncip_app_profile);
-    JSONObject response = ncip2Client.send(checkinItem);
+    JSONObject response = ncip_client.send(checkinItem);
     log.debug(response?.toString());
     if ( response.has('problems') ) {
       result.result = false;

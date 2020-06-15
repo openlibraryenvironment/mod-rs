@@ -4,8 +4,12 @@ import grails.gorm.multitenancy.Tenants
 import org.olf.rs.HostLMSLocation 
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.AvailableAction
-
 import org.olf.okapi.modules.directory.Symbol;
+
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -44,9 +48,9 @@ public class BackgroundTaskService {
         }
   
         // Find all patron requesrs where the current state has a System action attached that can be executed.
-        PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each { 
-          AvailableAction aa = (AvailableAction) it[1] 
-          log.debug("Apply system action ${it[1]} to patron request ${it[0]}");
+        PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each {  pr ->
+          AvailableAction aa = (AvailableAction) pr[1] 
+          log.debug("Apply system action ${pr[1]} to patron request ${pr[0]}");
           switch ( aa.actionType ) {
             case 'S':
               log.debug("service action");
@@ -60,6 +64,19 @@ public class BackgroundTaskService {
           }
           
         }
+
+        // Process any timers for sending pull slip notification emails
+        Timer.executeQuery('select t from Timer as t').each { timer ->
+          RecurrenceRule rule = new RecurrenceRule(timer.rrule);
+          DateTime start = DateTime.now()
+          RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
+          if (rrule_iterator.hasNext() ) {
+            DateTime nextInstance = rrule_iterator.nextDateTime();
+            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
+            log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
+          }
+        }
+        
       }
     }
     catch ( Exception e ) {
