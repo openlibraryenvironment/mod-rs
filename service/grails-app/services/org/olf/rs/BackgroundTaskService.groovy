@@ -69,7 +69,7 @@ public class BackgroundTaskService {
         // Refactor - lastExcecution now contains the next scheduled execution or 0
         Timer.executeQuery('select t from Timer as t where t.lastExecution < :now', [now:System.currentTimeMillis()]).each { timer ->
           try {
-            log.debug("Timer task ${timer.id} firing....");
+            log.debug("** Timer task ${timer.id} firing....");
             runTimer(timer);
  
             // Caclulate the next due date

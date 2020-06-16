@@ -652,19 +652,29 @@ public class ReshareApplicationEventHandlerService {
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
+      // if eventData.deliveryInfo.itemId then we should stash the item id
 
-      if (eventData?.deliveryInfo?.loanCondition) {
-        log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
-        incomingStatus = [status: "Conditional"]
+      if (eventData?.deliveryInfo ) {
+
+        if (eventData?.deliveryInfo?.loanCondition) {
+          log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
+          incomingStatus = [status: "Conditional"]
 
 
-        // Save the loan condition to the patron request
-        String loanCondition = eventData?.deliveryInfo?.loanCondition
-        Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
-        String note = eventData.messageInfo?.note
+          // Save the loan condition to the patron request
+          String loanCondition = eventData?.deliveryInfo?.loanCondition
+          Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+          String note = eventData.messageInfo?.note
 
-        addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
+          addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
+        }
+
+        // If we're being told about the barcode of the selected item, stash it in selectedItemBarcode on the requester side
+        if ( eventData.deliveryInfo.itemId != null ) {
+          pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
+        }
       }
+
       // Awesome - managed to look up patron request - see if we can action
       if ( eventData.messageInfo?.reasonForMessage != null) {
 
