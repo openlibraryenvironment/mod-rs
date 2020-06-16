@@ -52,6 +52,12 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
     consumer = new KafkaConsumer(props)
 
+    /*
+     * https://github.com/confluentinc/kafka-streams-examples/blob/5.4.1-post/src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java
+     * suggests this hook when using streams... We need to do something similar
+     * Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+     */
+
     Promise p = task {
       consumePatronRequestEvents();
     }
