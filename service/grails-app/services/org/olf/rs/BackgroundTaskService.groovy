@@ -86,7 +86,7 @@ public class BackgroundTaskService {
             timer.save(flush:true, failOnError:true)
           }
           catch ( Exception e ) {
-            log.error("Unexpected error processing timer tasks",e);
+            log.error("Unexpected error processing timer tasks ${e.message}");
           }
         }
         
