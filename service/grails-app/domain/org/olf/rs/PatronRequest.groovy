@@ -273,8 +273,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     resolvedPickupLocation (nullable: true)
 
     resolvedPatron (nullable: true)
-    requesterRequestedCancellation (nullable: false, blank: false)
-    requestToContinue (nullable: false, blank: false)
+    requesterRequestedCancellation (nullable: false)
+    requestToContinue (nullable: false)
 
     previousState (nullable: true)
     activeLoan(nullable: true)
