@@ -71,7 +71,7 @@
           "pathPattern": "/rs/statistics"
         },
         {
-          "methods": ["GET"],
+          "methods": ["GET","POST"],
           "pathPattern": "/rs/externalApi/*"
         }
       ]
