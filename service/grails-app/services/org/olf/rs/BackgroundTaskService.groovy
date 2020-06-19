@@ -9,6 +9,7 @@ import org.olf.okapi.modules.directory.Symbol;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import com.k_int.okapi.OkapiClient
 
 
 /**
@@ -20,6 +21,7 @@ public class BackgroundTaskService {
   def grailsApplication
   def reshareActionService
   static boolean running = false;
+  OkapiClient okapiClient
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
@@ -110,6 +112,22 @@ public class BackgroundTaskService {
     //   log.debug("Check pull slips fro ${loc}");
     //   checkPullSlipsFor(loc.code);
     // }
+
+    log.debug("Checking if okapi context provides us with configuration");
+
+    // if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
+    //   log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
+      // Needs to be blocking...
+      // List links = okapiClient.getSync("/erm/sas/linkedLicenses", [
+      //   filters: [
+      //     "remoteId==${license.id}"
+      //   ]
+      // ])
+    // }
+    // else {
+    //   log.debug(" -> okapi not exposing configuration ^2.0 to us");
+    // }
+    
   }
 
   private void checkPullSlipsFor(String location) {

@@ -14,7 +14,6 @@ class ReshareSettingsController {
   BackgroundTaskService backgroundTaskService
 
 
-
   def tenantSymbols() {
     def result = [:];
 

@@ -91,8 +91,8 @@ dependencies {
   compile "com.ibm.icu:icu4j:62.1"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.7"
 
-  compile 'com.k_int.grails:web-toolkit:3.7.1'
-  compile 'com.k_int.okapi:grails-okapi:3.6.16'
+  compile 'com.k_int.grails:web-toolkit:4.3.0'
+  compile 'com.k_int.okapi:grails-okapi:3.7.1'
   compile 'org.apache.kafka:kafka-clients:2.3.0'
   runtime "com.zaxxer:HikariCP:3.2.0"
   compile 'org.grails.plugins:rxjava'

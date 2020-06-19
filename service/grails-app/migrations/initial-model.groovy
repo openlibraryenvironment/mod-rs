@@ -1635,4 +1635,22 @@ databaseChangeLog = {
     changeSet(author: "efreestone (manual)", id: "202006171030-01") {
         addForeignKeyConstraint(baseColumnNames: "se_status_fk", baseTableName: "service", constraintName: "FK-service-status", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
     }
+
+  // Bump to web toolkit 
+  changeSet(author: "claudia (manual)", id: "202003191925-2") {
+    addColumn(tableName: "refdata_category") {
+      column(name: "internal", type: "boolean")
+    }
+    addNotNullConstraint (tableName: "refdata_category", columnName: "internal", defaultNullValue: false)
+  }
+
+  changeSet(author: "claudia (manual)", id: "202003191925-3") {
+    grailsChange {
+      change {
+        sql.execute("""
+          UPDATE ${database.defaultSchemaName}.refdata_category SET internal = true
+        """.toString())
+      }
+    }
+  }
 }
