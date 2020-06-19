@@ -1625,4 +1625,14 @@ databaseChangeLog = {
             column(name:"pr_due_date_from_lms", type: "VARCHAR(64)")
         }
     }
+
+    changeSet(author: "efreestone (manual)", id: "20200617-1030-001") {
+        addColumn(tableName: "service") {
+            column(name: "se_status_fk", type: "VARCHAR(36)");
+        }
+    }
+
+    changeSet(author: "efreestone (manual)", id: "202006171030-01") {
+        addForeignKeyConstraint(baseColumnNames: "se_status_fk", baseTableName: "service", constraintName: "FK-service-status", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    }
 }

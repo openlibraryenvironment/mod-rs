@@ -670,7 +670,7 @@ public class ReshareApplicationEventHandlerService {
         }
 
         // If we're being told about the barcode of the selected item, stash it in selectedItemBarcode on the requester side
-        if ( eventData.deliveryInfo.itemId != null ) {
+        if ( eventData.deliveryInfo.itemId) {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
       }
@@ -679,7 +679,7 @@ public class ReshareApplicationEventHandlerService {
       if ( eventData.messageInfo?.reasonForMessage != null) {
 
         // If there is a note, create notification entry
-        if (eventData.messageInfo?.note != null && eventData.messageInfo?.note != "") {
+        if (eventData.messageInfo?.note) {
           incomingNotificationEntry(pr, eventData, true)
         }
 
