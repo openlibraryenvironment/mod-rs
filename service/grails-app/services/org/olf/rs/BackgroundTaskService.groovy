@@ -115,15 +115,15 @@ public class BackgroundTaskService {
 
     log.debug("Checking if okapi context provides us with configuration");
 
-    // if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
-    //   log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
+    if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
+      log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
       // Needs to be blocking...
       // List links = okapiClient.getSync("/erm/sas/linkedLicenses", [
       //   filters: [
       //     "remoteId==${license.id}"
       //   ]
       // ])
-    // }
+    }
     // else {
     //   log.debug(" -> okapi not exposing configuration ^2.0 to us");
     // }
