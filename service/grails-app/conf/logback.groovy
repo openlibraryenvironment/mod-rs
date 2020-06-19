@@ -44,6 +44,11 @@ logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
 logger ('org.olf.rs.EventConsumerService', DEBUG)
 
+// logger ('com.k_int.okapi.OkapiClient', TRACE)
+// logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+// logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+// logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+
 // Uncomment below logging for output of OKAPI client http.
 //logger 'groovy.net.http.JavaHttpBuilder', DEBUG
 //logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
