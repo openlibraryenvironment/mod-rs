@@ -96,7 +96,8 @@
           "methods": [ "POST" ],
           "pathPattern": "/rs/settings/worker",
           "unit": "minute",
-          "delay": "2"
+          "delay": "2",
+          "modulePermissions": [ "configuration.entries.item.get" ]
         }
       ]
     }
