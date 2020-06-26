@@ -1282,7 +1282,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
 
         if ( ( entry_loan_policy == null ) ||
-             ( entry_loan_policy.value == 'Lending all types' ) ) {
+             ( entry_loan_policy.value?.value == 'lending_all_types' ) ) {
 
           Map peer_stats = statisticsService.getStatsFor(s);
 
@@ -1311,7 +1311,7 @@ public class ReshareApplicationEventHandlerService {
           result.add(rota_entry)
         }
         else {
-          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}");
+          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy.value?.value}");
         }
       }
       else {
