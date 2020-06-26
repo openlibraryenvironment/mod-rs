@@ -30,8 +30,10 @@ public class SharedIndexService {
     try {
       log.debug("Try graphql")
       if ( description?.systemInstanceIdentifier != null ) {
+        log.debug("Query shared index for holdings of system instance identifier: ${description?.systemInstanceIdentifier}");
+
         sharedIndexHoldings(description?.systemInstanceIdentifier).each { shared_index_availability ->
-          log.debug("add shared index availability: ${ishared_index_availability}");
+          log.debug("add shared index availability: ${shared_index_availability}");
 
           result.add(new AvailabilityStatement(
                                                symbol:shared_index_availability.symbol, 
@@ -222,7 +224,7 @@ public class SharedIndexService {
                       result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])
                     }
                     else {
-                      log.debug("Located existing entry in result for ${split_location[0]} - not adding another");
+                      log.debug("Located existing entry in result for ${location} - not adding another");
                     }
                   }
                   else {
