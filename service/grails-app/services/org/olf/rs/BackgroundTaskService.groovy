@@ -23,6 +23,8 @@ public class BackgroundTaskService {
   static boolean running = false;
   OkapiClient okapiClient
 
+  private static config_test_count = 0;
+
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
 
@@ -115,18 +117,27 @@ public class BackgroundTaskService {
 
     log.debug("Checking if okapi context provides us with configuration");
 
-    if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
-      log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
-      // Needs to be blocking...
-      // List links = okapiClient.getSync("/erm/sas/linkedLicenses", [
-      //   filters: [
-      //     "remoteId==${license.id}"
-      //   ]
-      // ])
+    if ( config_test_count < 0 ) {
+      try {
+        if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
+          log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
+          // Needs to be blocking...
+          // List links = okapiClient.getSync("/erm/sas/linkedLicenses", [
+          //   filters: [
+          //     "remoteId==${license.id}"
+          //   ]
+          // ])
+        }
+      }
+      catch ( Exception e ) {
+        log.error("Problem talking to mod-config",e);
+        log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+      }
+      // else {
+      //   log.debug(" -> okapi not exposing configuration ^2.0 to us");
+      // }
+      config_test_count++
     }
-    // else {
-    //   log.debug(" -> okapi not exposing configuration ^2.0 to us");
-    // }
     
   }
 
