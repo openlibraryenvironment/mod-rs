@@ -32,7 +32,8 @@ public class EventPublicationService {
 
     String compoundMessage = groovy.json.JsonOutput.toJson(data)
 
-    log.debug("publishAsJSON(topic:${topic} key:${key}, compoundMessage:...");
+    log.debug("publishAsJSON(topic:${topic} key:${key}, event:${data?.event} tenant:${data?.tenant} oid:${data?.oid}  compoundMessage:...");
+
     producer.send(
         new ProducerRecord<String, String>(topic, key, compoundMessage), { RecordMetadata metadata, Exception e ->
           // println "The offset of the record we just sent is: ${metadata?.offset()}"
