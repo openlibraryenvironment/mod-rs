@@ -83,6 +83,9 @@ public class AppListenerService implements ApplicationListener {
           ]
         );
       }
+      else {
+        log.warn("PatronRequest ${pr?.id} updated but no state change detected")
+      }
     }
   }
 
