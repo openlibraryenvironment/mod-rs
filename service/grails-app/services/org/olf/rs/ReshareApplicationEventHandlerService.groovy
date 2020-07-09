@@ -333,8 +333,7 @@ public class ReshareApplicationEventHandlerService {
             // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 
-                       'Unable to locate lenders', null);
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
             req.save(flush:true, failOnError:true)
           }
         }
@@ -1269,6 +1268,7 @@ public class ReshareApplicationEventHandlerService {
     log.debug("createRankedRota(${sia})");
     def result = []
     sia.each { av_stmt ->
+      log.debug("Consider rota entry ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
       Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;

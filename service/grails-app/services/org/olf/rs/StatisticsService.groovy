@@ -33,6 +33,9 @@ public class StatisticsService {
    * Given a symbol, try to retrieve the stats for a symbol - if needed, refresh the cache
    */
   public Map<String,Object> getStatsFor(Symbol symbol) {
+
+    log.debug("StatisticsService::getStatsFor(${symbol})");
+
     Map result = null;
     try {
       result = refreshStatsFor(symbol);
@@ -50,13 +53,15 @@ public class StatisticsService {
    */
   public Map<String, Object> refreshStatsFor(Symbol symbol) {
 
-    symbol.owner.customProperties.value.each { it ->
-      log.debug("refreshStatsFor cp ${it}");
-    }
+    log.debug("StatisticsService::refreshStatsForrefreshStatsFor(${symbol})");
 
-    symbol.owner.services.each { it ->
-      log.debug("refreshStatsFor service ${it}");
-    }
+    // symbol.owner.customProperties.value.each { it ->
+    //   log.debug("refreshStatsFor cp ${it}");
+    // }
+
+    // symbol.owner.services.each { it ->
+    //   log.debug("refreshStatsFor service ${it}");
+    // }
 
     // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
     def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
@@ -65,12 +70,15 @@ public class StatisticsService {
     log.debug("Loan to borrow ratio is : ${ratio}");
     log.debug("URL for stats is : ${stats_url}");
 
-    return [
+    Map<String, Object> result = [
       lbr_loan:1,
       lbr_borrow:1,
       current_loan_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1),
       current_borrowing_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1)
     ]
+
+    log.debug("Result of refreshStatsFor : ${result}");
+    return result;
   }
 }
 
