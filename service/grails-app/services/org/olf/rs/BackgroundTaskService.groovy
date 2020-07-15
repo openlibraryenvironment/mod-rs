@@ -76,9 +76,11 @@ public class BackgroundTaskService {
           try {
             log.debug("** Timer task ${timer.id} firing....");
             runTimer(timer);
- 
+
+            String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
+
             // Caclulate the next due date
-            RecurrenceRule rule = new RecurrenceRule(timer.rrule);
+            RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
             DateTime start = DateTime.now()
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = rrule_iterator.nextDateTime();
