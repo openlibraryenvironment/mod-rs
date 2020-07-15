@@ -81,9 +81,6 @@ public class BackgroundTaskService {
             RecurrenceRule rule = new RecurrenceRule(timer.rrule);
             DateTime start = DateTime.now()
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            // Rule will schedule a task immediately, skip it
-            rrule_iterator.nextDateTime();
-            // And then work out when it would next fire
             def nextInstance = rrule_iterator.nextDateTime();
             log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
             log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
