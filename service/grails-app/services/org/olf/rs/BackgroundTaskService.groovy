@@ -71,7 +71,8 @@ public class BackgroundTaskService {
 
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
-        Timer.executeQuery('select t from Timer as t where t.lastExecution < :now', [now:System.currentTimeMillis()]).each { timer ->
+        log.debug("Checking timers ready for execution");
+        Timer.executeQuery('select t from Timer as t where t.lastExecution < :now and t.enabled=:en', [now:System.currentTimeMillis(), en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
             runTimer(timer);
@@ -90,7 +91,10 @@ public class BackgroundTaskService {
             timer.save(flush:true, failOnError:true)
           }
           catch ( Exception e ) {
-            log.error("Unexpected error processing timer tasks ${e.message} - rule is ${timer.rrule}");
+            log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
+          }
+          finally {
+            log.debug("Completed scheduled task checking");
           }
         }
         
@@ -106,6 +110,9 @@ public class BackgroundTaskService {
   }
 
   private runTimer(Timer t) {
+    if ( t.taskCode == 'PullSlip' ) {
+      log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+    }
   }
 
   private void checkPullSlips() {

@@ -18,7 +18,7 @@ class Timer implements MultiTenant<Timer> {
   static constraints = {
       description (nullable : true,  blank: false)
             rrule (nullable : true, blank: false)
-    lastExecution (nullable : true, blank: false)
+    lastExecution (nullable : true)
          taskCode (nullable : false, blank: false)
        taskConfig (nullable : true, blank: false)
           enabled (nullable : true)
