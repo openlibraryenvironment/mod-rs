@@ -11,6 +11,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.k_int.okapi.OkapiClient
 
+import groovy.json.JsonSlurper
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -24,6 +25,7 @@ public class BackgroundTaskService {
   OkapiClient okapiClient
 
   private static config_test_count = 0;
+  private static Map email_config = null;
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
@@ -42,9 +44,6 @@ public class BackgroundTaskService {
 
     try {
       Tenants.withId(tenant) {
-        // We aren't doing this any longer / at the moment.
-        checkPullSlips();
-  
         // Warn of any duplicate symbols
         def duplicate_symbols = Symbol.executeQuery('select distinct s.symbol, s.authority.symbol from Symbol as s group by s.symbol, s.authority.symbol having count(*) > 1')
         duplicate_symbols.each { ds ->
@@ -109,42 +108,85 @@ public class BackgroundTaskService {
   }
 
   private runTimer(Timer t) {
-    if ( t.taskCode == 'PullSlip' ) {
-      log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+    switch ( t.taskCode ) {
+      case 'PrintPullSlips':
+        log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        Map task_config = jsonSlurper.parseText(t.taskConfig)
+        checkPullSlips(task_config)
+        break;
+      default:
+        log.debug("Unhandled timer task code ${t.taskCode}");
+        break;
     }
   }
 
-  private void checkPullSlips() {
-    log.debug("checkPullSlips()");
-    // HostLMSLocation.list().each { loc ->
-    //   log.debug("Check pull slips fro ${loc}");
-    //   checkPullSlipsFor(loc.code);
-    // }
+  // Use mod-configuration to retrieve the approproate setting
+  private String getSetting(String setting) {
+    String result = null;
+    try {
+      def setting_result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
+      log.debug("Got setting result ${setting_result}");
+    }   
+    catch ( Exception e ) {
+      e.printStackTrace()
+    }
 
-    log.debug("Checking if okapi context provides us with configuration");
+    return result;
+  }
 
-    if ( config_test_count < 0 ) {
+  private Map getEmailConfig() {
+    if ( email_config == null ) {
       try {
         if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
-          log.debug(" -> okapi exposing configuration ^2.0 to us - we can get the email config");
-          // Needs to be blocking...
-          // List links = okapiClient.getSync("/erm/sas/linkedLicenses", [
-          //   filters: [
-          //     "remoteId==${license.id}"
-          //   ]
-          // ])
+          email_config = [
+            EMAIL_SMTP_HOST:getSetting('EMAIL_SMTP_HOST'),
+            EMAIL_SMTP_PORT:getSetting('EMAIL_SMTP_PORT'),
+            EMAIL_SMTP_LOGIN_OPTION:getSetting('EMAIL_SMTP_LOGIN_OPTION'),
+            EMAIL_TRUST_ALL:getSetting('EMAIL_TRUST_ALL'),
+            EMAIL_SMTP_SSL:getSetting('EMAIL_SMTP_SSL'),
+            EMAIL_START_TLS_OPTIONS:getSetting('EMAIL_START_TLS_OPTIONS'),
+            EMAIL_USERNAME:getSetting('EMAIL_USERNAME'),
+            EMAIL_PASSWORD:getSetting('EMAIL_PASSWORD'),
+            EMAIL_FROM:getSetting('EMAIL_FROM')
+          ]
+          
+          log.debug("getEmailConfig : ${email_config}");
         }
       }
       catch ( Exception e ) {
         log.error("Problem talking to mod-config",e);
         log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
       }
-      // else {
-      //   log.debug(" -> okapi not exposing configuration ^2.0 to us");
-      // }
-      config_test_count++
     }
-    
+    return email_config;
+  }
+
+  private void checkPullSlips(Map timer_cfg) {
+    log.debug("checkPullSlips(${timer_cfg})");
+    // HostLMSLocation.list().each { loc ->
+    //   log.debug("Check pull slips fro ${loc}");
+    //   checkPullSlipsFor(loc.code);
+    // }
+
+    log.debug("Checking if okapi context provides us with configuration");
+    Map email_cfg = getEmailConfig();
+
+    if ( email_cfg != null ) {
+      try {
+        log.debug("Send email");
+        // if (okapiClient?.withTenant().providesInterface("email", "^1.0")) {
+        //   log.debug(" -> Got email");
+        //   // Needs to be blocking...
+        //   def email_result = okapiClient.post("/email", [
+        //   ], [:])
+        // }
+      }
+      catch ( Exception e ) {
+        log.error("Problem talking to mod-config",e);
+        log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+      }
+    }
   }
 
   private void checkPullSlipsFor(String location) {

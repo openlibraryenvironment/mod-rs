@@ -97,7 +97,11 @@
           "pathPattern": "/rs/settings/worker",
           "unit": "minute",
           "delay": "2",
-          "modulePermissions": [ "configuration.entries.item.get" ]
+          "modulePermissions": [ 
+            "configuration.entries.item.get", 
+            "configuration.entries.collection.get", 
+            "email.message.post" 
+          ]
         }
       ]
     }
