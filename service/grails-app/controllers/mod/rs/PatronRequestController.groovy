@@ -105,10 +105,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'requesterCancel':
               reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
-              reshareApplicationEventHandlerService.auditEntry(patron_request, 
-                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
-                                    reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CANCEL_PENDING'), 
-                                    'Requester requesting to cancel request', null);
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
               break;
             case 'supplierConditionalSupply':
