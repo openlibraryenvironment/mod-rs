@@ -38,8 +38,6 @@ public class ReshareActionService {
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
         AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
-        log.debug("LOGDEBUG: NCIP DISABLED?: ${ncip_disabled?.value}")
-        log.debug("LOGDEBUG: NCIP DISABLED DEFAULT: ${ncip_disabled?.defValue}")
         if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
           pr.selectedItemBarcode = actionParams?.itemBarcode;
 
@@ -403,52 +401,71 @@ public class ReshareActionService {
 
   public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
     boolean result = false;
-    // Check the item in to the local LMS
-    HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-    if ( host_lms ) {
-      try {
-        // Call the host lms to check the item out of the host system and in to reshare
-        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
-                                                pr.hrid,
-                                                pr.patronIdentifier, // user_idA
-                                                pr.author, // author,
-                                                pr.title, // title,
-                                                pr.isbn, // isbn,
-                                                pr.localCallNumber, // call_number,
-                                                pr.pickupLocation, // pickup_location,
-                                                null) // requested_action
 
-        if ( accept_result?.result == true ) {
-          // Mark item as awaiting circ
-          def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-          String message = 'NCIP acceptItem completed'
+    AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
+    if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
+      // Check the item in to the local LMS
+      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+      if ( host_lms ) {
+        try {
+          // Call the host lms to check the item out of the host system and in to reshare
+          Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+                                                  pr.hrid,
+                                                  pr.patronIdentifier, // user_idA
+                                                  pr.author, // author,
+                                                  pr.title, // title,
+                                                  pr.isbn, // isbn,
+                                                  pr.localCallNumber, // call_number,
+                                                  pr.pickupLocation, // pickup_location,
+                                                  null) // requested_action
 
-          reshareApplicationEventHandlerService.auditEntry(pr,
-                                          pr.state,
-                                          new_state,
-                                          message, 
-                                          null);
-          pr.state=new_state;
-          pr.needsAttention=false;
-          pr.save(flush:true, failOnError:true);
-          log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-          result = true;
+          if ( accept_result?.result == true ) {
+            // Mark item as awaiting circ
+            def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+            String message = 'NCIP acceptItem completed'
+
+            reshareApplicationEventHandlerService.auditEntry(pr,
+                                            pr.state,
+                                            new_state,
+                                            message, 
+                                            null);
+            pr.state=new_state;
+            pr.needsAttention=false;
+            pr.save(flush:true, failOnError:true);
+            log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+            result = true;
+          }
+          else {
+            String message = 'NCIP accept item failed. Please recheck and try again: '
+            // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
+            reshareApplicationEventHandlerService.auditEntry(pr,
+                                            pr.state,
+                                            pr.state,
+                                            message+accept_result?.problem, 
+                                            null);
+            pr.needsAttention=true;
+            pr.save(flush:true, failOnError:true);
+          }
         }
-        else {
-          String message = 'NCIP accept item failed. Please recheck and try again: '
-          // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
-          reshareApplicationEventHandlerService.auditEntry(pr,
-                                          pr.state,
-                                          pr.state,
-                                          message+accept_result?.problem, 
-                                          null);
-          pr.needsAttention=true;
-          pr.save(flush:true, failOnError:true);
+        catch ( Exception e ) {
+          log.error("NCIP Problem",e);
         }
       }
-      catch ( Exception e ) {
-        log.error("NCIP Problem",e);
-      }
+    } else {
+      // Mark item as awaiting circ
+      def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+      String message = 'Checked in to ReShare (NCIP integration turned off)'
+
+      reshareApplicationEventHandlerService.auditEntry(pr,
+                                      pr.state,
+                                      new_state,
+                                      message, 
+                                      null);
+      pr.state=new_state;
+      pr.needsAttention=false;
+      pr.save(flush:true, failOnError:true);
+      log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+      result = true;
     }
    
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
