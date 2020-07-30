@@ -64,26 +64,21 @@ public class ReshareActionService {
               pr.needsAttention=false;
               pr.dueDateFromLMS=checkout_result?.dueDate;
               s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-              auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare completed', null);
+              auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare completed', null);
+              result = true;
             }
             else {
-              s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
               pr.needsAttention=true;
-              auditEntry(pr, pr.state, s, 'NCIP problem in HOST LMS Integraiton. Check In to Reshare Failed - Manual checkout needed. '+checkout_result.problems?.toString(), null);
+              auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integraiton. Check In to Reshare failed - Fix the problem and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
             }
-            pr.state = s;
             pr.save(flush:true, failOnError:true);
           }
         }
         else {
-          Status s = Status.lookup('Responder', 'RES_AWAIT_LMS_CHECKOUT');
-          auditEntry(pr, pr.state, s, 'HOST LMS Integration not configured. Manual checkout needed');
+          auditEntry(pr, pr.state, pr.state, 'HOST LMS Integration not configured - Fix the problem and try again or disable NCIP integration in settings.');
           pr.needsAttention=true;
-          pr.state = s;
           pr.save(flush:true, failOnError:true);
         }
-
-        result = true;
       }
       else {
         log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
