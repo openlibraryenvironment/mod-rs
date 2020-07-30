@@ -480,25 +480,33 @@ public class ReshareActionService {
   public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
     boolean result = true;
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
-    try {
-      // Call the host lms to check the item out of the host system and in to reshare
-      // def accept_result = host_lms.checkInItem(patron_request.hrid)
-      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-      def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+    AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
+    if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
+      try {
+        // Call the host lms to check the item out of the host system and in to reshare
+        // def accept_result = host_lms.checkInItem(patron_request.hrid)
+        HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+        def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+        statisticsService.decrementCounter('/activeLoans');
+        patron_request.needsAttention=false;
+        patron_request.activeLoan=false
+      }
+      catch ( Exception e ) {
+        log.error("NCIP Problem",e);
+        patron_request.needsAttention=true;
+        reshareApplicationEventHandlerService.auditEntry(patron_request,
+                                            patron_request.state,
+                                            patron_request.state,
+                                            'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
+                                            null);
+        result = false;
+      }
+    } else {
       statisticsService.decrementCounter('/activeLoans');
       patron_request.needsAttention=false;
       patron_request.activeLoan=false
     }
-    catch ( Exception e ) {
-      log.error("NCIP Problem",e);
-      patron_request.needsAttention=true;
-      reshareApplicationEventHandlerService.auditEntry(patron_request,
-                                          patron_request.state,
-                                          patron_request.state,
-                                          'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
-                                          null);
-      result = false;
-    }
+
     return result;
   }
 
