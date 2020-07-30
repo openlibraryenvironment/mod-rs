@@ -37,46 +37,60 @@ public class ReshareActionService {
 
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
+        AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
+        log.debug("LOGDEBUG: NCIP DISABLED?: ${ncip_disabled?.value}")
+        log.debug("LOGDEBUG: NCIP DISABLED DEFAULT: ${ncip_disabled?.defValue}")
+        if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
+          pr.selectedItemBarcode = actionParams?.itemBarcode;
 
-        pr.selectedItemBarcode = actionParams?.itemBarcode;
-
-        HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-        if ( host_lms ) {
-          // Call the host lms to check the item out of the host system and in to reshare
-          def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                      actionParams?.itemBarcode, 
-                                                      pr.patronIdentifier,
-                                                      pr.resolvedRequester)
-          // If the host_lms adapter gave us a specific status to transition to, use it
-          if ( checkout_result?.status ) {
-            // the host lms service gave us a specific status to change to
-            Status s = Status.lookup('Responder', checkout_result?.status);
-            auditEntry(pr, pr.state, s, 'HOST LMS Integraiton Check In to Reshare Failed - Manual checkout needed', null);
-            pr.state = s;
-            pr.save(flush:true, failOnError:true);
-          }
-          else {
-            // Otherwise, if the checkout succeeded or failed, set appropriately
-            Status s = null;
-            if ( checkout_result.result == true ) {
-              statisticsService.incrementCounter('/activeLoans');
-              pr.activeLoan=true
-              pr.needsAttention=false;
-              pr.dueDateFromLMS=checkout_result?.dueDate;
-              s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
-              auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare completed', null);
-              result = true;
+          HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+          if ( host_lms ) {
+            // Call the host lms to check the item out of the host system and in to reshare
+            def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                        actionParams?.itemBarcode, 
+                                                        pr.patronIdentifier,
+                                                        pr.resolvedRequester)
+            // If the host_lms adapter gave us a specific status to transition to, use it
+            if ( checkout_result?.status ) {
+              // the host lms service gave us a specific status to change to
+              Status s = Status.lookup('Responder', checkout_result?.status);
+              auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare Failed - Fix the problem and try again or disable NCIP integration in settings.', null);
+              pr.state = s;
+              pr.save(flush:true, failOnError:true);
             }
             else {
-              pr.needsAttention=true;
-              auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integraiton. Check In to Reshare failed - Fix the problem and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+              // Otherwise, if the checkout succeeded or failed, set appropriately
+              Status s = null;
+              if ( checkout_result.result == true ) {
+                statisticsService.incrementCounter('/activeLoans');
+                pr.activeLoan=true
+                pr.needsAttention=false;
+                pr.dueDateFromLMS=checkout_result?.dueDate;
+                s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+                pr.state = s;
+                auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare completed', null);
+                result = true;
+              }
+              else {
+                pr.needsAttention=true;
+                auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integration. Check In to Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+checkout_result.problems?.toString(), null);
+              }
+              pr.save(flush:true, failOnError:true);
             }
+          }
+          else {
+            auditEntry(pr, pr.state, pr.state, 'HOST LMS Integration not configured - Fix the problem and try again or disable NCIP integration in settings.');
+            pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
           }
-        }
-        else {
-          auditEntry(pr, pr.state, pr.state, 'HOST LMS Integration not configured - Fix the problem and try again or disable NCIP integration in settings.');
-          pr.needsAttention=true;
+        } else {
+          statisticsService.incrementCounter('/activeLoans');
+          pr.activeLoan=true
+          pr.needsAttention=false;
+          Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+          pr.state = s;
+          auditEntry(pr, pr.state, s, 'Check In to Reshare completed (NCIP integration turned off)', null);
+          result = true;
           pr.save(flush:true, failOnError:true);
         }
       }
