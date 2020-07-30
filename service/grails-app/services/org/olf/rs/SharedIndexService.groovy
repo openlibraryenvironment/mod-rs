@@ -2,6 +2,7 @@ package org.olf.rs;
 
 import grails.gorm.multitenancy.Tenants
 import java.util.concurrent.ThreadLocalRandom;
+import org.olf.okapi.modules.directory.Symbol;
 import com.k_int.web.toolkit.settings.AppSetting
 import static groovyx.net.http.HttpBuilder.configure
 import groovy.json.JsonOutput;
@@ -216,15 +217,22 @@ public class SharedIndexService {
                   String[] split_location = location.split('/')
                   if ( split_location.length == 4 ) {
                     // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
+
+                    String local_symbol = convertSILocationToSymbol(split_location[0])
+                    if ( local_symbol != null ) {
                     
-                    // Do we already have an entry in the result for the given location? If not, Add it 
-                    if ( result.find { it.symbol==('RESHARE:'+split_location[0]) } == null ) {
-                      // And we don't already have the location
-                      log.debug("adding RESAHRE:${split_location[0]} - with policy ${hr.illPolicy?.name}");
-                      result.add([symbol:'RESHARE:'+split_location[0], illPolicy:hr.illPolicy?.name])
+                      // Do we already have an entry in the result for the given location? If not, Add it 
+                      if ( result.find { it.symbol==local_symbol } == null ) {
+                        // And we don't already have the location
+                        log.debug("adding ${local_symbol} - with policy ${hr.illPolicy?.name}");
+                        result.add([symbol:local_symbol, illPolicy:hr.illPolicy?.name])
+                      }
+                      else {
+                        log.debug("Located existing entry in result for ${location} - not adding another");
+                      }
                     }
                     else {
-                      log.debug("Located existing entry in result for ${location} - not adding another");
+                      log.warn("Unable to resolve shared index symbol ${split_location}");
                     }
                   }
                   else {
@@ -272,5 +280,30 @@ public class SharedIndexService {
     log.debug("Result: ${result}");
     return result;
   }
+
+  private String convertSILocationToSymbol(String si_location) {
+    // return 'RESHARE:'+si_location
+    String result = null;
+    // Try to resolve the symbol without a namespace
+    List<Symbol> r = Symbol.findAllBySymbol(si_location.trim().toUpperCase())
+    if ( r.size() == 1 ) {
+      Symbol s = r.get(0)
+      result = "${r.authority.symbol}:${r.symbol}".toString()
+    }
+    else if ( r.size() > 1 ) {
+      // The symbol was not uniqe over namespaces, try our priority list 
+      ['RESHARE', 'ISIL'].each {
+        if ( result == null ) {
+          List<Symbol> r2 = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol=:a and s.symbol=s',[a:it, s:si_location.trim().toUpperCase()]);
+          if ( r2.size() == 1 ) {
+            Symbol s = r2.get(0)
+            result = "${r.authority.symbol}:${r.symbol}".toString()
+          }
+        }
+      }
+    }
+    return result
+  }
+
 }
 
