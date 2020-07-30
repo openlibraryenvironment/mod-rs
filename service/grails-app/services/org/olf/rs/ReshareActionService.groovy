@@ -392,8 +392,8 @@ public class ReshareActionService {
   }
 
 
-  public void sendRequesterReceived(PatronRequest pr, Object actionParams) {
-
+  public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
+    boolean result = false;
     // Check the item in to the local LMS
     HostLMSActions host_lms = hostLMSService.getHostLMSActions();
     if ( host_lms ) {
@@ -423,13 +423,15 @@ public class ReshareActionService {
           pr.needsAttention=false;
           pr.save(flush:true, failOnError:true);
           log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+          result = true;
         }
         else {
+          String message = 'NCIP accept item failed. Please recheck and try again: '
           // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
           reshareApplicationEventHandlerService.auditEntry(pr,
                                           pr.state,
                                           pr.state,
-                                          'NCIP accept item failed. Please recheck and try again: '+accept_result?.problem, 
+                                          message+accept_result?.problem, 
                                           null);
           pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
@@ -441,6 +443,8 @@ public class ReshareActionService {
     }
    
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
+
+    return result;
   }
 
 
