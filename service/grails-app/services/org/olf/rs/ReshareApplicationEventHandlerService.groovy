@@ -1334,8 +1334,8 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
       def new_state = lookupStatus('Responder', 'RES_AWAIT_SHIP')
-      req.state=new_state
       auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
+      req.state=new_state
       req.save(flush:true, failOnError: true)
     }
   }

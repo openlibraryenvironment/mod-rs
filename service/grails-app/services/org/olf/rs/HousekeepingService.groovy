@@ -105,7 +105,6 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true, true);
         Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_LMS_CHECKOUT', '0021', true, true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
         Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
@@ -116,11 +115,6 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
         Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
-
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierManualCheckout', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'message', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_AWAIT_LMS_CHECKOUT', 'supplierAddCondition', 'M')
-        
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')

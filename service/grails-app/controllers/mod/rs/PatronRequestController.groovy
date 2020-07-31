@@ -47,6 +47,11 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'supplierCheckInToReshare':
               result.status = reshareActionService.checkInToReshare(patron_request, request.JSON.actionParams);
+              if (result.status == false) {
+                response.status = 400;
+                  result.code=-3; // NCIP action failed
+                  result.message='NCIP problem in HOST LMS Integration'
+              }
               break;
             case 'message':
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
@@ -236,7 +241,11 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'requesterReceived':
               // This will trigger an NCIP acceptItem as well
-              reshareActionService.sendRequesterReceived(patron_request, request.JSON.actionParams);
+              if(!reshareActionService.sendRequesterReceived(patron_request, request.JSON.actionParams)) {
+                response.status = 400;
+                  result.code=-3; // NCIP action failed
+                  result.message='NCIP accept item failed'
+              };
               break;
             case 'requesterManualCheckIn':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CHECKED_IN');

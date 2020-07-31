@@ -177,6 +177,16 @@ try {
                                   key: 'chat_auto_read',
                                   defValue: 'on').save(flush:true, failOnError: true);
 
+  RefdataValue.lookupOrCreate('NCIPDisabled', 'Disabled');
+  def ncip_en = RefdataValue.lookupOrCreate('NCIPDisabled', 'Enabled');
+
+  AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled') ?: new AppSetting(
+                                  section:'localNCIP',
+                                  settingType:'Refdata',
+                                  vocab:'NCIPDisabled',
+                                  key: 'ncip_disabled',
+                                  defValue: ncip_en?.value).save(flush:true, failOnError: true);
+
 
   RefdataValue.lookupOrCreate('loanConditions', 'LibraryUseOnly');
   RefdataValue.lookupOrCreate('loanConditions', 'NoReproduction');
