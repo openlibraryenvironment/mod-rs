@@ -282,26 +282,31 @@ public class SharedIndexService {
   }
 
   private String convertSILocationToSymbol(String si_location) {
+    log.debug("convertSILocationToSymbol(${si_location})");
     // return 'RESHARE:'+si_location
     String result = null;
     // Try to resolve the symbol without a namespace
     List<Symbol> r = Symbol.findAllBySymbol(si_location.trim().toUpperCase())
     if ( r.size() == 1 ) {
+      log.debug("Located unique symbol without namespace");
       Symbol s = r.get(0)
-      result = "${r.authority.symbol}:${r.symbol}".toString()
+      result = "${s.authority.symbol}:${s.symbol}".toString()
     }
     else if ( r.size() > 1 ) {
+      log.debug("Symbol is not unique over namespace");
       // The symbol was not uniqe over namespaces, try our priority list 
       ['RESHARE', 'ISIL'].each {
+        log.debug("Trying to locate symbol ${si_location} in ns ${it}");
         if ( result == null ) {
           List<Symbol> r2 = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol=:a and s.symbol=s',[a:it, s:si_location.trim().toUpperCase()]);
           if ( r2.size() == 1 ) {
             Symbol s = r2.get(0)
-            result = "${r.authority.symbol}:${r.symbol}".toString()
+            result = "${s.authority.symbol}:${s.symbol}".toString()
           }
         }
       }
     }
+    log.debug("convertSILocationToSymbol result: ${si_location}");
     return result
   }
 
