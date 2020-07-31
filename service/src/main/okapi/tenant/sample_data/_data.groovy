@@ -138,10 +138,10 @@ try {
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
 
   // Auto responder is on when an item can be found - will respond Will-Supply, when not found, left for a user to respond.
-  RefdataValue.lookupOrCreate('AutoResponder', 'On for found items');
+  RefdataValue.lookupOrCreate('AutoResponder', 'On: will supply only');
 
   // AutoResponder is ON and will automatically reply not-available if an item cannot be located
-  def ar_on = RefdataValue.lookupOrCreate('AutoResponder', 'On auto not-found');
+  def ar_on = RefdataValue.lookupOrCreate('AutoResponder', 'On: will supply and cannot supply');
 
 
   AppSetting auto_responder_status = AppSetting.findByKey('auto_responder_status') ?: new AppSetting( 
