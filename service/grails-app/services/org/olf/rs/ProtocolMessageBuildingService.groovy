@@ -208,6 +208,10 @@ class ProtocolMessageBuildingService {
   
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
+    
+    if( pr.selectedItemBarcode ) {
+      message.itemId = pr.selectedItemBarcode
+    }
 
     return message
   }
