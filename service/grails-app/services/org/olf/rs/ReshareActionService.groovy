@@ -343,19 +343,7 @@ public class ReshareActionService {
   }
 
   private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
-
-    String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
-    LocalDateTime ts = LocalDateTime.now();
-    log.debug("add audit entry at ${ts}");
-
-    pr.addToAudit( new PatronRequestAudit(
-      patronRequest: pr,
-      dateCreated:ts,
-      fromStatus:from,
-      toStatus:to,
-      duration:null,
-      message: message,
-      auditData: json_data))
+    reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data);
   }
 
   private Symbol resolveSymbol(String authorty, String symbol) {
@@ -388,10 +376,10 @@ public class ReshareActionService {
     if ( ( pr != null ) && ( new_state != null ) ) {
       String message = p_message ?: "Simple Transition ${pr.state?.code} to ${new_state.code}".toString()
 
-      reshareApplicationEventHandlerService.auditEntry(pr,
-                                      pr.state,
-                                      new_state,
-                                      message, null);
+      auditEntry(pr,
+        pr.state,
+        new_state,
+        message, null);
       pr.state=new_state;
       pr.save(flush:true, failOnError:true);
       log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
@@ -424,11 +412,11 @@ public class ReshareActionService {
             def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
             String message = 'NCIP acceptItem completed'
 
-            reshareApplicationEventHandlerService.auditEntry(pr,
-                                            pr.state,
-                                            new_state,
-                                            message, 
-                                            null);
+            auditEntry(pr,
+              pr.state,
+              new_state,
+              message, 
+              null);
             pr.state=new_state;
             pr.needsAttention=false;
             pr.save(flush:true, failOnError:true);
@@ -438,11 +426,11 @@ public class ReshareActionService {
           else {
             String message = 'NCIP accept item failed. Please recheck and try again: '
             // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
-            reshareApplicationEventHandlerService.auditEntry(pr,
-                                            pr.state,
-                                            pr.state,
-                                            message+accept_result?.problem, 
-                                            null);
+            auditEntry(pr,
+              pr.state,
+              pr.state,
+              message+accept_result?.problem, 
+              null);
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
           }
@@ -456,11 +444,11 @@ public class ReshareActionService {
       def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
       String message = 'Checked in to ReShare (NCIP integration turned off)'
 
-      reshareApplicationEventHandlerService.auditEntry(pr,
-                                      pr.state,
-                                      new_state,
-                                      message, 
-                                      null);
+      auditEntry(pr,
+        pr.state,
+        new_state,
+        message, 
+        null);
       pr.state=new_state;
       pr.needsAttention=false;
       pr.save(flush:true, failOnError:true);
@@ -478,7 +466,7 @@ public class ReshareActionService {
    * At the end of the process, check the item back into the HOST lms
    */
   public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
-    boolean result = true;
+    boolean result = false;
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
     if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
@@ -487,24 +475,31 @@ public class ReshareActionService {
         // def accept_result = host_lms.checkInItem(patron_request.hrid)
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
-        statisticsService.decrementCounter('/activeLoans');
-        patron_request.needsAttention=false;
-        patron_request.activeLoan=false
+        if(check_in_result?.result == true) {
+          statisticsService.decrementCounter('/activeLoans');
+          patron_request.needsAttention=false;
+          patron_request.activeLoan=false;
+          result = true;
+        } else {
+          pr.needsAttention=true;
+          auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integration. Check out of Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+check_in_result.problems?.toString(), null);
+        }
       }
       catch ( Exception e ) {
         log.error("NCIP Problem",e);
         patron_request.needsAttention=true;
-        reshareApplicationEventHandlerService.auditEntry(patron_request,
-                                            patron_request.state,
-                                            patron_request.state,
-                                            'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
-                                            null);
+        auditEntry(patron_request,
+          patron_request.state,
+          patron_request.state,
+          'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
+          null);
         result = false;
       }
     } else {
       statisticsService.decrementCounter('/activeLoans');
       patron_request.needsAttention=false;
-      patron_request.activeLoan=false
+      patron_request.activeLoan=false;
+      result = true;
     }
 
     return result;

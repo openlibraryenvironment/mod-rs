@@ -231,10 +231,15 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
               // ToDo: Clarify what shuld happen if this returns false - complete anyway, or force the user to iterate the checkOut process
               log.debug("supplierCheckOutOfReshare::check out of reshare");
-              reshareActionService.checkOutOfReshare(patron_request, request.JSON.actionParams);
-
-              log.debug("supplierCheckOutOfReshare::transition");
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              if(!reshareActionService.checkOutOfReshare(patron_request, request.JSON.actionParams)) {
+                response.status = 400;
+                result.code=-3; // NCIP action failed
+                result.message='NCIP checkOut item call failed'
+                patron_request.save(flush:true, failOnError:true);
+              } else {
+                log.debug("supplierCheckOutOfReshare::transition");
+                result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              }
               break;
             case 'cancel':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
