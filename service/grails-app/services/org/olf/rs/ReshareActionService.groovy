@@ -481,8 +481,8 @@ public class ReshareActionService {
           patron_request.activeLoan=false;
           result = true;
         } else {
-          pr.needsAttention=true;
-          auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integration. Check out of Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+check_in_result.problems?.toString(), null);
+          patron_request.needsAttention=true;
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'NCIP problem in HOST LMS integration. Check out of Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+check_in_result.problems?.toString(), null);
         }
       }
       catch ( Exception e ) {
