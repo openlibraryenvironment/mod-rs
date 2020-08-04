@@ -248,7 +248,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               if(!reshareActionService.sendRequesterReceived(patron_request, request.JSON.actionParams)) {
                 response.status = 400;
                   result.code=-3; // NCIP action failed
-                  result.message='NCIP accept item failed'
+                  result.message='NCIP AcceptItem call failed'
               };
               break;
             case 'requesterManualCheckIn':

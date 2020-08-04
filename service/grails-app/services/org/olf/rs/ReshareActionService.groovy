@@ -410,7 +410,7 @@ public class ReshareActionService {
           if ( accept_result?.result == true ) {
             // Mark item as awaiting circ
             def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-            String message = 'NCIP acceptItem completed'
+            String message = 'Receive succeeded. Host LMS integration: NCIP AcceptItem call succeeded.'
 
             auditEntry(pr,
               pr.state,
@@ -424,7 +424,7 @@ public class ReshareActionService {
             result = true;
           }
           else {
-            String message = 'NCIP accept item failed. Please recheck and try again: '
+            String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
             // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
             auditEntry(pr,
               pr.state,
@@ -437,12 +437,18 @@ public class ReshareActionService {
         }
         catch ( Exception e ) {
           log.error("NCIP Problem",e);
+          pr.needsAttention=true;
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
         }
+      } else {
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+          pr.needsAttention=true;
+          pr.save(flush:true, failOnError:true);
       }
     } else {
       // Mark item as awaiting circ
       def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-      String message = 'Checked in to ReShare (NCIP integration turned off)'
+      String message = 'Receive succeeded (NCIP integration disabled).'
 
       auditEntry(pr,
         pr.state,
