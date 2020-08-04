@@ -52,7 +52,7 @@ public class ReshareActionService {
             if ( checkout_result?.status ) {
               // the host lms service gave us a specific status to change to
               Status s = Status.lookup('Responder', checkout_result?.status);
-              auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare Failed - Fix the problem and try again or disable NCIP integration in settings.', null);
+              auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
               pr.state = s;
               pr.save(flush:true, failOnError:true);
             }
@@ -66,18 +66,18 @@ public class ReshareActionService {
                 pr.dueDateFromLMS=checkout_result?.dueDate;
                 s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
                 pr.state = s;
-                auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare completed', null);
+                auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
                 result = true;
               }
               else {
                 pr.needsAttention=true;
-                auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integration. Check In to Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+checkout_result.problems?.toString(), null);
+                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
               }
               pr.save(flush:true, failOnError:true);
             }
           }
           else {
-            auditEntry(pr, pr.state, pr.state, 'HOST LMS Integration not configured - Fix the problem and try again or disable NCIP integration in settings.');
+            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.');
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
           }
