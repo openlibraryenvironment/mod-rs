@@ -429,7 +429,7 @@ public class ReshareActionService {
             auditEntry(pr,
               pr.state,
               pr.state,
-              message+accept_result?.problem, 
+              message+accept_result?.problems, 
               null);
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
