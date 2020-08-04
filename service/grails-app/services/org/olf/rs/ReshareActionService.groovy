@@ -77,7 +77,7 @@ public class ReshareActionService {
             }
           }
           else {
-            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.');
+            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
           }
@@ -87,7 +87,7 @@ public class ReshareActionService {
           pr.needsAttention=false;
           Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
           pr.state = s;
-          auditEntry(pr, pr.state, s, 'Check In to Reshare completed (NCIP integration turned off)', null);
+          auditEntry(pr, pr.state, s, 'Fill request succeeded (NCIP integration disabled).', null);
           result = true;
           pr.save(flush:true, failOnError:true);
         }
@@ -470,19 +470,26 @@ public class ReshareActionService {
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
     if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
+
       try {
         // Call the host lms to check the item out of the host system and in to reshare
         // def accept_result = host_lms.checkInItem(patron_request.hrid)
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-        def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
-        if(check_in_result?.result == true) {
-          statisticsService.decrementCounter('/activeLoans');
-          patron_request.needsAttention=false;
-          patron_request.activeLoan=false;
-          result = true;
+        if ( host_lms ) {
+          def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+          if(check_in_result?.result == true) {
+            statisticsService.decrementCounter('/activeLoans');
+            patron_request.needsAttention=false;
+            patron_request.activeLoan=false;
+            auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded. Host LMS integration: NCIP CheckinItem Call succeeded.', null);
+            result = true;
+          } else {
+            patron_request.needsAttention=true;
+            auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
+          }
         } else {
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
           patron_request.needsAttention=true;
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'NCIP problem in HOST LMS integration. Check out of Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+check_in_result.problems?.toString(), null);
         }
       }
       catch ( Exception e ) {
@@ -491,7 +498,7 @@ public class ReshareActionService {
         auditEntry(patron_request,
           patron_request.state,
           patron_request.state,
-          'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
+          'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
           null);
         result = false;
       }
@@ -499,6 +506,7 @@ public class ReshareActionService {
       statisticsService.decrementCounter('/activeLoans');
       patron_request.needsAttention=false;
       patron_request.activeLoan=false;
+      auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded (NCIP integration disabled).', null);
       result = true;
     }
 
