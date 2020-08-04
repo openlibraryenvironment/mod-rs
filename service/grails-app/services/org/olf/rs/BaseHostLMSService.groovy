@@ -486,6 +486,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     log.debug("NCIP2 checkoutItem responseL ${response}");
     if ( response.has('problems') ) {
       result.result = false;
+      result.problems = response.get('problems');
     }
     else {
       result.result = true;

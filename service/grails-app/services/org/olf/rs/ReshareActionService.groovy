@@ -52,7 +52,7 @@ public class ReshareActionService {
             if ( checkout_result?.status ) {
               // the host lms service gave us a specific status to change to
               Status s = Status.lookup('Responder', checkout_result?.status);
-              auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare Failed - Fix the problem and try again or disable NCIP integration in settings.', null);
+              auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
               pr.state = s;
               pr.save(flush:true, failOnError:true);
             }
@@ -66,18 +66,18 @@ public class ReshareActionService {
                 pr.dueDateFromLMS=checkout_result?.dueDate;
                 s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
                 pr.state = s;
-                auditEntry(pr, pr.state, s, 'HOST LMS Integration Check In to Reshare completed', null);
+                auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
                 result = true;
               }
               else {
                 pr.needsAttention=true;
-                auditEntry(pr, pr.state, pr.state, 'NCIP problem in HOST LMS integration. Check In to Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+checkout_result.problems?.toString(), null);
+                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
               }
               pr.save(flush:true, failOnError:true);
             }
           }
           else {
-            auditEntry(pr, pr.state, pr.state, 'HOST LMS Integration not configured - Fix the problem and try again or disable NCIP integration in settings.');
+            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
           }
@@ -87,7 +87,7 @@ public class ReshareActionService {
           pr.needsAttention=false;
           Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
           pr.state = s;
-          auditEntry(pr, pr.state, s, 'Check In to Reshare completed (NCIP integration turned off)', null);
+          auditEntry(pr, pr.state, s, 'Fill request succeeded (NCIP integration disabled).', null);
           result = true;
           pr.save(flush:true, failOnError:true);
         }
@@ -410,7 +410,7 @@ public class ReshareActionService {
           if ( accept_result?.result == true ) {
             // Mark item as awaiting circ
             def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-            String message = 'NCIP acceptItem completed'
+            String message = 'Receive succeeded. Host LMS integration: NCIP AcceptItem call succeeded.'
 
             auditEntry(pr,
               pr.state,
@@ -424,12 +424,12 @@ public class ReshareActionService {
             result = true;
           }
           else {
-            String message = 'NCIP accept item failed. Please recheck and try again: '
+            String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
             // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
             auditEntry(pr,
               pr.state,
               pr.state,
-              message+accept_result?.problem, 
+              message+accept_result?.problems, 
               null);
             pr.needsAttention=true;
             pr.save(flush:true, failOnError:true);
@@ -437,12 +437,18 @@ public class ReshareActionService {
         }
         catch ( Exception e ) {
           log.error("NCIP Problem",e);
+          pr.needsAttention=true;
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
         }
+      } else {
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+          pr.needsAttention=true;
+          pr.save(flush:true, failOnError:true);
       }
     } else {
       // Mark item as awaiting circ
       def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-      String message = 'Checked in to ReShare (NCIP integration turned off)'
+      String message = 'Receive succeeded (NCIP integration disabled).'
 
       auditEntry(pr,
         pr.state,
@@ -470,19 +476,26 @@ public class ReshareActionService {
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
     AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
     if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
+
       try {
         // Call the host lms to check the item out of the host system and in to reshare
         // def accept_result = host_lms.checkInItem(patron_request.hrid)
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-        def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
-        if(check_in_result?.result == true) {
-          statisticsService.decrementCounter('/activeLoans');
-          patron_request.needsAttention=false;
-          patron_request.activeLoan=false;
-          result = true;
+        if ( host_lms ) {
+          def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+          if(check_in_result?.result == true) {
+            statisticsService.decrementCounter('/activeLoans');
+            patron_request.needsAttention=false;
+            patron_request.activeLoan=false;
+            auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded. Host LMS integration: NCIP CheckinItem Call succeeded.', null);
+            result = true;
+          } else {
+            patron_request.needsAttention=true;
+            auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
+          }
         } else {
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
           patron_request.needsAttention=true;
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'NCIP problem in HOST LMS integration. Check out of Reshare failed - Fix the problem and try again or disable NCIP integration in settings.'+check_in_result.problems?.toString(), null);
         }
       }
       catch ( Exception e ) {
@@ -491,7 +504,7 @@ public class ReshareActionService {
         auditEntry(patron_request,
           patron_request.state,
           patron_request.state,
-          'host LMS Integration - checkInItem failed. Please retry. Message:'+e.message,
+          'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
           null);
         result = false;
       }
@@ -499,6 +512,7 @@ public class ReshareActionService {
       statisticsService.decrementCounter('/activeLoans');
       patron_request.needsAttention=false;
       patron_request.activeLoan=false;
+      auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded (NCIP integration disabled).', null);
       result = true;
     }
 
