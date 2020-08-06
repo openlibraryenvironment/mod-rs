@@ -5,74 +5,212 @@
     {
       "id": "rs",
       "version": "${info.app.minorVersion}",
-      "handlers" : [
+      "handlers" : [ 
         {
-          "methods": ["GET", "POST", "PUT", "DELETE"],
-          "pathPattern": "/rs/patronrequests*"
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests",
+          "permissionsRequired": [ "rs.patronrequests.collection.get" ]
         },
         {
-          "methods": ["GET"],
-          "pathPattern": "/rs/refdata/*"
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/{id}/*",
+          "permissionsRequired": [ "rs.patronrequests.item.get" ]
+        }, 
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/{id}",
+          "permissionsRequired": [ "rs.patronrequests.item.get" ]
+        }, 
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/patronrequests*",
+          "permissionsRequired": [ "rs.patronrequests.item.post" ]
+        }, 
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/patronrequests/{id}/*",
+          "permissionsRequired": [ "rs.patronrequests.item.put" ]
         },
         {
-          "methods": ["GET", "POST"],
-          "pathPattern": "/rs/refdata"
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/patronrequests/{id}",
+          "permissionsRequired": [ "rs.patronrequests.item.put" ]
         },
         {
-          "methods": ["GET", "PUT", "DELETE"],
-          "pathPattern": "/rs/refdata/{id}"
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/patronrequests/{id}/*",
+          "permissionsRequired": [ "rs.patronrequests.item.delete" ]
+        }, 
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/patronrequests/{id}",
+          "permissionsRequired": [ "rs.patronrequests.item.delete" ]
+        },
+        
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/refdata*",
+          "permissionsRequired": [ "rs.refdata.get" ]
         },
         {
-          "methods": ["GET", "POST"],
-          "pathPattern": "/rs/custprops*"
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/refdata*",
+          "permissionsRequired": [ "rs.refdata.post" ]
         },
         {
-          "methods": ["GET"],
-          "pathPattern": "/rs/kiwt*"
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/refdata*",
+          "permissionsRequired": [ "rs.refdata.put" ]
         },
         {
-          "methods": ["GET", "POST", "PUT", "DELETE"],
-          "pathPattern": "/rs/shipments*"
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/refdata*",
+          "permissionsRequired": [ "rs.refdata.delete" ]
         },
         {
-          "methods": ["GET", "POST", "PUT", "DELETE"],
-          "pathPattern": "/rs/hostLMSLocations*"
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/status*",
+          "permissionsRequired": [ "rs.status.get" ]
         },
         {
-          "methods": ["GET", "POST", "PUT", "DELETE"],
-          "pathPattern": "/rs/timers*"
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/status*",
+          "permissionsRequired": [ "rs.status.post" ]
         },
         {
-          "methods": ["GET", "POST", "PUT", "DELETE"],
-          "pathPattern": "/rs/settings*"
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/status*",
+          "permissionsRequired": [ "rs.status.put" ]
         },
         {
-          "methods": ["GET", "POST"],
-          "pathPattern": "/rs/directoryEntry*"
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/status*",
+          "permissionsRequired": [ "rs.status.delete" ]
         },
         {
-          "methods": ["GET", "POST"],
-          "pathPattern": "/rs/settings/worker"
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/settings*",
+          "permissionsRequired": [ "rs.settings.get" ]
         },
         {
-          "methods": ["GET"],
-          "pathPattern": "/rs/status"
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/settings*",
+          "permissionsRequired": [ "rs.settings.post" ]
         },
         {
-          "methods": ["GET", "POST"],
-          "pathPattern": "/rs/settings/*"
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/settings*",
+          "permissionsRequired": [ "rs.settings.put" ]
         },
         {
-          "methods": ["POST"],
-          "pathPattern": "/rs/iso18626"
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/settings*",
+          "permissionsRequired": [ "rs.settings.delete" ]
         },
         {
-          "methods": ["GET"],
-          "pathPattern": "/rs/statistics"
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/statistics*",
+          "permissionsRequired": [ "rs.statistics.get" ]
         },
         {
-          "methods": ["GET","POST"],
-          "pathPattern": "/rs/externalApi/*"
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/statistics*",
+          "permissionsRequired": [ "rs.statistics.post" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/statistics*",
+          "permissionsRequired": [ "rs.statistics.put" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/statistics*",
+          "permissionsRequired": [ "rs.statistics.delete" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/iso18626*",
+          "permissionsRequired": [ "rs.iso18626.get" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/iso18626*",
+          "permissionsRequired": [ "rs.iso18626.post" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/iso18626*",
+          "permissionsRequired": [ "rs.iso18626.put" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/iso18626*",
+          "permissionsRequired": [ "rs.iso18626.delete" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/externalApi*",
+          "permissionsRequired": [ "rs.externalapi.get" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/externalApi*",
+          "permissionsRequired": [ "rs.externalapi.post" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/externalApi*",
+          "permissionsRequired": [ "rs.externalapi.put" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/externalApi*",
+          "permissionsRequired": [ "rs.externalapi.delete" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/directoryEntry*",
+          "permissionsRequired": [ "rs.directoryentry.get" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/directoryEntry*",
+          "permissionsRequired": [ "rs.directoryentry.post" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/directoryEntry*",
+          "permissionsRequired": [ "rs.directoryentry.put" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/directoryEntry*",
+          "permissionsRequired": [ "rs.directoryentry.delete" ]
+        },
+        {
+          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/custprops*",
+          "permissionsRequired": [ "rs.custprops" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/kiwt*",
+          "permissionsRequired": [ "rs.kiwt" ]
+        },
+        {
+          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/shipments*",
+          "permissionsRequired": [ "rs.shipments" ]
+        },
+        {
+          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/hostLMSLocations*",
+          "permissionsRequired": [ "rs.hostlmslocations" ]
+        },
+        {
+          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/timers*",
+          "permissionsRequired": [ "rs.hostlmslocations" ]
         }
       ]
     },{
@@ -107,6 +245,379 @@
     }
   ],
   "permissionSets": [
+    {
+      "permissionName": "rs.patronrequests.collection.get",
+      "displayName": "patronrequests collection get",
+      "description": "get patronrequests collection",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.item.get",
+      "displayName": "patronrequests item get",
+      "description": "get patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.item.post",
+      "displayName": "patronrequests item post",
+      "description": "post patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.item.put",
+      "displayName": "patronrequests item put",
+      "description": "put patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.item.delete",
+      "displayName": "patronrequests item delete",
+      "description": "delete patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.read",
+      "displayName": "patronrequests read",
+      "description": "read patronrequests",
+      "visible": false,
+      "subPermissions": [
+          "rs.patronrequests.collection.get",
+          "rs.patronrequests.item.get"
+      ]
+    },
+    {
+      "permissionName": "rs.patronrequests.write",
+      "displayName": "patronrequests write",
+      "description": "write patronrequests",
+      "visible": false,
+      "subPermissions": [
+          "rs.patronrequests.read",
+          "rs.patronrequests.item.post",
+          "rs.patronrequests.item.put",
+          "rs.patronrequests.item.delete"
+      ]
+    },
+    {
+      "permissionName": "rs.refdata.get",
+      "displayName": "refdata get",
+      "description": "get refdata",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.refdata.post",
+      "displayName": "refdata post",
+      "description": "post refdata",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.refdata.put",
+      "displayName": "refdata put",
+      "description": "put refdata",
+      "visible": false
+    }, {
+      "permissionName": "rs.refdata.delete",
+      "displayName": "refdata delete",
+      "description": "delete refdata",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.refdata.read",
+      "displayName": "refdata read",
+      "description": "read refdata",
+      "visible": false,
+      "subPermissions": [
+          "rs.refdata.get"
+      ]
+    },
+    {
+      "permissionName": "rs.refdata.write",
+      "displayName": "refdata write",
+      "description": "write refdata",
+      "visible": false,
+      "subPermissions": [
+          "rs.refdata.read",
+          "rs.refdata.post",
+          "rs.refdata.put",
+          "rs.refdata.delete"
+      ]
+    },
+    {
+      "permissionName": "rs.settings.get",
+      "displayName": "settings get",
+      "description": "get settings",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.settings.post",
+      "displayName": "settings post",
+      "description": "post settings",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.settings.put",
+      "displayName": "settings put",
+      "description": "put settings",
+      "visible": false
+    }, {
+      "permissionName": "rs.settings.delete",
+      "displayName": "settings delete",
+      "description": "delete settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.read",
+      "displayName": "settings read",
+      "description": "read settings",
+      "visible": false,
+      "subPermissions": [
+          "rs.settings.get"
+      ]
+    },
+    {
+      "permissionName": "rs.settings.write",
+      "displayName": "settings write",
+      "description": "write settings",
+      "visible": false,
+      "subPermissions": [
+          "rs.settings.read",
+          "rs.settings.post",
+          "rs.settings.put",
+          "rs.settings.delete"
+      ]
+    },
+
+    {
+      "permissionName": "rs.statistics.get",
+      "displayName": "statistics get",
+      "description": "get statistics",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.statistics.post",
+      "displayName": "statistics post",
+      "description": "post statistics",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.statistics.put",
+      "displayName": "statistics put",
+      "description": "put statistics",
+      "visible": false
+    }, {
+      "permissionName": "rs.statistics.delete",
+      "displayName": "statistics delete",
+      "description": "delete statistics",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.statistics.read",
+      "displayName": "statistics read",
+      "description": "read statistics",
+      "visible": false,
+      "subPermissions": [
+          "rs.statistics.get"
+      ]
+    },
+    {
+      "permissionName": "rs.statistics.write",
+      "displayName": "statistics write",
+      "description": "write statistics",
+      "visible": false,
+      "subPermissions": [
+          "rs.statistics.read",
+          "rs.statistics.post",
+          "rs.statistics.put",
+          "rs.statistics.delete"
+      ]
+    },
+
+    {
+      "permissionName": "rs.iso18626.get",
+      "displayName": "iso18626 get",
+      "description": "get iso18626",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.iso18626.post",
+      "displayName": "iso18626 post",
+      "description": "post iso18626",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.iso18626.put",
+      "displayName": "iso18626 put",
+      "description": "put iso18626",
+      "visible": false
+    }, {
+      "permissionName": "rs.iso18626.delete",
+      "displayName": "iso18626 delete",
+      "description": "delete iso18626",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.iso18626.read",
+      "displayName": "iso18626 read",
+      "description": "read iso18626",
+      "visible": false,
+      "subPermissions": [
+          "rs.iso18626.get"
+      ]
+    },
+    {
+      "permissionName": "rs.iso18626.write",
+      "displayName": "iso18626 write",
+      "description": "write iso18626",
+      "visible": false,
+      "subPermissions": [
+          "rs.iso18626.read",
+          "rs.iso18626.post",
+          "rs.iso18626.put",
+          "rs.iso18626.delete"
+      ]
+    },
+
+    {
+      "permissionName": "rs.externalapi.get",
+      "displayName": "externalapi get",
+      "description": "get externalapi",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.externalapi.post",
+      "displayName": "externalapi post",
+      "description": "post externalapi",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.externalapi.put",
+      "displayName": "externalapi put",
+      "description": "put externalapi",
+      "visible": false
+    }, {
+      "permissionName": "rs.externalapi.delete",
+      "displayName": "externalapi delete",
+      "description": "delete externalapi",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.externalapi.read",
+      "displayName": "externalapi read",
+      "description": "read externalapi",
+      "visible": false,
+      "subPermissions": [
+          "rs.externalapi.get"
+      ]
+    },
+    {
+      "permissionName": "rs.externalapi.write",
+      "displayName": "externalapi write",
+      "description": "write externalapi",
+      "visible": false,
+      "subPermissions": [
+          "rs.externalapi.read",
+          "rs.externalapi.post",
+          "rs.externalapi.put",
+          "rs.externalapi.delete"
+      ]
+    },
+
+    {
+      "permissionName": "rs.directoryentry.get",
+      "displayName": "directoryentry get",
+      "description": "get directoryentry",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.directoryentry.post",
+      "displayName": "directoryentry post",
+      "description": "post directoryentry",
+      "visible": false
+    }, 
+    {
+      "permissionName": "rs.directoryentry.put",
+      "displayName": "directoryentry put",
+      "description": "put directoryentry",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.directoryentry.delete",
+      "displayName": "directoryentry delete",
+      "description": "delete directoryentry",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.directoryentry.read",
+      "displayName": "directoryentry read",
+      "description": "read directoryentry",
+      "visible": false,
+      "subPermissions": [
+          "rs.directoryentry.get"
+      ]
+    },
+    {
+      "permissionName": "rs.directoryentry.write",
+      "displayName": "directoryentry write",
+      "description": "write directoryentry",
+      "visible": false,
+      "subPermissions": [
+          "rs.directoryentry.read",
+          "rs.directoryentry.post",
+          "rs.directoryentry.put",
+          "rs.directoryentry.delete"
+      ]
+    },
+
+    {
+      "permissionName": "rs.custprops",
+      "displayName": "custprops",
+      "description": "custom properties",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.kiwt",
+      "displayName": "kiwt",
+      "description": "kiwt",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.shipments",
+      "displayName": "shipments",
+      "description": "shipments",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmslocations",
+      "displayName": "hostlmslocations",
+      "description": "hostlmslocations",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.timers",
+      "displayName": "timers",
+      "description": "timers",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.all",
+      "displayName": "rs all",
+      "description": "All mod-rs permissions",
+      "visible": false,
+      "subPermissions": [
+        "rs.patronrequests.write",
+        "rs.refdata.write",
+        "rs.settings.write",
+        "rs.statistics.write",
+        "rs.iso18626.write",
+        "rs.externalapi.write",
+        "rs.directoryentry.write",
+        "rs.custprops",
+        "rs.kiwt",
+        "rs.shipments",
+        "rs.hostlmslocations",
+        "rs.timers"
+      ]
+    },
+
     {
       "permissionName": "module.rs-stripes.enabled",
       "displayName": "Stripes",
