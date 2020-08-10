@@ -65,8 +65,8 @@ public class ReshareActionService {
                 pr.needsAttention=false;
                 pr.dueDateFromLMS=checkout_result?.dueDate;
                 s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-                pr.state = s;
                 auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
+                pr.state = s;
                 result = true;
               }
               else {
@@ -86,8 +86,8 @@ public class ReshareActionService {
           pr.activeLoan=true
           pr.needsAttention=false;
           Status s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-          pr.state = s;
           auditEntry(pr, pr.state, s, 'Fill request succeeded (NCIP integration disabled).', null);
+          pr.state = s;
           result = true;
           pr.save(flush:true, failOnError:true);
         }
