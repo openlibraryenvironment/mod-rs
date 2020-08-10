@@ -64,7 +64,7 @@ public class ReshareActionService {
                 pr.activeLoan=true
                 pr.needsAttention=false;
                 pr.dueDateFromLMS=checkout_result?.dueDate;
-                s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+                s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
                 pr.state = s;
                 auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
                 result = true;
@@ -85,7 +85,7 @@ public class ReshareActionService {
           statisticsService.incrementCounter('/activeLoans');
           pr.activeLoan=true
           pr.needsAttention=false;
-          Status s = Status.lookup('Responder', 'RES_CHECKED_IN_TO_RESHARE');
+          Status s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
           pr.state = s;
           auditEntry(pr, pr.state, s, 'Fill request succeeded (NCIP integration disabled).', null);
           result = true;
@@ -93,7 +93,7 @@ public class ReshareActionService {
         }
       }
       else {
-        log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+        log.warn("Unable to locate RES_AWAIT_SHIPPING OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
       }
     }
 
@@ -117,9 +117,9 @@ public class ReshareActionService {
       result.status = true;
     }
     else {
-      log.warn("Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
+      log.warn("Unable to locate RES_AWAIT_PICKING OR request not currently RES_NEW_AWAIT_PULL_SLIP(${pr.state.code})");
       result.code=-1; // Wrong state
-      result.message="Unable to locate RES_CHECKED_IN_TO_RESHARE OR request not currently RES_AWAIT_PICKING(${pr?.state?.code})"
+      result.message="Unable to locate RES_AWAIT_PICKING OR request not currently RES_NEW_AWAIT_PULL_SLIP(${pr?.state?.code})"
     }
 
     return result;
