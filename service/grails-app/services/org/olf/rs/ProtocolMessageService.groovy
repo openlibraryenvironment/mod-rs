@@ -442,6 +442,7 @@ and sa.service.businessFunction.value=:ill
         needBeforeDate(eventData.serviceInfo.needBeforeDate)
         serviceLevel(eventData.serviceInfo.serviceLevel)
         anyEdition(eventData.serviceInfo.anyEdition)
+        note(eventData.serviceInfo.note)
       }
     }
   }
