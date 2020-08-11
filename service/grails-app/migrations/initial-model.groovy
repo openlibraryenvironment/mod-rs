@@ -1653,4 +1653,18 @@ databaseChangeLog = {
       }
     }
   }
+
+  changeSet(author: "efreestone (manual)", id: "202008111728-001") {
+    createTable(tableName: "patron_request_previous_states") {
+      column(name: "pr_previous_states", type: "VARCHAR(255)")
+
+      column(name: "previous_states_object", type: "VARCHAR(255)")
+
+      column(name: "previous_states_idx", type: "VARCHAR(255)")
+
+      column(name: "previous_states_elt", type: "VARCHAR(255)") {
+        constraints(nullable: "false")
+      }
+    }
+  }
 }
