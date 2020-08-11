@@ -520,7 +520,6 @@ public class ReshareApplicationEventHandlerService {
       }
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
-      log.debug("LOGDEBUG SERVICEINFO: ${serviceInfo}")
       if (serviceInfo.serviceType) {
         pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
       }
