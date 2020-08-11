@@ -11,6 +11,7 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import groovy.json.JsonOutput;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Instant;
 import java.time.ZonedDateTime;
