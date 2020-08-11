@@ -1667,4 +1667,8 @@ databaseChangeLog = {
       }
     }
   }
+
+  changeSet(author: "efreestone (manual)", id: "202008111728-002") {
+    dropColumn(tableName: "patron_request", columnName: "pr_previous_state")
+  }
 }
