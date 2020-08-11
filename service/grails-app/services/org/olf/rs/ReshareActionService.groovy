@@ -37,9 +37,9 @@ public class ReshareActionService {
 
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
+        pr.selectedItemBarcode = actionParams?.itemBarcode;
         AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
         if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
-          pr.selectedItemBarcode = actionParams?.itemBarcode;
 
           HostLMSActions host_lms = hostLMSService.getHostLMSActions();
           if ( host_lms ) {
