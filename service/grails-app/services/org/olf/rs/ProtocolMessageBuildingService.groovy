@@ -99,8 +99,9 @@ class ProtocolMessageBuildingService {
       serviceLevel: 'Loan',
       anyEdition: 'Y',
 
-      // Note that the internal name differs from the protocol name
-      needBeforeDate: req.neededBy
+      // Note that the internal names sometimes differ from the protocol names--pay attention with these fields
+      needBeforeDate: req.neededBy,
+      note: req.patronNote
 
     ]
     // TODO SupplierInfo Section

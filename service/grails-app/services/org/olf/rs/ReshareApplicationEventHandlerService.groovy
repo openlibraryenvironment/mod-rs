@@ -532,6 +532,9 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}")
         }
       }
+      if (serviceInfo.note) {
+       pr.patronNote = serviceInfo.note
+      }
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
       if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
