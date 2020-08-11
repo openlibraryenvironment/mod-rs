@@ -519,11 +519,17 @@ public class ReshareApplicationEventHandlerService {
       }
       // Add service information to Patron Request
       Map serviceInfo = eventData.serviceInfo
+      log.debug("LOGDEBUG SERVICEINFO: ${serviceInfo}")
       if (serviceInfo.serviceType) {
         pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
       }
       if (serviceInfo.needBeforeDate) {
-        pr.neededBy = serviceInfo.needBeforeDate
+        // This will come in as a string, will need parsing
+        try {
+          pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate)
+        } catch (Exception e) {
+          log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}")
+        }
       }
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later

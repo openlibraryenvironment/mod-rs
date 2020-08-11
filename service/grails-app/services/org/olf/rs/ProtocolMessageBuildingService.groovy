@@ -90,7 +90,14 @@ class ProtocolMessageBuildingService {
        * EndDate
        * Note
       */
-      serviceType: req.serviceType?.value,
+
+      //ToDo the below line currently does nothing since we never actually set serviceType rn
+      //serviceType: req.serviceType?.value,
+
+      // ToDo wire in some proper information here instead of this hardcoded stuff
+      serviceType: 'Loan',
+      serviceLevel: 'Loan',
+      anyEdition: 'Y',
 
       // Note that the internal name differs from the protocol name
       needBeforeDate: req.neededBy
