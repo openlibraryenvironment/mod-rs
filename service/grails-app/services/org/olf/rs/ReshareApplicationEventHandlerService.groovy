@@ -166,6 +166,9 @@ public class ReshareApplicationEventHandlerService {
             }
 
             // If we were supplied a pickup location code, attempt to resolve it here
+            /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
+             * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
+             */
             if( req.pickupLocationCode ) {
               DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
               
