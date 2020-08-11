@@ -11,6 +11,7 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import groovy.json.JsonOutput;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -523,7 +524,15 @@ public class ReshareApplicationEventHandlerService {
         pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
       }
       if (serviceInfo.needBeforeDate) {
-        pr.neededBy = serviceInfo.needBeforeDate
+        // This will come in as a string, will need parsing
+        try {
+          pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate)
+        } catch (Exception e) {
+          log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}")
+        }
+      }
+      if (serviceInfo.note) {
+       pr.patronNote = serviceInfo.note
       }
 
       // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later

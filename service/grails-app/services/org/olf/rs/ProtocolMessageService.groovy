@@ -260,33 +260,26 @@ and sa.service.businessFunction.value=:ill
         makeHeader(delegate, eventData)
 
         // Bib info and Service Info only apply to REQUESTS
-        log.debug("This is a requesting message, so needs BibliographicInfo")
+        log.debug("This is a request message, so needs BibliographicInfo")
         if (eventData.bibliographicInfo != null) {
           makeBibliographicInfo(delegate, eventData)
         } else {
           log.warn("No bibliographicInfo found")
         }
 
-        log.debug("This is a requesting message, so needs PublicationInfo")
+        log.debug("This is a request message, so needs PublicationInfo")
         if (eventData.publicationInfo != null) {
           makePublicationInfo(delegate, eventData)
         } else {
           log.warn("No publicationInfo found")
         }
 
-        //TODO Wire in proper serviceInfo here
-        serviceInfo {
-          serviceType('Loan')
-          serviceLevel('Loan')
-          //needBeforeDate('2014-05-01T00:00:00.0Z')
-          anyEdition('Y')
-        }
-        /* log.debug("This is a requesting message, so needs ServiceInfo")
+        log.debug("This is a request message, so needs ServiceInfo")
         if (eventData.serviceInfo != null) {
           makeServiceInfo(delegate, eventData)
         } else {
           log.warn("No serviceInfo found")
-        } */
+        }
 
         //TODO Wire in supplierInfo here
 
@@ -447,6 +440,9 @@ and sa.service.businessFunction.value=:ill
       serviceInfo {
         serviceType(eventData.serviceInfo.serviceType)
         needBeforeDate(eventData.serviceInfo.needBeforeDate)
+        serviceLevel(eventData.serviceInfo.serviceLevel)
+        anyEdition(eventData.serviceInfo.anyEdition)
+        note(eventData.serviceInfo.note)
       }
     }
   }
