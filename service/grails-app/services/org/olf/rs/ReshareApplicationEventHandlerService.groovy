@@ -709,12 +709,10 @@ public class ReshareApplicationEventHandlerService {
                 break;
               case 'N':
                 log.debug("Negative cancel response received")
-                //def previousState = lookupStatus('PatronRequest', pr.previousState)
                 def previousState = lookupStatus('PatronRequest', pr.previousStates[pr.state.code])
                 auditEntry(pr, pr.state, previousState, "Supplier denied cancellation.", null)
                 pr.previousStates[pr.state.code] = null
                 pr.state = previousState
-                //pr.previousState = null
                 break;
               default:
                 log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
@@ -826,10 +824,8 @@ public class ReshareApplicationEventHandlerService {
             if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
               // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
               if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-                //def new_state = lookupStatus('Responder', pr.previousState)
                 def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
                 auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
-                //pr.previousState = null;
                 pr.previousStates[pr.state.code] = null;
                 pr.state = new_state;
               } else {
@@ -844,7 +840,6 @@ public class ReshareApplicationEventHandlerService {
           case 'Cancel':
             // We cannot cancel a shipped item
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
-            //pr.previousState = pr.state.code;
             pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
             pr.save(flush: true, failOnError: true)
@@ -891,7 +886,6 @@ public class ReshareApplicationEventHandlerService {
         // System has auto-respond cancel on
         if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
           // Revert the state to it's original before the cancel request was received - previousState
-          //def new_state = lookupStatus('PatronRequest', req.previousState);
           def new_state = lookupStatus('PatronRequest', req.previousStates['RES_CANCEL_REQUEST_RECEIVED']);
           auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state ", null)
           req.state=new_state

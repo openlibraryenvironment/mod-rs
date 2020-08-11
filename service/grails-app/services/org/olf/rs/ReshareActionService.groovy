@@ -529,7 +529,6 @@ public class ReshareActionService {
   }
 
   public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
-    //pr.previousState = pr.state.code
     switch (action) {
       case 'requesterRejectedConditions':
         pr.requestToContinue = true;
