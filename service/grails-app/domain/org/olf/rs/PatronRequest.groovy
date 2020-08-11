@@ -166,8 +166,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   //Boolean to flag whether a request continues after the current cancellation with supplier
   boolean requestToContinue = true;
 
-  // We also sometimes need to know the state that existed before heading into a pending state
-  String previousState
+  // We also sometimes need to know the state(s) that existed before heading into a pending state--in the correct order
+  Map previousStates = [:]
 
   Patron resolvedPatron
 
@@ -276,7 +276,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     requesterRequestedCancellation (nullable: false)
     requestToContinue (nullable: false)
 
-    previousState (nullable: true)
     activeLoan(nullable: true)
     dueDateFromLMS(nullable: true)
 
@@ -364,7 +363,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     resolvedPatron column : 'pr_resolved_patron_fk'
     requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
     requestToContinue column: 'pr_request_to_continue'
-    previousState column: 'pr_previous_state'
+    previousStates column: 'pr_previous_states'
     activeLoan column: 'pr_active_loan'
     needsAttention column: 'pr_needs_attention'
 
