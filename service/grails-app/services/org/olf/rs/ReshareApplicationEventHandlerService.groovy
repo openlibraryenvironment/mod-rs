@@ -677,8 +677,8 @@ public class ReshareApplicationEventHandlerService {
           addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
         }
 
-        // If we're being told about the barcode of the selected item, stash it in selectedItemBarcode on the requester side
-        if ( eventData.deliveryInfo.itemId) {
+        // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
+        if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
       }

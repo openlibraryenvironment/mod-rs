@@ -195,9 +195,9 @@ class ProtocolMessageBuildingService {
 
     // We need to check in a couple of places whether the note is null/whether to add a note
     String note = messageParams?.note
-
+    message.deliveryInfo = [:]
     if ( messageParams.loanCondition ) {
-      message.deliveryInfo = [ loanCondition: messageParams?.loanCondition ]
+      message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
       reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
     }
 
@@ -216,11 +216,11 @@ class ProtocolMessageBuildingService {
   
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
-    
-    if( pr.selectedItemBarcode ) {
-      message.itemId = pr.selectedItemBarcode
-    }
 
+    if( pr.selectedItemBarcode ) {
+      message.deliveryInfo['itemId'] = pr.selectedItemBarcode
+    }
+    
     return message
   }
 
