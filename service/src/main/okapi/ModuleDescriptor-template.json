@@ -150,22 +150,22 @@
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ "rs.externalapi.get" ]
+          "permissionsRequired": [ ]
         },
         {
           "methods": [ "POST" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ "rs.externalapi.post" ]
+          "permissionsRequired": [ ]
         },
         {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ "rs.externalapi.put" ]
+          "permissionsRequired": [ ]
         },
         {
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ "rs.externalapi.delete" ]
+          "permissionsRequired": [ ]
         },
         {
           "methods": [ "GET" ],
