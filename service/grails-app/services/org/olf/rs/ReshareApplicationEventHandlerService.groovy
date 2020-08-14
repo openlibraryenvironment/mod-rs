@@ -886,23 +886,25 @@ public class ReshareApplicationEventHandlerService {
         // System has auto-respond cancel on
         if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
           // Revert the state to it's original before the cancel request was received - previousState
-          def new_state = lookupStatus('PatronRequest', req.previousStates['RES_CANCEL_REQUEST_RECEIVED']);
+          def new_state = lookupStatus('Responder', req.previousStates['RES_CANCEL_REQUEST_RECEIVED']);
           auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state ", null)
           req.state=new_state
           req.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = null;
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
         }
         else {
-          def new_state = lookupStatus('PatronRequest', 'RES_CANCELLED')
+          def new_state = lookupStatus('Responder', 'RES_CANCELLED')
           if ( new_state ) {
             req.state=new_state
             auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
           }
           else {
-            auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
+            log.error("Accepting requester cancellation--unable to find state: RES_CANCELLED")
+            auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
           }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
         }
+        req.save(flush: true, failOnError: true);
       }
       else {
         // Set needs attention=true
