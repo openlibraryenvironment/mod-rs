@@ -1671,4 +1671,10 @@ databaseChangeLog = {
   changeSet(author: "efreestone (manual)", id: "202008111728-002") {
     dropColumn(tableName: "patron_request", columnName: "pr_previous_state")
   }
+
+  changeSet(author: "efreestone (manual)", id: "202008281228-002") {
+    addColumn(tableName: "patron_request_loan_condition") {
+        column(name: "prlc_accepted", type: "BOOLEAN");
+    }
+  }
 }

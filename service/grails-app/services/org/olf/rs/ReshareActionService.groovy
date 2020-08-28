@@ -192,6 +192,12 @@ public class ReshareActionService {
     } else {
       log.warn("The supplying agency should not be able to call sendLoanConditionResponse.");
     }
+
+    def conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(pr, pr.resolvedSupplier)
+    conditions.each {cond ->
+      cond.setAccepted(true)
+      cond.save(flush: true, failOnError: true)
+    }
     return result;
   }
 

@@ -194,6 +194,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                     s,
                                     'Conditions manually marked as agreed', null);
               patron_request.state=s;
+              reshareApplicationEventHandlerService
+              // Mark all conditions as accepted
+              reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(patron_request)
               patron_request.previousStates['RES_PENDING_CONDITIONAL_ANSWER'] = null;
               patron_request.save(flush:true, failOnError:true);
               break;

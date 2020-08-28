@@ -6,6 +6,7 @@ import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.PatronRequestNotification
+import org.olf.rs.PatronRequestLoanCondition
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
@@ -828,7 +829,9 @@ public class ReshareApplicationEventHandlerService {
                 auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
                 pr.previousStates[pr.state.code] = null;
                 pr.state = new_state;
+                markAllLoanConditionsAccepted(pr)
               } else {
+                // Loan conditions were already marked as agreed
                 auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
               }
             } else {
@@ -1353,6 +1356,14 @@ public class ReshareApplicationEventHandlerService {
       auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
       req.state=new_state
       req.save(flush:true, failOnError: true)
+    }
+  }
+
+  public void markAllLoanConditionsAccepted(PatronRequest pr) {
+    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr)
+    conditions.each {cond ->
+      cond.setAccepted(true)
+      cond.save(flush: true, failOnError: true)
     }
   }
 }
