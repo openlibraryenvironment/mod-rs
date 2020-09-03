@@ -189,7 +189,7 @@ class iso18626Controller {
     c.rehydrate(del, c.owner, c.thisObject)()
   } 
 
-
+  // This is so that if the Tenants.withId fails to return a tenant, we can still return necessary information in the confirmation message
   def makeDefaultReqResult(incomingRequest, messageType) {
     def req_result = [:];
     if (messageType ==! null) {
