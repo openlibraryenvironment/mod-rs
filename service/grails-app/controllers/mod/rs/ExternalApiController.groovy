@@ -68,7 +68,7 @@ class ExternalApiController {
           recipient = getSymbolFor(mr.header.supplyingAgencyId)
           log.debug("incoming request message for ${recipient}");
 
-          req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+          def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
@@ -88,7 +88,7 @@ class ExternalApiController {
           recipient = getSymbolFor(msam.header.requestingAgencyId)
           log.debug("incoming supplying agency message for ${recipient}");
   
-          req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
+          def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
@@ -108,7 +108,7 @@ class ExternalApiController {
           recipient = getSymbolFor(mram.header.supplyingAgencyId);
           log.debug("incoming requesting agency message for ${recipient}");
 
-          req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
+          def req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
