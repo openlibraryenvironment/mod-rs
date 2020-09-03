@@ -2,10 +2,22 @@ package org.olf.rs;
 
 import groovy.lang.Closure
 import org.olf.rs.PatronRequest
-import org.olf.okapi.modules.directory.Symbol;
+import org.olf.okapi.modules.directory.Symbol
+import java.text.SimpleDateFormat
+import groovy.util.logging.Slf4j
+import groovy.xml.StreamingMarkupBuilder
 
 
 class ConfirmationMessageService {
+
+  // ToDo this method is currently also only used for logging purposes, consider removal
+  public def confirmationMessageReadable(def confirmationMessage) {
+    StringWriter sw = new StringWriter();
+    sw << new StreamingMarkupBuilder().bind (confirmationMessage)
+    String message = sw.toString();
+
+    return message
+  }
 
   // This method creates a confirmation message
   public def makeConfirmationMessage(def req_result) {

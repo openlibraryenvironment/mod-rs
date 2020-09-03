@@ -9,10 +9,6 @@ import org.olf.rs.GlobalConfigService
 import org.olf.rs.BackgroundTaskService;
 import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.ConfirmationMessageService
-import grails.gorm.multitenancy.Tenants
-import java.text.SimpleDateFormat
-import groovy.xml.StreamingMarkupBuilder
-import grails.gorm.multitenancy.Tenants
 import groovy.util.logging.Slf4j
 import org.olf.rs.Counter
 import grails.gorm.multitenancy.CurrentTenant
@@ -69,17 +65,14 @@ class ExternalApiController {
           def mr = iso18626_msg.request;
 
           // Look in request.header.supplyingAgencyId for the intended recipient
-          recipient = mr.header.supplyingAgencyId
-          log.debug("incoming request message for ${recipient} ${getSymbolFor(recipient)}");
+          recipient = getSymbolFor(mr.header.supplyingAgencyId)
+          log.debug("incoming request message for ${recipient}");
 
           req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
           log.debug("result of req_request ${req_result}");
   
-          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(delegate, req_result)
-          StringWriter sw = new StringWriter();
-          sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-          String message = sw.toString();
-  
+          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
           render( contentType:"text/xml" ) {
@@ -92,17 +85,14 @@ class ExternalApiController {
           def msam = iso18626_msg.supplyingAgencyMessage;
   
           // Look in request.header.requestingAgencyId for the intended recipient
-          recipient = msam.header.requestingAgencyId
-          log.debug("incoming supplying agency message for ${recipient} ${getSymbolFor(recipient)}");
+          recipient = getSymbolFor(msam.header.requestingAgencyId)
+          log.debug("incoming supplying agency message for ${recipient}");
   
           req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
           log.debug("result of req_request ${req_result}");
   
-          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(delegate, req_result)
-          StringWriter sw = new StringWriter();
-          sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-          String message = sw.toString();
-  
+          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
           render( contentType:"text/xml" ) {
@@ -115,17 +105,14 @@ class ExternalApiController {
           def mram = iso18626_msg.requestingAgencyMessage;
 
           // Look in request.header.supplyingAgencyId for the intended recipient
-          recipient = mram.header.supplyingAgencyId;
-          log.debug("incoming requesting agency message for ${recipient} ${getSymbolFor(recipient)}");
+          recipient = getSymbolFor(mram.header.supplyingAgencyId);
+          log.debug("incoming requesting agency message for ${recipient}");
 
           req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
           log.debug("result of req_request ${req_result}");
   
-          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(delegate, req_result)
-          StringWriter sw = new StringWriter();
-          sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-          String message = sw.toString();
-  
+          def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
           render( contentType:"text/xml" ) {
@@ -153,6 +140,7 @@ class ExternalApiController {
     render result as JSON
   }
 
+  // ToDo this method is only used for logging purposes--consider removal
   private String getSymbolFor(path) {
     String result = null;
     if ( path.agencyIdType != null && path.agencyIdValue != null ) {
