@@ -1677,4 +1677,52 @@ databaseChangeLog = {
         column(name: "prlc_accepted", type: "BOOLEAN");
     }
   }
+
+  changeSet(author: "jskomorowski (manual)", id: "202008281440-101") {
+      createTable(tableName: "notice_policy") {
+          column(name: "np_id", type: "VARCHAR(36)") {
+              constraints(nullable: "false")
+          }
+
+          column(name: "np_version", type: "BIGINT") {
+              constraints(nullable: "false")
+          }
+
+          column(name: "np_date_created", type: "timestamp")
+
+          column(name: "np_last_updated", type: "timestamp")
+
+          column(name: "np_name", type: "VARCHAR(255)")
+
+          column(name: "np_description", type: "TEXT")
+
+          column(name: "np_active", type: "BOOLEAN")
+      }
+  }
+
+  changeSet(author: "jskomorowski (manual)", id: "202008281440-102") {
+      createTable(tableName: "notice_policy_notice") {
+          column(name: "npn_id", type: "VARCHAR(36)") {
+              constraints(nullable: "false")
+          }
+
+          column(name: "npn_version", type: "BIGINT") {
+              constraints(nullable: "false")
+          }
+
+          column(name: "npn_date_created", type: "timestamp")
+
+          column(name: "npn_last_updated", type: "timestamp")
+
+          column(name: "npn_template", type: "VARCHAR(36)") {
+              constraints(nullable: "false")
+          }
+
+          column(name: "npn_real_time", type: "BOOLEAN")
+
+          column(name: "npn_notice_policy_fk", type: "VARCHAR(36)") {
+              constraints(nullable: "false")
+          }
+      }
+  }
 }

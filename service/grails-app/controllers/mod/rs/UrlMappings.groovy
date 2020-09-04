@@ -16,6 +16,8 @@ class UrlMappings {
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
     }
 
+    '/rs/noticePolicies' (resources: 'noticePolicy')
+
     "/rs/shipments" (resources: 'shipment' )
     "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
