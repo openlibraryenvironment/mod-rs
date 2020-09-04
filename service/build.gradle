@@ -99,6 +99,8 @@ dependencies {
 
   // uncomment once we have the standalone jar version
   compile 'org.olf.rs:lib-ncip-client:0.8.0'
+  compile 'com.github.jknack:handlebars:4.2.0'
+
   compile 'org.jsoup:jsoup:1.10.2'
   compile 'org.json:json:20190722'
   compile 'org.extensiblecatalog.ncip.v2:service:2.0.0'

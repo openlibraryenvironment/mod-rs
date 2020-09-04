@@ -323,7 +323,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( ( response ) && ( ! response.has('problems') ) ) {
             result.status='OK'
             result.result=true
-            result.userid=response.opt('userid')
+            result.userid=response.opt('userId') ?: response.opt('userid')
             result.givenName=response.opt('firstName')
             result.surname=response.opt('lastName')
             if ( response.has('electronicAddresses') ) {
