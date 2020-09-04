@@ -1,0 +1,7 @@
+import groovy.transform.*
+import org.olf.rs.NoticePolicy
+
+@Field NoticePolicy noticePolicy
+json g.render(noticePolicy, [expand: ['dateCreated',
+                                      'lastUpdated',
+                                      'notices']])
