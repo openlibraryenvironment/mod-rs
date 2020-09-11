@@ -31,6 +31,64 @@ public class ReshareActionService {
   HostLMSService hostLMSService
   StatisticsService statisticsService
 
+
+  public Map lookupPatron(PatronRequest pr, Map actionParams) {
+    Map result = [callSuccess: false, patronValid: false ]
+    // If the patron request somehow has no patronIdentifier then this is a waste of time
+    if (pr.patronIdentifier) {
+      log.debug("lookupPatron(${pr})");
+      def patron_details = hostLMSService.getHostLMSActions().lookupPatron(pr.patronIdentifier)
+      log.debug("Result of patron lookup ${patron_details}");
+      if ( patron_details.result ) {
+        result.callSuccess = true
+        if (isValidPatron(patron_details)) {
+          result.patronValid = true
+          // Let the user know if the success came from a real call or a spoofed one
+          String message = "Patron validated. ${patron_details.reason=='spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'}"
+          auditEntry(pr, pr.state, pr.state, message, null);
+
+          if ( patron_details.userid == null )
+            patron_details.userid = req.patronIdentifier
+
+          if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+            pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+            if ( pr.patronSurname == null )
+              pr.patronSurname = patron_details.surname;
+            if ( pr.patronGivenName == null )
+              pr.patronGivenName = patron_details.givenName;
+            pr.patronEmail = patron_details.email;
+          }
+        }
+      }
+    }  
+    pr.save(flush:true, failOnError:true);
+    return result
+  }
+
+  public boolean isValidPatron(Map patron_record) {
+    boolean result = false;
+    log.debug("Check isValidPatron: ${patron_record}");
+    if ( patron_record != null ) {
+      if ( patron_record.status == 'OK' ) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+    private Patron lookupOrCreatePatronProxy(Map patron_details) {
+    Patron result = null;
+    if ( ( patron_details != null ) && 
+         ( patron_details.userid != null ) &&
+         ( patron_details.userid.trim().length() > 0 ) ) {
+      result = Patron.findByHostSystemIdentifier(patron_details.userid) ?: new Patron(
+                                                           hostSystemIdentifier:patron_details.userid, 
+                                                           givenname: patron_details.givenName, 
+                                                           surname: patron_details.surname).save()
+    }
+    return result;
+  }
+
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
