@@ -152,6 +152,9 @@ public class ReshareApplicationEventHandlerService {
 
         if ( patron_details.problems == null ) {
           if ( isValidPatron(patron_details) ) {
+            // Let the user know if the success came from a real call or a spoofed one
+            String message = "Patron validated. ${patron_details.reason=='spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'}"
+            auditEntry(req, req.state, req.state, message, null);
   
             if ( patron_details.userid == null )
               patron_details.userid = req.patronIdentifier
