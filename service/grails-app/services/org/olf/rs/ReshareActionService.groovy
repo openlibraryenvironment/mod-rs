@@ -60,8 +60,12 @@ public class ReshareActionService {
           }
         }
       }
+      if (patron_details.problems) {
+        result.problems = patron_details.problems.toString()
+      }
+      result.status = patron_details?.status
+      pr.save(flush:true, failOnError:true);
     }  
-    pr.save(flush:true, failOnError:true);
     return result
   }
 

@@ -34,7 +34,8 @@ public class ManualHostLMSService implements HostLMSActions {
   
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK', reason: 'spoofed', result: true ];
+    //TODO DO NOT MERGE THIS CHANGE IN
+    Map result = [ status: 'BLOCKED', reason: 'spoofed', result: true ];
     return result
   }
 

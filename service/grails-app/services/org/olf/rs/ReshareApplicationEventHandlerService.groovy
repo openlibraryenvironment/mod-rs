@@ -147,7 +147,7 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
 
-        def lookup_patron = reshareActionService.lookupPatron(pr, null)
+        def lookup_patron = reshareActionService.lookupPatron(req, null)
 
         if ( lookup_patron.callSuccess ) {
           boolean patronValid = lookup_patron.patronValid
@@ -191,7 +191,7 @@ public class ReshareApplicationEventHandlerService {
             else {
               // If we're here then the requesting institution symbol was fine but the patron is invalid
               def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
-              String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${patron_details?.status != null ? " (Patron state=${patron_details.status})" : ""}".toString()
+              String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
               auditEntry(req, req.state, invalid_patron_state, message, null);
               req.state = invalid_patron_state;
               req.needsAttention=true;
@@ -206,7 +206,7 @@ public class ReshareApplicationEventHandlerService {
         else {
           // unexpected error in Host LMS call
           req.needsAttention=true;
-          String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+patron_details?.problems?.toString()
+          String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
           auditEntry(req, req.state, req.state, message, null);
         }
 
