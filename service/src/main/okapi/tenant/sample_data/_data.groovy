@@ -75,7 +75,7 @@ AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSet
 RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
 RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP2');
   
-AppSetting host_lms_integration = AppSetting.findByKey('check_out_item') ?: new AppSetting(
+AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckOutMethod',
@@ -84,7 +84,7 @@ AppSetting host_lms_integration = AppSetting.findByKey('check_out_item') ?: new 
 RefdataValue.lookupOrCreate('CheckInMethod', 'None');
 RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP2');
   
-AppSetting host_lms_integration = AppSetting.findByKey('check_in_item') ?: new AppSetting(
+AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckInMethod',
@@ -94,7 +94,7 @@ AppSetting host_lms_integration = AppSetting.findByKey('check_in_item') ?: new A
 RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
 RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP2');
   
-AppSetting host_lms_integration = AppSetting.findByKey('accept_item') ?: new AppSetting(
+AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'AcceptItemMethod',
