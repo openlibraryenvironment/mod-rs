@@ -272,12 +272,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 // The Host LMS check call has failed, stay in current state
                 req.needsAttention=true;
                 String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
-                auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
               } else {
                 // The call succeeded but patron is invalid
-                def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
+                def invalid_patron_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
                 String message = "Failed to validate patron with id: \"${patron_request.patronIdentifier}\".${borrower_check?.status != null ? " (Patron state=${borrower_check.status})" : ""}".toString()
-                auditEntry(patron_request, patron_request.state, invalid_patron_state, message, null);
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, invalid_patron_state, message, null);
                 patron_request.state = invalid_patron_state;
                 patron_request.needsAttention=true;
               }
@@ -294,7 +294,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 // The Host LMS check call has failed, stay in current state
                 req.needsAttention=true;
                 String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
-                auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
               }
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
