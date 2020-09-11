@@ -50,7 +50,8 @@ public class ReshareActionService {
           if ( checkout_result?.status ) {
             // the host lms service gave us a specific status to change to
             Status s = Status.lookup('Responder', checkout_result?.status);
-            auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString()
+            auditEntry(pr, pr.state, s, message, null);
             pr.state = s;
             pr.save(flush:true, failOnError:true);
           }

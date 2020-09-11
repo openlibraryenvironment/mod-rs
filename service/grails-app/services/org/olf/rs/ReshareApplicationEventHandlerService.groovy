@@ -150,7 +150,7 @@ public class ReshareApplicationEventHandlerService {
         def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
         log.debug("Result of patron lookup ${patron_details}");
 
-        if ( patron_details.problems == null ) {
+        if ( patron_details.result ) {
           if ( isValidPatron(patron_details) ) {
             // Let the user know if the success came from a real call or a spoofed one
             String message = "Patron validated. ${patron_details.reason=='spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'}"
@@ -219,9 +219,9 @@ public class ReshareApplicationEventHandlerService {
         }
         else {
           // unexpected error in NCIP call
-          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
           req.needsAttention=true;
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'NCIP Problem in lookupPatron: '+patron_details?.problems?.toString(), null);
+          String message = 'Host LMS integration: NCIP lookupPatron call failed. Review configuration and try again or disable NCIP integration in settings. '+patron_details?.problems?.toString()
+          auditEntry(req, req.state, req.state, message, null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
