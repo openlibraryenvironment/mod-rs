@@ -34,7 +34,7 @@ public class ManualHostLMSService implements HostLMSActions {
   
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK', reason: 'spoofed', result: true ];
+    Map result = [ result: true, status: 'OK', reason: 'spoofed', result: true ];
     return result
   }
 
