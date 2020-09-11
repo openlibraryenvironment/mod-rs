@@ -42,7 +42,7 @@ public class ReshareActionService {
     log.debug("Result of patron lookup ${patron_details}");
     if ( patron_details.result ) {
       result.callSuccess = true
-      if (isValidPatron(patron_details) || actionParams.override) {
+      if (isValidPatron(patron_details) || actionParams?.override) {
         result.patronValid = true
         // Let the user know if the success came from a real call or a spoofed one
         String reason = patron_details.reason == 'spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'
