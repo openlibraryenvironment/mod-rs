@@ -38,57 +38,46 @@ public class ReshareActionService {
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
         pr.selectedItemBarcode = actionParams?.itemBarcode;
-        AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
-        if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
 
-          HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-          if ( host_lms ) {
-            // Call the host lms to check the item out of the host system and in to reshare
-            def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                        actionParams?.itemBarcode, 
-                                                        pr.patronIdentifier,
-                                                        pr.resolvedRequester)
-            // If the host_lms adapter gave us a specific status to transition to, use it
-            if ( checkout_result?.status ) {
-              // the host lms service gave us a specific status to change to
-              Status s = Status.lookup('Responder', checkout_result?.status);
-              auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
-              pr.state = s;
-              pr.save(flush:true, failOnError:true);
-            }
-            else {
-              // Otherwise, if the checkout succeeded or failed, set appropriately
-              Status s = null;
-              if ( checkout_result.result == true ) {
-                statisticsService.incrementCounter('/activeLoans');
-                pr.activeLoan=true
-                pr.needsAttention=false;
-                pr.dueDateFromLMS=checkout_result?.dueDate;
-                s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-                auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
-                pr.state = s;
-                result = true;
-              }
-              else {
-                pr.needsAttention=true;
-                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
-              }
-              pr.save(flush:true, failOnError:true);
-            }
-          }
-          else {
-            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
-            pr.needsAttention=true;
+        HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+        if ( host_lms ) {
+          // Call the host lms to check the item out of the host system and in to reshare
+          def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                      actionParams?.itemBarcode, 
+                                                      pr.patronIdentifier,
+                                                      pr.resolvedRequester)
+          // If the host_lms adapter gave us a specific status to transition to, use it
+          if ( checkout_result?.status ) {
+            // the host lms service gave us a specific status to change to
+            Status s = Status.lookup('Responder', checkout_result?.status);
+            auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+            pr.state = s;
             pr.save(flush:true, failOnError:true);
           }
-        } else {
-          statisticsService.incrementCounter('/activeLoans');
-          pr.activeLoan=true
-          pr.needsAttention=false;
-          Status s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-          auditEntry(pr, pr.state, s, 'Fill request succeeded (NCIP integration disabled).', null);
-          pr.state = s;
-          result = true;
+          else {
+            // Otherwise, if the checkout succeeded or failed, set appropriately
+            Status s = null;
+            if ( checkout_result.result == true ) {
+              statisticsService.incrementCounter('/activeLoans');
+              pr.activeLoan=true
+              pr.needsAttention=false;
+              pr.dueDateFromLMS=checkout_result?.dueDate;
+              s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
+              // Let the user know if the success came from a real call or a spoofed one
+              auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
+              pr.state = s;
+              result = true;
+            }
+            else {
+              pr.needsAttention=true;
+              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+            }
+            pr.save(flush:true, failOnError:true);
+          }
+        }
+        else {
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+          pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
         }
       }
@@ -396,78 +385,60 @@ public class ReshareActionService {
   public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
     boolean result = false;
 
-    AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
-    if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
-      // Check the item in to the local LMS
-      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-      if ( host_lms ) {
-        try {
-          // Call the host lms to check the item out of the host system and in to reshare
-          Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
-                                                  pr.hrid,
-                                                  pr.patronIdentifier, // user_idA
-                                                  pr.author, // author,
-                                                  pr.title, // title,
-                                                  pr.isbn, // isbn,
-                                                  pr.localCallNumber, // call_number,
-                                                  pr.pickupLocation, // pickup_location,
-                                                  null) // requested_action
+    // Check the item in to the local LMS
+    HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+    if ( host_lms ) {
+      try {
+        // Call the host lms to check the item out of the host system and in to reshare
+        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
+                                                pr.hrid,
+                                                pr.patronIdentifier, // user_idA
+                                                pr.author, // author,
+                                                pr.title, // title,
+                                                pr.isbn, // isbn,
+                                                pr.localCallNumber, // call_number,
+                                                pr.pickupLocation, // pickup_location,
+                                                null) // requested_action
 
-          if ( accept_result?.result == true ) {
-            // Mark item as awaiting circ
-            def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-            String message = 'Receive succeeded. Host LMS integration: NCIP AcceptItem call succeeded.'
+        if ( accept_result?.result == true ) {
+          // Mark item as awaiting circ
+          def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+          // Let the user know if the success came from a real call or a spoofed one
+          String message = "Receive succeeded. ${accept_result.reason=='spoofed' ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}"
 
-            auditEntry(pr,
-              pr.state,
-              new_state,
-              message, 
-              null);
-            pr.state=new_state;
-            pr.needsAttention=false;
-            pr.save(flush:true, failOnError:true);
-            log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-            result = true;
-          }
-          else {
-            String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
-            // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
-            auditEntry(pr,
-              pr.state,
-              pr.state,
-              message+accept_result?.problems, 
-              null);
-            pr.needsAttention=true;
-            pr.save(flush:true, failOnError:true);
-          }
+          auditEntry(pr,
+            pr.state,
+            new_state,
+            message, 
+            null);
+          pr.state=new_state;
+          pr.needsAttention=false;
+          pr.save(flush:true, failOnError:true);
+          log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+          result = true;
         }
-        catch ( Exception e ) {
-          log.error("NCIP Problem",e);
-          pr.needsAttention=true;
-          auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
-        }
-      } else {
-          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        else {
+          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
+          // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
+          auditEntry(pr,
+            pr.state,
+            pr.state,
+            message+accept_result?.problems, 
+            null);
           pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
+        }
+      }
+      catch ( Exception e ) {
+        log.error("NCIP Problem",e);
+        pr.needsAttention=true;
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
       }
     } else {
-      // Mark item as awaiting circ
-      def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-      String message = 'Receive succeeded (NCIP integration disabled).'
-
-      auditEntry(pr,
-        pr.state,
-        new_state,
-        message, 
-        null);
-      pr.state=new_state;
-      pr.needsAttention=false;
-      pr.save(flush:true, failOnError:true);
-      log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-      result = true;
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        pr.needsAttention=true;
+        pr.save(flush:true, failOnError:true);
     }
-   
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
 
     return result;
@@ -480,48 +451,39 @@ public class ReshareActionService {
   public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
     boolean result = false;
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
-    AppSetting ncip_disabled = AppSetting.findByKey('ncip_disabled');
-    if (ncip_disabled?.value == "enabled" || (ncip_disabled?.value == null && ncip_disabled?.defValue == "enabled")) {
-
-      try {
-        // Call the host lms to check the item out of the host system and in to reshare
-        // def accept_result = host_lms.checkInItem(patron_request.hrid)
-        HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-        if ( host_lms ) {
-          def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
-          if(check_in_result?.result == true) {
-            statisticsService.decrementCounter('/activeLoans');
-            patron_request.needsAttention=false;
-            patron_request.activeLoan=false;
-            auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded. Host LMS integration: NCIP CheckinItem Call succeeded.', null);
-            result = true;
-          } else {
-            patron_request.needsAttention=true;
-            auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
-          }
+    try {
+      // Call the host lms to check the item out of the host system and in to reshare
+      // def accept_result = host_lms.checkInItem(patron_request.hrid)
+      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
+      if ( host_lms ) {
+        def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
+        if(check_in_result?.result == true) {
+          statisticsService.decrementCounter('/activeLoans');
+          patron_request.needsAttention=false;
+          patron_request.activeLoan=false;
+          // Let the user know if the success came from a real call or a spoofed one
+          String message = "Complete request succeeded. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+          auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+          result = true;
         } else {
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
           patron_request.needsAttention=true;
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
         }
-      }
-      catch ( Exception e ) {
-        log.error("NCIP Problem",e);
+      } else {
+        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
         patron_request.needsAttention=true;
-        auditEntry(patron_request,
-          patron_request.state,
-          patron_request.state,
-          'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
-          null);
-        result = false;
       }
-    } else {
-      statisticsService.decrementCounter('/activeLoans');
-      patron_request.needsAttention=false;
-      patron_request.activeLoan=false;
-      auditEntry(patron_request, patron_request.state, patron_request.state, 'Complete request succeeded (NCIP integration disabled).', null);
-      result = true;
     }
-
+    catch ( Exception e ) {
+      log.error("NCIP Problem",e);
+      patron_request.needsAttention=true;
+      auditEntry(patron_request,
+        patron_request.state,
+        patron_request.state,
+        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
+        null);
+      result = false;
+    }
     return result;
   }
 

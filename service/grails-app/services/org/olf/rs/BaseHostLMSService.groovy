@@ -251,12 +251,13 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK' ];
+    Map result = [ status: 'OK', reason: 'spoofed' ];
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
         case 'ncip2':
           result = ncip2LookupPatron(patron_id)
+          result.reason = 'ncip2'
           break;
         default:
           log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
@@ -455,13 +456,31 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                           String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-    return ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+    
+    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");                        
+    Map result = [
+      result: true,
+      reason: 'spoofed'
+    ];
+
+    AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
+    if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
+      switch ( check_out_setting.value ) {
+        case 'ncip2':
+          result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+          break;
+        default:
+          log.debug("Check out - no action, config ${check_out_setting?.value}");
+          // Check in is not configured, so return true
+          break;
+      }
+    }
+    return result;
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
-
-    Map result = [:];
+    // set reason to ncip2
+    Map result = [reason: 'ncip2'];
 
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
@@ -511,72 +530,105 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         String call_number,
                         String pickup_location,
                         String requested_action) {
-    Map result = [:]
+
     log.debug("acceptItem(${request_id},${user_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+    Map result = [
+      result: true,
+      reason: 'spoofed'
+    ]
 
-    String ncip_server_address = ncip_server_address_setting?.value
-    String ncip_from_agency = ncip_from_agency_setting?.value
-    String ncip_app_profile = ncip_app_profile_setting?.value
+    AppSetting accept_item_setting = AppSetting.findByKey('accept_item')
+    if ( ( accept_item_setting != null ) && ( accept_item_setting.value != null ) )  {
 
-    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
-    AcceptItem acceptItem = new AcceptItem()
-                  .setItemId(item_id)
-                  .setRequestId(request_id)
-                  .setUserId(user_id)
-                  .setAuthor(author)
-                  .setTitle(title)
-                  .setIsbn(isbn)
-                  .setCallNumber(call_number)
-                  .setPickupLocation(pickup_location)
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .setRequestedActionTypeString(requested_action)
-                  .setApplicationProfileType(ncip_app_profile);
-    JSONObject response = ncip_client.send(acceptItem);
-    if ( response.has('problems') ) {
-      result.result = false;
-      result.problems = response.get('problems')
+
+      switch ( accept_item_setting.value ) {
+        case 'ncip2':
+          // set reason block to ncip2 from 'spoofed'
+          result.reason = 'ncip2'
+          
+          AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+          AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+          AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+          String ncip_server_address = ncip_server_address_setting?.value
+          String ncip_from_agency = ncip_from_agency_setting?.value
+          String ncip_app_profile = ncip_app_profile_setting?.value
+
+          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+          AcceptItem acceptItem = new AcceptItem()
+                        .setItemId(item_id)
+                        .setRequestId(request_id)
+                        .setUserId(user_id)
+                        .setAuthor(author)
+                        .setTitle(title)
+                        .setIsbn(isbn)
+                        .setCallNumber(call_number)
+                        .setPickupLocation(pickup_location)
+                        .setToAgency(ncip_from_agency)
+                        .setFromAgency(ncip_from_agency)
+                        .setRequestedActionTypeString(requested_action)
+                        .setApplicationProfileType(ncip_app_profile);
+          JSONObject response = ncip_client.send(acceptItem);
+          if ( response.has('problems') ) {
+            result.result = false;
+            result.problems = response.get('problems')
+          }
+          break;
+        default:
+          log.debug("Accept item - no action, config ${accept_item_setting?.value}");
+          // Check in is not configured, so return true
+          break;
+      }
     }
-    else {
-      result.result = true;
-    }
-
     return result;
   }
 
 
   public Map checkInItem(String item_id) {
-    Map result = [:]
-    log.debug("checkInItem(${item_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+    Map result = [
+      result: true,
+      reason: 'spoofed'
+    ]
 
-    String ncip_server_address = ncip_server_address_setting?.value
-    String ncip_from_agency = ncip_from_agency_setting?.value
-    String ncip_app_profile = ncip_app_profile_setting?.value
+    AppSetting check_in_setting = AppSetting.findByKey('check_in_item')
+    if ( ( check_in_setting != null ) && ( check_in_setting.value != null ) )  {
 
-    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
-    CheckinItem checkinItem = new CheckinItem()
-                  .setItemId(item_id)
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .includeBibliographicDescription()
-                  .setApplicationProfileType(ncip_app_profile);
-    JSONObject response = ncip_client.send(checkinItem);
-    log.debug(response?.toString());
-    if ( response.has('problems') ) {
-      result.result = false;
-      result.problems = response.get('problems')
-    }
-    else {
-      result.result = true;
+      switch ( check_in_setting.value ) {
+        case 'ncip2':
+          // Set the reason from 'spoofed'
+          result.reason = 'ncip2'
+
+          log.debug("checkInItem(${item_id})");
+          AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+          AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+          AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+          String ncip_server_address = ncip_server_address_setting?.value
+          String ncip_from_agency = ncip_from_agency_setting?.value
+          String ncip_app_profile = ncip_app_profile_setting?.value
+
+          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+          CheckinItem checkinItem = new CheckinItem()
+                        .setItemId(item_id)
+                        .setToAgency(ncip_from_agency)
+                        .setFromAgency(ncip_from_agency)
+                        .includeBibliographicDescription()
+                        .setApplicationProfileType(ncip_app_profile);
+          JSONObject response = ncip_client.send(checkinItem);
+          log.debug(response?.toString());
+          if ( response.has('problems') ) {
+            // If there is a problem block, something went wrong, so change response to false.
+            result.result = false;
+            result.problems = response.get('problems')
+          }
+          break;
+        default:
+          log.debug("Check In - no action, config ${check_in_setting?.value}");
+          // Check in is not configured, so return true
+          break;
+      }
     }
     return result;
   }
-
-
+  
 }
