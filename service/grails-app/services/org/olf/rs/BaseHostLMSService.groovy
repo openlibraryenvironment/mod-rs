@@ -473,6 +473,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("Check out - no action, config ${check_out_setting?.value}");
           // Check in is not configured, so return true
           break;
+      }
     }
     return result;
   }
