@@ -176,8 +176,9 @@ public class ReshareApplicationEventHandlerService {
             if ( s != null && patronValid) {
               log.debug("Got request ${req}");
               log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-              req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-              auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
+              def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
+              auditEntry(req, req.state, validated_state, 'Request Validated', null);
+              req.state = validated_state;
             } else if (s == null) {
               // An unknown requesting institution symbol is a bigger deal than an invalid patron
               req.needsAttention=true;
