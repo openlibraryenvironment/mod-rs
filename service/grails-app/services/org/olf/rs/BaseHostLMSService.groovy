@@ -251,6 +251,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
+    // TODO DO NOT MERGE THIS
     Map result = [ result: true, status: 'BLOCKED', reason: 'spoofed' ];
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {

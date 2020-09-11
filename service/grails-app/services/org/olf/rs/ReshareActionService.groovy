@@ -48,7 +48,7 @@ public class ReshareActionService {
         auditEntry(pr, pr.state, pr.state, message, null);
 
         if ( patron_details.userid == null )
-          patron_details.userid = req.patronIdentifier
+          patron_details.userid = pr.patronIdentifier
 
         if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
           pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
@@ -64,7 +64,6 @@ public class ReshareActionService {
       result.problems = patron_details.problems.toString()
     }
     result.status = patron_details?.status
-    pr.save(flush:true, failOnError:true);
     return result
   }
 
