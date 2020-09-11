@@ -257,7 +257,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       switch ( borrower_check_setting.value ) {
         case 'ncip2':
           result = ncip2LookupPatron(patron_id)
-          result['reason'] = 'ncip2'
+          result.reason = 'ncip2'
           break;
         default:
           log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
@@ -468,6 +468,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       switch ( check_out_setting.value ) {
         case 'ncip2':
           result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+          result.reason = 'ncip2'
           break;
         default:
           log.debug("Check out - no action, config ${check_out_setting?.value}");
