@@ -50,7 +50,7 @@ public class ReshareActionService {
           if ( checkout_result?.status ) {
             // the host lms service gave us a specific status to change to
             Status s = Status.lookup('Responder', checkout_result?.status);
-            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString()
+            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
             auditEntry(pr, pr.state, s, message, null);
             pr.state = s;
             pr.save(flush:true, failOnError:true);
@@ -71,13 +71,13 @@ public class ReshareActionService {
             }
             else {
               pr.needsAttention=true;
-              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
             }
             pr.save(flush:true, failOnError:true);
           }
         }
         else {
-          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
           pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
         }
@@ -419,7 +419,7 @@ public class ReshareActionService {
           result = true;
         }
         else {
-          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
+          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '
           // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
           auditEntry(pr,
             pr.state,
@@ -433,10 +433,10 @@ public class ReshareActionService {
       catch ( Exception e ) {
         log.error("NCIP Problem",e);
         pr.needsAttention=true;
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message, null);
       }
     } else {
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
     }
@@ -468,10 +468,10 @@ public class ReshareActionService {
           result = true;
         } else {
           patron_request.needsAttention=true;
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+check_in_result.problems?.toString(), null);
         }
       } else {
-        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
         patron_request.needsAttention=true;
       }
     }
@@ -481,7 +481,7 @@ public class ReshareActionService {
       auditEntry(patron_request,
         patron_request.state,
         patron_request.state,
-        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
+        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message,
         null);
       result = false;
     }

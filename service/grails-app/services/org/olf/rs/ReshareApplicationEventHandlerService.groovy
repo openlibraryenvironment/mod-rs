@@ -220,7 +220,7 @@ public class ReshareApplicationEventHandlerService {
         else {
           // unexpected error in NCIP call
           req.needsAttention=true;
-          String message = 'Host LMS integration: NCIP lookupPatron call failed. Review configuration and try again or disable NCIP integration in settings. '+patron_details?.problems?.toString()
+          String message = 'Host LMS integration: NCIP lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+patron_details?.problems?.toString()
           auditEntry(req, req.state, req.state, message, null);
         }
 
