@@ -150,7 +150,7 @@ public class ReshareApplicationEventHandlerService {
         log.debug("DEBUGGING: LOOKING UP PATRON")
         def lookup_patron = reshareActionService.lookupPatron(req, null)
         log.debug("DEBUGGING: PATRON LOOKUP: ${lookup_patron}")
-        
+
         if ( lookup_patron.callSuccess ) {
           boolean patronValid = lookup_patron.patronValid
           // If we were supplied a pickup location code, attempt to resolve it here
@@ -180,7 +180,7 @@ public class ReshareApplicationEventHandlerService {
               log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
               req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
               auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
-            } else if (s != null) {
+            } else if (s == null) {
               // An unknown requesting institution symbol is a bigger deal than an invalid patron
               req.needsAttention=true;
               log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
