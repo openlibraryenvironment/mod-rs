@@ -251,7 +251,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK', reason: 'spoofed' ];
+    Map result = [ result: true, status: 'OK', reason: 'spoofed' ];
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
@@ -281,6 +281,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    *   givenName
    *   surname
    *   email
+   *   result: true|false
    * }
    */
   private Map ncip2LookupPatron(String patron_id) {
