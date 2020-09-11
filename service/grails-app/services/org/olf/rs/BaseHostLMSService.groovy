@@ -465,7 +465,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
     if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
-      switch ( check_in_setting.value ) {
+      switch ( check_out_setting.value ) {
         case 'ncip2':
           result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
           break;
@@ -530,39 +530,56 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         String call_number,
                         String pickup_location,
                         String requested_action) {
-    Map result = [:]
+
     log.debug("acceptItem(${request_id},${user_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+    Map result = [
+      result: true,
+      reason: 'spoofed'
+    ]
 
-    String ncip_server_address = ncip_server_address_setting?.value
-    String ncip_from_agency = ncip_from_agency_setting?.value
-    String ncip_app_profile = ncip_app_profile_setting?.value
+    AppSetting accept_item_setting = AppSetting.findByKey('accept_item')
+    if ( ( accept_item_setting != null ) && ( accept_item_setting.value != null ) )  {
 
-    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
-    AcceptItem acceptItem = new AcceptItem()
-                  .setItemId(item_id)
-                  .setRequestId(request_id)
-                  .setUserId(user_id)
-                  .setAuthor(author)
-                  .setTitle(title)
-                  .setIsbn(isbn)
-                  .setCallNumber(call_number)
-                  .setPickupLocation(pickup_location)
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .setRequestedActionTypeString(requested_action)
-                  .setApplicationProfileType(ncip_app_profile);
-    JSONObject response = ncip_client.send(acceptItem);
-    if ( response.has('problems') ) {
-      result.result = false;
-      result.problems = response.get('problems')
+
+      switch ( accept_item_setting.value ) {
+        case 'ncip2':
+          // set reason block to ncip2 from 'spoofed'
+          result.reason = 'ncip2'
+          
+          AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+          AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+          AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+
+          String ncip_server_address = ncip_server_address_setting?.value
+          String ncip_from_agency = ncip_from_agency_setting?.value
+          String ncip_app_profile = ncip_app_profile_setting?.value
+
+          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+          AcceptItem acceptItem = new AcceptItem()
+                        .setItemId(item_id)
+                        .setRequestId(request_id)
+                        .setUserId(user_id)
+                        .setAuthor(author)
+                        .setTitle(title)
+                        .setIsbn(isbn)
+                        .setCallNumber(call_number)
+                        .setPickupLocation(pickup_location)
+                        .setToAgency(ncip_from_agency)
+                        .setFromAgency(ncip_from_agency)
+                        .setRequestedActionTypeString(requested_action)
+                        .setApplicationProfileType(ncip_app_profile);
+          JSONObject response = ncip_client.send(acceptItem);
+          if ( response.has('problems') ) {
+            result.result = false;
+            result.problems = response.get('problems')
+          }
+          break;
+        default:
+          log.debug("Accept item - no action, config ${accept_item_setting?.value}");
+          // Check in is not configured, so return true
+          break;
+      }
     }
-    else {
-      result.result = true;
-    }
-
     return result;
   }
 
