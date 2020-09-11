@@ -32,6 +32,9 @@ public class ReshareActionService {
   StatisticsService statisticsService
 
 
+  /* WARNING: this method is NOT responsible for saving or for managing state changes.
+   * It simply performs the lookupAction and appends relevant info to the patron request
+   */
   public Map lookupPatron(PatronRequest pr, Map actionParams) {
     Map result = [callSuccess: false, patronValid: false ]
     log.debug("lookupPatron(${pr})");
