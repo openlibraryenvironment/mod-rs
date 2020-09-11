@@ -147,9 +147,7 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
 
-        log.debug("DEBUGGING: LOOKING UP PATRON")
         def lookup_patron = reshareActionService.lookupPatron(req, null)
-        log.debug("DEBUGGING: PATRON LOOKUP: ${lookup_patron}")
 
         if ( lookup_patron.callSuccess ) {
           boolean patronValid = lookup_patron.patronValid
