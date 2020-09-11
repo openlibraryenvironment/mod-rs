@@ -266,8 +266,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'borrowerCheck':
               Map borrower_check = reshareActionService.lookupPatron(patron_request, request.JSON.actionParams)
-              if (borrower_check?.callSuccess && borrower_check?.patronValid) {
-                result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_VALIDATED');
+              result.status = borrower_check?.callSuccess && borrower_check?.patronValid
+              if (result.status) {
+                reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_VALIDATED');
               } else if (!borrower_check?.callSuccess) {
                 // The Host LMS check call has failed, stay in current state
                 req.needsAttention=true;
@@ -288,8 +289,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
               Map borrower_check = reshareActionService.lookupPatron(patron_request, actionParams)
               // borrower_check.patronValid should ALWAYS be true in this action
-              if (borrower_check?.callSuccess) {
-                result.status = reshareActionService.simpleTransition(patron_request, actionParams, 'PatronRequest', 'REQ_VALIDATED');
+              result.status = borrower_check?.callSuccess
+              if (result.status) {
+                reshareActionService.simpleTransition(patron_request, actionParams, 'PatronRequest', 'REQ_VALIDATED');
               } else {
                 // The Host LMS check call has failed, stay in current state
                 req.needsAttention=true;
