@@ -468,7 +468,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       switch ( check_out_setting.value ) {
         case 'ncip2':
           result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
-          result.reason = 'ncip2'
           break;
         default:
           log.debug("Check out - no action, config ${check_out_setting?.value}");
@@ -480,7 +479,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
-
+    // set reason to ncip2
     Map result = [reason: 'ncip2'];
 
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
