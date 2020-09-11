@@ -323,7 +323,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
           //  "userId":"M00069192"}
           if ( ( response ) && ( ! response.has('problems') ) ) {
-            result.status='OK'
+            JSONArray priv = response.getJSONArray('privileges')
+            // Return a status of BLOCKED if the user is blocked, else OK for now
+            result.status=(priv.find { it.key=='STATUS' })?.value == 'BLOCKED' ? 'BLOCKED' : 'OK'
             result.result=true
             result.userid=response.opt('userId') ?: response.opt('userid')
             result.givenName=response.opt('firstName')
