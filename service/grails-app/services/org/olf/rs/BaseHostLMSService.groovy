@@ -456,13 +456,30 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                           String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-    return ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+    
+    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");                        
+    Map result = [
+      result: true,
+      reason: 'spoofed'
+    ];
+
+    AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
+    if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
+      switch ( check_in_setting.value ) {
+        case 'ncip2':
+          result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+          break;
+        default:
+          log.debug("Check out - no action, config ${check_out_setting?.value}");
+          // Check in is not configured, so return true
+          break;
+    }
+    return result;
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
 
-    Map result = [:];
+    Map result = [reason: 'ncip2'];
 
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
