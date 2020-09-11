@@ -251,7 +251,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK', reason: 'spoofed' ];
+    Map result = [ result: true, status: 'OK', reason: 'spoofed' ];
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
@@ -281,6 +281,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    *   givenName
    *   surname
    *   email
+   *   result: true|false
    * }
    */
   private Map ncip2LookupPatron(String patron_id) {
@@ -322,7 +323,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
           //  "userId":"M00069192"}
           if ( ( response ) && ( ! response.has('problems') ) ) {
-            result.status='OK'
+            JSONArray priv = response.getJSONArray('privileges')
+            // Return a status of BLOCKED if the user is blocked, else OK for now
+            result.status=(priv.find { it.key=='STATUS' })?.value == 'BLOCKED' ? 'BLOCKED' : 'OK'
             result.result=true
             result.userid=response.opt('userId') ?: response.opt('userid')
             result.givenName=response.opt('firstName')

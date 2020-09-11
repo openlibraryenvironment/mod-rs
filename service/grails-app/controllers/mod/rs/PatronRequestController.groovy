@@ -264,6 +264,43 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               reshareActionService.sendRequesterShippedReturn(patron_request, request.JSON.actionParams)
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER');
               break;
+            case 'borrowerCheck':
+              Map borrower_check = reshareActionService.lookupPatron(patron_request, request.JSON.actionParams)
+              result.status = borrower_check?.callSuccess && borrower_check?.patronValid
+              if (result.status) {
+                reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_VALIDATED');
+              } else if (!borrower_check?.callSuccess) {
+                // The Host LMS check call has failed, stay in current state
+                req.needsAttention=true;
+                String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+              } else {
+                // The call succeeded but patron is invalid
+                def invalid_patron_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
+                String message = "Failed to validate patron with id: \"${patron_request.patronIdentifier}\".${borrower_check?.status != null ? " (Patron state=${borrower_check.status})" : ""}".toString()
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, invalid_patron_state, message, null);
+                patron_request.state = invalid_patron_state;
+                patron_request.needsAttention=true;
+              }
+              patron_request.save(flush: true, failOnError: true)
+              break;
+            case 'borrowerCheckOverride':
+              Map actionParams = request.JSON.actionParams
+              actionParams.override = true
+
+              Map borrower_check = reshareActionService.lookupPatron(patron_request, actionParams)
+              // borrower_check.patronValid should ALWAYS be true in this action
+              result.status = borrower_check?.callSuccess
+              if (result.status) {
+                reshareActionService.simpleTransition(patron_request, actionParams, 'PatronRequest', 'REQ_VALIDATED');
+              } else {
+                // The Host LMS check call has failed, stay in current state
+                req.needsAttention=true;
+                String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
+                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+              }
+              patron_request.save(flush: true, failOnError: true)
+              break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
               response.status = 422;

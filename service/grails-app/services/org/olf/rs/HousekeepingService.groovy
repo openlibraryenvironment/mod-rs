@@ -167,6 +167,11 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'borrowerCheck', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheck', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheckOverride', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
 

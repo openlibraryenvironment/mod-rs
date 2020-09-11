@@ -31,6 +31,69 @@ public class ReshareActionService {
   HostLMSService hostLMSService
   StatisticsService statisticsService
 
+
+  /* WARNING: this method is NOT responsible for saving or for managing state changes.
+   * It simply performs the lookupAction and appends relevant info to the patron request
+   */
+  public Map lookupPatron(PatronRequest pr, Map actionParams) {
+    Map result = [callSuccess: false, patronValid: false ]
+    log.debug("lookupPatron(${pr})");
+    def patron_details = hostLMSService.getHostLMSActions().lookupPatron(pr.patronIdentifier)
+    log.debug("Result of patron lookup ${patron_details}");
+    if ( patron_details.result ) {
+      result.callSuccess = true
+      if (isValidPatron(patron_details) || actionParams?.override) {
+        result.patronValid = true
+        // Let the user know if the success came from a real call or a spoofed one
+        String reason = patron_details.reason == 'spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'
+        String outcome = actionParams?.override ? 'validation overriden' : 'validated'
+        String message = "Patron ${outcome}. ${reason}"
+        auditEntry(pr, pr.state, pr.state, message, null);
+
+        if ( patron_details.userid == null )
+          patron_details.userid = pr.patronIdentifier
+
+        if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+          pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+          if ( pr.patronSurname == null )
+            pr.patronSurname = patron_details.surname;
+          if ( pr.patronGivenName == null )
+            pr.patronGivenName = patron_details.givenName;
+          pr.patronEmail = patron_details.email;
+        }
+      }
+    }
+    if (patron_details.problems) {
+      result.problems = patron_details.problems.toString()
+    }
+    result.status = patron_details?.status
+    return result
+  }
+
+  public boolean isValidPatron(Map patron_record) {
+    boolean result = false;
+    log.debug("Check isValidPatron: ${patron_record}");
+    if ( patron_record != null ) {
+      if ( patron_record.status == 'OK' ) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+    private Patron lookupOrCreatePatronProxy(Map patron_details) {
+    Patron result = null;
+    if ( ( patron_details != null ) && 
+         ( patron_details.userid != null ) &&
+         ( patron_details.userid.trim().length() > 0 ) ) {
+      result = Patron.findByHostSystemIdentifier(patron_details.userid) ?: new Patron(
+                                                           hostSystemIdentifier:patron_details.userid, 
+                                                           givenname: patron_details.givenName, 
+                                                           surname: patron_details.surname).save()
+    }
+    return result;
+  }
+
   public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
     log.debug("checkInToReshare(${pr})");
     boolean result = false;
@@ -50,7 +113,8 @@ public class ReshareActionService {
           if ( checkout_result?.status ) {
             // the host lms service gave us a specific status to change to
             Status s = Status.lookup('Responder', checkout_result?.status);
-            auditEntry(pr, pr.state, s, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
+            auditEntry(pr, pr.state, s, message, null);
             pr.state = s;
             pr.save(flush:true, failOnError:true);
           }
@@ -70,13 +134,13 @@ public class ReshareActionService {
             }
             else {
               pr.needsAttention=true;
-              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or disable NCIP integration in settings. '+checkout_result.problems?.toString(), null);
+              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
             }
             pr.save(flush:true, failOnError:true);
           }
         }
         else {
-          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+          auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
           pr.needsAttention=true;
           pr.save(flush:true, failOnError:true);
         }
@@ -418,7 +482,7 @@ public class ReshareActionService {
           result = true;
         }
         else {
-          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '
+          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '
           // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
           auditEntry(pr,
             pr.state,
@@ -432,10 +496,10 @@ public class ReshareActionService {
       catch ( Exception e ) {
         log.error("NCIP Problem",e);
         pr.needsAttention=true;
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message, null);
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message, null);
       }
     } else {
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
     }
@@ -467,10 +531,10 @@ public class ReshareActionService {
           result = true;
         } else {
           patron_request.needsAttention=true;
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+check_in_result.problems?.toString(), null);
+          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+check_in_result.problems?.toString(), null);
         }
       } else {
-        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or disable NCIP integration in settings.', null);
+        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
         patron_request.needsAttention=true;
       }
     }
@@ -480,7 +544,7 @@ public class ReshareActionService {
       auditEntry(patron_request,
         patron_request.state,
         patron_request.state,
-        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or disable NCIP integration in settings. '+e.message,
+        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message,
         null);
       result = false;
     }
