@@ -44,7 +44,8 @@ public class ManualHostLMSService implements HostLMSActions {
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ]
   }
 
@@ -58,13 +59,15 @@ public class ManualHostLMSService implements HostLMSActions {
                             String pickup_location,
                             String requested_action) {
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ];
   }
 
   public Map checkInItem(String item_id) {
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ];
   }
 
