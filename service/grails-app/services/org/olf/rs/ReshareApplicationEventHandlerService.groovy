@@ -210,9 +210,11 @@ public class ReshareApplicationEventHandlerService {
             }
           }
           else {
-            req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
+            def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
+            String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${patron_details?.status != null ? " (Patron state=${patron_details.status})" : ""}".toString()
+            auditEntry(req, req.state, invalid_patron_state, message, null);
+            req.state = invalid_patron_state;
             req.needsAttention=true;
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
           }
         }
         else {
