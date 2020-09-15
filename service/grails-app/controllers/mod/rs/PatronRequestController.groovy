@@ -271,7 +271,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_VALIDATED');
               } else if (!borrower_check?.callSuccess) {
                 // The Host LMS check call has failed, stay in current state
-                req.needsAttention=true;
+                patron_request.needsAttention=true;
                 String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
                 reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
               } else {
@@ -295,7 +295,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 reshareActionService.simpleTransition(patron_request, actionParams, 'PatronRequest', 'REQ_VALIDATED');
               } else {
                 // The Host LMS check call has failed, stay in current state
-                req.needsAttention=true;
+                patron_request.needsAttention=true;
                 String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
                 reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
               }
