@@ -34,7 +34,7 @@ public class ManualHostLMSService implements HostLMSActions {
   
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");
-    Map result = [ status: 'OK' ];
+    Map result = [status: 'OK', reason: 'spoofed', result: true ];
     return result
   }
 
@@ -42,9 +42,10 @@ public class ManualHostLMSService implements HostLMSActions {
                           String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${}requesterDirectorySymbol)");
+    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ]
   }
 
@@ -58,13 +59,15 @@ public class ManualHostLMSService implements HostLMSActions {
                             String pickup_location,
                             String requested_action) {
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ];
   }
 
   public Map checkInItem(String item_id) {
     return [
-      result:false
+      result:true,
+      reason: 'spoofed'
     ];
   }
 

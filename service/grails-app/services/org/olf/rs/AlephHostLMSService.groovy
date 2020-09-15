@@ -17,7 +17,9 @@ import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.circ.client.CheckoutItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.AcceptItem;
-import org.olf.rs.circ.client.NCIP1Client;
+
+import org.olf.rs.circ.client.NCIPClientWrapper
+
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.olf.rs.circ.client.CirculationClient;
@@ -31,7 +33,8 @@ import org.olf.rs.circ.client.CirculationClient;
 public class AlephHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
-    return new NCIP1Client(address);
+    // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
+    return new NCIPClientWrapper(address, "NCIP1_SOCKET").circulationClient;
   }
 
 }

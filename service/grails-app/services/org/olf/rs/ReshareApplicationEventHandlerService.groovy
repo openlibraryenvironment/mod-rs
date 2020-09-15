@@ -6,6 +6,7 @@ import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.PatronRequestNotification
+import org.olf.rs.PatronRequestLoanCondition
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
@@ -146,76 +147,68 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("Updated req.hrid to ${req.hrid}");
 
-        def patron_details = hostLMSService.getHostLMSActions().lookupPatron(req.patronIdentifier)
-        log.debug("Result of patron lookup ${patron_details}");
+        def lookup_patron = reshareActionService.lookupPatron(req, null)
 
-        if ( patron_details.problems == null ) {
-          if ( isValidPatron(patron_details) ) {
-  
-            if ( patron_details.userid == null )
-              patron_details.userid = req.patronIdentifier
-  
-            if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
-              req.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
-              if ( req.patronSurname == null )
-                req.patronSurname = patron_details.surname;
-              if ( req.patronGivenName == null )
-                req.patronGivenName = patron_details.givenName;
-  
-              req.patronEmail = patron_details.email;
+        if ( lookup_patron.callSuccess ) {
+          boolean patronValid = lookup_patron.patronValid
+          // If we were supplied a pickup location code, attempt to resolve it here
+          /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
+            * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
+            */
+          if( req.pickupLocationCode ) {
+            DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+            
+            if(pickup_loc != null) {
+              req.resolvedPickupLocation = pickup_loc;
+              req.pickupLocation = pickup_loc.name;
             }
+          }
 
-            // If we were supplied a pickup location code, attempt to resolve it here
-            /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
-             * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
-             */
-            if( req.pickupLocationCode ) {
-              DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
-              
-              if(pickup_loc != null) {
-                req.resolvedPickupLocation = pickup_loc;
-                req.pickupLocation = pickup_loc.name;
-              }
+          if ( req.requestingInstitutionSymbol != null ) {
+            // We need to validate the requsting location - and check that we can act as requester for that symbol
+            Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
+            if (s != null) {
+              // We do this separately so that an invalid patron does not stop information being appended to the request
+              req.resolvedRequester = s
             }
-
-  
-            if ( req.requestingInstitutionSymbol != null ) {
-              // We need to validate the requsting location - and check that we can act as requester for that symbol
-              Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
-          
-              if ( s != null ) {
-                req.resolvedRequester = s
-                log.debug("Got request ${req}");
-                log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-                req.state = lookupStatus('PatronRequest', 'REQ_VALIDATED');
-                auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_VALIDATED'), 'Request Validated', null);
-              }
-              else {
-                log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
-                req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-                auditEntry(req, 
-                           lookupStatus('PatronRequest', 'REQ_IDLE'), 
-                           lookupStatus('PatronRequest', 'REQ_ERROR'), 
-                           'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
-              }
+            
+            // If s != null and patronValid == true then the request has passed validation
+            if ( s != null && patronValid) {
+              log.debug("Got request ${req}");
+              log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
+              def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
+              auditEntry(req, req.state, validated_state, 'Request Validated', null);
+              req.state = validated_state;
+            } else if (s == null) {
+              // An unknown requesting institution symbol is a bigger deal than an invalid patron
+              req.needsAttention=true;
+              log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
+              req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+              auditEntry(req, 
+                          lookupStatus('PatronRequest', 'REQ_IDLE'), 
+                          lookupStatus('PatronRequest', 'REQ_ERROR'), 
+                          'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
             }
             else {
-              req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+              // If we're here then the requesting institution symbol was fine but the patron is invalid
+              def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
+              String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
+              auditEntry(req, req.state, invalid_patron_state, message, null);
+              req.state = invalid_patron_state;
               req.needsAttention=true;
-              auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
             }
           }
           else {
-            req.state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON');
+            req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
             req.needsAttention=true;
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_INVALID_PATRON'), "Invalid Patron Id: \"${req.patronIdentifier}\"".toString(), null);
+            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
           }
         }
         else {
-          // unexpected error in NCIP call
-          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          // unexpected error in Host LMS call
           req.needsAttention=true;
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'NCIP Problem in lookupPatron: '+patron_details?.problems?.toString(), null);
+          String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
+          auditEntry(req, req.state, req.state, message, null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
@@ -249,18 +242,6 @@ public class ReshareApplicationEventHandlerService {
       }
     }
   }
-
-  public boolean isValidPatron(Map patron_record) {
-    boolean result = false;
-    log.debug("Check isValidPatron: ${patron_record}");
-    if ( patron_record != null ) {
-      if ( patron_record.status == 'OK' ) {
-        result = true;
-      }
-    }
-    return result;
-  }
-
 
   // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
   // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
@@ -828,7 +809,9 @@ public class ReshareApplicationEventHandlerService {
                 auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
                 pr.previousStates[pr.state.code] = null;
                 pr.state = new_state;
+                markAllLoanConditionsAccepted(pr)
               } else {
+                // Loan conditions were already marked as agreed
                 auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
               }
             } else {
@@ -842,6 +825,7 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
             pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
+            pr.requesterRequestedCancellation = true
             pr.save(flush: true, failOnError: true)
             break;
 
@@ -1185,19 +1169,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private Patron lookupOrCreatePatronProxy(Map patron_details) {
-    Patron result = null;
-    if ( ( patron_details != null ) && 
-         ( patron_details.userid != null ) &&
-         ( patron_details.userid.trim().length() > 0 ) ) {
-      result = Patron.findByHostSystemIdentifier(patron_details.userid) ?: new Patron(
-                                                           hostSystemIdentifier:patron_details.userid, 
-                                                           givenname: patron_details.givenName, 
-                                                           surname: patron_details.surname).save()
-    }
-    return result;
-  }
-
   public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
 
@@ -1352,6 +1323,14 @@ public class ReshareApplicationEventHandlerService {
       auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
       req.state=new_state
       req.save(flush:true, failOnError: true)
+    }
+  }
+
+  public void markAllLoanConditionsAccepted(PatronRequest pr) {
+    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr)
+    conditions.each {cond ->
+      cond.setAccepted(true)
+      cond.save(flush: true, failOnError: true)
     }
   }
 }

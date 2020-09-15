@@ -131,7 +131,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierConditionalSupply', 'M')
-        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
+        //AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
 
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierMarkConditionsAgreed', 'M')
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierCannotSupply', 'M')
@@ -166,18 +166,19 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterRejectConditions', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterCancel', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'borrowerCheck', 'M')
+
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheck', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheckOverride', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'requesterCancel', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'requesterCancel', 'M')
 
-        AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'cancel', 'M', 'C', CANCEL_ACTION_CLOSURE)
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'requesterCancel', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'message', 'M')

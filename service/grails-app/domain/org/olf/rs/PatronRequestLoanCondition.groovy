@@ -16,6 +16,13 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
+  /* 
+   * Right now, when a loan condition is rejected, this results in the request being cancelled with the supplier.
+   * Hence we can safely assume that false OR null == pending and true == accepted.
+   * If this behaviour changes in future we will be able to separate out null == pending and false == rejected
+   */
+  Boolean accepted = false;
+
   /* The actual code sent along the ISO18626 message, such as "LibraryUseOnly", "SpecCollSupervReq" or "Other"
    * THIS MIGHT NOT BE HUMAN READABLE, and we might not have refdata corresponding to it in the receiver's system,
    * so a translation lookup has to be done when displaying on the request. In cases where we know the refdata exists
@@ -30,6 +37,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
 
 
   static constraints = {
+    accepted (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
     patronRequest (nullable: true)
@@ -47,5 +55,6 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
                 note column : 'prlc_note'
        patronRequest column : 'prlc_patron_request_fk'
     relevantSupplier column : 'prlc_relevant_supplier_fk'
+            accepted column : 'prlc_accepted'
   }
 }
