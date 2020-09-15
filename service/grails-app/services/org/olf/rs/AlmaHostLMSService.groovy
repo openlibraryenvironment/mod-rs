@@ -17,7 +17,8 @@ import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.circ.client.CheckoutItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.AcceptItem;
-import org.olf.rs.circ.client.NCIP2Client;
+
+import org.olf.rs.circ.client.NCIPClientWrapper 
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -32,7 +33,7 @@ import org.olf.rs.circ.client.CirculationClient;
 public class AlmaHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
-    return new NCIP2Client(address);
+    return new NCIPClientWrapper(address, "NCIP2");
   }
 
 }
