@@ -1671,4 +1671,13 @@ databaseChangeLog = {
   changeSet(author: "efreestone (manual)", id: "202008111728-002") {
     dropColumn(tableName: "patron_request", columnName: "pr_previous_state")
   }
+  
+  changeSet(author: "knordstrom (manual)", id: "20200821-1402-001") {
+     addColumn(tableName:"patron_request") {
+       column(name: "pr_parsed_due_date_lms", type: "timestamp")
+       column(name: "pr_due_date_rs", type: "VARCHAR(64)")
+       column(name: "pr_parsed_due_date_rs", type: "timestamp")
+       column(name: "pr_overdue", type: "BOOLEAN")
+     }
+  }
 }

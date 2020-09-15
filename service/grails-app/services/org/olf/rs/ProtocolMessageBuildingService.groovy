@@ -221,6 +221,10 @@ class ProtocolMessageBuildingService {
       message.deliveryInfo['itemId'] = pr.selectedItemBarcode
     }
     
+    if( pr?.dueDateRS ) {
+      message.statusInfo['dueDate'] = pr.dueDateRS
+    }
+    
     return message
   }
 

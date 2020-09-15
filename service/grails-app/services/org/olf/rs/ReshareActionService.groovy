@@ -64,6 +64,21 @@ public class ReshareActionService {
                 pr.activeLoan=true
                 pr.needsAttention=false;
                 pr.dueDateFromLMS=checkout_result?.dueDate;
+                if(!pr?.dueDateRS) {
+                  pr.dueDateRS = pr.dueDateFromLMS;
+                }
+                
+                try {
+                  pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'H:m:s", pr.dueDateFromLMS);                  
+                } catch(Exception e) {
+                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+                }
+                
+                try {
+                  pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'H:m:s", pr.dueDateRS);
+                } catch(Exception e) {
+                  log.warn("Unable to parse ${pr.dueDateRS} to date");
+                }
                 s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
                 auditEntry(pr, pr.state, s, 'Fill request completed. Host LMS integration: NCIP CheckoutItem call succeeded.', null);
                 pr.state = s;
@@ -105,7 +120,20 @@ public class ReshareActionService {
     log.debug("supplierCannotSupply(${pr})");
     return result;
   }
-
+  
+  public void checkRequestOverdue(PatronRequest pr) {
+    if(!pr?.parsedDueDateRS) {
+      return;
+    }
+    nowDate = new Date();
+    if(nowDate.compareTo(pr.parsedDueDateRS) < 0) {
+      pr.overdue = true;
+      pr.save(flush:true, failOnError:true);
+    } 
+    
+    
+  }
+ 
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     Map result = [status:false];

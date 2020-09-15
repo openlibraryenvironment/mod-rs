@@ -176,6 +176,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   int unreadMessageCount
 
   String dueDateFromLMS
+  Date parsedDueDateFromLMS
+  
+  String dueDateRS
+  Date parsedDueDateRS
+  
+  Boolean overdue
+  
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
 
@@ -278,8 +285,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     activeLoan(nullable: true)
     dueDateFromLMS(nullable: true)
+    parsedDueDateFromLMS(nullable: true)
+    dueDateRS(nullable: true)
+    parsedDueDateRS(nullable: true)
 
     needsAttention(nullable: true)
+    
+    overdue(nullable: true)
   }
 
   static mapping = {
@@ -368,6 +380,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     needsAttention column: 'pr_needs_attention'
 
     dueDateFromLMS column: 'pr_due_date_from_lms'
+    parsedDueDateFromLMS: 'pr_parsed_due_date_lms'
+    dueDateRS: 'pr_due_date_rs'
+    parsedDueDateRS: 'pr_parsed_due_date_rs'
+    
+    overdue column: 'pr_overdue'
 
     audit(sort:'dateCreated', order:'desc')
   }
