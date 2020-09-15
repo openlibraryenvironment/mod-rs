@@ -33,7 +33,7 @@ import org.olf.rs.circ.client.CirculationClient;
 public class AlmaHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
-    return new NCIPClientWrapper(address, "NCIP2");
+    return new NCIPClientWrapper(address, "NCIP2").circulationClient;
   }
 
 }
