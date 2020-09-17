@@ -126,6 +126,23 @@ public class ReshareActionService {
               pr.activeLoan=true
               pr.needsAttention=false;
               pr.dueDateFromLMS=checkout_result?.dueDate;
+              if(!pr?.dueDateRS) {
+                pr.dueDateRS = pr.dueDateFromLMS;
+              }
+              
+              try {
+                pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+              }
+              
+              try {
+                pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateRS} to date");
+              }
+
+              pr.overdue=false;
               s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
               // Let the user know if the success came from a real call or a spoofed one
               auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
@@ -149,6 +166,7 @@ public class ReshareActionService {
         log.warn("Unable to locate RES_AWAIT_SHIPPING OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
       }
     }
+    checkRequestOverdue(pr);
 
     return result;
   }
@@ -158,7 +176,20 @@ public class ReshareActionService {
     log.debug("supplierCannotSupply(${pr})");
     return result;
   }
-
+  
+  public void checkRequestOverdue(PatronRequest pr) {
+    if(!pr?.parsedDueDateRS) {
+      return;
+    }
+    nowDate = new Date();
+    if(nowDate.compareTo(pr.parsedDueDateRS) < 0) {
+      pr.overdue = true;
+      pr.save(flush:true, failOnError:true);
+    } 
+    
+    
+  }
+ 
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
     log.debug("notiftyPullSlipPrinted(${pr})");
     Map result = [status:false];
@@ -503,6 +534,7 @@ public class ReshareActionService {
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
     }
+    checkRequestOverdue(pr);
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
 
     return result;
