@@ -126,6 +126,7 @@ public class ReshareActionService {
               pr.activeLoan=true
               pr.needsAttention=false;
               pr.dueDateFromLMS=checkout_result?.dueDate;
+              pr.overdue=false;
               s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
               // Let the user know if the success came from a real call or a spoofed one
               auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
@@ -149,6 +150,7 @@ public class ReshareActionService {
         log.warn("Unable to locate RES_AWAIT_SHIPPING OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
       }
     }
+    checkRequestOverdue(pr);
 
     return result;
   }
@@ -516,6 +518,7 @@ public class ReshareActionService {
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
     }
+    checkRequestOverdue(pr);
     sendRequestingAgencyMessage(pr, 'Received', actionParams);
 
     return result;

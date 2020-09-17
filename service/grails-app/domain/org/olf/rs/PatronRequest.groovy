@@ -380,9 +380,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     needsAttention column: 'pr_needs_attention'
 
     dueDateFromLMS column: 'pr_due_date_from_lms'
-    parsedDueDateFromLMS: 'pr_parsed_due_date_lms'
-    dueDateRS: 'pr_due_date_rs'
-    parsedDueDateRS: 'pr_parsed_due_date_rs'
+    parsedDueDateFromLMS column: 'pr_parsed_due_date_lms'
+    dueDateRS column: 'pr_due_date_rs'
+    parsedDueDateRS column: 'pr_parsed_due_date_rs'
     
     overdue column: 'pr_overdue'
 
