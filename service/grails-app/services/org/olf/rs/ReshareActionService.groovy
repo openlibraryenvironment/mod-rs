@@ -126,6 +126,22 @@ public class ReshareActionService {
               pr.activeLoan=true
               pr.needsAttention=false;
               pr.dueDateFromLMS=checkout_result?.dueDate;
+              if(!pr?.dueDateRS) {
+                pr.dueDateRS = pr.dueDateFromLMS;
+              }
+              
+              try {
+                pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+              }
+              
+              try {
+                pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateRS} to date");
+              }
+
               pr.overdue=false;
               s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
               // Let the user know if the success came from a real call or a spoofed one
