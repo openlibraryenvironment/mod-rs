@@ -718,6 +718,12 @@ public class ReshareApplicationEventHandlerService {
         result.errorType = "BadlyFormedMessage"
         throw new Exception("No reason for message");
       }
+      
+      if ( eventData.statusInfo?.dueDate ) {
+        pr.dueDateRS = eventData.statusInfo.dueDate;        
+      } else {
+        log.debug("No duedate found in eventData.statusInfo");
+      }
 
       if ( incomingStatus != null ) {
         handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
