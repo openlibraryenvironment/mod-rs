@@ -63,7 +63,7 @@ try {
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
-  RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP2');
+  RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
 
 AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -73,7 +73,7 @@ AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSet
                                   ).save(flush:true, failOnError: true);
 
 RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
-RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
   
 AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -82,7 +82,7 @@ AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSet
                                   key: 'check_out_item').save(flush:true, failOnError: true);
 
 RefdataValue.lookupOrCreate('CheckInMethod', 'None');
-RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
   
 AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -92,7 +92,7 @@ AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetti
 
 
 RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
   
 AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
