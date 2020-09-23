@@ -255,9 +255,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           result = ncip2LookupPatron(patron_id)
-          result.reason = 'ncip2'
+          result.reason = 'ncip'
           break;
         default:
           log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
@@ -469,7 +469,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
     if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
       switch ( check_out_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
           break;
         default:
@@ -482,8 +482,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
-    // set reason to ncip2
-    Map result = [reason: 'ncip2'];
+    // set reason to ncip
+    Map result = [reason: 'ncip'];
 
     log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
@@ -545,9 +545,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
 
       switch ( accept_item_setting.value ) {
-        case 'ncip2':
-          // set reason block to ncip2 from 'spoofed'
-          result.reason = 'ncip2'
+        case 'ncip':
+          // set reason block to ncip from 'spoofed'
+          result.reason = 'ncip'
           
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -597,9 +597,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if ( ( check_in_setting != null ) && ( check_in_setting.value != null ) )  {
 
       switch ( check_in_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           // Set the reason from 'spoofed'
-          result.reason = 'ncip2'
+          result.reason = 'ncip'
 
           log.debug("checkInItem(${item_id})");
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
