@@ -287,7 +287,7 @@ task createDockerfile(type: Dockerfile, dependsOn: prepareDocker) {
 
   destFile = project.file("${dockerBuildDir}/Dockerfile")
 
-  from 'folioci/openjdk8-jre-alpine:latest'
+  from 'folioci/alpine-jre-openjdk8'
   maintainer 'Knowledge Integration'
 
   exposePort 8080
