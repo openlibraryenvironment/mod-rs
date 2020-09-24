@@ -332,7 +332,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.surname=response.opt('lastName')
             if ( response.has('electronicAddresses') ) {
               JSONArray ea = response.getJSONArray('electronicAddresses')
-              result.email=(ea.find { it.key=='emailAddress' })?.value
+              // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
+              result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
               result.tel=(ea.find { it.key=='tel' })?.value
             }
           }
