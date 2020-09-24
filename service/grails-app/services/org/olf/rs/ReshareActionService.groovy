@@ -42,6 +42,19 @@ public class ReshareActionService {
     log.debug("Result of patron lookup ${patron_details}");
     if ( patron_details.result ) {
       result.callSuccess = true
+
+      // Save patron details whether they're valid or not
+      if ( patron_details.userid == null )
+          patron_details.userid = pr.patronIdentifier
+      if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+        pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+        if ( pr.patronSurname == null )
+          pr.patronSurname = patron_details.surname;
+        if ( pr.patronGivenName == null )
+          pr.patronGivenName = patron_details.givenName;
+        pr.patronEmail = patron_details.email;
+      }
+
       if (isValidPatron(patron_details) || actionParams?.override) {
         result.patronValid = true
         // Let the user know if the success came from a real call or a spoofed one
@@ -49,18 +62,6 @@ public class ReshareActionService {
         String outcome = actionParams?.override ? 'validation overriden' : 'validated'
         String message = "Patron ${outcome}. ${reason}"
         auditEntry(pr, pr.state, pr.state, message, null);
-
-        if ( patron_details.userid == null )
-          patron_details.userid = pr.patronIdentifier
-
-        if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
-          pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
-          if ( pr.patronSurname == null )
-            pr.patronSurname = patron_details.surname;
-          if ( pr.patronGivenName == null )
-            pr.patronGivenName = patron_details.givenName;
-          pr.patronEmail = patron_details.email;
-        }
       }
     }
     if (patron_details.problems) {
