@@ -207,6 +207,11 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   key: 'chat_auto_read',
                                   defValue: 'on').save(flush:true, failOnError: true);
 
+  AppSetting default_institutional_patron_id = AppSetting.findByKey('default_institutional_patron_id') ?: new AppSetting( 
+    section:'requests',
+    settingType:'String',
+    key: 'default_institutional_patron_id').save(flush:true, failOnError: true);
+
   RefdataValue.lookupOrCreate('loanConditions', 'LibraryUseOnly');
   RefdataValue.lookupOrCreate('loanConditions', 'NoReproduction');
   RefdataValue.lookupOrCreate('loanConditions', 'SignatureRequired');
