@@ -332,7 +332,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.surname=response.opt('lastName')
             if ( response.has('electronicAddresses') ) {
               JSONArray ea = response.getJSONArray('electronicAddresses')
-              result.email=(ea.find { it.key=='mailto' })?.value
+              result.email=(ea.find { it.key=='emailAddress' })?.value
               result.tel=(ea.find { it.key=='tel' })?.value
             }
           }
