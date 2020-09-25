@@ -50,7 +50,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               if (result.status == false) {
                 response.status = 400;
                   result.code=-3; // NCIP action failed
-                  result.message='NCIP CheckoutItem call failed'
+                  result.message='NCIP CheckoutItem call failed.'
               }
               break;
             case 'message':
