@@ -15,6 +15,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.custprops.CustomProperty
 
 
 /**
@@ -107,13 +108,20 @@ public class ReshareActionService {
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
 
-          log.debug("LOGDEBUG PATRON ID: ${pr.patronIdentifier}")
           /*
            * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
            * Instead use institutionalPatronID saved on DirEnt or default from settings.
           */
-          log.debug("LOGDEBUG resolvedRequester SYMBOL: ${pr.resolvedRequester}")
-          findDirectoryEntryBySymbol(pr.resolvedRequester)
+
+          /* 
+           * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
+           * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
+           * Finally we can extract the value from that custprop.
+           * Here that value is a string, but in the refdata case we'd need value?.value
+          */
+          CustomProperty institutionalPatronId = extractCustomPropertyFromDirectoryEntry(pr.resolvedRequester?.owner, 'local_institutionalPatronId')
+          String institutionalPatronIdValue = institutionalPatronId?.value
+          log.debug("LOGDEBUG institutionalPatronId: ${institutionalPatronIdValue}")
 
           def checkout_result = host_lms.checkoutItem(pr.hrid,
                                                       actionParams?.itemBarcode, 
@@ -728,16 +736,18 @@ public class ReshareActionService {
 
     return result;
   }
-
-  public void findDirectoryEntryBySymbol(Symbol symbol) {
-    log.debug("SYMBOL: ${symbol}")
-    log.debug("SYMBOL STRING (${symbol.authority.symbol}:${symbol.symbol})")
-    List something = DirectoryEntry.executeQuery(
-      'SELECT de.id, de.symbols FROM DirectoryEntry as de'
-    )
-    log.debug("LOGDEBUG LIST: ${something}")
-  }
   
+  /* 
+   * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+   * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
+   * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
+   */
+  public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
+    def custProps = de.customProperties?.value ?: []
+    CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
+    return cp
+  }
+
   public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     String attachedAction = actionMap.action
