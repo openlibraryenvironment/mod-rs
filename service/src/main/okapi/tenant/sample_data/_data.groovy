@@ -230,12 +230,8 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
-  def cp_demoprop = ensureTextProperty('demoCustprop', false);
-  def cp_test_prop = ensureTextProperty('TestParam', false);
   def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);
   def cp_local_institutionalPatronId = ensureTextProperty('local_institutionalPatronId', true, label='Institutional patron ID');
-  def cp_local_widget2 = ensureTextProperty('local_widget_2', true, label='Widget 2');
-  def cp_local_widget3 = ensureTextProperty('local_widget_3', true, label='Widget 3');
   def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
 
   NamingAuthority reshare = NamingAuthority.findBySymbol('RESHARE') ?: new NamingAuthority(symbol:'RESHARE').save(flush:true, failOnError:true);
