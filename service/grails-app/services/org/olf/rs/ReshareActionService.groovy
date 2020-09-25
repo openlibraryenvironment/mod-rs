@@ -127,8 +127,6 @@ public class ReshareActionService {
             institutionalPatronIdValue = default_institutional_patron_id?.value
           }
 
-          log.debug("LOGDEBUG institutionalPatronId: ${institutionalPatronIdValue}")
-
           // If there is still no institutionalPatronId then fail out with an error
           if(institutionalPatronIdValue != null && institutionalPatronIdValue != '') {
             def checkout_result = host_lms.checkoutItem(pr.hrid,
