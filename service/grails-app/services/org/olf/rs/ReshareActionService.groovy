@@ -15,6 +15,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.custprops.CustomProperty
 
 
 /**
@@ -106,54 +107,80 @@ public class ReshareActionService {
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
-          def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                      actionParams?.itemBarcode, 
-                                                      pr.patronIdentifier,
-                                                      pr.resolvedRequester)
-          // If the host_lms adapter gave us a specific status to transition to, use it
-          if ( checkout_result?.status ) {
-            // the host lms service gave us a specific status to change to
-            Status s = Status.lookup('Responder', checkout_result?.status);
-            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
-            auditEntry(pr, pr.state, s, message, null);
-            pr.state = s;
-            pr.save(flush:true, failOnError:true);
-          }
-          else {
-            // Otherwise, if the checkout succeeded or failed, set appropriately
-            Status s = null;
-            if ( checkout_result.result == true ) {
-              statisticsService.incrementCounter('/activeLoans');
-              pr.activeLoan=true
-              pr.needsAttention=false;
-              pr.dueDateFromLMS=checkout_result?.dueDate;
-              if(!pr?.dueDateRS) {
-                pr.dueDateRS = pr.dueDateFromLMS;
-              }
-              
-              try {
-                pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
-              } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
-              }
-              
-              try {
-                pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
-              } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateRS} to date");
-              }
 
-              pr.overdue=false;
-              s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-              // Let the user know if the success came from a real call or a spoofed one
-              auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
+          /*
+           * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
+           * Instead use institutionalPatronID saved on DirEnt or default from settings.
+          */
+
+          /* 
+           * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
+           * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
+           * Finally we can extract the value from that custprop.
+           * Here that value is a string, but in the refdata case we'd need value?.value
+          */
+          CustomProperty institutionalPatronId = extractCustomPropertyFromDirectoryEntry(pr.resolvedRequester?.owner, 'local_institutionalPatronId')
+          String institutionalPatronIdValue = institutionalPatronId?.value
+          if (!institutionalPatronIdValue) {
+            // If nothing on the Directory Entry then fallback to the default in settings
+            AppSetting default_institutional_patron_id = AppSetting.findByKey('default_institutional_patron_id')
+            institutionalPatronIdValue = default_institutional_patron_id?.value
+          }
+
+          // If there is still no institutionalPatronId then fail out with an error
+          if(institutionalPatronIdValue != null && institutionalPatronIdValue != '') {
+            def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                        actionParams?.itemBarcode, 
+                                                        institutionalPatronIdValue,
+                                                        pr.resolvedRequester)
+            // If the host_lms adapter gave us a specific status to transition to, use it
+            if ( checkout_result?.status ) {
+              // the host lms service gave us a specific status to change to
+              Status s = Status.lookup('Responder', checkout_result?.status);
+              String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
+              auditEntry(pr, pr.state, s, message, null);
               pr.state = s;
-              result = true;
+              pr.save(flush:true, failOnError:true);
             }
             else {
-              pr.needsAttention=true;
-              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
+              // Otherwise, if the checkout succeeded or failed, set appropriately
+              Status s = null;
+              if ( checkout_result.result == true ) {
+                statisticsService.incrementCounter('/activeLoans');
+                pr.activeLoan=true
+                pr.needsAttention=false;
+                pr.dueDateFromLMS=checkout_result?.dueDate;
+                if(!pr?.dueDateRS) {
+                  pr.dueDateRS = pr.dueDateFromLMS;
+                }
+                
+                try {
+                  pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
+                } catch(Exception e) {
+                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+                }
+                
+                try {
+                  pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
+                } catch(Exception e) {
+                  log.warn("Unable to parse ${pr.dueDateRS} to date");
+                }
+
+                pr.overdue=false;
+                s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
+                // Let the user know if the success came from a real call or a spoofed one
+                auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
+                pr.state = s;
+                result = true;
+              }
+              else {
+                pr.needsAttention=true;
+                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
+              }
+              pr.save(flush:true, failOnError:true);
             }
+          } else {
+            auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. No institutional patron ID found.', null);
             pr.save(flush:true, failOnError:true);
           }
         }
@@ -719,8 +746,18 @@ public class ReshareActionService {
 
     return result;
   }
-
   
+  /* 
+   * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+   * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
+   * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
+   */
+  public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
+    def custProps = de.customProperties?.value ?: []
+    CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
+    return cp
+  }
+
   public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     String attachedAction = actionMap.action
