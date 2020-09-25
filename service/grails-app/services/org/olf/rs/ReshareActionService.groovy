@@ -106,6 +106,15 @@ public class ReshareActionService {
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
+
+          log.debug("LOGDEBUG PATRON ID: ${pr.patronIdentifier}")
+          /*
+           * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
+           * Instead use institutionalPatronID saved on DirEnt or default from settings.
+          */
+          log.debug("LOGDEBUG resolvedRequester SYMBOL: ${pr.resolvedRequester}")
+          findDirectoryEntryBySymbol(pr.resolvedRequester)
+
           def checkout_result = host_lms.checkoutItem(pr.hrid,
                                                       actionParams?.itemBarcode, 
                                                       pr.patronIdentifier,
@@ -720,6 +729,14 @@ public class ReshareActionService {
     return result;
   }
 
+  public void findDirectoryEntryBySymbol(Symbol symbol) {
+    log.debug("SYMBOL: ${symbol}")
+    log.debug("SYMBOL STRING (${symbol.authority.symbol}:${symbol.symbol})")
+    List something = DirectoryEntry.executeQuery(
+      'SELECT de.id, de.symbols FROM DirectoryEntry as de'
+    )
+    log.debug("LOGDEBUG LIST: ${something}")
+  }
   
   public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
