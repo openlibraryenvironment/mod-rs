@@ -483,11 +483,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+    // set reason to ncip
+    Map result = [reason: 'ncip'];
+    
     // borrowerBarcode could be null or blank, error out if so
     if (borrowerBarcode != null && borrowerBarcode != '') {
-        // set reason to ncip
-      Map result = [reason: 'ncip'];
-
       log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
       AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
       AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
