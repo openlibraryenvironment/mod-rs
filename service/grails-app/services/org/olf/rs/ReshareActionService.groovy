@@ -127,60 +127,59 @@ public class ReshareActionService {
             institutionalPatronIdValue = default_institutional_patron_id?.value
           }
 
-          // If there is still no institutionalPatronId then fail out with an error
-          if(institutionalPatronIdValue != null && institutionalPatronIdValue != '') {
-            def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                        actionParams?.itemBarcode, 
-                                                        institutionalPatronIdValue,
-                                                        pr.resolvedRequester)
-            // If the host_lms adapter gave us a specific status to transition to, use it
-            if ( checkout_result?.status ) {
-              // the host lms service gave us a specific status to change to
-              Status s = Status.lookup('Responder', checkout_result?.status);
-              String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
-              auditEntry(pr, pr.state, s, message, null);
+          /*
+           * Be aware that institutionalPatronIdValue here may well be blank or null.
+           * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
+           * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block 
+           */
+          def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                      actionParams?.itemBarcode, 
+                                                      institutionalPatronIdValue,
+                                                      pr.resolvedRequester)
+          // If the host_lms adapter gave us a specific status to transition to, use it
+          if ( checkout_result?.status ) {
+            // the host lms service gave us a specific status to change to
+            Status s = Status.lookup('Responder', checkout_result?.status);
+            String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
+            auditEntry(pr, pr.state, s, message, null);
+            pr.state = s;
+            pr.save(flush:true, failOnError:true);
+          }
+          else {
+            // Otherwise, if the checkout succeeded or failed, set appropriately
+            Status s = null;
+            if ( checkout_result.result == true ) {
+              statisticsService.incrementCounter('/activeLoans');
+              pr.activeLoan=true
+              pr.needsAttention=false;
+              pr.dueDateFromLMS=checkout_result?.dueDate;
+              if(!pr?.dueDateRS) {
+                pr.dueDateRS = pr.dueDateFromLMS;
+              }
+              
+              try {
+                pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+              }
+              
+              try {
+                pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateRS} to date");
+              }
+
+              pr.overdue=false;
+              s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
+              // Let the user know if the success came from a real call or a spoofed one
+              auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
               pr.state = s;
-              pr.save(flush:true, failOnError:true);
+              result = true;
             }
             else {
-              // Otherwise, if the checkout succeeded or failed, set appropriately
-              Status s = null;
-              if ( checkout_result.result == true ) {
-                statisticsService.incrementCounter('/activeLoans');
-                pr.activeLoan=true
-                pr.needsAttention=false;
-                pr.dueDateFromLMS=checkout_result?.dueDate;
-                if(!pr?.dueDateRS) {
-                  pr.dueDateRS = pr.dueDateFromLMS;
-                }
-                
-                try {
-                  pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
-                } catch(Exception e) {
-                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
-                }
-                
-                try {
-                  pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
-                } catch(Exception e) {
-                  log.warn("Unable to parse ${pr.dueDateRS} to date");
-                }
-
-                pr.overdue=false;
-                s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-                // Let the user know if the success came from a real call or a spoofed one
-                auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
-                pr.state = s;
-                result = true;
-              }
-              else {
-                pr.needsAttention=true;
-                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
-              }
-              pr.save(flush:true, failOnError:true);
+              pr.needsAttention=true;
+              auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
             }
-          } else {
-            auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. No institutional patron ID found.', null);
             pr.save(flush:true, failOnError:true);
           }
         }
@@ -753,6 +752,9 @@ public class ReshareActionService {
    * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
    */
   public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
+    if (!de || ! cpName) {
+      return null
+    }
     def custProps = de.customProperties?.value ?: []
     CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
     return cp
