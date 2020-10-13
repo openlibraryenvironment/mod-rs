@@ -60,6 +60,18 @@ try {
                                   key: 'ncip_server_address'
                                   ).save(flush:true, failOnError: true);
 
+  AppSetting ncip_api_key = AppSetting.findByKey('ncip_api_key') ?: new AppSetting( 
+                                section:'localNCIP',
+                                settingType:'String',
+                                key: 'ncip_api_key'
+                                ).save(flush:true, failOnError: true);
+
+  AppSetting ncip_api_secret = AppSetting.findByKey('ncip_api_secret') ?: new AppSetting( 
+                                section:'localNCIP',
+                                settingType:'Password',
+                                key: 'ncip_api_secret'
+                                  ).save(flush:true, failOnError: true);
+
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
@@ -158,6 +170,7 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
                                   section:'hostLMSIntegration',
