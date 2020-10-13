@@ -34,7 +34,7 @@ public class AlmaHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
-    return new NCIPClientWrapper(address, "NCIP2").circulationClient;
+    return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
 }
