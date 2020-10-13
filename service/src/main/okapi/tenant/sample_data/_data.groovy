@@ -241,6 +241,10 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('LoanPolicy', 'Lendin Physical only')
   RefdataValue.lookupOrCreate('LoanPolicy', 'Lending Electronic only')
 
+  RefdataValue.lookupOrCreate('noticeFormats', 'E-mail', 'email');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'New request');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'End of rota');
+
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
   def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);

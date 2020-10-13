@@ -1,13 +1,15 @@
 package org.olf.rs
 
 import grails.gorm.MultiTenant
+import com.k_int.web.toolkit.refdata.RefdataValue
 
 class NoticePolicyNotice implements MultiTenant<NoticePolicy> {
 
   String id
   String template
   Boolean realTime
-  // TBD how to store format and trigger options
+  RefdataValue format
+  RefdataValue trigger
 
   Date dateCreated
   Date lastUpdated
@@ -16,6 +18,8 @@ class NoticePolicyNotice implements MultiTenant<NoticePolicy> {
 
   static constraints = {
     template (nullable: false)
+    format (nullable: false)
+    trigger (nullable: false)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
   }
@@ -28,5 +32,7 @@ class NoticePolicyNotice implements MultiTenant<NoticePolicy> {
     noticePolicy column : 'npn_notice_policy_fk'
     template column : 'npn_template'
     realTime column : 'npn_real_time'
+    format column : 'npn_format_fk'
+    trigger column : 'npn_trigger_fk'
   }
 }
