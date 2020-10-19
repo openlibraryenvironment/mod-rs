@@ -35,6 +35,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   informationSource: "Made up by Ian",
   patronReference:"Patron001",
   patronSurname:"patronsurname",
+  patronEmail:"patron@surname.tld",
   patronGivenName: "patronGivenName",
   patronType: "Faculty Staff",
   sendToPatron: true,

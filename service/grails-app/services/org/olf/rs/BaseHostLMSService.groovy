@@ -255,9 +255,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
     if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
       switch ( borrower_check_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           result = ncip2LookupPatron(patron_id)
-          result.reason = 'ncip2'
+          result.reason = 'ncip'
           break;
         default:
           log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
@@ -325,14 +325,15 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( ( response ) && ( ! response.has('problems') ) ) {
             JSONArray priv = response.getJSONArray('privileges')
             // Return a status of BLOCKED if the user is blocked, else OK for now
-            result.status=(priv.find { it.key=='STATUS' })?.value == 'BLOCKED' ? 'BLOCKED' : 'OK'
+            result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
             result.result=true
             result.userid=response.opt('userId') ?: response.opt('userid')
             result.givenName=response.opt('firstName')
             result.surname=response.opt('lastName')
             if ( response.has('electronicAddresses') ) {
               JSONArray ea = response.getJSONArray('electronicAddresses')
-              result.email=(ea.find { it.key=='mailto' })?.value
+              // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
+              result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
               result.tel=(ea.find { it.key=='tel' })?.value
             }
           }
@@ -469,7 +470,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
     if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
       switch ( check_out_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
           break;
         default:
@@ -482,41 +483,45 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
-    // set reason to ncip2
-    Map result = [reason: 'ncip2'];
+    // set reason to ncip
+    Map result = [reason: 'ncip'];
+    
+    // borrowerBarcode could be null or blank, error out if so
+    if (borrowerBarcode != null && borrowerBarcode != '') {
+      log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
+      AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
+      AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+      AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
-    log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+      String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
+      String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+      String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
-    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+      CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+      CheckoutItem checkoutItem = new CheckoutItem()
+                    .setUserId(borrowerBarcode)
+                    .setItemId(itemBarcode)
+                    .setRequestId(requestId)
+                    .setToAgency(ncip_from_agency)
+                    .setFromAgency(ncip_from_agency)
+                    .setApplicationProfileType(ncip_app_profile);
+                    //.setDesiredDueDate("2020-03-18");
 
-    CirculationClient ncip_client = getCirculationClient(ncip_server_address);
-    CheckoutItem checkoutItem = new CheckoutItem()
-                  .setUserId(borrowerBarcode)
-                  .setItemId(itemBarcode)
-                  .setRequestId(requestId)
-                  .setToAgency(ncip_from_agency)
-                  .setFromAgency(ncip_from_agency)
-                  .setApplicationProfileType(ncip_app_profile);
-                  //.setDesiredDueDate("2020-03-18");
-
-    JSONObject response = ncip_client.send(checkoutItem);
-    log.debug("NCIP2 checkoutItem responseL ${response}");
-    if ( response.has('problems') ) {
-      result.result = false;
-      result.problems = response.get('problems');
+      JSONObject response = ncip_client.send(checkoutItem);
+      log.debug("NCIP2 checkoutItem responseL ${response}");
+      if ( response.has('problems') ) {
+        result.result = false;
+        result.problems = response.get('problems');
+      }
+      else {
+        result.result = true;
+        result.dueDate = response.opt('dueDate');
+        result.userId = response.opt('userId')
+        result.itemId = response.opt('itemId')
+      }
+    } else {
+      result.problems = 'No institutional patron ID available'
     }
-    else {
-      result.result = true;
-      result.dueDate = response.opt('dueDate');
-      result.userId = response.opt('userId')
-      result.itemId = response.opt('itemId')
-    }
-
     return result;
   }
 
@@ -545,9 +550,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
 
       switch ( accept_item_setting.value ) {
-        case 'ncip2':
-          // set reason block to ncip2 from 'spoofed'
-          result.reason = 'ncip2'
+        case 'ncip':
+          // set reason block to ncip from 'spoofed'
+          result.reason = 'ncip'
           
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
@@ -597,9 +602,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if ( ( check_in_setting != null ) && ( check_in_setting.value != null ) )  {
 
       switch ( check_in_setting.value ) {
-        case 'ncip2':
+        case 'ncip':
           // Set the reason from 'spoofed'
-          result.reason = 'ncip2'
+          result.reason = 'ncip'
 
           log.debug("checkInItem(${item_id})");
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')

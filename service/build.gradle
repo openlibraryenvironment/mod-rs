@@ -97,9 +97,10 @@ dependencies {
   runtime "com.zaxxer:HikariCP:3.2.0"
   compile 'org.grails.plugins:rxjava'
 
-  // uncomment once we have the standalone jar version
-  compile 'org.olf.rs:lib-ncip-client:0.8.1'
+  compile 'org.olf.rs:lib-ncip-client:0.10.1'
   compile 'com.github.jknack:handlebars:4.2.0'
+  compile 'org.apache.commons:commons-collections4:4.4'
+
 
   compile 'org.jsoup:jsoup:1.10.2'
   compile 'org.json:json:20190722'
@@ -287,7 +288,7 @@ task createDockerfile(type: Dockerfile, dependsOn: prepareDocker) {
 
   destFile = project.file("${dockerBuildDir}/Dockerfile")
 
-  from 'folioci/openjdk8-jre-alpine:latest'
+  from 'folioci/alpine-jre-openjdk8'
   maintainer 'Knowledge Integration'
 
   exposePort 8080

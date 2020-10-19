@@ -15,6 +15,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.custprops.CustomProperty
 
 
 /**
@@ -42,6 +43,19 @@ public class ReshareActionService {
     log.debug("Result of patron lookup ${patron_details}");
     if ( patron_details.result ) {
       result.callSuccess = true
+
+      // Save patron details whether they're valid or not
+      if ( patron_details.userid == null )
+          patron_details.userid = pr.patronIdentifier
+      if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
+        pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
+        if ( pr.patronSurname == null )
+          pr.patronSurname = patron_details.surname;
+        if ( pr.patronGivenName == null )
+          pr.patronGivenName = patron_details.givenName;
+        pr.patronEmail = patron_details.email;
+      }
+
       if (isValidPatron(patron_details) || actionParams?.override) {
         result.patronValid = true
         // Let the user know if the success came from a real call or a spoofed one
@@ -49,18 +63,6 @@ public class ReshareActionService {
         String outcome = actionParams?.override ? 'validation overriden' : 'validated'
         String message = "Patron ${outcome}. ${reason}"
         auditEntry(pr, pr.state, pr.state, message, null);
-
-        if ( patron_details.userid == null )
-          patron_details.userid = pr.patronIdentifier
-
-        if ( ( patron_details != null ) && ( patron_details.userid != null ) ) {
-          pr.resolvedPatron = lookupOrCreatePatronProxy(patron_details);
-          if ( pr.patronSurname == null )
-            pr.patronSurname = patron_details.surname;
-          if ( pr.patronGivenName == null )
-            pr.patronGivenName = patron_details.givenName;
-          pr.patronEmail = patron_details.email;
-        }
       }
     }
     if (patron_details.problems) {
@@ -105,9 +107,34 @@ public class ReshareActionService {
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
           // Call the host lms to check the item out of the host system and in to reshare
+
+          /*
+           * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
+           * Instead use institutionalPatronID saved on DirEnt or default from settings.
+          */
+
+          /* 
+           * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
+           * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
+           * Finally we can extract the value from that custprop.
+           * Here that value is a string, but in the refdata case we'd need value?.value
+          */
+          CustomProperty institutionalPatronId = extractCustomPropertyFromDirectoryEntry(pr.resolvedRequester?.owner, 'local_institutionalPatronId')
+          String institutionalPatronIdValue = institutionalPatronId?.value
+          if (!institutionalPatronIdValue) {
+            // If nothing on the Directory Entry then fallback to the default in settings
+            AppSetting default_institutional_patron_id = AppSetting.findByKey('default_institutional_patron_id')
+            institutionalPatronIdValue = default_institutional_patron_id?.value
+          }
+
+          /*
+           * Be aware that institutionalPatronIdValue here may well be blank or null.
+           * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
+           * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block 
+           */
           def checkout_result = host_lms.checkoutItem(pr.hrid,
                                                       actionParams?.itemBarcode, 
-                                                      pr.patronIdentifier,
+                                                      institutionalPatronIdValue,
                                                       pr.resolvedRequester)
           // If the host_lms adapter gave us a specific status to transition to, use it
           if ( checkout_result?.status ) {
@@ -492,7 +519,7 @@ public class ReshareActionService {
                                                 pr.title, // title,
                                                 pr.isbn, // isbn,
                                                 pr.localCallNumber, // call_number,
-                                                pr.pickupLocation, // pickup_location,
+                                                pr.pickupLocationCode, // pickup_location,
                                                 null) // requested_action
 
         if ( accept_result?.result == true ) {
@@ -718,8 +745,21 @@ public class ReshareActionService {
 
     return result;
   }
-
   
+  /* 
+   * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+   * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
+   * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
+   */
+  public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
+    if (!de || ! cpName) {
+      return null
+    }
+    def custProps = de.customProperties?.value ?: []
+    CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
+    return cp
+  }
+
   public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     String attachedAction = actionMap.action

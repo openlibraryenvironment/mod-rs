@@ -23,6 +23,7 @@ public class HostLMSService {
   def defaultHostLMSService
   def manualHostLMSService
   def alephHostLMSService
+  def wmsHostLMSService
 
   public HostLMSActions getHostLMSActions() {
 
@@ -42,6 +43,9 @@ public class HostLMSService {
         break;
       case 'aleph':
         result = alephHostLMSService
+        break;
+      case 'wms':
+        result = wmsHostLMSService
         break;
       default:
         result = defaultHostLMSService

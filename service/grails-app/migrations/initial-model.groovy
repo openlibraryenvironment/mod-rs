@@ -1734,4 +1734,15 @@ databaseChangeLog = {
           }
       }
   } 
+
+  changeSet(author: "jskomorowski (manual)", id: "202009281618-000") {
+    addColumn(tableName: "notice_policy_notice") {
+      column(name: "npn_format_fk", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "npn_trigger_fk", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+    }
+  }
 }

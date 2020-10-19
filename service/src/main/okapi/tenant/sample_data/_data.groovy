@@ -60,10 +60,27 @@ try {
                                   key: 'ncip_server_address'
                                   ).save(flush:true, failOnError: true);
 
+  AppSetting ncip_api_key = AppSetting.findByKey('ncip_api_key') ?: new AppSetting( 
+                                section:'localNCIP',
+                                settingType:'String',
+                                key: 'ncip_api_key'
+                                ).save(flush:true, failOnError: true);
+
+  AppSetting ncip_api_secret = AppSetting.findByKey('ncip_api_secret') ?: new AppSetting( 
+                                section:'localNCIP',
+                                settingType:'Password',
+                                key: 'ncip_api_secret'
+                                  ).save(flush:true, failOnError: true);
+
+  AppSetting wms_lookup_patron_endpoint = AppSetting.findByKey('wms_lookup_patron_endpoint') ?: new AppSetting( 
+                                section:'wmsSettings',
+                                settingType:'String',
+                                key: 'wms_lookup_patron_endpoint'
+                                ).save(flush:true, failOnError: true);
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
-  RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP2');
+  RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
 
 AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -73,7 +90,7 @@ AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSet
                                   ).save(flush:true, failOnError: true);
 
 RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
-RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
   
 AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -82,7 +99,7 @@ AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSet
                                   key: 'check_out_item').save(flush:true, failOnError: true);
 
 RefdataValue.lookupOrCreate('CheckInMethod', 'None');
-RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
   
 AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -92,7 +109,7 @@ AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetti
 
 
 RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP2');
+RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
   
 AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
@@ -158,6 +175,7 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
                                   section:'hostLMSIntegration',
@@ -207,6 +225,11 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   key: 'chat_auto_read',
                                   defValue: 'on').save(flush:true, failOnError: true);
 
+  AppSetting default_institutional_patron_id = AppSetting.findByKey('default_institutional_patron_id') ?: new AppSetting( 
+    section:'requests',
+    settingType:'String',
+    key: 'default_institutional_patron_id').save(flush:true, failOnError: true);
+
   RefdataValue.lookupOrCreate('loanConditions', 'LibraryUseOnly');
   RefdataValue.lookupOrCreate('loanConditions', 'NoReproduction');
   RefdataValue.lookupOrCreate('loanConditions', 'SignatureRequired');
@@ -223,14 +246,14 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('LoanPolicy', 'Lendin Physical only')
   RefdataValue.lookupOrCreate('LoanPolicy', 'Lending Electronic only')
 
+  RefdataValue.lookupOrCreate('noticeFormats', 'E-mail', 'email');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'New request');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'End of rota');
+
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
-  def cp_demoprop = ensureTextProperty('demoCustprop', false);
-  def cp_test_prop = ensureTextProperty('TestParam', false);
   def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);
   def cp_local_institutionalPatronId = ensureTextProperty('local_institutionalPatronId', true, label='Institutional patron ID');
-  def cp_local_widget2 = ensureTextProperty('local_widget_2', true, label='Widget 2');
-  def cp_local_widget3 = ensureTextProperty('local_widget_3', true, label='Widget 3');
   def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
 
   NamingAuthority reshare = NamingAuthority.findBySymbol('RESHARE') ?: new NamingAuthority(symbol:'RESHARE').save(flush:true, failOnError:true);
