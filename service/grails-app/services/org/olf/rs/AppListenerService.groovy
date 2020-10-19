@@ -78,7 +78,8 @@ public class AppListenerService implements ApplicationListener {
             payload:[
               id: pr.id,
               title: pr.title,
-              state: pr.state.code
+              state: pr.state.code,
+              dueDate: pr.dueDateRS
             ]
           ]
         );

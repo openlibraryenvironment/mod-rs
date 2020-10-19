@@ -1050,7 +1050,7 @@ public class ReshareApplicationEventHandlerService {
 
     String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
     LocalDateTime ts = LocalDateTime.now();
-    log.debug("add audit entry at ${ts}");
+    log.debug("add audit entry at ${ts}, from ${from} to ${to}, message ${message}");
 
     try {
       pr.addToAudit( new PatronRequestAudit(
