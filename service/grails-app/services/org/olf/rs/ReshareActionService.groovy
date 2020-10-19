@@ -158,15 +158,15 @@ public class ReshareActionService {
               }
               
               try {
-                pr.parsedDueDateFromLMS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateFromLMS);                  
+                pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);                  
               } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateFromLMS} to date");
+                log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
               }
               
               try {
-                pr.parsedDueDateRS = Date.parse("yyyy-MM-dd'T'HH:mm:ssZ", pr.dueDateRS);
+                pr.parsedDueDateRS = parseDateString(pr.dueDateRS);
               } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateRS} to date");
+                log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
               }
 
               pr.overdue=false;
@@ -782,5 +782,27 @@ public class ReshareActionService {
     log.debug("Outbound Message: ${outboundMessage.messageContent}")
     pr.addToNotifications(outboundMessage)
     //outboundMessage.save(flush:true, failOnError:true)
+  }
+  
+  protected Date parseDateString(String dateString) {
+    def formatList = [
+      "yyyy-MM-dd'T'HH:mm:ssZ",
+      "yyyy-MM-dd HH:mm:ss"
+    ];
+    Date date = null;
+    formatList.any {
+      try {
+        date = Date.parse(it, dateString); 
+      } catch(Exception e) {
+        log.debug("Unable to parse date ${dateString} with format '${it}' ${e.getMessage()}");
+      }
+      if(date != null) {
+        return true;
+      }      
+    }
+    if(date == null) {
+      throw new Exception("Unable to parse " + dateString + " to date");
+    }
+
   }
 }
