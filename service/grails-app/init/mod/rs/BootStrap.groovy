@@ -14,8 +14,8 @@ class BootStrap {
 
     Thread.sleep(2000);
     
-    housekeepingService.ensureSharedSchema();
-    okapiTenantAdminService.freshenAllTenantSchemas()
+    // housekeepingService.ensureSharedSchema();
+    // okapiTenantAdminService.freshenAllTenantSchemas()
   }
 
   def destroy = {

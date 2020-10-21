@@ -23,7 +23,6 @@ class ProtocolMessageService {
   EventPublicationService eventPublicationService
   def grailsApplication
 
-  GlobalConfigService globalConfigService
   /**
    * @param eventData : A map structured as followed 
    *   event: {
@@ -56,20 +55,8 @@ class ProtocolMessageService {
     assert eventData.messageType != null;
     assert peer_symbol != null;
 
-    // The first thing to do is to look in the internal SharedConfig to see if the recipient is a
-    // tenant in this system. If so, we can simply call handleIncomingMessage
-    def tenant = globalConfigService.getTenantForSymbol(peer_symbol)
-    log.debug("The tenant for that symbol(${peer_symbol}) is: ${tenant}")
-
     List<ServiceAccount> ill_services_for_peer = findIllServices(peer_symbol)
     log.debug("ILL Services for peer: ${ill_services_for_peer}")
-
-
-    // If the system can't resolve that symbol, it needs to return a protocol error message -- THIS NEEDS TO BE IN REQUEST CONFIRMATION MESSAGE -- not sure this is being done yet.
-    /* if (ill_services_for_peer == null) {
-      // TODO add code here to build error data and incorporate in confirmation message
-      result.status='ERROR'
-    } */
 
     log.debug("Will send an ISO18626 message to ILL service")
 
