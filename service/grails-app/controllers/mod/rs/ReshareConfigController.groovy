@@ -1,10 +1,11 @@
 package mod.rs;
 
-import com.k_int.web.toolkit.ConfigController;
+// import com.k_int.web.toolkit.ConfigController;
 
 import grails.converters.JSON
 
-public class ReshareConfigController extends ConfigController {
+// public class ReshareConfigController extends ConfigController {
+public class ReshareConfigController {
 
   private static String raml_text = '''
 #%RAML 1.0

@@ -156,9 +156,9 @@ class RSNotSuppliedSpec extends GebSpec{
       'RSNotSuppTenantA' | 'note'
   }
     
-      RestBuilder restBuilder() {
-        new RestBuilder()
-      }
+  RestBuilder restBuilder() {
+    new RestBuilder()
+  }
   
   
 }

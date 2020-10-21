@@ -87,6 +87,8 @@ dependencies {
   compile "org.grails.plugins:hibernate5"
   compileOnly "io.micronaut:micronaut-inject-groovy"
 
+
+
   console ("org.grails:grails-console") {
     // The gpars transient depends on an older version of groovy-all.
     exclude group: 'org.codehaus.groovy', module: 'groovy'
@@ -116,6 +118,7 @@ dependencies {
   testCompile "org.seleniumhq.selenium:selenium-remote-driver:3.14.0"
   testCompile "org.seleniumhq.selenium:selenium-api:3.14.0"
   testCompile "org.seleniumhq.selenium:selenium-support:3.14.0"
+  testCompile 'org.grails:grails-datastore-rest-client:6.1.9.RELEASE'
   testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
   testRuntime "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
   compile 'org.z3950.zing:cql-java:1.13'
