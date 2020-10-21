@@ -23,7 +23,7 @@ podTemplate(
       semantic_version_components = app_version.toString().split('\\.')
       is_snapshot = app_version.contains('SNAPSHOT')
       constructed_tag = "build-${props?.appVersion}-${checkout_details?.GIT_COMMIT?.take(12)}"
-      println("Got props: asString:${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components}");
+      println("Got props: ${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components} is_snapshot=${is_snapshot}");
       sh 'echo branch:$BRANCH_NAME'
       sh 'echo commit:$checkout_details.GIT_COMMIT'
     }
@@ -57,7 +57,9 @@ podTemplate(
       container('docker') {
         dir('docker') {
           if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
-            println("Considering build tag : ${constructed_tag} version:${props.appVersion}");
+
+            println("Considering build tag : ${constructed_tag} version:${props.appVersion} is_snapshot:${is_snapshot}");
+
             // Some interesting stuff here https://github.com/jenkinsci/pipeline-examples/pull/83/files
             if ( !is_snapshot ) {
               // do_k8s_update=true
