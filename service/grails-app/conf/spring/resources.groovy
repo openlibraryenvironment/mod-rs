@@ -9,6 +9,10 @@ beans = {
     case Environment.TEST:
     //  sharedIndexService(MockSharedIndexImpl)
     //   hostLMSService(MockHostLMSServiceImpl)
+      emailService(MockEmailServiceImpl)
+      break
+    default:
+      emailService(FolioEmailServiceImpl)
       break
   }
 }

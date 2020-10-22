@@ -21,6 +21,7 @@ import org.grails.orm.hibernate.HibernateDatastore
 import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.olf.rs.EmailService
 
 @Slf4j
 @Integration
@@ -29,6 +30,7 @@ class RSLifecycleSpec extends HttpSpec {
   
 
   // ToDo: **/address needs to have ${baseUrl} replaced with the actual value
+  @Shared
   private static List<Map> DIRECTORY_INFO = [
     [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ] 
     ],
@@ -45,11 +47,15 @@ class RSLifecycleSpec extends HttpSpec {
     ]
   ]
 
+  @Shared
+  private static Map testctx = [:]
+
   def grailsApplication
   EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
   HibernateDatastore hibernateDatastore
   DataSource dataSource
+  EmailService emailService
 
   @Value('${local.server.port}')
   Integer serverPort
@@ -68,9 +74,22 @@ class RSLifecycleSpec extends HttpSpec {
         conn.readTimeout = 20000
       }
     }
+
   }
 
   def setup() {
+    if ( testctx.initialised == null ) {
+      log.debug("Inject actual runtime port number (${serverPort}) into directory entries (${baseUrl}) ");
+      for ( Map entry: DIRECTORY_INFO ) {
+        if ( entry.services != null ) {
+          for ( Map svc: entry.services ) {
+            svc.service.address = "${baseUrl}/rs/iso18626".toString()
+            log.debug("${entry.id}/${entry.name}/${svc.slug}/${svc.service.name} - address updated to ${svc.service.address}");
+          }
+        }
+      }
+      testctx.initialised = true
+    }
   }
 
   def cleanup() {
