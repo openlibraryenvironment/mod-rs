@@ -1,16 +1,7 @@
 package org.olf.rs;
 
 import grails.gorm.multitenancy.Tenants
-import org.olf.rs.HostLMSLocation 
-import org.olf.rs.PatronRequest
-import org.olf.rs.statemodel.AvailableAction
-import org.olf.okapi.modules.directory.Symbol;
-
-import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.k_int.okapi.OkapiClient
-
 import groovy.json.JsonSlurper
 
 /**
@@ -21,6 +12,8 @@ public class FolioEmailServiceImpl implements EmailService {
   def grailsApplication
   def reshareActionService
   static boolean running = false;
+
+  // injected by spring
   OkapiClient okapiClient
 
   public Map sendEmail(Map header_information, Map eventInformation) {

@@ -135,58 +135,12 @@ public class BackgroundTaskService {
     return result;
   }
 
-  private Map getEmailConfig() {
-    if ( email_config == null ) {
-      try {
-        if (okapiClient?.withTenant().providesInterface("configuration", "^2.0")) {
-          email_config = [
-            EMAIL_SMTP_HOST:getSetting('EMAIL_SMTP_HOST'),
-            EMAIL_SMTP_PORT:getSetting('EMAIL_SMTP_PORT'),
-            EMAIL_SMTP_LOGIN_OPTION:getSetting('EMAIL_SMTP_LOGIN_OPTION'),
-            EMAIL_TRUST_ALL:getSetting('EMAIL_TRUST_ALL'),
-            EMAIL_SMTP_SSL:getSetting('EMAIL_SMTP_SSL'),
-            EMAIL_START_TLS_OPTIONS:getSetting('EMAIL_START_TLS_OPTIONS'),
-            EMAIL_USERNAME:getSetting('EMAIL_USERNAME'),
-            EMAIL_PASSWORD:getSetting('EMAIL_PASSWORD'),
-            EMAIL_FROM:getSetting('EMAIL_FROM')
-          ]
-          
-          log.debug("getEmailConfig : ${email_config}");
-        }
-      }
-      catch ( Exception e ) {
-        log.error("Problem talking to mod-config",e);
-        log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
-      }
-    }
-    return email_config;
-  }
-
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
     // HostLMSLocation.list().each { loc ->
     //   log.debug("Check pull slips fro ${loc}");
     //   checkPullSlipsFor(loc.code);
     // }
-
-    log.debug("Checking if okapi context provides us with configuration");
-    Map email_cfg = getEmailConfig();
-
-    if ( email_cfg != null ) {
-      try {
-        log.debug("Send email");
-        // if (okapiClient?.withTenant().providesInterface("email", "^1.0")) {
-        //   log.debug(" -> Got email");
-        //   // Needs to be blocking...
-        //   def email_result = okapiClient.post("/email", [
-        //   ], [:])
-        // }
-      }
-      catch ( Exception e ) {
-        log.error("Problem talking to mod-config",e);
-        log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
-      }
-    }
   }
 
   private void checkPullSlipsFor(String location) {
