@@ -14,14 +14,41 @@ import spock.lang.Shared
 import grails.gorm.multitenancy.Tenants
 import org.olf.okapi.modules.directory.DirectoryEntry
 import com.k_int.web.toolkit.testing.HttpSpec
+import grails.databinding.SimpleMapDataBindingSource
+import grails.web.databinding.GrailsWebDataBinder
+import org.olf.rs.EventPublicationService
+import org.grails.orm.hibernate.HibernateDatastore
+import javax.sql.DataSource
 
 
 @Slf4j
 @Integration
 @Stepwise
 class RSLifecycleSpec extends HttpSpec {
+  
+
+  // ToDo: **/address needs to have ${baseUrl} replaced with the actual value
+  private static List<Map> DIRECTORY_INFO = [
+    [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ] 
+    ],
+    [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ] 
+    ],
+    [ id:'RS-T-D-0003', name: 'RSInstThree', slug:'RS_INST_THREE', symbols: [[ authority:'ISIL', symbol:'RST3', priority:'a'] ],
+      services:[
+        [
+          slug:'RSInstThree_ISO18626',
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+        ]
+      ]
+    ]
+  ]
 
   def grailsApplication
+  EventPublicationService eventPublicationService
+  GrailsWebDataBinder grailsWebDataBinder
+  HibernateDatastore hibernateDatastore
+  DataSource dataSource
 
   Closure authHeaders = {
     header OkapiHeaders.TOKEN, 'dummy'
@@ -85,6 +112,33 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
+  }
+
+
+  void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
+    when:"Load the default directory (test url is ${baseUrl})"
+
+    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+      dirents.each { entry ->
+        log.debug("Sync directory entry ${entry}")
+        def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
+        DirectoryEntry de = new DirectoryEntry()
+        grailsWebDataBinder.bind(de, source)
+
+        log.debug("Before save, ${de}, services:${de.services}");
+        de.save(flush:true, failOnError:true)
+        log.debug("Result of bind: ${de} ${de.id}");
+      }
+    }
+
+    then:"Test directory entries are present"
+    1==1
+
+    where:
+    tenant_id | dirents
+    'RSInstOne' | DIRECTORY_INFO
+    'RSInstTwo' | DIRECTORY_INFO
+    'RSInstThree' | DIRECTORY_INFO
   }
 
 }
