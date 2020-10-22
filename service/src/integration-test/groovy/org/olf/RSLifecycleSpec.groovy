@@ -19,7 +19,8 @@ import grails.web.databinding.GrailsWebDataBinder
 import org.olf.rs.EventPublicationService
 import org.grails.orm.hibernate.HibernateDatastore
 import javax.sql.DataSource
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 
 @Slf4j
 @Integration
@@ -49,6 +50,10 @@ class RSLifecycleSpec extends HttpSpec {
   GrailsWebDataBinder grailsWebDataBinder
   HibernateDatastore hibernateDatastore
   DataSource dataSource
+
+  @Value('${local.server.port}')
+  Integer serverPort
+
 
   Closure authHeaders = {
     header OkapiHeaders.TOKEN, 'dummy'
@@ -120,7 +125,7 @@ class RSLifecycleSpec extends HttpSpec {
 
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
       dirents.each { entry ->
-        log.debug("Sync directory entry ${entry}")
+        log.debug("Sync directory entry ${entry} - Detected runtime port is ${serverPort}")
         def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
         DirectoryEntry de = new DirectoryEntry()
         grailsWebDataBinder.bind(de, source)
