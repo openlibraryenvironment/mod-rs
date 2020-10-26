@@ -13,6 +13,9 @@ import com.k_int.okapi.OkapiClient
 
 import groovy.json.JsonSlurper
 
+import org.olf.rs.EmailService
+
+
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
@@ -23,9 +26,9 @@ public class BackgroundTaskService {
   def reshareActionService
   static boolean running = false;
   OkapiClient okapiClient
+  EmailService emailService
 
   private static config_test_count = 0;
-  private static Map email_config = null;
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
@@ -137,13 +140,27 @@ public class BackgroundTaskService {
 
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
-    // HostLMSLocation.list().each { loc ->
-    //   log.debug("Check pull slips fro ${loc}");
-    //   checkPullSlipsFor(loc.code);
-    // }
+    timer_cfg.locations.each { loc ->
+      log.debug("Check pull slips for ${loc}");
+      checkPullSlipsFor(loc);
+    }
   }
 
   private void checkPullSlipsFor(String location) {
     log.debug("checkPullSlipsFor(${location})");
+    try {
+      Map email_params = [
+            'notificationId':'1',
+                        'to':'ianibbo@gmail.com',
+                      'from':'admin@reshare.org',
+                    'header':'Test email from reshare',
+                      'body':'''Some test'''
+      ]
+
+      Map email_result = emailService.sendEmail(email_params);
+    }
+    catch ( Exception e ) {
+      e.printStackTrace();
+    }
   }
 }

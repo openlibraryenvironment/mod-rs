@@ -16,7 +16,7 @@ public class FolioEmailServiceImpl implements EmailService {
   // injected by spring
   OkapiClient okapiClient
 
-  public Map sendEmail(Map header_information, Map eventInformation) {
+  public Map sendEmail(Map email_params) {
     log.debug("FolioEmailServiceImpl::sendNotification(${header_information},${eventInformation})");
 
     Map email_cfg = getEmailConfig();
@@ -26,8 +26,9 @@ public class FolioEmailServiceImpl implements EmailService {
         log.debug("Send email");
         if (okapiClient?.withTenant().providesInterface("email", "^1.0")) {
           log.debug(" -> Got email");
-          // def email_result = okapiClient.post("/email", [
-          // ], [:])
+
+          // post(URL, JsonPayload, Params)
+          def email_result = okapiClient.post("/email", email_params, [:]);
         }
       }
       catch ( Exception e ) {

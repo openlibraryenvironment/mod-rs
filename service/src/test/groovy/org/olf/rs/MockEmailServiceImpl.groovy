@@ -25,9 +25,8 @@ public class MockEmailServiceImpl implements EmailService {
   static boolean running = false;
   OkapiClient okapiClient
 
-  public Map sendEmail(Map header_information, Map eventInformation) {
-    log.debug("MockEmailServiceImpl::sendNotification(${header_information},${eventInformation})");
-
+  public Map sendEmail(Map email_params) {
+    log.debug("MockEmailServiceImpl::sendNotification(${email_params})");
     return [ status: 'OK' ]
   }
 }
