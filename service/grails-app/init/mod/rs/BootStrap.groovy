@@ -10,12 +10,14 @@ class BootStrap {
   
   def init = { servletContext ->
 
-    log.info("**mod-rs** ${grailsApplication.metadata.'info.app.version'} / ${grailsApplication.metadata.'build.time'}");
-
-    Thread.sleep(2000);
-    
-    // housekeepingService.ensureSharedSchema();
-    // okapiTenantAdminService.freshenAllTenantSchemas()
+    log.info("${grailsApplication.getMetadata().getApplicationName()}  (${grailsApplication.config?.info?.app?.version}) initialising");
+    log.info("          build number -> ${grailsApplication.metadata['build.number']}");
+    log.info("        build revision -> ${grailsApplication.metadata['build.git.revision']}");
+    log.info("          build branch -> ${grailsApplication.metadata['build.git.branch']}");
+    log.info("          build commit -> ${grailsApplication.metadata['build.git.commit']}");
+    log.info("            build time -> ${grailsApplication.metadata['build.time']}");
+    log.info("            build host -> ${grailsApplication.metadata['build.host']}");
+    log.info("         Base JDBC URL -> ${grailsApplication.config.dataSource.url}");
   }
 
   def destroy = {
