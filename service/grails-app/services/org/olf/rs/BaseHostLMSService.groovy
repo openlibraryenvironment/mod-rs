@@ -293,10 +293,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( ( patron_id != null ) && ( patron_id.length() > 0 ) ) {
         AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
         AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+        AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
         AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
     
         String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
         String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+        String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
         String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
     
         if ( ( ncip_server_address != null ) &&
@@ -309,7 +311,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                       .includeUserAddressInformation()
                       .includeUserPrivilege()
                       .includeNameInformation()
-                      .setToAgency(ncip_from_agency)
+                      .setToAgency(ncip_to_agency)
                       .setFromAgency(ncip_from_agency)
                       .setApplicationProfileType(ncip_app_profile);
           JSONObject response = ncip_client.send(lookupUser);
@@ -491,10 +493,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
       AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
       AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+      AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
       AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
       String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
       String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
+      String ncip_to_agency = ncip_from_agency_setting?.value ?: ncip_from_agency
       String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
       CirculationClient ncip_client = getCirculationClient(ncip_server_address);
@@ -502,7 +506,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                     .setUserId(borrowerBarcode)
                     .setItemId(itemBarcode)
                     .setRequestId(requestId)
-                    .setToAgency(ncip_from_agency)
+                    .setToAgency(ncip_to_agency)
                     .setFromAgency(ncip_from_agency)
                     .setApplicationProfileType(ncip_app_profile);
                     //.setDesiredDueDate("2020-03-18");
@@ -556,10 +560,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+          AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
           AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
           String ncip_server_address = ncip_server_address_setting?.value
           String ncip_from_agency = ncip_from_agency_setting?.value
+          String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
           String ncip_app_profile = ncip_app_profile_setting?.value
 
           CirculationClient ncip_client = getCirculationClient(ncip_server_address);
@@ -572,7 +578,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setIsbn(isbn)
                         .setCallNumber(call_number)
                         .setPickupLocation(pickup_location)
-                        .setToAgency(ncip_from_agency)
+                        .setToAgency(ncip_to_agency)
                         .setFromAgency(ncip_from_agency)
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncip_app_profile);
@@ -609,16 +615,18 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("checkInItem(${item_id})");
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
+          AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
           AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
 
           String ncip_server_address = ncip_server_address_setting?.value
           String ncip_from_agency = ncip_from_agency_setting?.value
+          String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
           String ncip_app_profile = ncip_app_profile_setting?.value
 
           CirculationClient ncip_client = getCirculationClient(ncip_server_address);
           CheckinItem checkinItem = new CheckinItem()
                         .setItemId(item_id)
-                        .setToAgency(ncip_from_agency)
+                        .setToAgency(ncip_to_agency)
                         .setFromAgency(ncip_from_agency)
                         .includeBibliographicDescription()
                         .setApplicationProfileType(ncip_app_profile);
