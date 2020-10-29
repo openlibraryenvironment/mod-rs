@@ -74,7 +74,14 @@ public class BackgroundTaskService {
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
         log.debug("Checking timers ready for execution");
-        Timer.executeQuery('select t from Timer as t where t.lastExecution < :now and t.enabled=:en', [now:System.currentTimeMillis(), en: true]).each { timer ->
+
+        // Dump all timers whilst we look into timer execution
+        Timer.list().each { ti ->
+          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig}");
+        }
+
+        Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) and t.enabled=:en', 
+                           [now:System.currentTimeMillis(), en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
             runTimer(timer);
