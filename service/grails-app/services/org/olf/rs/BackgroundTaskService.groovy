@@ -77,7 +77,7 @@ public class BackgroundTaskService {
 
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
-          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.active}, ${ti.rrule}, ${ti.taskConfig}");
+          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig}");
         }
 
         Timer.executeQuery('select t from Timer as t where t.lastExecution < :now and t.enabled=:en', [now:System.currentTimeMillis(), en: true]).each { timer ->
