@@ -1,4 +1,4 @@
-@Library('indexdata-jsl@frontend-builds') _
+@Library('indexdata-jsl') _
 
 reshareBackend {
 }
