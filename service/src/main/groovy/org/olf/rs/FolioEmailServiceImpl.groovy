@@ -3,10 +3,12 @@ package org.olf.rs;
 import grails.gorm.multitenancy.Tenants
 import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 
 /**
- * An interface to the folio email service
+ * 
  */
+@Slf4j
 public class FolioEmailServiceImpl implements EmailService {
 
   def grailsApplication
