@@ -27,7 +27,7 @@ class EmailServiceSpec extends GebSpec {
 
   void "Test send email"() {
     when: "we send an email"
-      def send_result = emailService.sendEmail([:],[:]);
+      def send_result = emailService.sendEmail([:]);
 
     then: "service returns [status:'OK']"
       send_result.status == 'OK'
