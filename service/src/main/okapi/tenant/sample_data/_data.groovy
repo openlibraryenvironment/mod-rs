@@ -166,7 +166,7 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   key: 'ncip_from_agency',
                                   defValue: '').save(flush:true, failOnError: true);
 
-  AppSetting ncip_from_agency = AppSetting.findByKey('ncip_to_agency') ?: new AppSetting( 
+  AppSetting ncip_to_agency = AppSetting.findByKey('ncip_to_agency') ?: new AppSetting( 
                                   section:'localNCIP',
                                   settingType:'String',
                                   key: 'ncip_to_agency',
