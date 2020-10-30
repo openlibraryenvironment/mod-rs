@@ -80,7 +80,7 @@ public class BackgroundTaskService {
           log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig}");
         }
 
-        Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) and t.enabled=:en', 
+        Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
                            [now:System.currentTimeMillis(), en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
