@@ -19,9 +19,9 @@ import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.NCIP2Client;
 import org.olf.rs.circ.client.CirculationClient;
-
 import org.json.JSONObject;
 import org.json.JSONArray;
+import grails.gorm.multitenancy.Tenants.CurrentTenant
 
 
 /**
@@ -511,8 +511,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                     .setApplicationProfileType(ncip_app_profile);
                     //.setDesiredDueDate("2020-03-18");
 
+      log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
       JSONObject response = ncip_client.send(checkoutItem);
-      log.debug("NCIP2 checkoutItem responseL ${response}");
+      log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem response ${response}");
+
       if ( response.has('problems') ) {
         result.result = false;
         result.problems = response.get('problems');

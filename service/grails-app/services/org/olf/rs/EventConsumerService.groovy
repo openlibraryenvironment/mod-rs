@@ -179,6 +179,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                 log.debug("Update directory entry ${data.payload.slug} : ${data.payload}");
               }
               bindData(de, data.payload);
+              bindCustomProperties(de, data.payload);
               log.debug("Binding complete - ${de}");
               de.save(flush:true, failOnError:true);
             }
@@ -192,6 +193,40 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
     finally {
       log.debug("Directory update processing complete (${event})");
+    }
+  }
+
+  /**
+   * The "We must have the same ID's on directory entries in all modules has bitten us again.
+   * We need to do special work to bind custom properties in the payload to the directory entry.
+   * Right now, restricting this to string based properties. New custom properties will be bound without
+   * issues.
+   */
+  private void bindCustomProperties(DirectoryEntry de, Map payload) {
+    payload?.customProperties?.each { k, v ->
+      log.debug("Check binding for ${k} -> ${v}");
+      // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+      // we need to see if we can find
+      if ( ['local_institutionalPatronId'].contains(k) ) {
+        de.customProperties?.value.each { cp ->
+          if ( cp.definition.name == k ) {
+            log.debug("updating customProperties.${k}.value to ${v} - custprop type is ${cp.definition.type?.toString()}");
+            if ( v instanceof List ) {
+              cp.value = v.get(0);
+            }
+            else if ( v instanceof String ) {
+              cp.value = v
+            }
+
+            if ( cp.definition.type?.toString() == 'com.k_int.web.toolkit.custprops.types.CustomPropertyText' ) {
+              log.debug("Custprop is a string");
+            }
+            else {
+              log.debug("Custprop is not a string (${cp.definition.type?.toString()})");
+            }
+          }
+        }
+      }
     }
   }
 }
