@@ -19,7 +19,7 @@ public class FolioEmailServiceImpl implements EmailService {
   OkapiClient okapiClient
 
   public Map sendEmail(Map email_params) {
-    log.debug("FolioEmailServiceImpl::sendNotification(${header_information},${eventInformation})");
+    log.debug("FolioEmailServiceImpl::sendNotification(${email_params})");
 
     Map email_cfg = getEmailConfig();
 
