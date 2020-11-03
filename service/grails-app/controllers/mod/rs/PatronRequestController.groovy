@@ -55,6 +55,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'message':
               result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
+              patron_request.save(flush:true, failOnError:true);
               break;
             case 'messageSeen':
               result.status = reshareActionService.changeMessageSeenState(patron_request, request.JSON.actionParams);
@@ -70,6 +71,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
                 if ( reshareApplicationEventHandlerService.routeRequestToLocation(patron_request, location) ) {
                   reshareActionService.sendResponse(patron_request, 'ExpectToSupply', request.JSON.actionParams)
+                  patron_request.save(flush:true, failOnError:true);
                 }
                 else {
                   response.status = 400;
@@ -253,6 +255,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                   result.code=-3; // NCIP action failed
                   result.message='NCIP AcceptItem call failed'
               };
+              patron_request.save(flush:true, failOnError:true);
               break;
             case 'requesterManualCheckIn':
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CHECKED_IN');
