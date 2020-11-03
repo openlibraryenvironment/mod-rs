@@ -176,10 +176,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               }
               else {
                 de.lock()
+                clearCustomProperties(de)
                 log.debug("Update directory entry ${data.payload.slug} : ${data.payload}");
               }
+
               bindData(de, data.payload);
-              bindCustomProperties(de, data.payload);
               log.debug("Binding complete - ${de}");
               de.save(flush:true, failOnError:true);
             }
@@ -196,6 +197,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
   }
 
+  private void clearCustomProperties(DirectoryEntry de) {
+    
+  }
+
   /**
    * The "We must have the same ID's on directory entries in all modules has bitten us again.
    * We need to do special work to bind custom properties in the payload to the directory entry.
@@ -203,30 +208,42 @@ public class EventConsumerService implements EventPublisher, DataBinder {
    * issues.
    */
   private void bindCustomProperties(DirectoryEntry de, Map payload) {
+    log.debug("Iterate over custom properties sent in directory entry payload");
+
     payload?.customProperties?.each { k, v ->
       log.debug("Check binding for ${k} -> ${v}");
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
       // we need to see if we can find
       if ( ['local_institutionalPatronId'].contains(k) ) {
+        boolean first = true;
+
+        // Root level custom properties object is a custom properties container
+        // We iterate over each custom property to see if it's one we want to process
         de.customProperties?.value.each { cp ->
           if ( cp.definition.name == k ) {
             log.debug("updating customProperties.${k}.value to ${v} - custprop type is ${cp.definition.type?.toString()}");
             if ( v instanceof List ) {
-              cp.value = v.get(0);
+              // cp.value = v.get(0);
+              mergeCustpropWithList(cp, v)
             }
             else if ( v instanceof String ) {
-              cp.value = v
-            }
-
-            if ( cp.definition.type?.toString() == 'com.k_int.web.toolkit.custprops.types.CustomPropertyText' ) {
-              log.debug("Custprop is a string");
-            }
-            else {
-              log.debug("Custprop is not a string (${cp.definition.type?.toString()})");
+              // cp.value = v
+              mergeCustpropWithString(cp, v)
             }
           }
         }
       }
     }
   }
+
+  private void mergeCustpropWithList(Object cp_value, List binding_value) {
+    log.debug("mergeCustpropWithList(${cp_value?.class?.name}, ${binding_value})");
+    log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+  }
+
+  private void mergeCustpropWithString(Object cp_value, String binding_value) {
+    log.debug("mergeCustpropWithString(${cp_value?.class?.name}, ${binding_value})");
+    log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+  }
+
 }
