@@ -14,11 +14,31 @@ public class FolioEmailServiceImpl implements EmailService {
   def grailsApplication
   def reshareActionService
   static boolean running = false;
+  static map email_config = null;
 
   // injected by spring
   OkapiClient okapiClient
 
   public Map sendEmail(Map email_params) {
+    try {
+      log.debug("Send email");
+      if (okapiClient?.withTenant().providesInterface("email", "^1.0")) {
+        log.debug(" -> Got email");
+
+        // post(URL, JsonPayload, Params)
+        def email_result = okapiClient.post("/email", email_params, [:]);
+
+        log.debug("Email result: ${email_result}");
+      }
+    }
+    catch ( Exception e ) {
+      log.error("Problem talking to mod-config",e);
+      log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+    }
+
+  }
+
+  public Map legacySendEmail(Map email_params) {
     log.debug("FolioEmailServiceImpl::sendNotification(${email_params})");
 
     Map email_cfg = getEmailConfig();
