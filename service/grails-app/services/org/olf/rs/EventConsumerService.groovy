@@ -180,7 +180,17 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                 log.debug("Update directory entry ${data.payload.slug} : ${data.payload}");
               }
 
+              // Remove any custom properties from the payload - currently the custprops
+              // processing is additive - which means we get lots of values. Need a longer term solition for this
+              def custprops = data.payload.remove('customProperties');
+
+              // Bind all the data execep the custprops
               bindData(de, data.payload);
+
+              // Do special handling of the custprops
+              data.payload.customProperties = custprops;
+              bindCustomProperties(de, data.payload)
+
               log.debug("Binding complete - ${de}");
               de.save(flush:true, failOnError:true);
             }
@@ -208,7 +218,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
    * issues.
    */
   private void bindCustomProperties(DirectoryEntry de, Map payload) {
-    log.debug("Iterate over custom properties sent in directory entry payload");
+    log.debug("Iterate over custom properties sent in directory entry payload ${payload.customProperties}");
 
     payload?.customProperties?.each { k, v ->
       log.debug("Check binding for ${k} -> ${v}");

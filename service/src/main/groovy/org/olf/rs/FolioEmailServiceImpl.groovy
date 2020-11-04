@@ -14,7 +14,7 @@ public class FolioEmailServiceImpl implements EmailService {
   def grailsApplication
   def reshareActionService
   static boolean running = false;
-  static map email_config = null;
+  static Map email_config = null;
 
   // injected by spring
   OkapiClient okapiClient
