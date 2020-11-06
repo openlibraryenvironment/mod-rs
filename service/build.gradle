@@ -138,7 +138,6 @@ dependencies {
   compile 'com.opencsv:opencsv:4.6'
   compile 'commons-io:commons-io:2.6'
 
-  compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'     // TODO: Migrate away from this resource.
   compile 'com.k_int.grails:web-toolkit-ce:5.0.0-rc.5'
   compile 'com.k_int.okapi:grails-okapi:4.0.0-rc.1'
 
