@@ -5,6 +5,7 @@ import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import grails.core.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * 
@@ -12,23 +13,32 @@ import grails.core.GrailsApplication
 @Slf4j
 public class FolioEmailServiceImpl implements EmailService {
 
+  @Autowired
   GrailsApplication grailsApplication
+
   static boolean running = false;
   static Map email_config = null;
 
   // injected by spring
+  @Autowired
   OkapiClient okapiClient
 
   public Map sendEmail(Map email_params) {
     try {
-      log.debug("Send email");
-      if (okapiClient?.withTenant().providesInterface("email", "^1.0")) {
-        log.debug(" -> Got email");
+      log.debug("Send email (okapiClient=${okapiClient})");
 
-        // post(URL, JsonPayload, Params)
-        def email_result = okapiClient.post("/email", email_params, [:]);
-
-        log.debug("Email result: ${email_result}");
+      if ( okapiClient ) {
+        if (okapiClient.withTenant().providesInterface("email", "^1.0")) {
+          log.debug(" -> Got email");
+  
+          // post(URL, JsonPayload, Params)
+          def email_result = okapiClient.post("/email", email_params, [:]);
+  
+          log.debug("Email result: ${email_result}");
+        }
+      }
+      else {
+        log.warn("okapiClient not properly injcted - unable to send email");
       }
     }
     catch ( Exception e ) {
