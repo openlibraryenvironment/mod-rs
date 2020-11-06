@@ -4,6 +4,7 @@ import grails.gorm.multitenancy.Tenants
 import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import grails.core.GrailsApplication
 
 /**
  * 
@@ -11,8 +12,7 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class FolioEmailServiceImpl implements EmailService {
 
-  def grailsApplication
-  def reshareActionService
+  GrailsApplication grailsApplication
   static boolean running = false;
   static Map email_config = null;
 
