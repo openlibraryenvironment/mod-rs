@@ -13,6 +13,10 @@ import com.k_int.okapi.OkapiClient
 import groovy.util.logging.Slf4j
 import groovy.json.JsonSlurper
 
+import grails.core.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
+
+
 /**
  * A mock email service that allows the integration tests to complete without sending any actual emails
  *
@@ -20,13 +24,14 @@ import groovy.json.JsonSlurper
 @Slf4j
 public class MockEmailServiceImpl implements EmailService {
 
-  def grailsApplication
-  def reshareActionService
+  @Autowired
+  GrailsApplication grailsApplication
+
   static boolean running = false;
   OkapiClient okapiClient
 
   public Map sendEmail(Map email_params) {
-    log.debug("MockEmailServiceImpl::sendNotification(${email_params})");
+    log.debug("MockEmailServiceImpl::sendNotification(${email_params}) - grailsApplication is ${grailsApplication}");
     return [ status: 'OK' ]
   }
 }
