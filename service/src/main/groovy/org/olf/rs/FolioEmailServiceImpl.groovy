@@ -31,7 +31,7 @@ public class FolioEmailServiceImpl implements EmailService {
 
       if ( okapiClient ) {
         if (okapiClient.withTenant().providesInterface("email", "^1.0")) {
-          log.debug(" -> Got email");
+          log.debug(" -> Got email - calling post ${email_params}");
   
           // post(URL, JsonPayload, Params)
           def email_result = okapiClient.post("/email", email_params, [:]);
@@ -44,7 +44,7 @@ public class FolioEmailServiceImpl implements EmailService {
       }
     }
     catch ( Exception e ) {
-      log.error("Problem talking to mod-config",e);
+      log.error("Problem talking to mod-email",e);
       log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
     }
 
