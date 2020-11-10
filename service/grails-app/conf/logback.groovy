@@ -44,6 +44,9 @@ logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
 logger ('org.olf.rs.EventConsumerService', DEBUG)
 
+// Debugging call to mod-email
+logger ('com.k_int.okapi.OkapiClient', TRACE)
+
 // logger ('com.k_int.okapi.OkapiClient', TRACE)
 // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
 // logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG

@@ -78,7 +78,8 @@ public class BackgroundTaskService {
     
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
-          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${((ti.lastExecution?:0)-System.currentTimeMillis())}");
+          def remaining_min = ((ti.lastExecution?:0)-System.currentTimeMillis())/60000
+          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
         }
 
         Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
