@@ -314,9 +314,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                       .setToAgency(ncip_to_agency)
                       .setFromAgency(ncip_from_agency)
                       .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
           JSONObject response = ncip_client.send(lookupUser);
-    
-          log.debug("Lookup user response: ${response}");
+          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
     
   
           // {"firstName":"Stacey",
