@@ -584,7 +584,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setFromAgency(ncip_from_agency)
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem request ${acceptItem}");
           JSONObject response = ncip_client.send(acceptItem);
+          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem response ${response}");
+
           if ( response.has('problems') ) {
             result.result = false;
             result.problems = response.get('problems')
@@ -632,7 +636,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setFromAgency(ncip_from_agency)
                         .includeBibliographicDescription()
                         .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
+          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem response ${response}");
+
+
           log.debug(response?.toString());
           if ( response.has('problems') ) {
             // If there is a problem block, something went wrong, so change response to false.
