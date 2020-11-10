@@ -4,6 +4,7 @@ import grails.gorm.multitenancy.Tenants
 import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import grails.core.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -13,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 public class FolioEmailServiceImpl implements EmailService {
 
   @Autowired
-  def grailsApplication
-
-  @Autowired
-  def reshareActionService
+  GrailsApplication grailsApplication
 
   static boolean running = false;
   static Map email_config = null;
