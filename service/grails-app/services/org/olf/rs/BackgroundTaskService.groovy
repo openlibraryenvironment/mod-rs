@@ -120,16 +120,21 @@ public class BackgroundTaskService {
   }
 
   private runTimer(Timer t) {
-    switch ( t.taskCode ) {
-      case 'PrintPullSlips':
-        log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
-        JsonSlurper jsonSlurper = new JsonSlurper()
-        Map task_config = jsonSlurper.parseText(t.taskConfig)
-        checkPullSlips(task_config)
-        break;
-      default:
-        log.debug("Unhandled timer task code ${t.taskCode}");
-        break;
+    try {
+      switch ( t.taskCode ) {
+        case 'PrintPullSlips':
+          log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+          JsonSlurper jsonSlurper = new JsonSlurper()
+          Map task_config = jsonSlurper.parseText(t.taskConfig)
+          checkPullSlips(task_config)
+          break;
+        default:
+          log.debug("Unhandled timer task code ${t.taskCode}");
+          break;
+      }
+    }
+    catch ( Exception e ) {
+      log.error("ERROR running timer",e)
     }
   }
 
