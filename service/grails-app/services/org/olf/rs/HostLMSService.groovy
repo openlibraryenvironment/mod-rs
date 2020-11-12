@@ -22,11 +22,6 @@ public class HostLMSService {
 
   GrailsApplication grailsApplication
 
-  // def defaultHostLMSService
-  // def manualHostLMSService
-  // def alephHostLMSService
-  // def wmsHostLMSService
-
   public HostLMSActions getHostLMSActionsFor(String lms) {
     log.debug("HostLMSService::getHostLMSActionsFor(${lms})");
     HostLMSActions result = grailsApplication.mainContext."${lms}HostLMSService"
