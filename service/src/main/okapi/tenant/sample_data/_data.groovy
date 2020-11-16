@@ -78,6 +78,12 @@ try {
                                 key: 'wms_lookup_patron_endpoint'
                                 ).save(flush:true, failOnError: true);
 
+  AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id') ?: new AppSetting( 
+                              section:'wmsSettings',
+                              settingType:'String',
+                              key: 'wms_registry_id'
+                              ).save(flush:true, failOnError: true);
+
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');

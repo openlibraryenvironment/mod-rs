@@ -1,23 +1,19 @@
 #! /bin/sh
 
-AUTH_TOKEN=`./okapi-login`
-
-OKAPI="http://localhost:9130"
-TENANT="diku"
-
-if [ -f .okapirc ]; then
-  . .okapirc
-elif [ -f $HOME/.okapirc ]; then
-  . $HOME/.okapirc
+if [ $# -ne 2 ]; then
+   echo "Usage: $0 <locationCode> <locationName>" >&2
+   exit 1;
 fi
 
-
-
-#  serviceType:"Loan",
-LMS_LOC_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/hostLMSLocations -d ' {
-  code:"TestLoc1",
-  name:"Test Loc 1 Name"
-}
-'`
-
-echo Result : $LMS_LOC_1
+. ~/.okapi
+set -x
+curl \
+	-H "X-Okapi-Tenant: ${OKAPI_TENANT}" \
+	-H "X-Okapi-Token: ${OKAPI_TOKEN}" \
+	-H "Content-Type: application/json" \
+	-X POST \
+	${OKAPI_URL}/rs/hostLMSLocations \
+	-d "{
+  code: \"$1\",
+  name: \"$2\"
+}"
