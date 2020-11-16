@@ -243,6 +243,8 @@
           "modulePermissions": [ 
             "configuration.entries.item.get", 
             "configuration.entries.collection.get", 
+            "templates.item.get",
+            "template-request.post",
             "email.message.post" 
           ]
         }

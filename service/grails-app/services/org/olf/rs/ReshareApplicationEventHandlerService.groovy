@@ -42,6 +42,7 @@ public class ReshareApplicationEventHandlerService {
   HostLMSService hostLMSService
   ReshareActionService reshareActionService
   StatisticsService statisticsService
+  PatronNoticeService patronNoticeService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -178,6 +179,7 @@ public class ReshareApplicationEventHandlerService {
               def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
               auditEntry(req, req.state, validated_state, 'Request Validated', null);
               req.state = validated_state;
+              patronNoticeService.triggerNotices(req, "new_request");
             } else if (s == null) {
               // An unknown requesting institution symbol is a bigger deal than an invalid patron
               req.needsAttention=true;
