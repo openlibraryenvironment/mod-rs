@@ -22,6 +22,8 @@ import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.olf.rs.EmailService
+import org.olf.rs.HostLMSService
+import org.olf.rs.lms.HostLMSActions
 
 @Slf4j
 @Integration
@@ -56,6 +58,7 @@ class RSLifecycleSpec extends HttpSpec {
   HibernateDatastore hibernateDatastore
   DataSource dataSource
   EmailService emailService
+  HostLMSService hostLMSService
 
   @Value('${local.server.port}')
   Integer serverPort
@@ -113,6 +116,31 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
+  }
+
+  void "test presence of HOST LMS adapters"(String name, boolean should_be_found) {
+
+    when: "We try to look up ${name} as a host adapter"
+      log.debug("Lookup LMS adapter ${name}");
+      HostLMSActions actions = hostLMSService.getHostLMSActionsFor(name)
+      log.debug("result of lookup : ${actions}");
+
+    then: "We expect that the adapter should ${should_be_found ? 'BE' : 'NOT BE'} found. result was ${actions}."
+      if ( should_be_found ) {
+        actions != null
+      }
+      else {
+        actions == null
+      }
+
+    where:
+      name | should_be_found
+      'alma' | true
+      'aleph' | true
+      'wms' | true
+      'default' | true
+      'manual' | true
+      'wibble' | false
   }
 
   // Set up a new tenant called RSTestTenantA
