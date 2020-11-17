@@ -25,6 +25,11 @@ public class HostLMSService {
   public HostLMSActions getHostLMSActionsFor(String lms) {
     log.debug("HostLMSService::getHostLMSActionsFor(${lms})");
     HostLMSActions result = grailsApplication.mainContext."${lms}HostLMSService"
+
+    if ( result == null ) {
+      log.warn("Unable to locate HostLMSActions for ${lms}. Did you fail to configure the app_setting \"host_lms_integration\". Current options are aleph|alma|wms|manual|default");
+    }
+
     return result;
   }
 
