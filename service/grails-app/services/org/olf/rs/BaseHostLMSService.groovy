@@ -427,7 +427,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
       String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-      String ncip_to_agency = ncip_from_agency_setting?.value ?: ncip_from_agency
+      String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
       String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
 
       CirculationClient ncip_client = getCirculationClient(ncip_server_address);
