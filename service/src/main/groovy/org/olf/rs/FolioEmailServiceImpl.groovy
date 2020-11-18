@@ -25,10 +25,10 @@ public class FolioEmailServiceImpl implements EmailService {
 
   public Map sendEmail(Map email_params) {
     try {
-      log.debug("Send email (okapiClient=${okapiClient})");
+      log.debug("Send email (okapiClient=${okapiClient}) okapiHost=${okapiClient.}");
 
       if ( okapiClient ) {
-        if (okapiClient.withTenant().providesInterface("email", "^1.0")) {
+        // if (okapiClient.withTenant().providesInterface("email", "^1.0")) {
           log.debug(" -> Got email - calling post ${email_params}");
   
           // post(URL, JsonPayload, Params)
@@ -36,7 +36,7 @@ public class FolioEmailServiceImpl implements EmailService {
           }
   
           log.debug("Email result: ${email_result}");
-        }
+        // }
       }
       else {
         log.warn("okapiClient not properly injcted - unable to send email");
