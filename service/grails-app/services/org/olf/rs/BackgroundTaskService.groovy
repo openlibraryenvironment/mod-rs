@@ -10,10 +10,9 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.k_int.okapi.OkapiClient
-
 import groovy.json.JsonSlurper
-
 import org.olf.rs.EmailService
+import java.util.UUID;
 
 
 /**
@@ -163,10 +162,10 @@ public class BackgroundTaskService {
   private void checkPullSlipsFor(String location) {
     log.debug("checkPullSlipsFor(${location})");
     try {
+      // 'from':'admin@reshare.org',
       Map email_params = [
-            'notificationId':'1',
+            'notificationId':UUID.randomUUID().toString(),
                         'to':'ianibbo@gmail.com',
-                      'from':'admin@reshare.org',
                     'header':'Test email from reshare',
                       'body':'''Some test'''
       ]
