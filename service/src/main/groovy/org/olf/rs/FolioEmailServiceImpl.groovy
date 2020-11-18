@@ -25,7 +25,7 @@ public class FolioEmailServiceImpl implements EmailService {
 
   public Map sendEmail(Map email_params) {
     try {
-      log.debug("Send email (okapiClient=${okapiClient}) okapiHost=${okapiClient.}");
+      log.debug("Send email (okapiClient=${okapiClient})")
 
       if ( okapiClient ) {
         // if (okapiClient.withTenant().providesInterface("email", "^1.0")) {
