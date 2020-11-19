@@ -321,6 +321,7 @@ public class ReshareApplicationEventHandlerService {
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
             req.save(flush:true, failOnError:true)
+            patronNoticeService.triggerNotices(req, "end_of_rota");
           }
         }
       }

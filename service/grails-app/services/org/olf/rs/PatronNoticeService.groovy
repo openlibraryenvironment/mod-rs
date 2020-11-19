@@ -68,17 +68,19 @@ public class PatronNoticeService {
           email: pr.patronEmail,
           values: [
             user: [
-              id: pr?.patronReference,
-              firstName: pr?.patronGivenName,
-              lastName: pr?.patronSurname,
+              id: pr.patronReference,
+              givenName: pr?.patronGivenName ?: "",
+              surame: pr.patronSurname,
             ],
             request: [
               id: pr.hrid,
-              // pickupLocation: pr?.pickupLocation,
-              // neededBy: pr?.neededBy
+              pickupLocation: "",
+              neededBy: ""
+              // pickupLocation: pr?.pickupLocation ?: "",
+              // neededBy: pr?.neededBy ?: ""
             ],
             item: [
-              title: pr?.title
+              title: pr.title
             ]
           ]
         ]
@@ -108,15 +110,15 @@ public class PatronNoticeService {
               context: data.payload.values
             ]
             log.debug("Generating patron notice corresponding to trigger ${data.payload.trigger} for policy ${it.noticePolicy.name}")
-            // log.debug(tmplParams.toString())
             def tmplResult = okapiClient.post("/template-request", tmplParams)
             Map emailParams = [
               notificationId: it.id,
-              from: 'settingneeded@reshare.org',
+              to: data.payload.email,
               header: tmplResult.result.header,
-              body: tmplResult.result.body
+              body: tmplResult.result.body,
+              outputFormat: "text/html"
             ]
-            log.debug(emailParams.toString())
+            emailService.sendEmail(emailParams)
           }
         }
       }
