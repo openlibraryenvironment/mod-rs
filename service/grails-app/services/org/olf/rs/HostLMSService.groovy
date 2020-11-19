@@ -12,7 +12,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
-
+import grails.core.GrailsApplication
 
 /**
  * Return the right HostLMSActions for the tenant config
@@ -20,38 +20,25 @@ import org.olf.rs.lms.HostLMSActions;
  */
 public class HostLMSService {
 
-  def defaultHostLMSService
-  def manualHostLMSService
-  def alephHostLMSService
-  def wmsHostLMSService
+  GrailsApplication grailsApplication
+
+  public HostLMSActions getHostLMSActionsFor(String lms) {
+    log.debug("HostLMSService::getHostLMSActionsFor(${lms})");
+    HostLMSActions result = grailsApplication.mainContext."${lms}HostLMSService"
+
+    if ( result == null ) {
+      log.warn("Unable to locate HostLMSActions for ${lms}. Did you fail to configure the app_setting \"host_lms_integration\". Current options are aleph|alma|wms|manual|default");
+    }
+
+    return result;
+  }
 
   public HostLMSActions getHostLMSActions() {
-
     HostLMSActions result = null;
-
     AppSetting host_lms_intergation_setting = AppSetting.findByKey('host_lms_integration');
     String v = host_lms_intergation_setting?.value
-
-    log.debug("Return host lms integrations for : ${v}");
-
-    switch ( v ) {
-      case 'none':
-        result = manualHostLMSService
-        break;
-      case 'alma':
-        result = defaultHostLMSService
-        break;
-      case 'aleph':
-        result = alephHostLMSService
-        break;
-      case 'wms':
-        result = wmsHostLMSService
-        break;
-      default:
-        result = defaultHostLMSService
-        break;
-    }
-    
+    log.debug("Return host lms integrations for : ${v} - query application context for bean named ${v}HostLMSService");
+    result = getHostLMSActionsFor(v);
     return result;
   }
 

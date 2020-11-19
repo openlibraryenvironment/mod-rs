@@ -26,10 +26,7 @@ logger ('com.k_int', DEBUG)
 logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
 logger ('com.k_int.okapi', WARN)
 logger ('com.k_int.okapi.DataloadingService', DEBUG)
-// logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
-logger ('com.k_int.okapi.OkapiTenantAdminService', TRACE)
-// logger ('com.k_int.okapi.OkapiClient', WARN)
-// logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
+logger ('com.k_int.okapi.OkapiTenantAdminService', WARN)
 logger ('com.k_int.okapi.TenantController', DEBUG)
 logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
 logger ('folio', DEBUG)
@@ -43,6 +40,13 @@ logger ('okapi', INFO)
 logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
 logger ('org.olf.rs.EventConsumerService', DEBUG)
+
+// logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+// logger ('com.k_int.okapi.OkapiClient', WARN)
+// logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
+
+// Debugging call to mod-email
+logger ('com.k_int.okapi.OkapiClient', TRACE)
 
 // logger ('com.k_int.okapi.OkapiClient', TRACE)
 // logger 'groovy.net.http.JavaHttpBuilder', DEBUG

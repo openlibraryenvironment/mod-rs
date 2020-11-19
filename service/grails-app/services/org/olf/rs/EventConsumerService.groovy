@@ -253,12 +253,19 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
   private void mergeCustpropWithList(Object cp_value, List binding_value) {
     log.debug("mergeCustpropWithList(${cp_value?.class?.name}, ${binding_value})");
-    log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+    // log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+    if ( cp_value instanceof com.k_int.web.toolkit.custprops.types.CustomPropertyText ) {
+      // We're only concerned with single values for now.
+      cp_value.value = binding_value.get(0)?.toString();
+    }
   }
 
   private void mergeCustpropWithString(Object cp_value, String binding_value) {
     log.debug("mergeCustpropWithString(${cp_value?.class?.name}, ${binding_value})");
-    log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+    // log.debug("  -> existing cp value is ${cp_value?.value} / ${cp_value?.class?.name}");
+    if ( cp_value instanceof com.k_int.web.toolkit.custprops.types.CustomPropertyText ) {
+      cp_value.value = binding_value
+    }
   }
 
 }

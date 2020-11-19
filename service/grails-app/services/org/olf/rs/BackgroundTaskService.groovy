@@ -80,7 +80,8 @@ public class BackgroundTaskService {
     
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
-          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${((ti.lastExecution?:0)-System.currentTimeMillis())}");
+          def remaining_min = ((ti.lastExecution?:0)-System.currentTimeMillis())/60000
+          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
         }
 
         Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
@@ -121,16 +122,21 @@ public class BackgroundTaskService {
   }
 
   private runTimer(Timer t) {
-    switch ( t.taskCode ) {
-      case 'PrintPullSlips':
-        log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
-        JsonSlurper jsonSlurper = new JsonSlurper()
-        Map task_config = jsonSlurper.parseText(t.taskConfig)
-        checkPullSlips(task_config)
-        break;
-      default:
-        log.debug("Unhandled timer task code ${t.taskCode}");
-        break;
+    try {
+      switch ( t.taskCode ) {
+        case 'PrintPullSlips':
+          log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+          JsonSlurper jsonSlurper = new JsonSlurper()
+          Map task_config = jsonSlurper.parseText(t.taskConfig)
+          checkPullSlips(task_config)
+          break;
+        default:
+          log.debug("Unhandled timer task code ${t.taskCode}");
+          break;
+      }
+    }
+    catch ( Exception e ) {
+      log.error("ERROR running timer",e)
     }
   }
 

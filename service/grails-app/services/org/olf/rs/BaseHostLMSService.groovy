@@ -314,9 +314,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                       .setToAgency(ncip_to_agency)
                       .setFromAgency(ncip_from_agency)
                       .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
           JSONObject response = ncip_client.send(lookupUser);
-    
-          log.debug("Lookup user response: ${response}");
+          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
     
   
           // {"firstName":"Stacey",
@@ -358,78 +359,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     return result;
   }
-
-  /**
-   * @param patron_id - the patron to look up
-   * @return A map with the following keys {
-   *   status:'OK'|'FAIL'
-   *   userid
-   *   givenName
-   *   surname
-   *   email
-   * }
-   */
-  private Map old_ncip2LookupPatron(String patron_id) {
-    Map result = [ status:'FAIL' ];
-    log.debug("ncip2LookupPatron(${patron_id})");
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
-
-    String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-    String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-    String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
-
-    if ( ( ncip_server_address != null ) &&
-         ( ncip_from_agency != null ) &&
-         ( ncip_app_profile != null ) ) {
-      log.debug("Request patron from ${ncip_server_address}");
-
-      StringWriter sw = new StringWriter();
-      // sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest('01TULI_INST','EZBORROW',patron_id))
-      sw << new StreamingMarkupBuilder().bind (makeNCIPLookupUserRequest(ncip_from_agency, ncip_app_profile, patron_id))
-      String message = sw.toString();
-
-      log.debug("NCIP Request: ${message}");
-
-      HttpBuilder.configure {
-        request.uri = ncip_server_address
-        request.contentType = XML[0]
-        request.headers['accept'] = 'application/xml'
-      }.post {
-        request.body = message
-
-        response.success { FromServer fs, Object body ->
-            org.grails.databinding.xml.GPathResultMap mr = new org.grails.databinding.xml.GPathResultMap(body);
-            log.debug("NCIP Response: ${mr}");
-            result=[
-              userid: mr.LookupUserResponse?.UserId?.UserIdentifierValue,
-              givenName: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.GivenName,
-              surname: mr.LookupUserResponse?.UserOptionalFields?.NameInformation?.PersonalNameInformation?.StructuredPersonalUserName?.Surname,
-              status: 'OK'
-            ]
-            
-            mr.LookupUserResponse?.UserOptionalFields?.UserAddressInformation.each { uai ->
-              if ( ( uai.ElectronicAddress ) && ( uai.ElectronicAddress?.ElectronicAddressType == 'mailto' ) ) {
-                result.email = uai.ElectronicAddress.ElectronicAddressData
-              }
-            }
-
-            log.debug("Result of user lookup: ${result}");
-            // result = JsonOutput.toJson(body);
-        }
-        response.failure { FromServer fs ->
-          log.debug("Failure response from shared index - Lookup borrower info: ${fs.getStatusCode()} ${patron_id}");
-        }
-      }
-    }
-    else {
-      log.error("MISSING CONFIGURATION FOR NCIP. Unable to perform patron lookup ${patron_id}/addr=${ncip_server_address}/from=${ncip_from_agency}/profile=${ncip_app_profile}");
-    }
-
-    return result
-  }
-
 
   def makeNCIPLookupUserRequest(String agency, String application_profile, String user_id) {
     return {
@@ -584,7 +513,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setFromAgency(ncip_from_agency)
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem request ${acceptItem}");
           JSONObject response = ncip_client.send(acceptItem);
+          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem response ${response}");
+
           if ( response.has('problems') ) {
             result.result = false;
             result.problems = response.get('problems')
@@ -632,7 +565,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setFromAgency(ncip_from_agency)
                         .includeBibliographicDescription()
                         .setApplicationProfileType(ncip_app_profile);
+
+          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
+          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem response ${response}");
+
+
           log.debug(response?.toString());
           if ( response.has('problems') ) {
             // If there is a problem block, something went wrong, so change response to false.
