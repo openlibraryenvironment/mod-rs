@@ -507,6 +507,9 @@ public class ReshareActionService {
   public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
     boolean result = false;
 
+    // Increment the active borrowing counter
+    statisticsService.incrementCounter('/activeBorrowing');
+
     // Check the item in to the local LMS
     HostLMSActions host_lms = hostLMSService.getHostLMSActions();
     if ( host_lms ) {
@@ -616,6 +619,10 @@ public class ReshareActionService {
 
   public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
     log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
+
+    // Decrement the active borrowing counter - we are returning the item
+    statisticsService.decrementCounter('/activeBorrowing');
+
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 

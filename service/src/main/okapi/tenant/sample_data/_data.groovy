@@ -78,6 +78,12 @@ try {
                                 key: 'wms_lookup_patron_endpoint'
                                 ).save(flush:true, failOnError: true);
 
+  AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id') ?: new AppSetting( 
+                              section:'wmsSettings',
+                              settingType:'String',
+                              key: 'wms_registry_id'
+                              ).save(flush:true, failOnError: true);
+
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
@@ -182,12 +188,14 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
+  def manual_adapter_rdv = RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Manual');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'HostLMSIntegrationAdapter',
-                                  key: 'host_lms_integration').save(flush:true, failOnError: true);
+                                  key: 'host_lms_integration',
+                                  value: manual_adapter_rdv.value).save(flush:true, failOnError: true);
 
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
 
