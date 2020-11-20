@@ -295,11 +295,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
         AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
         AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+        AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
     
         String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
         String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
         String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
         String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+        // Will only be used by the client for WMS LMSs
+        String registry_id = wms_registry_id?.value
     
         if ( ( ncip_server_address != null ) &&
              ( ncip_from_agency != null ) &&
@@ -313,6 +316,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                       .includeNameInformation()
                       .setToAgency(ncip_to_agency)
                       .setFromAgency(ncip_from_agency)
+                      .setRegistryId(registry_id)
                       .setApplicationProfileType(ncip_app_profile);
 
           log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
@@ -424,11 +428,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
       AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
       AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+      AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
 
       String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
       String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
       String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
       String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
+      // Will only be used by the client for WMS LMSs
+      String registry_id = wms_registry_id?.value
 
       CirculationClient ncip_client = getCirculationClient(ncip_server_address);
       CheckoutItem checkoutItem = new CheckoutItem()
@@ -437,6 +444,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                     .setRequestId(requestId)
                     .setToAgency(ncip_to_agency)
                     .setFromAgency(ncip_from_agency)
+                    .setRegistryId(registry_id)
                     .setApplicationProfileType(ncip_app_profile);
                     //.setDesiredDueDate("2020-03-18");
 
@@ -493,11 +501,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
           AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
           AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+          AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
 
           String ncip_server_address = ncip_server_address_setting?.value
           String ncip_from_agency = ncip_from_agency_setting?.value
           String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
           String ncip_app_profile = ncip_app_profile_setting?.value
+          // Will only be used by the client for WMS LMSs
+          String registry_id = wms_registry_id?.value
 
           CirculationClient ncip_client = getCirculationClient(ncip_server_address);
           AcceptItem acceptItem = new AcceptItem()
@@ -511,6 +522,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setPickupLocation(pickup_location)
                         .setToAgency(ncip_to_agency)
                         .setFromAgency(ncip_from_agency)
+                        .setRegistryId(registry_id)
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncip_app_profile);
 
@@ -552,17 +564,21 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
           AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
           AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
+          AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
 
           String ncip_server_address = ncip_server_address_setting?.value
           String ncip_from_agency = ncip_from_agency_setting?.value
           String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
           String ncip_app_profile = ncip_app_profile_setting?.value
+          // Will only be used by the client for WMS LMSs
+          String registry_id = wms_registry_id?.value
 
           CirculationClient ncip_client = getCirculationClient(ncip_server_address);
           CheckinItem checkinItem = new CheckinItem()
                         .setItemId(item_id)
                         .setToAgency(ncip_to_agency)
                         .setFromAgency(ncip_from_agency)
+                        .setRegistryId(registry_id)
                         .includeBibliographicDescription()
                         .setApplicationProfileType(ncip_app_profile);
 
