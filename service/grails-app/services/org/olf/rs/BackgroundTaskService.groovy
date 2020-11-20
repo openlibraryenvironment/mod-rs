@@ -95,11 +95,12 @@ public class BackgroundTaskService {
             // DateTime start = DateTime.now()
             DateTime start = new DateTime(current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            def nextInstance = 0;
+            def nextInstance = null;
 
             // Cycle forward to the next occurrence after this moment
             int loopcount = 0;
-            while ( ( nextInstance < current_systime ) && ( loopcount++ < 10 ) ) {
+            while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) && 
+                    ( loopcount++ < 10 ) ) {
               nextInstance = rrule_iterator.nextDateTime();
               log.debug("Test Next calendar instance : ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
             }
