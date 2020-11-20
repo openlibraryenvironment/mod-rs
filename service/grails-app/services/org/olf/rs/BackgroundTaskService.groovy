@@ -74,15 +74,16 @@ public class BackgroundTaskService {
         // Refactor - lastExcecution now contains the next scheduled execution or 0
         log.debug("Checking timers ready for execution");
 
-    
+        long current_systime = System.currentTimeMillis();
+
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
-          def remaining_min = ((ti.lastExecution?:0)-System.currentTimeMillis())/60000
+          def remaining_min = ((ti.lastExecution?:0)-current_systime)/60000
           log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
         }
 
         Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
-                           [now:System.currentTimeMillis(), en: true]).each { timer ->
+                           [now:current_systime, en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
             runTimer(timer);
@@ -91,11 +92,19 @@ public class BackgroundTaskService {
 
             // Caclulate the next due date
             RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
-            DateTime start = DateTime.now()
+            // DateTime start = DateTime.now()
+            DateTime start = new DateTime(current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            def nextInstance = rrule_iterator.nextDateTime();
+            def nextInstance = 0;
+
+            // Cycle forward to the next occurrence after this moment
+            int loopcount = 0;
+            while ( ( nextInstance < current_systime ) && ( loopcount++ < 10 ) ) {
+              nextInstance = rrule_iterator.nextDateTime();
+              log.debug("Test Next calendar instance : ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
+            }
             log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
-            log.debug(" -> as timestamp ${nextInstance.getTimestamp()} == due in ${nextInstance.getTimestamp()-System.currentTimeMillis()}");
+            log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
             timer.lastExecution = nextInstance.getTimestamp();
             timer.save(flush:true, failOnError:true)
           }
