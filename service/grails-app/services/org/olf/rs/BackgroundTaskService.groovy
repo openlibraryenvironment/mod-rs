@@ -35,7 +35,7 @@ public class BackgroundTaskService {
 Select pr 
 from PatronRequest as pr
 where pr.pickShelvingLocation like :loccode
-or pr.pickLocaiton.code like :loccode
+or pr.pickLocation.code like :loccode
 and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 '''
 
