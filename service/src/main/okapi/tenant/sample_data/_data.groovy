@@ -60,16 +60,16 @@ try {
                                   key: 'ncip_server_address'
                                   ).save(flush:true, failOnError: true);
 
-  AppSetting ncip_api_key = AppSetting.findByKey('ncip_api_key') ?: new AppSetting( 
-                                section:'localNCIP',
+  AppSetting wms_api_key = AppSetting.findByKey('wms_api_key') ?: new AppSetting( 
+                                section:'wmsSettings',
                                 settingType:'String',
-                                key: 'ncip_api_key'
+                                key: 'wms_api_key'
                                 ).save(flush:true, failOnError: true);
 
-  AppSetting ncip_api_secret = AppSetting.findByKey('ncip_api_secret') ?: new AppSetting( 
-                                section:'localNCIP',
+  AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret') ?: new AppSetting( 
+                                section:'wmsSettings',
                                 settingType:'Password',
-                                key: 'ncip_api_secret'
+                                key: 'wms_api_secret'
                                   ).save(flush:true, failOnError: true);
 
   AppSetting wms_lookup_patron_endpoint = AppSetting.findByKey('wms_lookup_patron_endpoint') ?: new AppSetting( 
@@ -280,7 +280,7 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   def cp_accept_returns_policy = ensureRefdataProperty('policy.ill.returns', false, 'YNO', 'Accept Returns' )
   def cp_physical_loan_policy = ensureRefdataProperty('policy.ill.loan_policy', false, 'LoanPolicy', 'ILL Loan Policy' )
   def cp_last_resort_policy = ensureRefdataProperty('policy.ill.last_resort', false, 'YNO', 'Consider Institution As Last Resort' )
-  def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', true, label='ILL Loan To Borrow Ratio');
+  def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', false, label='ILL Loan To Borrow Ratio');
 
   println("_data.groovy complete");
 }
