@@ -29,6 +29,13 @@ public class BackgroundTaskService {
   EmailService emailService
 
   private static config_test_count = 0;
+  private static String PULL_SLIP_QUERY='''
+Select pr 
+from PatronRequest as pr
+where pr.pickShelvingLocation like :loccode
+or pr.pickLocaiton.code like :loccode
+and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+'''
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
@@ -163,15 +170,28 @@ public class BackgroundTaskService {
   private void checkPullSlipsFor(String location) {
     log.debug("checkPullSlipsFor(${location})");
     try {
-      Map email_params = [
-            'notificationId':'1',
-                        'to':'ianibbo@gmail.com',
-                      'from':'admin@reshare.org',
-                    'header':'Test email from reshare',
-                      'body':'''Some test'''
-      ]
+      List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:location]);
 
-      Map email_result = emailService.sendEmail(email_params);
+      if ( ( pending_ps_printing != null ) &&
+           ( pending_ps_printing.size() > 0 ) ) {
+
+        log.debug("${pending_ps_printing.size()} pending pull slip printing for location ${location}");
+
+        
+    
+        Map email_params = [
+              'notificationId':'1',
+                          'to':'ianibbo@gmail.com',
+                        'from':'admin@reshare.org',
+                      'header':'Test email from reshare',
+                        'body':'''Some test'''
+        ]
+
+        Map email_result = emailService.sendEmail(email_params);
+      }
+      else {
+        log.debug("No pending pull slips for ${location}");
+      }
     }
     catch ( Exception e ) {
       e.printStackTrace();
