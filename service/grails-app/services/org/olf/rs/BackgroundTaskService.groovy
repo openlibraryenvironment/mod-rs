@@ -190,13 +190,14 @@ Example email template - $numRequests waiting to be printed at $location
   private void checkPullSlipsFor(String location) {
     log.debug("checkPullSlipsFor(${location})");
     try {
-      DirectoryEntry de = DirectoryEntry.get(location);
+      // DirectoryEntry de = DirectoryEntry.get(location);
+      HostLMSLocation psloc = HostLMSLocation.get(location);
 
-      if ( ( de != null ) && ( de.lmsLocationCode != null ) ) {
+      if ( ( psloc != null ) && ( psloc.lmsLocationCode != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${de.lmsLocationCode}");
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.lmsLocationCode}");
 
-        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:de.lmsLocationCode]);
+        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.lmsLocationCode]);
   
         if ( ( pending_ps_printing != null ) &&
              ( pending_ps_printing.size() > 0 ) ) {
