@@ -35,9 +35,15 @@ public class BackgroundTaskService {
   private static String PULL_SLIP_QUERY='''
 Select pr 
 from PatronRequest as pr
-where pr.pickShelvingLocation like :loccode
-or pr.pickLocation.code like :loccode
+where ( pr.pickShelvingLocation like :loccode or pr.pickLocation.code like :loccode )
 and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+'''
+
+  private static String PULL_SLIP_SUMMARY = '''
+    Select count(pr.id), pr.pickLocation.code
+    from PatronRequest as pr
+    where pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+    group by pr.pickLocation.code
 '''
 
   private static String EMAIL_TEMPLATE='''
@@ -190,6 +196,11 @@ Example email template - $numRequests waiting to be printed at $location
   private void checkPullSlipsFor(String location) {
     log.debug("checkPullSlipsFor(${location})");
     try {
+
+      def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+
+      log.debug("pull slip summary: ${pull_slip_overall_summary}");
+
       // DirectoryEntry de = DirectoryEntry.get(location);
       HostLMSLocation psloc = HostLMSLocation.get(location);
 
