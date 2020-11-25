@@ -193,11 +193,11 @@ Example email template - $numRequests waiting to be printed at $location
       // DirectoryEntry de = DirectoryEntry.get(location);
       HostLMSLocation psloc = HostLMSLocation.get(location);
 
-      if ( ( psloc != null ) && ( psloc.lmsLocationCode != null ) ) {
+      if ( ( psloc != null ) && ( psloc.code != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.lmsLocationCode}");
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code}");
 
-        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.lmsLocationCode]);
+        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
   
         if ( ( pending_ps_printing != null ) &&
              ( pending_ps_printing.size() > 0 ) ) {
