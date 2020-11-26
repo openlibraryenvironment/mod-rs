@@ -216,7 +216,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
 
       if ( ( psloc != null ) && ( psloc.code != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code}");
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name}");
 
         List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
   
