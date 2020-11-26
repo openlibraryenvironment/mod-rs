@@ -47,7 +47,17 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 '''
 
   private static String EMAIL_TEMPLATE='''
-Example email template - $numRequests waiting to be printed at $location
+<h1>Example email template</h1>
+<p>
+$numRequests waiting to be printed at $location
+Click <a href="http://some.host">To view in the reshare app</a>
+</p>
+
+<ul>
+  <% sumamry.each { s -> %>
+    <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
+  <% } %>
+</ul>
 '''
 
   def performReshareTasks(String tenant) {
@@ -217,7 +227,9 @@ Example email template - $numRequests waiting to be printed at $location
       
           // 'from':'admin@reshare.org',
           def engine = new groovy.text.GStringTemplateEngine()
-          def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([numRequests:pending_ps_printing.size(), location: location])
+          def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
+                                                                            location: location,
+                                                                            summary: pull_slip_overall_summary])
           String body_text = email_template.toString()
   
           Map email_params = [
