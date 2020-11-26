@@ -197,13 +197,13 @@ Click <a href="http://some.host">To view in the reshare app</a>
 
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
-    timer_cfg.locations.each { loc ->
+    timer_cfg?.locations.each { loc ->
       log.debug("Check pull slips for ${loc}");
-      checkPullSlipsFor(loc);
+      checkPullSlipsFor(loc, timer_cfg.confirmNoPendingRequests?:true);
     }
   }
 
-  private void checkPullSlipsFor(String location) {
+  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips) {
     log.debug("checkPullSlipsFor(${location})");
     try {
 
@@ -220,26 +220,29 @@ Click <a href="http://some.host">To view in the reshare app</a>
 
         List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
   
-        if ( ( pending_ps_printing != null ) &&
-             ( pending_ps_printing.size() > 0 ) ) {
+        if ( pending_ps_printing != null ) {
+
+          if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
   
-          log.debug("${pending_ps_printing.size()} pending pull slip printing for location ${location}");
+            log.debug("${pending_ps_printing.size()} pending pull slip printing for location ${location}");
       
-          // 'from':'admin@reshare.org',
-          def engine = new groovy.text.GStringTemplateEngine()
-          def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
+            // 'from':'admin@reshare.org',
+            def engine = new groovy.text.GStringTemplateEngine()
+            def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
                                                                             location: location,
                                                                             summary: pull_slip_overall_summary])
-          String body_text = email_template.toString()
+            String body_text = email_template.toString()
   
-          Map email_params = [
-                'notificationId':'1',
-                            'to':'ianibbo@gmail.com',
-                        'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing",
-                          'body':body_text
-          ]
+            Map email_params = [
+                  'notificationId':'1',
+                              'to':'ianibbo@gmail.com',
+                    'outputFormat':'text/html',
+                          'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
+                            'body':body_text
+            ]
   
-          Map email_result = emailService.sendEmail(email_params);
+            Map email_result = emailService.sendEmail(email_params);
+          }
         }
         else {
           log.debug("No pending pull slips for ${location}");
