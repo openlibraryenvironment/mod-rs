@@ -54,7 +54,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
 </p>
 
 <ul>
-  <% sumamry.each { s -> %>
+  <% summary.each { s -> %>
     <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
   <% } %>
 </ul>
