@@ -202,7 +202,6 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   key: 'ncip_app_profile',
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
 
-  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
