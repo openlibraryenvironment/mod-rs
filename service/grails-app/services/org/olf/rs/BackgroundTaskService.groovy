@@ -5,6 +5,7 @@ import org.olf.rs.HostLMSLocation
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.AvailableAction
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.okapi.modules.directory.DirectoryEntry;
 
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -13,6 +14,7 @@ import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
 import org.olf.rs.EmailService
 import java.util.UUID;
+import groovy.text.GStringTemplateEngine;
 
 
 /**
@@ -23,11 +25,40 @@ public class BackgroundTaskService {
 
   def grailsApplication
   def reshareActionService
+  def groovyPageRenderer
+
   static boolean running = false;
   OkapiClient okapiClient
   EmailService emailService
 
   private static config_test_count = 0;
+  private static String PULL_SLIP_QUERY='''
+Select pr 
+from PatronRequest as pr
+where ( pr.pickShelvingLocation like :loccode or pr.pickLocation.code like :loccode )
+and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+'''
+
+  private static String PULL_SLIP_SUMMARY = '''
+    Select count(pr.id), pr.pickLocation.code
+    from PatronRequest as pr
+    where pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+    group by pr.pickLocation.code
+'''
+
+  private static String EMAIL_TEMPLATE='''
+<h1>Example email template</h1>
+<p>
+$numRequests waiting to be printed at $location
+Click <a href="http://some.host">To view in the reshare app</a>
+</p>
+
+<ul>
+  <% summary.each { s -> %>
+    <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
+  <% } %>
+</ul>
+'''
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
@@ -51,6 +82,9 @@ public class BackgroundTaskService {
         duplicate_symbols.each { ds ->
           log.warn("WARNING: Duplicate symbols detected. This means the symbol ${ds} appears more than once. This shoud not happen. Incoming requests for this symbol cannot be uniquely matched to an institution");
         }
+
+        // Generate and log patron requests at a pick location we don't know about
+        reportMissingPickLocations()
   
         // Find all patron requesrs where the current state has a System action attached that can be executed.
         PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each {  pr ->
@@ -95,11 +129,12 @@ public class BackgroundTaskService {
             // DateTime start = DateTime.now()
             DateTime start = new DateTime(current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            def nextInstance = 0;
+            def nextInstance = null;
 
             // Cycle forward to the next occurrence after this moment
             int loopcount = 0;
-            while ( ( nextInstance < current_systime ) && ( loopcount++ < 10 ) ) {
+            while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) && 
+                    ( loopcount++ < 10 ) ) {
               nextInstance = rrule_iterator.nextDateTime();
               log.debug("Test Next calendar instance : ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
             }
@@ -162,27 +197,78 @@ public class BackgroundTaskService {
 
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
-    timer_cfg.locations.each { loc ->
+    timer_cfg?.locations.each { loc ->
       log.debug("Check pull slips for ${loc}");
-      checkPullSlipsFor(loc);
+      checkPullSlipsFor(loc, timer_cfg.confirmNoPendingRequests?:true);
     }
   }
 
-  private void checkPullSlipsFor(String location) {
+  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips) {
     log.debug("checkPullSlipsFor(${location})");
     try {
-      // 'from':'admin@reshare.org',
-      Map email_params = [
-            'notificationId':UUID.randomUUID().toString(),
-                        'to':'ianibbo@gmail.com',
-                    'header':'Test email from reshare',
-                      'body':'''Some test'''
-      ]
 
-      Map email_result = emailService.sendEmail(email_params);
+      def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+
+      log.debug("pull slip summary: ${pull_slip_overall_summary}");
+
+      // DirectoryEntry de = DirectoryEntry.get(location);
+      HostLMSLocation psloc = HostLMSLocation.get(location);
+
+      if ( ( psloc != null ) && ( psloc.code != null ) ) {
+
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name}");
+
+        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
+  
+        if ( pending_ps_printing != null ) {
+
+          if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
+  
+            log.debug("${pending_ps_printing.size()} pending pull slip printing for location ${location}");
+      
+            // 'from':'admin@reshare.org',
+            def engine = new groovy.text.GStringTemplateEngine()
+            def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
+                                                                            location: location,
+                                                                            summary: pull_slip_overall_summary])
+            String body_text = email_template.toString()
+  
+            Map email_params = [
+                  'notificationId':'1',
+                              'to':'ianibbo@gmail.com',
+                    'outputFormat':'text/html',
+                          'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
+                            'body':body_text
+            ]
+  
+            Map email_result = emailService.sendEmail(email_params);
+          }
+        }
+        else {
+          log.debug("No pending pull slips for ${location}");
+        }
+      }
+      else {
+        if ( de == null ) {
+          log.warn("Failed to resolve directory entry id ${location}");
+        }
+        else {
+          log.warn("Directory entry for location ${location} does not have a host LMS location code");
+        }
+      }
+
+      log.debug("Dumping patron requests awaiting pull slip printing for validation");
+      PatronRequest.executeQuery('select pr from PatronRequest as pr where pr.state.code=:ps', [ps:'RES_NEW_AWAIT_PULL_SLIP']).each {
+        log.debug("${it.id} ${it.title} ${it.pickShelvingLocation} ${it.pickLocation?.code}");
+      }
     }
     catch ( Exception e ) {
       e.printStackTrace();
     }
+  }
+
+  private void reportMissingPickLocations() {
+    log.debug("reportMissingPickLocations()");
+    // ToDo: Implement a function that lists all pr.pickShelvingLocation values that do not have a corresponding directoryEntry.hostLMSCode and email an admin
   }
 }
