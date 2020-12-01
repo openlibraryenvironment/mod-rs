@@ -91,8 +91,6 @@ public class WmsHostLMSService extends BaseHostLMSService {
     //Override this method on BaseHost to use RTAC connector provided by IndexData
     String z3950Connector = "http://mkc.indexdata.com:9008/STU"
 
-    log.debug "RESOLVED SYMBOL: ${pr.resolvedSupplier.toString()}"
-
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
     }.get {
@@ -107,14 +105,10 @@ public class WmsHostLMSService extends BaseHostLMSService {
     log.debug("Got Z3950 response: ${z_response}")
 
     if ( z_response?.numberOfRecords == 1 ) {
-      // SEE http://mkc.indexdata.com:9008/STU?version=1.1&operation=searchRetrieve&x-username=reshare&x-password=reshare0618&query=rec.identifier=42354631&startRecord=1&maximumRecords=1
 
       // Got exactly 1 record
       Map availability_summary = [:]
       z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-        log.debug("HOLDING ${hld}");
-        log.debug("HOLDING AVAILABLE NOW ${hld.circulations?.circulation?.availableNow}");
-        log.debug("HOLDING AVAILABLE NOW VALUE ${hld.circulations?.circulation?.availableNow?.@value}");
         if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
           log.debug("Available now");
           ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
@@ -128,7 +122,6 @@ public class WmsHostLMSService extends BaseHostLMSService {
 
       log.debug("At end, availability summary: ${availability_summary}");
     }
-    log.debug "LOGDEBUG RESULT: ${result}"
     return result
   }
 }
