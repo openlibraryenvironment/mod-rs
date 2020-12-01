@@ -221,10 +221,14 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     log.debug("Iterate over custom properties sent in directory entry payload ${payload.customProperties}");
 
     payload?.customProperties?.each { k, v ->
-      log.debug("Check binding for ${k} -> ${v}");
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
       // we need to see if we can find
-      if ( ['local_institutionalPatronId'].contains(k) ) {
+      if ( ['local_institutionalPatronId',
+            'policy.ill.loan_policy',
+            'policy.ill.last_resort',
+            'policy.ill.returns',
+            'policy.ill.InstitutionalLoanToBorrowRatio'].contains(k) ) {
+        log.debug("processing binding for ${k} -> ${v}");
         boolean first = true;
 
         // Root level custom properties object is a custom properties container
@@ -242,6 +246,9 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             }
           }
         }
+      }
+      else {
+        log.debug("skip binding for ${k} -> ${v}");
       }
     }
   }
