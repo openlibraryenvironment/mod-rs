@@ -359,7 +359,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     catch ( Exception e ) {
       result.problems = "Unexpected problem in NCIP Call ${e.message}";
       result.result=false
-      println "LOGDEBUG STACKTRACE: ${e.stackTrace}"
     }
 
     return result;
