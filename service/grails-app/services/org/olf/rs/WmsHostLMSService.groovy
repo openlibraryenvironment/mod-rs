@@ -33,10 +33,15 @@ public class WmsHostLMSService extends BaseHostLMSService {
   ItemLocation determineBestLocation(PatronRequest pr) {
     ItemLocation result = null;
 
-    //Override this method on BaseHost to use RTAC connector provided by ID
+    //Override this method on BaseHost to use RTAC connector provided by IndexData
     String z3950Connector = "http://mkc.indexdata.com:9008/STU"
     def reqItem1 = 710733
     def reqItem2 = 42354631
+
+    //def query = "rec.identifier=${reqItem1}&startRecord=1&maximumRecords=1"
+    //def query = "rec.identifier=${reqItem2}&startRecord=1&maximumRecords=1"
+    def query = "dc.title=%22harry%20potter%22%20and%20bath.isbn=9780545010221&startRecord=1&maximumRecords=1"
+
 
     log.debug "RESOLVED SYMBOL: ${pr.resolvedSupplier.toString()}"
 
@@ -48,7 +53,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
                                 'operation': 'searchRetrieve',
                                 'x-username': 'reshare',
                                 'x-password': 'reshare0618',
-                                'query': "rec.identifier=${reqItem1}&startRecord=1&maximumRecords=1"
+                                'query': query
                               ]
       }
       log.debug("Got Z3950 response: ${z_response}")
