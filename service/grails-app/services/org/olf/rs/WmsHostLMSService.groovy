@@ -24,9 +24,9 @@ public class WmsHostLMSService extends BaseHostLMSService {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
       protocol: "WMS",
-      apiKey: wms_api_key.value,
-      apiSecret: wms_api_secret.value,
-      lookupPatronEndpoint: wms_lookup_patron_endpoint.value
+      apiKey: wms_api_key?.value,
+      apiSecret: wms_api_secret?.value,
+      lookupPatronEndpoint: wms_lookup_patron_endpoint?.value
       ]).circulationClient;
   }
 
@@ -89,7 +89,11 @@ public class WmsHostLMSService extends BaseHostLMSService {
     ItemLocation result = null;
 
     //Override this method on BaseHost to use RTAC connector provided by IndexData
-    String z3950Connector = "http://mkc.indexdata.com:9008/STU"
+    AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address')
+    AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username')
+    AppSetting wms_connector_password = AppSetting.findByKey('wms_connector_password')
+
+    String z3950Connector = wms_connector_address?.value
 
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
@@ -97,8 +101,8 @@ public class WmsHostLMSService extends BaseHostLMSService {
         request.uri.query = [
                               'version':'1.1',
                               'operation': 'searchRetrieve',
-                              'x-username': 'reshare',
-                              'x-password': 'reshare0618',
+                              'x-username': wms_connector_username?.value,
+                              'x-password': wms_connector_password?.value,
                               'query': query
                             ]
     }
