@@ -34,22 +34,22 @@ public class WmsHostLMSService extends BaseHostLMSService {
     [ 
       name:'Adapter_By_OCLC_Number',
       precondition: { pr -> return ( pr.oclcNumber != null ) },
-      strategy: { pr, service -> return service.lookupViaAdpater("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=1") }
+      strategy: { pr, service -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=1") }
     ],
     [ 
       name:'Adapter_By_Title_And_Identifier',
       precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
-      strategy: { pr, service -> return service.lookupViaAdpater("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
+      strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
     ],
     [
       name:'Adapter_By_Identifier',
       precondition: { pr -> return ( pr.isbn != null ) },
-      strategy: { pr, service -> return service.lookupViaAdpater("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
+      strategy: { pr, service -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
     ],
     [
       name:'Adapter_By_Title',
       precondition: { pr -> return ( pr.title != null ) },
-      strategy: { pr, service -> return service.lookupViaAdpater("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=1") }
+      strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=1") }
     ],
   ]
 
@@ -85,7 +85,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     return location;
   }
 
-  ItemLocation lookupViaAdpater(String query) {
+  ItemLocation lookupViaConnector(String query) {
     ItemLocation result = null;
 
     //Override this method on BaseHost to use RTAC connector provided by IndexData
