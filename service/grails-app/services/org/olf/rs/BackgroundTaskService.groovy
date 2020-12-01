@@ -49,7 +49,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
   private static String EMAIL_TEMPLATE='''
 <h1>Example email template</h1>
 <p>
-$numRequests waiting to be printed at $location
+$numRequests waiting to be printed at ${location.name}
 Click <a href="http://some.host">To view in the reshare app</a>
 </p>
 
@@ -229,7 +229,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
             // 'from':'admin@reshare.org',
             def engine = new groovy.text.GStringTemplateEngine()
             def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
-                                                                            location: location,
+                                                                            location: psloc,
                                                                             summary: pull_slip_overall_summary])
             String body_text = email_template.toString()
   
@@ -237,7 +237,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
                   'notificationId':'1',
                               'to':'ianibbo@gmail.com',
                     'outputFormat':'text/html',
-                          'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
+                          'header':"Reshare location ${psloc.name} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
                             'body':body_text
             ]
   
