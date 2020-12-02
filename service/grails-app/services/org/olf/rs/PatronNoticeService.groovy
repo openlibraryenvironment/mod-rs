@@ -69,15 +69,13 @@ public class PatronNoticeService {
           values: [
             user: [
               id: pr.patronReference,
-              givenName: pr?.patronGivenName ?: "",
+              givenName: pr?.patronGivenName ?: '',
               surame: pr.patronSurname,
             ],
             request: [
               id: pr.hrid,
-              pickupLocation: "",
-              neededBy: ""
-              // pickupLocation: pr?.pickupLocation ?: "",
-              // neededBy: pr?.neededBy ?: ""
+              pickupLocation: pr?.pickupLocation ?: '',
+              neededBy: pr?.neededBy?.toString() ?: ''
             ],
             item: [
               title: pr.title
