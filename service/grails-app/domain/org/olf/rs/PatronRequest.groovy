@@ -69,6 +69,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String bici
   String eissn // Shudder!
   String stitle // Series Title
+  String oclcNumber // OCLC-specific identifier used for lookup in certain situations
   String part
   String artnum
   String ssn
@@ -241,6 +242,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     sici (nullable: true, blank : false)
     bici (nullable: true, blank : false)
     eissn (nullable: true, blank : false)
+    oclcNumber (nullable: true, blank : false)
     stitle (nullable: true, blank : false)
     part (nullable: true, blank : false)
     artnum (nullable: true, blank : false)
@@ -333,6 +335,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     sici column : 'pr_sici'
     bici column : 'pr_bici'
     eissn column : 'pr_eissn'
+    oclcNumber column : 'pr_oclc_number'
     stitle column : 'pr_stitle'
     part column : 'pr_part'
     artnum column : 'pr_artnum'

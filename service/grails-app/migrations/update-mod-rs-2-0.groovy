@@ -18,4 +18,10 @@ databaseChangeLog = {
    addPrimaryKey(columnNames: "patron_request_tags_id, tag_id", constraintName: "patron_request_tagPK", tableName: "patron_request_tag")
    addPrimaryKey(columnNames: "pr_previous_states, previous_states_idx", constraintName: "patron_request_previous_statesPK", tableName: "patron_request_previous_states")
   }
+
+  changeSet(author: "efreestone (manual)", id: "20201201-1135-001") {
+    addColumn(tableName: "patron_request") {
+      column(name:'pr_oclc_number', type: "VARCHAR(255)")
+    }
+  }
 }

@@ -47,6 +47,8 @@ logger ('org.olf.rs.EventConsumerService', DEBUG)
 
 // Debugging call to mod-email
 logger ('com.k_int.okapi.OkapiClient', TRACE)
+logger ('groovyx.net.http.HttpBuilder', TRACE)
+logger ('groovyx.net.http.HttpBuilder', TRACE)
 
 // logger ('com.k_int.okapi.OkapiClient', TRACE)
 // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
