@@ -86,6 +86,10 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_REQ_BORROWER_RETURNED_ind': { service, eventData ->
     },
+    'STATUS_REQ_OVERDUE_ind': { service, eventData ->
+      log.debug("Overdue event handler called");
+      service.handleOverdue(eventData);
+    },
     'MESSAGE_REQUEST_ind': { service, eventData ->
       // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
       service.handleRequestMessage(eventData);
@@ -615,6 +619,25 @@ public class ReshareApplicationEventHandlerService {
 
   PatronRequest lookupPatronRequestByPeerId(String id) {
     return PatronRequest.findByPeerRequestIdentifier(id);
+  }
+  
+  def handleOverdue(Map eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleOverdue handler called with eventData ${eventData}");
+
+   PatronRequest.withNewTransaction { transactionStatus ->
+     def pr = delayedGet(eventData.payload.id, true);
+     if(pr == null) {
+       log.warn("Unable to locate request for ID ${eventData.payload.id}");
+     } else if(pr.isRequester) {
+       log.debug("pr ${pr.id} is requester, not sending protocol message");
+     } else {
+       log.debug("Sending protocol message with overdue status change from PatronRequest ${pr.id}");
+       Map params = [ note : "Request is Overdue"]
+       //reshareActionService.sendSupplyingAgencyMessage(pr, "Notification", null, params)
+       reshareActionService.sendStatusChange(pr, 'Overdue', "Request is Overdue");
+     }
+   }
+    
   }
 
   /**
