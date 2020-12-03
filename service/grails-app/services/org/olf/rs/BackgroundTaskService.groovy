@@ -26,6 +26,8 @@ public class BackgroundTaskService {
   static boolean running = false;
   OkapiClient okapiClient
   EmailService emailService
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+
 
   private static config_test_count = 0;
 
@@ -68,6 +70,26 @@ public class BackgroundTaskService {
               break;
           }
           
+        }
+        
+        //Find any supplier-side PatronRequests that have become overdue
+        log.debug("Checking for overdue PatronRequests");
+        Date currentDate = new Date();
+        def criteria = PatronRequest.createCriteria();
+        def results = criteria.list {
+          lt("parsedDueDateRS", currentDate) //current date is later than due date
+          state {
+            ne("code","REQ_OVERDUE" ) //status is not already overdue
+          }
+          ne("isRequester", true) //request is not request-side (we want supply-side)
+        }
+        results.each { patronRequest ->
+          log.debug("Found PatronRequest ${patronRequest.id} with state ${patronRequest.state?.code}");
+          def previousState = patronRequest.state;
+          def overdueState = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_OVERDUE');
+          patronRequest.state = overdueState;
+          reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
+          patronRequest.save(flush:true, failOnError:true);
         }
 
         // Process any timers for sending pull slip notification emails

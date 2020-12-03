@@ -261,6 +261,8 @@ class ProtocolMessageBuildingService {
     Map requestingAgencyId
     String requestingAgencyRequestId
     String supplyingAgencyRequestId
+    
+    log.debug("ProtocolMessageBuildingService::buildHeader(${pr}, ${messageType}, ${message_sender_symbol}, ${peer_symbol})");
 
     
     if (messageType == 'REQUEST' || messageType == 'REQUESTING_AGENCY_MESSAGE') {
