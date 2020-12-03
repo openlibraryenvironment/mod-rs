@@ -211,6 +211,8 @@ public class ReshareActionService {
     nowDate = new Date();
     if(nowDate.compareTo(pr.parsedDueDateRS) < 0) {
       pr.overdue = true;
+      Status s = Status.lookup('PatronRequest', 'REQ_OVERDUE');
+      pr.state = s;
       pr.save(flush:true, failOnError:true);
     } 
     
@@ -735,7 +737,7 @@ public class ReshareActionService {
 
       Map supplying_message_request = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reason_for_message, status, messageParams)
 
-      log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplying_message_request})");
+      log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplying_message_request}) for pr id ${pr.id}");
       def send_result = protocolMessageService.sendProtocolMessage(pr.supplyingInstitutionSymbol,
                                                                    pr.requestingInstitutionSymbol, 
                                                                    supplying_message_request);
