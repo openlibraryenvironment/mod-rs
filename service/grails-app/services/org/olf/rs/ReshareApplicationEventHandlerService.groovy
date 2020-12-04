@@ -87,9 +87,9 @@ public class ReshareApplicationEventHandlerService {
     },
     'STATUS_REQ_BORROWER_RETURNED_ind': { service, eventData ->
     },
-    'STATUS_REQ_OVERDUE_ind': { service, eventData ->
+    'STATUS_RES_OVERDUE_ind': { service, eventData ->
       log.debug("Overdue event handler called");
-      service.handleOverdue(eventData);
+      service.handleResOverdue(eventData);
     },
     'MESSAGE_REQUEST_ind': { service, eventData ->
       // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
@@ -626,7 +626,7 @@ public class ReshareApplicationEventHandlerService {
     return PatronRequest.findByPeerRequestIdentifier(id);
   }
   
-  def handleOverdue(Map eventData) {
+  def handleResOverdue(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleOverdue handler called with eventData ${eventData}");
 
    PatronRequest.withNewTransaction { transactionStatus ->
