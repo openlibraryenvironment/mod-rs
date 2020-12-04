@@ -115,6 +115,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
         Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
+        Status.lookupOrCreate('Responder', 'RES_OVERDUE', '9997', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
@@ -156,6 +157,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_COMPLETE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'supplierCheckOutOfReshare', 'M')
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')

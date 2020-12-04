@@ -115,17 +115,21 @@ Click <a href="http://some.host">To view in the reshare app</a>
         def results = criteria.list {
           lt("parsedDueDateRS", currentDate) //current date is later than due date
           state {
-            ne("code","REQ_OVERDUE" ) //status is not already overdue
+            ne("code","RES_OVERDUE" ) //status is not already overdue
           }
           ne("isRequester", true) //request is not request-side (we want supply-side)
         }
         results.each { patronRequest ->
           log.debug("Found PatronRequest ${patronRequest.id} with state ${patronRequest.state?.code}");
           def previousState = patronRequest.state;
-          def overdueState = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_OVERDUE');
-          patronRequest.state = overdueState;
-          reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
-          patronRequest.save(flush:true, failOnError:true);
+          def overdueState = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE');
+          if(overdueState == null) {
+            log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");            
+          } else {
+            patronRequest.state = overdueState;
+            reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
+            patronRequest.save(flush:true, failOnError:true);
+          }
         }
 
         // Process any timers for sending pull slip notification emails
