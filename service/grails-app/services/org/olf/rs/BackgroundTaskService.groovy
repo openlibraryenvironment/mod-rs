@@ -30,6 +30,7 @@ public class BackgroundTaskService {
   static boolean running = false;
   OkapiClient okapiClient
   EmailService emailService
+  PatronNoticeService patronNoticeService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
 
 
@@ -64,6 +65,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
+    patronNoticeService.processQueue()
 
 
     // If somehow we get asked to perform the background tasks, but a thread is already running, then just return

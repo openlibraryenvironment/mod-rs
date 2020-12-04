@@ -149,6 +149,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     tenant_list_updated = true;
   }
 
+  // Perhaps we should have a TenantListService or similar?
+  public Set getTenantList() {
+    return tenant_list
+  }
+
   // We don't want to be doing these updates on top of eachother
   @Subscriber('DirectoryUpdate')
   public synchronized  void processDirectoryUpdate(event) {
