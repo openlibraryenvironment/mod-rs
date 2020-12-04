@@ -115,7 +115,13 @@ Click <a href="http://some.host">To view in the reshare app</a>
         def results = criteria.list {
           lt("parsedDueDateRS", currentDate) //current date is later than due date
           state {
-            ne("code","RES_OVERDUE" ) //status is not already overdue
+            ne("code","RES_OVERDUE" ) //status is not already overdue            
+          }
+          state {
+            ne("code","RES_COMPLETE") //if the request is already complete, ignore it
+          }
+          state {
+            ne("code","RES_ITEM_RETURNED") //if the request item has already sent back, ignore it
           }
           ne("isRequester", true) //request is not request-side (we want supply-side)
         }
