@@ -199,11 +199,11 @@ Click <a href="http://some.host">To view in the reshare app</a>
     log.debug("checkPullSlips(${timer_cfg})");
     timer_cfg?.locations.each { loc ->
       log.debug("Check pull slips for ${loc}");
-      checkPullSlipsFor(loc, timer_cfg.confirmNoPendingRequests?:true);
+      checkPullSlipsFor(loc, timer_cfg.confirmNoPendingRequests?:true, timer_cfg.emailAddresses);
     }
   }
 
-  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips) {
+  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips, String emailAddress) {
     log.debug("checkPullSlipsFor(${location})");
     try {
 
@@ -214,9 +214,9 @@ Click <a href="http://some.host">To view in the reshare app</a>
       // DirectoryEntry de = DirectoryEntry.get(location);
       HostLMSLocation psloc = HostLMSLocation.get(location);
 
-      if ( ( psloc != null ) && ( psloc.code != null ) ) {
+      if ( ( psloc != null ) && ( psloc.code != null ) && ( emailAddress != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name}");
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name} - send to ${emailAddress}");
 
         List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
   
@@ -235,7 +235,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
   
             Map email_params = [
                   'notificationId':'1',
-                              'to':'ianibbo@gmail.com',
+                              'to':emailAddress,
                     'outputFormat':'text/html',
                           'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
                             'body':body_text
