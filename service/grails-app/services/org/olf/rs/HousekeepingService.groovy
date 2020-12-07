@@ -115,6 +115,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
         Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
+        Status.lookupOrCreate('Responder', 'RES_OVERDUE', '9997', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
@@ -156,6 +157,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_COMPLETE', 'message', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'supplierCheckOutOfReshare', 'M')
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
@@ -199,6 +201,9 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
+        
+        AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'patronReturnedItem', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'shippedReturn', 'M')
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
         def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)

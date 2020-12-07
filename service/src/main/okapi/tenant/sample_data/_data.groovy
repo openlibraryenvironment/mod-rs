@@ -84,6 +84,24 @@ try {
                               key: 'wms_registry_id'
                               ).save(flush:true, failOnError: true);
 
+  AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address') ?: new AppSetting( 
+                              section:'wmsSettings',
+                              settingType:'String',
+                              key: 'wms_connector_address'
+                              ).save(flush:true, failOnError: true);
+  
+  AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username') ?: new AppSetting( 
+                              section:'wmsSettings',
+                              settingType:'String',
+                              key: 'wms_connector_username'
+                              ).save(flush:true, failOnError: true);
+
+  AppSetting wms_connector_password = AppSetting.findByKey('wms_connector_password') ?: new AppSetting( 
+                              section:'wmsSettings',
+                              settingType:'Password',
+                              key: 'wms_connector_password'
+                              ).save(flush:true, failOnError: true);
+
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
@@ -184,7 +202,6 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   key: 'ncip_app_profile',
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
 
-  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'None');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');

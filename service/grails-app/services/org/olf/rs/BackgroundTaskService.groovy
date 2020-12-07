@@ -30,6 +30,9 @@ public class BackgroundTaskService {
   static boolean running = false;
   OkapiClient okapiClient
   EmailService emailService
+  PatronNoticeService patronNoticeService
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+
 
   private static config_test_count = 0;
   private static String PULL_SLIP_QUERY='''
@@ -49,7 +52,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
   private static String EMAIL_TEMPLATE='''
 <h1>Example email template</h1>
 <p>
-$numRequests waiting to be printed at $location
+$numRequests waiting to be printed at ${location.name}
 Click <a href="http://some.host">To view in the reshare app</a>
 </p>
 
@@ -62,6 +65,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant})");
+    patronNoticeService.processQueue()
 
 
     // If somehow we get asked to perform the background tasks, but a thread is already running, then just return
@@ -102,6 +106,36 @@ Click <a href="http://some.host">To view in the reshare app</a>
               break;
           }
           
+        }
+        
+        //Find any supplier-side PatronRequests that have become overdue
+        log.debug("Checking for overdue PatronRequests");
+        Date currentDate = new Date();
+        def criteria = PatronRequest.createCriteria();
+        def results = criteria.list {
+          lt("parsedDueDateRS", currentDate) //current date is later than due date
+          state {
+            ne("code","RES_OVERDUE" ) //status is not already overdue            
+          }
+          state {
+            ne("code","RES_COMPLETE") //if the request is already complete, ignore it
+          }
+          state {
+            ne("code","RES_ITEM_RETURNED") //if the request item has already sent back, ignore it
+          }
+          ne("isRequester", true) //request is not request-side (we want supply-side)
+        }
+        results.each { patronRequest ->
+          log.debug("Found PatronRequest ${patronRequest.id} with state ${patronRequest.state?.code}");
+          def previousState = patronRequest.state;
+          def overdueState = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE');
+          if(overdueState == null) {
+            log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");            
+          } else {
+            patronRequest.state = overdueState;
+            reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
+            patronRequest.save(flush:true, failOnError:true);
+          }
         }
 
         // Process any timers for sending pull slip notification emails
@@ -229,7 +263,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
             // 'from':'admin@reshare.org',
             def engine = new groovy.text.GStringTemplateEngine()
             def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
-                                                                            location: location,
+                                                                            location: psloc,
                                                                             summary: pull_slip_overall_summary])
             String body_text = email_template.toString()
   
@@ -237,7 +271,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
                   'notificationId':'1',
                               'to':emailAddress,
                     'outputFormat':'text/html',
-                          'header':"Reshare location ${location} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
+                          'header':"Reshare location ${psloc.name} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
                             'body':body_text
             ]
   

@@ -42,6 +42,7 @@ public class ReshareApplicationEventHandlerService {
   HostLMSService hostLMSService
   ReshareActionService reshareActionService
   StatisticsService statisticsService
+  PatronNoticeService patronNoticeService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -85,6 +86,10 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_AWAITING_RETURN_SHIPPING_ind': { service, eventData ->
     },
     'STATUS_REQ_BORROWER_RETURNED_ind': { service, eventData ->
+    },
+    'STATUS_RES_OVERDUE_ind': { service, eventData ->
+      log.debug("Overdue event handler called");
+      service.handleResOverdue(eventData);
     },
     'MESSAGE_REQUEST_ind': { service, eventData ->
       // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
@@ -178,6 +183,7 @@ public class ReshareApplicationEventHandlerService {
               def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
               auditEntry(req, req.state, validated_state, 'Request Validated', null);
               req.state = validated_state;
+              patronNoticeService.triggerNotices(req, "new_request");
             } else if (s == null) {
               // An unknown requesting institution symbol is a bigger deal than an invalid patron
               req.needsAttention=true;
@@ -319,6 +325,7 @@ public class ReshareApplicationEventHandlerService {
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
             req.save(flush:true, failOnError:true)
+            patronNoticeService.triggerNotices(req, "end_of_rota");
           }
         }
       }
@@ -440,12 +447,14 @@ public class ReshareApplicationEventHandlerService {
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
             req.save(flush:true, failOnError:true)
+            patronNoticeService.triggerNotices(req, "end_of_rota");
           }
         }
         else {
           log.warn("Annot send to next lender - rota is empty");
           req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
+          patronNoticeService.triggerNotices(req, "end_of_rota");
         }
         
         log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
@@ -615,6 +624,25 @@ public class ReshareApplicationEventHandlerService {
 
   PatronRequest lookupPatronRequestByPeerId(String id) {
     return PatronRequest.findByPeerRequestIdentifier(id);
+  }
+  
+  def handleResOverdue(Map eventData) {
+    log.debug("ReshareApplicationEventHandlerService::handleOverdue handler called with eventData ${eventData}");
+
+   PatronRequest.withNewTransaction { transactionStatus ->
+     def pr = delayedGet(eventData.payload.id, true);
+     if(pr == null) {
+       log.warn("Unable to locate request for ID ${eventData.payload.id}");
+     } else if(pr.isRequester) {
+       log.debug("pr ${pr.id} is requester, not sending protocol message");
+     } else {
+       log.debug("Sending protocol message with overdue status change from PatronRequest ${pr.id}");
+       Map params = [ note : "Request is Overdue"]
+       //reshareActionService.sendSupplyingAgencyMessage(pr, "Notification", null, params)
+       reshareActionService.sendStatusChange(pr, 'Overdue', "Request is Overdue");
+     }
+   }
+    
   }
 
   /**
