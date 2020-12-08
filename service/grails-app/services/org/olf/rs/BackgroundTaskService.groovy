@@ -237,7 +237,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
     }
   }
 
-  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips, String emailAddress) {
+  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips, ArrayList emailAddresses) {
     log.debug("checkPullSlipsFor(${location})");
     try {
 
@@ -248,9 +248,9 @@ Click <a href="http://some.host">To view in the reshare app</a>
       // DirectoryEntry de = DirectoryEntry.get(location);
       HostLMSLocation psloc = HostLMSLocation.get(location);
 
-      if ( ( psloc != null ) && ( psloc.code != null ) && ( emailAddress != null ) ) {
+      if ( ( psloc != null ) && ( psloc.code != null ) && ( emailAddresses != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name} - send to ${emailAddress}");
+        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name} - send to ${emailAddresses}");
 
         List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
   
@@ -269,7 +269,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
   
             Map email_params = [
                   'notificationId':'1',
-                              'to':emailAddress?.join(','),
+                              'to':emailAddresses?.join(','),
                     'outputFormat':'text/html',
                           'header':"Reshare location ${psloc.name} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
                             'body':body_text
