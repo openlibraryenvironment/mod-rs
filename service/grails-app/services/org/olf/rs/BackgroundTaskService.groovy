@@ -269,7 +269,7 @@ Click <a href="http://some.host">To view in the reshare app</a>
   
             Map email_params = [
                   'notificationId':'1',
-                              'to':emailAddress,
+                              'to':emailAddress?.join(','),
                     'outputFormat':'text/html',
                           'header':"Reshare location ${psloc.name} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
                             'body':body_text
