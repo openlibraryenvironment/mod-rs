@@ -15,6 +15,7 @@ import groovy.json.JsonSlurper
 import org.olf.rs.EmailService
 import java.util.UUID;
 import groovy.text.GStringTemplateEngine;
+import com.k_int.web.toolkit.settings.AppSetting
 
 
 /**
@@ -50,10 +51,11 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 '''
 
   private static String EMAIL_TEMPLATE='''
-<h1>Example email template</h1>
+<h1>Default Pull Slip Template</h1>
 <p>
 $numRequests waiting to be printed at ${location.name}
-Click <a href="http://some.host">To view in the reshare app</a>
+Click <a href="${foliourl}">To view in the reshare app</a>
+System time is ${new Date()}
 </p>
 
 <ul>
@@ -154,7 +156,14 @@ Click <a href="http://some.host">To view in the reshare app</a>
                            [now:current_systime, en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
-            runTimer(timer);
+
+            if ( ( timer.lastExecution == 0 ) || ( timer.lastExecution == null ) ) {
+              // First time we have seen this timer - we don't know when it is next due - so work that out
+              // as tho we just run the timer.
+            }
+            else {
+              runTimer(timer)
+            };
 
             String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
 
@@ -170,9 +179,8 @@ Click <a href="http://some.host">To view in the reshare app</a>
             while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) && 
                     ( loopcount++ < 10 ) ) {
               nextInstance = rrule_iterator.nextDateTime();
-              log.debug("Test Next calendar instance : ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
             }
-            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance}");
+            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
             log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
             timer.lastExecution = nextInstance.getTimestamp();
             timer.save(flush:true, failOnError:true)
@@ -233,13 +241,19 @@ Click <a href="http://some.host">To view in the reshare app</a>
     log.debug("checkPullSlips(${timer_cfg})");
     timer_cfg?.locations.each { loc ->
       log.debug("Check pull slips for ${loc}");
-      checkPullSlipsFor(loc, timer_cfg.confirmNoPendingRequests?:true, timer_cfg.emailAddresses);
+      checkPullSlipsFor(loc, 
+                        timer_cfg.confirmNoPendingRequests?:true, 
+                        timer_cfg.emailAddresses);
     }
   }
 
   private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips, ArrayList emailAddresses) {
     log.debug("checkPullSlipsFor(${location})");
     try {
+
+      AppSetting base_url_setting = AppSetting.findByKey('system_base_url')
+      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template')
+      String pull_slip_template = pull_slip_template_setting?.value ?: EMAIL_TEMPLATE;
 
       def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
 
@@ -262,9 +276,11 @@ Click <a href="http://some.host">To view in the reshare app</a>
       
             // 'from':'admin@reshare.org',
             def engine = new groovy.text.GStringTemplateEngine()
-            def email_template = engine.createTemplate(EMAIL_TEMPLATE).make([ numRequests:pending_ps_printing.size(), 
-                                                                            location: psloc,
-                                                                            summary: pull_slip_overall_summary])
+            def email_template = engine.createTemplate(pull_slip_template).make([ 
+                                                                              numRequests:pending_ps_printing.size(), 
+                                                                              location: psloc,
+                                                                              summary: pull_slip_overall_summary,
+                                                                              foliourl: base_url_setting?.value?:'Please set base_url in pull slip settings' ])
             String body_text = email_template.toString()
   
             Map email_params = [

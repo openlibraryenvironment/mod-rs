@@ -102,6 +102,32 @@ try {
                               key: 'wms_connector_password'
                               ).save(flush:true, failOnError: true);
 
+  AppSetting wms_connector_password = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
+                              section:'pullslip-notifications',
+                              settingType:'String',
+                              key: 'system_base_url'
+                              ).save(flush:true, failOnError: true);
+
+  AppSetting wms_connector_password = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
+                              section:'pullslip-notifications',
+                              settingType:'Template',
+                              key: 'pull_slip_template',
+                              value:'''
+<h1>Example email template</h1>
+<p>
+$numRequests waiting to be printed at ${location.name}
+Click <a href="${foliourl}">To view in the reshare app</a>
+</p>
+<p>
+<h2>Pending pull slip summary for all locations</h2>
+<ul>
+  <% summary.each { s -> %>
+    <li>There are ${s[0]} pending pull slips at location ${s[1]}</li>
+  <% } %>
+</ul>
+</p>
+''').save(flush:true, failOnError: true);
+
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
