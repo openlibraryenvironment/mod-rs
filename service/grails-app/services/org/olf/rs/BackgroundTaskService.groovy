@@ -16,6 +16,7 @@ import org.olf.rs.EmailService
 import java.util.UUID;
 import groovy.text.GStringTemplateEngine;
 import com.k_int.web.toolkit.settings.AppSetting
+import java.util.TimeZone;
 
 
 /**
@@ -170,7 +171,9 @@ System time is ${new Date()}
             // Caclulate the next due date
             RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
             // DateTime start = DateTime.now()
-            DateTime start = new DateTime(current_systime)
+            // DateTime start = new DateTime(current_systime)
+            // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
+            DateTime start = new DateTime(TimeZone.getTimeZone("EST"), current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = null;
 
