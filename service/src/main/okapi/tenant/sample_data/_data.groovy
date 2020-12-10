@@ -102,13 +102,13 @@ try {
                               key: 'wms_connector_password'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting wms_connector_password = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
+  AppSetting system_base_url = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
                               section:'pullslip-notifications',
                               settingType:'String',
                               key: 'system_base_url'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting wms_connector_password = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
+  AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
                               section:'pullslip-notifications',
                               settingType:'Template',
                               key: 'pull_slip_template',
