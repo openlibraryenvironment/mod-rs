@@ -34,13 +34,14 @@ public class BackgroundTaskService {
   EmailService emailService
   PatronNoticeService patronNoticeService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  OkapiSettingsService okapiSettingsService
 
 
   private static config_test_count = 0;
   private static String PULL_SLIP_QUERY='''
 Select pr 
 from PatronRequest as pr
-where ( pr.pickShelvingLocation like :loccode or pr.pickLocation.code like :loccode )
+where ( pr.pickLocation.id in ( :loccodes ) )
 and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 '''
 
@@ -51,18 +52,30 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     group by pr.pickLocation.code
 '''
 
-  private static String EMAIL_TEMPLATE='''
-<h1>Default Pull Slip Template</h1>
-<p>
-$numRequests waiting to be printed at ${location.name}
-Click <a href="${foliourl}">To view in the reshare app</a>
-System time is ${new Date()}
-</p>
-
+  private static String DEFAULT_EMAIL_TEMPLATE='''
+<h1>Please configure the pull_slip_template setting</h1>
+The template has the following variables 
 <ul>
-  <% summary.each { s -> %>
-    <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
-  <% } %>
+  <li>locations: The locations this pull slip report relates to</li>
+  <li>pendingRequests: The actual requests pending printing at those locations<li>
+  <li>numRequests: The total number of requests pending at those sites</li>
+  <li>summary: A summary of pending pull slips at all locations</li>
+  <li>foliourl: The base system URL of this folio install</li>
+</ul>
+For this run these values are
+<ul>
+  <li>locations: ${locations}</li>
+  <li>pendingRequests: ${pendingRequests}</li>
+  <li>numRequests: ${numRequests}</li>
+  <li>summary: 
+    <ul>
+      <% summary.each { s -> %>
+        <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
+      <% } %>
+    </li>
+  </li>
+  <li>foliourl: ${foliourl}</li>
+<ul>
 </ul>
 '''
 
@@ -173,6 +186,9 @@ System time is ${new Date()}
             // DateTime start = DateTime.now()
             // DateTime start = new DateTime(current_systime)
             // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
+            def system_timezone = okapiSettingsService.getSetting('localeSettings');
+            log.debug("Got system locale settings : ${system_timezone}");
+
             DateTime start = new DateTime(TimeZone.getTimeZone("EST"), current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = null;
@@ -226,50 +242,37 @@ System time is ${new Date()}
     }
   }
 
-  // Use mod-configuration to retrieve the approproate setting
-  private String getSetting(String setting) {
-    String result = null;
-    try {
-      def setting_result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
-      log.debug("Got setting result ${setting_result}");
-    }   
-    catch ( Exception e ) {
-      e.printStackTrace()
-    }
-
-    return result;
-  }
-
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
-    timer_cfg?.locations.each { loc ->
-      log.debug("Check pull slips for ${loc}");
-      checkPullSlipsFor(loc, 
-                        timer_cfg.confirmNoPendingRequests?:true, 
-                        timer_cfg.emailAddresses);
-    }
+    checkPullSlipsFor(timer_cfg.locations,
+                      timer_cfg.confirmNoPendingRequests?:true, 
+                      timer_cfg.emailAddresses);
   }
 
-  private void checkPullSlipsFor(String location, boolean confirm_no_pending_slips, ArrayList emailAddresses) {
-    log.debug("checkPullSlipsFor(${location})");
-    try {
+  private void checkPullSlipsFor(ArrayList loccodes, 
+                                 boolean confirm_no_pending_slips,
+                                 ArrayList emailAddresses) {
 
-      AppSetting base_url_setting = AppSetting.findByKey('system_base_url')
+    // See /configurations/entries?query=code==FOLIO_HOST
+    // See /configurations/entries?query=code==localeSettings
+    log.debug("checkPullSlipsFor(${loccodes},${confirm_no_pending_slips},${emailAddresses})");
+
+    try {
       AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template')
-      String pull_slip_template = pull_slip_template_setting?.value ?: EMAIL_TEMPLATE;
+      String pull_slip_template = pull_slip_template_setting?.value ?: DEFAULT_EMAIL_TEMPLATE;
 
       def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
 
       log.debug("pull slip summary: ${pull_slip_overall_summary}");
 
       // DirectoryEntry de = DirectoryEntry.get(location);
-      HostLMSLocation psloc = HostLMSLocation.get(location);
+      List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
 
-      if ( ( psloc != null ) && ( psloc.code != null ) && ( emailAddresses != null ) ) {
+      if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
 
-        log.debug("Resolved directory entry ${location} - lmsLocationCode is ${psloc.code} name: ${psloc.name} - send to ${emailAddresses}");
+        log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
-        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccode:psloc.code]);
+        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
   
         if ( pending_ps_printing != null ) {
 
@@ -280,17 +283,19 @@ System time is ${new Date()}
             // 'from':'admin@reshare.org',
             def engine = new groovy.text.GStringTemplateEngine()
             def email_template = engine.createTemplate(pull_slip_template).make([ 
-                                                                              numRequests:pending_ps_printing.size(), 
-                                                                              location: psloc,
-                                                                              summary: pull_slip_overall_summary,
-                                                                              foliourl: base_url_setting?.value?:'Please set base_url in pull slip settings' ])
+                                                                                  locations: pslocs,
+                                                                                  pendingRequests: pending_ps_printing,
+                                                                                  numRequests:pending_ps_printing.size(), 
+                                                                                  summary: pull_slip_overall_summary,
+                                                                                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
+                                                                               ])
             String body_text = email_template.toString()
   
             Map email_params = [
                   'notificationId':'1',
                               'to':emailAddresses?.join(','),
                     'outputFormat':'text/html',
-                          'header':"Reshare location ${psloc.name} has ${pending_ps_printing.size()} requests that need pull slip printing".toString(),
+                          'header':"Reshare ${pending_ps_printing.size()} new pull slips available".toString(),
                             'body':body_text
             ]
   
@@ -308,11 +313,6 @@ System time is ${new Date()}
         else {
           log.warn("Directory entry for location ${location} does not have a host LMS location code");
         }
-      }
-
-      log.debug("Dumping patron requests awaiting pull slip printing for validation");
-      PatronRequest.executeQuery('select pr from PatronRequest as pr where pr.state.code=:ps', [ps:'RES_NEW_AWAIT_PULL_SLIP']).each {
-        log.debug("${it.id} ${it.title} ${it.pickShelvingLocation} ${it.pickLocation?.code}");
       }
     }
     catch ( Exception e ) {
