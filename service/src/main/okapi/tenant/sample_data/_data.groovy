@@ -115,7 +115,7 @@ try {
                               value:'''
 <h1>Example email template</h1>
 <p>
-$numRequests waiting to be printed at ${location.name}
+$numRequests waiting to be printed at ${location?.name}
 Click <a href="${foliourl}">To view in the reshare app</a>
 </p>
 <p>
