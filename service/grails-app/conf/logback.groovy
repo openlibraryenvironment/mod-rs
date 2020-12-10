@@ -49,6 +49,7 @@ logger ('org.olf.rs.EventConsumerService', DEBUG)
 logger ('com.k_int.okapi.OkapiClient', TRACE)
 logger ('groovyx.net.http.HttpBuilder', TRACE)
 logger ('groovyx.net.http.HttpBuilder', TRACE)
+logger ('org.hibernate.orm.deprecation', ERROR)
 
 // logger ('com.k_int.okapi.OkapiClient', TRACE)
 // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
