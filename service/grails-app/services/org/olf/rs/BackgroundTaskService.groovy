@@ -265,7 +265,6 @@ For this run these values are
 
       log.debug("pull slip summary: ${pull_slip_overall_summary}");
 
-      // DirectoryEntry de = DirectoryEntry.get(location);
       List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
 
       if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
@@ -303,16 +302,11 @@ For this run these values are
           }
         }
         else {
-          log.debug("No pending pull slips for ${location}");
+          log.debug("No pending pull slips for ${loccodes}");
         }
       }
       else {
-        if ( de == null ) {
-          log.warn("Failed to resolve directory entry id ${location}");
-        }
-        else {
-          log.warn("Directory entry for location ${location} does not have a host LMS location code");
-        }
+        log.warn("Problem resolving locations or email addresses");
       }
     }
     catch ( Exception e ) {
