@@ -103,13 +103,13 @@ try {
                               ).save(flush:true, failOnError: true);
 
   AppSetting system_base_url = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
-                              section:'pullslip-notifications',
+                              section:'pullslip-templates',
                               settingType:'String',
                               key: 'system_base_url'
                               ).save(flush:true, failOnError: true);
 
   AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
-                              section:'pullslip-notifications',
+                              section:'pullslip-templates',
                               settingType:'Template',
                               key: 'pull_slip_template',
                               value:'''
