@@ -156,20 +156,20 @@ For this run these values are
 
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
-        log.debug("Checking timers ready for execution");
+        // log.debug("Checking timers ready for execution");
 
         long current_systime = System.currentTimeMillis();
 
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
           def remaining_min = ((ti.lastExecution?:0)-current_systime)/60000
-          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
+          // log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
         }
 
         Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
                            [now:current_systime, en: true]).each { timer ->
           try {
-            log.debug("** Timer task ${timer.id} firing....");
+            // log.debug("** Timer task ${timer.id} firing....");
 
             if ( ( timer.lastExecution == 0 ) || ( timer.lastExecution == null ) ) {
               // First time we have seen this timer - we don't know when it is next due - so work that out
@@ -208,7 +208,7 @@ For this run these values are
             log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
           }
           finally {
-            log.debug("Completed scheduled task checking");
+            // log.debug("Completed scheduled task checking");
           }
         }
         
@@ -219,7 +219,7 @@ For this run these values are
     }
     finally {
       running = false;
-      log.debug("BackgroundTaskService::performReshareTasks exiting");
+      // log.debug("BackgroundTaskService::performReshareTasks exiting");
     }
   }
 
@@ -278,8 +278,8 @@ For this run these values are
 
           if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
   
-            log.debug("${pending_ps_printing.size()} pending pull slip printing for location ${location}");
-      
+            log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
+
             // 'from':'admin@reshare.org',
             def engine = new groovy.text.GStringTemplateEngine()
             def email_template = engine.createTemplate(pull_slip_template).make([ 

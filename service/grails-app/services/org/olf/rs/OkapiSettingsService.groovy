@@ -32,6 +32,8 @@ public class OkapiSettingsService {
 
   // Use mod-configuration to retrieve the approproate setting
   private Map getSettingInternal(String setting) {
+
+
     Map result = null;
     try {
       def setting_result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
@@ -41,6 +43,7 @@ public class OkapiSettingsService {
       e.printStackTrace()
     }
 
+    log.debug("OkapiSettingsService::getSettingInternal(${setting}) result ${setting_result}");
     return result;
   }
 
