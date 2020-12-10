@@ -80,7 +80,7 @@ For this run these values are
 '''
 
   def performReshareTasks(String tenant) {
-    log.debug("performReshareTasks(${tenant})");
+    log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
     patronNoticeService.processQueue()
 
 
@@ -163,13 +163,13 @@ For this run these values are
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
           def remaining_min = ((ti.lastExecution?:0)-current_systime)/60000
-          // log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}");
+          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}min");
         }
 
         Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
                            [now:current_systime, en: true]).each { timer ->
           try {
-            // log.debug("** Timer task ${timer.id} firing....");
+            log.debug("** Timer task ${timer.id} firing....");
 
             if ( ( timer.lastExecution == 0 ) || ( timer.lastExecution == null ) ) {
               // First time we have seen this timer - we don't know when it is next due - so work that out
