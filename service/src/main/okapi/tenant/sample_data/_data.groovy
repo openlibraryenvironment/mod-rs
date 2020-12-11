@@ -115,8 +115,8 @@ try {
                               value:'''
 <h1>Example email template</h1>
 <p>
-$numRequests waiting to be printed at ${location?.name}
-Click <a href="${foliourl}">To view in the reshare app</a>
+$numRequests waiting to be printed at location(s) ${locations?.collect { it.code }.join(',')}
+Click <a href="${foliourl?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated">To view in the reshare app</a>
 </p>
 <p>
 <h2>Pending pull slip summary for all locations</h2>
