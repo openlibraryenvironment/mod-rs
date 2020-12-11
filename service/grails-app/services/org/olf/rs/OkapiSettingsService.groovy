@@ -35,7 +35,20 @@ public class OkapiSettingsService {
 
     Map result = null;
     try {
-      result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
+      def call_result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
+      if ( ( call_result != null ) &&
+           ( call_result instanceof Map ) &&
+           ( call_result.configs != null ) &&
+           ( call_result.configs.size() == 1 ) ) {
+        def cfg_result_record = call_result.configs[0]
+        result = [
+          id: cfg_result_record.id,
+          value: cfg_result_record.value,
+          code: cfg_result_record.code,
+          description: cfg_result_record.description,
+          name: cfg_result_record.name
+        ]
+      }
     }
     catch ( Exception e ) {
       e.printStackTrace()
