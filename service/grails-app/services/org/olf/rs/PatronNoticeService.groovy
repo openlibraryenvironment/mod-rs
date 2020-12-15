@@ -90,7 +90,14 @@ public class PatronNoticeService {
     log.debug("Processing patron notice queue for tenant ${tenant}");
     consumer.subscribe(["${tenant}_PatronNoticeEvents".toString()]);
     // TODO pass a Duration object (long is deprecated) and determine a less-arbitrary amount of time
-    def consumerRecords = consumer.poll(1000)
+    def consumerRecords = consumer.poll(2000);
+    // commit immediately though we've not processed the records as even successfully passing it to
+    // mod-email does not guarantee that a notice has been delivered but leaving it on the queue
+    // does incur some risk of sending multiple copies
+    consumer.commitAsync();
+    // relies on commitAsync reading subscriptions up front, perhaps best to
+    // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
+    consumer.unsubscribe();
     consumerRecords.each{ record ->
       try {
         log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
@@ -125,9 +132,5 @@ public class PatronNoticeService {
         log.debug("Completed processing of patron notice trigger for ${tenant}");
       }
     }
-    consumer.commitAsync();
-    // relies on commitAsync reading subscriptions up front, perhaps best to
-    // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
-    consumer.unsubscribe();
   }
 }
