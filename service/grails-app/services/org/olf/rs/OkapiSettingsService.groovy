@@ -33,9 +33,14 @@ public class OkapiSettingsService {
   // Use mod-configuration to retrieve the approproate setting
   private Map getSettingInternal(String setting) {
 
+    String lookup_prop = 'code';
+    if ( setting=='localSettings' ) {
+      lookup_prop='configName'
+    }
+
     Map result = null;
     try {
-      def call_result = okapiClient.getSync("/configurations/entries", [query:'code='+setting])
+      def call_result = okapiClient.getSync("/configurations/entries", [query:lookup_prop+'='+setting])
       if ( ( call_result != null ) &&
            ( call_result instanceof Map ) &&
            ( call_result.configs != null ) &&
