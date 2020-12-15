@@ -68,9 +68,9 @@ public class PatronNoticeService {
           email: pr.patronEmail,
           values: [
             user: [
-              id: pr.patronReference,
+              id: pr.patronIdentifier,
               givenName: pr?.patronGivenName ?: '',
-              surame: pr.patronSurname,
+              surname: pr.patronSurname,
             ],
             request: [
               id: pr.hrid,
@@ -78,7 +78,9 @@ public class PatronNoticeService {
               neededBy: pr?.neededBy?.toString() ?: ''
             ],
             item: [
-              title: pr.title
+              barcode: pr?.selectedItemBarcode ?: '',
+              title: pr.title,
+              materialType: pr?.publicationType?.label ?: ''
             ]
           ]
         ]
