@@ -17,10 +17,10 @@ public class OkapiSettingsService {
   @Autowired
   OkapiClient okapiClient
 
-  Map setting_cache = [:]
+  Map<String, Map> setting_cache = [:]
 
-  public String getSetting(String setting_code) {
-    String result = setting_cache.get(setting_code)
+  public Map getSetting(String setting_code) {
+    Map result = setting_cache.get(setting_code)
     if ( result == null ) {
       result = getSettingInternal(setting_code)
       if ( result ) {
