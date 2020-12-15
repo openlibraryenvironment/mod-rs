@@ -81,7 +81,7 @@ For this run these values are
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
-    patronNoticeService.processQueue()
+    patronNoticeService.processQueue(tenant)
 
 
     // If somehow we get asked to perform the background tasks, but a thread is already running, then just return
