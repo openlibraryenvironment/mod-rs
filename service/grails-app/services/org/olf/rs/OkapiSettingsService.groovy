@@ -49,6 +49,9 @@ public class OkapiSettingsService {
           name: cfg_result_record.name
         ]
       }
+      else {
+        log.info("Config lookup for ${setting} did not return expected record: ${call_result}");
+      }
     }
     catch ( Exception e ) {
       e.printStackTrace()
