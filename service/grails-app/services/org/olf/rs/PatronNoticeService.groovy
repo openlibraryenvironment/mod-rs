@@ -89,6 +89,7 @@ public class PatronNoticeService {
   public void processQueue(String tenant) {
     log.debug("Processing patron notice queue for tenant ${tenant}");
     consumer.subscribe(["${tenant}_PatronNoticeEvents".toString()]);
+    // TODO pass a Duration object (long is deprecated) and determine a less-arbitrary amount of time
     def consumerRecords = consumer.poll(1000)
     consumerRecords.each{ record ->
       try {
@@ -125,6 +126,8 @@ public class PatronNoticeService {
       }
     }
     consumer.commitAsync();
+    // relies on commitAsync reading subscriptions up front, perhaps best to
+    // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
     consumer.unsubscribe();
   }
 }
