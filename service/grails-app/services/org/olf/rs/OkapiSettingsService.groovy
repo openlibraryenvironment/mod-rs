@@ -6,6 +6,7 @@ import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import grails.core.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
+import com.k_int.okapi.OkapiTenantResolver
 
 @Slf4j
 public class OkapiSettingsService {
@@ -20,11 +21,13 @@ public class OkapiSettingsService {
   Map<String, Map> setting_cache = [:]
 
   public Map getSetting(String setting_code) {
-    Map result = setting_cache.get(setting_code)
+    String tenantId = OkapiTenantResolver.schemaNameToTenantId( Tenants.currentId().toString() )
+    String unique_setting = tenantId+':'+setting_code;
+    Map result = setting_cache.get(unique_setting)
     if ( result == null ) {
       result = getSettingInternal(setting_code)
       if ( result ) {
-        setting_cache[setting_code] = result;
+        setting_cache[unique_setting] = result;
       }
     }
     return result;
