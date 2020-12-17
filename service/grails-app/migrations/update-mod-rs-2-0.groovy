@@ -24,4 +24,14 @@ databaseChangeLog = {
       column(name:'pr_oclc_number', type: "VARCHAR(255)")
     }
   }
+
+  changeSet(author: "efreestone (manual)", id: "20201210-1026-001") {
+    modifyDataType(
+      tableName: "app_setting",
+      columnName: "st_value", type: "text",
+      newDataType: "text",
+      confirm: "successfully updated the st_value column."
+    )
+  }
+        
 }
