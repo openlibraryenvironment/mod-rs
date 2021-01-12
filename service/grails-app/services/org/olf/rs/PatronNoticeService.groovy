@@ -18,7 +18,8 @@ public class PatronNoticeService {
   EventPublicationService eventPublicationService
   OkapiClient okapiClient
   GrailsApplication grailsApplication
-  private KafkaConsumer consumer = null
+
+  Properties props = null
 
   @javax.annotation.PostConstruct
   public void init() {
@@ -26,7 +27,7 @@ public class PatronNoticeService {
     // as they come in whereas the notice triggers need to queue until they can
     // be consumed under the aegis of a timer request
     log.debug("Configuring event consumer for patron notice service")
-    Properties props = new Properties()
+    props = new Properties()
     try {
       grailsApplication.config.events.consumer.toProperties().each { final String key, final String value ->
         // Directly access each entry to cause lookup from env
@@ -40,14 +41,13 @@ public class PatronNoticeService {
       log.error("Problem assembling props for consume",e);
     }
 
-    consumer = new KafkaConsumer(props)
     log.debug("PatronNoticeService::init() returning");
   }
 
   @javax.annotation.PreDestroy
   private void cleanUp() throws Exception {
     log.info("PatronNoticeService::cleanUp");
-    consumer.wakeup();
+    // consumer.wakeup();
   }
 
   public void triggerNotices(PatronRequest pr, String trigger) {
@@ -90,6 +90,13 @@ public class PatronNoticeService {
 
   public void processQueue(String tenant) {
     log.debug("Processing patron notice queue for tenant ${tenant}");
+
+    // KafkaConsumers cannot be shared - when we recieve multiple timers for different tenants this method
+    // will be called causing us to try to reuse the same consumer for each tenant. Refactoring to
+    // dynamically create the consumer here and then destroy it - KafkaConsumer is a heavy object and this is not
+    // an ideal way of working - it's the only pragmatic way forward at the moment tho.
+    KafkaConsumer consumer = new KafkaConsumer(props)
+
     consumer.subscribe(["${tenant}_PatronNoticeEvents".toString()]);
     // TODO pass a Duration object (long is deprecated) and determine a less-arbitrary amount of time
     def consumerRecords = consumer.poll(2000);
