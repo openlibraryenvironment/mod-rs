@@ -11,7 +11,7 @@ class Token implements MultiTenant<Token> {
   static mapping = {
               id column: 'tk_id', generator: 'uuid2', length:36
          version column: 'tk_version'
-            name column: 'tk_token'
+           token column: 'tk_token'
     previewValue column: 'tk_preview_value'
            owner column: 'tk_owner_fk'
   }

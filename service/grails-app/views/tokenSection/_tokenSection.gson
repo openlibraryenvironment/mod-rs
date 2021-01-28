@@ -1,0 +1,7 @@
+import groovy.transform.*
+import org.olf.rs.TokenSection;
+
+@Field TokenSection tokenSection
+json g.render(tokenSection) {
+  tokens g.render(tokenSection.tokens)
+}
