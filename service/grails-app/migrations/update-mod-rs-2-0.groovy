@@ -33,5 +33,86 @@ databaseChangeLog = {
       confirm: "successfully updated the st_value column."
     )
   }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-001") {
+    createTable(tableName: "template_container") {
+      column(name: "tmc_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "tmc_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+      column(name: "tmc_name", type: "VARCHAR(255)")
+      column(name: "tmc_template_resolver", type: "VARCHAR(36)")
+      column(name: "tmc_description", type: "VARCHAR(255)")
+      column(name: "tmc_date_created", type: "timestamp")
+      column(name: "tmc_last_updated", type: "timestamp")
+      column(name: "tmc_template_fk", type: "VARCHAR(36)")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-002") {
+    addPrimaryKey(columnNames: "tmc_id", constraintName: "template_containerPK", tableName: "template_container")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-003") {
+    createTable(tableName: "template") {
+      column(name: "tm_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "tm_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+      column(name: "tm_header", type: "VARCHAR(255)")
+      column(name: "tm_template_body", type: "text")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-004") {
+    addPrimaryKey(columnNames: "tm_id", constraintName: "templatePK", tableName: "template")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-005") {
+    addForeignKeyConstraint(baseColumnNames: "tmc_template_resolver", baseTableName: "template_container", constraintName: "tmc_template_container_template_resolverFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    addForeignKeyConstraint(baseColumnNames: "tmc_template_fk", baseTableName: "template_container", constraintName: "tmc_template_container_templateFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tm_id", referencedTableName: "template")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-006") {
+    createTable(tableName: "token_section") {
+      column(name: "tks_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "tks_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+      column(name: "tks_name", type: "VARCHAR(255)")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-007") {
+    addPrimaryKey(columnNames: "tks_id", constraintName: "token_sectionPK", tableName: "token_section")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-008") {
+    createTable(tableName: "token") {
+      column(name: "tk_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "tk_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+      column(name: "tk_token", type: "VARCHAR(255)")
+      column(name: "tk_preview_value", type: "VARCHAR(255)")
+      column(name: "tk_owner_fk", type: "VARCHAR(36)")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-009") {
+    addPrimaryKey(columnNames: "tk_id", constraintName: "tokenPK", tableName: "token")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-010") {
+    addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
+  }
         
 }
