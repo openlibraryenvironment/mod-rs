@@ -54,6 +54,5 @@ class UrlMappings {
     "404"(view: '/notFound')
 
     '/rs/template'(resources: 'template')
-    '/rs/token'(resources: 'tokenSection')
   }
 }

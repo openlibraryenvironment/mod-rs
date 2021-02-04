@@ -125,7 +125,7 @@ public class PatronNoticeService {
             ]
             log.debug("Generating patron notice corresponding to trigger ${data.payload.trigger} for policy ${it.noticePolicy.name}")
             
-            def templatingService.performTemplate()
+            def test = templatingService.performTemplate()
             //def tmplResult = okapiClient.post("/template-request", tmplParams)
             Map emailParams = [
               notificationId: it.id,

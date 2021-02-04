@@ -98,48 +98,6 @@ databaseChangeLog = {
     addForeignKeyConstraint(baseColumnNames: "tmc_template_resolver", baseTableName: "template_container", constraintName: "tmc_template_container_template_resolverFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-009") {
-    createTable(tableName: "token_section") {
-      column(name: "tks_id", type: "VARCHAR(36)") {
-        constraints(nullable: "false")
-      }
-      column(name: "tks_version", type: "BIGINT") {
-        constraints(nullable: "false")
-      }
-      column(name: "tks_name", type: "VARCHAR(255)")
-    }
-  }
-
-  changeSet(author: "efreestone (manual)", id: "202101281128-010") {
-    addPrimaryKey(columnNames: "tks_id", constraintName: "token_sectionPK", tableName: "token_section")
-  }
-
-  changeSet(author: "efreestone (manual)", id: "202101281128-011") {
-    createTable(tableName: "token") {
-      column(name: "tk_id", type: "VARCHAR(36)") {
-        constraints(nullable: "false")
-      }
-      column(name: "tk_version", type: "BIGINT") {
-        constraints(nullable: "false")
-      }
-      column(name: "tk_token", type: "VARCHAR(255)")
-      column(name: "tk_preview_value", type: "VARCHAR(255)")
-      column(name: "tk_owner_fk", type: "VARCHAR(36)")
-    }
-  }
-
-  changeSet(author: "efreestone (manual)", id: "202101281128-012") {
-    addPrimaryKey(columnNames: "tk_id", constraintName: "tokenPK", tableName: "token")
-  }
-
-  changeSet(author: "efreestone (manual)", id: "202101281128-013") {
-    addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
-  }
-
-  changeSet(author: "efreestone (manual)", id: "202101281128-013") {
-    addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
-  }
-
   // We need to blow away the existing notice policy notices as part of this template switchover
   changeSet(author: "efreestone (manual)", id: "2021-02-04-1522-001") {
     grailsChange {
@@ -157,6 +115,16 @@ databaseChangeLog = {
     }
     addForeignKeyConstraint(baseColumnNames: "npn_template_fk", baseTableName: "notice_policy_notice", constraintName: "notice_policy_notice_templateFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tmc_id", referencedTableName: "template_container")
     dropColumn(tableName: "notice_policy_notice", columnName: "npn_template")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "2021-02-04-1522-002") {
+    grailsChange {
+      change {
+        sql.execute("""
+          DELETE FROM ${database.defaultSchemaName}.notice_policy
+        """.toString())
+      }
+    }
   }
   
 }

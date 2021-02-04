@@ -219,12 +219,7 @@
         },
         {
           "methods": [ "GET", "POST", "PUT", "DELETE" ],
-          "pathPattern": "/rs/template",
-          "permissionsRequired": []
-        },
-        {
-          "methods": [ "GET", "POST", "PUT", "DELETE" ],
-          "pathPattern": "/rs/token",
+          "pathPattern": "/rs/template*",
           "permissionsRequired": []
         }
       ]

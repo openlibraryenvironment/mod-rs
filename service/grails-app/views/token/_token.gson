@@ -1,5 +1,0 @@
-import groovy.transform.*
-import org.olf.rs.Token;
-
-@Field Token token
-json g.render(token, [excludes: ['owner']])
