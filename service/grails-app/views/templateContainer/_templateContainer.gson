@@ -2,4 +2,4 @@ import groovy.transform.*
 import org.olf.rs.TemplateContainer;
 
 @Field TemplateContainer templateContainer
-json g.render(templateContainer, [expand: ['template', 'templateResolver']])
+json g.render(templateContainer, [expand: ['localizedTemplates', 'templateResolver']])
