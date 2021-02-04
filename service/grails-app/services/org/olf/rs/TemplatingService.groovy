@@ -35,9 +35,9 @@ public class TemplatingService {
 
 
       String outputString = ''
-      def template = engine.createTemplate(template).make(binding)
+      def boundTemplate = engine.createTemplate(template).make(binding)
       StringWriter sw = new StringWriter()
-      template.writeTo(sw)
+      boundTemplate.writeTo(sw)
       outputString = sw.toString()
 
       return outputString
