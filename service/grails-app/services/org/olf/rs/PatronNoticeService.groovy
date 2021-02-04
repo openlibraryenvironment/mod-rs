@@ -7,6 +7,7 @@ import groovy.json.JsonSlurper
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
 import org.olf.rs.EmailService
+import org.olf.rs.TemplatingService
 import org.olf.rs.EventConsumerService
 import org.olf.rs.EventPublicationService
 import org.olf.rs.NoticePolicyNotice
@@ -14,6 +15,7 @@ import org.olf.rs.NoticePolicyNotice
 public class PatronNoticeService {
 
   EmailService emailService
+  TemplatingService templatingService
   EventConsumerService eventConsumerService
   EventPublicationService eventPublicationService
   OkapiClient okapiClient
@@ -122,7 +124,9 @@ public class PatronNoticeService {
               context: data.payload.values
             ]
             log.debug("Generating patron notice corresponding to trigger ${data.payload.trigger} for policy ${it.noticePolicy.name}")
-            def tmplResult = okapiClient.post("/template-request", tmplParams)
+            
+            def templatingService.performTemplate()
+            //def tmplResult = okapiClient.post("/template-request", tmplParams)
             Map emailParams = [
               notificationId: it.id,
               to: data.payload.email,

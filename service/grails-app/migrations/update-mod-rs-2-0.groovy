@@ -135,5 +135,28 @@ databaseChangeLog = {
   changeSet(author: "efreestone (manual)", id: "202101281128-013") {
     addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
   }
-        
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-013") {
+    addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
+  }
+
+  // We need to blow away the existing notice policy notices as part of this template switchover
+  changeSet(author: "efreestone (manual)", id: "2021-02-04-1522-001") {
+    grailsChange {
+      change {
+        sql.execute("""
+          DELETE FROM ${database.defaultSchemaName}.notice_policy_notice
+        """.toString())
+      }
+    }
+
+    addColumn(tableName: "notice_policy_notice") {
+      column(name: "npn_template_fk", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+    }
+    addForeignKeyConstraint(baseColumnNames: "npn_template_fk", baseTableName: "notice_policy_notice", constraintName: "notice_policy_notice_templateFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tmc_id", referencedTableName: "template_container")
+    dropColumn(tableName: "notice_policy_notice", columnName: "npn_template")
+  }
+  
 }
