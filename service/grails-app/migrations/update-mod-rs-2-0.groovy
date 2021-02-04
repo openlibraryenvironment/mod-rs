@@ -47,7 +47,6 @@ databaseChangeLog = {
       column(name: "tmc_description", type: "VARCHAR(255)")
       column(name: "tmc_date_created", type: "timestamp")
       column(name: "tmc_last_updated", type: "timestamp")
-      column(name: "tmc_template_fk", type: "VARCHAR(36)")
     }
   }
 
@@ -56,6 +55,24 @@ databaseChangeLog = {
   }
 
   changeSet(author: "efreestone (manual)", id: "202101281128-003") {
+    createTable(tableName: "localized_template") {
+      column(name: "ltm_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+      column(name: "ltm_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+      column(name: "ltm_locality", type: "VARCHAR(36)")
+      column(name: "ltm_owner_fk", type: "VARCHAR(36)")
+      column(name: "ltm_template_fk", type: "VARCHAR(36)")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-004") {
+    addPrimaryKey(columnNames: "ltm_id", constraintName: "localizedTemplatePK", tableName: "localized_template")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-005") {
     createTable(tableName: "template") {
       column(name: "tm_id", type: "VARCHAR(36)") {
         constraints(nullable: "false")
@@ -68,16 +85,20 @@ databaseChangeLog = {
     }
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-004") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-006") {
     addPrimaryKey(columnNames: "tm_id", constraintName: "templatePK", tableName: "template")
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-005") {
-    addForeignKeyConstraint(baseColumnNames: "tmc_template_resolver", baseTableName: "template_container", constraintName: "tmc_template_container_template_resolverFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
-    addForeignKeyConstraint(baseColumnNames: "tmc_template_fk", baseTableName: "template_container", constraintName: "tmc_template_container_templateFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tm_id", referencedTableName: "template")
+  changeSet(author: "efreestone (manual)", id: "202101281128-007") {
+    addForeignKeyConstraint(baseColumnNames: "ltm_owner_fk", baseTableName: "localized_template", constraintName: "localized_template_template_containerFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tmc_id", referencedTableName: "template_container")
+    addForeignKeyConstraint(baseColumnNames: "ltm_template_fk", baseTableName: "localized_template", constraintName: "localized_template_templateFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tm_id", referencedTableName: "template")
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-006") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-008") {
+    addForeignKeyConstraint(baseColumnNames: "tmc_template_resolver", baseTableName: "template_container", constraintName: "tmc_template_container_template_resolverFK", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "202101281128-009") {
     createTable(tableName: "token_section") {
       column(name: "tks_id", type: "VARCHAR(36)") {
         constraints(nullable: "false")
@@ -89,11 +110,11 @@ databaseChangeLog = {
     }
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-007") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-010") {
     addPrimaryKey(columnNames: "tks_id", constraintName: "token_sectionPK", tableName: "token_section")
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-008") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-011") {
     createTable(tableName: "token") {
       column(name: "tk_id", type: "VARCHAR(36)") {
         constraints(nullable: "false")
@@ -107,11 +128,11 @@ databaseChangeLog = {
     }
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-009") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-012") {
     addPrimaryKey(columnNames: "tk_id", constraintName: "tokenPK", tableName: "token")
   }
 
-  changeSet(author: "efreestone (manual)", id: "202101281128-010") {
+  changeSet(author: "efreestone (manual)", id: "202101281128-013") {
     addForeignKeyConstraint(baseColumnNames: "tk_owner_fk", baseTableName: "token", constraintName: "tk_owner_idfk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "tks_id", referencedTableName: "token_section")
   }
         

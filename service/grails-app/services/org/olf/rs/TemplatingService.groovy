@@ -6,20 +6,27 @@ import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.helper.StringHelpers
 import com.github.jknack.handlebars.EscapingStrategy
 
+import java.time.LocalDateTime
+
+import groovy.util.logging.Slf4j;
+
+@Slf4j 
 public class TemplatingService {
 
-  public static String performTemplate(String template, Map binding, String resolver) {
+  public static Map performTemplate(TemplateContainer templateContainer, Map binding, String locality) {
+
+    String resolver = templateContainer.templateResolver.value
     switch (resolver) {
       case 'handlebars':
-        return performHandlebarsTemplate(template, binding)
+        return performHandlebarsTemplate(templateContainer, binding, locality)
         break;
       default:
-        log.error("No method defined for template resolver (${resolver})")
+        log.warn("No method defined for template resolver (${resolver})")
         break;
     }
   }
 
-  public static String performHandlebarsTemplate(String template, Map binding) {
+  public static String performHandlebarsTemplateString(String template, Map binding) {
       // Set up handlebars configuration
       EscapingStrategy noEscaping = new EscapingStrategy() {
         public String escape(final CharSequence value) {
@@ -43,4 +50,34 @@ public class TemplatingService {
       return outputString
   }
 
+  public static Map performHandlebarsTemplate(TemplateContainer templateContainer, Map binding, String locality) {
+      Map output = [:]
+      Map result = [:]
+      Map meta = [:]
+
+      try {
+        // TODO for now we hardcode text/html format
+        meta.outputFormat = "text/html"
+        LocalizedTemplate lt = LocalizedTemplate.getByOwnerAndLocality(templateContainer, locality)
+        try {
+          String body = performHandlebarsTemplateString(lt.template.templateBody, binding)
+          result.header = performHandlebarsTemplateString(lt.template.header, binding)
+          result.body = body
+
+          meta.lang = locality
+          meta.size = body.length()
+          meta.dateCreate = LocalDateTime.now()
+        } catch (Exception e) {
+          log.error("Failed to perform template: ${e.message}")
+        }
+
+      } catch (Exception e) {
+        log.error("Failed to get localised template for locality ${locality}: ${e.message}")
+      }
+
+      output.result = result
+      output.meta = meta
+
+      output
+  }
 }
