@@ -1,5 +1,7 @@
 package org.olf.rs
 
+import grails.gorm.transactions.Transactional
+
 import uk.co.cacoethes.handlebars.HandlebarsTemplateEngine
 import com.github.jknack.handlebars.Handlebars
 
@@ -10,7 +12,8 @@ import java.time.LocalDateTime
 
 import groovy.util.logging.Slf4j;
 
-@Slf4j 
+@Slf4j
+@Transactional
 public class TemplatingService {
 
   public static Map performTemplate(TemplateContainer templateContainer, Map binding, String locality) {
@@ -51,33 +54,42 @@ public class TemplatingService {
   }
 
   public static Map performHandlebarsTemplate(TemplateContainer templateContainer, Map binding, String locality) {
-      Map output = [:]
-      Map result = [:]
-      Map meta = [:]
+    Map output = [:]
+    Map result = [:]
+    Map meta = [:]
 
+    try {
+      // TODO for now we hardcode text/html format
+      meta.outputFormat = "text/html"
+      LocalizedTemplate lt = LocalizedTemplate.executeQuery("""
+        SELECT lt FROM LocalizedTemplate AS lt
+        WHERE lt.owner.id = :ownerId
+        AND
+        lt.locality = :locality
+      """,[ownerId: templateContainer.id, locality: locality])[0]
+      if (lt == null) {
+        throw new Exception("No localized template exists with owner: ${templateContainer.id} and locality: ${locality}")
+      }
+      
       try {
-        // TODO for now we hardcode text/html format
-        meta.outputFormat = "text/html"
-        LocalizedTemplate lt = LocalizedTemplate.getByOwnerAndLocality(templateContainer, locality)
-        try {
-          String body = performHandlebarsTemplateString(lt.template.templateBody, binding)
-          result.header = performHandlebarsTemplateString(lt.template.header, binding)
-          result.body = body
+        String body = performHandlebarsTemplateString(lt.template.templateBody, binding)
+        result.header = performHandlebarsTemplateString(lt.template.header, binding)
+        result.body = body
 
-          meta.lang = locality
-          meta.size = body.length()
-          meta.dateCreate = LocalDateTime.now()
-        } catch (Exception e) {
-          log.error("Failed to perform template: ${e.message}")
-        }
-
+        meta.lang = locality
+        meta.size = body.length()
+        meta.dateCreate = LocalDateTime.now()
       } catch (Exception e) {
-        log.error("Failed to get localised template for locality ${locality}: ${e.message}")
+        log.error("Failed to perform template: ${e.message}")
       }
 
-      output.result = result
-      output.meta = meta
+    } catch (Exception e) {
+      log.error("Failed to get localised template for locality ${locality}: ${e.message}")
+    }
 
-      output
+    output.result = result
+    output.meta = meta
+
+    output
   }
 }

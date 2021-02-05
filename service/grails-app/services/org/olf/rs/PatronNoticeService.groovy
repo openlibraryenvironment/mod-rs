@@ -117,16 +117,8 @@ public class PatronNoticeService {
         Tenants.withId(data.tenant) {
           def notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.value == data.payload.trigger }
           notices.each {
-            Map tmplParams = [
-              templateId: it.template,
-              lang: "en",
-              outputFormat: "text/html",
-              context: data.payload.values
-            ]
             log.debug("Generating patron notice corresponding to trigger ${data.payload.trigger} for policy ${it.noticePolicy.name}")
-            
-            def test = templatingService.performTemplate()
-            //def tmplResult = okapiClient.post("/template-request", tmplParams)
+            def tmplResult = templatingService.performTemplate(it.template, data.payload.values, "en")
             Map emailParams = [
               notificationId: it.id,
               to: data.payload.email,
