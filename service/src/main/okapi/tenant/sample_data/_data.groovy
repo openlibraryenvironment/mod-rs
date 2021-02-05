@@ -111,6 +111,7 @@ try {
   AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
                               section:'pullslip-templates',
                               settingType:'Template',
+                              vocab: 'pullslipTemplate',
                               key: 'pull_slip_template',
                               value:'''
 <h1>Example email template</h1>

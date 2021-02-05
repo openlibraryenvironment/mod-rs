@@ -218,9 +218,29 @@
           "permissionsRequired": ["rs.noticePolicies"]
         },
         {
-          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "methods": [ "GET" ],
           "pathPattern": "/rs/template*",
-          "permissionsRequired": []
+          "permissionsRequired": ["rs.template.collection.get"]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/template/{id}*",
+          "permissionsRequired": ["rs.template.item.get"]
+        },
+        {
+          "methods": ["POST" ],
+          "pathPattern": "/rs/template*",
+          "permissionsRequired": ["rs.template.item.post"]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/template/{id}*",
+          "permissionsRequired": ["rs.template.item.put"]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/template/{id}*",
+          "permissionsRequired": ["rs.template.item.delete"]
         }
       ]
     },{
@@ -307,6 +327,58 @@
           "rs.patronrequests.item.post",
           "rs.patronrequests.item.put",
           "rs.patronrequests.item.delete"
+      ]
+    },
+    {
+      "permissionName": "rs.template.collection.get",
+      "displayName": "template collection get",
+      "description": "get template collection",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.template.item.get",
+      "displayName": "template item get",
+      "description": "get template item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.template.item.post",
+      "displayName": "template item post",
+      "description": "post template item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.template.item.put",
+      "displayName": "template item put",
+      "description": "put template item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.template.item.delete",
+      "displayName": "template item delete",
+      "description": "delete template item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.template.read",
+      "displayName": "template read",
+      "description": "read template",
+      "visible": false,
+      "subPermissions": [
+          "rs.template.collection.get",
+          "rs.template.item.get"
+      ]
+    },
+    {
+      "permissionName": "rs.template.write",
+      "displayName": "template write",
+      "description": "write template",
+      "visible": false,
+      "subPermissions": [
+          "rs.template.read",
+          "rs.template.item.post",
+          "rs.template.item.put",
+          "rs.template.item.delete"
       ]
     },
     {
