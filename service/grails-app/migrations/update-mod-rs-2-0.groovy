@@ -108,6 +108,14 @@ databaseChangeLog = {
       }
     }
 
+    grailsChange {
+      change {
+        sql.execute("""
+          DELETE FROM ${database.defaultSchemaName}.notice_policy
+        """.toString())
+      }
+    }
+
     addColumn(tableName: "notice_policy_notice") {
       column(name: "npn_template_fk", type: "VARCHAR(36)") {
         constraints(nullable: "false")
@@ -124,6 +132,12 @@ databaseChangeLog = {
           DELETE FROM ${database.defaultSchemaName}.notice_policy
         """.toString())
       }
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "2021-02-05-1219-001") {
+    addColumn(tableName: "template_container") {
+      column(name: "tmc_context", type: "VARCHAR(255)")
     }
   }
   

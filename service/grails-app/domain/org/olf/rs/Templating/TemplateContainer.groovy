@@ -18,6 +18,8 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
   Date dateCreated
   Date lastUpdated
 
+  String context
+
   static hasMany = [localizedTemplates: LocalizedTemplate];
 
   static mapping = {
@@ -28,6 +30,7 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
            description column: 'tmc_description'
            dateCreated column: 'tmc_date_created'
            lastUpdated column: 'tmc_last_updated'
+               context column: 'tmc_context'
     localizedTemplates cascade : 'all-delete-orphan'
   }
 }
