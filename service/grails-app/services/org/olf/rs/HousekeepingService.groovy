@@ -92,6 +92,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_LOCAL_REVIEW', '0079', true);
         // This one doesn't appear to be in use
         // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
@@ -204,6 +205,10 @@ public class HousekeepingService {
         
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'patronReturnedItem', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'shippedReturn', 'M')
+        
+        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'fillLocally', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'supplierCannotSupply', 'M')
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
         def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)

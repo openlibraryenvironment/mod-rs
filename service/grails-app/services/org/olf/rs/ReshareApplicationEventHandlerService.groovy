@@ -1286,6 +1286,15 @@ public class ReshareApplicationEventHandlerService {
   private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
     def result = []
+    /*
+    def criteria = DirectoryEntry.createCriteria();
+    def localEntries = criteria.list {
+      status {
+        eq("value", "Managed")
+      }
+    }
+    log.debug("localEntries found are ${localEntries}");
+    */
     sia.each { av_stmt ->
       log.debug("Consider rota entry ${av_stmt}");
 
@@ -1307,7 +1316,11 @@ public class ReshareApplicationEventHandlerService {
 
           def loadBalancingScore = null;
           def loadBalancingReason = null;
-          if ( peer_stats != null ) {
+          if ( s.owner.status.value == "Managed" ) {
+            loadBalancingScore = 100;
+            loadBalancingReason = "Local lending sources prioritized";
+          }
+          else if ( peer_stats != null ) {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
