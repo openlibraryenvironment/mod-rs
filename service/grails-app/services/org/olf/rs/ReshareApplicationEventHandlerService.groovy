@@ -217,8 +217,9 @@ public class ReshareApplicationEventHandlerService {
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
-          log.debug("calling fetchSharedIndexRecord");
-          req.bibRecord = sharedIndexService.fetchSharedIndexRecord(req.systemInstanceIdentifier)
+          log.debug("calling fetchSharedIndexRecords");
+          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.systemInstanceIdentifier]);
+          if (bibRecords?.size() == 1) req.bibRecord = bibRecords[0];
         }
         else {
           log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
@@ -279,7 +280,7 @@ public class ReshareApplicationEventHandlerService {
           // NO rota supplied - see if we can use the shared index service to locate appropriate copies
           // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
           // here in the test environments.
-          List<AvailabilityStatement> sia = sharedIndexService.findAppropriateCopies(req.getDescriptiveMetadata());
+          List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
           log.debug("Result of shared index lookup : ${sia}");
           int ctr = 0;
 
@@ -570,8 +571,9 @@ public class ReshareApplicationEventHandlerService {
       pr.hrid = header.requestingAgencyRequestId
 
       if ( ( pr.systemInstanceIdentifier != null ) && ( pr.systemInstanceIdentifier.length() > 0 ) ) {
-        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecord ${pr.systemInstanceIdentifier}");
-        pr.bibRecord = sharedIndexService.fetchSharedIndexRecord(pr.systemInstanceIdentifier)
+        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecords ${pr.systemInstanceIdentifier}");
+        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.systemInstanceIdentifier]);
+        if (bibRecords?.size() == 1) pr.bibRecord = bibRecords[0];
       }
 
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
