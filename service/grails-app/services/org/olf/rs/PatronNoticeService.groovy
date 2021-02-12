@@ -7,7 +7,7 @@ import groovy.json.JsonSlurper
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
 import org.olf.rs.EmailService
-import org.olf.rs.TemplatingService
+import org.olf.templating.TemplatingService
 import org.olf.rs.EventConsumerService
 import org.olf.rs.EventPublicationService
 import org.olf.rs.NoticePolicyNotice

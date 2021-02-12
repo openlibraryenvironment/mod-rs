@@ -1,4 +1,4 @@
-package org.olf.rs
+package org.olf.templating
 import grails.gorm.MultiTenant
 
 class Template implements MultiTenant<Template> {

@@ -2,7 +2,7 @@ package org.olf.rs
 
 import grails.gorm.MultiTenant
 import com.k_int.web.toolkit.refdata.RefdataValue
-import org.olf.rs.TemplateContainer
+import org.olf.templating.TemplateContainer
 
 class NoticePolicyNotice implements MultiTenant<NoticePolicy> {
 

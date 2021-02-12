@@ -103,31 +103,17 @@ try {
                               ).save(flush:true, failOnError: true);
 
   AppSetting system_base_url = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
-                              section:'pullslip-templates',
+                              section:'pullslipTemplateConfig',
                               settingType:'String',
                               key: 'system_base_url'
                               ).save(flush:true, failOnError: true);
 
   AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
-                              section:'pullslip-templates',
+                              section:'pullslipTemplateConfig',
                               settingType:'Template',
                               vocab: 'pullslipTemplate',
                               key: 'pull_slip_template',
-                              value:'''
-<h1>Example email template</h1>
-<p>
-$numRequests waiting to be printed at location(s) ${locations?.collect { it.code }.join(',')}
-Click <a href="${foliourl?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated">To view in the reshare app</a>
-</p>
-<p>
-<h2>Pending pull slip summary for all locations</h2>
-<ul>
-  <% summary.each { s -> %>
-    <li>There are ${s[0]} pending pull slips at location ${s[1]}</li>
-  <% } %>
-</ul>
-</p>
-''').save(flush:true, failOnError: true);
+                              ).save(flush:true, failOnError: true);
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');

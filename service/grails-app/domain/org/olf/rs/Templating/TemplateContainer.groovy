@@ -1,10 +1,12 @@
-package org.olf.rs
+package org.olf.templating
 import grails.gorm.MultiTenant
 
-import org.olf.rs.Template
+import org.olf.templating.Template
 
 import com.k_int.web.toolkit.refdata.Defaults
 import com.k_int.web.toolkit.refdata.RefdataValue
+
+import org.olf.templating.TemplatingService
 
 class TemplateContainer implements MultiTenant<TemplateContainer> {
   String id
@@ -32,5 +34,11 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
            lastUpdated column: 'tmc_last_updated'
                context column: 'tmc_context'
     localizedTemplates cascade : 'all-delete-orphan'
+  }
+
+  // Before deletion, remove this template container as a value from any template setting
+  // TODO CHANGE THIS TO A BEFORE DELETE VETO IF IN USE
+  void afterDelete() {
+    TemplatingService.safelyRemoveSettings(this.id)
   }
 }

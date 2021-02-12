@@ -1,4 +1,4 @@
-package org.olf.rs
+package org.olf.templating
 
 import grails.gorm.transactions.Transactional
 
@@ -9,6 +9,7 @@ import com.github.jknack.handlebars.helper.StringHelpers
 import com.github.jknack.handlebars.EscapingStrategy
 
 import java.time.LocalDateTime
+import com.k_int.web.toolkit.settings.AppSetting
 
 import groovy.util.logging.Slf4j;
 
@@ -91,5 +92,19 @@ public class TemplatingService {
     output.meta = meta
 
     output
+  }
+
+  public static safelyRemoveSettings(String tcId) {
+    // If deleting a TemplateContainer, ensure you reset all settings using it
+    AppSetting.withNewSession {
+      AppSetting.withNewTransaction {
+        ArrayList<AppSetting> settingList = AppSetting.findAllBySettingTypeAndValue("Template", tcId)
+        log.debug("LOGDEBUG SETTINGLIST: ${settingList}")
+        settingList.forEach{setting ->
+          setting.value = null
+          setting.save(failOnError: true)
+        }
+      }
+    }
   }
 }
