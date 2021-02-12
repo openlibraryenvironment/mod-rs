@@ -110,13 +110,6 @@ try {
                               key: 'system_base_url'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
-                              section:'pullslipTemplateConfig',
-                              settingType:'Template',
-                              vocab: 'pullslipTemplate',
-                              key: 'pull_slip_template'
-                              ).save(flush:true, failOnError: true);
-
   TemplateContainer DEFAULT_EMAIL_TEMPLATE = TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE') ?: new TemplateContainer(
     name: 'DEFAULT_EMAIL_TEMPLATE',
     templateResolver: [
@@ -145,10 +138,10 @@ try {
               <li>numRequests: {{numRequests}}</li>
               <li>summary: {{summary}}
               <li>foliourl: {{foliourl}}</li>
-            <ul>
             </ul>
 
             You can access certain properties from these as follows
+
             <ul>
               <li>size of an array: {{pendingRequests.length}} </li>
               <li>get index in an array: {{locations.[0]}} </li>
@@ -161,10 +154,18 @@ try {
               </li>
             </ul>
           ''',
-          header: '''Reshare {{arraySize pendingRequests}} new pull slips available'''
+          header: '''Reshare {{pendingRequests.length}} new pull slips available'''
         ]
       ]
     ]
+  ).save(flush:true, failOnError: true);
+
+  AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
+    section:'pullslipTemplateConfig',
+    settingType:'Template',
+    vocab: 'pullslipTemplate',
+    key: 'pull_slip_template',
+    value: DEFAULT_EMAIL_TEMPLATE.id
   ).save(flush:true, failOnError: true);
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
