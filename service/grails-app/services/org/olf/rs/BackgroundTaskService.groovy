@@ -237,52 +237,55 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
       TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
       TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
 
-      def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+      if (tc != null) {
+        def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+        log.debug("pull slip summary: ${pull_slip_overall_summary}");
 
-      log.debug("pull slip summary: ${pull_slip_overall_summary}");
+        List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
 
-      List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
+        if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
+          log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
-      if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
-        log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
+          List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
+    
+          if ( pending_ps_printing != null ) {
 
-        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
-  
-        if ( pending_ps_printing != null ) {
+            if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
+              log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
 
-          if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
-            log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
+              // 'from':'admin@reshare.org',
+              def tmplResult = templatingService.performTemplate(
+                tc,
+                [
+                  locations: pslocs,
+                  pendingRequests: pending_ps_printing,
+                  numRequests:pending_ps_printing.size(),
+                  summary: pull_slip_overall_summary,
+                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
+                ],
+                "en"
+              );
 
-            // 'from':'admin@reshare.org',
-            def tmplResult = templatingService.performTemplate(
-              tc,
-              [
-                locations: pslocs,
-                pendingRequests: pending_ps_printing,
-                numRequests:pending_ps_printing.size(),
-                summary: pull_slip_overall_summary,
-                foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
-              ],
-              "en"
-            );
-
-            Map email_params = [
-              notificationId: '1',
-              to: emailAddresses?.join(','),
-              header: tmplResult.result.header,
-              body: tmplResult.result.body,
-              outputFormat: "text/html"
-            ]
-  
-            Map email_result = emailService.sendEmail(email_params);
+              Map email_params = [
+                notificationId: '1',
+                to: emailAddresses?.join(','),
+                header: tmplResult.result.header,
+                body: tmplResult.result.body,
+                outputFormat: "text/html"
+              ]
+    
+              Map email_result = emailService.sendEmail(email_params);
+            }
+          }
+          else {
+            log.debug("No pending pull slips for ${loccodes}");
           }
         }
         else {
-          log.debug("No pending pull slips for ${loccodes}");
+          log.warn("Problem resolving locations or email addresses");
         }
-      }
-      else {
-        log.warn("Problem resolving locations or email addresses");
+      } else {
+        log.error("Cannot find a pull slip template")
       }
     }
     catch ( Exception e ) {
