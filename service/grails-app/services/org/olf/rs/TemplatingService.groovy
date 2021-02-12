@@ -13,6 +13,8 @@ import com.k_int.web.toolkit.settings.AppSetting
 
 import groovy.util.logging.Slf4j;
 
+import org.olf.templating.TemplateHelpers
+
 @Slf4j
 @Transactional
 public class TemplatingService {
@@ -40,7 +42,10 @@ public class TemplatingService {
 
       def handlebars = new Handlebars().with(noEscaping)
       
+      // This is where we can register other helpers
       handlebars.registerHelpers(StringHelpers)
+      handlebars.registerHelpers(TemplateHelpers)
+
       def engine = new HandlebarsTemplateEngine()
       engine.handlebars = handlebars
 
@@ -54,6 +59,16 @@ public class TemplatingService {
       return outputString
   }
 
+  public static LocalizedTemplate getTemplateByLocalityAndOwner(String locality, String ownerId) {
+    LocalizedTemplate lt = LocalizedTemplate.executeQuery("""
+        SELECT lt FROM LocalizedTemplate AS lt
+        WHERE lt.owner.id = :ownerId
+        AND
+        lt.locality = :locality
+      """,[ownerId: ownerId, locality: locality])[0]
+      return lt
+  }
+
   public static Map performHandlebarsTemplate(TemplateContainer templateContainer, Map binding, String locality) {
     Map output = [:]
     Map result = [:]
@@ -62,12 +77,8 @@ public class TemplatingService {
     try {
       // TODO for now we hardcode text/html format
       meta.outputFormat = "text/html"
-      LocalizedTemplate lt = LocalizedTemplate.executeQuery("""
-        SELECT lt FROM LocalizedTemplate AS lt
-        WHERE lt.owner.id = :ownerId
-        AND
-        lt.locality = :locality
-      """,[ownerId: templateContainer.id, locality: locality])[0]
+      LocalizedTemplate lt = getTemplateByLocalityAndOwner(locality, templateContainer.id)
+
       if (lt == null) {
         throw new Exception("No localized template exists with owner: ${templateContainer.id} and locality: ${locality}")
       }
@@ -94,17 +105,15 @@ public class TemplatingService {
     output
   }
 
-  public static safelyRemoveSettings(String tcId) {
-    // If deleting a TemplateContainer, ensure you reset all settings using it
+  public static boolean usedInAppSettings(String tcId) {
+    // Check if a Template Container is in use for any Template AppSettings
+    int count;
     AppSetting.withNewSession {
       AppSetting.withNewTransaction {
         ArrayList<AppSetting> settingList = AppSetting.findAllBySettingTypeAndValue("Template", tcId)
-        log.debug("LOGDEBUG SETTINGLIST: ${settingList}")
-        settingList.forEach{setting ->
-          setting.value = null
-          setting.save(failOnError: true)
-        }
+        count = settingList.size() 
       }
     }
+    return count > 0;
   }
 }

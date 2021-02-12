@@ -18,6 +18,7 @@ import groovy.text.GStringTemplateEngine;
 import com.k_int.web.toolkit.settings.AppSetting
 import java.util.TimeZone;
 
+import org.olf.templating.*
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -28,6 +29,7 @@ public class BackgroundTaskService {
   def grailsApplication
   def reshareActionService
   def groovyPageRenderer
+  def templatingService
 
   static boolean running = false;
   OkapiClient okapiClient
@@ -259,7 +261,8 @@ For this run these values are
 
     try {
       AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template')
-      String pull_slip_template = pull_slip_template_setting?.value ?: DEFAULT_EMAIL_TEMPLATE;
+      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
+      TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
 
       def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
 
@@ -268,7 +271,6 @@ For this run these values are
       List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
 
       if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
-
         log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
         List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
@@ -276,26 +278,27 @@ For this run these values are
         if ( pending_ps_printing != null ) {
 
           if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
-  
             log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
 
             // 'from':'admin@reshare.org',
-            def engine = new groovy.text.GStringTemplateEngine()
-            def email_template = engine.createTemplate(pull_slip_template).make([ 
-                                                                                  locations: pslocs,
-                                                                                  pendingRequests: pending_ps_printing,
-                                                                                  numRequests:pending_ps_printing.size(), 
-                                                                                  summary: pull_slip_overall_summary,
-                                                                                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
-                                                                               ])
-            String body_text = email_template.toString()
-  
+            def tmplResult = templatingService.performTemplate(
+              tc,
+              [
+                locations: pslocs,
+                pendingRequests: pending_ps_printing,
+                numRequests:pending_ps_printing.size(),
+                summary: pull_slip_overall_summary,
+                foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
+              ],
+              "en"
+            );
+
             Map email_params = [
-                  'notificationId':'1',
-                              'to':emailAddresses?.join(','),
-                    'outputFormat':'text/html',
-                          'header':"Reshare ${pending_ps_printing.size()} new pull slips available".toString(),
-                            'body':body_text
+              notificationId: '1',
+              to: emailAddresses?.join(','),
+              header: tmplResult.result.header,
+              body: tmplResult.result.body,
+              outputFormat: "text/html"
             ]
   
             Map email_result = emailService.sendEmail(email_params);

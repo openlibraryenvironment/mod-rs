@@ -6,6 +6,8 @@ import com.k_int.okapi.OkapiTenantAwareController
 import grails.converters.JSON
 import org.olf.templating.TemplateContainer
 
+import org.olf.rs.BackgroundTaskService
+
 @Slf4j
 @CurrentTenant
 class TemplateController extends OkapiTenantAwareController<TemplateContainer>  {
