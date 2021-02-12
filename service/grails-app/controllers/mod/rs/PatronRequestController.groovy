@@ -304,6 +304,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               patron_request.save(flush: true, failOnError: true)
               break;
+            case 'fillLocally':
+              log.debug("Fill request locally, considered complete for ReShare");
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
               response.status = 422;

@@ -165,7 +165,19 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   settingType:'String',
                                   key: 'default_request_symbol',
                                   ).save(flush:true, failOnError: true);
-
+             
+  /*
+  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'None');
+  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'Review');
+                                  
+  AppSetting local_request_policy = AppSetting.findByKey('local_request_policy') ?: new AppSetting(
+                                  section: 'requests',
+                                  settingType:'Refdata',
+                                  vocab:'LocalRequestPolicy',
+                                  key: 'local_request_policy'
+                                  ).save(flush:true, failOnError: true);
+  */
+                                  
   AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
                                   section:'sharedIndex',
                                   settingType:'String',
@@ -226,6 +238,8 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   vocab:'HostLMSIntegrationAdapter',
                                   key: 'host_lms_integration',
                                   value: manual_adapter_rdv.value).save(flush:true, failOnError: true);
+                                
+  
 
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
 
