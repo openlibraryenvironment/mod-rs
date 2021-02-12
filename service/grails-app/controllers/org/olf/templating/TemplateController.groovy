@@ -16,4 +16,13 @@ class TemplateController extends OkapiTenantAwareController<TemplateContainer>  
     super(TemplateContainer)
   }
 
+    // Before deletion, check this template container isn't in use as a value from any template setting
+    def delete() {
+      if (!TemplatingService.usedInAppSettings(params.id)) {
+        super.delete()
+      } else {
+        response.sendError(400, "That template is in use on one or more AppSettings")
+      }
+    }
+
 }

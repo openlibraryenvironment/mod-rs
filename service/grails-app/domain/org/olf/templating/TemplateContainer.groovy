@@ -35,9 +35,4 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
                 context column: 'tmc_context'
     localizedTemplates cascade: 'all-delete-orphan'
   }
-
-  // Before deletion, check this template container isn't in use as a value from any template setting
-  def beforeDelete() {
-    return !TemplatingService.usedInAppSettings(this.id)
-  }
 }
