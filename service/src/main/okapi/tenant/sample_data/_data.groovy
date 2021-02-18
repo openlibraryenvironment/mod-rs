@@ -9,6 +9,8 @@ import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
 import org.olf.okapi.modules.directory.NamingAuthority;
 
+import org.olf.templating.*;
+
 CustomPropertyDefinition ensureRefdataProperty(String name, boolean local, String category, String label = null) {
 
   CustomPropertyDefinition result = null;
@@ -102,31 +104,69 @@ try {
                               key: 'wms_connector_password'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting system_base_url = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
-                              section:'pullslip-templates',
+  AppSetting pullslip_template_url = AppSetting.findByKey('pullslip_template_url') ?: new AppSetting( 
+                              section:'pullslipTemplateConfig',
                               settingType:'String',
-                              key: 'system_base_url'
+                              key: 'pullslip_template_url'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
-                              section:'pullslip-templates',
-                              settingType:'Template',
-                              key: 'pull_slip_template',
-                              value:'''
-<h1>Example email template</h1>
-<p>
-$numRequests waiting to be printed at location(s) ${locations?.collect { it.code }.join(',')}
-Click <a href="${foliourl?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated">To view in the reshare app</a>
-</p>
-<p>
-<h2>Pending pull slip summary for all locations</h2>
-<ul>
-  <% summary.each { s -> %>
-    <li>There are ${s[0]} pending pull slips at location ${s[1]}</li>
-  <% } %>
-</ul>
-</p>
-''').save(flush:true, failOnError: true);
+  TemplateContainer DEFAULT_EMAIL_TEMPLATE = TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE') ?: new TemplateContainer(
+    name: 'DEFAULT_EMAIL_TEMPLATE',
+    templateResolver: [
+      value: 'handlebars'
+    ],
+    description: 'A default email template for pullslip templates',
+    context: 'pullslipTemplate',
+    localizedTemplates: [
+      [
+        locality: 'en',
+        template: [
+          templateBody: '''
+            <h1>Please configure the pull_slip_template_id setting</h1>
+            The template has the following variables 
+            <ul>
+              <li>locations: The locations this pull slip report relates to</li>
+              <li>pendingRequests: The actual requests pending printing at those locations<li>
+              <li>numRequests: The total number of requests pending at those sites</li>
+              <li>summary: A summary of pending pull slips at all locations</li>
+              <li>foliourl: The base system URL of this folio install</li>
+            </ul>
+            For this run these values are
+            <ul>
+              <li>locations: {{locations}}</li>
+              <li>pendingRequests: {{pendingRequests}}</li>
+              <li>numRequests: {{numRequests}}</li>
+              <li>summary: {{summary}}
+              <li>foliourl: {{foliourl}}</li>
+            </ul>
+
+            You can access certain properties from these as follows
+
+            <ul>
+              <li>size of an array: {{pendingRequests.length}} </li>
+              <li>get index in an array: {{locations.[0]}} </li>
+              <li>Return a list from an array: 
+                <ul>
+                  {{#each summary}}
+                    <li>There are {{this.[0]}} pending pull slips at location {{this.[1]}} </li>
+                  {{/each}}
+                </ul>
+              </li>
+            </ul>
+          ''',
+          header: '''Reshare {{pendingRequests.length}} new pull slips available'''
+        ]
+      ]
+    ]
+  ).save(flush:true, failOnError: true);
+
+  AppSetting pull_slip_template_id = AppSetting.findByKey('pull_slip_template_id') ?: new AppSetting( 
+    section:'pullslipTemplateConfig',
+    settingType:'Template',
+    vocab: 'pullslipTemplate',
+    key: 'pull_slip_template_id',
+    value: DEFAULT_EMAIL_TEMPLATE.id
+  ).save(flush:true, failOnError: true);
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
@@ -178,7 +218,19 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   settingType:'String',
                                   key: 'default_request_symbol',
                                   ).save(flush:true, failOnError: true);
-
+             
+  /*
+  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'None');
+  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'Review');
+                                  
+  AppSetting local_request_policy = AppSetting.findByKey('local_request_policy') ?: new AppSetting(
+                                  section: 'requests',
+                                  settingType:'Refdata',
+                                  vocab:'LocalRequestPolicy',
+                                  key: 'local_request_policy'
+                                  ).save(flush:true, failOnError: true);
+  */
+                                  
   AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
                                   section:'sharedIndex',
                                   settingType:'String',
@@ -239,6 +291,8 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   vocab:'HostLMSIntegrationAdapter',
                                   key: 'host_lms_integration',
                                   value: manual_adapter_rdv.value).save(flush:true, failOnError: true);
+                                
+  
 
   RefdataValue.lookupOrCreate('AutoResponder', 'Off');
 
