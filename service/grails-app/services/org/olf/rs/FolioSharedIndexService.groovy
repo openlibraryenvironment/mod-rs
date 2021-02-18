@@ -4,6 +4,8 @@ import grails.gorm.multitenancy.Tenants
 import java.util.concurrent.ThreadLocalRandom;
 import org.olf.okapi.modules.directory.Symbol;
 import com.k_int.web.toolkit.settings.AppSetting
+import javax.servlet.http.HttpServletRequest
+import groovyx.net.http.HttpBuilder
 import static groovyx.net.http.HttpBuilder.configure
 import groovy.json.JsonOutput;
 import groovyx.net.http.FromServer;
@@ -124,6 +126,15 @@ public class FolioSharedIndexService implements SharedIndexActions {
     return result;
   }
 
+  // Proxy a discovery request to an appropriate SI endpoint
+  //
+  // Doesn't seem to be a clear way to just disable the parser irrespective of
+  // content-type, will probably ultimately want to eschew HttpBuilder entirely
+  // for this interface
+  public HttpBuilder queryPassthrough(HttpServletRequest request) {
+    return sharedIndexRequest('/inventory/instances', request.getQueryString(), null);
+  }
+
 
   private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
     String result = null;
@@ -164,6 +175,64 @@ public class FolioSharedIndexService implements SharedIndexActions {
       }
 
     log.debug("Result of okapi login: ${result}");
+    return result;
+  }
+
+
+  private HttpBuilder sharedIndexRequest(String path, String query, String body) {
+    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
+    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
+    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
+    AppSetting shared_index_tenant_setting = AppSetting.findByKey('shared_index_tenant');
+
+    String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
+    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
+    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
+    String shared_index_tenant =  shared_index_tenant_setting?.value ?: shared_index_tenant_setting?.defValue ?: 'diku'
+
+    if ( ( shared_index_base_url != null ) &&
+         ( shared_index_user != null ) &&
+         ( shared_index_pass != null ) ) {
+      long start_time = System.currentTimeMillis();
+      try {
+        String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
+        if ( token ) {
+          log.debug("Attempt to initiate shared index request to ${path}");
+          return configure {
+            request.headers['X-Okapi-Tenant'] = shared_index_tenant;
+            request.headers['X-Okapi-Token'] = token
+            request.uri = shared_index_base_url + path + ("?${query}" ?: '')
+            request.contentType = 'application/json'
+            if (body != null) {
+              request.body = body
+            }
+          }
+        }
+        else {
+          log.warn("Unable to login to remote shared index");
+          return null;
+        }
+      }
+      catch ( Exception e ) {
+        log.error("Problem attempting get in shared index",e);
+        return null;
+      }
+    }
+    else {
+      def missingSettings = [];
+      if( shared_index_base_url == null ) {
+        missingSettings += "url";
+      }
+      if( shared_index_user == null ) {
+        missingSettings += "user";
+      }
+      if( shared_index_pass == null ) {
+        missingSettings += "password";
+      }
+      log.debug("Unable to contact shared index - Missing settings: ${missingSettings}");
+    }
+
+    log.debug("Result: ${result}");
     return result;
   }
 
