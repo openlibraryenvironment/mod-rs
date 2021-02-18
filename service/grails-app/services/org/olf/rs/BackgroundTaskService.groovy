@@ -233,7 +233,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     log.debug("checkPullSlipsFor(${loccodes},${confirm_no_pending_slips},${emailAddresses})");
 
     try {
-      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template')
+      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
       TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
       TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
 

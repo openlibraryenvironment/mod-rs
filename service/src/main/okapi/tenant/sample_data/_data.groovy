@@ -104,10 +104,10 @@ try {
                               key: 'wms_connector_password'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting system_base_url = AppSetting.findByKey('system_base_url') ?: new AppSetting( 
+  AppSetting pullslip_template_url = AppSetting.findByKey('pullslip_template_url') ?: new AppSetting( 
                               section:'pullslipTemplateConfig',
                               settingType:'String',
-                              key: 'system_base_url'
+                              key: 'pullslip_template_url'
                               ).save(flush:true, failOnError: true);
 
   TemplateContainer DEFAULT_EMAIL_TEMPLATE = TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE') ?: new TemplateContainer(
@@ -122,7 +122,7 @@ try {
         locality: 'en',
         template: [
           templateBody: '''
-            <h1>Please configure the pull_slip_template setting</h1>
+            <h1>Please configure the pull_slip_template_id setting</h1>
             The template has the following variables 
             <ul>
               <li>locations: The locations this pull slip report relates to</li>
@@ -160,11 +160,11 @@ try {
     ]
   ).save(flush:true, failOnError: true);
 
-  AppSetting pull_slip_template = AppSetting.findByKey('pull_slip_template') ?: new AppSetting( 
+  AppSetting pull_slip_template_id = AppSetting.findByKey('pull_slip_template_id') ?: new AppSetting( 
     section:'pullslipTemplateConfig',
     settingType:'Template',
     vocab: 'pullslipTemplate',
-    key: 'pull_slip_template',
+    key: 'pull_slip_template_id',
     value: DEFAULT_EMAIL_TEMPLATE.id
   ).save(flush:true, failOnError: true);
 
