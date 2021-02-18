@@ -4,18 +4,31 @@ import groovy.util.logging.Slf4j;
 import grails.gorm.multitenancy.CurrentTenant;
 import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.rs.FolioSharedIndexService;
+import org.olf.rs.SharedIndexService;
 import groovyx.net.http.FromServer;
 
 @Slf4j
 @CurrentTenant
 class SharedIndexQueryController {
 
-  FolioSharedIndexService folioSharedIndexService
+  SharedIndexService sharedIndexService
 
   def query() {
     def stream;
     def status;
-    folioSharedIndexService.queryPassthrough(request).get() {
+    def si = sharedIndexService.getSharedIndexActions();
+
+    // right now only FOLIO SI has such a method, eventually (TODO) we should
+    // have an interface for the passthrough but it probably won't be based on
+    // HttpBuilder for reasons below
+    if (!(si instanceof FolioSharedIndexService)) {
+      def msg = "Query passthrough accessed on a shared index that does not implement it";
+      log.warn(msg);
+      response.sendError(422, msg);
+      return;
+    }
+
+    si.queryPassthrough(request).get() {
       def parser = { Object cfg, FromServer fs ->
         stream = fs.inputStream;
         status = fs.getStatusCode();
