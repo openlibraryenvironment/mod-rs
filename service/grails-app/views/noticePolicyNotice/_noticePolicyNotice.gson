@@ -2,4 +2,4 @@ import groovy.transform.*
 import org.olf.rs.NoticePolicyNotice
 
 @Field NoticePolicyNotice noticePolicyNotice
-json g.render(noticePolicyNotice)
+json g.render(noticePolicyNotice, [expand: ['template']])

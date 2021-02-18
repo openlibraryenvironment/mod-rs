@@ -53,7 +53,8 @@ public class ReshareActionService {
           pr.patronSurname = patron_details.surname;
         if ( pr.patronGivenName == null )
           pr.patronGivenName = patron_details.givenName;
-        pr.patronEmail = patron_details.email;
+        if ( pr.patronEmail == null )
+          pr.patronEmail = patron_details.email;
       }
 
       if (isValidPatron(patron_details) || actionParams?.override) {
