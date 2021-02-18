@@ -125,16 +125,6 @@ databaseChangeLog = {
     dropColumn(tableName: "notice_policy_notice", columnName: "npn_template")
   }
 
-  changeSet(author: "efreestone (manual)", id: "2021-02-04-1522-002") {
-    grailsChange {
-      change {
-        sql.execute("""
-          DELETE FROM ${database.defaultSchemaName}.notice_policy
-        """.toString())
-      }
-    }
-  }
-
   changeSet(author: "efreestone (manual)", id: "2021-02-05-1219-001") {
     addColumn(tableName: "template_container") {
       column(name: "tmc_context", type: "VARCHAR(255)")
