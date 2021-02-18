@@ -1288,15 +1288,7 @@ public class ReshareApplicationEventHandlerService {
   private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
     def result = []
-    /*
-    def criteria = DirectoryEntry.createCriteria();
-    def localEntries = criteria.list {
-      status {
-        eq("value", "Managed")
-      }
-    }
-    log.debug("localEntries found are ${localEntries}");
-    */
+
     sia.each { av_stmt ->
       log.debug("Consider rota entry ${av_stmt}");
 
