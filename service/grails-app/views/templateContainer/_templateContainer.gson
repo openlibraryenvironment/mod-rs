@@ -1,0 +1,5 @@
+import groovy.transform.*
+import org.olf.templating.TemplateContainer;
+
+@Field TemplateContainer templateContainer
+json g.render(templateContainer, [expand: ['localizedTemplates', 'templateResolver']])

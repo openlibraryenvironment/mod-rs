@@ -18,6 +18,7 @@ import groovy.text.GStringTemplateEngine;
 import com.k_int.web.toolkit.settings.AppSetting
 import java.util.TimeZone;
 
+import org.olf.templating.*
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -28,6 +29,7 @@ public class BackgroundTaskService {
   def grailsApplication
   def reshareActionService
   def groovyPageRenderer
+  def templatingService
 
   static boolean running = false;
   OkapiClient okapiClient
@@ -50,33 +52,6 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     from PatronRequest as pr
     where pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     group by pr.pickLocation.code
-'''
-
-  private static String DEFAULT_EMAIL_TEMPLATE='''
-<h1>Please configure the pull_slip_template setting</h1>
-The template has the following variables 
-<ul>
-  <li>locations: The locations this pull slip report relates to</li>
-  <li>pendingRequests: The actual requests pending printing at those locations<li>
-  <li>numRequests: The total number of requests pending at those sites</li>
-  <li>summary: A summary of pending pull slips at all locations</li>
-  <li>foliourl: The base system URL of this folio install</li>
-</ul>
-For this run these values are
-<ul>
-  <li>locations: ${locations}</li>
-  <li>pendingRequests: ${pendingRequests}</li>
-  <li>numRequests: ${numRequests}</li>
-  <li>summary: 
-    <ul>
-      <% summary.each { s -> %>
-        <li>There are ${s[0]} pending pull slips at locaiton ${s[1]}</li>
-      <% } %>
-    </li>
-  </li>
-  <li>foliourl: ${foliourl}</li>
-<ul>
-</ul>
 '''
 
   def performReshareTasks(String tenant) {
@@ -258,55 +233,59 @@ For this run these values are
     log.debug("checkPullSlipsFor(${loccodes},${confirm_no_pending_slips},${emailAddresses})");
 
     try {
-      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template')
-      String pull_slip_template = pull_slip_template_setting?.value ?: DEFAULT_EMAIL_TEMPLATE;
+      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
+      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
+      TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
 
-      def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+      if (tc != null) {
+        def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+        log.debug("pull slip summary: ${pull_slip_overall_summary}");
 
-      log.debug("pull slip summary: ${pull_slip_overall_summary}");
+        List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
 
-      List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
+        if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
+          log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
-      if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
+          List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
+    
+          if ( pending_ps_printing != null ) {
 
-        log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
+            if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
+              log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
 
-        List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
-  
-        if ( pending_ps_printing != null ) {
+              // 'from':'admin@reshare.org',
+              def tmplResult = templatingService.performTemplate(
+                tc,
+                [
+                  locations: pslocs,
+                  pendingRequests: pending_ps_printing,
+                  numRequests:pending_ps_printing.size(),
+                  summary: pull_slip_overall_summary,
+                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
+                ],
+                "en"
+              );
 
-          if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
-  
-            log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
-
-            // 'from':'admin@reshare.org',
-            def engine = new groovy.text.GStringTemplateEngine()
-            def email_template = engine.createTemplate(pull_slip_template).make([ 
-                                                                                  locations: pslocs,
-                                                                                  pendingRequests: pending_ps_printing,
-                                                                                  numRequests:pending_ps_printing.size(), 
-                                                                                  summary: pull_slip_overall_summary,
-                                                                                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
-                                                                               ])
-            String body_text = email_template.toString()
-  
-            Map email_params = [
-                  'notificationId':'1',
-                              'to':emailAddresses?.join(','),
-                    'outputFormat':'text/html',
-                          'header':"Reshare ${pending_ps_printing.size()} new pull slips available".toString(),
-                            'body':body_text
-            ]
-  
-            Map email_result = emailService.sendEmail(email_params);
+              Map email_params = [
+                notificationId: '1',
+                to: emailAddresses?.join(','),
+                header: tmplResult.result.header,
+                body: tmplResult.result.body,
+                outputFormat: "text/html"
+              ]
+    
+              Map email_result = emailService.sendEmail(email_params);
+            }
+          }
+          else {
+            log.debug("No pending pull slips for ${loccodes}");
           }
         }
         else {
-          log.debug("No pending pull slips for ${loccodes}");
+          log.warn("Problem resolving locations or email addresses");
         }
-      }
-      else {
-        log.warn("Problem resolving locations or email addresses");
+      } else {
+        log.error("Cannot find a pull slip template")
       }
     }
     catch ( Exception e ) {

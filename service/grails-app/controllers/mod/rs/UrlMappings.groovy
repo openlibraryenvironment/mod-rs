@@ -21,6 +21,7 @@ class UrlMappings {
     "/rs/shipments" (resources: 'shipment' )
     "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
+    "/rs/sharedIndexQuery" (controller: 'sharedIndexQuery', action: 'query', parseRequest: false)
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 
     // Call /rs/refdata to list all refdata categories
@@ -52,5 +53,7 @@ class UrlMappings {
 
     "500"(view: '/error')
     "404"(view: '/notFound')
+
+    '/rs/template'(resources: 'template')
   }
 }
