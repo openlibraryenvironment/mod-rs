@@ -358,6 +358,32 @@ public class ReshareApplicationEventHandlerService {
         
         Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
 
+        
+        // search through the rota for the one with the highest load balancing score 
+         
+        if ( req.rota.size() > 0 ) {
+          def top_entry = null;
+          for(int i = 0; i < req.rota.size(); i++) {
+            def current_entry = req.rota[i];
+            if(top_entry == null ||
+              ( current_entry.get("loadBalancingScore") > top_entry.get("loadBalancingScore")) 
+            ) {
+              top_entry = current_entry;
+            }     
+          }
+          def symbol = top_entry.get("symbol");
+          if(symbol != null) {
+            if ( s.owner?.status?.value == "Managed" ) {
+              log.debug("Top lender is local, going to review state");
+              req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+              auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+                lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+              req.save(flush:true, failOnError:true);
+              return; //Nothing more to do here
+            }
+          }
+        }
+        
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
 
@@ -452,7 +478,7 @@ public class ReshareApplicationEventHandlerService {
           }
         }
         else {
-          log.warn("Annot send to next lender - rota is empty");
+          log.warn("Cannot send to next lender - rota is empty");
           req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
           patronNoticeService.triggerNotices(req, "end_of_rota");
@@ -900,6 +926,7 @@ public class ReshareApplicationEventHandlerService {
   private void handleCancelRequestReceived(eventData) {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
+      reshareActionService.sendMessage(req, [note:'Recieved Cancellation Request']);
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
       if ( auto_cancel?.toLowerCase().startsWith('on') ) {
         // System has auto-respond cancel on
@@ -927,6 +954,9 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         // Set needs attention=true
+        auditEntry(req, req.state, req.state, "Cancellation Request Recieved", null);
+        req.needsAttention=true;
+        req.save(flush: true, failOnError: true);
       }
     }
   }
@@ -1288,15 +1318,7 @@ public class ReshareApplicationEventHandlerService {
   private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
     def result = []
-    /*
-    def criteria = DirectoryEntry.createCriteria();
-    def localEntries = criteria.list {
-      status {
-        eq("value", "Managed")
-      }
-    }
-    log.debug("localEntries found are ${localEntries}");
-    */
+
     sia.each { av_stmt ->
       log.debug("Consider rota entry ${av_stmt}");
 
