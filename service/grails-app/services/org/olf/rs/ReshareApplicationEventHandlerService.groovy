@@ -926,6 +926,7 @@ public class ReshareApplicationEventHandlerService {
   private void handleCancelRequestReceived(eventData) {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
+      reshareActionService.sendMessage(req, [note:'Recieved Cancellation Request']);
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
       if ( auto_cancel?.toLowerCase().startsWith('on') ) {
         // System has auto-respond cancel on
@@ -953,6 +954,9 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         // Set needs attention=true
+        auditEntry(req, req.state, req.state, "Cancellation Request Recieved", null);
+        req.needsAttention=true;
+        req.save(flush: true, failOnError: true);
       }
     }
   }
