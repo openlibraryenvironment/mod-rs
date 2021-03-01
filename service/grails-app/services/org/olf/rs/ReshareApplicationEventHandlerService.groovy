@@ -354,10 +354,9 @@ public class ReshareApplicationEventHandlerService {
            ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
              ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) ||
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
-        log.debug("Got request ${req} (HRID Is ${req.hrid})");
+        log.debug("Got request ${req} (HRID Is ${req.hrid}) (Status code is ${req.state?.code})");
         
         Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
-
         
         // search through the rota for the one with the highest load balancing score 
          
@@ -372,8 +371,9 @@ public class ReshareApplicationEventHandlerService {
             }     
           }
           def symbol = top_entry.get("symbol");
+          log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
           if(symbol != null) {
-            if ( s.owner?.status?.value == "Managed" ) {
+            if ( symbol.owner?.status?.value == "Managed" ) {
               log.debug("Top lender is local, going to review state");
               req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
               auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
