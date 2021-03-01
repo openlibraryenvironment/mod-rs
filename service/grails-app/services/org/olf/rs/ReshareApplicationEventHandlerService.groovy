@@ -1341,10 +1341,11 @@ public class ReshareApplicationEventHandlerService {
           def loadBalancingScore = null;
           def loadBalancingReason = null;
           def ownerStatus = s.owner?.status?.value;
+          log.debug("Found status of ${ownerStatus} for symbol ${s}");
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
           } else if ( ownerStatus == "Managed" ) {
-            loadBalancingScore = 100;
+            loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
           }
           else if ( peer_stats != null ) {
