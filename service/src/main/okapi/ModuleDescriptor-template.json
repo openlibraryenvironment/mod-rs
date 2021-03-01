@@ -215,7 +215,7 @@
         {
           "methods": [ "GET", "POST", "PUT", "DELETE" ],
           "pathPattern": "/rs/timers*",
-          "permissionsRequired": [ "rs.timers", "email.message.post" ]
+          "permissionsRequired": [ "rs.timers" ]
         },
         {
           "methods": [ "GET", "POST", "PUT", "DELETE" ],

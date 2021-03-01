@@ -17,7 +17,7 @@ public class SharedIndexService {
     SharedIndexActions result = grailsApplication.mainContext."${si}SharedIndexService"
 
     if ( result == null && si != 'none' ) {
-      log.warn("Unable to locate SharedIndexActions for ${si}. Did you fail to configure the app_setting \"host_si_integration\". Current options are folio|none");
+      log.warn("Unable to locate SharedIndexActions for ${si}. Did you fail to configure the app_setting \"shared_index_integration\". Current options are folio|none");
     }
 
     return result;
@@ -25,8 +25,8 @@ public class SharedIndexService {
 
   public SharedIndexActions getSharedIndexActions() {
     SharedIndexActions result = null;
-    AppSetting host_si_intergation_setting = AppSetting.findByKey('host_si_integration');
-    String v = host_si_intergation_setting?.value ?: 'folio';
+    AppSetting shared_index_setting = AppSetting.findByKey('shared_index_integration');
+    String v = shared_index_setting?.value;
     log.debug("Return host si integrations for : ${v} - query application context for bean named ${v}SharedIndexService");
     result = getSharedIndexActionsFor(v);
     return result;

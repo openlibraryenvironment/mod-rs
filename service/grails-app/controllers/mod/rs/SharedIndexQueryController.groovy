@@ -16,6 +16,7 @@ class SharedIndexQueryController {
   def query() {
     def stream;
     def status;
+    def headers;
     def si = sharedIndexService.getSharedIndexActions();
 
     // right now only FOLIO SI has such a method, eventually (TODO) we should
@@ -32,6 +33,7 @@ class SharedIndexQueryController {
       def parser = { Object cfg, FromServer fs ->
         stream = fs.inputStream;
         status = fs.getStatusCode();
+        headers = fs.getHeaders();
       }
       // Doesn't seem to be a clear way to just disable the parser irrespective of
       // content-type, will probably ultimately want to eschew HttpBuilder entirely
@@ -45,6 +47,11 @@ class SharedIndexQueryController {
         log.debug("Failure response from shared index query passthrough: ${status}");
       }
     };
+
+    def passHeaders = ['Content-Type'];
+    passHeaders.each {
+      response.setHeader(it, headers.find { h-> h.key == it }.getValue());
+    }
 
     response.setStatus(status);
     response << stream;
