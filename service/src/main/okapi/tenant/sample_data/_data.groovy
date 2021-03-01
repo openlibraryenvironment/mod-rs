@@ -218,6 +218,15 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   settingType:'String',
                                   key: 'default_request_symbol',
                                   ).save(flush:true, failOnError: true);             
+
+  def folio_si_rdv = RefdataValue.lookupOrCreate('SharedIndexAdapter', 'FOLIO');
+
+  AppSetting shared_index_integration = AppSetting.findByKey('shared_index_integration') ?: new AppSetting(
+                                  section:'sharedIndex',
+                                  settingType:'Refdata',
+                                  vocab:'SharedIndexAdapter',
+                                  key: 'shared_index_integration',
+                                  value: folio_si_rdv.value).save(flush:true, failOnError: true);
                                   
   AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
                                   section:'sharedIndex',
