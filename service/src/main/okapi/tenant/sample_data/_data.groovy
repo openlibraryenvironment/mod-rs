@@ -172,36 +172,36 @@ try {
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
 
-AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
+  AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'BorrowerCheckMethod',
                                   key: 'borrower_check'
                                   ).save(flush:true, failOnError: true);
 
-RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
-RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
+  RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
   
-AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
+  AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckOutMethod',
                                   key: 'check_out_item').save(flush:true, failOnError: true);
 
-RefdataValue.lookupOrCreate('CheckInMethod', 'None');
-RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('CheckInMethod', 'None');
+  RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
   
-AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
+  AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckInMethod',
                                   key: 'check_in_item').save(flush:true, failOnError: true);
 
 
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
+  RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
   
-AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
+  AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'AcceptItemMethod',
