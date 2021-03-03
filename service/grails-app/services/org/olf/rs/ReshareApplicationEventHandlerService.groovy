@@ -373,13 +373,16 @@ public class ReshareApplicationEventHandlerService {
           def symbol = top_entry.get("symbol");
           log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
           if(symbol != null) {
-            if ( symbol.owner?.status?.value == "Managed" ) {
+            def ownerStatus = symbol.owner?.status?.value;
+            if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
               log.debug("Top lender is local, going to review state");
               req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
               auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                 lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
               req.save(flush:true, failOnError:true);
               return; //Nothing more to do here
+            } else {
+              log.debug("Owner status for ${symbol} is ${ownerStatus}");
             }
           }
         }
@@ -1344,7 +1347,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Found status of ${ownerStatus} for symbol ${s}");
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
-          } else if ( ownerStatus == "Managed" ) {
+          } else if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
           }
