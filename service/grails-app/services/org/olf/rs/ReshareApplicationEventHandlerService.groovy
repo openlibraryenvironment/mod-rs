@@ -1323,13 +1323,13 @@ public class ReshareApplicationEventHandlerService {
     def result = []
 
     sia.each { av_stmt ->
-      log.debug("Consider rota entry ${av_stmt}");
+      log.debug("Considering rota entry: ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
       Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
-        log.debug("Refine ${av_stmt}");
+        log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
 
         // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
         // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
@@ -1350,8 +1350,7 @@ public class ReshareApplicationEventHandlerService {
           } else if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
-          }
-          else if ( peer_stats != null ) {
+          } else if ( peer_stats != null ) {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
