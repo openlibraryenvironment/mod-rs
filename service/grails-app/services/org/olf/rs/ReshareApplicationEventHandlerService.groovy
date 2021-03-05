@@ -370,7 +370,8 @@ public class ReshareApplicationEventHandlerService {
               top_entry = current_entry;
             }     
           }
-          def symbol = top_entry.get("symbol");
+          def top_symbol = top_entry.get("symbol");
+          def symbol = ( top_symbol != null ) ? resolveCombinedSymbol(top_symbol) : null;
           log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
           if(symbol != null) {
             def ownerStatus = symbol.owner?.status?.value;
