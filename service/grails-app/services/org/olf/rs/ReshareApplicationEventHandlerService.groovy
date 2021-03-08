@@ -366,11 +366,12 @@ public class ReshareApplicationEventHandlerService {
             def current_entry = req.rota[i];
             if(top_entry == null ||
               ( current_entry.get("loadBalancingScore") > top_entry.get("loadBalancingScore")) 
-            ) {
+            ) {              
               top_entry = current_entry;
+              log.debug("Current top loadBalancingScore is ${top_entry.get("loadBalancingScore")}");
             }     
           }
-          def top_symbol = top_entry.get("symbol");
+          def top_symbol = top_entry.get("directoryId");
           def symbol = ( top_symbol != null ) ? resolveCombinedSymbol(top_symbol) : null;
           log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
           if(symbol != null) {
