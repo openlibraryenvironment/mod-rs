@@ -361,20 +361,19 @@ public class ReshareApplicationEventHandlerService {
         // search through the rota for the one with the highest load balancing score 
          
         if ( req.rota.size() > 0 ) {
-          def top_entry = null;
+          PatronRequestRota top_entry = null;
           req.rota.each { current_entry ->
             if(top_entry == null ||
-              ( current_entry.get("loadBalancingScore") > top_entry.get("loadBalancingScore")) 
+              ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
             ) {              
               top_entry = current_entry;
-              log.debug("Current top loadBalancingScore is ${top_entry.get("loadBalancingScore")}");
+              log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
             }     
           }
-          log.debug("Rota entry with highest loadBalancingScore is ${top_entry}");
-          def top_symbol = top_entry.get("directoryId");
-          def symbol = ( top_symbol != null ) ? resolveCombinedSymbol(top_symbol) : null;
-          log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
+          log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
+          def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
           if(symbol != null) {
+            log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
             def ownerStatus = symbol.owner?.status?.value;
             if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
               log.debug("Top lender is local, going to review state");
@@ -386,6 +385,8 @@ public class ReshareApplicationEventHandlerService {
             } else {
               log.debug("Owner status for ${symbol} is ${ownerStatus}");
             }
+          } else {
+            log.debug("Unable to find symbol for ${top_entry?.directoryId}");
           }
         }
         
