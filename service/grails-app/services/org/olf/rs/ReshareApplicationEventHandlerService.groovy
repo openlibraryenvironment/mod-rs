@@ -362,8 +362,7 @@ public class ReshareApplicationEventHandlerService {
          
         if ( req.rota.size() > 0 ) {
           def top_entry = null;
-          for(int i = 0; i < req.rota.size(); i++) {
-            def current_entry = req.rota[i];
+          req.rota.each { current_entry ->
             if(top_entry == null ||
               ( current_entry.get("loadBalancingScore") > top_entry.get("loadBalancingScore")) 
             ) {              
@@ -371,6 +370,7 @@ public class ReshareApplicationEventHandlerService {
               log.debug("Current top loadBalancingScore is ${top_entry.get("loadBalancingScore")}");
             }     
           }
+          log.debug("Rota entry with highest loadBalancingScore is ${top_entry}");
           def top_symbol = top_entry.get("directoryId");
           def symbol = ( top_symbol != null ) ? resolveCombinedSymbol(top_symbol) : null;
           log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
