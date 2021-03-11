@@ -84,7 +84,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.code=-1; // No location specified
                 result.message='No pick location specified. Unable to continue'
               }
-              break;
+              break;          
             case 'supplierCannotSupply':
               reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
@@ -303,6 +303,18 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
               }
               patron_request.save(flush: true, failOnError: true)
+              break;
+            case 'localSupplierCannotSupply':
+              //remove top rota position
+              //set status to unfilled
+              def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
+              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(top_rota_entry?.directoryId);
+              patron_request.rota = new_rota_set;
+              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED');
+              reshareApplicationEventHandlerService.auditEntry(patron_request,
+                patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
+              patron_request.state = unfilled_state;
+              patron_request.save(flush:true, failOnError:true);
               break;
             case 'fillLocally':
               log.debug("Fill request locally, considered complete for ReShare");
