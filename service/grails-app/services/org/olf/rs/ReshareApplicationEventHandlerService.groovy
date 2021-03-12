@@ -1414,9 +1414,9 @@ public class ReshareApplicationEventHandlerService {
         ) {              
           top_entry = current_entry;
           log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
-        }
-        return top_entry;
+        }        
       }      
+      return top_entry;
     } else {
      return null;
     }
