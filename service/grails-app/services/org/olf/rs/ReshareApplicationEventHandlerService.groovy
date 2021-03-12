@@ -361,15 +361,7 @@ public class ReshareApplicationEventHandlerService {
         // search through the rota for the one with the highest load balancing score 
          
         if ( req.rota.size() > 0 ) {
-          PatronRequestRota top_entry = null;
-          req.rota.each { current_entry ->
-            if(top_entry == null ||
-              ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
-            ) {              
-              top_entry = current_entry;
-              log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
-            }     
-          }
+          PatronRequestRota top_entry = getTopRotaEntry(req);
           log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
           def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
           if(symbol != null) {
@@ -1412,4 +1404,32 @@ public class ReshareApplicationEventHandlerService {
       cond.save(flush: true, failOnError: true)
     }
   }
+  
+  public PatronRequestRota getTopRotaEntry( PatronRequest req ) {
+    if(req && req.rota?.size() > 0) {
+      PatronRequestRota top_entry = null;
+      req.rota.each { current_entry ->
+        if(top_entry == null ||
+          ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
+        ) {              
+          top_entry = current_entry;
+          log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
+        }
+        return top_entry;
+      }      
+    } else {
+     return null;
+    }
+  }
+  
+  public Set excludeRotaEntry( Set originalRota, String excludeDirectoryId ) {
+    def returnList = [];
+    originalRota.each { current_entry ->
+      if(current_entry.directoryId != excludeDirectoryId) {
+        returnList.add(current_entry);
+      }
+    }
+    return returnList.toSet();
+  }
+  
 }
