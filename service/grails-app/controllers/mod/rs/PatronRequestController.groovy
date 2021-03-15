@@ -308,7 +308,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               //remove top rota position
               //set status to unfilled
               def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
-              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(top_rota_entry?.directoryId);
+              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
+                patron_request.rota, top_rota_entry?.directoryId);
               patron_request.rota = new_rota_set;
               def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED');
               reshareApplicationEventHandlerService.auditEntry(patron_request,
