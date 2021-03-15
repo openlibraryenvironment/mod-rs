@@ -311,7 +311,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
                 patron_request.rota, top_rota_entry?.directoryId);
               patron_request.rota = new_rota_set;
-              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED');
+              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'REQ_UNFILLED');
               reshareApplicationEventHandlerService.auditEntry(patron_request,
                 patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
               patron_request.state = unfilled_state;
