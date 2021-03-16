@@ -84,7 +84,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.code=-1; // No location specified
                 result.message='No pick location specified. Unable to continue'
               }
-              break;
+              break;          
             case 'supplierCannotSupply':
               reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
@@ -304,9 +304,25 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               patron_request.save(flush: true, failOnError: true)
               break;
+            case 'localSupplierCannotSupply':
+              //remove top rota position
+              //set status to unfilled              
+              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');
+              reshareApplicationEventHandlerService.auditEntry(patron_request,
+                patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
+              patron_request.state = unfilled_state;
+              def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
+              log.debug("Top rota entry (to remove) is ${top_rota_entry}");
+              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
+                patron_request.rota, top_rota_entry?.directoryId);
+              log.debug("New rota set returned after removal: ${new_rota_set}");
+              patron_request.rota = new_rota_set;
+              patron_request.save(flush:true, failOnError:true);
+              break;
             case 'fillLocally':
               log.debug("Fill request locally, considered complete for ReShare");
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
               response.status = 422;

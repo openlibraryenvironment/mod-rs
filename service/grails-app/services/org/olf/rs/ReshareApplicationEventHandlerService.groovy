@@ -354,10 +354,34 @@ public class ReshareApplicationEventHandlerService {
            ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
              ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) ||
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
-        log.debug("Got request ${req} (HRID Is ${req.hrid})");
+        log.debug("Got request ${req} (HRID Is ${req.hrid}) (Status code is ${req.state?.code})");
         
         Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
-
+        
+        // search through the rota for the one with the highest load balancing score 
+         
+        if ( req.rota.size() > 0 ) {
+          PatronRequestRota top_entry = getTopRotaEntry(req);
+          log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
+          def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
+          if(symbol != null) {
+            log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
+            def ownerStatus = symbol.owner?.status?.value;
+            if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
+              log.debug("Top lender is local, going to review state");
+              req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+              auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+                lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+              req.save(flush:true, failOnError:true);
+              return; //Nothing more to do here
+            } else {
+              log.debug("Owner status for ${symbol} is ${ownerStatus}");
+            }
+          } else {
+            log.debug("Unable to find symbol for ${top_entry?.directoryId}");
+          }
+        }
+        
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
 
@@ -452,7 +476,7 @@ public class ReshareApplicationEventHandlerService {
           }
         }
         else {
-          log.warn("Annot send to next lender - rota is empty");
+          log.warn("Cannot send to next lender - rota is empty");
           req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
           patronNoticeService.triggerNotices(req, "end_of_rota");
@@ -900,6 +924,7 @@ public class ReshareApplicationEventHandlerService {
   private void handleCancelRequestReceived(eventData) {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
+      reshareActionService.sendMessage(req, [note:'Recieved Cancellation Request']);
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
       if ( auto_cancel?.toLowerCase().startsWith('on') ) {
         // System has auto-respond cancel on
@@ -927,6 +952,9 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         // Set needs attention=true
+        auditEntry(req, req.state, req.state, "Cancellation Request Recieved", null);
+        req.needsAttention=true;
+        req.save(flush: true, failOnError: true);
       }
     }
   }
@@ -1288,23 +1316,15 @@ public class ReshareApplicationEventHandlerService {
   private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
     def result = []
-    /*
-    def criteria = DirectoryEntry.createCriteria();
-    def localEntries = criteria.list {
-      status {
-        eq("value", "Managed")
-      }
-    }
-    log.debug("localEntries found are ${localEntries}");
-    */
+
     sia.each { av_stmt ->
-      log.debug("Consider rota entry ${av_stmt}");
+      log.debug("Considering rota entry: ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
       Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
-        log.debug("Refine ${av_stmt}");
+        log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
 
         // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
         // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
@@ -1319,13 +1339,13 @@ public class ReshareApplicationEventHandlerService {
           def loadBalancingScore = null;
           def loadBalancingReason = null;
           def ownerStatus = s.owner?.status?.value;
+          log.debug("Found status of ${ownerStatus} for symbol ${s}");
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
-          } else if ( ownerStatus == "Managed" ) {
-            loadBalancingScore = 100;
+          } else if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
+            loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
-          }
-          else if ( peer_stats != null ) {
+          } else if ( peer_stats != null ) {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
@@ -1384,4 +1404,32 @@ public class ReshareApplicationEventHandlerService {
       cond.save(flush: true, failOnError: true)
     }
   }
+  
+  public PatronRequestRota getTopRotaEntry( PatronRequest req ) {
+    if(req && req.rota?.size() > 0) {
+      PatronRequestRota top_entry = null;
+      req.rota.each { current_entry ->
+        if(top_entry == null ||
+          ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
+        ) {              
+          top_entry = current_entry;
+          log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
+        }        
+      }      
+      return top_entry;
+    } else {
+     return null;
+    }
+  }
+  
+  public Set excludeRotaEntry( Set originalRota, String excludeDirectoryId ) {
+    def returnList = [];
+    originalRota.each { current_entry ->
+      if(current_entry.directoryId != excludeDirectoryId) {
+        returnList.add(current_entry);
+      }
+    }
+    return returnList.toSet();
+  }
+  
 }

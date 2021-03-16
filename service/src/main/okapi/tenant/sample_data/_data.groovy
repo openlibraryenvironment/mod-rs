@@ -217,19 +217,16 @@ try {
                                   section:'requests',
                                   settingType:'String',
                                   key: 'default_request_symbol',
-                                  ).save(flush:true, failOnError: true);
-             
-  /*
-  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'None');
-  RefdataValue.lookupOrCreate('LocalRequestPolicy', 'Review');
-                                  
-  AppSetting local_request_policy = AppSetting.findByKey('local_request_policy') ?: new AppSetting(
-                                  section: 'requests',
+                                  ).save(flush:true, failOnError: true);             
+
+  def folio_si_rdv = RefdataValue.lookupOrCreate('SharedIndexAdapter', 'FOLIO');
+
+  AppSetting shared_index_integration = AppSetting.findByKey('shared_index_integration') ?: new AppSetting(
+                                  section:'sharedIndex',
                                   settingType:'Refdata',
-                                  vocab:'LocalRequestPolicy',
-                                  key: 'local_request_policy'
-                                  ).save(flush:true, failOnError: true);
-  */
+                                  vocab:'SharedIndexAdapter',
+                                  key: 'shared_index_integration',
+                                  value: folio_si_rdv.value).save(flush:true, failOnError: true);
                                   
   AppSetting shared_index_base_url = AppSetting.findByKey('shared_index_base_url') ?: new AppSetting( 
                                   section:'sharedIndex',
@@ -282,6 +279,9 @@ try {
 
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'FOLIO');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sierra');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sirsi');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
   def manual_adapter_rdv = RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Manual');
 
