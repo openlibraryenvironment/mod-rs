@@ -362,13 +362,14 @@ public class ReshareApplicationEventHandlerService {
          
         if ( req.rota.size() > 0 ) {
           PatronRequestRota top_entry = getTopRotaEntry(req);
-          log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
+          //log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
           def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
           if(symbol != null) {
             log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
             def ownerStatus = symbol.owner?.status?.value;
             if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
               log.debug("Top lender is local, going to review state");
+              
               req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
               auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                 lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
@@ -1413,9 +1414,9 @@ public class ReshareApplicationEventHandlerService {
           ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
         ) {              
           top_entry = current_entry;
-          log.debug("Current top loadBalancingScore is ${top_entry.loadBalancingScore}");
         }        
-      }      
+      }   
+      log.debug("Top entry returned with directoryId ${top_entry?.directoryId} and loadBalancing score ${top_entry?.loadBalancingScore}");
       return top_entry;
     } else {
      return null;
@@ -1425,8 +1426,11 @@ public class ReshareApplicationEventHandlerService {
   public Set excludeRotaEntry( Set originalRota, String excludeDirectoryId ) {
     def returnList = [];
     originalRota.each { current_entry ->
+      log.debug("Comparing ${current_entry.directoryId} to ${excludeDirectoryId}");
       if(current_entry.directoryId != excludeDirectoryId) {
         returnList.add(current_entry);
+      } else {
+        log.debug("Directory Id ${current_entry.directoryId} excluded from new rota set");
       }
     }
     return returnList.toSet();
