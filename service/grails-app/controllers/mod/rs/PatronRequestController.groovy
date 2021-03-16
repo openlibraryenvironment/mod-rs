@@ -306,15 +306,17 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'localSupplierCannotSupply':
               //remove top rota position
-              //set status to unfilled
-              def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
-              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
-                patron_request.rota, top_rota_entry?.directoryId);
-              patron_request.rota = new_rota_set;
+              //set status to unfilled              
               def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');
               reshareApplicationEventHandlerService.auditEntry(patron_request,
                 patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
               patron_request.state = unfilled_state;
+              def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
+              log.debug("Top rota entry (to remove) is ${top_rota_entry}");
+              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
+                patron_request.rota, top_rota_entry?.directoryId);
+              log.debug("New rota set returned after removal: ${new_rota_set}");
+              patron_request.rota = new_rota_set;
               patron_request.save(flush:true, failOnError:true);
               break;
             case 'fillLocally':
