@@ -361,6 +361,7 @@ public class ReshareApplicationEventHandlerService {
         // search through the rota for the one with the highest load balancing score 
          
         if ( req.rota.size() > 0 ) {
+          log.debug("Current rota found with contents: ${getRotaString(req.rota)}");
           PatronRequestRota top_entry = getTopRotaEntry(req);
           //log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
           def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
@@ -1434,6 +1435,14 @@ public class ReshareApplicationEventHandlerService {
       }
     }
     return returnList.toSet();
+  }
+  
+  public String getRotaString( Set rota ) {
+    def returnList = [];
+    rota.each { entry ->
+      returnList.add("directoryId: ${entry.directoryId} loadBalancingScore: ${entry.loadBalancingScore} rotaPosition: ${entry.rotaPosition}");
+    }
+    return returnList.join(",");
   }
   
 }
