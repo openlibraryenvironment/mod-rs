@@ -311,7 +311,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               log.debug("Top rota entry (to remove) has directoryId ${top_rota_entry?.directoryId} and loadBalancingScore ${top_rota_entry?.loadBalancingScore}");
               def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
                 patron_request.rota, top_rota_entry?.directoryId);
-              log.debug("New rota set returned after removal: ${new_rota_set}");
+              log.debug("New rota set returned after removal: ${reshareApplicationEventHandlerService.getRotaString(new_rota_set)}");
               patron_request.rota = new_rota_set;
               patron_request.save(flush:true, failOnError:true); //Probably unnecessary?
               def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');
