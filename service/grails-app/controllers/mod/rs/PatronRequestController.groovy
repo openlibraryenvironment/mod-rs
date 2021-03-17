@@ -309,12 +309,15 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               //set status to unfilled      
               def top_rota_entry = reshareApplicationEventHandlerService.getTopRotaEntry(patron_request);
               log.debug("Top rota entry (to remove) has directoryId ${top_rota_entry?.directoryId} and loadBalancingScore ${top_rota_entry?.loadBalancingScore}");
-              def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
-                patron_request.rota, top_rota_entry?.directoryId);
-              log.debug("New rota set returned after removal: ${reshareApplicationEventHandlerService.getRotaString(new_rota_set)}");
-              patron_request.rota = new_rota_set;
+              //def new_rota_set = reshareApplicationEventHandlerService.excludeRotaEntry(
+              //  patron_request.rota, top_rota_entry?.directoryId);
+              //log.debug("New rota set returned after removal: ${reshareApplicationEventHandlerService.getRotaString(new_rota_set)}");
+              //patron_request.rota = new_rota_set;
+              def entry = patron_request.rota.find( it.directoryId == top_rota_entry?.directoryId );
+              patron_request.removeFromRota(entry);
               patron_request.save(flush:true, failOnError:true); //Probably unnecessary?
-              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');
+              log.debug("Modified rota is ${reshareApplicationEventHandlerService.getRotaString(patron_request.rota)}");
+              //def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');
               reshareApplicationEventHandlerService.auditEntry(patron_request,
                 patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
               patron_request.state = unfilled_state;
