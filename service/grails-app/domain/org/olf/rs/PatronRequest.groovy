@@ -214,7 +214,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronReference (nullable: true)
     serviceType (nullable: true)
     state (nullable: true, bindable: false)
-    isRequester (nullable: true, bindable: true)  // Should be false, only set to true for testing, shouldn't be sent in by client it should be set by the code
+    isRequester (nullable: true, bindable: true)
     numberOfRetries (nullable: true, bindable: false)
     delayPerformingActionUntil (nullable: true, bindable: false)
     preErrorStatus (nullable: true, bindable: false)
