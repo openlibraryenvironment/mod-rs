@@ -949,6 +949,7 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
           }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
+          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush: true, failOnError: true);
       }
@@ -981,6 +982,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Cancelling request")
           auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush:true, failOnError: true)
       } else {

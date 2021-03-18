@@ -360,6 +360,7 @@ try {
   RefdataValue.lookupOrCreate('noticeFormats', 'E-mail', 'email');
   RefdataValue.lookupOrCreate('noticeTriggers', 'New request');
   RefdataValue.lookupOrCreate('noticeTriggers', 'End of rota');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'Request cancelled');
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);
