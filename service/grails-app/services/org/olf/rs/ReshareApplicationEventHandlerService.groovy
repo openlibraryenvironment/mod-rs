@@ -360,6 +360,7 @@ public class ReshareApplicationEventHandlerService {
         
         // search through the rota for the one with the highest load balancing score 
          
+        /*
         if ( req.rota.size() > 0 ) {
           log.debug("Current rota found with contents: ${getRotaString(req.rota)}");
           PatronRequestRota top_entry = getTopRotaEntry(req);
@@ -383,6 +384,7 @@ public class ReshareApplicationEventHandlerService {
             log.debug("Unable to find symbol for ${top_entry?.directoryId}");
           }
         }
+        */
         
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
@@ -404,6 +406,17 @@ public class ReshareApplicationEventHandlerService {
               String next_responder = prr.directoryId
 
               Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
+              log.debug("Responder symbol is ${s} with status ${s?.owner?.status?.value}");
+              def ownerStatus = s.owner?.status?.value;
+              if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
+                log.debug("Responder is local, going to review state");
+
+                req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+                auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+                  lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+                req.save(flush:true, failOnError:true);
+                return; //Nothing more to do here
+              }
 
               // Fill out the directory entry reference if it's not currently set, and try to send.
               if ( ( next_responder != null ) && 
