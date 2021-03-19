@@ -1357,7 +1357,8 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Found status of ${ownerStatus} for symbol ${s}");
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
-          } else if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
+          } 
+          if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
           } else if ( peer_stats != null ) {
@@ -1366,8 +1367,7 @@ public class ReshareApplicationEventHandlerService {
             long target_lending = peer_stats.current_borrowing_level*lbr
             loadBalancingScore = target_lending - peer_stats.current_loan_level
             loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
-          }
-          else {
+          } else {
             loadBalancingScore = 0;
             loadBalancingReason = 'No load balancing information available for peer'
           }
