@@ -306,10 +306,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               patron_request.save(flush: true, failOnError: true)
               break;
             case 'localSupplierCannotSupply':
-              PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } );
-              def rota_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NOT_SUPPLIED');
-              prr.state = rota_state;
-              prr.save(flush:true, failOnError: true);
+              PatronRequestRota prr = patron_request.rota.find( { it.rotaPosition == patron_request.rotaPosition } );       
+              if(prr) {
+                def rota_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NOT_SUPPLIED');
+                prr.state = rota_state;
+                prr.save(flush:true, failOnError: true);
+              }
               def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');     
               reshareApplicationEventHandlerService.auditEntry(patron_request,
                 patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
