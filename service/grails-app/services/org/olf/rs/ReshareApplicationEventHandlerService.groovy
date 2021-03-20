@@ -1376,9 +1376,9 @@ public class ReshareApplicationEventHandlerService {
       } 
     }
     
-    result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
-    log.debug("createRankedRota returns ${result}");
-    return result;
+    def sorted_result = result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
+    log.debug("createRankedRota returns ${sorted_result}");
+    return sorted_result;
   }
 
   /**
