@@ -275,4 +275,14 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
   }
 
+  @Subscriber('okapi:tenant_load_reference')
+  public void onTenantLoadReference(final String tenantId, 
+                                    final String value, 
+                                    final boolean existing_tenant, 
+                                    final boolean upgrading, 
+                                    final String toVersion, 
+                                    final String fromVersion) {
+    log.info("onTenantLoadReference(${tenantId},${value},${existing_tenant},${upgrading},${toVersion},${fromVersion})");
+  }
+
 }

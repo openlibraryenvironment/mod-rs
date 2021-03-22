@@ -172,36 +172,36 @@ try {
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'None');
   RefdataValue.lookupOrCreate('BorrowerCheckMethod', 'NCIP');
 
-AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
+  AppSetting borrower_check = AppSetting.findByKey('borrower_check') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'BorrowerCheckMethod',
                                   key: 'borrower_check'
                                   ).save(flush:true, failOnError: true);
 
-RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
-RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('CheckOutMethod', 'None');
+  RefdataValue.lookupOrCreate('CheckOutMethod', 'NCIP');
   
-AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
+  AppSetting check_out_item = AppSetting.findByKey('check_out_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckOutMethod',
                                   key: 'check_out_item').save(flush:true, failOnError: true);
 
-RefdataValue.lookupOrCreate('CheckInMethod', 'None');
-RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('CheckInMethod', 'None');
+  RefdataValue.lookupOrCreate('CheckInMethod', 'NCIP');
   
-AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
+  AppSetting check_in_item = AppSetting.findByKey('check_in_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckInMethod',
                                   key: 'check_in_item').save(flush:true, failOnError: true);
 
 
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
-RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
+  RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
+  RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
   
-AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
+  AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'AcceptItemMethod',
@@ -325,6 +325,10 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Available locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Invalid user');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Patron requested');
+
   RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On (excluding action messages)');
@@ -360,6 +364,7 @@ AppSetting accept_item = AppSetting.findByKey('accept_item') ?: new AppSetting(
   RefdataValue.lookupOrCreate('noticeFormats', 'E-mail', 'email');
   RefdataValue.lookupOrCreate('noticeTriggers', 'New request');
   RefdataValue.lookupOrCreate('noticeTriggers', 'End of rota');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'Request cancelled');
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);

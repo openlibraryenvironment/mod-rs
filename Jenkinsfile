@@ -6,7 +6,8 @@ podTemplate(
     containerTemplate(name: 'docker',               image:'docker:18',                    ttyEnabled:true, command:'cat')
   ],
   volumes: [
-    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+    hostPathVolume(hostPath: '/var/lib/jenkins/.gradledist', mountPath: '/root/.gradle')
   ])
 {
   node(POD_LABEL) {
@@ -87,7 +88,15 @@ podTemplate(
       }
     }
 
+    stage('Publish module descriptor') {
+      sh 'ls -la service/build/resources/main/okapi'
+      // this worked as expected
+      // sh "curl http://okapi.reshare:9130/_/discovery/modules"
+      // It may be worth calling curl http://localhost:30100/_/proxy/modules/mod-directory-2.1.0-SNAPSHOT.001 to see if the module is already present
+      sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+    }
   }
+
 
   stage ('Remove old builds') {
     //keep 3 builds per branch
