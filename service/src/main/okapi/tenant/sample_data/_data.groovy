@@ -325,6 +325,10 @@ try {
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Available locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Invalid user');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Patron requested');
+
   RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On (excluding action messages)');

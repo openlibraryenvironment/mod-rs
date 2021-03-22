@@ -3,6 +3,8 @@ package mod.rs
 import org.olf.rs.PatronRequest
 
 import com.k_int.okapi.OkapiTenantAwareController
+import com.k_int.web.toolkit.refdata.RefdataCategory
+import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
@@ -114,6 +116,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'requesterCancel':
               patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
               reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+              if (request.JSON.actionParams.reason) {
+                def cat = RefdataCategory.findByDesc('cancellationReasons');
+                def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
+                if  (val) {
+                  patron_request.cancellationReason = val;
+                  patron_request.save(flush:true, failOnError:true);
+                }
+              }
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
               break;
             case 'supplierConditionalSupply':
