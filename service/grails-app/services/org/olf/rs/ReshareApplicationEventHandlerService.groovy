@@ -358,34 +358,6 @@ public class ReshareApplicationEventHandlerService {
         
         Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
         
-        // search through the rota for the one with the highest load balancing score 
-         
-        /*
-        if ( req.rota.size() > 0 ) {
-          log.debug("Current rota found with contents: ${getRotaString(req.rota)}");
-          PatronRequestRota top_entry = getTopRotaEntry(req);
-          //log.debug("Rota entry with highest loadBalancingScore is ${top_entry} with directoryId ${top_entry?.directoryId} and loadBalancingScore ${top_entry?.loadBalancingScore}");
-          def symbol = ( top_entry.directoryId != null ) ? resolveCombinedSymbol(top_entry.directoryId) : null;
-          if(symbol != null) {
-            log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
-            def ownerStatus = symbol.owner?.status?.value;
-            if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
-              log.debug("Top lender is local, going to review state");
-              
-              req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-              auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
-              req.save(flush:true, failOnError:true);
-              return; //Nothing more to do here
-            } else {
-              log.debug("Owner status for ${symbol} is ${ownerStatus}");
-            }
-          } else {
-            log.debug("Unable to find symbol for ${top_entry?.directoryId}");
-          }
-        }
-        */
-        
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
 
@@ -1418,36 +1390,6 @@ public class ReshareApplicationEventHandlerService {
       cond.setAccepted(true)
       cond.save(flush: true, failOnError: true)
     }
-  }
-  
-  public PatronRequestRota getTopRotaEntry( PatronRequest req ) {
-    if(req && req.rota?.size() > 0) {
-      PatronRequestRota top_entry = null;
-      req.rota.each { current_entry ->
-        if(top_entry == null ||
-          ( current_entry.loadBalancingScore > top_entry.loadBalancingScore) 
-        ) {              
-          top_entry = current_entry;
-        }        
-      }   
-      log.debug("Top entry returned with directoryId ${top_entry?.directoryId} and loadBalancing score ${top_entry?.loadBalancingScore}");
-      return top_entry;
-    } else {
-     return null;
-    }
-  }
-  
-  public Set excludeRotaEntry( Set originalRota, String excludeDirectoryId ) {
-    def returnList = [];
-    originalRota.each { current_entry ->
-      log.debug("Comparing ${current_entry.directoryId} to ${excludeDirectoryId}");
-      if(current_entry.directoryId != excludeDirectoryId) {
-        returnList.add(current_entry);
-      } else {
-        log.debug("Directory Id ${current_entry.directoryId} excluded from new rota set");
-      }
-    }
-    return returnList.toSet();
   }
   
   public String getRotaString( Set rota ) {

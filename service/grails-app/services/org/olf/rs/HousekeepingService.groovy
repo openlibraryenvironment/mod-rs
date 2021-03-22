@@ -207,7 +207,7 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'shippedReturn', 'M')
         
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'fillLocally', 'M')
-        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'cancelLocal', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'localSupplierCannotSupply', 'M')
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
