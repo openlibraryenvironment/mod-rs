@@ -1,2 +1,4 @@
-/.*
 !/.gitignore
+.gradle
+.gradle/*
+.token.txt
