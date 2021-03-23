@@ -251,12 +251,16 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
             if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
               log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
+              
+              String locationsText = pslocs.inject('', { String output, HostLMSLocation loc ->
+                output + (output != '' ? ', ' : '') + (loc.name ?: loc.code)
+              })
 
               // 'from':'admin@reshare.org',
               def tmplResult = templatingService.performTemplate(
                 tc,
                 [
-                  locations: pslocs.collect { it.name }.join(', '),
+                  locations: locationsText,
                   pendingRequests: pending_ps_printing,
                   numRequests:pending_ps_printing.size(),
                   summary: pull_slip_overall_summary,
