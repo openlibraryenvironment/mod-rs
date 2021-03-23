@@ -30,7 +30,7 @@ jobs:
     - name: Add SHORT_SHA env property with commit short sha
       run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
     - name: set snapshot version
-      run: sed -i -E "s/appVersion=(.*$)/appVersion=\1.$JOB_ID/" service/gradle.properties
+      run: sed -i -E "s/appVersion=([0-9]+\.[0-9]+\.[0-9]).*$/appVersion=\1-ci.$JOB_ID/" service/gradle.properties
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
       working-directory: ./service
@@ -43,7 +43,9 @@ jobs:
       run: |
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:latest
+      if: github.ref == 'refs/heads/master'
     - name: Docker push
       run: |
         docker push $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
         docker push $DOCKER_REPO/$MODULE_NAME:latest
+      if: github.ref == 'refs/heads/master'
