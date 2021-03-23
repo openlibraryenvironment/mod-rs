@@ -3,9 +3,9 @@ name: build ReShare backend module
 
 on:
   push:
-    branches: [ master ]
+    branches: [ tag-version ]
   pull_request:
-    branches: [ master ]
+    branches: [ tag-version ]
 
 jobs:
   build:
@@ -32,6 +32,8 @@ jobs:
       run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
     - name: set snapshot version
       run: sed -i -E "s/appVersion=([0-9]+\.[0-9]+\.[0-9]).*$/appVersion=\1-ci.$JOB_ID/" service/gradle.properties
+    - name: Add MOD_VERSION env property
+      run: echo "MOD_VERSION=`cat service/gradle.properties | jq -r .id`" >> $GITHUB_ENV
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
       working-directory: ./service
@@ -43,11 +45,13 @@ jobs:
     - name: Docker tag
       run: |
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
+        docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$MOD_VERSION
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:latest
-      if: github.ref == 'refs/heads/master'
+      #if: github.ref == 'refs/heads/master'
     - name: Docker push
       run: |
         docker push $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
+        docker push $DOCKER_REPO/$MODULE_NAME:$MOD_VERSION
         docker push $DOCKER_REPO/$MODULE_NAME:latest
       if: github.ref == 'refs/heads/master'
     - name: Post MD
