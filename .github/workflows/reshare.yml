@@ -3,9 +3,9 @@ name: build ReShare backend module
 
 on:
   push:
-    branches: [ tag-version ]
+    branches: [ master ]
   pull_request:
-    branches: [ tag-version ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -47,7 +47,7 @@ jobs:
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$MOD_VERSION
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:latest
-      #if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
     - name: Docker push
       run: |
         docker push $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
