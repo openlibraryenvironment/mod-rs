@@ -234,8 +234,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
     try {
       AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
-      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
-      TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
+      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value)
 
       if (tc != null) {
         def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
@@ -257,7 +256,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
               def tmplResult = templatingService.performTemplate(
                 tc,
                 [
-                  locations: pslocs,
+                  locations: pslocs.collect { it.name }.join(', '),
                   pendingRequests: pending_ps_printing,
                   numRequests:pending_ps_printing.size(),
                   summary: pull_slip_overall_summary,
