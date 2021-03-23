@@ -130,5 +130,10 @@ databaseChangeLog = {
       column(name: "tmc_context", type: "VARCHAR(255)")
     }
   }
-  
+
+  changeSet(author: "jskomorowski (manual)", id: "2021-03-18-1600-002") {
+    addColumn(tableName: "patron_request") {
+      column(name:'pr_cancellation_reason_fk', type: "VARCHAR(36)")
+    }
+  }
 }

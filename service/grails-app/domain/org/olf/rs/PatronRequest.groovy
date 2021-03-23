@@ -183,6 +183,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Date parsedDueDateRS
   
   Boolean overdue
+
+  RefdataValue cancellationReason
   
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
@@ -214,7 +216,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronReference (nullable: true)
     serviceType (nullable: true)
     state (nullable: true, bindable: false)
-    isRequester (nullable: true, bindable: true)  // Should be false, only set to true for testing, shouldn't be sent in by client it should be set by the code
+    isRequester (nullable: true, bindable: true)
     numberOfRetries (nullable: true, bindable: false)
     delayPerformingActionUntil (nullable: true, bindable: false)
     preErrorStatus (nullable: true, bindable: false)
@@ -291,6 +293,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     dueDateRS(nullable: true)
     parsedDueDateRS(nullable: true)
 
+    cancellationReason(nullable: true)
     needsAttention(nullable: true)
     
     overdue(nullable: true)
@@ -381,6 +384,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     previousStates column: 'pr_previous_states'
     activeLoan column: 'pr_active_loan'
     needsAttention column: 'pr_needs_attention'
+    cancellationReason column: 'pr_cancellation_reason_fk'
 
     dueDateFromLMS column: 'pr_due_date_from_lms'
     parsedDueDateFromLMS column: 'pr_parsed_due_date_lms'

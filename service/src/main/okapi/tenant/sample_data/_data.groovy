@@ -104,68 +104,11 @@ try {
                               key: 'wms_connector_password'
                               ).save(flush:true, failOnError: true);
 
-  AppSetting pullslip_template_url = AppSetting.findByKey('pullslip_template_url') ?: new AppSetting( 
-                              section:'pullslipTemplateConfig',
-                              settingType:'String',
-                              key: 'pullslip_template_url'
-                              ).save(flush:true, failOnError: true);
-
-  TemplateContainer DEFAULT_EMAIL_TEMPLATE = TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE') ?: new TemplateContainer(
-    name: 'DEFAULT_EMAIL_TEMPLATE',
-    templateResolver: [
-      value: 'handlebars'
-    ],
-    description: 'A default email template for pullslip templates',
-    context: 'pullslipTemplate',
-    localizedTemplates: [
-      [
-        locality: 'en',
-        template: [
-          templateBody: '''
-            <h1>Please configure the pull_slip_template_id setting</h1>
-            The template has the following variables 
-            <ul>
-              <li>locations: The locations this pull slip report relates to</li>
-              <li>pendingRequests: The actual requests pending printing at those locations<li>
-              <li>numRequests: The total number of requests pending at those sites</li>
-              <li>summary: A summary of pending pull slips at all locations</li>
-              <li>foliourl: The base system URL of this folio install</li>
-            </ul>
-            For this run these values are
-            <ul>
-              <li>locations: {{locations}}</li>
-              <li>pendingRequests: {{pendingRequests}}</li>
-              <li>numRequests: {{numRequests}}</li>
-              <li>summary: {{summary}}
-              <li>foliourl: {{foliourl}}</li>
-            </ul>
-
-            You can access certain properties from these as follows
-
-            <ul>
-              <li>size of an array: {{pendingRequests.length}} </li>
-              <li>get index in an array: {{locations.[0]}} </li>
-              <li>Return a list from an array: 
-                <ul>
-                  {{#each summary}}
-                    <li>There are {{this.[0]}} pending pull slips at location {{this.[1]}} </li>
-                  {{/each}}
-                </ul>
-              </li>
-            </ul>
-          ''',
-          header: '''Reshare {{pendingRequests.length}} new pull slips available'''
-        ]
-      ]
-    ]
-  ).save(flush:true, failOnError: true);
-
   AppSetting pull_slip_template_id = AppSetting.findByKey('pull_slip_template_id') ?: new AppSetting( 
     section:'pullslipTemplateConfig',
     settingType:'Template',
     vocab: 'pullslipTemplate',
-    key: 'pull_slip_template_id',
-    value: DEFAULT_EMAIL_TEMPLATE.id
+    key: 'pull_slip_template_id'
   ).save(flush:true, failOnError: true);
 
   // External LMS call methods -- none represents no integration and we will spoof a passing response instead
@@ -325,6 +268,10 @@ try {
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
 
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Available locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Invalid user');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Patron requested');
+
   RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On (excluding action messages)');
@@ -360,6 +307,7 @@ try {
   RefdataValue.lookupOrCreate('noticeFormats', 'E-mail', 'email');
   RefdataValue.lookupOrCreate('noticeTriggers', 'New request');
   RefdataValue.lookupOrCreate('noticeTriggers', 'End of rota');
+  RefdataValue.lookupOrCreate('noticeTriggers', 'Request cancelled');
 
   def cp_ns = ensureTextProperty('ILLPreferredNamespaces', false);
   def cp_url = ensureTextProperty('url', false);

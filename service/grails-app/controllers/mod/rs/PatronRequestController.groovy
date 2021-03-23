@@ -4,6 +4,8 @@ import org.olf.rs.PatronRequest
 import org.olf.rs.PatronRequestRota
 
 import com.k_int.okapi.OkapiTenantAwareController
+import com.k_int.web.toolkit.refdata.RefdataCategory
+import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
@@ -115,6 +117,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'requesterCancel':
               patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
               reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+              if (request.JSON.actionParams.reason) {
+                def cat = RefdataCategory.findByDesc('cancellationReasons');
+                def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
+                if  (val) {
+                  patron_request.cancellationReason = val;
+                  patron_request.save(flush:true, failOnError:true);
+                }
+              }
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
               break;
             case 'supplierConditionalSupply':
@@ -321,6 +331,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'fillLocally':
               log.debug("Fill request locally, considered complete for ReShare");
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              break;
+            case 'cancelLocal':
+              log.debug("Cancel local request");
+              def cancel_state = lookupStatus('Responder', 'RES_CANCELLED');
+              reshareApplicationEventHandlerService.auditEntry(patron_request,
+                patron_request.state, cancel_state, "Local request cancelled", null);
+              patron_request.state = cancel_state;
+              patron_request.save(flush:true, failOnError:true);
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
