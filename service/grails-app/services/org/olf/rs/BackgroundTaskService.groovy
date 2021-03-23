@@ -261,7 +261,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
                   pendingRequests: pending_ps_printing,
                   numRequests:pending_ps_printing.size(),
                   summary: pull_slip_overall_summary,
-                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')?.value
+                  reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated"
                 ],
                 "en"
               );
