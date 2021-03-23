@@ -38,16 +38,20 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build -x integrationTest
       working-directory: ./service
+    - name: Add MOD_VERSION env property
+      run: echo "MOD_VERSION=`cat service/build/resources/main/okapi/ModuleDescriptor.json | jq -r .id`" >> $GITHUB_ENV
     - name: Docker build
       run: docker build -t $MODULE_NAME:latest .
     - name: Docker tag
       run: |
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
+        docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:$MOD_VERSION
         docker tag $MODULE_NAME:latest $DOCKER_REPO/$MODULE_NAME:latest
       if: github.ref == 'refs/heads/master'
     - name: Docker push
       run: |
         docker push $DOCKER_REPO/$MODULE_NAME:$SHORT_SHA
+        docker push $DOCKER_REPO/$MODULE_NAME:$MOD_VERSION
         docker push $DOCKER_REPO/$MODULE_NAME:latest
       if: github.ref == 'refs/heads/master'
     - name: Post MD
