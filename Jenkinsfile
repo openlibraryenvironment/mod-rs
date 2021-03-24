@@ -40,9 +40,8 @@ podTemplate(
     stage ('build') {
       container('jdk11') {
         dir('service') {
-          sh 'printenv'
-          sh 'echo "GIT_BRANCH=${checkout_details.GIT_BRANCH}" >> /etc/environment'
-          sh 'echo "GIT_COMMIT=${checkout_details.GIT_COMMIT}" >> /etc/environment'
+          env.GIT_BRANCH=checkout_details.GIT_BRANCH
+          env.GIT_COMMIT=checkout_details.GIT_COMMIT
           sh './gradlew --version'
           sh './gradlew --no-daemon -x integrationTest --console=plain clean build'
           sh 'ls ./build/libs'
