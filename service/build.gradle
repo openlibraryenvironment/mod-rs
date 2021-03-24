@@ -273,12 +273,34 @@ buildProperties.doLast {
       }
     }
   }
+
+  // Add in build number and other useful build env properties
+  Map<String, String> env = System.getenv()
   
   // Add new properties from various sources
   properties.setProperty('build.time', new Date().format("yyyy-MM-dd HH:mm:ss"))
 
   // Get a System property
   properties.setProperty('build.java.version', System.getProperty('java.version'))
+
+  if(env.BUILD_NUMBER)
+    properties.setProperty('build.number', env.BUILD_NUMBER)
+
+  if ( env.GIT_REVISION ) {
+    properties.setProperty('build.git.revision', env.GIT_REVISION)
+    properties.setProperty('git.revision', env.GIT_REVISION)
+  }
+
+  if ( env.GIT_BRANCH ) {
+    properties.setProperty('build.git.branch', env.GIT_BRANCH)
+    properties.setProperty('git.branch', env.GIT_BRANCH)
+  }
+
+  if (env.GIT_COMMIT) {
+    properties.setProperty('build.git.commit', env.GIT_COMMIT)
+    properties.setProperty('git.commit', env.GIT_COMMIT)
+  }
+
 
   // Write the properties back to the file
   grailsBuildInfoFile.withOutputStream {

@@ -25,8 +25,9 @@ podTemplate(
       is_snapshot = app_version.contains('SNAPSHOT')
       constructed_tag = "build-${props?.appVersion}-${checkout_details?.GIT_COMMIT?.take(12)}"
       println("Got props: ${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components} is_snapshot=${is_snapshot}");
-      sh 'echo branch:$BRANCH_NAME'
-      sh 'echo commit:$checkout_details.GIT_COMMIT'
+      println("Checkout details ${checkout_details}");
+      sh "echo branch:${checkout_details.GIT_BRANCH}"
+      sh "echo commit:${checkout_details.GIT_COMMIT}"
     }
 
     stage ('check') {

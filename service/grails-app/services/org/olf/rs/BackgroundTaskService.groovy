@@ -234,8 +234,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
     try {
       AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
-      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value) ?:
-      TemplateContainer.findByName('DEFAULT_EMAIL_TEMPLATE')
+      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value)
 
       if (tc != null) {
         def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
@@ -252,16 +251,20 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
             if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
               log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
+              
+              String locationsText = pslocs.inject('', { String output, HostLMSLocation loc ->
+                output + (output != '' ? ', ' : '') + (loc.name ?: loc.code)
+              })
 
               // 'from':'admin@reshare.org',
               def tmplResult = templatingService.performTemplate(
                 tc,
                 [
-                  locations: pslocs,
+                  locations: locationsText,
                   pendingRequests: pending_ps_printing,
                   numRequests:pending_ps_printing.size(),
                   summary: pull_slip_overall_summary,
-                  foliourl: okapiSettingsService.getSetting('FOLIO_HOST')
+                  reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated"
                 ],
                 "en"
               );
