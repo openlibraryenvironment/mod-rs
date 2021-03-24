@@ -16,14 +16,18 @@ buildscript {
 
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
 Map<String, String> env = System.getenv();
+String calculated_version = null;
+
 if ( ( appVersion.contains('SNAPSHOT') ) && ( env.BUILD_NUMBER != null ) ) {
   println("Detected snapshot version and build number - appending");
-  verison "${appVersion}.${env.BUILD_NUMBER}"
+  calculated_version = "${appVersion}.${env.BUILD_NUMBER}".toString()
 }
 else {
   println("Release version");
-  version "${appVersion}"
+  calculated_version = "${appVersion}".toString()
 }
+
+version "${calculated_version}"
 group "mod.rs"
 
 apply plugin: 'eclipse'
