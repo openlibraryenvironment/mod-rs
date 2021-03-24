@@ -80,7 +80,7 @@ podTemplate(
               docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing snapshot-latest");
                 docker_image.push('snapshot-latest')
-                docker_image.push("snapshot-${app_version}${BUILD_NUMBER}".toString())
+                docker_image.push("${app_version}.${BUILD_NUMBER}".toString())
                 // deploy_cfg='deploy_snapshot.yaml'
               }
             }
