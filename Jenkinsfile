@@ -24,6 +24,7 @@ podTemplate(
       is_snapshot = app_version.contains('SNAPSHOT')
       constructed_tag = "build-${props?.appVersion}-${checkout_details?.GIT_COMMIT?.take(12)}"
       println("Got props: ${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components} is_snapshot=${is_snapshot}");
+      sh 'echo build number:$BUILD_NUMBER'
       sh 'echo branch:$BRANCH_NAME'
       sh 'echo commit:$checkout_details.GIT_COMMIT'
     }
@@ -63,7 +64,8 @@ podTemplate(
             // Some interesting stuff here https://github.com/jenkinsci/pipeline-examples/pull/83/files
             if ( !is_snapshot ) {
               // do_k8s_update=true
-              docker.withRegistry('','nexus-kidevops') {
+              // docker.withRegistry('','nexus-kidevops') {
+              docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing released version with latest tag and semver ${semantic_version_components}");
                 docker_image.push('latest')
                 docker_image.push("v${app_version}".toString())
@@ -73,9 +75,11 @@ podTemplate(
               }
             }
             else {
-              docker.withRegistry('','nexus-kidevops') {
+              // docker.withRegistry('','nexus-kidevops') {
+              docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing snapshot-latest");
                 docker_image.push('snapshot-latest')
+                docker_image.push("snapshot-${app_version}${BUILD_NUMBER}".toString())
                 // deploy_cfg='deploy_snapshot.yaml'
               }
             }
