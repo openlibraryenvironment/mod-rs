@@ -15,7 +15,15 @@ buildscript {
 
 
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
-version "${appVersion}"
+Map<String, String> env = System.getenv();
+if ( ( appVersion.contains('SNAPSHOT') ) && ( env.BUILD_NUMBER != null ) ) {
+  println("Detected snapshot version and build number - appending");
+  verison "${appVersion}.${env.BUILD_NUMBER}"
+}
+else {
+  println("Release version");
+  version "${appVersion}"
+}
 group "mod.rs"
 
 apply plugin: 'eclipse'
@@ -239,7 +247,6 @@ jar {
 
 buildProperties.doLast {
 
-
   // Find the right file
   File grailsBuildInfoFile = it.outputs.files.files.find { it.name == 'grails.build.info' }
 
@@ -276,8 +283,8 @@ buildProperties.doLast {
   }
 
   // Add in build number and other useful build env properties
-  Map<String, String> env = System.getenv()
-  println("Build env: ${env}")
+  // Map<String, String> env = System.getenv()
+  // println("Build env: ${env}")
   
   // Add new properties from various sources
   properties.setProperty('build.time', new Date().format("yyyy-MM-dd HH:mm:ss"))
