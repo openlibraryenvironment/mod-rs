@@ -6,7 +6,8 @@ podTemplate(
     containerTemplate(name: 'docker',               image:'docker:18',                    ttyEnabled:true, command:'cat')
   ],
   volumes: [
-    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+    hostPathVolume(hostPath: '/var/lib/jenkins/.gradledist', mountPath: '/root/.gradle')
   ])
 {
   node(POD_LABEL) {
@@ -24,9 +25,7 @@ podTemplate(
       is_snapshot = app_version.contains('SNAPSHOT')
       constructed_tag = "build-${props?.appVersion}-${checkout_details?.GIT_COMMIT?.take(12)}"
       println("Got props: ${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components} is_snapshot=${is_snapshot}");
-      sh 'echo build number:$BUILD_NUMBER'
-      sh 'echo branch:$BRANCH_NAME'
-      sh 'echo commit:$checkout_details.GIT_COMMIT'
+      println("Checkout details ${checkout_details}");
     }
 
     stage ('check') {
@@ -39,6 +38,8 @@ podTemplate(
     stage ('build') {
       container('jdk11') {
         dir('service') {
+          env.GIT_BRANCH=checkout_details.GIT_BRANCH
+          env.GIT_COMMIT=checkout_details.GIT_COMMIT
           sh './gradlew --version'
           sh './gradlew --no-daemon -x integrationTest --console=plain clean build'
           sh 'ls ./build/libs'
@@ -91,7 +92,16 @@ podTemplate(
       }
     }
 
+    stage('Publish module descriptor') {
+      sh 'ls -la service/build/resources/main/okapi'
+      // this worked as expected
+      // sh "curl http://okapi.reshare:9130/_/discovery/modules"
+      // It may be worth calling curl http://localhost:30100/_/proxy/modules/mod-directory-2.1.0-SNAPSHOT.001 to see if the module is already present
+      sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+      sh "cat service/build/resources/main/META-INF/grails.build.info"
+    }
   }
+
 
   stage ('Remove old builds') {
     //keep 3 builds per branch

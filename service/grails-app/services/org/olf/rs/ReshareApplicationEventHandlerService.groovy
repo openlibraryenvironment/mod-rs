@@ -358,32 +358,6 @@ public class ReshareApplicationEventHandlerService {
         
         Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
         
-        // search through the rota for the one with the highest load balancing score 
-         
-        if ( req.rota.size() > 0 ) {
-          def top_entry = null;
-          for(int i = 0; i < req.rota.size(); i++) {
-            def current_entry = req.rota[i];
-            if(top_entry == null ||
-              ( current_entry.get("loadBalancingScore") > top_entry.get("loadBalancingScore")) 
-            ) {
-              top_entry = current_entry;
-            }     
-          }
-          def symbol = top_entry.get("symbol");
-          log.debug("Top symbol is ${symbol} with status ${symbol?.owner?.status?.value}");
-          if(symbol != null) {
-            if ( symbol.owner?.status?.value == "Managed" ) {
-              log.debug("Top lender is local, going to review state");
-              req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-              auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
-              req.save(flush:true, failOnError:true);
-              return; //Nothing more to do here
-            }
-          }
-        }
-        
         if ( req.rota.size() > 0 ) {
           boolean request_sent = false;
 
@@ -404,6 +378,17 @@ public class ReshareApplicationEventHandlerService {
               String next_responder = prr.directoryId
 
               Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
+              log.debug("Responder symbol is ${s} with status ${s?.owner?.status?.value}");
+              def ownerStatus = s.owner?.status?.value;
+              if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
+                log.debug("Responder is local, going to review state");
+
+                req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+                auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+                  lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+                req.save(flush:true, failOnError:true);
+                return; //Nothing more to do here
+              }
 
               // Fill out the directory entry reference if it's not currently set, and try to send.
               if ( ( next_responder != null ) && 
@@ -949,6 +934,7 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
           }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
+          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush: true, failOnError: true);
       }
@@ -981,6 +967,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Cancelling request")
           auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
+          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush:true, failOnError: true)
       } else {
@@ -1320,13 +1307,13 @@ public class ReshareApplicationEventHandlerService {
     def result = []
 
     sia.each { av_stmt ->
-      log.debug("Consider rota entry ${av_stmt}");
+      log.debug("Considering rota entry: ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
       Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
-        log.debug("Refine ${av_stmt}");
+        log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
 
         // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
         // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
@@ -1344,18 +1331,17 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Found status of ${ownerStatus} for symbol ${s}");
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
-          } else if ( ownerStatus == "Managed" ) {
+          } 
+          if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
-          }
-          else if ( peer_stats != null ) {
+          } else if ( peer_stats != null ) {
             // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
             double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
             long target_lending = peer_stats.current_borrowing_level*lbr
             loadBalancingScore = target_lending - peer_stats.current_loan_level
             loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
-          }
-          else {
+          } else {
             loadBalancingScore = 0;
             loadBalancingReason = 'No load balancing information available for peer'
           }
@@ -1379,9 +1365,9 @@ public class ReshareApplicationEventHandlerService {
       } 
     }
     
-    result.toSorted { a,b -> a.loadBalancingScore <=> b.loadBalancingScore }
-    log.debug("createRankedRota returns ${result}");
-    return result;
+    def sorted_result = result.toSorted { a,b -> b.loadBalancingScore <=> a.loadBalancingScore }
+    log.debug("createRankedRota returns ${sorted_result}");
+    return sorted_result;
   }
 
   /**
@@ -1407,4 +1393,13 @@ public class ReshareApplicationEventHandlerService {
       cond.save(flush: true, failOnError: true)
     }
   }
+  
+  public String getRotaString( Set rota ) {
+    def returnList = [];
+    rota.each { entry ->
+      returnList.add("directoryId: ${entry.directoryId} loadBalancingScore: ${entry.loadBalancingScore} rotaPosition: ${entry.rotaPosition}");
+    }
+    return returnList.join(",");
+  }
+  
 }

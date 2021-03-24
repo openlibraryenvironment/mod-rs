@@ -77,7 +77,8 @@ public class PatronNoticeService {
             request: [
               id: pr.hrid,
               pickupLocation: pr?.pickupLocation ?: '',
-              neededBy: pr?.neededBy?.toString() ?: ''
+              neededBy: pr?.neededBy?.toString() ?: '',
+              cancellationReason: pr?.cancellationReason?.label ?: ''
             ],
             item: [
               barcode: pr?.selectedItemBarcode ?: '',

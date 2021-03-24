@@ -1,8 +1,11 @@
 package mod.rs
 
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestRota
 
 import com.k_int.okapi.OkapiTenantAwareController
+import com.k_int.web.toolkit.refdata.RefdataCategory
+import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
@@ -84,7 +87,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.code=-1; // No location specified
                 result.message='No pick location specified. Unable to continue'
               }
-              break;
+              break;          
             case 'supplierCannotSupply':
               reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
               reshareApplicationEventHandlerService.auditEntry(patron_request, 
@@ -114,6 +117,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             case 'requesterCancel':
               patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
               reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+              if (request.JSON.actionParams.reason) {
+                def cat = RefdataCategory.findByDesc('cancellationReasons');
+                def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
+                if  (val) {
+                  patron_request.cancellationReason = val;
+                  patron_request.save(flush:true, failOnError:true);
+                }
+              }
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
               break;
             case 'supplierConditionalSupply':
@@ -304,9 +315,31 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               }
               patron_request.save(flush: true, failOnError: true)
               break;
+            case 'localSupplierCannotSupply':
+              PatronRequestRota prr = patron_request.rota.find( { it.rotaPosition == patron_request.rotaPosition } );       
+              if(prr) {
+                def rota_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NOT_SUPPLIED');
+                prr.state = rota_state;
+                prr.save(flush:true, failOnError: true);
+              }
+              def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');     
+              reshareApplicationEventHandlerService.auditEntry(patron_request,
+                patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
+              patron_request.state = unfilled_state;
+              patron_request.save(flush:true, failOnError:true);
+              break;
             case 'fillLocally':
               log.debug("Fill request locally, considered complete for ReShare");
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              break;
+            case 'cancelLocal':
+              log.debug("Cancel local request");
+              def cancel_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED');
+              reshareApplicationEventHandlerService.auditEntry(patron_request,
+                patron_request.state, cancel_state, "Local request cancelled", null);
+              patron_request.state = cancel_state;
+              patron_request.save(flush:true, failOnError:true);
+              break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
               response.status = 422;

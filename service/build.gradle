@@ -153,7 +153,7 @@ dependencies {
   }
 
   // NCIP deps
-  compile 'org.olf.rs:lib-ncip-client:0.11.0'
+  compile 'org.olf.rs:lib-ncip-client:0.14.0'
   compile 'com.github.jknack:handlebars:4.2.0'
   compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
   compile 'org.apache.commons:commons-collections4:4.4'
@@ -239,6 +239,7 @@ jar {
 
 buildProperties.doLast {
 
+
   // Find the right file
   File grailsBuildInfoFile = it.outputs.files.files.find { it.name == 'grails.build.info' }
 
@@ -273,12 +274,35 @@ buildProperties.doLast {
       }
     }
   }
+
+  // Add in build number and other useful build env properties
+  Map<String, String> env = System.getenv()
+  println("Build env: ${env}")
   
   // Add new properties from various sources
   properties.setProperty('build.time', new Date().format("yyyy-MM-dd HH:mm:ss"))
 
   // Get a System property
   properties.setProperty('build.java.version', System.getProperty('java.version'))
+
+  if(env.BUILD_NUMBER)
+    properties.setProperty('build.number', env.BUILD_NUMBER)
+
+  if ( env.GIT_REVISION ) {
+    properties.setProperty('build.git.revision', env.GIT_REVISION)
+    properties.setProperty('git.revision', env.GIT_REVISION)
+  }
+
+  if ( env.GIT_BRANCH ) {
+    properties.setProperty('build.git.branch', env.GIT_BRANCH)
+    properties.setProperty('git.branch', env.GIT_BRANCH)
+  }
+
+  if (env.GIT_COMMIT) {
+    properties.setProperty('build.git.commit', env.GIT_COMMIT)
+    properties.setProperty('git.commit', env.GIT_COMMIT)
+  }
+
 
   // Write the properties back to the file
   grailsBuildInfoFile.withOutputStream {

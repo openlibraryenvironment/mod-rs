@@ -135,22 +135,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = [:]
-        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-          log.debug("${hld}");
-          log.debug("${hld.circulations?.circulation?.availableNow}");
-          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-            log.debug("Available now");
-            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-  
-            if ( result == null ) 
-              result = il;
-  
-            availability_summary[hld.localLocation] = il;
-          }
+        Map availability_summary = null;
+
+        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+            result = availability_summary.get(0);
         }
-  
+
         log.debug("At end, availability summary: ${availability_summary}");
       }
     }
@@ -179,22 +171,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = [:]
-        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-          log.debug("${hld}");
-          log.debug("${hld.circulations?.circulation?.availableNow}");
-          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-            log.debug("Available now");
-            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-  
-            if ( result == null ) 
-              result = il;
-  
-            availability_summary[hld.localLocation] = il;
-          }
+        Map availability_summary = null
+
+        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+            result = availability_summary.get(0);
         }
-  
+
         log.debug("At end, availability summary: ${availability_summary}");
       }
       else {
@@ -224,20 +208,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = [:]
-        z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.each { hld ->
-          log.debug("${hld}");
-          log.debug("${hld.circulations?.circulation?.availableNow}");
-          log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-          if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-            log.debug("Available now");
-            ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-  
-            if ( result == null ) 
-              result = il;
-  
-            availability_summary[hld.localLocation] = il;
-          }
+        Map availability_summary = null
+        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+            result = availability_summary.get(0);
         }
   
         log.debug("At end, availability summary: ${availability_summary}");
@@ -602,5 +577,27 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
     return result;
   }
-  
+
+  /**
+   * Override this method if the server returns opac records but does something dumb like cram availability status into a public note
+   */
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+
+    Map<String,ItemLocation> availability_summary = [:]
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("${hld}");
+      log.debug("${hld.circulations?.circulation?.availableNow}");
+      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+        log.debug("Available now");
+        ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+        if ( result == null ) 
+          result = il;
+        availability_summary[hld.localLocation] = il;
+      }
+    }
+
+    return availability_summary;
+  }
 }
