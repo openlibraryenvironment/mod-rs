@@ -10,12 +10,7 @@
           "methods": [ "GET" ],
           "pathPattern": "/rs/patronrequests",
           "permissionsRequired": [ "rs.patronrequests.collection.get" ]
-        },
-        {
-          "methods": [ "GET" ],
-          "pathPattern": "/rs/patronrequests/{id}/*",
-          "permissionsRequired": [ "rs.patronrequests.item.get" ]
-        }, 
+        },        
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/patronrequests/{id}",
@@ -23,9 +18,19 @@
         }, 
         {
           "methods": [ "POST" ],
-          "pathPattern": "/rs/patronrequests*",
+          "pathPattern": "/rs/patronrequests",
           "permissionsRequired": [ "rs.patronrequests.item.post" ]
         }, 
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/patronrequests/{id}/performAction",
+          "permissionsRequired": [ "rs.patronrequests.item.performaction" ]
+        },
+        {
+          "methods" : [ "GET" ],
+          "pathPattern": "/rs/patronrequests/{id}/validActions",
+          "permissionsRequired": [ "rs.patronrequests.item.validactions" ]
+        },
         {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
@@ -313,13 +318,26 @@
       "visible": false
     },
     {
+      "permissionName": "rs.patronrequests.item.performaction",
+      "displayName": "patronrequests item perform action",
+      "description": "perform action on patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.item.validactions",
+      "displayName": "patronrequests item get valid actions",
+      "description": "get valid actions on patronrequests item",
+      "visible": false
+    },
+    {
       "permissionName": "rs.patronrequests.read",
       "displayName": "patronrequests read",
       "description": "read patronrequests",
       "visible": false,
       "subPermissions": [
           "rs.patronrequests.collection.get",
-          "rs.patronrequests.item.get"
+          "rs.patronrequests.item.get",
+          "rs.patronrequests.item.validactions"
       ]
     },
     {
@@ -331,7 +349,8 @@
           "rs.patronrequests.read",
           "rs.patronrequests.item.post",
           "rs.patronrequests.item.put",
-          "rs.patronrequests.item.delete"
+          "rs.patronrequests.item.delete",
+          "rs.patronrequests.item.performaction"
       ]
     },
     {
