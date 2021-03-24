@@ -239,6 +239,7 @@ jar {
 
 buildProperties.doLast {
 
+
   // Find the right file
   File grailsBuildInfoFile = it.outputs.files.files.find { it.name == 'grails.build.info' }
 
@@ -276,6 +277,7 @@ buildProperties.doLast {
 
   // Add in build number and other useful build env properties
   Map<String, String> env = System.getenv()
+  println("Build env: ${env}")
   
   // Add new properties from various sources
   properties.setProperty('build.time', new Date().format("yyyy-MM-dd HH:mm:ss"))
