@@ -106,6 +106,7 @@ podTemplate(
     }
 
     stage ('deploy') {
+      println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
       kubernetesDeploy(
         enableConfigSubstitution: true,
         kubeconfigId: 'local_k8s',

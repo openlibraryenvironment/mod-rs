@@ -1,3 +1,4 @@
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: $MOD_RS_DEPLOY_AS
@@ -20,7 +21,7 @@ spec:
     spec:
       containers:
         - name: $MOD_RS_DEPLOY_AS
-          image: $MOD_RS_IMAGE
+          image: docker.libsdev.k-int.com/$MOD_RS_IMAGE
           imagePullPolicy: Always
           envFrom:
             - secretRef:
