@@ -75,7 +75,7 @@ podTemplate(
                 // deploy_cfg='deploy_latest.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_versionapp_version}"
-              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}".replaceAll('\\.','-')
+              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}".replaceAll('\\.','-').toLowerCase()
             }
             else {
               // docker.withRegistry('','nexus-kidevops') {
@@ -86,7 +86,7 @@ podTemplate(
                 // deploy_cfg='deploy_snapshot.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
-              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}.${BUILD_NUMBER}".replaceAll('\\.','-');
+              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}.${BUILD_NUMBER}".replaceAll('\\.','-').toLowerCase();
             }
           }
           else {
