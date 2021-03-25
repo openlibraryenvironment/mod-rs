@@ -54,6 +54,7 @@ spec:
             limits:
               memory: 2Gi
 ---
+apiVersion: apps/v1
 kind: Service
 metadata:
   name: $MOD_RS_DEPLOY_AS
