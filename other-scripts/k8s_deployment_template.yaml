@@ -53,4 +53,15 @@ spec:
               memory: 768Mi
             limits:
               memory: 2Gi
+---
+kind: Service
+metadata:
+  name: $MOD_RS_DEPLOY_AS
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: $MOD_RS_DEPLOY_AS
+  ports:
+    - port: 8080
 
