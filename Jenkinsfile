@@ -104,14 +104,14 @@ podTemplate(
       sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
       sh "cat service/build/resources/main/META-INF/grails.build.info"
     }
-  }
 
-  stage ('deploy') {
-    kubernetesDeploy(
-      enableConfigSubstitution: true,
-      kubeconfigId: 'local_k8s',
-      configs: 'other-scripts/k8s_deployment_template.yaml'
-    );
+    stage ('deploy') {
+      kubernetesDeploy(
+        enableConfigSubstitution: true,
+        kubeconfigId: 'local_k8s',
+        configs: 'other-scripts/k8s_deployment_template.yaml'
+      );
+    }
   }
 
 
