@@ -272,6 +272,9 @@ buildProperties.doLast {
     version = project.version
     properties.setProperty('info.app.version', version)
   }
+  else {
+    println("No version")
+  }
 
   def versionParts
   if (version && (versionParts = version =~ version_regex)) {
