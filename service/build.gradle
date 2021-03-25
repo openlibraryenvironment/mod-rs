@@ -14,7 +14,7 @@ buildscript {
 }
 
 
-final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
+final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+(\.\d+)?))?$/
 Map<String, String> env = System.getenv();
 String calculated_version = null;
 
