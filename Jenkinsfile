@@ -74,6 +74,8 @@ podTemplate(
                 docker_image.push("v${semantic_version_components[0]}".toString())
                 // deploy_cfg='deploy_latest.yaml'
               }
+              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_versionapp_version}"
+              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}"
             }
             else {
               // docker.withRegistry('','nexus-kidevops') {
@@ -83,6 +85,8 @@ podTemplate(
                 docker_image.push("${app_version}.${BUILD_NUMBER}".toString())
                 // deploy_cfg='deploy_snapshot.yaml'
               }
+              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
+              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}"
             }
           }
           else {
@@ -100,6 +104,14 @@ podTemplate(
       sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
       sh "cat service/build/resources/main/META-INF/grails.build.info"
     }
+  }
+
+  stage ('deploy') {
+    kubernetesDeploy(
+      enableConfigSubstitution: true,
+      kubeconfigId: 'local_k8s',
+      configs: 'other-scripts/k8s_deployment_template.yaml'
+    );
   }
 
 
