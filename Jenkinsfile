@@ -86,7 +86,7 @@ podTemplate(
                 // deploy_cfg='deploy_snapshot.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
-              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}"
+              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}.${BUILD_NUMBER}".replaceAll(',','-');
             }
           }
           else {
@@ -102,7 +102,7 @@ podTemplate(
       // sh "curl http://okapi.reshare:9130/_/discovery/modules"
       // It may be worth calling curl http://localhost:30100/_/proxy/modules/mod-directory-2.1.0-SNAPSHOT.001 to see if the module is already present
       sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
-      sh "cat service/build/resources/main/META-INF/grails.build.info"
+      // sh "cat service/build/resources/main/META-INF/grails.build.info"
     }
 
     stage ('deploy') {
