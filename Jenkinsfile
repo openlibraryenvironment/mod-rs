@@ -96,6 +96,15 @@ podTemplate(
       }
     }
 
+    stage ('deploy') {
+      println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
+      kubernetesDeploy(
+        enableConfigSubstitution: true,
+        kubeconfigId: 'local_k8s',
+        configs: 'other-scripts/k8s_deployment_template.yaml'
+      );
+    }
+
     stage('Publish module descriptor') {
       sh 'ls -la service/build/resources/main/okapi'
       // this worked as expected
@@ -105,13 +114,8 @@ podTemplate(
       // sh "cat service/build/resources/main/META-INF/grails.build.info"
     }
 
-    stage ('deploy') {
-      println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
-      kubernetesDeploy(
-        enableConfigSubstitution: true,
-        kubeconfigId: 'local_k8s',
-        configs: 'other-scripts/k8s_deployment_template.yaml'
-      );
+    stage('Upgrade okapi tenant installation') {
+      println "upgrade..."
     }
   }
 
