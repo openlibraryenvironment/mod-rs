@@ -105,6 +105,9 @@ podTemplate(
         kubeconfigId: 'local_k8s',
         configs: 'other-scripts/k8s_deployment_template.yaml'
       );
+      println("Wait for module to start...")
+      sleep(10)
+      println("Continue");
     }
 
     stage('Publish module descriptor') {
