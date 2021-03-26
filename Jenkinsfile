@@ -75,7 +75,8 @@ podTemplate(
                 // deploy_cfg='deploy_latest.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_versionapp_version}"
-              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}".replaceAll('\\.','-').toLowerCase()
+              env.SERVICE_ID="mod-rs-${app_version}"
+              env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase()
             }
             else {
               // docker.withRegistry('','nexus-kidevops') {
@@ -86,7 +87,8 @@ podTemplate(
                 // deploy_cfg='deploy_snapshot.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
-              env.MOD_RS_DEPLOY_AS="mod-rs-${app_version}.${BUILD_NUMBER}".replaceAll('\\.','-').toLowerCase();
+              env.SERVICE_ID="mod-rs-${app_version}.${BUILD_NUMBER}"
+              env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase();
             }
           }
           else {
@@ -109,10 +111,33 @@ podTemplate(
       sh 'ls -la service/build/resources/main/okapi'
       // this worked as expected
       // sh "curl http://okapi.reshare:9130/_/discovery/modules"
-      // It may be worth calling curl http://localhost:30100/_/proxy/modules/mod-directory-2.1.0-SNAPSHOT.001 to see if the module is already present
-      sh "curl -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
-      // sh "cat service/build/resources/main/META-INF/grails.build.info"
+      sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+
+      // Now deployment descriptor
+      // srvcid needs to be the dotted version, not the hyphen version
+      DEP_DESC="""{ "srvcId": "${env.SERVICE_ID}", "instId": "${env.MOD_RS_DEPLOY_AS}-cluster", "url": "http://${env.MOD_RS_DEPLOY_AS}.reshare:8080" } """
+      deployment_command="curl -i -XPOST 'http://okapi.reshare:9130/_/discovery/modules' -d '${DEP_DESC}'"
+      println("Deployment descriptor will be ${DEP_DESC}");
+      println("Deployment command will be ${deployment_command}");
+      sh deployment_command
+
+
+      tenants_to_update=['kint1']
+
+      // now install for tenant
+      ENABLE_DOC="""[ { "id":"${env.SERVICE_ID}", "action":"enable" } ]"""
+      println("install doc will be ${DEP_DESC}");
+      tenants_to_update.each { tenant ->
+        println("Attempting module activation of ${env.SERVICE_ID} on ${tenant} using ${DEP_DESC}");
+        activation_command="curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/tenants/${tenant}/install?tenantParameters=loadSample%3Dtest,loadReference%3Dother' -d '${ENABLE_DOC}'"
+        println("Activation cmd: ${activation_command}");
+        sh activation_command
+      }
+
     }
+
+  }
+
 
     stage('Upgrade okapi tenant installation') {
       println "upgrade..."
