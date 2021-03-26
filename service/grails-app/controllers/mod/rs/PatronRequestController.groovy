@@ -12,6 +12,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
+import org.olf.rs.PatronNoticeService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.lms.ItemLocation;
@@ -23,6 +24,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
   ReshareActionService reshareActionService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  PatronNoticeService patronNoticeService
 
   PatronRequestController() {
     super(PatronRequest)
@@ -339,6 +341,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 patron_request.state, cancel_state, "Local request cancelled", null);
               patron_request.state = cancel_state;
               patron_request.save(flush:true, failOnError:true);
+              patronNoticeService.triggerNotices(req, "request_cancelled");
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
