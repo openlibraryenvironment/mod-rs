@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $MOD_RS_DEPLOY_AS
+  labels:
+    app: $MOD_RS_DEPLOY_AS
+    module: "mod-rs"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: $MOD_RS_DEPLOY_AS
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: $MOD_RS_DEPLOY_AS
+        module: "mod-rs"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: $MOD_RS_DEPLOY_AS
+          image: docker.libsdev.k-int.com/$MOD_RS_IMAGE
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: folio-db-connect
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OKAPI_SERVICE_PORT
+              value: "9130"
+            - name: OKAPI_SERVICE_HOST
+              value: "okapi"
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0"
+            - name: EVENTS_PUBLISHER_BOOTSTRAP_SERVERS
+              value: "reshare-kafka-release:9092" 
+            - name: EVENTS_CONSUMER_BOOTSTRAP_SERVERS
+              value: "reshare-kafka-release:9092" 
+            - name: EVENTS_PUBLISHER_ZK_CONNECT
+              value: "reshare-zookeeper-release:2181" 
+            - name: EVENTS_CONSUMER_ZK_CONNECT
+              value: "reshare-zookeeper-release:2181"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              memory: 768Mi
+            limits:
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $MOD_RS_DEPLOY_AS
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: $MOD_RS_DEPLOY_AS
+  ports:
+    - port: 8080

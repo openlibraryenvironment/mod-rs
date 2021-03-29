@@ -14,8 +14,20 @@ buildscript {
 }
 
 
-final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+\.\d+))?$/
-version "${appVersion}"
+final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+(\.\d+)?))?$/
+Map<String, String> env = System.getenv();
+String calculated_version = null;
+
+if ( ( appVersion.contains('SNAPSHOT') ) && ( env.BUILD_NUMBER != null ) ) {
+  println("Detected snapshot version and build number - appending");
+  calculated_version = "${appVersion}.${env.BUILD_NUMBER}".toString()
+}
+else {
+  println("Release version");
+  calculated_version = "${appVersion}".toString()
+}
+
+version "${calculated_version}"
 group "mod.rs"
 
 apply plugin: 'eclipse'
@@ -260,6 +272,9 @@ buildProperties.doLast {
     version = project.version
     properties.setProperty('info.app.version', version)
   }
+  else {
+    println("No version")
+  }
 
   def versionParts
   if (version && (versionParts = version =~ version_regex)) {
@@ -275,7 +290,8 @@ buildProperties.doLast {
   }
 
   // Add in build number and other useful build env properties
-  Map<String, String> env = System.getenv()
+  // Map<String, String> env = System.getenv()
+  // println("Build env: ${env}")
   
   // Add new properties from various sources
   properties.setProperty('build.time', new Date().format("yyyy-MM-dd HH:mm:ss"))

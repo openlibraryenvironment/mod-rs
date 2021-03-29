@@ -26,8 +26,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
   String actionBody
 
   static constraints = {
-             model (nullable: false, blank:false)
-         fromState (nullable: false, blank:false)
+             model (nullable: false)
+         fromState (nullable: false)
         actionCode (nullable: false, blank:false)
        triggerType (nullable: true, blank:false)
         actionType (nullable: true, blank:false)

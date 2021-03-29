@@ -743,6 +743,9 @@
       "visible": true
     }
   ],
+  "requires": [
+    { "id":"email", "version":"1.1" }
+  ],
   "launchDescriptor": {
     "dockerImage": "${info.app.name}:${info.app.version}",
     "dockerArgs": {

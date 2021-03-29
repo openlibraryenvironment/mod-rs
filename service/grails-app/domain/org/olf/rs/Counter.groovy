@@ -16,7 +16,7 @@ class Counter implements MultiTenant<Counter> {
   static constraints = {
         context (nullable : false, blank: false, unique: true)
     description (nullable : true,  blank: false)
-          value (nullable : false, blank: false)
+          value (nullable : false)
   }
 
   static mapping = {
