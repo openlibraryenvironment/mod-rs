@@ -652,8 +652,20 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           tag_data[ sf.@code ] = sf
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
+        try {
+          int num_copies = Integer.parseInt(tag_data['f'])
+          if ( num_copies > 0 ) {
+            availability_summary.add( new ItemLocation( location: tag_data['a'], 
+                                                        shelvingLocation: tag_data['b'],
+                                                        callNumber:tag_data['c'] ) )
+          }
+        }
+        catch ( Exception e ) {
+          // All kind of odd strings like 'NONE' that mean there aren't any holdings available
+        }
       }
     }
+    log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
   }
 }
