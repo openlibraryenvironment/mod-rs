@@ -49,9 +49,33 @@ public class SirsiHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(record) {
-    log.debug("Extract holdings from marcxml record ${record}");
-    return new HashMap<String, ItemLocation>()
-  }
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
+    log.debug("Extract holdings from marcxml record ${z_response}");
 
+    // <zs:searchRetrieveResponse>
+    //   <zs:numberOfRecords>9421</zs:numberOfRecords>
+    //   <zs:records>
+    //     <zs:record>
+    //       <zs:recordSchema>marcxml</zs:recordSchema>
+    //       <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+    //       <zs:recordData>
+    //         <record>
+    //           <leader>02370cam a2200541Ii 4500</leader>
+    //           <controlfield tag="008">140408r20141991nyua j 001 0 eng d</controlfield>
+    //           <datafield tag="040" ind1=" " ind2=" ">
+    //           </datafield>
+    //           <datafield tag="926" ind1=" " ind2=" ">
+    //             <subfield code="a">WEST</subfield>
+    //             <subfield code="b">RESERVES</subfield>
+    //             <subfield code="c">QL737 .C23 C58 2014</subfield>
+    //             <subfield code="d">BOOK</subfield>
+    //             <subfield code="f">2</subfield>
+    //           </datafield>
+    Map<String, ItemLocation> availability_summary = null;
+    if ( z_response?.records?.record?.recordData?.record != null ) {
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record);
+    }
+    return availability_summary;
+
+  }
 }

@@ -40,12 +40,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     [ 
       name:'ISBN_identifier_By_Z3950',
       precondition: { pr -> return ( pr.isbn != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByCQL(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
+      stragegy: { pr, service -> return service.z3950ItemByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
     ],
     [ 
       name:'Local_identifier_By_Title',
       precondition: { pr -> return ( pr.title != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByCQL(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
+      stragegy: { pr, service -> return service.z3950ItemByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
     ],
 
   ]
@@ -118,10 +118,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(record) {
-    return extractAvailableItemsFromOpacRecord(record);
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
+    Map availability_summary = null;
+    if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+      availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+    }
+    return availability_summary;
   }
-  
+
   public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
 
     ItemLocation result = null;
@@ -158,13 +162,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = null;
-
-        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
-          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-            result = availability_summary.get(0);
-        }
+        Map availability_summary = extractAvailableItemsFrom(z_response)
+        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+          result = availability_summary.get(0);
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -197,13 +197,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = null
+        Map availability_summary = extractAvailableItemsFrom(z_response)
 
-        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
-          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-            result = availability_summary.get(0);
-        }
+        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+          result = availability_summary.get(0);
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -214,7 +211,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public ItemLocation z3950ItemByCQL(PatronRequest pr, String cql) {
+  public ItemLocation z3950ItemByPrefixQuery(PatronRequest pr, String prefix_query_string) {
 
     ItemLocation result = null;
 
@@ -226,7 +223,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       }.get {
           request.uri.path = '/'
           request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': cql,
+                               'x-pquery': prefix_query_string,
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
             request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
@@ -237,17 +234,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = null
-        if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
-          if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-            result = availability_summary.get(0);
-        }
+        Map availability_summary = extractAvailableItemsFrom(z_response);
+        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
+          result = availability_summary.get(0);
   
         log.debug("At end, availability summary: ${availability_summary}");
       }
       else {
-        log.debug("CQL lookup(${cql}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
+        log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
       }
     }
     return result;
@@ -627,6 +621,39 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       }
     }
 
+    return availability_summary;
+  }
+
+  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
+    // <zs:searchRetrieveResponse>
+    //   <zs:numberOfRecords>9421</zs:numberOfRecords>
+    //   <zs:records>
+    //     <zs:record>
+    //       <zs:recordSchema>marcxml</zs:recordSchema>
+    //       <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+    //       <zs:recordData>
+    //         <record>
+    //           <leader>02370cam a2200541Ii 4500</leader>
+    //           <controlfield tag="008">140408r20141991nyua j 001 0 eng d</controlfield>
+    //           <datafield tag="040" ind1=" " ind2=" ">
+    //           </datafield>
+    //           <datafield tag="926" ind1=" " ind2=" ">
+    //             <subfield code="a">WEST</subfield>
+    //             <subfield code="b">RESERVES</subfield>
+    //             <subfield code="c">QL737 .C23 C58 2014</subfield>
+    //             <subfield code="d">BOOK</subfield>
+    //             <subfield code="f">2</subfield>
+    //           </datafield>
+    Map<String,ItemLocation> availability_summary = [:]
+    record.datafield.each { df ->
+      if ( df.'@tag' == "926" ) {
+        Map tag_data = [:]
+        df.subfield.each { sf ->
+          tag_data[ sf.@code ] = sf
+        }
+        log.debug("Found holdings tag : ${df} ${tag_data}");
+      }
+    }
     return availability_summary;
   }
 }
