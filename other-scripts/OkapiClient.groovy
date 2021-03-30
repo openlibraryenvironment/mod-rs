@@ -81,7 +81,7 @@ public class OkapiClient {
       headers.'Content-Type'='application/json'
       body= postBody
       response.success = { resp, json ->
-        println("Login completed");
+        println("Login completed : ${json}");
         session_ctx.auth = json;
       }
       response.failure = { resp ->
@@ -188,7 +188,21 @@ public class OkapiClient {
           println("Error: ${resp.status}");
       }
     }
-  
+  }
+
+  def addFriend(String foaf_url) {
+    this.getClient().request( GET, JSON) { req ->
+      uri.path='/directory/api/addFriend'
+      uri.query=[friendUrl:foaf_url]
+      headers.'X-Okapi-Tenant'=this.tenant;
+      headers.'accept'='application/json'
+      response.success = { resp, json ->
+        println("addFriend completed");
+      }
+      response.failure = { resp ->
+          println("Error: ${resp.status}");
+      }
+    }
   }
 
   def listRequests() {

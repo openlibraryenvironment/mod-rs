@@ -29,6 +29,10 @@ import org.olf.rs.circ.client.CirculationClient;
 /**
  * The interface between mod-rs and any host Library Management Systems
  *
+ * Sirsi Z3950 behaves a little differently when looking for available copies.
+ * The format of the URL for metaproxy needs to be 
+ * http://mpserver:9000/?x-target=http://unicornserver:2200/UNICORN&x-pquery=@attr 1=1016 @attr 3=3 water&maximumRecords=1&recordSchema=marcxml
+ *
  */
 public class SirsiHostLMSService extends BaseHostLMSService {
 

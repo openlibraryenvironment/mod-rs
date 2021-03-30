@@ -51,7 +51,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   ]
 
   void validatePatron(String patronIdentifier) {
-
   }
 
   public abstract CirculationClient getCirculationClient(String address);
@@ -71,6 +70,15 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     result
   }
 
+
+  /*
+   * This method is called by the auto-responder on an incoming ILL request from a remote system (acting as a prospective borrower)
+   * The method will use whatever strategies are available to try and find locations of copies inside THIS institution.
+   * If available copies are located, the service MAY respond will-supply depending upon other configuration, if no available copies
+   * are found the system MAY automatically respond not-supplied in order to rapidly move through rota entries until a possible supplier
+   * is located.
+   * Lookup strategies go from most specific to least.
+   */
   ItemLocation determineBestLocation(PatronRequest pr) {
 
     log.debug("determineBestLocation(${pr})");
@@ -102,6 +110,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     log.debug("determineBestLocation returns ${location}");
     return location;
   }
+
+  // By default, ask for OPAC records - @override in implementation if you want different
+  protected String getHoldingsQueryRecsyn() {
+    return null;
+  }
+
+  // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
+  // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(record) {
+    return extractAvailableItemsFromOpacRecord(record);
+  }
   
   public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
 
@@ -129,6 +148,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           request.uri.query = ['x-target': z3950_server,
                                'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
                                'maximumRecords':'1' ]
+
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+          }
       }
 
       log.debug("Got Z3950 response: ${z_response}");
@@ -138,7 +161,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         Map availability_summary = null;
 
         if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
           if ( ( result == null ) && ( availability_summary.size() > 0 ) )
             result = availability_summary.get(0);
         }
@@ -165,6 +188,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           request.uri.query = ['x-target': z3950_server,
                                'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
                                'maximumRecords':'3' ]
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+          }
       }
   
       log.debug("Got Z3950 response: ${z_response}");
@@ -174,7 +200,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         Map availability_summary = null
 
         if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
           if ( ( result == null ) && ( availability_summary.size() > 0 ) )
             result = availability_summary.get(0);
         }
@@ -202,6 +228,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           request.uri.query = ['x-target': z3950_server,
                                'x-pquery': cql,
                                'maximumRecords':'3' ]
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+          }
       }
   
       log.debug("Got Z3950 response: ${z_response}");
@@ -210,7 +239,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         // Got exactly 1 record
         Map availability_summary = null
         if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
-          availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
+          availability_summary = extractAvailableItemsFrom(z_response?.records?.record?.recordData?.opacRecord);
           if ( ( result == null ) && ( availability_summary.size() > 0 ) )
             result = availability_summary.get(0);
         }
