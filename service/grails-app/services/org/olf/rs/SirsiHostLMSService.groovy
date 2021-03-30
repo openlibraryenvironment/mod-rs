@@ -41,4 +41,17 @@ public class SirsiHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP1"]).circulationClient;
   }
 
+  @Override
+  protected String getHoldingsQueryRecsyn() {
+    return 'marcxml';
+  }
+
+  // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
+  // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
+  @Override
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(record) {
+    log.debug("Extract holdings from marcxml record ${record}");
+    return new HashMap<String, ItemLocation>()
+  }
+
 }
