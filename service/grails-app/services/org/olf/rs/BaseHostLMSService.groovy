@@ -653,16 +653,21 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
-          String str_tag_f = tag_data['f']?.toString()
-          int num_copies = Integer.parseInt(str_tag_f);
-          log.debug("Tag f will be \"${str_tag_f}\" parses to ${num_copies}");
-          if ( num_copies > 0 ) {
-            availability_summary.add( new ItemLocation( location: tag_data['a'], 
-                                                        shelvingLocation: tag_data['b'],
-                                                        callNumber:tag_data['c'] ) )
+          if ( tag_data['f'] != null ){
+            log.debug("All about tag f: v:\"${tag_data['f']}\" t:${tag_data['f']?.class?.name} toString:${tag_data['f']?.toString()}");
+
+            String str_tag_f = tag_data['f']?.toString()
+            int num_copies = Integer.parseInt(str_tag_f);
+            log.debug("Tag f will be \"${str_tag_f}\" parses to ${num_copies}");
+            if ( num_copies > 0 ) {
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+            }
+            else {
+              log.debug("calculated ${num_copies} available - not adding item location");
+            }
           }
           else {
-            log.debug("calculated ${num_copies} available - not adding item location");
+            log.debug("No subfield f present - unable to determine number of copies available");
           }
         }
         catch ( Exception e ) {
