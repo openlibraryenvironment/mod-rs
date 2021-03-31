@@ -164,7 +164,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         // Got exactly 1 record
         Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().get(0);
+          result = availability_summary.values().iterator().next()
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -200,7 +200,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
 
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().get(0);
+          result = availability_summary.values().iterator().next()
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -236,7 +236,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         // Got exactly 1 record
         Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response);
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().get(0);
+          result = availability_summary.values().iterator().next()
   
         log.debug("At end, availability summary: ${availability_summary}, result=${result}");
       }
