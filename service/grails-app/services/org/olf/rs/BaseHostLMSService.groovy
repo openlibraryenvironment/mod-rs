@@ -98,7 +98,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.error("Problem attempting strategy ${next_strategy.name}",e);
         }
         finally {
-          log.debug("Completed strategt ${next_strategy.name}");
+          log.debug("Completed strategy ${next_strategy.name}, location = ${location}");
         }
      
       }
@@ -119,7 +119,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
-    Map availability_summary = null;
+    Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
     }
@@ -162,9 +162,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response)
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().get(0);
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -197,10 +197,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response)
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
 
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().get(0);
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -234,11 +234,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response);
+        Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response);
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().get(0);
   
-        log.debug("At end, availability summary: ${availability_summary}");
+        log.debug("At end, availability summary: ${availability_summary}, result=${result}");
       }
       else {
         log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
