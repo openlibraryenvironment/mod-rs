@@ -660,7 +660,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
           if ( tag_data['b'] != null ){
-            if ( [ 'RESERVES', 'CHECKEDOUT', 'MISSING', 'DISCARD'].contains(tag_data['b']) {
+            if ( [ 'RESERVES', 'CHECKEDOUT', 'MISSING', 'DISCARD'].contains(tag_data['b']) ) {
               // $b contains a string we think implies non-availability
             }
             else {
