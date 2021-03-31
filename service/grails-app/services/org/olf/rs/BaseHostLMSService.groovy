@@ -154,7 +154,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'maximumRecords':'1' ]
 
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
 
@@ -189,7 +189,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
   
@@ -226,7 +226,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'x-pquery': prefix_query_string,
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
   
