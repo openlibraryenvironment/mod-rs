@@ -653,15 +653,21 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
-          int num_copies = Integer.parseInt(tag_data['f'])
+          String str_tag_f = tag_data['f']
+          log.debug("Tag f will be \"${str_tag_f}\" parses to ${Integer.parseInt(str_tag_f)}");
+          int num_copies = Integer.parseInt(str_tag_f);
           if ( num_copies > 0 ) {
             availability_summary.add( new ItemLocation( location: tag_data['a'], 
                                                         shelvingLocation: tag_data['b'],
                                                         callNumber:tag_data['c'] ) )
           }
+          else {
+            log.debug("calculated ${num_copies} available - not adding item location");
+          }
         }
         catch ( Exception e ) {
           // All kind of odd strings like 'NONE' that mean there aren't any holdings available
+          log.debug("Unable to parse number of copies: ${e.message}");
         }
       }
     }
