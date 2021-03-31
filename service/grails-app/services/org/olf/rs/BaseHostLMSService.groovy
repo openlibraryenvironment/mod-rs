@@ -653,9 +653,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
-          String str_tag_f = tag_data['f']
-          log.debug("Tag f will be \"${str_tag_f}\" parses to ${Integer.parseInt(str_tag_f)}");
+          String str_tag_f = tag_data['f']?.toString()
           int num_copies = Integer.parseInt(str_tag_f);
+          log.debug("Tag f will be \"${str_tag_f}\" parses to ${num_copies}");
           if ( num_copies > 0 ) {
             availability_summary.add( new ItemLocation( location: tag_data['a'], 
                                                         shelvingLocation: tag_data['b'],
