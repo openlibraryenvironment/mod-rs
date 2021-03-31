@@ -13,4 +13,18 @@ import groovy.json.JsonSlurper
  * this may be a looking in a shared index, a static list of responders or some other strategy
  */
 public class RequestRouterService {
+
+  public void findMoreSuppliers() {
+    // Initially this method needs to hide the details of what happens in the following calls
+    // around line 222 of ReshareApplicationEventHandlerService.groovy. Our aim is to hide the 
+    // details of finding a list of potential suppliers so different implementations can be used
+
+    // List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
+    // log.debug("Result of shared index lookup : ${sia}");
+    // int ctr = 0;
+    // List<Map> enrichedRota = createRankedRota(sia)
+    // log.debug("Created ranked rota: ${enrichedRota}")
+  }
+
+
 }

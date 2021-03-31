@@ -1,4 +1,4 @@
-package org.olf.rs;
+package org.olf.rs.hostlms;
 
 import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
@@ -30,11 +30,11 @@ import org.olf.rs.circ.client.CirculationClient;
  * The interface between mod-rs and any host Library Management Systems
  *
  */
-public class AlephHostLMSService extends BaseHostLMSService {
+public class SierraHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
-    return new NCIPClientWrapper(address, [protocol: "NCIP1_SOCKET"]).circulationClient;
+    return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
 }

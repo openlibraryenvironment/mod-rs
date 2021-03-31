@@ -43,6 +43,7 @@ public class ReshareApplicationEventHandlerService {
   ReshareActionService reshareActionService
   StatisticsService statisticsService
   PatronNoticeService patronNoticeService
+  RequestRouterService requestRouterService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
