@@ -652,9 +652,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( df.'@tag' == "926" ) {
         Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
-          if ( sf.@code != null ) {
-            log.debug("926 processing - adding subfield \"${sf.'@code'}\" (${sf.'@code'?.class?.name}) with value \"${sf}\"");
-            tag_data[ sf.'@code'.toString().trim() ] = sf.toString().trim()
+          if ( sf.'@code' != null ) {
+            tag_data[ sf.'@code'.toString().trim() ] = sf.text().trim()
           }
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");

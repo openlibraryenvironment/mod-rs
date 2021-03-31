@@ -106,7 +106,6 @@ public class SirsiHostLMSService extends BaseHostLMSService {
         Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
           if ( sf.@code != null ) {
-            log.debug("926 processing - adding subfield \"${sf.'@code'}\" (${sf.'@code'?.class?.name}) with value \"${sf}\"");
             tag_data[ sf.'@code'.toString() ] = sf.toString()
           }
         }
