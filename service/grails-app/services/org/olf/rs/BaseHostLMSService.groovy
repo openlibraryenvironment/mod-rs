@@ -624,6 +624,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return availability_summary;
   }
 
+  /**
+   * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
+   */
   public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
@@ -651,26 +654,22 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         df.subfield.each { sf ->
           if ( sf.@code != null ) {
             log.debug("926 processing - adding subfield \"${sf.'@code'}\" (${sf.'@code'?.class?.name}) with value \"${sf}\"");
-            tag_data[ sf.'@code'.toString() ] = sf.toString()
+            tag_data[ sf.'@code'.toString().trim() ] = sf.toString().trim()
           }
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
-          if ( tag_data['f'] != null ){
-            log.debug("All about tag f: v:\"${tag_data['f']}\" t:${tag_data['f']?.class?.name} toString:${tag_data['f']?.toString()}");
-
-            String str_tag_f = tag_data['f']?.toString()
-            int num_copies = Integer.parseInt(str_tag_f);
-            log.debug("Tag f will be \"${str_tag_f}\" parses to ${num_copies}");
-            if ( num_copies > 0 ) {
-              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+          if ( tag_data['b'] != null ){
+            if ( [ 'RESERVES', 'CHECKEDOUT', 'MISSING', 'DISCARD'].contains(tag_data['b']) {
+              // $b contains a string we think implies non-availability
             }
             else {
-              log.debug("calculated ${num_copies} available - not adding item location");
+              log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
             }
           }
           else {
-            log.debug("No subfield f present - unable to determine number of copies available");
+            log.debug("No subfield b present - unable to determine number of copies available");
           }
         }
         catch ( Exception e ) {
