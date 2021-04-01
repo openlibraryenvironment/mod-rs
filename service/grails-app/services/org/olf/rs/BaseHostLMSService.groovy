@@ -615,8 +615,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
         log.debug("Available now");
         ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-        if ( result == null ) 
-          result = il;
         availability_summary[hld.localLocation] = il;
       }
     }
