@@ -232,7 +232,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Launch auto responder for request");
           String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
           if ( auto_respond?.toLowerCase().startsWith('on') ) {
-            autoRespond(req, auto_respond, auto_respond.toLowerCase())
+            autoRespond(req, auto_respond.toLowerCase())
           }
           else {
             auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
