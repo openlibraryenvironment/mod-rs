@@ -134,13 +134,16 @@ class RSLifecycleSpec extends HttpSpec {
       }
 
     where:
-      name | should_be_found
-      'alma' | true
-      'aleph' | true
-      'wms' | true
+      name      | should_be_found
+      'alma'    | true
+      'aleph'   | true
+      'wms'     | true
       'default' | true
-      'manual' | true
-      'wibble' | false
+      'manual'  | true
+      'folio'   | true
+      'sirsi'   | true
+      'sierra'  | true
+      'wibble'  | false
   }
 
   // Set up a new tenant called RSTestTenantA
