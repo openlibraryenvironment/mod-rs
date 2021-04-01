@@ -98,7 +98,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.error("Problem attempting strategy ${next_strategy.name}",e);
         }
         finally {
-          log.debug("Completed strategt ${next_strategy.name}");
+          log.debug("Completed strategy ${next_strategy.name}, location = ${location}");
         }
      
       }
@@ -119,7 +119,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
-    Map availability_summary = null;
+    Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord);
     }
@@ -154,7 +154,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'maximumRecords':'1' ]
 
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
 
@@ -162,9 +162,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response)
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().iterator().next()
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -189,7 +189,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
   
@@ -197,10 +197,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response)
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
 
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().iterator().next()
 
         log.debug("At end, availability summary: ${availability_summary}");
       }
@@ -226,7 +226,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'x-pquery': prefix_query_string,
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query[recordSchema] = getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
       }
   
@@ -234,11 +234,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map availability_summary = extractAvailableItemsFrom(z_response);
+        Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response);
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.get(0);
+          result = availability_summary.values().iterator().next()
   
-        log.debug("At end, availability summary: ${availability_summary}");
+        log.debug("At end, availability summary: ${availability_summary}, result=${result}");
       }
       else {
         log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
@@ -615,8 +615,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
         log.debug("Available now");
         ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-        if ( result == null ) 
-          result = il;
         availability_summary[hld.localLocation] = il;
       }
     }
@@ -624,6 +622,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return availability_summary;
   }
 
+  /**
+   * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
+   */
   public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
@@ -647,21 +648,30 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     Map<String,ItemLocation> availability_summary = [:]
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {
-        Map tag_data = [:]
+        Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
-          tag_data[ sf.@code ] = sf
+          if ( sf.'@code' != null ) {
+            tag_data[ sf.'@code'.toString().trim() ] = sf.text().trim()
+          }
         }
         log.debug("Found holdings tag : ${df} ${tag_data}");
         try {
-          int num_copies = Integer.parseInt(tag_data['f'])
-          if ( num_copies > 0 ) {
-            availability_summary.add( new ItemLocation( location: tag_data['a'], 
-                                                        shelvingLocation: tag_data['b'],
-                                                        callNumber:tag_data['c'] ) )
+          if ( tag_data['b'] != null ){
+            if ( [ 'RESERVES', 'CHECKEDOUT', 'MISSING', 'DISCARD'].contains(tag_data['b']) ) {
+              // $b contains a string we think implies non-availability
+            }
+            else {
+              log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+            }
+          }
+          else {
+            log.debug("No subfield b present - unable to determine number of copies available");
           }
         }
         catch ( Exception e ) {
           // All kind of odd strings like 'NONE' that mean there aren't any holdings available
+          log.debug("Unable to parse number of copies: ${e.message}");
         }
       }
     }

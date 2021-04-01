@@ -968,7 +968,6 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Cancelling request")
           auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
           req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
-          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush:true, failOnError: true)
       } else {

@@ -490,10 +490,15 @@ public class ReshareActionService {
 
   public simpleTransition(PatronRequest pr, Map params, String state_model, String target_status, String p_message=null) {
 
-    log.debug("request to transition ${pr} to ${target_status}");
+    if( pr == null ) {
+      log.warn("Cannot transition status for null request object");
+      return;
+    }
+    
+    log.debug("request to transition ${pr} to ${state_model}/${target_status}");
     def new_state = reshareApplicationEventHandlerService.lookupStatus(state_model, target_status);
 
-    if ( ( pr != null ) && ( new_state != null ) ) {
+    if (  new_state != null )  {
       String message = p_message ?: "Simple Transition ${pr.state?.code} to ${new_state.code}".toString()
 
       auditEntry(pr,
@@ -503,6 +508,8 @@ public class ReshareActionService {
       pr.state=new_state;
       pr.save(flush:true, failOnError:true);
       log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+    } else {
+      log.warn("Unable to find state for state model ${state_model}, state name ${target_status}");
     }
   }
 

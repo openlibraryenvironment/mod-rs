@@ -52,6 +52,16 @@ public class SirsiHostLMSService extends BaseHostLMSService {
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
     log.debug("Extract holdings from marcxml record ${z_response}");
 
+    Map<String, ItemLocation> availability_summary = null;
+    if ( z_response?.records?.record?.recordData?.record != null ) {
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record);
+    }
+    return availability_summary;
+
+  }
+
+  @Override
+  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -71,11 +81,38 @@ public class SirsiHostLMSService extends BaseHostLMSService {
     //             <subfield code="d">BOOK</subfield>
     //             <subfield code="f">2</subfield>
     //           </datafield>
-    Map<String, ItemLocation> availability_summary = null;
-    if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record);
+    Map<String,ItemLocation> availability_summary = [:]
+    record.datafield.each { df ->
+      if ( df.'@tag' == "926" ) {
+        Map<String,String> tag_data = [:]
+        df.subfield.each { sf ->
+          if ( sf.@code != null ) {
+            tag_data[ sf.'@code'.toString() ] = sf.toString()
+          }
+        }
+        log.debug("Found holdings tag : ${df} ${tag_data}");
+        try {
+          if ( tag_data['b'] != null ){
+            if ( [ 'RESERVES', 'CHECKEDOUT', 'MISSING', 'DISCARD'].contains(tag_data['b']) ) {
+              // $b contains a string we think implies non-availability
+            }
+            else {
+              log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+            }
+          }
+          else {
+            log.debug("No subfield b present - unable to determine number of copies available");
+          }
+        }
+        catch ( Exception e ) {
+          // All kind of odd strings like 'NONE' that mean there aren't any holdings available
+          log.debug("Unable to parse number of copies: ${e.message}");
+        }
+      }
     }
+    log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
-
   }
+
 }

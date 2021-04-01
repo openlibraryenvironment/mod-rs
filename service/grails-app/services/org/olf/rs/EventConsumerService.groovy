@@ -118,7 +118,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               log.error("problem processing event notification",e);
             }
             finally {
-              log.debug("Completed processing of directory entry event");
+              log.debug("Completed processing of rs entry event");
             }
           }
           consumer.commitAsync();

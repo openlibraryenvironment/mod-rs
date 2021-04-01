@@ -37,4 +37,36 @@ public class SierraHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
+  /**
+   * III Sierra doesn't provide an availableNow flag in it's holdings record - instead the XML looks as followS:
+   * <holdings>
+   *   <holding>
+   *     <localLocation>Gumberg Silverman Phen General - 1st Floor</localLocation>
+   *     <callNumber>B3279.H94 T756 2021 </callNumber>
+   *     <publicNote>AVAILABLE</publicNote>
+   *   </holding>
+   * </holdings>
+   *
+   * We are taking publicNote==AVAILABLE as an indication of an available copy
+   */
+  @Override
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+
+    Map<String,ItemLocation> availability_summary = [:]
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("${hld}");
+      if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
+        log.debug("Available now");
+        ItemLocation il = new ItemLocation( 
+                                            location: hld.localLocation?.toString(), 
+                                            shelvingLocation:hld.localLocation?.toString(), 
+                                            callNumber:hld.callNumber?.toString() )
+        availability_summary[hld.localLocation?.toString()] = il;
+      }
+    }
+
+    return availability_summary;
+  }
+
 }

@@ -12,6 +12,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.workflow.*;
 import grails.converters.JSON
 import org.olf.rs.statemodel.StateTransition
+import org.olf.rs.PatronNoticeService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.lms.ItemLocation;
@@ -23,6 +24,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
   ReshareActionService reshareActionService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  PatronNoticeService patronNoticeService
 
   PatronRequestController() {
     super(PatronRequest)
@@ -330,7 +332,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'fillLocally':
               log.debug("Fill request locally, considered complete for ReShare");
-              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
+              result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_FILLED_LOCALLY');
               break;
             case 'cancelLocal':
               log.debug("Cancel local request");
@@ -338,7 +340,15 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               reshareApplicationEventHandlerService.auditEntry(patron_request,
                 patron_request.state, cancel_state, "Local request cancelled", null);
               patron_request.state = cancel_state;
+              if (request.JSON.actionParams.reason) {
+                def cat = RefdataCategory.findByDesc('cancellationReasons');
+                def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
+                if  (val) {
+                  patron_request.cancellationReason = val;
+                }
+              }
               patron_request.save(flush:true, failOnError:true);
+              patronNoticeService.triggerNotices(patron_request, "request_cancelled");
               break;
             default:
               log.warn("unhandled patron request action: ${request.JSON.action}");
