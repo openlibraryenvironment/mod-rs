@@ -910,11 +910,17 @@ public class ReshareApplicationEventHandlerService {
   }
 
   private void handleCancelRequestReceived(eventData) {
+
+    log.debug("handleCancelRequestReceived::(${eventData.payload.id})")
+
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
+
       reshareActionService.sendMessage(req, [note:'Recieved Cancellation Request']);
+
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
       if ( auto_cancel?.toLowerCase().startsWith('on') ) {
+        log.debug("Auto cancel is on");
         // System has auto-respond cancel on
         if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
           // Revert the state to it's original before the cancel request was received - previousState
