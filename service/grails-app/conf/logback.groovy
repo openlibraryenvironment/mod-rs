@@ -41,6 +41,7 @@ logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
 logger ('org.olf.rs.EventConsumerService', DEBUG)
 logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
+logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
 
 // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
 // logger ('com.k_int.okapi.OkapiClient', WARN)

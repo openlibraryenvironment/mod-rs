@@ -24,19 +24,34 @@ import org.springframework.beans.factory.annotation.Value
 import org.olf.rs.EmailService
 import org.olf.rs.HostLMSService
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.routing.RankedSupplier
 
 @Slf4j
 @Integration
 @Stepwise
 class RSLifecycleSpec extends HttpSpec {
   
-
   // ToDo: **/address needs to have ${baseUrl} replaced with the actual value
   @Shared
   private static List<Map> DIRECTORY_INFO = [
-    [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ] 
+    [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ],
+      services:[
+        [
+          slug:'RSInstThree_ISO18626',
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+        ]
+      ]
     ],
-    [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ] 
+    [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ],
+      services:[
+        [
+          slug:'RSInstThree_ISO18626',
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+        ]
+      ]
     ],
     [ id:'RS-T-D-0003', name: 'RSInstThree', slug:'RS_INST_THREE', symbols: [[ authority:'ISIL', symbol:'RST3', priority:'a'] ],
       services:[
@@ -59,6 +74,7 @@ class RSLifecycleSpec extends HttpSpec {
   DataSource dataSource
   EmailService emailService
   HostLMSService hostLMSService
+  StaticRouterService staticRouterService
 
   @Value('${local.server.port}')
   Integer serverPort
@@ -194,6 +210,16 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstOne' | DIRECTORY_INFO
     'RSInstTwo' | DIRECTORY_INFO
     'RSInstThree' | DIRECTORY_INFO
+  }
+
+  void "Validate Static Router"() {
+
+    when:"We call the static router"
+      List<RankedSupplier> resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
+      log.debug("Static Router resolved to ${resolved_rota}");
+
+    then:"The expecte result is returned"
+      resolved_rota.size() == 3;
   }
 
   void "Configure Tenants for Mock Lending"(String tenant_id, String note) {  

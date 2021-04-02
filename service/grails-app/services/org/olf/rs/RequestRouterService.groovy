@@ -5,6 +5,7 @@ import grails.core.GrailsApplication
 import grails.gorm.multitenancy.Tenants
 import groovy.json.JsonSlurper
 import org.olf.rs.routing.RequestRouter;
+import com.k_int.web.toolkit.settings.AppSetting
 
 /**
  * Has responsibility for taking a citation and creating a viable list of possible responders given the requesting library preferences. 
