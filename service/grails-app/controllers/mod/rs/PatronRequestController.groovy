@@ -209,7 +209,10 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                                     s,
                                     'Conditions manually marked as agreed', null);
               patron_request.state=s;
-              reshareApplicationEventHandlerService
+
+              // Ian - commenting out the line below - I don't understand what it's doing
+              // reshareApplicationEventHandlerService
+
               // Mark all conditions as accepted
               reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(patron_request)
               patron_request.previousStates['RES_PENDING_CONDITIONAL_ANSWER'] = null;
@@ -226,10 +229,10 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 patron_request.previousStates[patron_request.state.code] = null
                 patron_request.state = s;
               } else {
-                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
+                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED')
                 reshareApplicationEventHandlerService.auditEntry(patron_request, 
                                         patron_request.state, 
-                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
+                                        reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED'), 
                                         'Cancellation accepted', null);
                 patron_request.requesterRequestedCancellation = false;
               }
