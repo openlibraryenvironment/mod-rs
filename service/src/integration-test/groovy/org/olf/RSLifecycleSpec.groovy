@@ -141,7 +141,7 @@ class RSLifecycleSpec extends HttpSpec {
       'default' | true
       'manual'  | true
       'folio'   | true
-      'sirsi'   | true
+      'symphony'| true
       'sierra'  | true
       'wibble'  | false
   }
