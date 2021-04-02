@@ -224,7 +224,7 @@ try {
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'FOLIO');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sierra');
-  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sirsi');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Symphony');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
   def manual_adapter_rdv = RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Manual');
 

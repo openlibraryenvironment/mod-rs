@@ -34,7 +34,7 @@ import org.olf.rs.circ.client.CirculationClient;
  * http://mpserver:9000/?x-target=http://unicornserver:2200/UNICORN&x-pquery=@attr 1=1016 @attr 3=3 water&maximumRecords=1&recordSchema=marcxml
  *
  */
-public class SirsiHostLMSService extends BaseHostLMSService {
+public class SymphonyHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead

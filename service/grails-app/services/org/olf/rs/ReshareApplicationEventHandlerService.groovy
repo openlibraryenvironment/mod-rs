@@ -233,7 +233,7 @@ public class ReshareApplicationEventHandlerService {
           log.debug("Launch auto responder for request");
           String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
           if ( auto_respond?.toLowerCase().startsWith('on') ) {
-            autoRespond(req)
+            autoRespond(req, auto_respond.toLowerCase())
           }
           else {
             auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
@@ -1113,7 +1113,7 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private void autoRespond(PatronRequest pr) {
+  private void autoRespond(PatronRequest pr, String auto_respond_variant) {
     log.debug("autoRespond....");
 
     // Use the hostLMSService to determine the best location to send a pull-slip to
@@ -1121,6 +1121,7 @@ public class ReshareApplicationEventHandlerService {
 
     log.debug("result of determineBestLocation = ${location}");
 
+    // Were we able to locate a copy?
     if ( location != null ) {
 
       // set localCallNumber to whatever we managed to look up
@@ -1137,10 +1138,13 @@ public class ReshareApplicationEventHandlerService {
       }
     }
     else {
-      log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
-      reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
-      auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
-      pr.state=lookupStatus('Responder', 'RES_UNFILLED')
+      // No - is the auto responder set up to sent not-supplied?
+      if ( auto_respond_variant=='on:_will_supply_and_cannot_supply') {
+        log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
+        reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
+        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
+        pr.state=lookupStatus('Responder', 'RES_UNFILLED')
+      }
     }
   }
 
