@@ -196,7 +196,7 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstThree' | DIRECTORY_INFO
   }
 
-  void "Configure Tenants for Mock Lending"(String tenant_id) {  
+  void "Configure Tenants for Mock Lending"(String tenant_id, String note) {  
     when:"We configure a tenant"
       println("Post settings here");
       // RequestRouter = Static
@@ -204,10 +204,10 @@ class RSLifecycleSpec extends HttpSpec {
     then:"Tenant is configured"
       1==1
     where:
-      tenant_id
-      'RSInstOne'
-      'RSInstTwo' 
-      'RSInstThree'
+      tenant_id      | note
+      'RSInstOne'    | ''
+      'RSInstTwo'    | ''
+      'RSInstThree'  | ''
 
   }
 
