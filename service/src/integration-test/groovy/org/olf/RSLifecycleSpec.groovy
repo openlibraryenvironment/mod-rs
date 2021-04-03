@@ -34,7 +34,11 @@ import org.olf.rs.routing.RankedSupplier
 @Stepwise
 class RSLifecycleSpec extends HttpSpec {
   
-  // ToDo: **/address needs to have ${baseUrl} replaced with the actual value
+  // Warning: You will notice that these directory entries carry and additional customProperty: AdditionalHeaders
+  // When okapi fronts the /rs/externalApi/iso18626 endpoint it does so through a root path like 
+  // _/invoke/tenant/TENANT_ID/rs/externalApi/iso18626 - it then calls the relevant path with the TENANT_ID as a header
+  // Because we want our tests to run without an OKAPI, we need to supply the tenant-id that OKAPI normally would and that
+  // is the function of the AdditionalHeaders custom property here
   @Shared
   private static List<Map> DIRECTORY_INFO = [
     [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ],
@@ -42,7 +46,10 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstOne_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+          customProperties:[ 
+            'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+            'AdditionalHeaders':'X-Okapi-Tenant:RSInstOne'
+          ]
         ]
       ]
     ],
@@ -51,7 +58,10 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstTwo_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+          customProperties:[ 
+            'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+            'AdditionalHeaders':'X-Okapi-Tenant:RSInstTwo'
+          ]
         ]
       ]
     ],
@@ -60,7 +70,10 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstThree_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
+          customProperties:[ 
+            'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+            'AdditionalHeaders':'X-Okapi-Tenant:RSInstThree'
+          ]
         ]
       ]
     ]
