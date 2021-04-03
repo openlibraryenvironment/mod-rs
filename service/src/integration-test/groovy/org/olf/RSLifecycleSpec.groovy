@@ -41,7 +41,7 @@ class RSLifecycleSpec extends HttpSpec {
       services:[
         [
           slug:'RSInstOne_ISO18626',
-          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
         ]
       ]
@@ -50,7 +50,7 @@ class RSLifecycleSpec extends HttpSpec {
       services:[
         [
           slug:'RSInstTwo_ISO18626',
-          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
         ]
       ]
@@ -59,7 +59,7 @@ class RSLifecycleSpec extends HttpSpec {
       services:[
         [
           slug:'RSInstThree_ISO18626',
-          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
+          service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
         ]
       ]
@@ -100,7 +100,7 @@ class RSLifecycleSpec extends HttpSpec {
       for ( Map entry: DIRECTORY_INFO ) {
         if ( entry.services != null ) {
           for ( Map svc: entry.services ) {
-            svc.service.address = "${baseUrl}rs/iso18626".toString()
+            svc.service.address = "${baseUrl}rs/externalApi/iso18626".toString()
             log.debug("${entry.id}/${entry.name}/${svc.slug}/${svc.service.name} - address updated to ${svc.service.address}");
           }
         }
@@ -240,7 +240,7 @@ class RSLifecycleSpec extends HttpSpec {
       def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0'])
       if ( changes_needed != null ) {
         resp.each { setting ->
-          log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
+          // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
           if ( changes_needed.containsKey(setting.key) ) {
             def new_value = changes_needed[setting.key];
             // log.debug("Post update to ${setting} ==> ${new_value}");
@@ -293,19 +293,13 @@ class RSLifecycleSpec extends HttpSpec {
         tags: [ 'RS-TESTCASE-1' ]
       ]
 
-      String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
-
       setHeaders([
                    'X-Okapi-Tenant': tenant_id,
                    'X-Okapi-Token': 'dummy',
                    'X-Okapi-User-Id': 'dummy',
                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
                  ])
-      def resp = doPost("${baseUrl}/rs/patronrequests") {
-        contentType 'application/json; charset=UTF-8'
-        accept 'application/json; charset=UTF-8'
-        json json_payload
-      }
+      def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
 
       log.debug("CreateReqTest1 -- Response: RESP:${resp} ID:${resp.id}");
 
@@ -317,6 +311,11 @@ class RSLifecycleSpec extends HttpSpec {
     then:"Check the return value"
       resp != null
       assert this.testctx.request_data[p_patron_reference] != null;
+
+      // next step is to poll the responder to see when the request arrives locally - until then
+      synchronized(this) {
+        Thread.sleep(5000)
+      }
 
     where:
       tenant_id   | p_title             | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | responder_symbol

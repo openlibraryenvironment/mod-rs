@@ -142,6 +142,7 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
 
       def req = delayedGet(eventData.payload.id, true);
+      log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
       // If the role is requester then validate the request and set the state to validated
       if ( ( req != null ) && 
@@ -245,7 +246,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req.isRequester}");
       }
     }
   }
