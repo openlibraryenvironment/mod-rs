@@ -48,7 +48,7 @@ class RSLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':'X-Okapi-Tenant:RSInstOne'
+            'AdditionalHeaders':['X-Okapi-Tenant:RSInstOne']
           ]
         ]
       ]
@@ -60,7 +60,7 @@ class RSLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':'X-Okapi-Tenant:RSInstTwo'
+            'AdditionalHeaders':['X-Okapi-Tenant:RSInstTwo']
           ]
         ]
       ]
@@ -72,7 +72,7 @@ class RSLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':'X-Okapi-Tenant:RSInstThree'
+            'AdditionalHeaders':['X-Okapi-Tenant:RSInstThree']
           ]
         ]
       ]
