@@ -327,15 +327,15 @@ try {
   def cp_last_resort_policy = ensureRefdataProperty('policy.ill.last_resort', false, 'YNO', 'Consider Institution As Last Resort' )
   def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', false, label='ILL Loan To Borrow Ratio');
 
-  def folio_si_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'FOLIOSharedIndex');
-  def folio_si_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'StaticRouter');
+  def folio_si_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'FOLIOSharedIndex');
+  def static_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'StaticRouter');
 
-  AppSetting host_lms_integration = AppSetting.findByKey('routing_adapter') ?: new AppSetting(
+  AppSetting routing_adapter = AppSetting.findByKey('routing_adapter') ?: new AppSetting(
                                   section:'Request Routing',
                                   settingType:'Refdata',
                                   vocab:'RequestRoutingAdapter',
                                   key: 'routing_adapter',
-                                  value: folio_si_adapter.value).save(flush:true, failOnError: true);
+                                  value: folio_si_routing_adapter.value).save(flush:true, failOnError: true);
 
 
   println("_data.groovy complete");

@@ -10,6 +10,8 @@ import groovy.util.logging.Slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.k_int.okapi.OkapiHeaders
+import grails.plugins.rest.client.RestBuilder
+import grails.plugins.rest.client.RestResponse
 import spock.lang.Shared
 import grails.gorm.multitenancy.Tenants
 import org.olf.okapi.modules.directory.DirectoryEntry
@@ -38,7 +40,7 @@ class RSLifecycleSpec extends HttpSpec {
     [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ],
       services:[
         [
-          slug:'RSInstThree_ISO18626',
+          slug:'RSInstOne_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
         ]
@@ -47,7 +49,7 @@ class RSLifecycleSpec extends HttpSpec {
     [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ],
       services:[
         [
-          slug:'RSInstThree_ISO18626',
+          slug:'RSInstTwo_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'] ]
         ]
@@ -65,7 +67,9 @@ class RSLifecycleSpec extends HttpSpec {
   ]
 
   @Shared
-  private static Map testctx = [:]
+  private static Map testctx = [
+    request_data:[:]
+  ]
 
   def grailsApplication
   EventPublicationService eventPublicationService
@@ -79,12 +83,6 @@ class RSLifecycleSpec extends HttpSpec {
   @Value('${local.server.port}')
   Integer serverPort
 
-
-  Closure authHeaders = {
-    header OkapiHeaders.TOKEN, 'dummy'
-    header OkapiHeaders.USER_ID, 'dummy'
-    header OkapiHeaders.PERMISSIONS, '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-  }
 
   def setupSpec() {
     httpClientConfig = {
@@ -102,7 +100,7 @@ class RSLifecycleSpec extends HttpSpec {
       for ( Map entry: DIRECTORY_INFO ) {
         if ( entry.services != null ) {
           for ( Map svc: entry.services ) {
-            svc.service.address = "${baseUrl}/rs/iso18626".toString()
+            svc.service.address = "${baseUrl}rs/iso18626".toString()
             log.debug("${entry.id}/${entry.name}/${svc.slug}/${svc.service.name} - address updated to ${svc.service.address}");
           }
         }
@@ -117,7 +115,7 @@ class RSLifecycleSpec extends HttpSpec {
   void "Attempt to delete any old tenants"(tenantid, name) {
     when:"We post a delete request"
       try {
-        setHeaders(['X-Okapi-Tenant': tenantid])
+        setHeaders(['X-Okapi-Tenant': tenantid, 'accept': 'application/json; charset=UTF-8'])
         def resp = doDelete("${baseUrl}_/tenant".toString(),null)
       }
       catch ( Exception e ) {
@@ -168,13 +166,16 @@ class RSLifecycleSpec extends HttpSpec {
 
       log.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
 
-      setHeaders(['X-Okapi-Tenant': tenantid])
-      def resp = doPost("${baseUrl}_/tenant") {
-        // header 'X-Okapi-Tenant', tenantid
-        authHeaders.rehydrate(delegate, owner, thisObject)()
-      }
-
-    log.debug("Got response: ${resp}");
+      setHeaders([
+                   'X-Okapi-Tenant': tenantid,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      // post to tenant endpoint
+      // doPost(url,jsondata,params,closure)
+      def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
+    log.debug("Got response for new tenant: ${resp}");
     then:"The response is correct"
       resp != null;
 
@@ -196,9 +197,9 @@ class RSLifecycleSpec extends HttpSpec {
         DirectoryEntry de = new DirectoryEntry()
         grailsWebDataBinder.bind(de, source)
 
-        log.debug("Before save, ${de}, services:${de.services}");
+        // log.debug("Before save, ${de}, services:${de.services}");
         de.save(flush:true, failOnError:true)
-        log.debug("Result of bind: ${de} ${de.id}");
+        // log.debug("Result of bind: ${de} ${de.id}");
       }
     }
 
@@ -222,19 +223,103 @@ class RSLifecycleSpec extends HttpSpec {
       resolved_rota.size() == 3;
   }
 
-  void "Configure Tenants for Mock Lending"(String tenant_id, String note) {  
-    when:"We configure a tenant"
+  /** Grab the settings for each tenant so we can modify them as needeed and send back,
+   *  then work through the list posting back any changes needed for that particular tenant in this testing setup
+   *  for now, disable all auto responders
+   */
+  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {  
+    when:"We fetch the existing settings for ${tenant_id}"
       println("Post settings here");
       // RequestRouter = Static
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                ])
+      def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0'])
+      if ( changes_needed != null ) {
+        resp.each { setting ->
+          log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
+          if ( changes_needed.containsKey(setting.key) ) {
+            def new_value = changes_needed[setting.key];
+            // log.debug("Post update to ${setting} ==> ${new_value}");
+            setting.entry = new_value;
+            def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
+            log.debug("Result of settings update: ${update_setting_result}");
+          }
+        }
+      }
 
     then:"Tenant is configured"
       1==1
+
     where:
-      tenant_id      | note
-      'RSInstOne'    | ''
-      'RSInstTwo'    | ''
-      'RSInstThree'  | ''
+      tenant_id      | changes_needed
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
 
   }
 
+
+  /**
+   * Send a test request from RSInstOne(ISIL:RST1) to RSInstThree(ISIL:RST3)
+   * This test bypasses the request routing component by providing a pre-established rota
+   */
+  void "Send request with preset rota"(String tenant_id, 
+                                       String p_title, 
+                                       String p_author, 
+                                       String p_systemInstanceIdentifier, 
+                                       String p_patron_id, 
+                                       String p_patron_reference,
+                                       String requesting_symbol,
+                                       String responder_symbol) {
+    when:"post new request"
+      log.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
+
+      // Create a request from OCLC:PPPA TO OCLC:AVL
+      def req_json_data = [
+        requestingInstitutionSymbol:requesting_symbol,
+        title: p_title,
+        author: p_author,
+        systemInstanceIdentifier: p_systemInstanceIdentifier,
+        patronReference:p_patron_reference,
+        patronIdentifier:p_patron_id,
+        isRequester:true,
+        rota:[
+          [directoryId:responder_symbol, rotaPosition:"0", 'instanceIdentifier': '001TagFromMarc', 'copyIdentifier':'COPYBarcode from 9xx']
+        ],
+        tags: [ 'RS-TESTCASE-1' ]
+      ]
+
+      String json_payload = new groovy.json.JsonBuilder(req_json_data).toString()
+
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def resp = doPost("${baseUrl}/rs/patronrequests") {
+        contentType 'application/json; charset=UTF-8'
+        accept 'application/json; charset=UTF-8'
+        json json_payload
+      }
+
+      log.debug("CreateReqTest1 -- Response: RESP:${resp} ID:${resp.id}");
+
+      // Stash the ID
+      this.testctx.request_data[p_patron_reference] = resp.id
+      log.debug("Created new request for with-rota test case 1. ID is : ${this.testctx.request_data['RS-LIFECYCLE-TEST-00001']}")
+
+
+    then:"Check the return value"
+      resp != null
+      assert this.testctx.request_data[p_patron_reference] != null;
+
+    where:
+      tenant_id   | p_title             | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | responder_symbol
+      'RSInstOne' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
+  }
 }
