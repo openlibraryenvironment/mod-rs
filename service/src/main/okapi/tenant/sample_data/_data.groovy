@@ -314,6 +314,7 @@ try {
   def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);
   def cp_local_institutionalPatronId = ensureTextProperty('local_institutionalPatronId', true, label='Institutional patron ID');
   def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
+  def cp_additional_headers = ensureTextProperty('AdditionalHeaders', false, 'Additional Headers');
 
   NamingAuthority reshare = NamingAuthority.findBySymbol('RESHARE') ?: new NamingAuthority(symbol:'RESHARE').save(flush:true, failOnError:true);
   NamingAuthority isil = NamingAuthority.findBySymbol('ISIL') ?: new NamingAuthority(symbol:'ISIL').save(flush:true, failOnError:true);

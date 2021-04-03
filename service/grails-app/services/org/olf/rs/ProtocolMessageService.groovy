@@ -74,6 +74,12 @@ class ProtocolMessageService {
 
     try {
       log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
+      if ( ill_services_for_peer[0].customProperties != null ) {
+        log.debug("Service has custom properties: ${ill_services_for_peer[0].customProperties}");
+        ill_services_for_peer[0].customProperties.value.each { cp ->
+          log.debug("CP -> ${cp} ${cp?.value}");
+        }
+      }
       sendISO18626Message(eventData, serviceAddress)
       result.status = "SENT"
       log.debug("ISO18626 message sent")
