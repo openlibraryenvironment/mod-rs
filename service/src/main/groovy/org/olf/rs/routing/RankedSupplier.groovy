@@ -7,6 +7,7 @@ package org.olf.rs.routing;
  */
 public class RankedSupplier {
   public String supplier_symbol
+  public String instance_identifier
   public String copy_identifier
   public String ill_policy
   public Long rank

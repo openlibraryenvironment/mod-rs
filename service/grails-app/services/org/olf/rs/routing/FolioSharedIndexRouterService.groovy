@@ -12,9 +12,8 @@ public class FolioSharedIndexRouterService implements RequestRouter {
   SharedIndexService sharedIndexService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
-    return null;
     List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
-    createRankedRota(sia);
+    return createRankedRota(sia);
   }
 
 
@@ -27,9 +26,9 @@ public class FolioSharedIndexRouterService implements RequestRouter {
    *   ]
    * ]
    */
-  private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
+  private List<RankedSupplier> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
-    def result = []
+    List<RankedSupplier> result = new ArrayList<RankedSupplier>()
 
     sia.each { av_stmt ->
       log.debug("Considering rota entry: ${av_stmt}");
@@ -71,14 +70,13 @@ public class FolioSharedIndexRouterService implements RequestRouter {
             loadBalancingReason = 'No load balancing information available for peer'
           }
 
-          def rota_entry = [
-            symbol:av_stmt.symbol,
-            instanceIdentifier:av_stmt.instanceIdentifier,
-            copyIdentifier:av_stmt.copyIdentifier,
-            illPolicy: av_stmt.illPolicy,
-            loadBalancingScore: loadBalancingScore,
-            loadBalancingReason:loadBalancingReason
-          ]
+          RankedSupplier rota_entry = new RankedSupplier( 
+                                               supplier_symbol: av_stmt.symbol,
+                                               instance_identifier: av_stmt.instanceIdentifier,
+                                               copy_identifier: av_stmt.copyIdentifier,
+                                               ill_policy: av_stmt.illPolicy,
+                                               rank: loadBalancingScore,
+                                               rankReason: loadBalancingReason )
           result.add(rota_entry)
         }
         else {

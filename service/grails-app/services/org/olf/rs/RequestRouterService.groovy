@@ -6,6 +6,7 @@ import grails.gorm.multitenancy.Tenants
 import groovy.json.JsonSlurper
 import org.olf.rs.routing.RequestRouter;
 import com.k_int.web.toolkit.settings.AppSetting
+import org.olf.rs.routing.RankedSupplier
 
 /**
  * Has responsibility for taking a citation and creating a viable list of possible responders given the requesting library preferences. 
@@ -41,16 +42,11 @@ public class RequestRouterService {
     return result;
   }
 
-  public void findMoreSuppliers() {
+  public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
     // Initially this method needs to hide the details of what happens in the following calls
     // around line 222 of ReshareApplicationEventHandlerService.groovy. Our aim is to hide the 
     // details of finding a list of potential suppliers so different implementations can be used
-
-    // List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
-    // log.debug("Result of shared index lookup : ${sia}");
-    // int ctr = 0;
-    // List<Map> enrichedRota = createRankedRota(sia)
-    // log.debug("Created ranked rota: ${enrichedRota}")
+    return getRequestRouter().findMoreSuppliers(description,already_tried_symbols);
   }
 
 

@@ -11,6 +11,7 @@ import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
+import org.olf.rs.routing.RankedSupplier;
 import groovy.json.JsonOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -279,40 +280,35 @@ public class ReshareApplicationEventHandlerService {
         } else {
           def operation_data = [:]
           operation_data.candidates=[]
-          log.debug("No rota supplied - call sharedIndexService.findAppropriateCopies to find appropriate copies");
-          // NO rota supplied - see if we can use the shared index service to locate appropriate copies
-          // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
-          // here in the test environments.
-          List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
-          log.debug("Result of shared index lookup : ${sia}");
-          int ctr = 0;
 
-          List<Map> enrichedRota = createRankedRota(sia)
-          log.debug("Created ranked rota: ${enrichedRota}")
+          // We will shortly refactor this block to use requestRouterService to get the next block of requests
 
-          if (  enrichedRota.size() > 0 ) {
+          List<RankedSupplier> possible_suppliers = requestRouterService.findMoreSuppliers(req.getDescriptiveMetadata(), []);
+
+          log.debug("Created ranked rota: ${possible_suppliers}")
+
+          if (  possible_suppliers.size() > 0 ) {
 
             // Pre-process the list of candidates
-            enrichedRota?.each { av_stmt ->
+            enrichedRota?.each { ranked_supplier ->
               if ( av_stmt.symbol != null ) {
-                operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
-                if ( av_stmt.illPolicy == 'Will lend' ) {
-
-                  log.debug("Adding to rota: ${av_stmt}");
+                operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Added"]);
+                if ( ranked_supplier.ill_policy == 'Will lend' ) {
+                  log.debug("Adding to rota: ${ranked_supplier}");
 
                   // Pull back any data we need from the shared index in order to sort the list of candidates
                   req.addToRota (new PatronRequestRota(
                                                        patronRequest:req,
                                                        rotaPosition:ctr++, 
-                                                       directoryId:av_stmt.symbol,
-                                                       instanceIdentifier:av_stmt.instanceIdentifier,
-                                                       copyIdentifier:av_stmt.copyIdentifier,
+                                                       directoryId:ranked_supplier.supplier_symbol,
+                                                       instanceIdentifier:ranked_supplier.instance_identifier,
+                                                       copyIdentifier:ranked_supplier.copy_identifier,
                                                        state: lookupStatus('PatronRequest', 'REQ_IDLE'),
-                                                       loadBalancingScore:av_stmt.loadBalancingScore,
-                                                       loadBalancingReason:av_stmt.loadBalancingReason))
+                                                       loadBalancingScore:ranked_supplier.rank,
+                                                       loadBalancingReason:ranked_supplier.rankReason))
                 }
                 else {
-                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
+                  operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Skipping - illPolicy is \"${ranked_supplier.ill_policy}\""]);
                 }
               }
             }
