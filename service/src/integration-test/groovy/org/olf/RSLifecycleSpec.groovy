@@ -257,7 +257,7 @@ class RSLifecycleSpec extends HttpSpec {
           if ( changes_needed.containsKey(setting.key) ) {
             def new_value = changes_needed[setting.key];
             // log.debug("Post update to ${setting} ==> ${new_value}");
-            setting.entry = new_value;
+            setting.value = new_value;
             def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
             log.debug("Result of settings update: ${update_setting_result}");
           }

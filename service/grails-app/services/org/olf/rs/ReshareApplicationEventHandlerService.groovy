@@ -348,7 +348,7 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
 
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+      // log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id, true);
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
@@ -1061,7 +1061,7 @@ public class ReshareApplicationEventHandlerService {
    * up to 5 times.
    */
   public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
-    log.debug("delayedGet called (${wth_lock})")
+    // log.debug("delayedGet called (${wth_lock})")
     PatronRequest result = null;
     int retries = 0;
 
@@ -1079,7 +1079,7 @@ public class ReshareApplicationEventHandlerService {
           Thread.sleep(900);
           retries++;
         } else {
-          log.debug("Result found for ${pr_id}. Refresh")
+          // log.debug("Result found for ${pr_id}. Refresh")
         }
       }
     }
