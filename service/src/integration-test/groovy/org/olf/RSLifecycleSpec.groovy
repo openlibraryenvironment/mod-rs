@@ -125,6 +125,41 @@ class RSLifecycleSpec extends HttpSpec {
   def cleanup() {
   }
 
+
+
+  // For the given tenant, block up to timeout ms until the given request is found in the given state
+  private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
+    long start_time = System.currentTimeMillis();
+    String request_id = null;
+    String request_state = null;
+    long elapsed = 0;
+    while ( ( required_state != request_state ) &&
+            ( elapsed < timeout ) ) {
+
+      setHeaders([ 'X-Okapi-Tenant': tenant ]);
+      // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+      def resp = doGet("${baseUrl}rs/patronrequests", 
+                       [ 
+                         'max':'100', 
+                         'offset':'0',
+                         'match':'patronReference',
+                         'term':patron_reference
+                       ])
+      if ( resp?.size() == 1 ) {
+        request_id = resp[0].id
+        request_state = resp[0].state?.code
+      }
+
+      if ( required_state != request_state ) {
+        // Request not found OR not yet in required state
+        log.debug("Not yet found.. sleeping");
+        Thread.sleep(1000);
+      }
+      elapsed = System.currentTimeMillis() - start_time
+    }
+    return request_id;
+  }
+
   void "Attempt to delete any old tenants"(tenantid, name) {
     when:"We post a delete request"
       try {
@@ -281,6 +316,7 @@ class RSLifecycleSpec extends HttpSpec {
    * This test bypasses the request routing component by providing a pre-established rota
    */
   void "Send request with preset rota"(String tenant_id, 
+                                       String peer_tenant,
                                        String p_title, 
                                        String p_author, 
                                        String p_systemInstanceIdentifier, 
@@ -318,20 +354,18 @@ class RSLifecycleSpec extends HttpSpec {
 
       // Stash the ID
       this.testctx.request_data[p_patron_reference] = resp.id
-      log.debug("Created new request for with-rota test case 1. ID is : ${this.testctx.request_data['RS-LIFECYCLE-TEST-00001']}")
+
+      String peer_request = waitForRequestState(peer_tenant, 10000, p_patron_reference, 'RES_IDLE')
+      log.debug("Created new request for with-rota test case 1. REQUESTER ID is : ${this.testctx.request_data[p_patron_reference]}")
+      log.debug("                                               RESPONDER ID is : ${peer_request}");
 
 
     then:"Check the return value"
-      resp != null
       assert this.testctx.request_data[p_patron_reference] != null;
-
-      // next step is to poll the responder to see when the request arrives locally - until then
-      synchronized(this) {
-        Thread.sleep(5000)
-      }
+      assert peer_request != null
 
     where:
-      tenant_id   | p_title             | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | responder_symbol
-      'RSInstOne' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
+      tenant_id   | peer_tenant   | p_title             | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | responder_symbol
+      'RSInstOne' | 'RSInstThree' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
   }
 }

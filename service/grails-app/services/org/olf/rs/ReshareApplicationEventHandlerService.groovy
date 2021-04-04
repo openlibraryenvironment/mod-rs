@@ -238,6 +238,7 @@ public class ReshareApplicationEventHandlerService {
           }
           else {
             auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
+            req.needsAttention=true;
           }
           req.save(flush:true, failOnError:true);
         }
