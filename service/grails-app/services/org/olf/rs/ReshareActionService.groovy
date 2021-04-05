@@ -255,13 +255,22 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean sendMessage(PatronRequest pr, Object actionParams) {
+
+  /**
+   *  send a message.
+   *  It appears this method can be called from multiple places including controllers and other services.
+   *  Previously, we relied upon groovy magic to allow actionParams be a controller params object or a standard
+   *  map. However, a standard map does not support isNull. In order to detect and tidy this, the method signture
+   *  is changed to an explicit Map and the test for a note property is done via the map interface and not
+   *  the special isNull method injected by the controller object (Which then breaks this method if called from another service).
+   */
+  public boolean sendMessage(PatronRequest pr, Map actionParams) {
     log.debug("actionMessage(${pr})");
     boolean result = false;
     // Sending a message does not change the state of a request
 
     // If the actionParams does not contain a note then this method should do nothing
-    if (!actionParams.isNull("note")) {
+    if ( actionParams.get('note') != null ) {
       Map eventData = [header:[]];
 
       String message_sender_symbol = "unassigned_message_sender_symbol";
