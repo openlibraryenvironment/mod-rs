@@ -83,10 +83,12 @@ podTemplate(
               docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing snapshot-latest");
                 docker_image.push('snapshot-latest')
-                docker_image.push("${app_version}.${BUILD_NUMBER}".toString())
+                // docker_image.push("${app_version}.${BUILD_NUMBER}".toString())
+                docker_image.push("${app_version}".toString())
                 // deploy_cfg='deploy_snapshot.yaml'
               }
-              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
+              // env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
+              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}"
               env.SERVICE_ID="mod-rs-${app_version}.${BUILD_NUMBER}"
               env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase();
             }
