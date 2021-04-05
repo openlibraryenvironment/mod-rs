@@ -339,6 +339,14 @@ try {
                                   value: folio_si_routing_adapter.value).save(flush:true, failOnError: true);
 
 
+  AppSetting static_routing = AppSetting.findByKey('static_routes') ?: new AppSetting(
+                                  section:'Request Routing',
+                                  settingType:'String',
+                                  key: 'static_routes',
+                                  value: '').save(flush:true, failOnError: true);
+
+
+
   println("_data.groovy complete");
 }
 catch ( Exception e ) {

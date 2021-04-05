@@ -74,7 +74,7 @@ podTemplate(
                 docker_image.push("v${semantic_version_components[0]}".toString())
                 // deploy_cfg='deploy_latest.yaml'
               }
-              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_versionapp_version}"
+              env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}"
               env.SERVICE_ID="mod-rs-${app_version}"
               env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase()
             }

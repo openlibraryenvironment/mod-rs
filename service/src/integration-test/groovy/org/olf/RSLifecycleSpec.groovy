@@ -261,16 +261,6 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstThree' | DIRECTORY_INFO
   }
 
-  void "Validate Static Router"() {
-
-    when:"We call the static router"
-      List<RankedSupplier> resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
-      log.debug("Static Router resolved to ${resolved_rota}");
-
-    then:"The expecte result is returned"
-      resolved_rota.size() == 3;
-  }
-
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
    *  for now, disable all auto responders
@@ -304,10 +294,23 @@ class RSLifecycleSpec extends HttpSpec {
 
     where:
       tenant_id      | changes_needed
-      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
-      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
-      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off' ]
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST1' ]
 
+  }
+
+  void "Validate Static Router"() {
+
+    when:"We call the static router"
+      List<RankedSupplier> resolved_rota = null;
+      Tenants.withId('RSInstOne_mod_rs'.toLowerCase()) {
+        resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
+      }
+      log.debug("Static Router resolved to ${resolved_rota}");
+
+    then:"The expecte result is returned"
+      resolved_rota.size() == 2;
   }
 
 

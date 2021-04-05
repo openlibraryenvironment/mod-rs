@@ -12,4 +12,8 @@ public class RankedSupplier {
   public String ill_policy
   public Long rank
   public String rankReason
+
+  public String toString() {
+    return "RankedSupplier(${supplier_symbol},${instance_identifier},${copy_identifier},${ill_policy},${rank},${rankReason})".toString()
+  }
 }

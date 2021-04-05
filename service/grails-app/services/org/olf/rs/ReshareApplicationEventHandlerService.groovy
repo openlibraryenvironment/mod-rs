@@ -150,9 +150,9 @@ public class ReshareApplicationEventHandlerService {
            ( req.state?.code == 'REQ_IDLE' ) && 
            ( req.isRequester == true) ) {
 
-        // If valid - generate a human readabe ID to use
+        // Generate a human readabe ID to use
         req.hrid=generateHrid()
-        log.debug("Updated req.hrid to ${req.hrid}");
+        log.debug("set req.hrid to ${req.hrid}");
 
         def lookup_patron = reshareActionService.lookupPatron(req, null)
 
@@ -482,7 +482,8 @@ public class ReshareApplicationEventHandlerService {
 
 
   /**
-   * A new request has been received from a peer institution. We will need to create a request where isRequester==false
+   * A new request has been received from an external PEER institution using some comms protocol. 
+   * We will need to create a request where isRequester==false
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleRequestMessage(Map eventData) {
@@ -1152,6 +1153,10 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+  /**
+   * The auto responder has determined that a local copy is available. update the state of the request and
+   * mark the pick location as the selected location.
+   */
   public boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
     boolean result = false;

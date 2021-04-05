@@ -46,7 +46,12 @@ public class RequestRouterService {
     // Initially this method needs to hide the details of what happens in the following calls
     // around line 222 of ReshareApplicationEventHandlerService.groovy. Our aim is to hide the 
     // details of finding a list of potential suppliers so different implementations can be used
-    return getRequestRouter().findMoreSuppliers(description,already_tried_symbols);
+    List<RankedSupplier> supplier_list = getRequestRouter().findMoreSuppliers(description,already_tried_symbols);
+
+    // Currently, ranking is done in the FolioRouter really the ranking algorithm should also be seperated out and called
+    // here so that different supplier list generators can be ranked by different ranking algorithms.
+
+    return supplier_list
   }
 
 
