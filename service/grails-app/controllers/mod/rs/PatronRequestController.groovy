@@ -334,7 +334,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'cancelLocal':
               log.debug("Cancel local request");
-              def cancel_state = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED');
+              def cancel_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CANCELLED');
               def audit_text = "Local request cancelled";
               patron_request.state = cancel_state;
               if (request.JSON.actionParams.reason) {
