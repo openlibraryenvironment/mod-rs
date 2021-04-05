@@ -264,6 +264,8 @@ class RSLifecycleSpec extends HttpSpec {
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
    *  for now, disable all auto responders
+   *  N.B. that the test "Send request using static router" below RELIES upon the static routes assigned to RSInstOne.
+   *  changing this data may well break that test.
    */
   void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {  
     when:"We fetch the existing settings for ${tenant_id}"
@@ -294,9 +296,9 @@ class RSLifecycleSpec extends HttpSpec {
 
     where:
       tenant_id      | changes_needed
-      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
-      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
-      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'staticrouter', 'static_routes':'SYMBOL:ISIL:RST1' ]
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1' ]
 
   }
 
@@ -371,4 +373,59 @@ class RSLifecycleSpec extends HttpSpec {
       tenant_id   | peer_tenant   | p_title             | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | responder_symbol
       'RSInstOne' | 'RSInstThree' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
   }
+
+  /**
+   * Important note for this test case:: peer_tenant is set to RSInstThree and this works because RSInstOne has a static rota set up
+   * so that RSInstThree is the first option for sending a request to. Any changes in the test data will likely break this test. Watch out 
+   */
+  void "Send request using static router"(String tenant_id,
+                                          String peer_tenant,
+                                          String p_title,
+                                          String p_author,
+                                          String p_systemInstanceIdentifier,
+                                          String p_patron_id,
+                                          String p_patron_reference,
+                                          String requesting_symbol) {
+    when:"post new request"
+      log.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
+
+      // Create a request from OCLC:PPPA TO OCLC:AVL
+      def req_json_data = [
+        requestingInstitutionSymbol:requesting_symbol,
+        title: p_title,
+        author: p_author,
+        systemInstanceIdentifier: p_systemInstanceIdentifier,
+        patronReference:p_patron_reference,
+        patronIdentifier:p_patron_id,
+        isRequester:true,
+        tags: [ 'RS-TESTCASE-2' ]
+      ]
+
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
+
+      log.debug("CreateReqTest2 -- Response: RESP:${resp} ID:${resp.id}");
+
+      // Stash the ID
+      this.testctx.request_data[p_patron_reference] = resp.id
+
+      String peer_request = waitForRequestState(peer_tenant, 10000, p_patron_reference, 'RES_IDLE')
+      log.debug("Created new request for with-rota test case 1. REQUESTER ID is : ${this.testctx.request_data[p_patron_reference]}")
+      log.debug("                                               RESPONDER ID is : ${peer_request}");
+
+
+    then:"Check the return value"
+      assert this.testctx.request_data[p_patron_reference] != null;
+      assert peer_request != null
+
+    where:
+      tenant_id   | peer_tenant   | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol
+      'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'
+  }
+
 }

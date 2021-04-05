@@ -7,7 +7,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.SharedIndexService;
 
-public class FolioSharedIndexRouterService implements RequestRouter {
+public class FoliosharedindexRouterService implements RequestRouter {
 
   SharedIndexService sharedIndexService
 

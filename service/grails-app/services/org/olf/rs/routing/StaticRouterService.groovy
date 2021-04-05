@@ -22,7 +22,7 @@ public class StaticRouterService implements RequestRouter {
             result.add(new RankedSupplier(supplier_symbol:"${option_parts[1]}:${option_parts[2]}", 
                                           copy_identifier:'', 
                                           instance_identifier:'', 
-                                          ill_policy:'loan', 
+                                          ill_policy:'Will lend', 
                                           rank:0, 
                                           rankReason:'static rank'));
           }

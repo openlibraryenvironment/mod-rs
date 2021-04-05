@@ -329,7 +329,7 @@ try {
   def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', false, label='ILL Loan To Borrow Ratio');
 
   def folio_si_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'FOLIOSharedIndex');
-  def static_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'StaticRouter');
+  def static_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'Static');
 
   AppSetting routing_adapter = AppSetting.findByKey('routing_adapter') ?: new AppSetting(
                                   section:'Request Routing',

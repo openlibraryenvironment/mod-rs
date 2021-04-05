@@ -289,9 +289,11 @@ public class ReshareApplicationEventHandlerService {
 
           if (  possible_suppliers.size() > 0 ) {
 
+            int ctr = 0
+
             // Pre-process the list of candidates
-            enrichedRota?.each { ranked_supplier ->
-              if ( av_stmt.symbol != null ) {
+            possible_suppliers?.each { ranked_supplier ->
+              if ( ranked_supplier.supplier_symbol != null ) {
                 operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Added"]);
                 if ( ranked_supplier.ill_policy == 'Will lend' ) {
                   log.debug("Adding to rota: ${ranked_supplier}");
@@ -308,8 +310,12 @@ public class ReshareApplicationEventHandlerService {
                                                        loadBalancingReason:ranked_supplier.rankReason))
                 }
                 else {
+                  log.warn("ILL Policy was not Will lend");
                   operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Skipping - illPolicy is \"${ranked_supplier.ill_policy}\""]);
                 }
+              }
+              else {
+                log.warn("requestRouterService returned an entry without a supplier symbol");
               }
             }
 
@@ -355,9 +361,10 @@ public class ReshareApplicationEventHandlerService {
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid}) (Status code is ${req.state?.code})");
         
-        Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
-        
         if ( req.rota.size() > 0 ) {
+
+          Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
+
           boolean request_sent = false;
 
           // There may be problems with entries in the lending string, so we loop through the rota
@@ -1304,83 +1311,6 @@ public class ReshareApplicationEventHandlerService {
     loanCondition.setRelevantSupplier(relevantSupplier)
 
     pr.addToConditions(loanCondition)
-  }
-
-  /**
-   * Take a list of availability statements and turn it into a ranked rota
-   * @param sia - List of AvailabilityStatement
-   * @return [
-   *   [
-   *     symbol:
-   *   ]
-   * ]
-   */
-  private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
-    log.debug("createRankedRota(${sia})");
-    def result = []
-
-    sia.each { av_stmt ->
-      log.debug("Considering rota entry: ${av_stmt}");
-
-      // 1. look up the directory entry for the symbol
-      Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
-
-      if ( s != null ) {
-        log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
-
-        // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
-        // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
-        def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
-        log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
-
-        if ( ( entry_loan_policy == null ) ||
-             ( entry_loan_policy.value?.value == 'lending_all_types' ) ) {
-
-          Map peer_stats = statisticsService.getStatsFor(s);
-
-          def loadBalancingScore = null;
-          def loadBalancingReason = null;
-          def ownerStatus = s.owner?.status?.value;
-          log.debug("Found status of ${ownerStatus} for symbol ${s}");
-          if ( ownerStatus == null ) {
-            log.debug("Unable to get owner status for ${s}");
-          } 
-          if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
-            loadBalancingScore = 10000;
-            loadBalancingReason = "Local lending sources prioritized";
-          } else if ( peer_stats != null ) {
-            // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
-            double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
-            long target_lending = peer_stats.current_borrowing_level*lbr
-            loadBalancingScore = target_lending - peer_stats.current_loan_level
-            loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
-          } else {
-            loadBalancingScore = 0;
-            loadBalancingReason = 'No load balancing information available for peer'
-          }
-
-          def rota_entry = [
-            symbol:av_stmt.symbol,
-            instanceIdentifier:av_stmt.instanceIdentifier,
-            copyIdentifier:av_stmt.copyIdentifier,
-            illPolicy: av_stmt.illPolicy,
-            loadBalancingScore: loadBalancingScore,
-            loadBalancingReason:loadBalancingReason
-          ]
-          result.add(rota_entry)
-        }
-        else {
-          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy.value?.value}");
-        }
-      }
-      else {
-        log.debug("Unable to locate symbol ${av_stmt.symbol}");
-      } 
-    }
-    
-    def sorted_result = result.toSorted { a,b -> b.loadBalancingScore <=> a.loadBalancingScore }
-    log.debug("createRankedRota returns ${sorted_result}");
-    return sorted_result;
   }
 
   /**
