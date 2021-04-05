@@ -64,6 +64,9 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
+    'STATUS_REQ_CANCELLED_ind': { service, eventData ->
+      service.triggerNotices(eventData.payload.id, "request_cancelled");
+    },
     'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
       service.handleCancelledWithSupplier(eventData);
     },
@@ -129,6 +132,11 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.warn("Event ${eventData.event} no handler found");
     }
+  }
+
+  public void triggerNotices(String prId, String trigger) {
+    def req = delayedGet(prId, true);
+    patronNoticeService.triggerNotices(req, trigger);
   }
 
   // Notify us of a new patron request in the database - regardless of role
@@ -940,7 +948,6 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
           }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
-          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush: true, failOnError: true);
       }
