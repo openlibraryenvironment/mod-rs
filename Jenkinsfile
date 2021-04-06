@@ -127,6 +127,9 @@ podTemplate(
         // this worked as expected
         // sh "curl http://okapi.reshare:9130/_/discovery/modules"
         sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+
+        // Publish also to global registry
+        sh "curl -i -XPOST 'https://registry.reshare-dev.indexdata.com/' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
   
         // Now deployment descriptor
         // srvcid needs to be the dotted version, not the hyphen version
@@ -135,8 +138,7 @@ podTemplate(
         println("Deployment descriptor will be ${DEP_DESC}");
         println("Deployment command will be ${deployment_command}");
         sh deployment_command
-  
-  
+        
         // tenants_to_update=['kint1']
   
         // now install for tenant
