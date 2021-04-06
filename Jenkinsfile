@@ -127,6 +127,8 @@ podTemplate(
         // this worked as expected
         // sh "curl http://okapi.reshare:9130/_/discovery/modules"
         sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+
+        sh "curl -i -XPOST 'https://registry.reshare-dev.indexdata.com/' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
   
         // Now deployment descriptor
         // srvcid needs to be the dotted version, not the hyphen version
