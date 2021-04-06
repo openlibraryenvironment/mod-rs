@@ -24,8 +24,15 @@ podTemplate(
       semantic_version_components = app_version.toString().split('\\.')
       is_snapshot = app_version.contains('SNAPSHOT')
       constructed_tag = "build-${props?.appVersion}-${checkout_details?.GIT_COMMIT?.take(12)}"
+
+      // More nuanced approach here - tenant kint1 will take all master branch updates (snapshots) shortly,
+      // a newer tenant will track only the release branch. Testing propagation of tenant_to_update in this commit.
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
+        tenants_to_update=['kint1']
+      }
+
       println("Got props: ${props} appVersion:${props.appVersion}/${props['appVersion']}/${semantic_version_components} is_snapshot=${is_snapshot}");
-      println("Checkout details ${checkout_details}");
+      println("Checkout details ${checkout_details}, ${tenants_to_update}");
     }
 
     stage ('check') {
@@ -101,44 +108,47 @@ podTemplate(
     }
 
     stage ('deploy') {
-      println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
-      kubernetesDeploy(
-        enableConfigSubstitution: true,
-        kubeconfigId: 'local_k8s',
-        configs: 'other-scripts/k8s_deployment_template.yaml'
-      );
-      println("Wait for module to start...")
-      sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
-      println("Continue");
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
+        println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
+        kubernetesDeploy(
+          enableConfigSubstitution: true,
+          kubeconfigId: 'local_k8s',
+          configs: 'other-scripts/k8s_deployment_template.yaml'
+        );
+        println("Wait for module to start...")
+        sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
+        println("Continue");
+      }
     }
 
     stage('Publish module descriptor') {
-      sh 'ls -la service/build/resources/main/okapi'
-      // this worked as expected
-      // sh "curl http://okapi.reshare:9130/_/discovery/modules"
-      sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
-
-      // Now deployment descriptor
-      // srvcid needs to be the dotted version, not the hyphen version
-      DEP_DESC="""{ "srvcId": "${env.SERVICE_ID}", "instId": "${env.MOD_RS_DEPLOY_AS}-cluster", "url": "http://${env.MOD_RS_DEPLOY_AS}.reshare:8080" } """
-      deployment_command="curl -i -XPOST 'http://okapi.reshare:9130/_/discovery/modules' -d '${DEP_DESC}'"
-      println("Deployment descriptor will be ${DEP_DESC}");
-      println("Deployment command will be ${deployment_command}");
-      sh deployment_command
-
-
-      tenants_to_update=['kint1']
-
-      // now install for tenant
-      ENABLE_DOC="""[ { "id":"${env.SERVICE_ID}", "action":"enable" } ]"""
-      println("install doc will be ${DEP_DESC}");
-      tenants_to_update.each { tenant ->
-        println("Attempting module activation of ${env.SERVICE_ID} on ${tenant} using ${DEP_DESC}");
-        activation_command="curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/tenants/${tenant}/install?tenantParameters=loadSample%3Dtest,loadReference%3Dother' -d '${ENABLE_DOC}'"
-        println("Activation cmd: ${activation_command}");
-        sh activation_command
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
+        sh 'ls -la service/build/resources/main/okapi'
+        // this worked as expected
+        // sh "curl http://okapi.reshare:9130/_/discovery/modules"
+        sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
+  
+        // Now deployment descriptor
+        // srvcid needs to be the dotted version, not the hyphen version
+        DEP_DESC="""{ "srvcId": "${env.SERVICE_ID}", "instId": "${env.MOD_RS_DEPLOY_AS}-cluster", "url": "http://${env.MOD_RS_DEPLOY_AS}.reshare:8080" } """
+        deployment_command="curl -i -XPOST 'http://okapi.reshare:9130/_/discovery/modules' -d '${DEP_DESC}'"
+        println("Deployment descriptor will be ${DEP_DESC}");
+        println("Deployment command will be ${deployment_command}");
+        sh deployment_command
+  
+  
+        // tenants_to_update=['kint1']
+  
+        // now install for tenant
+        ENABLE_DOC="""[ { "id":"${env.SERVICE_ID}", "action":"enable" } ]"""
+        println("install doc will be ${DEP_DESC}");
+        tenants_to_update.each { tenant ->
+          println("Attempting module activation of ${env.SERVICE_ID} on ${tenant} using ${DEP_DESC}");
+          activation_command="curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/tenants/${tenant}/install?tenantParameters=loadSample%3Dtest,loadReference%3Dother' -d '${ENABLE_DOC}'"
+          println("Activation cmd: ${activation_command}");
+          sh activation_command
+        }
       }
-
     }
 
   }
