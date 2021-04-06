@@ -64,8 +64,14 @@ public class ReshareApplicationEventHandlerService {
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
     },
+    'STATUS_REQ_CANCELLED_ind': { service, eventData ->
+      service.triggerNotices(eventData.payload.id, "request_cancelled");
+    },
     'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
       service.handleCancelledWithSupplier(eventData);
+    },
+    'STATUS_REQ_END_OF_ROTA_ind': { service, eventData ->
+      service.triggerNotices(eventData.payload.id, "end_of_rota");
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -129,6 +135,11 @@ public class ReshareApplicationEventHandlerService {
     else {
       log.warn("Event ${eventData.event} no handler found");
     }
+  }
+
+  public void triggerNotices(String prId, String trigger) {
+    def req = delayedGet(prId, true);
+    patronNoticeService.triggerNotices(req, trigger);
   }
 
   // Notify us of a new patron request in the database - regardless of role
@@ -326,7 +337,6 @@ public class ReshareApplicationEventHandlerService {
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
             req.save(flush:true, failOnError:true)
-            patronNoticeService.triggerNotices(req, "end_of_rota");
           }
         }
       }
@@ -459,14 +469,12 @@ public class ReshareApplicationEventHandlerService {
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
             auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
             req.save(flush:true, failOnError:true)
-            patronNoticeService.triggerNotices(req, "end_of_rota");
           }
         }
         else {
           log.warn("Cannot send to next lender - rota is empty");
           req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
           req.save(flush:true, failOnError:true)
-          patronNoticeService.triggerNotices(req, "end_of_rota");
         }
         
         log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
@@ -940,7 +948,6 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
           }
           reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
-          patronNoticeService.triggerNotices(req, "request_cancelled");
         }
         req.save(flush: true, failOnError: true);
       }
