@@ -8,6 +8,8 @@ import com.k_int.web.toolkit.custprops.types.CustomPropertyRefdataDefinition
 import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
 import org.olf.okapi.modules.directory.NamingAuthority;
+import org.olf.rs.statemodel.*;
+import com.k_int.web.toolkit.refdata.RefdataValue;
 
 import org.olf.templating.*;
 
@@ -345,6 +347,27 @@ try {
                                   key: 'static_routes',
                                   value: '').save(flush:true, failOnError: true);
 
+  // To delete an unwanted action add State Model, State, Action to this array
+  [
+    [ 'PatronRequest', 'REQ_LOCAL_REVIEW', 'requesterCancel' ],
+    [ 'PatronRequest', 'REQ_LOCAL_REVIEW', 'supplierCannotSupply' ]
+  ].each { action_to_remove ->
+    println("Remove available action ${action_to_remove}");
+    AvailableAction.executeUpdate('''delete from AvailableAction 
+                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
+                                  [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
+  }
+
+  // This looks slightly odd, but rather than litter this file with an ever growing list of
+  // random delete statements, if you wish to delete
+  // deprecated refdata values, add a new line to the array here consisting of [ 'VALUE', 'CATEGORY' ]
+  [ 
+    [ 'sirsi', 'HostLMSIntegrationAdapter' ]
+  ].each { r ->
+    println("Remove refdata value : ${r}");
+    RefdataValue.executeUpdate('delete from RefdataValue where id in ( select rdv.id from RefdataValue as rdv where rdv.value = :v and rdv.owner.desc = :d)',
+                               [v:RefdataValue.normValue(r[0]),d:r[1]]);
+  }
 
 
   println("_data.groovy complete");
