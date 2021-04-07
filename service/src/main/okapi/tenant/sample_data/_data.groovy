@@ -353,9 +353,14 @@ try {
     [ 'PatronRequest', 'REQ_LOCAL_REVIEW', 'supplierCannotSupply' ]
   ].each { action_to_remove ->
     println("Remove available action ${action_to_remove}");
-    AvailableAction.executeUpdate('''delete from AvailableAction 
-                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
-                                  [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
+    try {
+      AvailableAction.executeUpdate('''delete from AvailableAction 
+                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
+                                    [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
+    }
+    catch ( Exception e ) {
+      println("Unable to delete action ${action_to_remove} - ${e.message}");
+    }
   }
 
   // This looks slightly odd, but rather than litter this file with an ever growing list of
@@ -365,8 +370,13 @@ try {
     [ 'sirsi', 'HostLMSIntegrationAdapter' ]
   ].each { r ->
     println("Remove refdata value : ${r}");
-    RefdataValue.executeUpdate('delete from RefdataValue where id in ( select rdv.id from RefdataValue as rdv where rdv.value = :v and rdv.owner.desc = :d)',
-                               [v:RefdataValue.normValue(r[0]),d:r[1]]);
+    try {
+      RefdataValue.executeUpdate('delete from RefdataValue where id in ( select rdv.id from RefdataValue as rdv where rdv.value = :v and rdv.owner.desc = :d)',
+                                 [v:RefdataValue.normValue(r[0]),d:r[1]]);
+    }
+    catch ( Exception e ) {
+      println("Unable to delete refdata ${r} - ${e.message}");
+    }
   }
 
 
