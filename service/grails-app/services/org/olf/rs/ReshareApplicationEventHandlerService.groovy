@@ -930,8 +930,6 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
       def req = delayedGet(eventData.payload.id, true);
 
-      reshareActionService.sendMessage(req, [note:'Recieved Cancellation Request']);
-
       String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
       if ( auto_cancel?.toLowerCase().startsWith('on') ) {
         log.debug("Auto cancel is on");
