@@ -265,14 +265,14 @@ try {
                                   key: 'auto_responder_cancel',
                                   value: arc_on?.value).save(flush:true, failOnError: true);
 
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'No longer available', 'unavailable');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Missing', 'missing');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Incorrect', 'incorrect');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Other', 'other');
 
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Available locally');
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Invalid user');
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Patron requested');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Requested item is locally available', 'available_locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'User account is invalid', 'invalid_user');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'User requested cancellation', 'patron_requested');
 
   RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On');

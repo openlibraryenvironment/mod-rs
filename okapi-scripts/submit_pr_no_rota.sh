@@ -15,7 +15,7 @@ fi
 
 #  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST ${OKAPI}/rs/patronrequests -d ' {
-  requestingInstitutionSymbol:"RESHARE:KNOWINT01",
+  requestingInstitutionSymbol:"RESHARE:LOCALHOSTA",
   title:"Platform for Change",
   author:"Beer, Stafford A",
   subtitle:"A message from Stafford Beer",
@@ -34,12 +34,13 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: ${TENANT}" -H "X-Okapi-Token: ${AUT
   patronReference:"Patron001",
   patronSurname:"patronsurname",
   patronGivenName: "patronGivenName",
+  patronEmail:"jason@indexdata.com",
   patronType: "Faculty Staff",
   sendToPatron: true,
   state:"Idle",
   isRequester:true,
   notARealProperty:"Test that this is ignored in accordance with Postels law",
-  systemInstanceIdentifier:"893475987348973",
+  systemInstanceIdentifier:"in00000001110",
   tags:[
     "Testdata", "TestCase001", "MonographTest"
   ],
