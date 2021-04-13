@@ -337,7 +337,7 @@ try {
     println("Remove available action ${action_to_remove}");
     try {
       AvailableAction.executeUpdate('''delete from AvailableAction 
-                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
+                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)''',
                                     [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
     }
     catch ( Exception e ) {
