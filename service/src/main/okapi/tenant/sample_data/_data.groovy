@@ -265,14 +265,14 @@ try {
                                   key: 'auto_responder_cancel',
                                   value: arc_on?.value).save(flush:true, failOnError: true);
 
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'unavailable');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'missing');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'incorrect');
-  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'other');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'No longer available', 'unavailable');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Missing', 'missing');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Incorrect', 'incorrect');
+  RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Other', 'other');
 
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Available locally');
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Invalid user');
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Patron requested');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Requested item is locally available', 'available_locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'User account is invalid', 'invalid_user');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'User requested cancellation', 'patron_requested');
 
   RefdataValue.lookupOrCreate('ChatAutoRead', 'Off');
   RefdataValue.lookupOrCreate('ChatAutoRead', 'On');
@@ -355,7 +355,7 @@ try {
     println("Remove available action ${action_to_remove}");
     try {
       AvailableAction.executeUpdate('''delete from AvailableAction 
-                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
+                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)''',
                                     [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
     }
     catch ( Exception e ) {
