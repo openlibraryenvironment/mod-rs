@@ -270,7 +270,7 @@ try {
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Incorrect', 'incorrect');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Other', 'other');
 
-  RefdataValue.lookupOrCreate('cancellationReasons', 'Requested item is locally available', 'available_locally');
+  RefdataValue.lookupOrCreate('cancellationReasons', 'Requested item is locally available', available_locally');
   RefdataValue.lookupOrCreate('cancellationReasons', 'User account is invalid', 'invalid_user');
   RefdataValue.lookupOrCreate('cancellationReasons', 'User requested cancellation', 'patron_requested');
 
