@@ -129,8 +129,7 @@ podTemplate(
         println("Get pods1...");
         withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KCFG')]) {
           println("ins1");
-          println("create config... ${KCFG}");
-          sh (script:'cat $KCFG > ~/.kube/config')
+          writeFile file: '~/.kube/config', text: readFile(KCFG)
           println("Get pods 2");
           String r = sh (script:'kubectl get po', returnStdout: true)
           println("Result : ${r}");
