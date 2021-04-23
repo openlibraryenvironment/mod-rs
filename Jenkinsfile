@@ -121,9 +121,7 @@ podTemplate(
         String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
         println("Template is ${ymlFile}");
 
-        Map interpolate_vars = new HashMap()
-        interpolate_vars.putAll(env.getOverriddenEnvironment());
-        String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( interpolate_vars ).toString()
+        String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
         println("Resolved template: ${tmpResolved}");
 
         println("Get pods1...");
