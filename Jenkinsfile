@@ -124,10 +124,12 @@ podTemplate(
         groovy.text.Template tmpl = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile )
         Map interpolate_vars = new HashMap()
         interpolate_vars.putAll(env.getOverriddenEnvironment());
+
         String tmpResolved = tmpl.make( interpolate_vars ).toString()
+        println("Resolved template: ${tmpResolved}");
 
         println("Get pods1...");
-        withCredentials([file(credentialsId: 'local_k8s', variable: 'KCFG')]) {
+        withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KCFG')]) {
           println("create config... ${KCFG}");
           sh 'cat $KCFG > ~/.kube/config'
           println("Get pods 2");
