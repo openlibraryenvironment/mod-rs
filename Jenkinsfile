@@ -128,11 +128,12 @@ podTemplate(
 
         println("Get pods1...");
         withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KCFG')]) {
-          println("ins1");
-          writeFile file: '~/.kube/config', text: readFile(KCFG)
-          println("Get pods 2");
-          String r = sh (script:'kubectl get po', returnStdout: true)
-          println("Result : ${r}");
+          sh 'cat $KCGF'
+          // println("ins1 config file is ${KCFG}");
+          // writeFile file: '~/.kube/config', text: readFile(KCFG)
+          // println("Get pods 2");
+          // String r = sh (script:'kubectl get po', returnStdout: true)
+          // println("Result : ${r}");
         }
 
         error("Build failed whilst we explore alternatives to kubernetesDeploy");
