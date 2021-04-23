@@ -119,7 +119,7 @@ podTemplate(
         // );
 
         String ymlFile = readYaml ( 'other-scripts/k8s_deployment_template.yaml' )
-        String tmpResolved = new SimpleTemplateEngine().createTemplate( ymlFile ).make( env )
+        String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( env )
         println("result: ${tmpResolved}");
 
         error("Build failed whilst we explore alternatives to kubernetesDeploy");
