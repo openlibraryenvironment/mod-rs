@@ -118,8 +118,9 @@ podTemplate(
         //   configs: 'other-scripts/k8s_deployment_template.yaml'
         // );
 
-        sh(script: "cat other-scripts/k8s_deployment_template.yaml | envsubst > temp_deployment_descriptor.yaml" )
-        sh(script: "cat temp_deployment_descriptor.yaml")
+        String ymlFile = readYaml ( 'other-scripts/k8s_deployment_template.yaml' )
+        String tmpResolved = new SimpleTemplateEngine().createTemplate( ymlFile ).make( env )
+        println("result: ${tmpResolved}");
 
         error("Build failed whilst we explore alternatives to kubernetesDeploy");
 
