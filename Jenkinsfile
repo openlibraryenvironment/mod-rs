@@ -128,6 +128,8 @@ podTemplate(
         println("Get pods1...");
         container('kubectl') {
           withKubeConfig([credentialsId: 'local_k8s_sf']) {
+            sh 'echo $KUBECONFIG'
+            sh 'cat $KUBECONFIG'
             sh 'kubectl get po'
           }
         }
