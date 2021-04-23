@@ -118,7 +118,7 @@ podTemplate(
         //   configs: 'other-scripts/k8s_deployment_template.yaml'
         // );
 
-        String ymlFile = readYaml ( 'other-scripts/k8s_deployment_template.yaml' )
+        String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
         String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( env )
         println("result: ${tmpResolved}");
 
