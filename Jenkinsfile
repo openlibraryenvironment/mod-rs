@@ -107,6 +107,7 @@ podTemplate(
       }
     }
 
+    /*
     stage ('deploy') {
       if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
         println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
@@ -140,6 +141,7 @@ podTemplate(
         println("Continue");
       }
     }
+    */
 
     stage('Publish module descriptor') {
       if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
@@ -156,11 +158,14 @@ podTemplate(
         deployment_command="curl -i -XPOST 'http://okapi.reshare:9130/_/discovery/modules' -d '${DEP_DESC}'"
         println("Deployment descriptor will be ${DEP_DESC}");
         println("Deployment command will be ${deployment_command}");
-        sh deployment_command
+
+        // We are no longer actually doing the deployment here
+        // sh deployment_command
         
         // tenants_to_update=['kint1']
   
         // now install for tenant
+        /*
         ENABLE_DOC="""[ { "id":"${env.SERVICE_ID}", "action":"enable" } ]"""
         println("install doc will be ${DEP_DESC}");
         tenants_to_update.each { tenant ->
@@ -169,7 +174,13 @@ podTemplate(
           println("Activation cmd: ${activation_command}");
           sh activation_command
         }
+        */
       }
+    }
+
+
+    stage('Announce module') {
+      println("Module image posted as ${MOD_RS_IMAGE}. Suggested service id is ${SERVICE_ID}");
     }
 
   }
