@@ -110,11 +110,19 @@ podTemplate(
     stage ('deploy') {
       if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
         println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
-        kubernetesDeploy(
-          enableConfigSubstitution: true,
-          kubeconfigId: 'local_k8s',
-          configs: 'other-scripts/k8s_deployment_template.yaml'
-        );
+
+
+        // kubernetesDeploy(
+        //   enableConfigSubstitution: true,
+        //   kubeconfigId: 'local_k8s',
+        //   configs: 'other-scripts/k8s_deployment_template.yaml'
+        // );
+
+        sh(script: "cat other-scripts/k8s_deployment_template.yaml | envsubst > temp_deployment_descriptor.yaml" )
+        sh(script: "cat temp_deployment_descriptor.yaml")
+
+        error("Build failed whilst we explore alternatives to kubernetesDeploy");
+
         println("Wait for module to start...")
         sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
         println("Continue");
