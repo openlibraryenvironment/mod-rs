@@ -126,7 +126,7 @@ podTemplate(
         println("Resolved template: ${tmpResolved}");
 
         println("Get pods1...");
-        container('jdk11') {
+        container('kubectl') {
           withKubeConfig([credentialsId: 'local_k8s_sf']) {
             sh 'kubectl get po'
           }
