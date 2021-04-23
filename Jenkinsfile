@@ -3,7 +3,8 @@
 podTemplate(
   containers:[
     containerTemplate(name: 'jdk11',                image:'adoptopenjdk:11-jdk-openj9',   ttyEnabled:true, command:'cat'),
-    containerTemplate(name: 'docker',               image:'docker:18',                    ttyEnabled:true, command:'cat')
+    containerTemplate(name: 'docker',               image:'docker:18',                    ttyEnabled:true, command:'cat'),
+    containerTemplate(name: 'kubectl',              image:'bitnami/kubectl:latest',       ttyEnabled:true, command:'cat')
   ],
   volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
@@ -125,8 +126,10 @@ podTemplate(
         println("Resolved template: ${tmpResolved}");
 
         println("Get pods1...");
-        withKubeConfig([credentialsId: 'local_k8s_sf']) {
-          sh 'kubectl get po'
+        container('jdk11') {
+          withKubeConfig([credentialsId: 'local_k8s_sf']) {
+            sh 'kubectl get po'
+          }
         }
 
         error("Build failed whilst we explore alternatives to kubernetesDeploy");
