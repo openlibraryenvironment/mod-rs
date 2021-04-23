@@ -127,7 +127,9 @@ podTemplate(
 
         println("Get pods1...");
         container('kubectl') {
-          withKubeConfig([credentialsId: 'local_k8s_sf']) {
+          withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KCFG')]) {
+            sh 'echo $KCFG'
+            sh 'export KUBECFG=$KCFG'
             sh 'echo $KUBECONFIG'
             sh 'cat $KUBECONFIG'
             sh 'kubectl get po'
