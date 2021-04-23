@@ -122,7 +122,8 @@ podTemplate(
         println("Template is ${ymlFile}");
 
         groovy.text.Template tmpl = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile )
-        Map interpolate_vars = env.getOverriddenEnvironment();
+        Map interpolate_vars = new HashMap()
+        interpolate_vars.putAll(env.getOverriddenEnvironment());
 
         println("Resolve template - vars = ${interpolate_vars}");
         String tmpResolved = tmpl.make( interpolate_vars ).toString()
