@@ -129,6 +129,11 @@ podTemplate(
         String tmpResolved = tmpl.make( interpolate_vars ).toString()
         println("result: ${tmpResolved}");
 
+        withCredentials([file(credentialsId: 'local_k8s', variable: 'KUBECONFIG')]) {
+          sh 'cat $KUBECONFIG > ~/.kube/config'
+          sh 'kubectl get po'
+        }
+
         error("Build failed whilst we explore alternatives to kubernetesDeploy");
 
         println("Wait for module to start...")
