@@ -99,42 +99,6 @@ podTemplate(
       }
     }
 
-    /*
-    stage ('deploy') {
-      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
-        println("Attempt deployment : ${env.MOD_RS_IMAGE} as ${env.MOD_RS_DEPLOY_AS}");
-
-
-        kubernetesDeploy(
-          enableConfigSubstitution: true,
-          kubeconfigId: 'local_k8s',
-          configs: 'other-scripts/k8s_deployment_template.yaml'
-        );
-
-        // String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
-        // println("Template is ${ymlFile}");
-
-        // String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
-        // println("Resolved template: ${tmpResolved}");
-
-        // println("Get pods1...");
-        // withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KCFG')]) {
-        //   sh "echo kcfg var = $KCFG"
-        //   sh "export KUBECFG=$KCFG"
-        //   sh "echo $KUBECONFIG"
-        //   sh "cat $KUBECONFIG"
-        //   // sh 'kubectl get po'
-        // }
-
-        // error("Build failed whilst we explore alternatives to kubernetesDeploy");
-
-        println("Wait for module to start...")
-        sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
-        println("Continue");
-      }
-    }
-    */
-
     stage('Publish module descriptor') {
       if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
         sh 'ls -la service/build/resources/main/okapi'
@@ -194,10 +158,9 @@ podTemplate(
         // We are no longer actually doing the deployment here
         // sh deployment_command
         
-        // tenants_to_update=['kint1']
+        tenants_to_update=['kint1']
   
         // now install for tenant
-        /*
         ENABLE_DOC="""[ { "id":"${env.SERVICE_ID}", "action":"enable" } ]"""
         println("install doc will be ${DEP_DESC}");
         tenants_to_update.each { tenant ->
@@ -206,7 +169,6 @@ podTemplate(
           println("Activation cmd: ${activation_command}");
           sh activation_command
         }
-        */
       }
     }
 
