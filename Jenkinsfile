@@ -2,8 +2,9 @@
 
 podTemplate(
   containers:[
-    containerTemplate(name: 'jdk11',                image:'adoptopenjdk:11-jdk-openj9',   ttyEnabled:true, command:'cat'),
-    containerTemplate(name: 'docker',               image:'docker:18',                    ttyEnabled:true, command:'cat')
+    containerTemplate(name: 'jdk11',   image:'adoptopenjdk:11-jdk-openj9',                                             ttyEnabled:true, command:'cat'),
+    containerTemplate(name: 'docker',  image:'docker:18',                                                              ttyEnabled:true, command:'cat'),
+    containerTemplate(name: 'kubectl', image:'docker.libsdev.k-int.com/knowledgeintegration/kubectl-container:latest', ttyEnabled:true, command:'cat')
   ],
   volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
@@ -149,9 +150,55 @@ podTemplate(
         // this worked as expected
         // sh "curl http://okapi.reshare:9130/_/discovery/modules"
         sh "curl -i -XPOST 'http://okapi.reshare:9130/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
-
         sh "curl -i -XPOST 'https://registry.reshare-dev.indexdata.com/_/proxy/modules' -d @service/build/resources/main/okapi/ModuleDescriptor.json"
-  
+      }
+    }
+
+    // In order for our test and UAT tenants to see this build we need to have the new snapshot
+    // running along-side the existing one and then upgrade the tenant. 
+    // This stage will deploy the new snapshot using the name ${env.MOD_RS_DEPLOY_AS} and
+    // the image ${env.MOD_RS_IMAGE}. 
+    // N.B. A reaper process, owned by the root user in the kubernetes node will run nightly to reap
+    // any old snapshots which are no longer in use by any tenant. This means the number of running snapshots may grow throughout
+    // the day and then be periodically reaped by /root/bin/prune_reshare.sh which is triggered by cron@root
+    stage('Deploy Latest Snapshot') {
+      when {
+        checkout_details?.GIT_BRANCH == 'origin/master'
+      }
+      steps {
+        container('kubectl') {
+          withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KUBECONFIG')]) {
+            String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
+            String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
+            println("Resolved template: ${tmpResolved}");
+            writeFile 'module_deploy.yaml' tmpResolved
+            sh 'kubectl get po'
+            sh 'kubectl apply module_deploy.yaml'
+
+            // Remember that this container is itself a pod, so it sees the same DNS discovery as other modules and pods
+            // wait for the service to appear
+	    sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
+          }
+        }
+      }
+    }
+
+    stage('Upgrade Test and UAT Tenants') {
+      when {
+        checkout_details?.GIT_BRANCH == 'origin/master'
+      }
+      steps {
+        println("upgrade");
+      }
+    }
+
+
+    stage('Announce module') {
+      when {
+        checkout_details?.GIT_BRANCH == 'origin/master'
+      }
+      steps {
+        println("Module image posted as ${MOD_RS_IMAGE}. Suggested service id is ${SERVICE_ID}");
         // Now deployment descriptor
         // srvcid needs to be the dotted version, not the hyphen version
         DEP_DESC="""{ "srvcId": "${env.SERVICE_ID}", "instId": "${env.MOD_RS_DEPLOY_AS}-cluster", "url": "http://${env.MOD_RS_DEPLOY_AS}.reshare:8080" } """
@@ -176,11 +223,6 @@ podTemplate(
         }
         */
       }
-    }
-
-
-    stage('Announce module') {
-      println("Module image posted as ${MOD_RS_IMAGE}. Suggested service id is ${SERVICE_ID}");
     }
 
   }
