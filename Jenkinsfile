@@ -69,33 +69,24 @@ podTemplate(
           if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
 
             println("Considering build tag : ${constructed_tag} version:${props.appVersion} is_snapshot:${is_snapshot}");
-
-            // Some interesting stuff here https://github.com/jenkinsci/pipeline-examples/pull/83/files
             if ( !is_snapshot ) {
-              // do_k8s_update=true
-              // docker.withRegistry('','nexus-kidevops') {
               docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing released version with latest tag and semver ${semantic_version_components}");
                 docker_image.push('latest')
                 docker_image.push("v${app_version}".toString())
                 docker_image.push("v${semantic_version_components[0]}.${semantic_version_components[1]}".toString())
                 docker_image.push("v${semantic_version_components[0]}".toString())
-                // deploy_cfg='deploy_latest.yaml'
               }
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}"
               env.SERVICE_ID="mod-rs-${app_version}"
               env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase()
             }
             else {
-              // docker.withRegistry('','nexus-kidevops') {
               docker.withRegistry('https://docker.libsdev.k-int.com','libsdev-deployer') {
                 println("Publishing snapshot-latest");
                 docker_image.push('snapshot-latest')
-                // docker_image.push("${app_version}.${BUILD_NUMBER}".toString())
                 docker_image.push("${app_version}".toString())
-                // deploy_cfg='deploy_snapshot.yaml'
               }
-              // env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}.${BUILD_NUMBER}"
               env.MOD_RS_IMAGE="knowledgeintegration/mod-rs:${app_version}"
               env.SERVICE_ID="mod-rs-${app_version}.${BUILD_NUMBER}"
               env.MOD_RS_DEPLOY_AS=env.SERVICE_ID.replaceAll('\\.','-').toLowerCase();
@@ -161,29 +152,34 @@ podTemplate(
     // N.B. A reaper process, owned by the root user in the kubernetes node will run nightly to reap
     // any old snapshots which are no longer in use by any tenant. This means the number of running snapshots may grow throughout
     // the day and then be periodically reaped by /root/bin/prune_reshare.sh which is triggered by cron@root
-    stage('Deploy Latest Snapshot', (checkout_details?.GIT_BRANCH == 'origin/master') ) {
-      container('kubectl') {
-        withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KUBECONFIG')]) {
-          String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
-          String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
-          println("Resolved template: ${tmpResolved}");
-          writeFile 'module_deploy.yaml' tmpResolved
-          sh 'kubectl get po'
-          sh 'kubectl apply module_deploy.yaml'
-
-          // Remember that this container is itself a pod, so it sees the same DNS discovery as other modules and pods
-          // wait for the service to appear
-	  sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
+    stage('Deploy Latest Snapshot') {
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
+        container('kubectl') {
+          withCredentials([file(credentialsId: 'local_k8s_sf', variable: 'KUBECONFIG')]) {
+            String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
+            String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
+            println("Resolved template: ${tmpResolved}");
+            writeFile 'module_deploy.yaml' tmpResolved
+            sh 'kubectl get po'
+            sh 'kubectl apply module_deploy.yaml'
+  
+            // Remember that this container is itself a pod, so it sees the same DNS discovery as other modules and pods
+            // wait for the service to appear
+  	  sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
+          }
         }
       }
     }
 
-    stage('Upgrade Test and UAT Tenants', (checkout_details?.GIT_BRANCH == 'origin/master') ) {
-      println("upgrade");
+    stage('Upgrade Test and UAT Tenants') {
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
+        println("upgrade");
+      }
     }
 
 
-    stage('Announce module', (checkout_details?.GIT_BRANCH == 'origin/master') ) {
+    stage('Announce module') {
+      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
         println("Module image posted as ${MOD_RS_IMAGE}. Suggested service id is ${SERVICE_ID}");
         // Now deployment descriptor
         // srvcid needs to be the dotted version, not the hyphen version
@@ -208,6 +204,7 @@ podTemplate(
           sh activation_command
         }
         */
+      }
     }
 
   }
