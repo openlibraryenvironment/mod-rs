@@ -140,13 +140,6 @@ podTemplate(
 
     stage('Upgrade Test and UAT Tenants') {
       if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
-        println("upgrade");
-      }
-    }
-
-
-    stage('Announce module') {
-      if ( checkout_details?.GIT_BRANCH == 'origin/master' ) {
         println("Module image posted as ${MOD_RS_IMAGE}. Suggested service id is ${SERVICE_ID}");
         // Now deployment descriptor
         // srvcid needs to be the dotted version, not the hyphen version
