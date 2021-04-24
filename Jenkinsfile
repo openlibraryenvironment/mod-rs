@@ -160,12 +160,15 @@ podTemplate(
             String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
             println("Resolved template: ${tmpResolved}");
             writeFile 'module_deploy.yaml' tmpResolved
+
+            println("Get pods");
             sh 'kubectl get po'
-            sh 'kubectl apply module_deploy.yaml'
+            println("Apply deployment");
+            sh 'kubectl apply -f module_deploy.yaml'
   
             // Remember that this container is itself a pod, so it sees the same DNS discovery as other modules and pods
             // wait for the service to appear
-  	  sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
+            sh(script: "curl -s --retry-connrefused --retry 15 --retry-delay 10 http://${env.MOD_RS_DEPLOY_AS}.reshare:8080/actuator/health", returnStdout: true)
           }
         }
       }
