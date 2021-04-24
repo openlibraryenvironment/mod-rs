@@ -159,7 +159,7 @@ podTemplate(
             String ymlFile = readFile ( 'other-scripts/k8s_deployment_template.yaml' )
             String tmpResolved = new groovy.text.SimpleTemplateEngine().createTemplate( ymlFile ).make( [:] + env.getOverriddenEnvironment() ).toString()
             println("Resolved template: ${tmpResolved}");
-            writeFile 'module_deploy.yaml' tmpResolved
+            writeFile file:'module_deploy.yaml' text:tmpResolved
 
             println("Get pods");
             sh 'kubectl get po'
