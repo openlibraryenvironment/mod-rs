@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: $MOD_RS_DEPLOY_AS
+  name: $MOD_DEPLOY_AS
   labels:
-    app: $MOD_RS_DEPLOY_AS
+    app: $MOD_DEPLOY_AS
     module: "mod-rs"
     folio_role: "backend-module"
   namespace: "reshare"
 spec:
   selector:
     matchLabels:
-      app: $MOD_RS_DEPLOY_AS
+      app: $MOD_DEPLOY_AS
   replicas: 1
   template:
     metadata:
       labels:
-        app: $MOD_RS_DEPLOY_AS
+        app: $MOD_DEPLOY_AS
         module: "mod-rs"
         folio_role: "backend-module"
     spec:
       containers:
-        - name: $MOD_RS_DEPLOY_AS
-          image: docker.libsdev.k-int.com/$MOD_RS_IMAGE
+        - name: $MOD_DEPLOY_AS
+          image: docker.libsdev.k-int.com/$MOD_IMAGE
           imagePullPolicy: Always
           envFrom:
             - secretRef:
@@ -57,11 +57,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: $MOD_RS_DEPLOY_AS
+  name: $MOD_DEPLOY_AS
   namespace: "reshare"
 spec:
   type: "ClusterIP"
   selector:
-    app: $MOD_RS_DEPLOY_AS
+    app: $MOD_DEPLOY_AS
   ports:
     - port: 8080
