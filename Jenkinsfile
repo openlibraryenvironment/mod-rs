@@ -9,7 +9,7 @@ Map args=[
   descriptorRegistries:['http://okapi.reshare:9130/_/proxy/modules',
                         'https://registry.reshare-dev.indexdata.com/_/proxy/modules'
   ],
-  deploymentTemplate:'other_scripts/k8s_deployment_template.yaml',
+  deploymentTemplate:'other-scripts/k8s_deployment_template.yaml',
   targetNamespace:'reshare'
 ]
 buildOkapiModule(args)
