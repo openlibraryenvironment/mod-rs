@@ -7,7 +7,7 @@ Map args=[
   dockerImageName:'knowledgeintegration/mod-rs',
   serviceName:'mod-rs',
   descriptorRegistries:['http://okapi.reshare:9130/_/proxy/modules',
-                        '@service/build/resources/main/okapi/ModuleDescriptor.json'
+                        'https://registry.reshare-dev.indexdata.com/_/proxy/modules'
   ],
   deploymentTemplate:'other_scripts/k8s_deployment_template.yaml',
   targetNamespace:'reshare'
