@@ -6,8 +6,9 @@ Map args=[
   tenantsToUpdate:['kint1'],
   dockerImageName:'knowledgeintegration/mod-rs',
   serviceName:'mod-rs',
-  descriptorRegistries:['http://okapi.reshare:9130/_/proxy/modules',
-                        'https://registry.reshare-dev.indexdata.com/_/proxy/modules'
+  descriptorRegistries:[
+    'http://okapi.reshare:9130/_/proxy/modules'
+    [ url:'http://okapi.reshare:9130/_/proxy/modules', credentials:'supertenant' ]
   ],
   deploymentTemplate:'other-scripts/k8s_deployment_template.yaml',
   targetNamespace:'reshare'
