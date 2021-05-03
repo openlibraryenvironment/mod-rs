@@ -7,7 +7,7 @@ Map args=[
   dockerImageName:'knowledgeintegration/mod-rs',
   serviceName:'mod-rs',
   descriptorRegistries:[
-    'http://okapi.reshare:9130/_/proxy/modules'
+    'http://okapi.reshare:9130/_/proxy/modules',
     [ url:'http://okapi.reshare:9130/_/proxy/modules', credentials:'supertenant' ]
   ],
   deploymentTemplate:'other-scripts/k8s_deployment_template.yaml',
