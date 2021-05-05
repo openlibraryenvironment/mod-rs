@@ -225,6 +225,8 @@ try {
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'FOLIO');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Koha');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Millennium');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sierra');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Symphony');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
