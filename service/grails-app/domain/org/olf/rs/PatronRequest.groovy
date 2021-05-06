@@ -54,6 +54,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String sponsoringBody
   String publisher
   String placeOfPublication
+
+  /*
+   * This field represents the freeform text string we get in the request message
+   * (on the supplier's side),
+   * or from discovery (on the requester's side).
+   * Once the supplier comes to scan and ship the items, at that point they can read this and make a decision about which
+   */
   String volume
   String issue
   String startPage
