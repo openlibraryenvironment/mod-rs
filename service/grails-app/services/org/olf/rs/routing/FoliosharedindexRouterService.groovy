@@ -12,7 +12,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
   SharedIndexService sharedIndexService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
-    List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
+    List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(description);
     return createRankedRota(sia);
   }
 
