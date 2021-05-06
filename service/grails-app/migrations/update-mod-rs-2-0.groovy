@@ -136,4 +136,35 @@ databaseChangeLog = {
       column(name:'pr_cancellation_reason_fk', type: "VARCHAR(36)")
     }
   }
+
+  changeSet(author: "efreestone (manual)", id: "2021-05-06-1451-001") {
+    createTable(tableName: "request_volume") {
+      column(name: "rv_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rv_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rv_name", type: "VARCHAR(255)") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rv_item_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false", blank: "false")
+      }
+
+      column(name: "rv_patron_request_fk", type: "VARCHAR(36)") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rv_date_created", type: "timestamp")
+      column(name: "rv_last_updated", type: "timestamp")
+    }
+  }
+
+  changeSet(author: "efreestone (manual)", id: "2021-05-06-1451-002") {
+    addForeignKeyConstraint(baseColumnNames: "rv_patron_request_fk", baseTableName: "request_volume", constraintName: "request_volume_patron_request_fk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request")
+  }
 }
