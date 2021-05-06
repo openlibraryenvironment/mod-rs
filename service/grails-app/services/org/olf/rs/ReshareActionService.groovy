@@ -5,6 +5,7 @@ import groovy.lang.Closure
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest
 import org.olf.rs.PatronRequestRota
+import org.olf.rs.RequestVolume
 import org.olf.rs.PatronRequestNotification
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
@@ -104,6 +105,14 @@ public class ReshareActionService {
     if ( actionParams?.itemBarcode != null ) {
       if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
         pr.selectedItemBarcode = actionParams?.itemBarcode;
+
+        // At this point we want to add this with volume label from request.
+        // The user can then choose to add more volumes later, from AWAITING_SHIPPING
+        RequestVolume initialVolumeFulfilled = new RequestVolume(
+          patronRequest: pr,
+          name: pr.volume,
+          itemId: actionParams?.itemBarcode
+        ).save(failOnError: true);
 
         HostLMSActions host_lms = hostLMSService.getHostLMSActions();
         if ( host_lms ) {
