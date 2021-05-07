@@ -1,4 +1,5 @@
 import org.olf.rs.HostLMSLocation
+import org.olf.rs.HostLMSLocation
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Address
 import com.k_int.web.toolkit.settings.AppSetting
@@ -236,6 +237,44 @@ try {
                                   vocab:'HostLMSIntegrationAdapter',
                                   key: 'host_lms_integration',
                                   value: manual_adapter_rdv.value).save(flush:true, failOnError: true);
+                                
+  AppSetting patron_store_base_url = AppSetting.findByKey('patron_store_base_url') ?: new AppSetting( 
+                                  section:'patronStore',
+                                  settingType:'String',
+                                  key: 'patron_store_base_url',
+                                  defValue: 'http://127.0.0.1:9130'
+                                  ).save(flush:true, failOnError: true);
+  AppSetting patron_store_tenant = AppSetting.findByKey('patron_store_tenant') ?: new AppSetting( 
+                                  section:'patronStore',
+                                  settingType:'String',
+                                  key: 'patron_store_tenant',
+                                  defValue: 'diku').save(flush:true, failOnError: true);
+  AppSetting patron_store_user = AppSetting.findByKey('patron_store_user') ?: new AppSetting( 
+                                  section:'patronStore',
+                                  settingType:'String',
+                                  key: 'patron_store_user',
+                                  defValue: 'diku_admin').save(flush:true, failOnError: true);
+  AppSetting patron_store_pass = AppSetting.findByKey('patron_store_pass') ?: new AppSetting( 
+                                  section:'patronStore',
+                                  settingType:'Password',
+                                  key: 'patron_store_pass',
+                                  defValue: '').save(flush:true, failOnError: true);
+  AppSetting patron_store_group = AppSetting.findByKey('patron_store_group') ?: new AppSetting(
+                                  section:'patronStore',
+                                  settingType: 'String',
+                                  key: 'patron_store_group',
+                                  defValue: 'bdc2b6d4-5ceb-4a12-ab46-249b9a68473e').save(flush:true, failOnError: true);
+                                
+  RefdataValue.lookupOrCreate("PatronStoreAdapter", "FOLIO");
+  def manual_patronstore_adapter_rdv = RefdataValue.lookupOrCreate("PatronStoreAdapter", "Manual"); //Fallback
+  
+  AppSetting patron_store = AppSetting.findByKey("patron_store") ?: new AppSetting(
+                                  section: 'patronStore',
+                                  settingType: 'Refdata',
+                                  vocab: 'PatronStoreAdapter',
+                                  key: 'patron_store',
+                                  value: manual_patronstore_adapter_rdv.value).save(flush:true, failOnError:true);
+  
                                 
   
 
