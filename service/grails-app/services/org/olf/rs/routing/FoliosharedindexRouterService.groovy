@@ -6,10 +6,12 @@ import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.SharedIndexService;
+import org.olf.rs.StatisticsService
 
 public class FoliosharedindexRouterService implements RequestRouter {
 
   SharedIndexService sharedIndexService
+  StatisticsService statisticsService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
     List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(description);
