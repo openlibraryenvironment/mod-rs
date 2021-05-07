@@ -55,6 +55,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
           def loadBalancingReason = null;
           def ownerStatus = s.owner?.status?.value;
           log.debug("Found status of ${ownerStatus} for symbol ${s}");
+
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
           } 
@@ -90,7 +91,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
       } 
     }
     
-    def sorted_result = result.toSorted { a,b -> b.loadBalancingScore <=> a.loadBalancingScore }
+    def sorted_result = result.toSorted { a,b -> b.rank <=> a.rank }
     log.debug("createRankedRota returns ${sorted_result}");
     return sorted_result;
   }
