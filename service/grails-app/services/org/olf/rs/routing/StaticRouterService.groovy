@@ -17,7 +17,17 @@ public class StaticRouterService implements RequestRouter {
       String[] components = static_routing_str.split(',')  // TYPE:NAMESPACE:SYMBOL,TYPE:NAMESPACE:SYMBOL
       components.each { static_option ->
         String[] option_parts = static_option.split(':');
-        if ( option_parts.size() == 3 ) {
+        if ( option_parts.size() == 2 ) {
+          // We assume SYMBOL if only 2 parts
+          result.add(new RankedSupplier(supplier_symbol:"${option_parts[0]}:${option_parts[1]}",
+                                        copy_identifier:'', 
+                                        instance_identifier:'',
+                                        ill_policy:'Will lend',
+                                        rank:0, 
+                                        rankReason:'static rank'));
+
+        }
+        else if ( option_parts.size() == 3 ) {
           if ( option_parts[0] == 'SYMBOL' ) {
             result.add(new RankedSupplier(supplier_symbol:"${option_parts[1]}:${option_parts[2]}", 
                                           copy_identifier:'', 
