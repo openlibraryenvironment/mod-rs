@@ -43,4 +43,10 @@ public class StaticRouterService implements RequestRouter {
     return result
   }
 
+  public Map getRouterInfo() {
+    return [
+      'name':'FoliosharedindexRouterService'
+    ]
+  }
+
 }

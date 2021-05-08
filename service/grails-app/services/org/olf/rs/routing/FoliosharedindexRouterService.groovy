@@ -19,6 +19,13 @@ public class FoliosharedindexRouterService implements RequestRouter {
     return createRankedRota(sia);
   }
 
+  public Map getRouterInfo() {
+    return [
+      'name':'FoliosharedindexRouterService'
+    ]
+  }
+
+
 
   /**
    * Take a list of availability statements and turn it into a ranked rota

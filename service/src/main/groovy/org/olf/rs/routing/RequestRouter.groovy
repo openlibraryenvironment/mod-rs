@@ -12,5 +12,6 @@ public interface RequestRouter {
    */
   List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols);
 
+  Map getRouterInfo();
 }
 

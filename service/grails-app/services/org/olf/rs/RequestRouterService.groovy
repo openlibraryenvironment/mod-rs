@@ -29,6 +29,9 @@ public class RequestRouterService {
     if ( result == null ) {
       log.warn("Unable to locate RequestRouter for ${impl}. Did you fail to configure the app_setting \"routing_adapter\". Current options are FOLIOSharedIndex|Static");
     }
+    else {
+      log.debug("Got ${result.getRouterInfo()}");
+    }
 
     return result;
   }
