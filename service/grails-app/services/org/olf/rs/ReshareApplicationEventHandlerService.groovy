@@ -61,7 +61,9 @@ public class ReshareApplicationEventHandlerService {
       service.sourcePatronRequest(eventData);
     },
     'STATUS_REQ_SOURCING_ITEM_ind': { service, eventData ->
-      service.log.debug("REQ_SOURCING_ITEM state should now be REQ_SUPPLIER_IDENTIFIED");
+      // STATUS_REQ_SOURCING_ITEM is a transitional state whilst the function sourcePatronRequest does it's work. At the end
+      // of sourcePatronRequest that function will update state to REQ_SUPPLIER_IDENTIFIED or REQ_END_OF_ROTA
+      service.log.debug("Request is in the transitional state REQ_SOURCING_ITEM shortly to REQ_SUPPLIER_IDENTIFIED");
     },
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -281,12 +283,12 @@ public class ReshareApplicationEventHandlerService {
         req.state = lookupStatus('PatronRequest', 'REQ_SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
 
-
         if(req.rota?.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently REQ_SOURCING_ITEM - transition to REQ_SUPPLIER_IDENTIFIED");
+          def old_state = req.state;
           req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
+          auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
           def operation_data = [:]
@@ -331,16 +333,19 @@ public class ReshareApplicationEventHandlerService {
             }
 
             // Procesing
+
+            def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                        'Ratio-Ranked lending string calculated from shared index', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
+            def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
+            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders', null);
             req.save(flush:true, failOnError:true)
           }
         }

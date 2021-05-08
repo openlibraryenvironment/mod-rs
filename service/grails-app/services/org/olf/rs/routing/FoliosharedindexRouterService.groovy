@@ -14,6 +14,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
   StatisticsService statisticsService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
+    log.debug("FoliosharedindexRouterService::findMoreSuppliers");
     List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(description);
     return createRankedRota(sia);
   }
