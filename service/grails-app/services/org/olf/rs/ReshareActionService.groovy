@@ -86,6 +86,19 @@ public class ReshareActionService {
 
     private Patron lookupOrCreatePatronProxy(Map patron_details) {
     Patron result = null;
+    AppSetting patron_store_setting = AppSetting.findByKey('patron_store');
+    String patron_store = patron_store_setting?.value;
+    FolioPatronStoreService folioPatronStoreService;
+    ManualPatronStoreService manualPatronStoreService;
+    BasePatronStoreActions patronStoreService;
+    if(patron_store == 'FOLIO') {
+      patronStoreService = folioPatronStoreService;
+    } else {
+      patronStoreService = manualPatronStoreService;
+    }
+
+    def patron_map = patronStoreService.lookupOrCreatePatronStore(patron_details.userid, patron_details);
+
     if ( ( patron_details != null ) && 
          ( patron_details.userid != null ) &&
          ( patron_details.userid.trim().length() > 0 ) ) {
