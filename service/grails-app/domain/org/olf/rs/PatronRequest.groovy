@@ -164,6 +164,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // Boolean to flag whether a request is currently in the process of cancellation
   boolean requesterRequestedCancellation = false;
+
   //Boolean to flag whether a request continues after the current cancellation with supplier
   boolean requestToContinue = true;
 
@@ -284,8 +285,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     resolvedPickupLocation (nullable: true)
 
     resolvedPatron (nullable: true)
-    requesterRequestedCancellation (nullable: false)
-    requestToContinue (nullable: false)
+    // these 2 are Boolean - does not support nullable - must be true or false - comment out to remove warning
+    // requesterRequestedCancellation (nullable: false)
+    // requestToContinue (nullable: false)
 
     activeLoan(nullable: true)
     dueDateFromLMS(nullable: true)

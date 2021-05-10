@@ -74,7 +74,22 @@ class ProtocolMessageService {
 
     try {
       log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
-      sendISO18626Message(eventData, serviceAddress)
+      def additional_headers = [:]
+      if ( ill_services_for_peer[0].customProperties != null ) {
+        log.debug("Service has custom properties: ${ill_services_for_peer[0].customProperties}");
+        ill_services_for_peer[0].customProperties.value.each { cp ->
+          if ( cp?.definition?.name=='AdditionalHeaders' ) {
+            // We need to parse this properly
+            cp.value.split(',').each { hdr ->
+              def v = hdr.split(':');
+              if ( v && v.length == 2 ) {
+                additional_headers[v[0]]=v[1]
+              }
+            }
+          }
+        }
+      }
+      sendISO18626Message(eventData, serviceAddress, additional_headers)
       result.status = "SENT"
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
@@ -213,17 +228,21 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
-  def sendISO18626Message(Map eventData, String address) {
+  def sendISO18626Message(Map eventData, String address, Map additionalHeaders=[:]) {
+
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
-    log.debug("ISO18626 Message: ${message}")
+    log.debug("ISO18626 Message: ${message} ${additionalHeaders}")
 
     if ( address != null ) {
       def iso18626_response = configure {
         request.uri = address
         request.contentType = XML[0]
         request.headers['accept'] = 'application/xml'
+        additionalHeaders?.each { k,v ->
+          request.headers[k] = v
+        }
       }.post {
         request.body = message
 

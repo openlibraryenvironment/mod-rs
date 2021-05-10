@@ -150,7 +150,7 @@ dependencies {
   compile 'com.opencsv:opencsv:4.6'
   compile 'commons-io:commons-io:2.6'
 
-  compile 'com.k_int.grails:web-toolkit-ce:5.0.0-rc.5'
+  compile 'com.k_int.grails:web-toolkit-ce:5.0.0'
   compile 'com.k_int.okapi:grails-okapi:4.0.0-rc.1'
 
   // Custom non profile deps.
@@ -165,7 +165,7 @@ dependencies {
   }
 
   // NCIP deps
-  compile 'org.olf.rs:lib-ncip-client:0.15.0'
+  compile 'org.olf.rs:lib-ncip-client:0.16.0'
   compile 'com.github.jknack:handlebars:4.2.0'
   compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
   compile 'org.apache.commons:commons-collections4:4.4'

@@ -11,6 +11,7 @@ import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
+import org.olf.rs.routing.RankedSupplier;
 import groovy.json.JsonOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,6 +44,7 @@ public class ReshareApplicationEventHandlerService {
   ReshareActionService reshareActionService
   StatisticsService statisticsService
   PatronNoticeService patronNoticeService
+  RequestRouterService requestRouterService
 
   // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
   // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
@@ -59,7 +61,9 @@ public class ReshareApplicationEventHandlerService {
       service.sourcePatronRequest(eventData);
     },
     'STATUS_REQ_SOURCING_ITEM_ind': { service, eventData ->
-      service.log.debug("REQ_SOURCING_ITEM state should now be REQ_SUPPLIER_IDENTIFIED");
+      // STATUS_REQ_SOURCING_ITEM is a transitional state whilst the function sourcePatronRequest does it's work. At the end
+      // of sourcePatronRequest that function will update state to REQ_SUPPLIER_IDENTIFIED or REQ_END_OF_ROTA
+      service.log.debug("Request is in the transitional state REQ_SOURCING_ITEM shortly to REQ_SUPPLIER_IDENTIFIED");
     },
     'STATUS_REQ_UNFILLED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -152,15 +156,16 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
 
       def req = delayedGet(eventData.payload.id, true);
+      log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
       // If the role is requester then validate the request and set the state to validated
       if ( ( req != null ) && 
            ( req.state?.code == 'REQ_IDLE' ) && 
            ( req.isRequester == true) ) {
 
-        // If valid - generate a human readabe ID to use
+        // Generate a human readabe ID to use
         req.hrid=generateHrid()
-        log.debug("Updated req.hrid to ${req.hrid}");
+        log.debug("set req.hrid to ${req.hrid}");
 
         def lookup_patron = reshareActionService.lookupPatron(req, null)
 
@@ -247,6 +252,7 @@ public class ReshareApplicationEventHandlerService {
           }
           else {
             auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
+            req.needsAttention=true;
           }
           req.save(flush:true, failOnError:true);
         }
@@ -255,7 +261,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code})");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req.isRequester}");
       }
     }
   }
@@ -277,65 +283,69 @@ public class ReshareApplicationEventHandlerService {
         req.state = lookupStatus('PatronRequest', 'REQ_SOURCING_ITEM');
         req.save(flush:true, failOnError:true)
 
-
         if(req.rota?.size() != 0) {
           log.debug("Found a potential supplier for ${req}");
           log.debug(" -> Request is currently REQ_SOURCING_ITEM - transition to REQ_SUPPLIER_IDENTIFIED");
+          def old_state = req.state;
           req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
+          auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
           req.save(flush:true, failOnError:true)
         } else {
           def operation_data = [:]
           operation_data.candidates=[]
-          log.debug("No rota supplied - call sharedIndexService.findAppropriateCopies to find appropriate copies");
-          // NO rota supplied - see if we can use the shared index service to locate appropriate copies
-          // N.B. grails-app/conf/spring/resources.groovy causes a different implementation to be injected
-          // here in the test environments.
-          List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
-          log.debug("Result of shared index lookup : ${sia}");
-          int ctr = 0;
 
-          List<Map> enrichedRota = createRankedRota(sia)
-          log.debug("Created ranked rota: ${enrichedRota}")
+          // We will shortly refactor this block to use requestRouterService to get the next block of requests
 
-          if (  enrichedRota.size() > 0 ) {
+          List<RankedSupplier> possible_suppliers = requestRouterService.findMoreSuppliers(req.getDescriptiveMetadata(), []);
+
+          log.debug("Created ranked rota: ${possible_suppliers}")
+
+          if (  possible_suppliers.size() > 0 ) {
+
+            int ctr = 0
 
             // Pre-process the list of candidates
-            enrichedRota?.each { av_stmt ->
-              if ( av_stmt.symbol != null ) {
-                operation_data.candidates.add([symbol:av_stmt.symbol, message:"Added"]);
-                if ( av_stmt.illPolicy == 'Will lend' ) {
-
-                  log.debug("Adding to rota: ${av_stmt}");
+            possible_suppliers?.each { ranked_supplier ->
+              if ( ranked_supplier.supplier_symbol != null ) {
+                operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Added"]);
+                if ( ranked_supplier.ill_policy == 'Will lend' ) {
+                  log.debug("Adding to rota: ${ranked_supplier}");
 
                   // Pull back any data we need from the shared index in order to sort the list of candidates
                   req.addToRota (new PatronRequestRota(
                                                        patronRequest:req,
                                                        rotaPosition:ctr++, 
-                                                       directoryId:av_stmt.symbol,
-                                                       instanceIdentifier:av_stmt.instanceIdentifier,
-                                                       copyIdentifier:av_stmt.copyIdentifier,
+                                                       directoryId:ranked_supplier.supplier_symbol,
+                                                       instanceIdentifier:ranked_supplier.instance_identifier,
+                                                       copyIdentifier:ranked_supplier.copy_identifier,
                                                        state: lookupStatus('PatronRequest', 'REQ_IDLE'),
-                                                       loadBalancingScore:av_stmt.loadBalancingScore,
-                                                       loadBalancingReason:av_stmt.loadBalancingReason))
+                                                       loadBalancingScore:ranked_supplier.rank,
+                                                       loadBalancingReason:ranked_supplier.rankReason))
                 }
                 else {
-                  operation_data.candidates.add([symbol:av_stmt.symbol, message:"Skipping - illPolicy is \"${av_stmt.illPolicy}\""]);
+                  log.warn("ILL Policy was not Will lend");
+                  operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Skipping - illPolicy is \"${ranked_supplier.ill_policy}\""]);
                 }
+              }
+              else {
+                log.warn("requestRouterService returned an entry without a supplier symbol");
               }
             }
 
             // Procesing
+
+            def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
+            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
                        'Ratio-Ranked lending string calculated from shared index', null);
             req.save(flush:true, failOnError:true)
           }
           else {
             // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
             log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
+            def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_VALIDATED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders. Availability from SI was'+sia, null);
+            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders', null);
             req.save(flush:true, failOnError:true)
           }
         }
@@ -356,7 +366,7 @@ public class ReshareApplicationEventHandlerService {
     PatronRequest.withNewTransaction { transaction_status ->
 
       def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
+      // log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id, true);
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
@@ -366,9 +376,10 @@ public class ReshareApplicationEventHandlerService {
              ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
         log.debug("Got request ${req} (HRID Is ${req.hrid}) (Status code is ${req.state?.code})");
         
-        Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
-        
         if ( req.rota.size() > 0 ) {
+
+          Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
+
           boolean request_sent = false;
 
           // There may be problems with entries in the lending string, so we loop through the rota
@@ -491,7 +502,8 @@ public class ReshareApplicationEventHandlerService {
 
 
   /**
-   * A new request has been received from a peer institution. We will need to create a request where isRequester==false
+   * A new request has been received from an external PEER institution using some comms protocol. 
+   * We will need to create a request where isRequester==false
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleRequestMessage(Map eventData) {
@@ -1064,7 +1076,7 @@ public class ReshareApplicationEventHandlerService {
    * up to 5 times.
    */
   public PatronRequest delayedGet(String pr_id, boolean wth_lock=false) {
-    log.debug("delayedGet called (${wth_lock})")
+    // log.debug("delayedGet called (${wth_lock})")
     PatronRequest result = null;
     int retries = 0;
 
@@ -1082,7 +1094,7 @@ public class ReshareApplicationEventHandlerService {
           Thread.sleep(900);
           retries++;
         } else {
-          log.debug("Result found for ${pr_id}. Refresh")
+          // log.debug("Result found for ${pr_id}. Refresh")
         }
       }
     }
@@ -1158,6 +1170,10 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
+  /**
+   * The auto responder has determined that a local copy is available. update the state of the request and
+   * mark the pick location as the selected location.
+   */
   public boolean routeRequestToLocation(PatronRequest pr, ItemLocation location) {
     log.debug("routeRequestToLocation(${pr},${location})");
     boolean result = false;
@@ -1305,83 +1321,6 @@ public class ReshareApplicationEventHandlerService {
     loanCondition.setRelevantSupplier(relevantSupplier)
 
     pr.addToConditions(loanCondition)
-  }
-
-  /**
-   * Take a list of availability statements and turn it into a ranked rota
-   * @param sia - List of AvailabilityStatement
-   * @return [
-   *   [
-   *     symbol:
-   *   ]
-   * ]
-   */
-  private List<Map> createRankedRota(List<AvailabilityStatement> sia) {
-    log.debug("createRankedRota(${sia})");
-    def result = []
-
-    sia.each { av_stmt ->
-      log.debug("Considering rota entry: ${av_stmt}");
-
-      // 1. look up the directory entry for the symbol
-      Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
-
-      if ( s != null ) {
-        log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
-
-        // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
-        // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
-        def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
-        log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
-
-        if ( ( entry_loan_policy == null ) ||
-             ( entry_loan_policy.value?.value == 'lending_all_types' ) ) {
-
-          Map peer_stats = statisticsService.getStatsFor(s);
-
-          def loadBalancingScore = null;
-          def loadBalancingReason = null;
-          def ownerStatus = s.owner?.status?.value;
-          log.debug("Found status of ${ownerStatus} for symbol ${s}");
-          if ( ownerStatus == null ) {
-            log.debug("Unable to get owner status for ${s}");
-          } 
-          if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
-            loadBalancingScore = 10000;
-            loadBalancingReason = "Local lending sources prioritized";
-          } else if ( peer_stats != null ) {
-            // 3. See if we can locate load balancing informaiton for the entry - if so, calculate a score, if not, set to 0
-            double lbr = peer_stats.lbr_loan/peer_stats.lbr_borrow
-            long target_lending = peer_stats.current_borrowing_level*lbr
-            loadBalancingScore = target_lending - peer_stats.current_loan_level
-            loadBalancingReason = "LB Ratio ${peer_stats.lbr_loan}:${peer_stats.lbr_borrow}=${lbr}. Actual Borrowing=${peer_stats.current_borrowing_level}. Target loans=${target_lending} Actual loans=${peer_stats.current_loan_level} Distance/Score=${loadBalancingScore}";
-          } else {
-            loadBalancingScore = 0;
-            loadBalancingReason = 'No load balancing information available for peer'
-          }
-
-          def rota_entry = [
-            symbol:av_stmt.symbol,
-            instanceIdentifier:av_stmt.instanceIdentifier,
-            copyIdentifier:av_stmt.copyIdentifier,
-            illPolicy: av_stmt.illPolicy,
-            loadBalancingScore: loadBalancingScore,
-            loadBalancingReason:loadBalancingReason
-          ]
-          result.add(rota_entry)
-        }
-        else {
-          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy.value?.value}");
-        }
-      }
-      else {
-        log.debug("Unable to locate symbol ${av_stmt.symbol}");
-      } 
-    }
-    
-    def sorted_result = result.toSorted { a,b -> b.loadBalancingScore <=> a.loadBalancingScore }
-    log.debug("createRankedRota returns ${sorted_result}");
-    return sorted_result;
   }
 
   /**

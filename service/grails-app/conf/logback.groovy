@@ -41,6 +41,7 @@ logger ('org.grails.datastore', WARN)
 logger ('org.olf', DEBUG)
 logger ('org.olf.rs.EventConsumerService', DEBUG)
 logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
+logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
 
 // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
 // logger ('com.k_int.okapi.OkapiClient', WARN)
@@ -63,9 +64,9 @@ logger ('org.hibernate.orm.deprecation', ERROR)
 //logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
 
 if (Environment.currentEnvironment == Environment.TEST) {
-  logger 'groovy.net.http.JavaHttpBuilder', DEBUG
-  logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
-  logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+  // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+  // logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+  // logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
 }
 
 

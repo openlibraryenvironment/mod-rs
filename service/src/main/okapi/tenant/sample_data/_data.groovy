@@ -226,6 +226,8 @@ try {
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'FOLIO');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Koha');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Millennium');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Sierra');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Symphony');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
@@ -355,6 +357,7 @@ try {
   def cp_z3950_base_name = ensureTextProperty('Z3950BaseName', false);
   def cp_local_institutionalPatronId = ensureTextProperty('local_institutionalPatronId', true, label='Institutional patron ID');
   def cp_local_alma_agency = ensureTextProperty('ALMA_AGENCY_ID', true, label='ALMA Agency ID');
+  def cp_additional_headers = ensureTextProperty('AdditionalHeaders', false, 'Additional Headers');
 
   NamingAuthority reshare = NamingAuthority.findBySymbol('RESHARE') ?: new NamingAuthority(symbol:'RESHARE').save(flush:true, failOnError:true);
   NamingAuthority isil = NamingAuthority.findBySymbol('ISIL') ?: new NamingAuthority(symbol:'ISIL').save(flush:true, failOnError:true);
@@ -368,6 +371,23 @@ try {
   def cp_last_resort_policy = ensureRefdataProperty('policy.ill.last_resort', false, 'YNO', 'Consider Institution As Last Resort' )
   def cp_lb_ratio = ensureTextProperty('policy.ill.InstitutionalLoanToBorrowRatio', false, label='ILL Loan To Borrow Ratio');
 
+  def folio_si_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'FOLIOSharedIndex');
+  def static_routing_adapter = RefdataValue.lookupOrCreate('RequestRoutingAdapter', 'Static');
+
+  AppSetting routing_adapter = AppSetting.findByKey('routing_adapter') ?: new AppSetting(
+                                  section:'Request Routing',
+                                  settingType:'Refdata',
+                                  vocab:'RequestRoutingAdapter',
+                                  key: 'routing_adapter',
+                                  value: folio_si_routing_adapter.value).save(flush:true, failOnError: true);
+
+
+  AppSetting static_routing = AppSetting.findByKey('static_routes') ?: new AppSetting(
+                                  section:'Request Routing',
+                                  settingType:'String',
+                                  key: 'static_routes',
+                                  value: '').save(flush:true, failOnError: true);
+
   // To delete an unwanted action add State Model, State, Action to this array
   [
     [ 'PatronRequest', 'REQ_LOCAL_REVIEW', 'requesterCancel' ],
@@ -376,14 +396,13 @@ try {
     println("Remove available action ${action_to_remove}");
     try {
       AvailableAction.executeUpdate('''delete from AvailableAction 
-                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode.code=:code and aa.fromState=:fs and aa.model.shortcode=:sm)''',
+                                       where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)''',
                                     [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
     }
     catch ( Exception e ) {
       println("Unable to delete action ${action_to_remove} - ${e.message}");
     }
   }
-
 
   // This looks slightly odd, but rather than litter this file with an ever growing list of
   // random delete statements, if you wish to delete
