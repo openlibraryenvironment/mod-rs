@@ -15,7 +15,8 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
-import com.k_int.web.toolkit.custprops.CustomProperty
+import com.k_int.web.toolkit.custprops.CustomProperty;
+import org.olf.rs.patronstore.PatronStoreActions;
 
 
 /**
@@ -31,15 +32,14 @@ public class ReshareActionService {
   ProtocolMessageBuildingService protocolMessageBuildingService
   HostLMSService hostLMSService
   StatisticsService statisticsService
-  FolioPatronStoreService folioPatronStoreService;
-  ManualPatronStoreService manualPatronStoreService;
+  PatronStoreService patronStoreService
 
 
   /* WARNING: this method is NOT responsible for saving or for managing state changes.
    * It simply performs the lookupAction and appends relevant info to the patron request
    */
   public Map lookupPatron(PatronRequest pr, Map actionParams) {
-    if(folioPatronStoreService && manualPatronStoreService) {
+    if(patronStoreService) {
       log.debug("Patron Store Services are initialized");
     } else {
       log.error("Patron Store Services are not initialized");
@@ -91,17 +91,11 @@ public class ReshareActionService {
     return result;
   }
 
-    private Patron lookupOrCreatePatronProxy(Map patron_details) {
+  private Patron lookupOrCreatePatronProxy(Map patron_details) {
     Patron result = null;
-    AppSetting patron_store_setting = AppSetting.findByKey('patron_store');
-    String patron_store = patron_store_setting?.value;
-    BasePatronStoreActions patronStoreService;
-    if(patron_store == 'FOLIO') {
-      patronStoreService = folioPatronStoreService;
-    } else {
-      patronStoreService = manualPatronStoreService;
-    }
-
+    PatronStoreActions patronStoreActions;
+    patronStoreActions = PatronStoreService.getPatronStoreActions();
+    log.debug("patronStoreService is currently ${patronStoreService}");
     try {
       def patron_map = patronStoreService.lookupOrCreatePatronStore(patron_details.userid, patron_details);
     } catch(Exception e) {
