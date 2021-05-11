@@ -31,12 +31,19 @@ public class ReshareActionService {
   ProtocolMessageBuildingService protocolMessageBuildingService
   HostLMSService hostLMSService
   StatisticsService statisticsService
+  FolioPatronStoreService folioPatronStoreService;
+  ManualPatronStoreService manualPatronStoreService;
 
 
   /* WARNING: this method is NOT responsible for saving or for managing state changes.
    * It simply performs the lookupAction and appends relevant info to the patron request
    */
   public Map lookupPatron(PatronRequest pr, Map actionParams) {
+    if(folioPatronStoreService && manualPatronStoreService) {
+      log.debug("Patron Store Services are initialized");
+    } else {
+      log.error("Patron Store Services are not initialized");
+    }
     Map result = [callSuccess: false, patronValid: false ]
     log.debug("lookupPatron(${pr})");
     def patron_details = hostLMSService.getHostLMSActions().lookupPatron(pr.patronIdentifier)
@@ -88,8 +95,6 @@ public class ReshareActionService {
     Patron result = null;
     AppSetting patron_store_setting = AppSetting.findByKey('patron_store');
     String patron_store = patron_store_setting?.value;
-    FolioPatronStoreService folioPatronStoreService;
-    ManualPatronStoreService manualPatronStoreService;
     BasePatronStoreActions patronStoreService;
     if(patron_store == 'FOLIO') {
       patronStoreService = folioPatronStoreService;
