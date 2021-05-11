@@ -94,7 +94,7 @@ public class ReshareActionService {
   private Patron lookupOrCreatePatronProxy(Map patron_details) {
     Patron result = null;
     PatronStoreActions patronStoreActions;
-    patronStoreActions = PatronStoreService.getPatronStoreActions();
+    patronStoreActions = patronStoreService.getPatronStoreActions();
     log.debug("patronStoreService is currently ${patronStoreService}");
     try {
       def patron_map = patronStoreService.lookupOrCreatePatronStore(patron_details.userid, patron_details);
