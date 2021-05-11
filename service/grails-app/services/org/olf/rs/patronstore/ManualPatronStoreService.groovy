@@ -1,6 +1,8 @@
-package org.olf.rs
+package org.olf.rs.patronstore
 
-public class ManualPatronStoreService implements BasePatronStoreActions {
+import org.olf.rs.patronstore.PatronStoreActions
+
+public class ManualPatronStoreService implements PatronStoreActions {
   public boolean createPatronStore(Map patronData) {
     return true;
   }

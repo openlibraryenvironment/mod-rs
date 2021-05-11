@@ -1,13 +1,12 @@
-
-package org.olf.rs
+package org.olf.rs.patronstore
 
 import com.k_int.web.toolkit.settings.AppSetting;
 import static groovyx.net.http.Method.GET;
 import static groovyx.net.http.HttpBuilder.configure;
 import groovyx.net.http.FromServer;
-import org.olf.rs.BasePatronStoreActions;
+import org.olf.rs.patronstore.PatronStoreActions;
 
-public class FolioPatronStoreService implements BasePatronStoreActions {
+public class FolioPatronStoreService implements PatronStoreActions {
   
      
   private Map getFolioSettings() {

@@ -1,7 +1,7 @@
-package org.olf.rs
+package org.olf.rs.patronstore
 
 
-public interface BasePatronStoreActions {
+public interface PatronStoreActions {
   
   /* 
    * Create a backend store in whatever system we are using to hold patrons
