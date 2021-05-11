@@ -97,8 +97,11 @@ public class ReshareActionService {
       patronStoreService = manualPatronStoreService;
     }
 
-    def patron_map = patronStoreService.lookupOrCreatePatronStore(patron_details.userid, patron_details);
-
+    try {
+      def patron_map = patronStoreService.lookupOrCreatePatronStore(patron_details.userid, patron_details);
+    } catch(Exception e) {
+      log.error("Unable to lookup or create Patron Store: ${e}");
+    }
     if ( ( patron_details != null ) && 
          ( patron_details.userid != null ) &&
          ( patron_details.userid.trim().length() > 0 ) ) {
