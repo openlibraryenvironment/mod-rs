@@ -17,10 +17,10 @@ public class PatronStoreService {
    
     PatronStoreActions result = null;
 
-    if('FOLIO' == ps) {
-      result = grailsApplication.mainContext.FolioPatronStoreService;
+    if('FOLIO' == ps?.toUpperCase()) {
+      result = grailsApplication.mainContext.folioPatronStoreService;
     } else {
-      result = grailsApplication.mainContext.ManualPatronStoreService;
+      result = grailsApplication.mainContext.manualPatronStoreService;
     }
 
     if ( result == null && ps != 'none' ) {
