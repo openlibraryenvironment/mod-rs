@@ -11,20 +11,28 @@ import grails.core.GrailsApplication;
 public class PatronStoreService {
 
   GrailsApplication grailsApplication
+  String app_setting = 'patron_store';
 
   public PatronStoreActions getPatronStoreActionsFor(String ps) {
     log.debug("PatronStoreService::getSharedIndexActionsFor(${ps})");
    
     PatronStoreActions result = null;
+    String bean_name;
 
     if('FOLIO' == ps?.toUpperCase()) {
-      result = grailsApplication.mainContext.folioPatronStoreService;
+      bean_name = 'folioPatronStoreService';
     } else {
-      result = grailsApplication.mainContext.manualPatronStoreService;
+      bean_name = 'manualPatronStoreService';
+    }
+
+    try {
+      result = grailsApplication.mainContext.getBean(bean_name);
+    } catch(Exception e) {
+      log.error("Unable to retrieve bean ${bean_name} from grails application context: ${e}");
     }
 
     if ( result == null && ps != 'none' ) {
-      log.warn("Unable to locate PatronStoreActions for ${ps}. Did you fail to configure the app_setting \"shared_index_integration\". Current options are folio|none");
+      log.warn("Unable to locate PatronStoreActions for ${ps}. Did you fail to configure the app_setting \"${app_setting}\". Current options are folio|none");
     }
 
     return result;
@@ -32,9 +40,9 @@ public class PatronStoreService {
 
   public PatronStoreActions getPatronStoreActions() {
     PatronStoreActions result = null;
-    AppSetting patron_store_setting = AppSetting.findByKey('patron_store');
+    AppSetting patron_store_setting = AppSetting.findByKey(app_setting);
     String v = patron_store_setting?.value;
-    log.debug("Return host si integrations for : ${v} - query application context for bean named ${v}PatronStoreService");
+    log.debug("Return host patron store integrations for : ${v} - query application context for bean named ${v}PatronStoreService");
     result = getPatronStoreActionsFor(v);
     return result;
   }
