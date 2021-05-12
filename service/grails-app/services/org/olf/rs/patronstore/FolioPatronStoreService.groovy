@@ -131,10 +131,11 @@ public class FolioPatronStoreService implements PatronStoreActions {
         request.headers['X-Okapi-Tenant'] = tenant
         request.headers['accept'] = 'application/json'
         request.contentType = 'application/json'
-        request.uri = baseUrl+'/authn/login'
+        request.uri.path = '/authn/login'
         request.uri.query = [expandPermissions:true,fullPermissions:true]
         request.body = postBody
-      }.get() {
+      }.post() {
+        log.debug("Posting to uri ${request.uri}");
         response.success { resp ->
           if ( resp == null ) {
             log.error("Response null from http post");
