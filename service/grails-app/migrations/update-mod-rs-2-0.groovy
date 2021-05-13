@@ -161,10 +161,16 @@ databaseChangeLog = {
 
       column(name: "rv_date_created", type: "timestamp")
       column(name: "rv_last_updated", type: "timestamp")
+
+      column(name: "rv_status_fk", type: "VARCHAR(36)")
     }
   }
 
   changeSet(author: "efreestone (manual)", id: "2021-05-06-1451-002") {
     addForeignKeyConstraint(baseColumnNames: "rv_patron_request_fk", baseTableName: "request_volume", constraintName: "request_volume_patron_request_fk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request")
+  }
+
+  changeSet(author: "efreestone (manual)", id: "2021-05-13-1127-001") {
+    addForeignKeyConstraint(baseColumnNames: "rv_status_fk", baseTableName: "request_volume", constraintName: "request_volume_status_fk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
   }
 }

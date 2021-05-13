@@ -407,6 +407,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     overdue column: 'pr_overdue'
 
     audit(sort:'dateCreated', order:'desc')
+
+    volumes cascade: 'all-delete-orphan'
   }
 
   /**
