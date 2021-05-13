@@ -95,7 +95,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
             }
           }
           response.failure { FromServer fs ->
-            log.error("Unable to read Patron with id ${systemPatronId} at url ${folioSettings.url}: Status ${fs.getStatus()}: ${fs.getMessage()}");
+            log.error("Unable to read Patron with id ${systemPatronId} at url ${folioSettings.url}: Status ${fs.getStatusCode()}: ${fs.getMessage()}");
           }
         }    
       }
