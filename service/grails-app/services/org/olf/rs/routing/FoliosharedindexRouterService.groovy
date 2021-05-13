@@ -6,15 +6,25 @@ import org.olf.okapi.modules.directory.Symbol;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.SharedIndexService;
+import org.olf.rs.StatisticsService
 
 public class FoliosharedindexRouterService implements RequestRouter {
 
   SharedIndexService sharedIndexService
+  StatisticsService statisticsService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
-    List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(req.getDescriptiveMetadata());
+    log.debug("FoliosharedindexRouterService::findMoreSuppliers");
+    List<AvailabilityStatement> sia = sharedIndexService.getSharedIndexActions().findAppropriateCopies(description);
     return createRankedRota(sia);
   }
+
+  public Map getRouterInfo() {
+    return [
+      'name':'FoliosharedindexRouterService'
+    ]
+  }
+
 
 
   /**
@@ -53,6 +63,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
           def loadBalancingReason = null;
           def ownerStatus = s.owner?.status?.value;
           log.debug("Found status of ${ownerStatus} for symbol ${s}");
+
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
           } 
@@ -88,7 +99,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
       } 
     }
     
-    def sorted_result = result.toSorted { a,b -> b.loadBalancingScore <=> a.loadBalancingScore }
+    def sorted_result = result.toSorted { a,b -> b.rank <=> a.rank }
     log.debug("createRankedRota returns ${sorted_result}");
     return sorted_result;
   }

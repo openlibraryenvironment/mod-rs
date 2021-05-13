@@ -29,6 +29,9 @@ public class RequestRouterService {
     if ( result == null ) {
       log.warn("Unable to locate RequestRouter for ${impl}. Did you fail to configure the app_setting \"routing_adapter\". Current options are FOLIOSharedIndex|Static");
     }
+    else {
+      log.debug("Got ${result.getRouterInfo()}");
+    }
 
     return result;
   }
@@ -43,10 +46,19 @@ public class RequestRouterService {
   }
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
+
+    List<RankedSupplier> supplier_list = null;
+
     // Initially this method needs to hide the details of what happens in the following calls
     // around line 222 of ReshareApplicationEventHandlerService.groovy. Our aim is to hide the 
     // details of finding a list of potential suppliers so different implementations can be used
-    List<RankedSupplier> supplier_list = getRequestRouter().findMoreSuppliers(description,already_tried_symbols);
+    RequestRouter rr = getRequestRouter()
+    if ( rr != null ) {
+      supplier_list = rr.findMoreSuppliers(description,already_tried_symbols);
+    }
+    else {
+      log.error("Unable to obtain request router");
+    }
 
     // Currently, ranking is done in the FolioRouter really the ranking algorithm should also be seperated out and called
     // here so that different supplier list generators can be ranked by different ranking algorithms.
