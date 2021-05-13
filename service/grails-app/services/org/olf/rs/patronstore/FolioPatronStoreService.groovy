@@ -57,7 +57,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
           }
           response.failure { FromServer fs ->
             result = false;
-            log.error("Unable to create new FOLIO User with JSON ${newUser}: ${resp.status}");
+            log.error("Unable to create new FOLIO User with JSON ${newUser}: ${fs.status}");
           }
         }
       }
@@ -95,7 +95,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
             }
           }
           response.failure { FromServer fs ->
-            log.error("Unable to read Patron with id ${systemPatronId} at url ${folioSettings.url}: ${resp.status}");
+            log.error("Unable to read Patron with id ${systemPatronId} at url ${folioSettings.url}: Status ${fs.getStatus}: ${fs.getMessage()}");
           }
         }    
       }
