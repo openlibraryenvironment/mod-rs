@@ -42,8 +42,8 @@ public class FolioPatronStoreService implements PatronStoreActions {
         def newUser = [:];
         newUser['externalSystemId'] = patronData['userid'];
         newUser['personal'] = [:];
-        newUser['personal']['firstName'] = patronData['givenName'];
-        newUser['personal']['lastName'] = patronData['surname'];
+        newUser['personal']['firstName'] = patronData['givenName'] ?: 'None';
+        newUser['personal']['lastName'] = patronData['surname'] ?: 'None';
         newUser['patronGroup'] = folioSettings['group'];
         def userRequest = configure {
           request.uri = folioSettings.url;
@@ -88,11 +88,15 @@ public class FolioPatronStoreService implements PatronStoreActions {
         }.get() {
           response.success { FromServer fs, Object body -> 
             try {
-              def record = body['users'][0];
-              resultMap['userid'] = user['externalSystemId'];
-              resultMap['givenName'] = user['personal']['firstName'];
-              resultMap['surname'] = user['personal']['lastName'];
-
+              def users = body['users'];
+              if(!users || users.size() < 1) {
+                log.debug("No users found with externalSystemId of ${systemPatronId}");
+              } else {
+                def user = users[0];
+                resultMap['userid'] = user['externalSystemId'];
+                resultMap['givenName'] = user['personal']['firstName'];
+                resultMap['surname'] = user['personal']['lastName'];
+              }
             } catch(Exception e) {
               log.error("Error reading returned JSON ${body}: ${e}");
             }
