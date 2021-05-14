@@ -46,7 +46,8 @@ public class FolioPatronStoreService implements PatronStoreActions {
         newUser['personal']['lastName'] = patronData['surname'];
         newUser['patronGroup'] = folioSettings['group'];
         def userRequest = configure {
-          request.uri = folioSettings.url + "/users";
+          request.uri = folioSettings.url;
+          request.uri.path = "/users";
           request.contentType = "application/json";
           request.headers['X-Okapi-Tenant'] = folioSettings.tenant;
           request.headers['X-Okapi-Token'] = token;          
