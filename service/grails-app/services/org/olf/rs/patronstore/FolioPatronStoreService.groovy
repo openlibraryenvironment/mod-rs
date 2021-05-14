@@ -78,7 +78,9 @@ public class FolioPatronStoreService implements PatronStoreActions {
         log.warn("Unable to acquire token for Folio Patron Store");
       } else {
         def userRequest = configure {
-          request.uri = folioSettings.url + "/users?query=externalSystemId=${systemPatronId}";
+          request.uri = folioSettings.url;
+          request.uri.path = "/users";
+          request.uri.query = [ query : "externalSystemId=${systemPatronId}" ];
           request.contentType = "application/json";
           request.headers['X-Okapi-Tenant'] = folioSettings.tenant;
           request.headers['X-Okapi-Token'] = token;
