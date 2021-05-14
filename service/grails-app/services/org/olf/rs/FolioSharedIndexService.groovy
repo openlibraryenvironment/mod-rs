@@ -83,11 +83,12 @@ public class FolioSharedIndexService implements SharedIndexActions {
     log.debug("fetchSharedIndexRecord(${id})");
 
     List<String> result = [];
+
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
     AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
     AppSetting shared_index_tenant_setting = AppSetting.findByKey('shared_index_tenant');
-
+    
     String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
     String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
     String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;

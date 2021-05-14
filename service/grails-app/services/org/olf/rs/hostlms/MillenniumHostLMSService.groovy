@@ -37,4 +37,27 @@ public class MillenniumHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
+  /**
+   * Copied from Sierra
+   */
+  @Override
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+
+    Map<String,ItemLocation> availability_summary = [:]
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("${hld}");
+      if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
+        log.debug("Available now");
+        ItemLocation il = new ItemLocation(
+                                            location: hld.localLocation?.toString(),
+                                            shelvingLocation:hld.localLocation?.toString(),
+                                            callNumber:hld.callNumber?.toString() )
+        availability_summary[hld.localLocation?.toString()] = il;
+      }
+    }
+
+    return availability_summary;
+  }
+
 }
