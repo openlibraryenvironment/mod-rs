@@ -30,6 +30,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
   public boolean createPatronStore(Map patronData) {
     def folioSettings = getFolioSettings();
     def result = false;
+    log.debug("Creating patron store with data ${patronData}");
     if(folioSettings.url == null || folioSettings.tenant == null ||
       folioSettings.user == null || folioSettings.pass == null) {
       log.warn("Unable to connect to Folio Patron Store: Bad url/tenant/user/password");
@@ -63,12 +64,13 @@ public class FolioPatronStoreService implements PatronStoreActions {
         }
       }
     }
-      return result;
+    return result;
   }
    
   public Map lookupPatronStore(String systemPatronId) {
     def folioSettings = getFolioSettings();
     def resultMap = [:];
+    log.debug("Looking up patron store for id ${systemPatronId}");
     if(folioSettings.url == null || folioSettings.tenant == null ||
       folioSettings.user == null || folioSettings.pass == null) {
       log.warn("Unable to connect to Folio Patron Store: Bad url/tenant/user/password");
