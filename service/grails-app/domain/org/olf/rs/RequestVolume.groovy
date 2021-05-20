@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import com.k_int.web.toolkit.refdata.Defaults
+import com.k_int.web.toolkit.refdata.RefdataCategory
 import com.k_int.web.toolkit.refdata.RefdataValue
 
 import grails.gorm.multitenancy.Tenants;

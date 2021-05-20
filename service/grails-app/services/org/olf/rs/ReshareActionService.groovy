@@ -129,7 +129,9 @@ public class ReshareActionService {
     boolean result = false;
 
     if ( actionParams?.itemBarcodes.size() != 0 ) {
-      if ( pr.state.code=='RES_AWAIT_PICKING' || pr.state.code=='RES_AWAIT_PROXY_BORROWER') {
+      if ( pr.state.code=='RES_AWAIT_PICKING' ||
+           pr.state.code=='RES_AWAIT_PROXY_BORROWER' ||
+           pr.state.code=='RES_AWAIT_SHIP') {
 
         // TODO For now we still use this, so just set to first item in array for now. Should be removed though
         pr.selectedItemBarcode = actionParams?.itemBarcodes[0]?.itemId;
@@ -137,17 +139,15 @@ public class ReshareActionService {
 
         // We now want to update the patron request's "volumes" field to reflect the incoming params
         // In order to then use the updated list later, we mimic those actions on a dummy list, 
-        List
 
         actionParams?.itemBarcodes.each { ib ->
           RequestVolume rv = pr.volumes.find {rv -> rv.itemId == ib.itemId };
-
           // If there's no rv and the delete is true then just skip creation
           if (!rv && !ib._delete) {
             rv = new RequestVolume(
               name: ib.name ?: pr.volume,
               itemId: ib.itemId,
-              status: 'awaiting_check_in_to_reshare'
+              status: RequestVolume.lookupStatus('awaiting_check_in_to_reshare')
             )
             pr.addToVolumes(rv)
           }
@@ -195,31 +195,37 @@ public class ReshareActionService {
 
             // At this point we have a list of NCIP calls to make.
             // We should make those calls and track which succeeded/failed
-            // FIXME this is the point at which we should run through the NCIP calls one by one
             // TODO perhaps test by inserting a temporary % chance of NCIP failure in manual adapter
-            log.debug("LOGDEBUG VNCI: ${volumesNotCheckedIn}")
-            throw new Exception("Fake exception")
-            /*
-            * Be aware that institutionalPatronIdValue here may well be blank or null.
-            * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
-            * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block 
-            */
-            def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                        actionParams?.itemBarcode, 
-                                                        institutionalPatronIdValue,
-                                                        pr.resolvedRequester)
-            // If the host_lms adapter gave us a specific status to transition to, use it
-            if ( checkout_result?.status ) {
-              // the host lms service gave us a specific status to change to
-              Status s = Status.lookup('Responder', checkout_result?.status);
-              String message = 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString()
-              auditEntry(pr, pr.state, s, message, null);
-              pr.state = s;
-              pr.save(flush:true, failOnError:true);
-            }
-            else {
+
+            // Iterate over volumes not yet checked in in for loop so we can break out if we need to
+            for (def vol : volumesNotCheckedIn) {
+
+              /*
+              * Be aware that institutionalPatronIdValue here may well be blank or null.
+              * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
+              * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block 
+              */
+              def checkout_result = host_lms.checkoutItem(pr.hrid,
+                                                          vol.itemId,
+                                                          institutionalPatronIdValue,
+                                                          pr.resolvedRequester)
+
+              // If the host_lms adapter gave us a specific status to transition to, use it
+              if ( checkout_result?.status ) {
+                // the host lms service gave us a specific status to change to
+                Status s = Status.lookup('Responder', checkout_result?.status);
+                String message = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString()
+                auditEntry(pr, pr.state, s, message, null);
+                pr.state = s;
+                pr.save(flush:true, failOnError:true);
+
+                // We're in a new status, break out of the loop to deal with that,
+                // we can deal with the other checkouts later
+                break;
+              }
+
               // Otherwise, if the checkout succeeded or failed, set appropriately
-              Status s = null;
+              
               if ( checkout_result.result == true ) {
                 statisticsService.incrementCounter('/activeLoans');
                 pr.activeLoan=true
@@ -242,19 +248,42 @@ public class ReshareActionService {
                 }
 
                 pr.overdue=false;
-                s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-                // Let the user know if the success came from a real call or a spoofed one
-                auditEntry(pr, pr.state, s, "Fill request completed. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
-                pr.state = s;
-                initialVolumeFulfilled.status = RefdataValue.lookupOrCreate('RequestVolume.Status', 'Checked in to ReShare')
-                result = true;
+                
+                RefdataValue volStatus = vol.lookupStatus('Checked in to ReShare')
+                if (volStatus) {
+                  vol.status = volStatus
+                }
+                vol.save(failOnError: true)
+                auditEntry(pr, pr.state, pr.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
               }
               else {
-                pr.needsAttention=true;
-                auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP CheckoutItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+checkout_result.problems?.toString(), null);
+                auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
               }
-              pr.save(flush:true, failOnError:true);
             }
+            pr.save(flush:true, failOnError:true);
+
+            // At this point we should have all volumes checked out. Check that again
+            volumesNotCheckedIn = pr.volumes.findAll {rv ->
+              rv.status.value == 'awaiting_check_in_to_reshare'
+            }
+
+            Status s = null;
+            if (volumesNotCheckedIn.size() == 0) {
+              s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
+
+              // Log message differs from "fill request" to "add additional items"
+              def auditLogMessage = (pr.state.code=='RES_AWAIT_PICKING' ||
+              pr.state.code=='RES_AWAIT_PROXY_BORROWER') ? 'Fill request completed.' :
+              'Additional items successfully checked in to ReShare'
+
+              auditEntry(pr, pr.state, s, auditLogMessage, null);
+              pr.state = s;
+              result = true;
+            } else {
+              pr.needsAttention=true;
+              auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.", null);
+            }
+            pr.save(flush: true, failOnError: true)
           }
           else {
             auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
@@ -262,6 +291,7 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
         } else {
+          auditEntry(pr, pr.state, pr.state, 'No un-checked-in item ids recieved, returning', null);
           log.warn("No item ids remain not checked into ReShare");
         }
       }
