@@ -45,7 +45,11 @@ public class FolioPatronStoreService implements PatronStoreActions {
         newUser['personal'] = [:];
         newUser['personal']['firstName'] = patronData['givenName'] ?: 'None';
         newUser['personal']['lastName'] = patronData['surname'] ?: 'None';
+        newUser['personal']['email'] = patronData['email'] ?: 'null@null.null';
         newUser['patronGroup'] = folioSettings['group'];
+        newUser['username'] = patronData['userid']; 
+        newUser['barcode'] = patronData['userid'];
+        newUser['active'] = true;
         def userRequest = configure {
           request.uri = folioSettings.url;
           request.uri.path = "/users";
@@ -98,6 +102,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
                 resultMap['userid'] = user['externalSystemId'];
                 resultMap['givenName'] = user['personal']['firstName'];
                 resultMap['surname'] = user['personal']['lastName'];
+                resultMap['email'] = user['personal']['email'];
               }
             } catch(Exception e) {
               log.error("Error reading returned JSON ${body}: ${e}");
