@@ -8,32 +8,40 @@ import org.grails.datastore.gorm.validation.constraints.registry.ConstraintRegis
 import org.grails.datastore.mapping.model.MappingContext;
 import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.gorm.validation.constraints.registry.DefaultValidatorRegistry;
+import org.grails.datastore.mapping.validation.ValidatorRegistry
 
 import org.springframework.boot.web.embedded.undertow.UndertowBuilderCustomizer
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory
-import io.micronaut.context.annotation.Bean
+import org.springframework.context.annotation.Bean
+import org.springframework.scheduling.annotation.EnableScheduling
+
+import groovy.transform.CompileStatic
 import io.undertow.Undertow.Builder
 import io.undertow.UndertowOptions
 
 
+
+@CompileStatic
 @Slf4j 
 class Application extends GrailsAutoConfiguration {
-    static void main(String[] args) {
-        GrailsApp.run(Application, args)
-    }
 
-    void doWithApplicationContext() {
-      try {
-        // Register the pending action constraint
-        MappingContext mc = grailsApplication.getMappingContext();
-        DefaultValidatorRegistry reg = mc.validatorRegistry
-      } catch (Exception e) {
-        log.error("Exception thrown", e);
-      }
+  static void main(String[] args) {
+    GrailsApp.run(Application, args)
+  }
+
+  void doWithApplicationContext() {
+    try {
+      // Register the pending action constraint
+      MappingContext mc = grailsApplication.getMappingContext();
+      ValidatorRegistry reg = mc.getValidatorRegistry()
+    } catch (Exception e) {
+      log.error("Exception thrown", e);
     }
+  }
 
   @Bean
-  UndertowServletWebServerFactory embeddedServletContainerFactory(){
+  public UndertowServletWebServerFactory embeddedServletContainerFactory() {
+
     UndertowServletWebServerFactory factory = new UndertowServletWebServerFactory()
     factory.builderCustomizers << new UndertowBuilderCustomizer() {
 
@@ -41,9 +49,11 @@ class Application extends GrailsAutoConfiguration {
       public void customize(Builder builder) {
 
         // Min of 2, Max of 4 I/O threads
-        builder.ioThreads = Math.min(Math.max(Runtime.getRuntime().availableProcessors(), 2), 4)
+        final int ioThreadCount = Math.min(Math.max(Runtime.getRuntime().availableProcessors(), 2), 4)
+        builder.ioThreads = ioThreadCount
 
-        final int heap_coef = (Runtime.getRuntime().maxMemory() / 1024 / 1024)/256
+
+        final int heap_coef = ((Runtime.getRuntime().maxMemory() / 1024 / 1024)/256) as int
         int workers_per_io = 8
         if (heap_coef <= 2) {
           workers_per_io = 6
@@ -52,18 +62,20 @@ class Application extends GrailsAutoConfiguration {
         }
 
         // 8 Workers per I/O thread
-        builder.workerThreads = builder.workerThreads = builder.ioThreads * workers_per_io
-
+        final int workerThreadCount = ioThreadCount * workers_per_io
+        builder.workerThreads = workerThreadCount
         // Enable HTTP2
-        builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true)
+        // builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true)
 
-        println("Runtime memory reported ${Runtime.getRuntime().maxMemory() / 1024 / 1024} mb")
-        println("Runtime CPUs reported ${Runtime.getRuntime().availableProcessors()}")
-        println("Allocated ${builder.ioThreads} IO Threads")
-        println("Allocated ${builder.workerThreads} worker threads")
-        println("Allocated ${builder.bufferSize} bytes of ${builder.directBuffers ? 'direct' : 'indirect'} buffer space per thread")
+        println "Runtime memory reported ${Runtime.getRuntime().maxMemory() / 1024 / 1024} mb"
+        println "Runtime CPUs reported ${Runtime.getRuntime().availableProcessors()}"
+        println "Allocated ${ioThreadCount} IO Threads"
+        println "Allocated ${workerThreadCount} worker threads"
+
       }
     }
+
+    return factory
   }
 
 }

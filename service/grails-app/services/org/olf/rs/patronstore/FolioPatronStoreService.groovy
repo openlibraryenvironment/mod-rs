@@ -30,6 +30,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
   public boolean createPatronStore(Map patronData) {
     def folioSettings = getFolioSettings();
     def result = false;
+    log.debug("Creating patron store with data ${patronData}");
     if(folioSettings.url == null || folioSettings.tenant == null ||
       folioSettings.user == null || folioSettings.pass == null) {
       log.warn("Unable to connect to Folio Patron Store: Bad url/tenant/user/password");
@@ -42,11 +43,12 @@ public class FolioPatronStoreService implements PatronStoreActions {
         def newUser = [:];
         newUser['externalSystemId'] = patronData['userid'];
         newUser['personal'] = [:];
-        newUser['personal']['firstName'] = patronData['givenName'];
-        newUser['personal']['lastName'] = patronData['surname'];
+        newUser['personal']['firstName'] = patronData['givenName'] ?: 'None';
+        newUser['personal']['lastName'] = patronData['surname'] ?: 'None';
         newUser['patronGroup'] = folioSettings['group'];
         def userRequest = configure {
-          request.uri = folioSettings.url + "/users";
+          request.uri = folioSettings.url;
+          request.uri.path = "/users";
           request.contentType = "application/json";
           request.headers['X-Okapi-Tenant'] = folioSettings.tenant;
           request.headers['X-Okapi-Token'] = token;          
@@ -57,17 +59,18 @@ public class FolioPatronStoreService implements PatronStoreActions {
           }
           response.failure { FromServer fs ->
             result = false;
-            log.error("Unable to create new FOLIO User with JSON ${newUser}: ${resp.status}");
+            log.error("Unable to create new FOLIO User at url ${fs.getUri().toString()} with JSON ${newUser}: ${fs.getStatusCode()} ${fs.getMessage()}");
           }
         }
       }
     }
-      return result;
+    return result;
   }
    
   public Map lookupPatronStore(String systemPatronId) {
     def folioSettings = getFolioSettings();
     def resultMap = [:];
+    log.debug("Looking up patron store for id ${systemPatronId}");
     if(folioSettings.url == null || folioSettings.tenant == null ||
       folioSettings.user == null || folioSettings.pass == null) {
       log.warn("Unable to connect to Folio Patron Store: Bad url/tenant/user/password");
@@ -78,24 +81,30 @@ public class FolioPatronStoreService implements PatronStoreActions {
         log.warn("Unable to acquire token for Folio Patron Store");
       } else {
         def userRequest = configure {
-          request.uri = folioSettings.url + "/users?query=externalSystemId=${systemPatronId}";
+          request.uri = folioSettings.url;
+          request.uri.path = "/users";
+          request.uri.query = [ query : "externalSystemId=${systemPatronId}" ];
           request.contentType = "application/json";
           request.headers['X-Okapi-Tenant'] = folioSettings.tenant;
           request.headers['X-Okapi-Token'] = token;
         }.get() {
           response.success { FromServer fs, Object body -> 
             try {
-              def record = body['users'][0];
-              resultMap['userid'] = user['externalSystemId'];
-              resultMap['givenName'] = user['personal']['firstName'];
-              resultMap['surname'] = user['personal']['lastName'];
-
+              def users = body['users'];
+              if(!users || users.size() < 1) {
+                log.debug("No users found with externalSystemId of ${systemPatronId}");
+              } else {
+                def user = users[0];
+                resultMap['userid'] = user['externalSystemId'];
+                resultMap['givenName'] = user['personal']['firstName'];
+                resultMap['surname'] = user['personal']['lastName'];
+              }
             } catch(Exception e) {
               log.error("Error reading returned JSON ${body}: ${e}");
             }
           }
           response.failure { FromServer fs ->
-            log.error("Unable to read Patron with id ${systemPatronId} at url ${folioSettings.url}: ${resp.status}");
+            log.error("Unable to read Patron with id ${systemPatronId} at url ${fs.getUri().toString()}: Status ${fs.getStatusCode()}: ${fs.getMessage()}");
           }
         }    
       }
