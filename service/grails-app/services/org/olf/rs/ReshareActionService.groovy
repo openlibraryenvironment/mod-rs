@@ -156,9 +156,9 @@ public class ReshareActionService {
             if (ib._delete && rv.status.value == 'awaiting_check_in_to_reshare') {
               // Remove if deleted by incoming call and NCIP call hasn't succeeded yet
               pr.removeFromVolumes(rv);
-            } else if (ib.name && rv.name != ib.name) {
+            } else if (rv.name != ib.name) {
               // Allow changing of label up to shipping
-              rv.name = ib.name;
+              rv.name = ib.name ?: pr.volume;
             }
           }
           pr.save(failOnError: true)
@@ -291,8 +291,10 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
         } else {
-          auditEntry(pr, pr.state, pr.state, 'No un-checked-in item ids recieved, returning', null);
-          log.warn("No item ids remain not checked into ReShare");
+          // Make sure we save pr in case names have changed
+          pr.save(flush:true, failOnError:true);
+          result = true
+          log.info("No item ids remain not checked into ReShare, return true");
         }
       }
       else {
