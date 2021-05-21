@@ -120,8 +120,10 @@ public class FolioPatronStoreService implements PatronStoreActions {
   public Map lookupOrCreatePatronStore(String systemPatronId, Map patronData) {
     def resultMap = lookupPatronStore(systemPatronId);
     if(resultMap.size() != 0) {
+      log.debug("Existing patron for id ${systemPatronId}: ${resultMap}");
       return resultMap;
     } else {
+      log.debug("Creating new patron store for id ${systemPatronId} with data ${patronData}");
       def createResult = createPatronStore(patronData);
       if(!createResult) {
         log.error("Unable to create new Folio Patron Record")
