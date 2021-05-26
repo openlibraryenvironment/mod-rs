@@ -16,6 +16,8 @@ public interface PatronStoreActions {
   public abstract Map lookupPatronStore(String systemPatronId);
 
   public abstract Map lookupOrCreatePatronStore(String systemPatronId, Map patronData); 
+
+  public abstract boolean updateOrCreatePatronStore(String systemPatronId, Map patronData);
   
   
 	
