@@ -70,6 +70,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
     }
     return result;
   }
+
    
   public Map lookupPatronStore(String systemPatronId) {
     def folioSettings = getFolioSettings();
@@ -117,6 +118,72 @@ public class FolioPatronStoreService implements PatronStoreActions {
     return resultMap;
   }
 
+  public boolean updatePatronStore(String systemPatronId, Map patronData) {
+    def resultMap = lookupPatronStore(systemPatronId);
+    boolean result = false;
+    if(resultMap.size() == 0) {
+      log.debug("Cannot update patron store, none found for id ${systemPatronId}");
+      return false;
+    }
+    log.debug("Updating patron store with identifier ${systemPatronId}");
+
+    def folioSettings = getFolioSettings();
+    String token = getOkapiToken(folioSettings.url, folioSettings.user, folioSettings.pass,
+       folioSettings.tenant);
+    if(!token) {
+      log.warn("Unable to acquire token for Folio Patron Store");
+      return false;
+    }
+
+    String folioId = resultMap['id'];
+
+    if(resultMap['personal'] == null) {
+      resultMap['personal'] = [:];
+    }
+    resultMap['personal']['firstName'] = patronData['givenName'] ?:
+      (resultMap['personal']['firstName'] ?: 'None');
+
+    resultMap['personal']['lastName'] = patronData['surname'] ?:
+      (resultMap['personal']['lastName'] ?: 'None');
+
+    resultMap['personal']['email'] = patronData['email'] ?:
+      (resultMap['personal']['email'] ?: 'null@null.null');
+    
+    if(resultMap['patronGroup'] == null) {
+      resultMap['patronGroup'] = folioSettings['group'];
+    }
+
+    if(resultMap['username'] == null) {
+      resultMap['username'] = patronData['userid'];
+    }
+    
+    if(resultMap['barcode'] == null) {
+      resultMap['barcode'] = patronData['userid'];
+    }
+
+    if(resultMap['active'] == null) {
+      resultMap['active'] = true;
+    }
+
+    def updateRequest = configure {
+      request.uri = folioSettings.url;
+      request.uri.path = "/users/${folioId}";
+      request.contentType = "application/json";
+      request.headers['X-Okapi-Tenant'] = folioSettings.tenant;
+      request.headers['X-Okapi-Token'] = token;
+    }.put() {
+      request.body = resultMap;
+      response.success { FromServer fs, Object body ->
+        result = true;
+      }
+      response.failure { FromServer fs ->
+        result = false;
+        log.error("Unable to update FOLIO user at url ${fs.getUri().toString()} with JSON ${resultMap}: ${fs.getStatusCode()} ${fs.getMessage()}");
+      }
+    }
+    return result;
+  }
+
   public Map lookupOrCreatePatronStore(String systemPatronId, Map patronData) {
     def resultMap = lookupPatronStore(systemPatronId);
     if(resultMap.size() != 0) {
@@ -131,6 +198,15 @@ public class FolioPatronStoreService implements PatronStoreActions {
       }
       return patronData;
     }
+  }
+
+  public boolean updateOrCreatePatronStore(String systemPatronId, Map patronData) {
+    boolean success = updatePatronStore(systemPatronId, patronData);
+    if(!success) {
+      log.debug("Unable to update patron store with identifier ${systemPatronId}");
+      success = createPatronStore(patronData);
+    }
+    return success;
   }
   
   

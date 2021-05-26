@@ -14,4 +14,8 @@ public class ManualPatronStoreService implements PatronStoreActions {
   public Map lookupOrCreatePatronStore(String systemPatronId, Map patronData) {
     return patronData;
   }
+
+  public boolean updateOrCreatePatronStore(String systemPatronId, Map patronData) {
+    return true;
+  }
 }
