@@ -281,8 +281,15 @@ public class ReshareActionService {
               pr.state = s;
               result = true;
             } else {
+              // If status is in RES_AWAIT_SHIP, send back to RES_AWAIT_PICKING til all checked in
+              if (pr.state.code == 'RES_AWAIT_SHIP') {
+                Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
+                pr.state = s;
+                auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare, returning to RES_AWAIT_PICKING. Review configuration and try again or deconfigure host LMS integration in settings.", null);
+              } else {
+                auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.", null);
+              }
               pr.needsAttention=true;
-              auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.", null);
             }
             pr.save(flush: true, failOnError: true)
           }
