@@ -71,8 +71,8 @@ public class FolioPatronStoreService implements PatronStoreActions {
     return result;
   }
 
-   
-  public Map lookupPatronStore(String systemPatronId) {
+
+  public Map lookupRawFolioUser(String systemPatronId) {
     def folioSettings = getFolioSettings();
     def resultMap = [:];
     log.debug("Looking up patron store for id ${systemPatronId}");
@@ -99,11 +99,7 @@ public class FolioPatronStoreService implements PatronStoreActions {
               if(!users || users.size() < 1) {
                 log.debug("No users found with externalSystemId of ${systemPatronId}");
               } else {
-                def user = users[0];
-                resultMap['userid'] = user['externalSystemId'];
-                resultMap['givenName'] = user['personal']['firstName'];
-                resultMap['surname'] = user['personal']['lastName'];
-                resultMap['email'] = user['personal']['email'];
+                resultMap = users[0];
               }
             } catch(Exception e) {
               log.error("Error reading returned JSON ${body}: ${e}");
@@ -118,22 +114,44 @@ public class FolioPatronStoreService implements PatronStoreActions {
     return resultMap;
   }
 
+  public Map lookupPatronStore(String systemPatronId) {
+    def user = lookupRawFolioUser(systemPatronId);
+    def resultMap = [:];
+    if(user) {
+      try {
+        resultMap['userid'] = user['externalSystemId'];
+        resultMap['givenName'] = user['personal']['firstName'];
+        resultMap['surname'] = user['personal']['lastName'];
+        resultMap['email'] = user['personal']['email'];
+      } catch(Exception e) {
+        log.error("Error assigning values from user JSON ${user}: ${e}");
+      }
+    }
+    return resultMap;
+  }
+
   public boolean updatePatronStore(String systemPatronId, Map patronData) {
-    def resultMap = lookupPatronStore(systemPatronId);
-    boolean result = false;
+    def resultMap = lookupRawFolioUser(systemPatronId);
+
     if(resultMap.size() == 0) {
       log.debug("Cannot update patron store, none found for id ${systemPatronId}");
       return false;
     }
-    log.debug("Updating patron store with identifier ${systemPatronId}");
 
     def folioSettings = getFolioSettings();
     String token = getOkapiToken(folioSettings.url, folioSettings.user, folioSettings.pass,
        folioSettings.tenant);
+
     if(!token) {
       log.warn("Unable to acquire token for Folio Patron Store");
       return false;
     }
+
+    boolean result = false;
+    
+
+    log.debug("Updating patron store with identifier ${systemPatronId}");
+    
 
     String folioId = resultMap['id'];
 
