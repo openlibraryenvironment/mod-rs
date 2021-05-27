@@ -21,7 +21,6 @@ import org.olf.okapi.modules.directory.Symbol;
  *
  */
 public class ManualHostLMSService implements HostLMSActions {
-
   Map placeHold(String instanceIdentifier, String itemIdentifier) {
     def result=[:]
     result
@@ -43,8 +42,19 @@ public class ManualHostLMSService implements HostLMSActions {
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+
+    //FIXME this should be removed -- only here for testing purposes
+    def randNum = Math.random()
+
+    if (randNum < 0.5) {
+      return [
+        result:true,
+        reason: 'spoofed'
+      ]
+    }
+    
     return [
-      result:true,
+      result:false,
       reason: 'spoofed'
     ]
   }

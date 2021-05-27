@@ -292,7 +292,16 @@ public class ReshareActionService {
             pr.save(flush:true, failOnError:true);
           }
         } else {
-          // Make sure we save pr in case names have changed
+          // If we have deleted all failing requests, we can move to next state
+          if (pr.state.code != 'RES_AWAIT_SHIP') {
+            Status s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
+            // Log message differs from "fill request" to "add additional items"
+            def auditLogMessage = ('Fill request completed.')
+            auditEntry(pr, pr.state, s, auditLogMessage, null);
+            pr.state = s;
+          }
+
+          // Make sure we save pr in case names have changed or status has changed
           pr.save(flush:true, failOnError:true);
           result = true
           log.info("No item ids remain not checked into ReShare, return true");
