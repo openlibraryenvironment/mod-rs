@@ -157,9 +157,9 @@ public class ReshareActionService {
             if (ib._delete && rv.status.value == 'awaiting_check_in_to_reshare') {
               // Remove if deleted by incoming call and NCIP call hasn't succeeded yet
               pr.removeFromVolumes(rv);
-            } else if (rv.name != ib.name) {
+            } else if (ib.name && rv.name != ib.name) {
               // Allow changing of label up to shipping
-              rv.name = ib.name ?: pr.volume;
+              rv.name = ib.name;
             }
           }
           pr.save(failOnError: true)
