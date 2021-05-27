@@ -23,8 +23,8 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
   // This allows us to check whether each item in turn has succeeded NCIP call
   @Defaults([
-    'Filled; awaiting LMS check out', // Supplier's side
-    'Filled; LMS check out complete', // Supplier's side
+    'Awaiting LMS check out', // Supplier's side
+    'LMS check out complete', // Supplier's side
     'Completed', // Supplier's side
     'Awaiting temporary item creation', // Requester's side
     'Temporary item created in host LMS' // Requester's side

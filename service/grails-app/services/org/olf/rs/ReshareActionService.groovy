@@ -148,13 +148,13 @@ public class ReshareActionService {
             rv = new RequestVolume(
               name: ib.name ?: pr.volume,
               itemId: ib.itemId,
-              status: RequestVolume.lookupStatus('awaiting_check_in_to_reshare')
+              status: RequestVolume.lookupStatus('awaiting_lms_check_out')
             )
             pr.addToVolumes(rv)
           }
 
           if (rv) {
-            if (ib._delete && rv.status.value == 'awaiting_check_in_to_reshare') {
+            if (ib._delete && rv.status.value == 'awaiting_lms_check_out') {
               // Remove if deleted by incoming call and NCIP call hasn't succeeded yet
               pr.removeFromVolumes(rv);
             } else if (ib.name && rv.name != ib.name) {
@@ -167,7 +167,7 @@ public class ReshareActionService {
 
         // At this point we should have an accurate list of the calls that need to run/have succeeded
         def volumesNotCheckedIn = pr.volumes.findAll {rv ->
-          rv.status.value == 'awaiting_check_in_to_reshare'
+          rv.status.value == 'awaiting_lms_check_out'
         }
 
         if (volumesNotCheckedIn.size() > 0) {
@@ -265,7 +265,7 @@ public class ReshareActionService {
 
             // At this point we should have all volumes checked out. Check that again
             volumesNotCheckedIn = pr.volumes.findAll {rv ->
-              rv.status.value == 'awaiting_check_in_to_reshare'
+              rv.status.value == 'awaiting_lms_check_out'
             }
 
             Status s = null;

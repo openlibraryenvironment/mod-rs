@@ -725,6 +725,29 @@ public class ReshareApplicationEventHandlerService {
         if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
+
+        if (eventData.deliveryInfo.itemId.size() > 0) {
+          // Item ids coming in, handle those
+          eventData.deliveryInfo.itemId.each {iid ->
+            def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
+            if (matcher.size() > 0) {
+              // At this point we have an itemId of the form "multivol:<name>,<id>"
+              def iidId = matcher[0][2]
+              def iidName = matcher[0][1]
+
+              // Check if a RequestVolume exists for this itemId, and if not, create one
+              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+              if (!rv) {
+                rv = new RequestVolume(
+                  name: iidName ?: pr.volume,
+                  itemId: iidId,
+                  status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+                )
+                pr.addToVolumes(rv)
+              }
+            }
+          }
+        }
       }
 
       // Awesome - managed to look up patron request - see if we can action
