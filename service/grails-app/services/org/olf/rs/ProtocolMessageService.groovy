@@ -504,7 +504,10 @@ and sa.service.businessFunction.value=:ill
     exec(del) {
       deliveryInfo {
         dateSent(eventData.deliveryInfo.dateSent)
-        itemId(eventData.deliveryInfo.itemId)
+        // Build multiple ItemIds
+        eventData.deliveryInfo.itemId.collect {iid ->
+          itemId(iid)
+        }
         sentVia(eventData.deliveryInfo.sentVia)
         sentToPatron(eventData.deliveryInfo.sentToPatron)
         loanCondition(eventData.deliveryInfo.loanCondition)

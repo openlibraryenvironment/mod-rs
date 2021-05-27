@@ -22,7 +22,13 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   Date lastUpdated
 
   // This allows us to check whether each item in turn has succeeded NCIP call
-  @Defaults(['Awaiting check in to ReShare', 'Checked in to ReShare', 'Checked out of ReShare'])
+  @Defaults([
+    'Filled; awaiting LMS check out', // Supplier's side
+    'Filled; LMS check out complete', // Supplier's side
+    'Completed', // Supplier's side
+    'Awaiting temporary item creation', // Requester's side
+    'Temporary item created in host LMS' // Requester's side
+  ])
   RefdataValue status
   
   static constraints = {

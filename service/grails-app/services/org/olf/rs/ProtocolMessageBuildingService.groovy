@@ -217,8 +217,8 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
-    if( pr.selectedItemBarcode ) {
-      message.deliveryInfo['itemId'] = pr.selectedItemBarcode
+    if ( pr.volumes.size() > 0) {
+      message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}"}
     }
     
     if( pr?.dueDateRS ) {
