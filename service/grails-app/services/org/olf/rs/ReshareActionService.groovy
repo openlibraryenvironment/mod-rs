@@ -228,28 +228,6 @@ public class ReshareActionService {
               // Otherwise, if the checkout succeeded or failed, set appropriately
               
               if ( checkout_result.result == true ) {
-                statisticsService.incrementCounter('/activeLoans');
-                pr.activeLoan=true
-                pr.needsAttention=false;
-                pr.dueDateFromLMS=checkout_result?.dueDate;
-                if(!pr?.dueDateRS) {
-                  pr.dueDateRS = pr.dueDateFromLMS;
-                }
-                
-                try {
-                  pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);                  
-                } catch(Exception e) {
-                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
-                }
-                
-                try {
-                  pr.parsedDueDateRS = parseDateString(pr.dueDateRS);
-                } catch(Exception e) {
-                  log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
-                }
-
-                pr.overdue=false;
-                
                 RefdataValue volStatus = vol.lookupStatus('lms_check_out_complete')
                 if (volStatus) {
                   vol.status = volStatus
@@ -270,6 +248,27 @@ public class ReshareActionService {
 
             Status s = null;
             if (volumesNotCheckedIn.size() == 0) {
+              statisticsService.incrementCounter('/activeLoans');
+              pr.activeLoan=true
+              pr.needsAttention=false;
+              pr.dueDateFromLMS=checkout_result?.dueDate;
+              if(!pr?.dueDateRS) {
+                pr.dueDateRS = pr.dueDateFromLMS;
+              }
+              
+              try {
+                pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);                  
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
+              }
+              
+              try {
+                pr.parsedDueDateRS = parseDateString(pr.dueDateRS);
+              } catch(Exception e) {
+                log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
+              }
+
+              pr.overdue=false;
               s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
 
               // Log message differs from "fill request" to "add additional items"
@@ -688,6 +687,7 @@ public class ReshareActionService {
               message, 
               null);
             vol.status=newVolState;
+            vol.save(failOnError: true)
           }
           else {
             String message = "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "
@@ -730,6 +730,12 @@ public class ReshareActionService {
         result = true;
         sendRequestingAgencyMessage(pr, 'Received', actionParams);
       } else {
+        String message = "Host LMS integration: AcceptItem call failed for some items."
+        auditEntry(pr,
+          pr.state,
+          pr.state,
+          message,
+          null);
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
       }
@@ -750,26 +756,41 @@ public class ReshareActionService {
   public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
     boolean result = false;
     log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
+
+    def volumesNotCheckedOut = patron_request.volumes.findAll {rv ->
+      rv.status.value == 'awaiting_lms_check_in'
+    }
     try {
-      // Call the host lms to check the item out of the host system and in to reshare
-      // def accept_result = host_lms.checkInItem(patron_request.hrid)
+      // Call the host lms to check the item out of reshare and in to the host system
       HostLMSActions host_lms = hostLMSService.getHostLMSActions();
       if ( host_lms ) {
-        def check_in_result = host_lms.checkInItem(patron_request.selectedItemBarcode)
-        if(check_in_result?.result == true) {
-          statisticsService.decrementCounter('/activeLoans');
-          patron_request.needsAttention=false;
-          patron_request.activeLoan=false;
-          // Let the user know if the success came from a real call or a spoofed one
-          String message = "Complete request succeeded. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
-          auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
-          result = true;
-        } else {
-          patron_request.needsAttention=true;
-          auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+check_in_result.problems?.toString(), null);
+        // Iterate over volumes not yet checked out in for loop so we can break out if we need to
+        for (def vol : volumesNotCheckedOut) {
+          def check_in_result = host_lms.checkInItem(vol.itemId)
+          if(check_in_result?.result == true) {
+            String message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+            auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+            
+            def newVolStatus = vol.lookupStatus('completed')
+            vol.status = newVolStatus
+            vol.save(failOnError: true)
+          } else {
+            patron_request.needsAttention=true;
+            auditEntry(
+              patron_request,
+              patron_request.state,
+              patron_request.state,
+              "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
+              null);
+          }
         }
       } else {
-        auditEntry(patron_request, patron_request.state, patron_request.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
+        auditEntry(
+          patron_request,
+          patron_request.state,
+          patron_request.state,
+          'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.',
+          null);
         patron_request.needsAttention=true;
       }
     }
@@ -779,10 +800,36 @@ public class ReshareActionService {
       auditEntry(patron_request,
         patron_request.state,
         patron_request.state,
-        'Host LMS integration: NCIP CheckinItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message,
+        "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+e.message,
         null);
       result = false;
     }
+    patron_request.save(flush:true, failOnError:true);
+
+    // At this point we should have all volumes checked out. Check that again
+    volumesNotCheckedOut = patron_request.volumes.findAll {rv ->
+      rv.status.value == 'awaiting_lms_check_in'
+    }
+
+    if (volumesNotCheckedOut.size() == 0) {
+      statisticsService.decrementCounter('/activeLoans');
+      patron_request.needsAttention=false;
+      patron_request.activeLoan=false;
+      // Let the user know if the success came from a real call or a spoofed one
+      String message = "Complete request succeeded. Host LMS integration: CheckinItem call succeeded for all items."
+      auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+      result = true;
+    } else {
+      String message = "Host LMS integration: NCIP CheckinItem calls failed for some items."
+      auditEntry(patron_request,
+        patron_request.state,
+        patron_request.state,
+        message,
+        null);
+      patron_request.needsAttention=true;
+      patron_request.save(flush:true, failOnError:true);
+    }
+
     return result;
   }
 

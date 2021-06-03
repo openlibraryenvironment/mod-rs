@@ -248,9 +248,6 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
               break;
             case 'supplierCheckOutOfReshare':
               // SimpleTransition does a save
-              log.debug("supplierCheckOutOfReshare::send status change");
-              reshareActionService.sendStatusChange(patron_request, "LoanCompleted", request.JSON.actionParams?.note)
-
               log.debug("supplierCheckOutOfReshare::check out of reshare");
               if(!reshareActionService.checkOutOfReshare(patron_request, request.JSON.actionParams)) {
                 response.status = 400;
@@ -258,7 +255,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.message='NCIP CheckinItem call failed'
                 patron_request.save(flush:true, failOnError:true);
               } else {
-                log.debug("supplierCheckOutOfReshare::transition");
+                log.debug("supplierCheckOutOfReshare::transition and send status change");
+                reshareActionService.sendStatusChange(patron_request, "LoanCompleted", request.JSON.actionParams?.note)
                 result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams,'Responder',  'RES_COMPLETE');
               }
               break;
