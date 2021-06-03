@@ -408,7 +408,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     audit(sort:'dateCreated', order:'desc')
 
-    volumes cascade: 'all-delete-orphan', sort: 'name'
+    volumes cascade: 'all-delete-orphan'
   }
 
   /**
