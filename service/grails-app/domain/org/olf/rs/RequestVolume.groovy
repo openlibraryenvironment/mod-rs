@@ -25,6 +25,7 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   @Defaults([
     'Awaiting LMS check out', // Supplier's side
     'LMS check out complete', // Supplier's side
+    'Awaiting LMS check in', // Supplier's side
     'Completed', // Supplier's side
     'Awaiting temporary item creation', // Requester's side
     'Temporary item created in host LMS' // Requester's side

@@ -250,7 +250,7 @@ public class ReshareActionService {
 
                 pr.overdue=false;
                 
-                RefdataValue volStatus = vol.lookupStatus('Checked in to ReShare')
+                RefdataValue volStatus = vol.lookupStatus('lms_check_out_complete')
                 if (volStatus) {
                   vol.status = volStatus
                 }
@@ -656,51 +656,82 @@ public class ReshareActionService {
     // Check the item in to the local LMS
     HostLMSActions host_lms = hostLMSService.getHostLMSActions();
     if ( host_lms ) {
-      try {
-        // Call the host lms to check the item out of the host system and in to reshare
-        Map accept_result = host_lms.acceptItem(pr.hrid, // Item Barcode - using Request human readable ID for now
-                                                pr.hrid,
-                                                pr.patronIdentifier, // user_idA
-                                                pr.author, // author,
-                                                pr.title, // title,
-                                                pr.isbn, // isbn,
-                                                pr.localCallNumber, // call_number,
-                                                pr.pickupLocationCode, // pickup_location,
-                                                null) // requested_action
+      def volumesWithoutTemporaryItem = pr.volumes.findAll {rv ->
+        rv.status.value == 'awaiting_temporary_item_creation'
+      }
+      // Iterate over volumes without temp item in for loop so we can break out if we need to
+      for (def vol : volumesWithoutTemporaryItem) {
+        try {
 
-        if ( accept_result?.result == true ) {
-          // Mark item as awaiting circ
-          def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-          // Let the user know if the success came from a real call or a spoofed one
-          String message = "Receive succeeded. ${accept_result.reason=='spoofed' ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}"
+          // Item Barcode - using Request human readable ID + volId for now
+          def temporaryItemBarcode = "${pr.hrid}:${vol.itemId}"
 
-          auditEntry(pr,
-            pr.state,
-            new_state,
-            message, 
-            null);
-          pr.state=new_state;
-          pr.needsAttention=false;
-          pr.save(flush:true, failOnError:true);
-          log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-          result = true;
+          // Call the host lms to check the item out of the host system and in to reshare
+          Map accept_result = host_lms.acceptItem(temporaryItemBarcode,
+                                                  pr.hrid,
+                                                  pr.patronIdentifier, // user_idA
+                                                  pr.author, // author,
+                                                  pr.title, // title,
+                                                  pr.isbn, // isbn,
+                                                  pr.localCallNumber, // call_number,
+                                                  pr.pickupLocationCode, // pickup_location,
+                                                  null) // requested_action
+
+          if ( accept_result?.result == true ) {
+            // Let the user know if the success came from a real call or a spoofed one
+            String message = "Receive succeeded for item id: ${vol.itemId}. ${accept_result.reason=='spoofed' ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}"
+            def newVolState = RequestVolume.lookupStatus('temporary_item_created_in_host_lms')
+
+            auditEntry(pr,
+              pr.state,
+              pr.state,
+              message, 
+              null);
+            vol.status=newVolState;
+          }
+          else {
+            String message = "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "
+            // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is.
+            // IF THIS NEEDS TO GO INTO ANOTHER STATE, WE SHOULD DO IT AFTER ALL VOLS HAVE BEEN ATTEMPTED
+            auditEntry(pr,
+              pr.state,
+              pr.state,
+              message+accept_result?.problems, 
+              null);
+          }
         }
-        else {
-          String message = 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '
-          // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is
-          auditEntry(pr,
-            pr.state,
-            pr.state,
-            message+accept_result?.problems, 
-            null);
-          pr.needsAttention=true;
-          pr.save(flush:true, failOnError:true);
+        catch ( Exception e ) {
+          log.error("NCIP Problem",e);
+          auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+e.message, null);
         }
       }
-      catch ( Exception e ) {
-        log.error("NCIP Problem",e);
+      pr.save(flush:true, failOnError:true);
+
+      // At this point we should have all volumes' temporary items created. Check that again
+      volumesWithoutTemporaryItem = pr.volumes.findAll {rv ->
+        rv.status.value == 'awaiting_temporary_item_creation'
+      }
+
+      if (volumesWithoutTemporaryItem.size() == 0) {
+        // Mark item as awaiting circ
+        def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
+        // Let the user know if the success came from a real call or a spoofed one
+        String message = "Host LMS integration: AcceptItem call succeeded for all items."
+
+        auditEntry(pr,
+          pr.state,
+          new_state,
+          message, 
+          null);
+        pr.state=new_state;
+        pr.needsAttention=false;
+        pr.save(flush:true, failOnError:true);
+        log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
+        result = true;
+        sendRequestingAgencyMessage(pr, 'Received', actionParams);
+      } else {
         pr.needsAttention=true;
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration: NCIP AcceptItem call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+e.message, null);
+        pr.save(flush:true, failOnError:true);
       }
     } else {
         auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
@@ -708,7 +739,6 @@ public class ReshareActionService {
         pr.save(flush:true, failOnError:true);
     }
     checkRequestOverdue(pr);
-    sendRequestingAgencyMessage(pr, 'Received', actionParams);
 
     return result;
   }

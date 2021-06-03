@@ -37,13 +37,8 @@ public class ManualHostLMSService implements HostLMSActions {
     return result
   }
 
-  public Map checkoutItem(String requestId,
-                          String itemBarcode,
-                          String borrowerBarcode,
-                          Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
-
-    //FIXME this should be removed -- only here for testing purposes
+  //FIXME this should be removed -- only here for testing purposes
+  private Map spoofFailingResult() {
     def randNum = Math.random()
 
     if (randNum < 0.5) {
@@ -59,6 +54,23 @@ public class ManualHostLMSService implements HostLMSActions {
     ]
   }
 
+  public Map checkoutItem(String requestId,
+                          String itemBarcode,
+                          String borrowerBarcode,
+                          Symbol requesterDirectorySymbol) {
+    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+
+
+    //FIXME this should be removed -- only here for testing purposes
+    return spoofFailingResult()
+
+    /* return [
+      result:true,
+      reason: 'spoofed'
+    ] */
+    
+  }
+
   public Map acceptItem(String item_id,
                             String request_id,
                             String user_id,
@@ -68,17 +80,23 @@ public class ManualHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
-    return [
+
+    //FIXME this should be removed -- only here for testing purposes
+    return spoofFailingResult()
+    /* return [
       result:true,
       reason: 'spoofed'
-    ];
+    ]; */
   }
 
   public Map checkInItem(String item_id) {
-    return [
+    //FIXME this should be removed -- only here for testing purposes
+    return spoofFailingResult()
+
+    /* return [
       result:true,
       reason: 'spoofed'
-    ];
+    ]; */
   }
 
 }

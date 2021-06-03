@@ -726,7 +726,7 @@ public class ReshareApplicationEventHandlerService {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
 
-        if (eventData.deliveryInfo.itemId.size() > 0) {
+        if ((eventData?.deliveryInfo?.itemId ?: []).size() > 0) {
           // Item ids coming in, handle those
           eventData.deliveryInfo.itemId.each {iid ->
             def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
@@ -881,6 +881,10 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'ShippedReturn':
             def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+            pr.volumes?.each {vol ->
+              vol.status = vol.lookupStatus('awaiting_lms_check_in')
+            }
+
             auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
             pr.state = new_state;
             pr.save(flush: true, failOnError: true)
