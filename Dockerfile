@@ -1,4 +1,4 @@
-FROM adoptopenjdk:11-jdk-openj9-bionic
+FROM folioci/alpine-jre-openjdk11:latest
 MAINTAINER Ian.Ibbotson@k-int.com
 VOLUME /tmp
 COPY service/build/libs/mod-rs-*.*.*.jar mod-rs.war
