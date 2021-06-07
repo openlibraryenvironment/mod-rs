@@ -190,6 +190,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                'maximumRecords':'3' ]
           if ( getHoldingsQueryRecsyn() ) {
             request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+            log.debug("Using recordSchema ${getHoldingsQueryRecsyn()}" );
+          } else {
+            log.debug("No recordSchema found");
           }
       }
   
