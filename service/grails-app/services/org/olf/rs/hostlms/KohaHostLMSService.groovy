@@ -51,6 +51,11 @@ public class KohaHostLMSService extends BaseHostLMSService {
 
   }
 
+  @Override
+  protected String getHoldingsQueryRecsyn() {
+    return 'marcxml';
+  }
+
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
@@ -74,6 +79,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
     //             <subfield code="d">BOOK</subfield>
     //             <subfield code="f">2</subfield>
     //           </datafield>
+    log.debug("KohaHostLMSService extracting available items from record ${record}");
     Map<String,ItemLocation> availability_summary = [:]
     record.datafield.each { df ->
       if ( df.'@tag' == "952" ) {
