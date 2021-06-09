@@ -23,6 +23,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.routing.RequestRouter
 
 /**
  * Handle application events.
@@ -296,7 +297,12 @@ public class ReshareApplicationEventHandlerService {
 
           // We will shortly refactor this block to use requestRouterService to get the next block of requests
 
-          List<RankedSupplier> possible_suppliers = requestRouterService.findMoreSuppliers(req.getDescriptiveMetadata(), []);
+          RequestRouter selected_router = requestRouterService.getRequestRouter();
+
+          if ( selected_router == null ) 
+            throw new RuntimeException('Unable to locate router');
+
+          List<RankedSupplier> possible_suppliers = selected_router.findMoreSuppliers(req.getDescriptiveMetadata(), []);
 
           log.debug("Created ranked rota: ${possible_suppliers}")
 
@@ -337,7 +343,7 @@ public class ReshareApplicationEventHandlerService {
             def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                       'Ratio-Ranked lending string calculated from shared index', null);
+                       'Ratio-Ranked lending string calculated by '+selected_router.getRouterInfo()?.description, null);
             req.save(flush:true, failOnError:true)
           }
           else {

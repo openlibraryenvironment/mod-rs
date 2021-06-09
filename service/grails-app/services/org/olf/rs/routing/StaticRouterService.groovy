@@ -55,7 +55,8 @@ public class StaticRouterService implements RequestRouter {
 
   public Map getRouterInfo() {
     return [
-      'name':'StaticRouterService'
+      'name':'StaticRouterService',
+      'description': 'Static Routing Service'
     ]
   }
 
