@@ -23,47 +23,6 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
-logger ('com.k_int', DEBUG)
-logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
-logger ('com.k_int.okapi', WARN)
-logger ('com.k_int.okapi.DataloadingService', DEBUG)
-logger ('com.k_int.okapi.OkapiTenantAdminService', WARN)
-logger ('com.k_int.okapi.TenantController', DEBUG)
-logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
-logger ('folio', DEBUG)
-logger ('grails.app.init', DEBUG)
-logger ('grails.app.controllers', DEBUG)
-logger ('grails.app.domains', DEBUG)
-logger ('grails.app.jobs', DEBUG)
-logger ('grails.app.services', DEBUG)
-logger ('mod.rs', DEBUG)
-logger ('okapi', INFO)
-logger ('org.grails.datastore', WARN)
-logger ('org.olf', DEBUG)
-logger ('org.olf.rs.EventConsumerService', DEBUG)
-logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
-logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
-
-// logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
-// logger ('com.k_int.okapi.OkapiClient', WARN)
-// logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
-
-// Debugging call to mod-email
-logger ('com.k_int.okapi.OkapiClient', TRACE)
-logger ('groovyx.net.http.HttpBuilder', TRACE)
-logger ('groovyx.net.http.HttpBuilder', TRACE)
-logger ('org.hibernate.orm.deprecation', ERROR)
-
-// logger ('com.k_int.okapi.OkapiClient', TRACE)
-// logger 'groovy.net.http.JavaHttpBuilder', DEBUG
-// logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
-// logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
-
-// Uncomment below logging for output of OKAPI client http.
-//logger 'groovy.net.http.JavaHttpBuilder', DEBUG
-//logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
-//logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
-
 if (Environment.currentEnvironment == Environment.TEST) {
   // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
   // logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
@@ -72,7 +31,50 @@ if (Environment.currentEnvironment == Environment.TEST) {
 
 
 def targetDir = BuildSettings.TARGET_DIR
-if (Environment.isDevelopmentMode() && targetDir != null) {
+
+if (Environment.isDevelopmentMode() ) {
+  logger ('com.k_int', DEBUG)
+  logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
+  logger ('com.k_int.okapi', WARN)
+  logger ('com.k_int.okapi.DataloadingService', DEBUG)
+  logger ('com.k_int.okapi.OkapiTenantAdminService', WARN)
+  logger ('com.k_int.okapi.TenantController', DEBUG)
+  logger ('com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers', WARN)
+  logger ('folio', DEBUG)
+  logger ('grails.app.init', DEBUG)
+  logger ('grails.app.controllers', DEBUG)
+  logger ('grails.app.domains', DEBUG)
+  logger ('grails.app.jobs', DEBUG)
+  logger ('grails.app.services', DEBUG)
+  logger ('mod.rs', DEBUG)
+  logger ('okapi', INFO)
+  logger ('org.grails.datastore', WARN)
+  logger ('org.olf', DEBUG)
+  logger ('org.olf.rs.EventConsumerService', DEBUG)
+  logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
+  logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
+  
+  // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
+  // logger ('com.k_int.okapi.OkapiClient', WARN)
+  // logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
+  
+  // Debugging call to mod-email
+  logger ('com.k_int.okapi.OkapiClient', TRACE)
+  logger ('groovyx.net.http.HttpBuilder', TRACE)
+  logger ('groovyx.net.http.HttpBuilder', TRACE)
+  logger ('org.hibernate.orm.deprecation', ERROR)
+  
+  // logger ('com.k_int.okapi.OkapiClient', TRACE)
+  // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+  // logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+  // logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+  
+  // Uncomment below logging for output of OKAPI client http.
+  //logger 'groovy.net.http.JavaHttpBuilder', DEBUG
+  //logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
+  //logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
+}
+else if (Environment.isDevelopmentMode() && targetDir != null) {
     appender("FULL_STACKTRACE", FileAppender) {
         file = "${targetDir}/stacktrace.log"
         append = true
@@ -82,4 +84,9 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     }
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
 }
+else {
+  logger ('com.k_int', INFO)
+  logger ('org.olf', INFO)
+}
+
 root(WARN, ['STDOUT'])
