@@ -256,6 +256,8 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
                 output + (output != '' ? ', ' : '') + (loc.name ?: loc.code)
               })
 
+              String locFilters = loccodes.collect{"location.${it}"}.join('%2C')
+
               // 'from':'admin@reshare.org',
               def tmplResult = templatingService.performTemplate(
                 tc,
@@ -264,7 +266,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
                   pendingRequests: pending_ps_printing,
                   numRequests:pending_ps_printing.size(),
                   summary: pull_slip_overall_summary,
-                  reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=state.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated"
+                  reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}%2Cstate.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated"
                 ],
                 "en"
               );
