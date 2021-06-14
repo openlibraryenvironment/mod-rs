@@ -404,9 +404,9 @@ public class ReshareApplicationEventHandlerService {
               if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
                 log.debug("Responder is local, going to review state");
 
+                def current_state = req.state;
                 req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-                auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                  lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+                auditEntry(req, current_state, req.state, 'Sent to local review', null);
                 req.save(flush:true, failOnError:true);
                 return; //Nothing more to do here
               }
