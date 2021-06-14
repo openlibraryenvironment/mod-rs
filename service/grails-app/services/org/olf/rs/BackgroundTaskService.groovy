@@ -56,7 +56,10 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
-    patronNoticeService.processQueue(tenant)
+
+    if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
+      patronNoticeService.processQueue(tenant)
+    }
 
 
     // If somehow we get asked to perform the background tasks, but a thread is already running, then just return

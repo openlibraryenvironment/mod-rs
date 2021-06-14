@@ -3,6 +3,9 @@
 # All root settings (anything not under the 'environements' key) here are loaded for every profile. 
 ###
 
+reshare:
+    patronNoticesEnabled: false
+
 grails:
     profile: rest-api
     codegen:
