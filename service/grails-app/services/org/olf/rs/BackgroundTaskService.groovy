@@ -17,7 +17,7 @@ import java.util.UUID;
 import groovy.text.GStringTemplateEngine;
 import com.k_int.web.toolkit.settings.AppSetting
 import java.util.TimeZone;
-
+import java.text.NumberFormat;
 import org.olf.templating.*
 
 /**
@@ -56,6 +56,20 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
+
+    Runtime runtime = Runtime.getRuntime();
+
+    NumberFormat format = NumberFormat.getInstance();
+
+    StringBuilder sb = new StringBuilder();
+    long maxMemory = runtime.maxMemory();
+    long allocatedMemory = runtime.totalMemory();
+    long freeMemory = runtime.freeMemory();
+
+    log.info("free memory: " + format.format(freeMemory / 1024));
+    log.info("allocated memory: " + format.format(allocatedMemory / 1024));
+    log.info("max memory: " + format.format(maxMemory / 1024));
+    log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
 
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
       patronNoticeService.processQueue(tenant)
