@@ -4,7 +4,8 @@
 ###
 
 reshare:
-    patronNoticesEnabled: false
+    patronNoticesEnabled: true
+
 
 grails:
     profile: rest-api

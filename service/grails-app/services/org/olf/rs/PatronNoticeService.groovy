@@ -94,22 +94,37 @@ public class PatronNoticeService {
   public void processQueue(String tenant) {
     log.debug("Processing patron notice queue for tenant ${tenant}");
 
-    // KafkaConsumers cannot be shared - when we recieve multiple timers for different tenants this method
-    // will be called causing us to try to reuse the same consumer for each tenant. Refactoring to
-    // dynamically create the consumer here and then destroy it - KafkaConsumer is a heavy object and this is not
-    // an ideal way of working - it's the only pragmatic way forward at the moment tho.
-    KafkaConsumer consumer = new KafkaConsumer(props)
+    def consumerRecords = null;
+    KafkaConsumer consumer = null;
 
-    consumer.subscribe(["${tenant}_PatronNoticeEvents".toString()]);
-    // TODO pass a Duration object (long is deprecated) and determine a less-arbitrary amount of time
-    def consumerRecords = consumer.poll(2000);
-    // commit immediately though we've not processed the records as even successfully passing it to
-    // mod-email does not guarantee that a notice has been delivered but leaving it on the queue
-    // does incur some risk of sending multiple copies
-    consumer.commitAsync();
-    // relies on commitAsync reading subscriptions up front, perhaps best to
-    // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
-    consumer.unsubscribe();
+    try {
+      // KafkaConsumers cannot be shared - when we recieve multiple timers for different tenants this method
+      // will be called causing us to try to reuse the same consumer for each tenant. Refactoring to
+      // dynamically create the consumer here and then destroy it - KafkaConsumer is a heavy object and this is not
+      // an ideal way of working - it's the only pragmatic way forward at the moment tho.
+      consumer = new KafkaConsumer(props)
+  
+      consumer.subscribe(["${tenant}_PatronNoticeEvents".toString()]);
+      // TODO pass a Duration object (long is deprecated) and determine a less-arbitrary amount of time
+      consumerRecords = consumer.poll(2000);
+      // commit immediately though we've not processed the records as even successfully passing it to
+      // mod-email does not guarantee that a notice has been delivered but leaving it on the queue
+      // does incur some risk of sending multiple copies
+      consumer.commitAsync();
+      // relies on commitAsync reading subscriptions up front, perhaps best to
+      // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
+      consumer.unsubscribe();
+  
+    }
+    catch (Exception e) {
+      log.error("Problem collecting patron notice events",e);
+    }
+    finally {
+      if ( consumer != null ) {
+        consumer.close()
+      }
+    }
+
     consumerRecords.each{ record ->
       try {
         log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}");
