@@ -25,6 +25,8 @@ import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.routing.RequestRouter
 
+import groovy.json.JsonSlurper
+
 /**
  * Handle application events.
  *
@@ -236,7 +238,27 @@ public class ReshareApplicationEventHandlerService {
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecords");
           List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.systemInstanceIdentifier]);
-          if (bibRecords?.size() == 1) req.bibRecord = bibRecords[0];
+          if (bibRecords?.size() == 1) {
+            req.bibRecord = bibRecords[0];
+            //If our OCLC field isn't set, let's try to set it from our bibrecord
+            if(!req.oclcNumber) {
+              try {
+                slurper = new JsonSlurper();
+                bibJson = slurper.parseText(bibRecords[0]);
+                for(identifier in bibJson.identifiers) {
+                  def oclcId = getOCLCId(identifier.value);
+                  if(oclcId) {
+                    log.debug("Setting request oclcNumber to ${oclcId}");
+                    req.oclcNumber = oclcId;
+                    break;
+                  }
+                }         
+              } catch(Exception e) {
+                log.warn("Unable to parse bib json: ${e}");
+              }
+            }
+          }
+
         }
         else {
           log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
@@ -1359,6 +1381,15 @@ public class ReshareApplicationEventHandlerService {
       returnList.add("directoryId: ${entry.directoryId} loadBalancingScore: ${entry.loadBalancingScore} rotaPosition: ${entry.rotaPosition}");
     }
     return returnList.join(",");
+  }
+
+  public static String getOCLCId( String id ) {
+    def pattern = ~/^ocn(\d+)/;
+    def matcher = id =~ pattern;
+    if(matcher.find()) {
+      return matcher.group(1);
+    }
+    return null;
   }
   
 }
