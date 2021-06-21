@@ -243,7 +243,7 @@ public class ReshareApplicationEventHandlerService {
             //If our OCLC field isn't set, let's try to set it from our bibrecord
             if(!req.oclcNumber) {
               try {
-                slurper = new JsonSlurper();
+                def slurper = new JsonSlurper();
                 bibJson = slurper.parseText(bibRecords[0]);
                 for(identifier in bibJson.identifiers) {
                   def oclcId = getOCLCId(identifier.value);
