@@ -244,7 +244,7 @@ public class ReshareApplicationEventHandlerService {
             if(!req.oclcNumber) {
               try {
                 def slurper = new JsonSlurper();
-                bibJson = slurper.parseText(bibRecords[0]);
+                def bibJson = slurper.parseText(bibRecords[0]);
                 for(identifier in bibJson.identifiers) {
                   def oclcId = getOCLCId(identifier.value);
                   if(oclcId) {
