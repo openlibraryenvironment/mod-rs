@@ -157,7 +157,7 @@ public class ReshareApplicationEventHandlerService {
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-
+    log.debug("LOGDEBUG: ${eventData}")
       def req = delayedGet(eventData.payload.id, true);
       log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
@@ -284,7 +284,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req.isRequester}");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req?.isRequester}");
       }
     }
   }

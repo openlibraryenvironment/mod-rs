@@ -18,8 +18,8 @@ json g.render(patronRequest, [expand: ['state',
                                        ],
                               excludes: ['volumes']]) {
   validActions patronRequest.getValidActions()
-  volumes g.render(patronRequest.volumes.sort {a,b ->
+  volumes g.render(patronRequest.volumes?.sort {a,b ->
     a.name <=> b.name ?: a.itemId <=> b.itemId
-  })
+  }) ?: []
 }
 
