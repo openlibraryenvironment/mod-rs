@@ -36,7 +36,7 @@ spec:
             - name: OKAPI_SERVICE_HOST
               value: "okapi"
             - name: JAVA_OPTIONS
-              value: "-XX:MaxRAMPercentage=66.0"
+              value: "-server -XX:+UseContainerSupport -XX:MaxRAMPercentage=55.0 -XX:+PrintFlagsFinal"
             - name: EVENTS_PUBLISHER_BOOTSTRAP_SERVERS
               value: "reshare-kafka-release:9092" 
             - name: EVENTS_CONSUMER_BOOTSTRAP_SERVERS

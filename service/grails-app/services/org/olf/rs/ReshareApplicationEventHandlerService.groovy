@@ -23,6 +23,9 @@ import com.k_int.web.toolkit.settings.AppSetting
 import com.k_int.web.toolkit.refdata.*
 import static groovyx.net.http.HttpBuilder.configure
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.routing.RequestRouter
+
+import groovy.json.JsonSlurper
 
 /**
  * Handle application events.
@@ -235,7 +238,27 @@ public class ReshareApplicationEventHandlerService {
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecords");
           List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.systemInstanceIdentifier]);
-          if (bibRecords?.size() == 1) req.bibRecord = bibRecords[0];
+          if (bibRecords?.size() == 1) {
+            req.bibRecord = bibRecords[0];
+            //If our OCLC field isn't set, let's try to set it from our bibrecord
+            if(!req.oclcNumber) {
+              try {
+                def slurper = new JsonSlurper();
+                def bibJson = slurper.parseText(bibRecords[0]);
+                for(identifier in bibJson.identifiers) {
+                  def oclcId = getOCLCId(identifier.value);
+                  if(oclcId) {
+                    log.debug("Setting request oclcNumber to ${oclcId}");
+                    req.oclcNumber = oclcId;
+                    break;
+                  }
+                }         
+              } catch(Exception e) {
+                log.warn("Unable to parse bib json: ${e}");
+              }
+            }
+          }
+
         }
         else {
           log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
@@ -296,7 +319,12 @@ public class ReshareApplicationEventHandlerService {
 
           // We will shortly refactor this block to use requestRouterService to get the next block of requests
 
-          List<RankedSupplier> possible_suppliers = requestRouterService.findMoreSuppliers(req.getDescriptiveMetadata(), []);
+          RequestRouter selected_router = requestRouterService.getRequestRouter();
+
+          if ( selected_router == null ) 
+            throw new RuntimeException('Unable to locate router');
+
+          List<RankedSupplier> possible_suppliers = selected_router.findMoreSuppliers(req.getDescriptiveMetadata(), []);
 
           log.debug("Created ranked rota: ${possible_suppliers}")
 
@@ -337,7 +365,7 @@ public class ReshareApplicationEventHandlerService {
             def old_state = req.state;
             req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
             auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                       'Ratio-Ranked lending string calculated from shared index', null);
+                       'Ratio-Ranked lending string calculated by '+selected_router.getRouterInfo()?.description, null);
             req.save(flush:true, failOnError:true)
           }
           else {
@@ -404,9 +432,9 @@ public class ReshareApplicationEventHandlerService {
               if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
                 log.debug("Responder is local, going to review state");
 
+                def current_state = req.state;
                 req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-                auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                  lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW'), 'Sent to local review', null);
+                auditEntry(req, current_state, req.state, 'Sent to local review', null);
                 req.save(flush:true, failOnError:true);
                 return; //Nothing more to do here
               }
@@ -1380,6 +1408,15 @@ public class ReshareApplicationEventHandlerService {
       returnList.add("directoryId: ${entry.directoryId} loadBalancingScore: ${entry.loadBalancingScore} rotaPosition: ${entry.rotaPosition}");
     }
     return returnList.join(",");
+  }
+
+  public static String getOCLCId( String id ) {
+    def pattern = ~/^ocn(\d+)/;
+    def matcher = id =~ pattern;
+    if(matcher.find()) {
+      return matcher.group(1);
+    }
+    return null;
   }
   
 }

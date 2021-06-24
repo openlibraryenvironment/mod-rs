@@ -21,7 +21,8 @@ public class FoliosharedindexRouterService implements RequestRouter {
 
   public Map getRouterInfo() {
     return [
-      'name':'FoliosharedindexRouterService'
+      'name':'FoliosharedindexRouterService',
+      'description': 'Shared Index Routing Service'
     ]
   }
 

@@ -5,6 +5,7 @@ import static groovy.json.JsonOutput.*
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
+import com.k_int.web.toolkit.async.WithPromises
 import grails.async.Promise
 import grails.core.GrailsApplication
 import grails.events.EventPublisher
@@ -13,6 +14,8 @@ import groovy.json.JsonSlurper
 import grails.web.databinding.DataBinder
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import grails.gorm.multitenancy.Tenants
+
+
 
 
 /**
@@ -58,7 +61,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
      * Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
      */
 
-    Promise p = task {
+    Promise p = WithPromises.task {
       consumePatronRequestEvents();
     }
 
