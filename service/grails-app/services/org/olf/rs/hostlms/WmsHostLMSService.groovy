@@ -92,6 +92,8 @@ public class WmsHostLMSService extends BaseHostLMSService {
     AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address')
     AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username')
     AppSetting wms_connector_password = AppSetting.findByKey('wms_connector_password')
+    AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
+    AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
 
     String z3950Connector = wms_connector_address?.value
 
@@ -99,12 +101,15 @@ public class WmsHostLMSService extends BaseHostLMSService {
       request.uri = z3950Connector
     }.get {
         request.uri.query = [
-                              'version':'1.1',
+                              'version':'2.0',
                               'operation': 'searchRetrieve',
                               'x-username': wms_connector_username?.value,
                               'x-password': wms_connector_password?.value,
+                              'user': wms_api_key?.value,
+                              'password': wms_api_secret?.value,
                               'query': query
                             ]
+        log.debug("Querying connector with URL ${request.uri?.toURL().toString()}");
     }
     log.debug("Got Z3950 response: ${z_response}")
 
