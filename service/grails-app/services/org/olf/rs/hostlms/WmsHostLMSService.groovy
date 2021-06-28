@@ -108,7 +108,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
                               'x-password': wms_connector_password?.value,
                               'query': query
                             ]
-        log.debug("Querying connector with URL ${request.uri?.toURL().toString()}");
+        log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
     }
     log.debug("Got Z3950 response: ${z_response}")
 
