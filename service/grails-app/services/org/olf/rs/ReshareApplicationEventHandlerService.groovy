@@ -407,6 +407,7 @@ public class ReshareApplicationEventHandlerService {
         if ( req.rota.size() > 0 ) {
 
           Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
+          log.debug("Built request message request: ${request_message_request}")
 
           boolean request_sent = false;
 
