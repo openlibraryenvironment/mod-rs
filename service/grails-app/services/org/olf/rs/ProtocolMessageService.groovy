@@ -425,6 +425,8 @@ and sa.service.businessFunction.value=:ill
 
         // Should this be here?
         patronNote(eventData.bibliographicInfo.patronNote)
+
+        oclcNumber(eventData.bibliographicInfo.oclcNumber)
       }
     }
   }
