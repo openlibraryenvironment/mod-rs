@@ -21,6 +21,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
     AppSetting wms_lookup_patron_endpoint = AppSetting.findByKey('wms_lookup_patron_endpoint')
     
+    
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
       protocol: "WMS",
@@ -95,9 +96,10 @@ public class WmsHostLMSService extends BaseHostLMSService {
     AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
     AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
     AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
+    
 
     //API key and API secret get embedded in the URL
-    String z3950Connector = "${wms_connector_address?.value},user=${wms_api_key?.value}&password=${wms_api_secret?.value}"
+    String z3950Connector = "${wms_connector_address?.value},user=${wms_api_key?.value}&password=${wms_api_secret?.value}&x-registryId=${wms_registry_id?.value}"
 
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
@@ -106,8 +108,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
                               'version':'2.0',
                               'operation': 'searchRetrieve',
                               'x-username': wms_connector_username?.value,
-                              'x-password': wms_connector_password?.value,
-                              'registryId': wms_registry_id?.value,
+                              'x-password': wms_connector_password?.value,                              
                               'query': query
                           
                             ]
