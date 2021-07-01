@@ -1385,10 +1385,10 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public static String getOCLCId( String id ) {
-    def pattern = ~/^ocn(\d+)/;
+    def pattern = ~/^(ocn|ocm)(\d+)/;
     def matcher = id =~ pattern;
     if(matcher.find()) {
-      return matcher.group(1);
+      return matcher.group(2);
     }
     return null;
   }
