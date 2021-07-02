@@ -37,4 +37,46 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP1_SOCKET", strictSocket:true]).circulationClient;
   }
 
+  @Override
+  /*
+    Instead of having using a localLocation and a shelvingLocation field, the Voyager result
+    simply stores both in the localLocation field and separates them with a dash. If there is
+    no dash-separated name, assume it is only the location and there is no shelving location
+    provided. In the event of not finding a shelving location in the localLocation field, we'll
+    check for a shelvingLocation field just in case it exists
+  */
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+
+    Map<String,ItemLocation> availability_summary = [:]
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("${hld}");
+      log.debug("${hld.circulations?.circulation?.availableNow}");
+      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+        log.debug("Available now");
+        def shelvingLocation = hld.shelvingLocation;
+        def location = hld.localLocation;
+        def locParts = splitLocation(hld.localLocation);
+        if(locParts) {
+          location = locParts[0];
+          shelvingLocation = locParts[1];
+        }
+        ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
+        availability_summary[hld.localLocation] = il;
+      }
+    }
+
+    return availability_summary;
+  }
+
+  public static List<String> splitLocation(String loc) {
+    def pattern = /(.+)\s+-\s+(.+)/;
+    def matcher = loc =~ pattern;
+    if(matcher.find()) {
+      return [ matcher.group(1), matcher.group(2)];
+    }
+    return null;
+  }
+
 }
