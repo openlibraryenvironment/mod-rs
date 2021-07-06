@@ -156,6 +156,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( getHoldingsQueryRecsyn() ) {
             request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
+
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
       }
 
       log.debug("Got Z3950 response: ${z_response}");
@@ -194,6 +196,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           } else {
             log.debug("No recordSchema found");
           }
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
       }
   
       log.debug("Got Z3950 response: ${z_response}");
@@ -231,6 +234,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( getHoldingsQueryRecsyn() ) {
             request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
       }
   
       log.debug("Got Z3950 response: ${z_response}");
