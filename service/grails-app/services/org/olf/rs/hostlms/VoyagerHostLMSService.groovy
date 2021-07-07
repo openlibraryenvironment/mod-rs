@@ -55,8 +55,8 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
       log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
         log.debug("Available now");
-        def shelvingLocation = hld.shelvingLocation;
-        def location = hld.localLocation;
+        def shelvingLocation = hld.shelvingLocation?.text();
+        def location = hld.localLocation?.text();
         def locParts = splitLocation(hld.localLocation?.text());
         log.debug("splitLocation returned ${locParts}");
         if(locParts) {
