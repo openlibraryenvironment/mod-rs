@@ -63,6 +63,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
           location = locParts[0];
           shelvingLocation = locParts[1];
         }
+        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
         ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
         availability_summary[hld.localLocation] = il;
       }
