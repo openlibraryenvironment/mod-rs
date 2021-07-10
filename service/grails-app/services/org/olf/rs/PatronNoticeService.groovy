@@ -113,7 +113,6 @@ public class PatronNoticeService {
       consumer.commitAsync();
       // relies on commitAsync reading subscriptions up front, perhaps best to
       // run unsubscribe afterwards by implementing OffsetCommitCallback (TODO)
-      consumer.unsubscribe();
   
     }
     catch (Exception e) {
@@ -121,6 +120,8 @@ public class PatronNoticeService {
     }
     finally {
       if ( consumer != null ) {
+        console.log("cleanly closing consumer for ${tenant} patron notice queue");
+        consumer.unsubscribe();
         consumer.close()
       }
     }
