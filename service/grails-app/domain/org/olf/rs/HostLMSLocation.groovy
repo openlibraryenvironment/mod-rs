@@ -27,7 +27,10 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   Date dateCreated
   Date lastUpdated
 
-  
+  // < 0 - Never use
+  // 0 - No preference / default
+  // > 0 - Preference order
+  Long supplyPreference
 
   static constraints = {
     code (nullable: false)
@@ -36,18 +39,20 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     lastCompleted (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
+    supplyPreference (nullable: true)
   }
 
   static mapping = {
     table 'host_lms_location'
-               id column : 'hll_id', generator: 'uuid2', length:36
-          version column : 'hll_version'
-             code column : 'hll_code'
-             name column : 'hll_name'
-        icalRrule column : 'hll_ical_rrule'
-    lastCompleted column : 'hll_last_completed'
-      dateCreated column : 'hll_date_created'
-      lastUpdated column : 'hll_last_updated'
+                    id column : 'hll_id', generator: 'uuid2', length:36
+               version column : 'hll_version'
+                  code column : 'hll_code'
+                  name column : 'hll_name'
+             icalRrule column : 'hll_ical_rrule'
+         lastCompleted column : 'hll_last_completed'
+           dateCreated column : 'hll_date_created'
+           lastUpdated column : 'hll_last_updated'
+      supplyPreference column : 'hll_supply_preference'
   }
 
   public String toString() {
