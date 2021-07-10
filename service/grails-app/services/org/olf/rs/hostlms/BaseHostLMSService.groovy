@@ -142,7 +142,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       o.preference = loc.supplyPreference ?: 0
     }
 
-    List<ItemLocation> sorted_options = options.sort { it.preference }
+    List<ItemLocation> sorted_options = options.sort { it.preference }.reverse()
 
     log.debug("Preference order of locations: ${sorted_options}");
 
