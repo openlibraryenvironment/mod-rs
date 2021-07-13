@@ -5,6 +5,7 @@ import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import java.time.LocalDateTime
 import grails.gorm.MultiTenant
+import org.olf.okapi.modules.directory.DirectoryEntry
 
 class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
@@ -32,6 +33,8 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   // > 0 - Preference order
   Long supplyPreference
 
+  DirectoryEntry correspondingDirectoryEntry
+
   static constraints = {
     code (nullable: false)
     name (nullable: true)
@@ -40,19 +43,21 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
     supplyPreference (nullable: true)
+    correspondingDirectoryEntry (nullable: true)
   }
 
   static mapping = {
     table 'host_lms_location'
-                    id column : 'hll_id', generator: 'uuid2', length:36
-               version column : 'hll_version'
-                  code column : 'hll_code'
-                  name column : 'hll_name'
-             icalRrule column : 'hll_ical_rrule'
-         lastCompleted column : 'hll_last_completed'
-           dateCreated column : 'hll_date_created'
-           lastUpdated column : 'hll_last_updated'
-      supplyPreference column : 'hll_supply_preference'
+                               id column : 'hll_id', generator: 'uuid2', length:36
+                          version column : 'hll_version'
+                             code column : 'hll_code'
+                             name column : 'hll_name'
+                        icalRrule column : 'hll_ical_rrule'
+                    lastCompleted column : 'hll_last_completed'
+                      dateCreated column : 'hll_date_created'
+                      lastUpdated column : 'hll_last_updated'
+                 supplyPreference column : 'hll_supply_preference'
+      correspondingDirectoryEntry column : 'hll_corresponding_de'
   }
 
   public String toString() {

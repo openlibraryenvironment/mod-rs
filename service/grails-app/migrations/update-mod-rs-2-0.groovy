@@ -143,4 +143,10 @@ databaseChangeLog = {
     }
   }
 
+  changeSet(author: "ianibbo (manual)", id: "2021-07-13-1448-001") {
+    addColumn(tableName: "host_lms_location") {
+      column(name:'hll_corresponding_de', type: "VARCHAR(36)")
+    }
+  }
+
 }
