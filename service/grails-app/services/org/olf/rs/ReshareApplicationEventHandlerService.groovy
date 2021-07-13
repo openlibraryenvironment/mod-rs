@@ -157,7 +157,7 @@ public class ReshareApplicationEventHandlerService {
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-
+    log.debug("LOGDEBUG: ${eventData}")
       def req = delayedGet(eventData.payload.id, true);
       log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
@@ -284,7 +284,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req.isRequester}");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req?.isRequester}");
       }
     }
   }
@@ -754,6 +754,29 @@ public class ReshareApplicationEventHandlerService {
         if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
+
+        if ((eventData?.deliveryInfo?.itemId ?: []).size() > 0) {
+          // Item ids coming in, handle those
+          eventData.deliveryInfo.itemId.each {iid ->
+            def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
+            if (matcher.size() > 0) {
+              // At this point we have an itemId of the form "multivol:<name>,<id>"
+              def iidId = matcher[0][2]
+              def iidName = matcher[0][1]
+
+              // Check if a RequestVolume exists for this itemId, and if not, create one
+              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+              if (!rv) {
+                rv = new RequestVolume(
+                  name: iidName ?: pr.volume,
+                  itemId: iidId,
+                  status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+                )
+                pr.addToVolumes(rv)
+              }
+            }
+          }
+        }
       }
 
       // Awesome - managed to look up patron request - see if we can action
@@ -887,6 +910,10 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'ShippedReturn':
             def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+            pr.volumes?.each {vol ->
+              vol.status = vol.lookupStatus('awaiting_lms_check_in')
+            }
+
             auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
             pr.state = new_state;
             pr.save(flush: true, failOnError: true)

@@ -54,6 +54,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String sponsoringBody
   String publisher
   String placeOfPublication
+
+  /*
+   * This field represents the freeform text string we get in the request message
+   * (on the supplier's side),
+   * or from discovery (on the requester's side).
+   * Once the supplier comes to scan and ship the items, at that point they can read this and make a decision about which
+   * items to include in the request, before attaching them to the request as 
+   */
   String volume
   String issue
   String startPage
@@ -196,13 +204,16 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     conditions: PatronRequestLoanCondition,
     notifications: PatronRequestNotification,
     rota  : PatronRequestRota,
-    tags  : Tag];
+    tags  : Tag,
+    volumes: RequestVolume
+  ];
 
   static mappedBy = [
     rota: 'patronRequest',
     audit: 'patronRequest',
     conditions: 'patronRequest',
-    notifications: 'patronRequest'
+    notifications: 'patronRequest',
+    volumes: 'patronRequest'
   ]
 
   static fetchMode = [
@@ -396,6 +407,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     overdue column: 'pr_overdue'
 
     audit(sort:'dateCreated', order:'desc')
+
+    volumes cascade: 'all-delete-orphan'
   }
 
   /**
