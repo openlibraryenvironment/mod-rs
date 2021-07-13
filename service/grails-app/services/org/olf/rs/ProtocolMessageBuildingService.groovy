@@ -66,6 +66,7 @@ class ProtocolMessageBuildingService {
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
+      oclcNumber: req.oclcNumber
     ]
     message.publicationInfo = [
       publisher: req.publisher,

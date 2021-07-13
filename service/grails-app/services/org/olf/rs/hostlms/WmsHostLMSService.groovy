@@ -21,6 +21,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
     AppSetting wms_lookup_patron_endpoint = AppSetting.findByKey('wms_lookup_patron_endpoint')
     
+    
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
       protocol: "WMS",
@@ -92,19 +93,26 @@ public class WmsHostLMSService extends BaseHostLMSService {
     AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address')
     AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username')
     AppSetting wms_connector_password = AppSetting.findByKey('wms_connector_password')
+    AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
+    AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
+    AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
+    
 
-    String z3950Connector = wms_connector_address?.value
+    //API key and API secret get embedded in the URL
+    String z3950Connector = "${wms_connector_address?.value},user=${wms_api_key?.value}&password=${wms_api_secret?.value}&x-registryId=${wms_registry_id?.value}"
 
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
     }.get {
         request.uri.query = [
-                              'version':'1.1',
+                              'version':'2.0',
                               'operation': 'searchRetrieve',
                               'x-username': wms_connector_username?.value,
-                              'x-password': wms_connector_password?.value,
+                              'x-password': wms_connector_password?.value,                              
                               'query': query
+                          
                             ]
+        log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
     }
     log.debug("Got Z3950 response: ${z_response}")
 

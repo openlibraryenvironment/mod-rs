@@ -407,6 +407,7 @@ public class ReshareApplicationEventHandlerService {
         if ( req.rota.size() > 0 ) {
 
           Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
+          log.debug("Built request message request: ${request_message_request}")
 
           boolean request_sent = false;
 
@@ -1411,10 +1412,10 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public static String getOCLCId( String id ) {
-    def pattern = ~/^ocn(\d+)/;
+    def pattern = ~/^(ocn|ocm)(\d+)/;
     def matcher = id =~ pattern;
     if(matcher.find()) {
-      return matcher.group(1);
+      return matcher.group(2);
     }
     return null;
   }
