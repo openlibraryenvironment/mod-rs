@@ -136,4 +136,17 @@ databaseChangeLog = {
       column(name:'pr_cancellation_reason_fk', type: "VARCHAR(36)")
     }
   }
+
+  changeSet(author: "ianibbo (manual)", id: "2021-07-10-1339-001") {
+    addColumn(tableName: "host_lms_location") {
+      column(name:'hll_supply_preference', type: "BIGINT")
+    }
+  }
+
+  changeSet(author: "ianibbo (manual)", id: "2021-07-13-1448-001") {
+    addColumn(tableName: "host_lms_location") {
+      column(name:'hll_corresponding_de', type: "VARCHAR(36)")
+    }
+  }
+
 }
