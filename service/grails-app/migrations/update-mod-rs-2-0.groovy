@@ -173,4 +173,16 @@ databaseChangeLog = {
   changeSet(author: "efreestone (manual)", id: "2021-05-13-1127-001") {
     addForeignKeyConstraint(baseColumnNames: "rv_status_fk", baseTableName: "request_volume", constraintName: "request_volume_status_fk", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
   }
+
+  changeSet(author: "ianibbo (manual)", id: "2021-07-10-1339-001") {
+    addColumn(tableName: "host_lms_location") {
+      column(name:'hll_supply_preference', type: "BIGINT")
+    }
+  }
+
+  changeSet(author: "ianibbo (manual)", id: "2021-07-13-1448-001") {
+    addColumn(tableName: "host_lms_location") {
+      column(name:'hll_corresponding_de', type: "VARCHAR(36)")
+    }
+  }
 }

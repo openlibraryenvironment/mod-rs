@@ -22,7 +22,7 @@ import org.olf.rs.circ.client.CirculationClient;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import grails.gorm.multitenancy.Tenants.CurrentTenant
-
+import org.olf.rs.HostLMSLocation;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -35,17 +35,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     [ 
       name:'Local_identifier_By_Z3950',
       precondition: { pr -> return ( pr.systemInstanceIdentifier != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByIdentifier(pr) }
+      stragegy: { pr, service -> return service.z3950ItemsByIdentifier(pr) }
     ],
     [ 
       name:'ISBN_identifier_By_Z3950',
       precondition: { pr -> return ( pr.isbn != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
+      stragegy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
     ],
     [ 
       name:'Local_identifier_By_Title',
       precondition: { pr -> return ( pr.title != null ) },
-      stragegy: { pr, service -> return service.z3950ItemByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
+      stragegy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
     ],
 
   ]
@@ -92,7 +92,15 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( next_strategy.precondition(pr) == true ) {
         log.debug("Strategy ${next_strategy.name} passed precondition");
         try {
-          location = next_strategy.stragegy(pr, this);
+          def strategy_result = next_strategy.stragegy(pr, this);
+          if ( strategy_result instanceof ItemLocation ) {
+            log.debug("Legacy strategy - return top holding");
+            location = strategy_result;
+          }
+          else if ( strategy_result instanceof List<ItemLocation> ) {
+            log.debug("V2 strategy - rank supplying locations by cross referencing with hostLMSLocation");
+            location = pickBestSupplyLocationFrom(strategy_result)
+          }
         }
         catch ( Exception e ) {
           log.error("Problem attempting strategy ${next_strategy.name}",e);
@@ -109,6 +117,45 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     
     log.debug("determineBestLocation returns ${location}");
     return location;
+  }
+
+
+  /**
+   * Cross reference the ItemLocation options returned from the local catalog with our internal information which 
+   * holds a preference order for supplying locations. Rank the locations according to our local info and return the
+   * best option.
+   */
+  private ItemLocation pickBestSupplyLocationFrom(List<ItemLocation> options) {
+    ItemLocation result = null;
+
+    // Iterate through each option and see if we have a corresponding HostLMSlocation record for that location
+    // If not, create one, as we may wish to record information about this location
+    // Copy the location preference from the HostLMSLocation into the list of options so we can sort the list by the preference property.
+    // higher preferences values == use in preference to lower values
+    // Values < 0 are considered "DO NOT USE" - E.G. bindery
+    options.each { o ->
+      // See if we can find a HostLMSLocation for the given item - create one if not
+      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(location.location,location.location) ?: new HostLMSLocation(
+                                                                        code:location.location,
+                                                                        name:location.location,
+                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+      o.preference = loc.supplyPreference ?: 0
+    }
+
+    List<ItemLocation> sorted_options = options.sort { it.preference }.reverse()
+
+    log.debug("Preference order of locations: ${sorted_options}");
+
+    if ( sorted_options.size() > 0 ) {
+      result = sorted_options[0]
+
+      // If after sorting high-low our higest ranking option has a preference of < 0 then we don't have
+      // a location capable of supplying - return null;
+      if ( result.preference < 0 ) {
+        result = null;
+      }
+    }
+    return result;
   }
 
   // By default, ask for OPAC records - @override in implementation if you want different
@@ -175,6 +222,66 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
+
+  /**
+   * The method above z3950ItemByIdentifier returns the first available holding of an item, this is not ideal
+   * when there are several locations holding an item and an institution wishes to express a preference as to
+   * which locations are to be preferred for lending. This variant of the method returns all possible locations
+   * it is the callers job to rank the response records.
+   */
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+
+    List<ItemLocation> result = [];
+
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+    // TNS: tcp:aleph.library.nyu.edu:9992/TNSEZB
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=water&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=4%20%22Head%20Cases:%20stories%20of%20brain%20injury%20and%20its%20aftermath%22&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+
+    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
+    String z3950_server = getZ3950Server();
+
+    if ( z3950_server != null ) {
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
+
+      def z_response = HttpBuilder.configure {
+        request.uri = z3950_proxy
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
+                               'maximumRecords':'1' ]
+
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+          }
+
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
+        if ( availability_summary.size() > 0 ) {
+          availability_summary.values().each { v ->
+            result.add(v);
+          }
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
+    }
+
+    return result;
+  }
+
+
   public ItemLocation z3950ItemByTitle(PatronRequest pr) {
 
     ItemLocation result = null;
@@ -217,6 +324,55 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
+
+  public List<ItemLocation> z3950ItemsByTitle(PatronRequest pr) {
+
+    List<ItemLocation> result = [];
+
+    String z3950_server = getZ3950Server();
+
+    if ( z3950_server != null ) {
+      def z_response = HttpBuilder.configure {
+        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
+                               'maximumRecords':'3' ]
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+            log.debug("Using recordSchema ${getHoldingsQueryRecsyn()}" );
+          } else {
+            log.debug("No recordSchema found");
+          }
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response)
+
+        if ( availability_summary.size() > 0 ) {
+          // result = availability_summary.values().iterator().next()
+          availability_summary.values().each { v ->
+            result.add(v);
+          }
+          
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
+      else {
+        log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
+      }
+    }
+    return result;
+  }
+
+
   public ItemLocation z3950ItemByPrefixQuery(PatronRequest pr, String prefix_query_string) {
 
     ItemLocation result = null;
@@ -253,6 +409,47 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
     return result;
   }
+
+  public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string) {
+
+    List<ItemLocation> result = [];
+
+    String z3950_server = getZ3950Server();
+
+    if ( z3950_server != null ) {
+      def z_response = HttpBuilder.configure {
+        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
+      }.get {
+          request.uri.path = '/'
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': prefix_query_string,
+                               'maximumRecords':'3' ]
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+          }
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response);
+        if ( availability_summary.size() > 0 ) {
+          availability_summary.values().each { v ->
+            result.add(v)
+          }
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}, result=${result}");
+      }
+      else {
+        log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
+      }
+    }
+    return result;
+  }
+
 
   public Map lookupPatron(String patron_id) {
     log.debug("lookupPatron(${patron_id})");

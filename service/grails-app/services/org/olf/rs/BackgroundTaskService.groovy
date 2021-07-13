@@ -19,6 +19,8 @@ import com.k_int.web.toolkit.settings.AppSetting
 import java.util.TimeZone;
 import java.text.NumberFormat;
 import org.olf.templating.*
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -65,11 +67,13 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     long maxMemory = runtime.maxMemory();
     long allocatedMemory = runtime.totalMemory();
     long freeMemory = runtime.freeMemory();
+    long jvmUpTime = ManagementFactory.getRuntimeMXBean().getUptime();
 
     log.info("free memory: " + format.format(freeMemory / 1024));
     log.info("allocated memory: " + format.format(allocatedMemory / 1024));
     log.info("max memory: " + format.format(maxMemory / 1024));
     log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
+    log.info("JVM uptime: " + format.format(jvmUpTime));
 
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
       patronNoticeService.processQueue(tenant)

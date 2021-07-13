@@ -236,7 +236,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     rotaPosition (nullable: true, bindable: false)
     publicationType (nullable: true)
 
-    title (nullable: true, blank : false)
+    title (nullable: true, blank : false, maxSize:255)
     author (nullable: true, blank : false)
     subtitle (nullable: true, blank : false)
     sponsoringBody (nullable: true, blank : false)
