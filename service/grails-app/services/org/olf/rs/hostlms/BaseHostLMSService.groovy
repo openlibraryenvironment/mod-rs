@@ -135,9 +135,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     // Values < 0 are considered "DO NOT USE" - E.G. bindery
     options.each { o ->
       // See if we can find a HostLMSLocation for the given item - create one if not
-      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(location.location,location.location) ?: new HostLMSLocation(
-                                                                        code:location.location,
-                                                                        name:location.location,
+      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(o.location,o.location) ?: new HostLMSLocation(
+                                                                        code:o.location,
+                                                                        name:o.location,
                                                                         icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
       o.preference = loc.supplyPreference ?: 0
     }
