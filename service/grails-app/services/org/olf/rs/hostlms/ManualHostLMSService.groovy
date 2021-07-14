@@ -21,7 +21,6 @@ import org.olf.okapi.modules.directory.Symbol;
  *
  */
 public class ManualHostLMSService implements HostLMSActions {
-
   Map placeHold(String instanceIdentifier, String itemIdentifier) {
     def result=[:]
     result
@@ -43,6 +42,7 @@ public class ManualHostLMSService implements HostLMSActions {
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+
     return [
       result:true,
       reason: 'spoofed'
@@ -58,6 +58,7 @@ public class ManualHostLMSService implements HostLMSActions {
                             String call_number,
                             String pickup_location,
                             String requested_action) {
+
     return [
       result:true,
       reason: 'spoofed'
@@ -65,6 +66,7 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   public Map checkInItem(String item_id) {
+
     return [
       result:true,
       reason: 'spoofed'

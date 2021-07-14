@@ -6,7 +6,7 @@ metadata:
     app: $MOD_DEPLOY_AS
     module: "mod-rs"
     folio_role: "backend-module"
-  namespace: "reshare"
+  namespace: $TARGET_NAMESPACE
 spec:
   selector:
     matchLabels:
@@ -58,7 +58,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: $MOD_DEPLOY_AS
-  namespace: "reshare"
+  namespace: $TARGET_NAMESPACE
 spec:
   type: "ClusterIP"
   selector:
