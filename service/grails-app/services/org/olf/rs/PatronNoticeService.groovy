@@ -120,7 +120,7 @@ public class PatronNoticeService {
     }
     finally {
       if ( consumer != null ) {
-        console.log("cleanly closing consumer for ${tenant} patron notice queue");
+        log.debug("cleanly closing consumer for ${tenant} patron notice queue");
         consumer.unsubscribe();
         consumer.close()
       }
