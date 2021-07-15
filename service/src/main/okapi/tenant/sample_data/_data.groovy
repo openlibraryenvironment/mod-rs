@@ -232,6 +232,7 @@ try {
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Symphony');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Voyager');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'TLC');
   def manual_adapter_rdv = RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Manual');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
