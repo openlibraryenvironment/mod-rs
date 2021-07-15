@@ -54,6 +54,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String sponsoringBody
   String publisher
   String placeOfPublication
+
+  /*
+   * This field represents the freeform text string we get in the request message
+   * (on the supplier's side),
+   * or from discovery (on the requester's side).
+   * Once the supplier comes to scan and ship the items, at that point they can read this and make a decision about which
+   * items to include in the request, before attaching them to the request as 
+   */
   String volume
   String issue
   String startPage
@@ -74,6 +82,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String artnum
   String ssn
   String quarter
+  String bibliographicRecordId
+  String supplierUniqueRecordId
+  
+  // These fields reflect local resources we have correlated with the fields from a protocol message above
   String systemInstanceIdentifier
   String selectedItemBarcode
 
@@ -196,13 +208,16 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     conditions: PatronRequestLoanCondition,
     notifications: PatronRequestNotification,
     rota  : PatronRequestRota,
-    tags  : Tag];
+    tags  : Tag,
+    volumes: RequestVolume
+  ];
 
   static mappedBy = [
     rota: 'patronRequest',
     audit: 'patronRequest',
     conditions: 'patronRequest',
-    notifications: 'patronRequest'
+    notifications: 'patronRequest',
+    volumes: 'patronRequest'
   ]
 
   static fetchMode = [
@@ -225,7 +240,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     rotaPosition (nullable: true, bindable: false)
     publicationType (nullable: true)
 
-    title (nullable: true, blank : false)
+    title (nullable: true, blank : false, maxSize:255)
     author (nullable: true, blank : false)
     subtitle (nullable: true, blank : false)
     sponsoringBody (nullable: true, blank : false)
@@ -253,6 +268,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     quarter (nullable: true, blank : false)
     systemInstanceIdentifier (nullable: true, blank : false)
     selectedItemBarcode (nullable: true, blank : false)
+    bibliographicRecordId( nullable: true, blank : false)
+    supplierUniqueRecordId( nullable: true, blank : false)
 
     titleOfComponent (nullable: true, blank : false)
     authorOfComponent (nullable: true, blank : false)
@@ -346,6 +363,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum column : 'pr_artnum'
     ssn column : 'pr_ssn'
     quarter column : 'pr_quarter'
+    bibliographicRecordId column : 'pr_bib_record_id'
+    supplierUniqueRecordId column : 'pr_supplier_unique_record_id'
+
     systemInstanceIdentifier column: 'pr_system_instance_id'
     selectedItemBarcode column: 'pr_selected_item_barcode'
 
@@ -396,6 +416,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     overdue column: 'pr_overdue'
 
     audit(sort:'dateCreated', order:'desc')
+
+    volumes cascade: 'all-delete-orphan'
   }
 
   /**

@@ -338,6 +338,7 @@ class RSLifecycleSpec extends HttpSpec {
         title: p_title,
         author: p_author,
         systemInstanceIdentifier: p_systemInstanceIdentifier,
+        bibliographicRecordId: p_systemInstanceIdentifier,
         patronReference:p_patron_reference,
         patronIdentifier:p_patron_id,
         isRequester:true,
@@ -353,6 +354,8 @@ class RSLifecycleSpec extends HttpSpec {
                    'X-Okapi-User-Id': 'dummy',
                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
                  ])
+
+      log.debug("Post to patronrequests: ${req_json_data}");
       def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
 
       log.debug("CreateReqTest1 -- Response: RESP:${resp} ID:${resp.id}");

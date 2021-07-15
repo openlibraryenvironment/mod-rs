@@ -157,7 +157,7 @@ public class ReshareApplicationEventHandlerService {
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-
+    log.debug("LOGDEBUG: ${eventData}")
       def req = delayedGet(eventData.payload.id, true);
       log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
@@ -170,31 +170,32 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("set req.hrid to ${req.hrid}");
 
-        def lookup_patron = reshareActionService.lookupPatron(req, null)
+        
+        // If we were supplied a pickup location code, attempt to resolve it here
+        /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
+          * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
+          */
+        if( req.pickupLocationCode ) {
+          DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+          
+          if(pickup_loc != null) {
+            req.resolvedPickupLocation = pickup_loc;
+            req.pickupLocation = pickup_loc.name;
+          }
+        }
 
-        if ( lookup_patron.callSuccess ) {
-          boolean patronValid = lookup_patron.patronValid
-          // If we were supplied a pickup location code, attempt to resolve it here
-          /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
-            * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
-            */
-          if( req.pickupLocationCode ) {
-            DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
-            
-            if(pickup_loc != null) {
-              req.resolvedPickupLocation = pickup_loc;
-              req.pickupLocation = pickup_loc.name;
-            }
+        if ( req.requestingInstitutionSymbol != null ) {
+          // We need to validate the requsting location - and check that we can act as requester for that symbol
+          Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
+          if (s != null) {
+            // We do this separately so that an invalid patron does not stop information being appended to the request
+            req.resolvedRequester = s
           }
 
-          if ( req.requestingInstitutionSymbol != null ) {
-            // We need to validate the requsting location - and check that we can act as requester for that symbol
-            Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
-            if (s != null) {
-              // We do this separately so that an invalid patron does not stop information being appended to the request
-              req.resolvedRequester = s
-            }
-            
+          def lookup_patron = reshareActionService.lookupPatron(req, null)
+          if ( lookup_patron.callSuccess ) {
+            boolean patronValid = lookup_patron.patronValid
+          
             // If s != null and patronValid == true then the request has passed validation
             if ( s != null && patronValid) {
               log.debug("Got request ${req}");
@@ -212,8 +213,7 @@ public class ReshareApplicationEventHandlerService {
                           lookupStatus('PatronRequest', 'REQ_IDLE'), 
                           lookupStatus('PatronRequest', 'REQ_ERROR'), 
                           'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
-            }
-            else {
+            } else {
               // If we're here then the requesting institution symbol was fine but the patron is invalid
               def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
               String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
@@ -221,23 +221,21 @@ public class ReshareApplicationEventHandlerService {
               req.state = invalid_patron_state;
               req.needsAttention=true;
             }
-          }
-          else {
-            req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          } else {
+            // unexpected error in Host LMS call
             req.needsAttention=true;
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+            String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
+            auditEntry(req, req.state, req.state, message, null);
           }
-        }
-        else {
-          // unexpected error in Host LMS call
+        } else {
+          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
           req.needsAttention=true;
-          String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
-          auditEntry(req, req.state, req.state, message, null);
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
-        if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
+        if ( ( req.bibliographicRecordId != null ) && ( req.bibliographicRecordId.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecords");
-          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.systemInstanceIdentifier]);
+          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.bibliographicRecordId]);
           if (bibRecords?.size() == 1) {
             req.bibRecord = bibRecords[0];
             //If our OCLC field isn't set, let's try to set it from our bibrecord
@@ -261,7 +259,7 @@ public class ReshareApplicationEventHandlerService {
 
         }
         else {
-          log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
+          log.debug("No req.bibliographicRecordId : ${req.bibliographicRecordId}");
         }
 
         req.save(flush:true, failOnError:true)
@@ -284,7 +282,7 @@ public class ReshareApplicationEventHandlerService {
         }
       }
       else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req.isRequester}");
+        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req?.isRequester}");
       }
     }
   }
@@ -465,8 +463,8 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 if ( ( prr.instanceIdentifier != null ) && ( prr.instanceIdentifier.length() > 0 ) ) {
-                  // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
-                  request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
+                  // update request_message_request.supplierUniqueRecordId to the system number specified in the rota
+                  request_message_request.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
                 }
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
 
@@ -630,9 +628,9 @@ public class ReshareApplicationEventHandlerService {
       // able to use that for our request.
       pr.hrid = header.requestingAgencyRequestId
 
-      if ( ( pr.systemInstanceIdentifier != null ) && ( pr.systemInstanceIdentifier.length() > 0 ) ) {
-        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecords ${pr.systemInstanceIdentifier}");
-        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.systemInstanceIdentifier]);
+      if ( ( pr.bibliographicRecordId != null ) && ( pr.bibliographicRecordId.length() > 0 ) ) {
+        log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
+        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
         if (bibRecords?.size() == 1) pr.bibRecord = bibRecords[0];
       }
 
@@ -753,6 +751,29 @@ public class ReshareApplicationEventHandlerService {
         // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
         if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
+        }
+
+        if ((eventData?.deliveryInfo?.itemId ?: []).size() > 0) {
+          // Item ids coming in, handle those
+          eventData.deliveryInfo.itemId.each {iid ->
+            def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
+            if (matcher.size() > 0) {
+              // At this point we have an itemId of the form "multivol:<name>,<id>"
+              def iidId = matcher[0][2]
+              def iidName = matcher[0][1]
+
+              // Check if a RequestVolume exists for this itemId, and if not, create one
+              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+              if (!rv) {
+                rv = new RequestVolume(
+                  name: iidName ?: pr.volume,
+                  itemId: iidId,
+                  status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+                )
+                pr.addToVolumes(rv)
+              }
+            }
+          }
         }
       }
 
@@ -887,6 +908,10 @@ public class ReshareApplicationEventHandlerService {
             break;
           case 'ShippedReturn':
             def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+            pr.volumes?.each {vol ->
+              vol.status = vol.lookupStatus('awaiting_lms_check_in')
+            }
+
             auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
             pr.state = new_state;
             pr.save(flush: true, failOnError: true)

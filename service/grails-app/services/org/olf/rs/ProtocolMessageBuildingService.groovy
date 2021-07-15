@@ -61,12 +61,20 @@ class ProtocolMessageBuildingService {
       artnum: req.artnum,
       ssn: req.ssn,
       quarter: req.quarter,
-      systemInstanceIdentifier: req.systemInstanceIdentifier,
+      bibliographicRecordId: req.bibliographicRecordId ?: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
-      oclcNumber: req.oclcNumber
+      supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      bibliographicItemId:[
+        [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
+      ],
+      // These should be removed - they have no business being here as they are not part of the protocol
+      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
+      systemInstanceIdentifier: req.systemInstanceIdentifier,
+      oclcNumber: req.oclcNumber,
+     
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -218,8 +226,8 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
-    if( pr.selectedItemBarcode ) {
-      message.deliveryInfo['itemId'] = pr.selectedItemBarcode
+    if ( pr.volumes.size() > 0) {
+      message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}"}
     }
     
     if( pr?.dueDateRS ) {

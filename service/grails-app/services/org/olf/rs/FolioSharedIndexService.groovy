@@ -39,10 +39,14 @@ public class FolioSharedIndexService implements SharedIndexActions {
         sharedIndexHoldings(description?.systemInstanceIdentifier).each { shared_index_availability ->
           log.debug("add shared index availability: ${shared_index_availability}");
 
+          // We need to look through the identifiers to see if there is an identifiier where identifierTypeObject.name == shared_index_availability.symbol
+          // If so, that identifier is the instanceIdentifier in the shared index for this item - I know - it makes my brain hurt too
+          
+
           result.add(new AvailabilityStatement(
                                                symbol:shared_index_availability.symbol, 
-                                               instanceIdentifier:null, 
-                                               copyIdentifier:null,
+                                               instanceIdentifier:shared_index_availability.instanceIdentifier, 
+                                               copyIdentifier:shared_index_availability.copyIdentifier,
                                                illPolicy:shared_index_availability.illPolicy));
         }
       }
@@ -301,8 +305,23 @@ public class FolioSharedIndexService implements SharedIndexActions {
                       // Do we already have an entry in the result for the given location? If not, Add it 
                       if ( result.find { it.symbol==local_symbol } == null ) {
                         // And we don't already have the location
+
+                        // Iterate through identifiers to try and find one with the same identifierTypeObject.name as our symbol
+                        // Very unsure about this, so wrapping for now
+                        def instance_identifier = null;
+                        try {
+                          instance_identifier = r1.data.instance_storage_instances_SINGLE?.identifiers.find { it.identifierTypeObject?.name?.equalsIgnoreCase(local_symbol)} ?. value
+                        }
+                        catch ( Exception e ) {
+                          e.printStackTrace()
+                        }
+
                         log.debug("adding ${local_symbol} - with policy ${hr.illPolicy?.name}");
-                        result.add([symbol:local_symbol, illPolicy:hr.illPolicy?.name])
+                        result.add([
+                                    symbol:local_symbol, 
+                                    illPolicy:hr.illPolicy?.name,
+                                    instanceIdentifier:instance_identifier,
+                                    copyIdentifier:null ])
                       }
                       else {
                         log.debug("Located existing entry in result for ${location} - not adding another");

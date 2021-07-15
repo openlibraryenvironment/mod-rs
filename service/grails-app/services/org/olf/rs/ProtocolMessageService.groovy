@@ -417,9 +417,14 @@ and sa.service.businessFunction.value=:ill
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
 
+        // 
+        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
+        bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
+        
+
         // Pretty sure this shouldn't be here
-        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
         systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
+        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
         supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
         requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
 
@@ -506,7 +511,10 @@ and sa.service.businessFunction.value=:ill
     exec(del) {
       deliveryInfo {
         dateSent(eventData.deliveryInfo.dateSent)
-        itemId(eventData.deliveryInfo.itemId)
+        // Build multiple ItemIds
+        eventData.deliveryInfo.itemId.collect {iid ->
+          itemId(iid)
+        }
         sentVia(eventData.deliveryInfo.sentVia)
         sentToPatron(eventData.deliveryInfo.sentToPatron)
         loanCondition(eventData.deliveryInfo.loanCondition)
