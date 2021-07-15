@@ -170,31 +170,32 @@ public class ReshareApplicationEventHandlerService {
         req.hrid=generateHrid()
         log.debug("set req.hrid to ${req.hrid}");
 
-        def lookup_patron = reshareActionService.lookupPatron(req, null)
+        
+        // If we were supplied a pickup location code, attempt to resolve it here
+        /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
+          * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
+          */
+        if( req.pickupLocationCode ) {
+          DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+          
+          if(pickup_loc != null) {
+            req.resolvedPickupLocation = pickup_loc;
+            req.pickupLocation = pickup_loc.name;
+          }
+        }
 
-        if ( lookup_patron.callSuccess ) {
-          boolean patronValid = lookup_patron.patronValid
-          // If we were supplied a pickup location code, attempt to resolve it here
-          /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
-            * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
-            */
-          if( req.pickupLocationCode ) {
-            DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
-            
-            if(pickup_loc != null) {
-              req.resolvedPickupLocation = pickup_loc;
-              req.pickupLocation = pickup_loc.name;
-            }
+        if ( req.requestingInstitutionSymbol != null ) {
+          // We need to validate the requsting location - and check that we can act as requester for that symbol
+          Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
+          if (s != null) {
+            // We do this separately so that an invalid patron does not stop information being appended to the request
+            req.resolvedRequester = s
           }
 
-          if ( req.requestingInstitutionSymbol != null ) {
-            // We need to validate the requsting location - and check that we can act as requester for that symbol
-            Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
-            if (s != null) {
-              // We do this separately so that an invalid patron does not stop information being appended to the request
-              req.resolvedRequester = s
-            }
-            
+          def lookup_patron = reshareActionService.lookupPatron(req, null)
+          if ( lookup_patron.callSuccess ) {
+            boolean patronValid = lookup_patron.patronValid
+          
             // If s != null and patronValid == true then the request has passed validation
             if ( s != null && patronValid) {
               log.debug("Got request ${req}");
@@ -212,8 +213,7 @@ public class ReshareApplicationEventHandlerService {
                           lookupStatus('PatronRequest', 'REQ_IDLE'), 
                           lookupStatus('PatronRequest', 'REQ_ERROR'), 
                           'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
-            }
-            else {
+            } else {
               // If we're here then the requesting institution symbol was fine but the patron is invalid
               def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
               String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
@@ -221,18 +221,16 @@ public class ReshareApplicationEventHandlerService {
               req.state = invalid_patron_state;
               req.needsAttention=true;
             }
-          }
-          else {
-            req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
+          } else {
+            // unexpected error in Host LMS call
             req.needsAttention=true;
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+            String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
+            auditEntry(req, req.state, req.state, message, null);
           }
-        }
-        else {
-          // unexpected error in Host LMS call
+        } else {
+          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
           req.needsAttention=true;
-          String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
-          auditEntry(req, req.state, req.state, message, null);
+          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
         if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
