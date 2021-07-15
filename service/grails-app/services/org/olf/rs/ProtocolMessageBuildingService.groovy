@@ -61,14 +61,20 @@ class ProtocolMessageBuildingService {
       artnum: req.artnum,
       ssn: req.ssn,
       quarter: req.quarter,
-      bibliographicRecordId: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
+      bibliographicRecordId: req.bibliographicRecordId ?: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
+      supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      bibliographicItemId:[
+        [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
+      ],
+      // These should be removed - they have no business being here as they are not part of the protocol
+      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
       systemInstanceIdentifier: req.systemInstanceIdentifier,
       oclcNumber: req.oclcNumber,
-      supplierUniqueRecordId: null   // Set later on from rota where we store the supplier id
+     
     ]
     message.publicationInfo = [
       publisher: req.publisher,

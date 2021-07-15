@@ -84,7 +84,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String quarter
   String bibliographicRecordId
   String supplierUniqueRecordId
-
+  
+  // These fields reflect local resources we have correlated with the fields from a protocol message above
   String systemInstanceIdentifier
   String selectedItemBarcode
 
@@ -267,6 +268,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     quarter (nullable: true, blank : false)
     systemInstanceIdentifier (nullable: true, blank : false)
     selectedItemBarcode (nullable: true, blank : false)
+    bibliographicRecordId( nullable: true, blank : false)
+    supplierUniqueRecordId( nullable: true, blank : false)
 
     titleOfComponent (nullable: true, blank : false)
     authorOfComponent (nullable: true, blank : false)

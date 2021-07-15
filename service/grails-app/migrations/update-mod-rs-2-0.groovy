@@ -186,10 +186,10 @@ databaseChangeLog = {
     }
   }
 
-  changeSet(author: "ianibbo (manual)", id: "2021-07-15-1028-001") {
+  changeSet(author: "ianibbo (manual)", id: "2021-07-15-1122-001") {
     addColumn(tableName: "patron_request") {
-      column(name:'bibliographicRecordId', type: "VARCHAR(255)")
-      column(name:'supplierUniqueRecordId', type: "VARCHAR(255)")
+      column(name:'pr_bib_record_id', type: "VARCHAR(255)")
+      column(name:'pr_supplier_unique_record_id', type: "VARCHAR(255)")
     }
   }
 
