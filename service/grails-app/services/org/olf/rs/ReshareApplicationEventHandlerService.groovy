@@ -235,9 +235,9 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(req, req.state, req.state, message, null);
         }
 
-        if ( ( req.systemInstanceIdentifier != null ) && ( req.systemInstanceIdentifier.length() > 0 ) ) {
+        if ( ( req.bibliographicRecordId != null ) && ( req.bibliographicRecordId.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecords");
-          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.systemInstanceIdentifier]);
+          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.bibliographicRecordId]);
           if (bibRecords?.size() == 1) {
             req.bibRecord = bibRecords[0];
             //If our OCLC field isn't set, let's try to set it from our bibrecord
@@ -261,7 +261,7 @@ public class ReshareApplicationEventHandlerService {
 
         }
         else {
-          log.debug("No req.systemInstanceIdentifier : ${req.systemInstanceIdentifier}");
+          log.debug("No req.bibliographicRecordId : ${req.bibliographicRecordId}");
         }
 
         req.save(flush:true, failOnError:true)
@@ -465,8 +465,8 @@ public class ReshareApplicationEventHandlerService {
                 }
 
                 if ( ( prr.instanceIdentifier != null ) && ( prr.instanceIdentifier.length() > 0 ) ) {
-                  // update request_message_request.systemInstanceIdentifier to the system number specified in the rota
-                  request_message_request.bibliographicInfo.systemInstanceIdentifier = prr.instanceIdentifier;
+                  // update request_message_request.supplierUniqueRecordId to the system number specified in the rota
+                  request_message_request.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
                 }
                 request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
 
@@ -630,9 +630,9 @@ public class ReshareApplicationEventHandlerService {
       // able to use that for our request.
       pr.hrid = header.requestingAgencyRequestId
 
-      if ( ( pr.systemInstanceIdentifier != null ) && ( pr.systemInstanceIdentifier.length() > 0 ) ) {
-        log.debug("Incoming request with pr.systemInstanceIdentifier - calling fetchSharedIndexRecords ${pr.systemInstanceIdentifier}");
-        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.systemInstanceIdentifier]);
+      if ( ( pr.bibliographicRecordId != null ) && ( pr.bibliographicRecordId.length() > 0 ) ) {
+        log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
+        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
         if (bibRecords?.size() == 1) pr.bibRecord = bibRecords[0];
       }
 

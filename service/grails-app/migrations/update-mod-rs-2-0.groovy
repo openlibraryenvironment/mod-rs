@@ -185,4 +185,12 @@ databaseChangeLog = {
       column(name:'hll_corresponding_de', type: "VARCHAR(36)")
     }
   }
+
+  changeSet(author: "ianibbo (manual)", id: "2021-07-15-1028-001") {
+    addColumn(tableName: "patron_request") {
+      column(name:'bibliographicRecordId', type: "VARCHAR(255)")
+      column(name:'supplierUniqueRecordId', type: "VARCHAR(255)")
+    }
+  }
+
 }

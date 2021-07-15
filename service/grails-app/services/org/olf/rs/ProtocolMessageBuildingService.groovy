@@ -61,12 +61,14 @@ class ProtocolMessageBuildingService {
       artnum: req.artnum,
       ssn: req.ssn,
       quarter: req.quarter,
-      systemInstanceIdentifier: req.systemInstanceIdentifier,
+      bibliographicRecordId: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
-      oclcNumber: req.oclcNumber
+      systemInstanceIdentifier: req.systemInstanceIdentifier,
+      oclcNumber: req.oclcNumber,
+      supplierUniqueRecordId: null   // Set later on from rota where we store the supplier id
     ]
     message.publicationInfo = [
       publisher: req.publisher,

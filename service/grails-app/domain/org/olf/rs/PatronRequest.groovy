@@ -82,6 +82,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String artnum
   String ssn
   String quarter
+  String bibliographicRecordId
+  String supplierUniqueRecordId
+
   String systemInstanceIdentifier
   String selectedItemBarcode
 
@@ -357,6 +360,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum column : 'pr_artnum'
     ssn column : 'pr_ssn'
     quarter column : 'pr_quarter'
+    bibliographicRecordId column : 'pr_bib_record_id'
+    supplierUniqueRecordId column : 'pr_supplier_unique_record_id'
+
     systemInstanceIdentifier column: 'pr_system_instance_id'
     selectedItemBarcode column: 'pr_selected_item_barcode'
 

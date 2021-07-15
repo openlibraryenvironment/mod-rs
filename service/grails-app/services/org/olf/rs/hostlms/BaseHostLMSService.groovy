@@ -34,7 +34,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   def lookup_strategies = [
     [ 
       name:'Local_identifier_By_Z3950',
-      precondition: { pr -> return ( pr.systemInstanceIdentifier != null ) },
+      precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
       stragegy: { pr, service -> return service.z3950ItemsByIdentifier(pr) }
     ],
     [ 
@@ -188,8 +188,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String z3950_server = getZ3950Server();
 
     if ( z3950_server != null ) {
-      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
-      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
 
       def z_response = HttpBuilder.configure {
         request.uri = z3950_proxy
@@ -197,7 +197,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           request.uri.path = '/'
           // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
           request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
+                               'x-pquery': '@attr 1=12 '+pr.supplierUniqueRecordId,
                                'maximumRecords':'1' ]
 
           if ( getHoldingsQueryRecsyn() ) {
@@ -244,8 +244,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String z3950_server = getZ3950Server();
 
     if ( z3950_server != null ) {
-      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
-      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.systemInstanceIdentifier}");
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
 
       def z_response = HttpBuilder.configure {
         request.uri = z3950_proxy
@@ -253,7 +253,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           request.uri.path = '/'
           // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
           request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=12 '+pr.systemInstanceIdentifier,
+                               'x-pquery': '@attr 1=12 '+pr.supplierUniqueRecordId,
                                'maximumRecords':'1' ]
 
           if ( getHoldingsQueryRecsyn() ) {
