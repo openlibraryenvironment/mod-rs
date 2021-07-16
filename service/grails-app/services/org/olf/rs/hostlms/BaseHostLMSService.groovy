@@ -166,6 +166,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    log.debug("Extract available items from opac record ${z_response}, reason: ${reason}");
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord, reason);
