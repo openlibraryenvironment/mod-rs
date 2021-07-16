@@ -27,12 +27,17 @@ import org.olf.rs.circ.client.CirculationClient;
 public class TlcHostLMSService extends BaseHostLMSService {
 
 
+  @Override
+  protected String getHoldingsQueryRecsyn() {
+    return 'marcxml';
+  }
+  
   public CirculationClient getCirculationClient(String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
-@Override
+  @Override
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
     log.debug("Extract holdings from marcxml record ${z_response}");
 
