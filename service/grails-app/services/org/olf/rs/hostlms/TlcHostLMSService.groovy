@@ -38,8 +38,8 @@ public class TlcHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, reason=null) {
-    log.debug("Extract holdings from TLC marcxml record ${z_response}, reason ${reason}");
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    log.debug("Extract available items from TLC marcxml record ${z_response}, reason ${reason}");
 
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
