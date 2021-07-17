@@ -93,7 +93,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
             log.debug("Available now");
             def location = tag_data['b'];
             def shelvingLocation = tag_data['c'];
-            ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation, null );
+            ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation );
             availability_summary[location] = il;
           }
         } catch(Exception e) {
@@ -102,7 +102,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
         
       }
     }
-    log.debug("Tlc Host availability: ${availability_summary}");
+    log.debug("Tlc Host availability: ${availability_summary}")
     return availability_summary;
 
   }
