@@ -146,7 +146,7 @@ public class ReshareActionService {
           // If there's no rv and the delete is true then just skip creation
           if (!rv && !ib._delete) {
             rv = new RequestVolume(
-              name: ib.name ?: pr.volume,
+              name: ib.name ?: pr.volume ?: ib.itemId,
               itemId: ib.itemId,
               status: RequestVolume.lookupStatus('awaiting_lms_check_out')
             )
@@ -197,7 +197,7 @@ public class ReshareActionService {
             // At this point we have a list of NCIP calls to make.
             // We should make those calls and track which succeeded/failed
             // TODO perhaps test by inserting a temporary % chance of NCIP failure in manual adapter
-
+            
             // Iterate over volumes not yet checked in in for loop so we can break out if we need to
             for (def vol : volumesNotCheckedIn) {
 
@@ -234,6 +234,18 @@ public class ReshareActionService {
                 }
                 vol.save(failOnError: true)
                 auditEntry(pr, pr.state, pr.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
+
+                // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
+                try {
+                  Date parsedDate = parseDateString(checkout_result?.dueDate)
+                  if (parsedDate.before(pr.parsedDueDateFromLMS)) {
+                    pr.dueDateFromLMS=checkout_result?.dueDate;
+                    pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);
+                  }
+                } catch(Exception e) {
+                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
+                }
+
               }
               else {
                 auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
@@ -251,15 +263,8 @@ public class ReshareActionService {
               statisticsService.incrementCounter('/activeLoans');
               pr.activeLoan=true
               pr.needsAttention=false;
-              pr.dueDateFromLMS=checkout_result?.dueDate;
               if(!pr?.dueDateRS) {
                 pr.dueDateRS = pr.dueDateFromLMS;
-              }
-              
-              try {
-                pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);                  
-              } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
               }
               
               try {
