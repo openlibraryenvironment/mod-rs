@@ -446,6 +446,11 @@ public class ReshareApplicationEventHandlerService {
                   auditEntry(req, current_state, req.state, 'Sent to local review', null);
                   req.save(flush:true, failOnError:true);
                   return; //Nothing more to do here
+                } else {
+                  prr.state = lookupStatus('Responder', 'RES_NOT_SUPPLIED');
+                  prr.save(flush: true, failOnError: true);
+                  log.debug("Cannot fill locally, skipping");
+                  continue;
                 }
               }
 
