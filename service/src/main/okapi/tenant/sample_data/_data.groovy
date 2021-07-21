@@ -308,6 +308,16 @@ try {
                                   key: 'auto_responder_cancel',
                                   value: arc_on?.value).save(flush:true, failOnError: true);
 
+  RefdataValue.lookupOrCreate('AutoResponder_Local', 'On');
+  def arl_off = RefdataValue.lookupOrCreate('AutoResponder_Local', 'Off');
+  AppSetting auto_responder_local = AppSetting.findByKey('auto_responder_local') ?: new AppSetting(
+                                  section:'autoResponder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder_Local',
+                                  key: 'auto_responder_local',
+                                  value: arl_off).save(flush: true, failOnError: true);
+  )
+
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'No longer available', 'unavailable');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Missing', 'missing');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Incorrect', 'incorrect');
