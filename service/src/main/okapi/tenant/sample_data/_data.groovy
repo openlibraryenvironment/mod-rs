@@ -315,8 +315,8 @@ try {
                                   settingType:'Refdata',
                                   vocab:'AutoResponder_Local',
                                   key: 'auto_responder_local',
-                                  value: arl_off).save(flush: true, failOnError: true);
-  )
+                                  value: arl_off?.value).save(flush: true, failOnError: true);
+
 
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'No longer available', 'unavailable');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Missing', 'missing');
