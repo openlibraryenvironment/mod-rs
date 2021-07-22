@@ -429,13 +429,29 @@ public class ReshareApplicationEventHandlerService {
               log.debug("Responder symbol is ${s} with status ${s?.owner?.status?.value}");
               def ownerStatus = s.owner?.status?.value;
               if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
-                log.debug("Responder is local, going to review state");
-
-                def current_state = req.state;
-                req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-                auditEntry(req, current_state, req.state, 'Sent to local review', null);
-                req.save(flush:true, failOnError:true);
-                return; //Nothing more to do here
+                log.debug("Responder is local") //, going to review state");
+                boolean do_local_review = true;
+                //Check to see if we're going to try to automatically check for local
+                //copies
+                String local_auto_respond = AppSetting.findByKey('local_auto_responder_status')?.value;
+                if(local_auto_respond?.toLowerCase().startsWith('on')) {
+                  boolean has_local_copy = checkForLocalCopy(req);
+                  if(!has_local_copy) {
+                    do_local_review = false;
+                  }
+                }
+                if(do_local_review) {
+                  def current_state = req.state;
+                  req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+                  auditEntry(req, current_state, req.state, 'Sent to local review', null);
+                  req.save(flush:true, failOnError:true);
+                  return; //Nothing more to do here
+                } else {
+                  prr.state = lookupStatus('Responder', 'RES_NOT_SUPPLIED');
+                  prr.save(flush: true, failOnError: true);
+                  log.debug("Cannot fill locally, skipping");
+                  continue;
+                }
               }
 
               // Fill out the directory entry reference if it's not currently set, and try to send.
@@ -1221,6 +1237,23 @@ public class ReshareApplicationEventHandlerService {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
+    }
+  }
+
+  //Check to see if we can find a local copy of the item. If yes, then we go
+  //ahead and transitition to local review. If not, transitition to send-to-next-lender
+
+  private boolean checkForLocalCopy(PatronRequest pr) {
+    log.debug("Checking to see if we have a local copy available");
+
+    //Let's still go ahead and try to call the LMS Adapter to find a copy of the request
+    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr);
+    log.debug("Got ${location} as a result of local host lms lookup");
+    
+    if(location != null) {
+      return true;
+    } else {
+      return false;
     }
   }
 
