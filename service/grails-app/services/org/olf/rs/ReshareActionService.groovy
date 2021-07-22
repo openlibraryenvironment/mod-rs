@@ -217,9 +217,6 @@ public class ReshareActionService {
                                                           institutionalPatronIdValue,
                                                           pr.resolvedRequester)
 
-              // TODO REMOVE THIS, idk why it wasn't working with log.debug
-              auditEntry(pr, pr.state, pr.state,"LOGDEBUG checkout RESULT: ${checkout_result}", null);
-
               // If the host_lms adapter gave us a specific status to transition to, use it
               if ( checkout_result?.status ) {
                 // the host lms service gave us a specific status to change to

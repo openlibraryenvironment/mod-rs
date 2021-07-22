@@ -193,4 +193,8 @@ databaseChangeLog = {
     }
   }
 
+  changeSet(author: "efreestone (manual)", id: "2021-07-22-1355-001") {
+    addPrimaryKey(columnNames: "rv_id", constraintName: "request_volumePK", tableName: "request_volume")
+  }
+
 }
