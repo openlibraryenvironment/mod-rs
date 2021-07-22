@@ -678,7 +678,7 @@ public class ReshareActionService {
         try {
 
           // Item Barcode - using Request human readable ID + volId for now
-          def temporaryItemBarcode = "${pr.hrid}:${vol.itemId}"
+          def temporaryItemBarcode = "${pr.hrid}-${vol.itemId}"
 
           // Call the host lms to check the item out of the host system and in to reshare
           Map accept_result = host_lms.acceptItem(temporaryItemBarcode,

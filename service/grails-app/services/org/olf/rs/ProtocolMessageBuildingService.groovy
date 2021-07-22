@@ -225,9 +225,18 @@ class ProtocolMessageBuildingService {
   
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
-
-    if ( pr.volumes.size() > 0) {
-      message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}"}
+  
+    switch (pr.volumes.size()) {
+      case 0:
+        break;
+      case 1:
+        // We have a single volume, send as a single itemId string
+        message.deliveryInfo['itemId'] = pr.volumes[0].itemId
+        break;
+      default:
+        // We have many volumes, send as an array of multiVol itemIds
+        message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}" }
+        break;
     }
     
     if( pr?.dueDateRS ) {

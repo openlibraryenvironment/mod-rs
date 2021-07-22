@@ -157,7 +157,6 @@ public class ReshareApplicationEventHandlerService {
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-    log.debug("LOGDEBUG: ${eventData}")
       def req = delayedGet(eventData.payload.id, true);
       log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
@@ -769,9 +768,12 @@ public class ReshareApplicationEventHandlerService {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
 
-        if ((eventData?.deliveryInfo?.itemId ?: []).size() > 0) {
+        // Could recieve a single string or an array here as per the standard/our profile
+        def itemId = eventData?.deliveryInfo?.itemId
+        if (itemId) {
+          if (itemId instanceof Collection) {
           // Item ids coming in, handle those
-          eventData.deliveryInfo.itemId.each {iid ->
+          itemId.each {iid ->
             def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
             if (matcher.size() > 0) {
               // At this point we have an itemId of the form "multivol:<name>,<id>"
@@ -782,12 +784,25 @@ public class ReshareApplicationEventHandlerService {
               RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
               if (!rv) {
                 rv = new RequestVolume(
-                  name: iidName ?: pr.volume,
+                  name: iidName ?: pr.volume ?: iidId,
                   itemId: iidId,
                   status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
                 )
                 pr.addToVolumes(rv)
               }
+            }
+          }
+          } else {
+            // We have a single string, this is the usual standard case and should be handled as a single request volume
+            // Check if a RequestVolume exists for this itemId, and if not, create one
+            RequestVolume rv = pr.volumes.find {rv -> rv.itemId == itemId };
+            if (!rv) {
+              rv = new RequestVolume(
+                name: pr.volume ?: itemId,
+                itemId: itemId,
+                status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+              )
+              pr.addToVolumes(rv)
             }
           }
         }
@@ -856,8 +871,7 @@ public class ReshareApplicationEventHandlerService {
       }
 
       pr.save(flush:true, failOnError:true);
-    }
-    catch ( Exception e ) {
+    } catch ( Exception e ) {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
 
