@@ -438,7 +438,12 @@ public class ReshareApplicationEventHandlerService {
                   boolean has_local_copy = checkForLocalCopy(req);
                   if(!has_local_copy) {
                     do_local_review = false;
+                    auditEntry(req, req.state, req.state, "Local auto-responder did not locate a local copy - sent to next lender", null);
+                  } else {
+                    auditEntry(req, req.state, req.state, "Local auto-responder located a local copy - requires review", null);
                   }
+                } else {
+                  auditEntry(req, req.state, req.state, "Local auto-responder off - requires manual checking", null);
                 }
                 if(do_local_review) {
                   def current_state = req.state;
