@@ -19,6 +19,7 @@ import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
 import com.k_int.web.toolkit.custprops.CustomProperty;
 import org.olf.rs.patronstore.PatronStoreActions;
+import java.text.SimpleDateFormat
 
 
 /**
@@ -198,6 +199,11 @@ public class ReshareActionService {
             // We should make those calls and track which succeeded/failed
             // TODO perhaps test by inserting a temporary % chance of NCIP failure in manual adapter
             
+
+            // Store a string and a Date to save onto the PR at the end
+            Date parsedDate
+            String stringDate
+
             // Iterate over volumes not yet checked in in for loop so we can break out if we need to
             for (def vol : volumesNotCheckedIn) {
 
@@ -237,13 +243,13 @@ public class ReshareActionService {
 
                 // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
                 try {
-                  Date parsedDate = parseDateString(checkout_result?.dueDate)
-                  if (parsedDate.before(pr.parsedDueDateFromLMS)) {
-                    pr.dueDateFromLMS=checkout_result?.dueDate;
-                    pr.parsedDueDateFromLMS = parseDateString(pr.dueDateFromLMS);
+                  Date tempParsedDate = parseDateString(checkout_result?.dueDate)
+                  if (!pr.parsedDueDateFromLMS || parsedDate.before(pr.parsedDueDateFromLMS)) {
+                    parsedDate = tempParsedDate
+                    stringDate = checkout_result?.dueDate
                   }
                 } catch(Exception e) {
-                  log.warn("Unable to parse ${pr.dueDateFromLMS} to date: ${e.getMessage()}");
+                  log.warn("Unable to parse ${checkout_result?.dueDate} to date: ${e.getMessage()}");
                 }
 
               }
@@ -251,6 +257,10 @@ public class ReshareActionService {
                 auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
               }
             }
+
+            // Save the earliest Date we found as the dueDate
+            pr.dueDateFromLMS = stringDate;
+            pr.parsedDueDateFromLMS = parsedDate;
             pr.save(flush:true, failOnError:true);
 
             // At this point we should have all volumes checked out. Check that again
@@ -668,7 +678,7 @@ public class ReshareActionService {
         try {
 
           // Item Barcode - using Request human readable ID + volId for now
-          def temporaryItemBarcode = "${pr.hrid}:${vol.itemId}"
+          def temporaryItemBarcode = "${pr.hrid}-${vol.itemId}"
 
           // Call the host lms to check the item out of the host system and in to reshare
           Map accept_result = host_lms.acceptItem(temporaryItemBarcode,
@@ -1023,8 +1033,9 @@ public class ReshareActionService {
     ];
     Date date = null;
     formatList.any {
+      SimpleDateFormat format = new SimpleDateFormat(it);
       try {
-        date = Date.parse(it, dateString); 
+        date = format.parse(dateString); 
       } catch(Exception e) {
         log.debug("Unable to parse date ${dateString} with format '${it}' ${e.getMessage()}");
       }
