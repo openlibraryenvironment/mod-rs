@@ -922,7 +922,8 @@ public class ReshareApplicationEventHandlerService {
             /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
              * then we'll need to check whether or not we need to change state.
             */
-            if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
+            if ((messageData.note != null) &&
+                (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
               // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
               if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
                 def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
