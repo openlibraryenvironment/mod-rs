@@ -433,8 +433,8 @@ public class ReshareApplicationEventHandlerService {
                 boolean do_local_review = true;
                 //Check to see if we're going to try to automatically check for local
                 //copies
-                String local_auto_respond = AppSetting.findByKey('local_auto_responder_status')?.value;
-                if(local_auto_respond?.toLowerCase().startsWith('on')) {
+                String local_auto_respond = AppSetting.findByKey('auto_responder_local')?.value;
+                if(local_auto_respond?.toLowerCase()?.startsWith('on')) {
                   boolean has_local_copy = checkForLocalCopy(req);
                   if(!has_local_copy) {
                     do_local_review = false;
