@@ -25,12 +25,10 @@ json g.render(patronRequest, [expand: ['state',
   }) ?: []
 
   if ( patronRequest?.pickLocation?.correspondingDirectoryEntry ) {
-    pickLocation {
-      correspondingDirectoryEntry {
-        id patronRequest.pickLocation.correspondingDirectoryEntry?.id
-        name patronRequest.pickLocation.correspondingDirectoryEntry?.name
-        symbols patronRequest.pickLocation.correspondingDirectoryEntry?.symbols
-      }
+    pickLocationDE {
+      id patronRequest.pickLocation.correspondingDirectoryEntry?.id
+      name patronRequest.pickLocation.correspondingDirectoryEntry?.name
+      symbols patronRequest.pickLocation.correspondingDirectoryEntry?.symbols
     }
   }
 }
