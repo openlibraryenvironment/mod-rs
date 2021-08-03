@@ -179,7 +179,11 @@ public class ReshareApplicationEventHandlerService {
           
           if(pickup_loc != null) {
             req.resolvedPickupLocation = pickup_loc;
-            req.pickupLocation = pickup_loc.name;
+            def pickup_symbols = pickup_loc?.symbols?.findResults {
+              it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
+            }
+            // TODO this deserves a better home
+            req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
           }
         }
 
