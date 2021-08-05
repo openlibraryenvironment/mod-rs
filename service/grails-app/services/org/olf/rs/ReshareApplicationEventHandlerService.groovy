@@ -391,9 +391,6 @@ public class ReshareApplicationEventHandlerService {
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
 
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      // log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
       def req = delayedGet(eventData.payload.id, true);
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
       if ( ( req != null ) && 
