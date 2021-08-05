@@ -16,10 +16,27 @@ json g.render(patronRequest, [expand: ['state',
                                        'resolvedSupplier',
                                        'resolvedPickupLocation'
                                        ],
-                              excludes: ['volumes']]) {
+                              excludes: ['volumes', 'pickLocation']]) {
+
   validActions patronRequest.getValidActions()
+
   volumes g.render(patronRequest.volumes?.sort {a,b ->
     a.name <=> b.name ?: a.itemId <=> b.itemId
   }) ?: []
+
+  if ( patronRequest.pickLocation ) {
+    pickLocation g.render( patronRequest.pickLocation, [excludes: ['correspondingDirectoryEntry']] ) {
+      correspondingDirectoryEntry {
+        id patronRequest.pickLocation.correspondingDirectoryEntry?.id
+        name patronRequest.pickLocation.correspondingDirectoryEntry?.name
+        if (patronRequest.pickLocation.correspondingDirectoryEntry?.symbols) {
+          symbols g.render(patronRequest.pickLocation.correspondingDirectoryEntry?.symbols, [
+            expand: ['authority'],
+            excludes: ['owner', 'parent']
+          ])
+        }
+      }
+    }
+  }
 }
 

@@ -232,6 +232,7 @@ try {
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Symphony');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Voyager');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'WMS');
+  RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'TLC');
   def manual_adapter_rdv = RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Manual');
 
   AppSetting host_lms_integration = AppSetting.findByKey('host_lms_integration') ?: new AppSetting( 
@@ -306,6 +307,16 @@ try {
                                   vocab:'AutoResponder_Cancel',
                                   key: 'auto_responder_cancel',
                                   value: arc_on?.value).save(flush:true, failOnError: true);
+
+  RefdataValue.lookupOrCreate('AutoResponder_Local', 'On');
+  def arl_off = RefdataValue.lookupOrCreate('AutoResponder_Local', 'Off');
+  AppSetting auto_responder_local = AppSetting.findByKey('auto_responder_local') ?: new AppSetting(
+                                  section:'autoResponder',
+                                  settingType:'Refdata',
+                                  vocab:'AutoResponder_Local',
+                                  key: 'auto_responder_local',
+                                  value: arl_off?.value).save(flush: true, failOnError: true);
+
 
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'No longer available', 'unavailable');
   RefdataValue.lookupOrCreate('cannotSupplyReasons', 'Missing', 'missing');

@@ -214,6 +214,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/hostLMSLocations*",
+          "permissionsRequired": [ "rs.hostlmslocations.get" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/sharedIndexQuery*",
           "permissionsRequired": [ ]
         },

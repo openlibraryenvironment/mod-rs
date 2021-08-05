@@ -157,7 +157,6 @@ public class ReshareApplicationEventHandlerService {
   public void handleNewPatronRequestIndication(eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-    log.debug("LOGDEBUG: ${eventData}")
       def req = delayedGet(eventData.payload.id, true);
       log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
 
@@ -180,7 +179,11 @@ public class ReshareApplicationEventHandlerService {
           
           if(pickup_loc != null) {
             req.resolvedPickupLocation = pickup_loc;
-            req.pickupLocation = pickup_loc.name;
+            def pickup_symbols = pickup_loc?.symbols?.findResults {
+              it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
+            }
+            // TODO this deserves a better home
+            req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
           }
         }
 
@@ -426,13 +429,34 @@ public class ReshareApplicationEventHandlerService {
               log.debug("Responder symbol is ${s} with status ${s?.owner?.status?.value}");
               def ownerStatus = s.owner?.status?.value;
               if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
-                log.debug("Responder is local, going to review state");
-
-                def current_state = req.state;
-                req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-                auditEntry(req, current_state, req.state, 'Sent to local review', null);
-                req.save(flush:true, failOnError:true);
-                return; //Nothing more to do here
+                log.debug("Responder is local") //, going to review state");
+                boolean do_local_review = true;
+                //Check to see if we're going to try to automatically check for local
+                //copies
+                String local_auto_respond = AppSetting.findByKey('auto_responder_local')?.value;
+                if(local_auto_respond?.toLowerCase()?.startsWith('on')) {
+                  boolean has_local_copy = checkForLocalCopy(req);
+                  if(!has_local_copy) {
+                    do_local_review = false;
+                    auditEntry(req, req.state, req.state, "Local auto-responder did not locate a local copy - sent to next lender", null);
+                  } else {
+                    auditEntry(req, req.state, req.state, "Local auto-responder located a local copy - requires review", null);
+                  }
+                } else {
+                  auditEntry(req, req.state, req.state, "Local auto-responder off - requires manual checking", null);
+                }
+                if(do_local_review) {
+                  def current_state = req.state;
+                  req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
+                  auditEntry(req, current_state, req.state, 'Sent to local review', null);
+                  req.save(flush:true, failOnError:true);
+                  return; //Nothing more to do here
+                } else {
+                  prr.state = lookupStatus('Responder', 'RES_NOT_SUPPLIED');
+                  prr.save(flush: true, failOnError: true);
+                  log.debug("Cannot fill locally, skipping");
+                  continue;
+                }
               }
 
               // Fill out the directory entry reference if it's not currently set, and try to send.
@@ -750,9 +774,12 @@ public class ReshareApplicationEventHandlerService {
           pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
         }
 
-        if ((eventData?.deliveryInfo?.itemId ?: []).size() > 0) {
+        // Could recieve a single string or an array here as per the standard/our profile
+        def itemId = eventData?.deliveryInfo?.itemId
+        if (itemId) {
+          if (itemId instanceof Collection) {
           // Item ids coming in, handle those
-          eventData.deliveryInfo.itemId.each {iid ->
+          itemId.each {iid ->
             def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
             if (matcher.size() > 0) {
               // At this point we have an itemId of the form "multivol:<name>,<id>"
@@ -763,12 +790,25 @@ public class ReshareApplicationEventHandlerService {
               RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
               if (!rv) {
                 rv = new RequestVolume(
-                  name: iidName ?: pr.volume,
+                  name: iidName ?: pr.volume ?: iidId,
                   itemId: iidId,
                   status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
                 )
                 pr.addToVolumes(rv)
               }
+            }
+          }
+          } else {
+            // We have a single string, this is the usual standard case and should be handled as a single request volume
+            // Check if a RequestVolume exists for this itemId, and if not, create one
+            RequestVolume rv = pr.volumes.find {rv -> rv.itemId == itemId };
+            if (!rv) {
+              rv = new RequestVolume(
+                name: pr.volume ?: itemId,
+                itemId: itemId,
+                status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+              )
+              pr.addToVolumes(rv)
             }
           }
         }
@@ -837,8 +877,7 @@ public class ReshareApplicationEventHandlerService {
       }
 
       pr.save(flush:true, failOnError:true);
-    }
-    catch ( Exception e ) {
+    } catch ( Exception e ) {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
 
@@ -1219,6 +1258,23 @@ public class ReshareApplicationEventHandlerService {
         auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
+    }
+  }
+
+  //Check to see if we can find a local copy of the item. If yes, then we go
+  //ahead and transitition to local review. If not, transitition to send-to-next-lender
+
+  private boolean checkForLocalCopy(PatronRequest pr) {
+    log.debug("Checking to see if we have a local copy available");
+
+    //Let's still go ahead and try to call the LMS Adapter to find a copy of the request
+    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr);
+    log.debug("Got ${location} as a result of local host lms lookup");
+    
+    if(location != null) {
+      return true;
+    } else {
+      return false;
     }
   }
 
