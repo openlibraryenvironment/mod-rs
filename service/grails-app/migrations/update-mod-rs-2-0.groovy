@@ -197,4 +197,17 @@ databaseChangeLog = {
     addPrimaryKey(columnNames: "rv_id", constraintName: "request_volumePK", tableName: "request_volume")
   }
 
+  changeSet(author: "jskomorowski (manual)", id: "2021-08-06-1300-002") {
+    createTable(tableName: "notice_event") {
+      column(autoIncrement: "true", name: "ne_id", type: "BIGINT") {
+        constraints(primaryKey: "true", primaryKeyName: "notice_eventPK")
+      }
+      column(name: "ne_patron_request_fk", type: "VARCHAR(36)") { constraints(nullable: "false") }
+      column(name: "ne_trigger_fk", type: "VARCHAR(36)") { constraints(nullable: "false") }
+      column(name: "ne_sent", type: "BOOLEAN") { constraints(nullable: "false") }
+      column(name: "ne_date_created", type: "timestamp")
+      column(name: "ne_version", type: "BIGINT") { constraints(nullable: "false") }
+    }
+  }
+
 }

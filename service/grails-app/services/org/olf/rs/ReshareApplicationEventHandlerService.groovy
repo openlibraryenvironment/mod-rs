@@ -72,13 +72,13 @@ public class ReshareApplicationEventHandlerService {
       service.sendToNextLender(eventData);
     },
     'STATUS_REQ_CANCELLED_ind': { service, eventData ->
-      service.triggerNotices(eventData.payload.id, "request_cancelled");
+      service.triggerNotices(eventData.payload.id, "Request cancelled");
     },
     'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
       service.handleCancelledWithSupplier(eventData);
     },
     'STATUS_REQ_END_OF_ROTA_ind': { service, eventData ->
-      service.triggerNotices(eventData.payload.id, "end_of_rota");
+      service.triggerNotices(eventData.payload.id, "End of rota");
     },
     'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
       service.sendToNextLender(eventData);
@@ -146,7 +146,7 @@ public class ReshareApplicationEventHandlerService {
 
   public void triggerNotices(String prId, String trigger) {
     def req = delayedGet(prId, true);
-    patronNoticeService.triggerNotices(req, trigger);
+    patronNoticeService.triggerNotices(req, RefdataValue.lookupOrCreate('noticeTriggers', trigger));
   }
 
   // Notify us of a new patron request in the database - regardless of role
@@ -206,7 +206,7 @@ public class ReshareApplicationEventHandlerService {
               def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
               auditEntry(req, req.state, validated_state, 'Request Validated', null);
               req.state = validated_state;
-              patronNoticeService.triggerNotices(req, "new_request");
+              patronNoticeService.triggerNotices(req, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
             } else if (s == null) {
               // An unknown requesting institution symbol is a bigger deal than an invalid patron
               req.needsAttention=true;
