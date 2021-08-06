@@ -236,6 +236,12 @@ public class ReshareApplicationEventHandlerService {
           auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
+        // This is a bit dirty - some clients continue to send req.systemInstanceIdentifier rather than req.bibliographicRecordId
+        // If we find we are missing a bib record id but do have a system instance identifier, copy it over. Needs sorting properly post PALCI go live
+        if ( ( req.bibliographicRecordId == null ) && ( req.systemInstanceIdentifier != null ) ) {
+          req.bibliographicRecordId = req.systemInstanceIdentifier
+        }
+
         if ( ( req.bibliographicRecordId != null ) && ( req.bibliographicRecordId.length() > 0 ) ) {
           log.debug("calling fetchSharedIndexRecords");
           List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.bibliographicRecordId]);
