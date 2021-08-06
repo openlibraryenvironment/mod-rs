@@ -212,7 +212,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.systemInstanceIdentifier}")
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
         if ( ( result == null ) && ( availability_summary.size() > 0 ) )
           result = availability_summary.values().iterator().next()
 
@@ -268,7 +268,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.systemInstanceIdentifier}")
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
         if ( availability_summary.size() > 0 ) {
           availability_summary.values().each { v ->
             result.add(v);

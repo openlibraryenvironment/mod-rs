@@ -651,7 +651,12 @@ public class ReshareApplicationEventHandlerService {
       if ( ( pr.bibliographicRecordId != null ) && ( pr.bibliographicRecordId.length() > 0 ) ) {
         log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
         List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
-        if (bibRecords?.size() == 1) pr.bibRecord = bibRecords[0];
+        if (bibRecords?.size() > 0) {
+          pr.bibRecord = bibRecords[0];
+          if ( bibRecords?.size() > 1 ) {
+             auditEntry(pr, null, pr.state, "WARNING: shared index ID ${pr.bibliographicRecordId} matched multiple records", null);
+          }
+        }
       }
 
       log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
