@@ -21,17 +21,30 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   Date dateCreated
   Date lastUpdated
 
-  // This allows us to check whether each item in turn has succeeded NCIP call
+  /* 
+    This allows us to check whether each item in turn has succeeded NCIP call
+    -----SUPPLIER'S SIDE-----
+    awaiting_lms_check_out ─┬─► lms_check_out_complete         ─┬─► awaiting_lms_check_in ─┬─► completed
+                            └─► lms_check_out_(no_integration) ─┘                          └─► lms_check_in_(no_integration)
+
+    -----REQUESTER'S SIDE-----    
+    awaiting_temporary_item_creation ─┬─► temporary_item_created_in_host_lms
+                                      └─► temporary_item_creation_(no_integration)
+  */
   @Defaults([
-    'Awaiting LMS check out', // Supplier's side
-    'LMS check out complete', // Supplier's side
-    'Awaiting LMS check in', // Supplier's side
-    'Completed', // Supplier's side
-    'Awaiting temporary item creation', // Requester's side
-    'Temporary item created in host LMS' // Requester's side
+    'Awaiting LMS check out', // Automatic
+    'LMS check out complete', // Requires NCIP call
+    'LMS check out (no integration)', // NCIP off -- deal with manually
+    'Awaiting LMS check in', // Automatic
+    'Completed',  // Requires NCIP call
+    'LMS check in (no integration)', // NCIP off -- deal with manually
+
+    'Awaiting temporary item creation', // Automatic
+    'Temporary item created in host LMS', // Requires NCIP call
+    'Temporary item creation (no integration)' // NCIP off -- deal with manually
   ])
   RefdataValue status
-  
+
   static constraints = {
     itemId (blank: false)
     dateCreated (nullable: true, bindable: false)

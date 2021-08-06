@@ -234,7 +234,7 @@ public class ReshareActionService {
               // Otherwise, if the checkout succeeded or failed, set appropriately
               
               if ( checkout_result.result == true ) {
-                RefdataValue volStatus = vol.lookupStatus('lms_check_out_complete')
+                RefdataValue volStatus = checkout_result.reason=='spoofed' ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete') 
                 if (volStatus) {
                   vol.status = volStatus
                 }
@@ -694,7 +694,7 @@ public class ReshareActionService {
           if ( accept_result?.result == true ) {
             // Let the user know if the success came from a real call or a spoofed one
             String message = "Receive succeeded for item id: ${vol.itemId}. ${accept_result.reason=='spoofed' ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}"
-            def newVolState = RequestVolume.lookupStatus('temporary_item_created_in_host_lms')
+            def newVolState = accept_result.reason=='spoofed' ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms')
 
             auditEntry(pr,
               pr.state,
@@ -786,7 +786,7 @@ public class ReshareActionService {
             String message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
             auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
             
-            def newVolStatus = vol.lookupStatus('completed')
+            def newVolStatus = check_in_result.reason=='spoofed' ? vol.lookupStatus('lms_check_in_(no_integration)') : vol.lookupStatus('completed')
             vol.status = newVolStatus
             vol.save(failOnError: true)
           } else {

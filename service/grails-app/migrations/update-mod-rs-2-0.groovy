@@ -193,6 +193,13 @@ databaseChangeLog = {
     }
   }
 
+
+  changeSet(author: "ianibbo (manual)", id: "20210720-1500-001") {
+    addColumn(tableName: "directory_entry") {
+      column(name: "de_branding_url", type: "VARCHAR(255)");
+    }
+  }
+
   changeSet(author: "efreestone (manual)", id: "2021-07-22-1355-001") {
     addPrimaryKey(columnNames: "rv_id", constraintName: "request_volumePK", tableName: "request_volume")
   }
