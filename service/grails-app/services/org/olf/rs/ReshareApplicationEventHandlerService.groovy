@@ -179,7 +179,11 @@ public class ReshareApplicationEventHandlerService {
           
           if(pickup_loc != null) {
             req.resolvedPickupLocation = pickup_loc;
-            req.pickupLocation = pickup_loc.name;
+            def pickup_symbols = pickup_loc?.symbols?.findResults {
+              it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
+            }
+            // TODO this deserves a better home
+            req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
           }
         }
 
@@ -389,9 +393,6 @@ public class ReshareApplicationEventHandlerService {
   public void sendToNextLender(eventData) {
     log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
     PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      // log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
 
       def req = delayedGet(eventData.payload.id, true);
       // We must have found the request, and it as to be in a state of supplier identifier or unfilled
@@ -962,7 +963,8 @@ public class ReshareApplicationEventHandlerService {
             /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
              * then we'll need to check whether or not we need to change state.
             */
-            if (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#")) {
+            if ((messageData.note != null) &&
+                (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
               // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
               if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
                 def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
