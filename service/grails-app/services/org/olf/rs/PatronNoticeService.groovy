@@ -22,7 +22,7 @@ public class PatronNoticeService {
   public void triggerNotices(PatronRequest pr, RefdataValue trigger) {
     log.debug("triggerNotices(${pr.patronEmail}, ${trigger.value})")
     def ne = new NoticeEvent(patronRequest: pr, trigger: trigger)
-    ne.save()
+    ne.save(flush:true, failOnError:true)
   }
 
   public void processQueue(String tenant) {
