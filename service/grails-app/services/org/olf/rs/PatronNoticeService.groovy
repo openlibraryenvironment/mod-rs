@@ -82,10 +82,10 @@ public class PatronNoticeService {
       }
     }
     catch(Exception e) {
-      log.error("Problem processing notice trigger for ${tenant}", e);
+      log.error("Problem processing notice triggers for ${tenant}", e);
     }
     finally {
-      log.debug("Completed processing of patron notice trigger for ${tenant}");
+      log.debug("Completed processing of patron notice triggers for ${tenant}");
     }
   }
 }
