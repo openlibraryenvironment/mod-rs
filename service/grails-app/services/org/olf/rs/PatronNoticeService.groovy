@@ -1,7 +1,6 @@
 package org.olf.rs
 
 import com.k_int.okapi.OkapiClient
-import grails.core.GrailsApplication
 import grails.gorm.multitenancy.Tenants
 import com.k_int.web.toolkit.refdata.RefdataValue
 import org.hibernate.Transaction
@@ -17,7 +16,6 @@ public class PatronNoticeService {
   EmailService emailService
   TemplatingService templatingService
   OkapiClient okapiClient
-  GrailsApplication grailsApplication
 
   public void triggerNotices(PatronRequest pr, RefdataValue trigger) {
     log.debug("triggerNotices(${pr.patronEmail}, ${trigger.value})")
