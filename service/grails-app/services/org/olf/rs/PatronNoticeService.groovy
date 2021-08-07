@@ -69,16 +69,18 @@ public class PatronNoticeService {
                   outputFormat: "text/html"
                 ]
                 emailService.sendEmail(emailParams)
-                ev.sent = true
-                ev.save()
               }
               catch(Exception e) {
                 log.error("Problem sending notice for ${tenant}", e);
               }
             }
+            // "sent" in this case is more like processed -- not all events necessarily result in notices
+            ev.sent = true
+            ev.save()
           }
           tx.commit()
         }
+        NoticeEvent.executeUpdate("delete NoticeEvent ne where ne.sent = true")
       }
     }
     catch(Exception e) {
