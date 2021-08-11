@@ -43,7 +43,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
 
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record);
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
     }
     return availability_summary;
 
@@ -53,7 +53,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
 
   
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
+  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     //<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
     //  <zs:numberOfRecords>1359</zs:numberOfRecords>
     //  <zs:records>

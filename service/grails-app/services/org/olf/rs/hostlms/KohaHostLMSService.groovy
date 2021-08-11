@@ -59,7 +59,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
+  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
