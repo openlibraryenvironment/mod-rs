@@ -41,7 +41,7 @@ public class MillenniumHostLMSService extends BaseHostLMSService {
    * Copied from Sierra
    */
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
     Map<String,ItemLocation> availability_summary = [:]
 
@@ -50,6 +50,7 @@ public class MillenniumHostLMSService extends BaseHostLMSService {
       if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
         log.debug("Available now");
         ItemLocation il = new ItemLocation(
+                                            reason: reason,
                                             location: hld.localLocation?.toString(),
                                             shelvingLocation:hld.localLocation?.toString(),
                                             callNumber:hld.callNumber?.toString() )
