@@ -50,15 +50,16 @@ public class SierraHostLMSService extends BaseHostLMSService {
    * We are taking publicNote==AVAILABLE as an indication of an available copy
    */
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord) {
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
     Map<String,ItemLocation> availability_summary = [:]
 
     opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("${hld}");
+      log.debug("Process sierra OPAC holdings record:: ${hld}");
       if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
-        log.debug("Available now");
+        log.debug("SIERRA OPAC Record: Item Available now");
         ItemLocation il = new ItemLocation( 
+                                            reason: reason,
                                             location: hld.localLocation?.toString(), 
                                             shelvingLocation:hld.localLocation?.toString(), 
                                             callNumber:hld.callNumber?.toString() )
