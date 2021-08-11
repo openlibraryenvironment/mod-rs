@@ -81,6 +81,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     //             <subfield code="d">BOOK</subfield>
     //             <subfield code="f">2</subfield>
     //           </datafield>
+    log.debug("extractAvailableItemsFromMARCXMLRecord (SymphonyHostLMSService)");
     Map<String,ItemLocation> availability_summary = [:]
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {

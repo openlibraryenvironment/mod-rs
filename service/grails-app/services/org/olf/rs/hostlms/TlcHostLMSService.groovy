@@ -78,6 +78,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
     //          <subfield code="m"/>
     //          <subfield code="s">A</subfield>
     //        </datafield>
+    log.debug("extractAvailableItemsFromMARCXMLRecord (TlcHostLMSService)");
     Map<String, ItemLocation> availability_summary = [:];
     record.datafield.each { df ->
       if( df.'@tag' == "982") {

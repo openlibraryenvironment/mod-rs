@@ -47,6 +47,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   */
   public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
+    log.debug("extractAvailableItemsFromOpacRecord (VoyagerHostLMSService)");
     Map<String,ItemLocation> availability_summary = [:]
 
     opacRecord?.holdings?.holding?.each { hld ->
