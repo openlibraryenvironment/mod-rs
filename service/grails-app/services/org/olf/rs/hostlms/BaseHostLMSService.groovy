@@ -166,10 +166,13 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
-    log.debug("Extract available items from opac record ${z_response}, reason: ${reason}");
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+      log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
       availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord, reason);
+    }
+    else {
+      log.warn("BaseHostLMSService expected the response to contain an OPAC record, but none was found");
     }
     return availability_summary;
   }
@@ -814,11 +817,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     Map<String,ItemLocation> availability_summary = [:]
 
     opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("${hld}");
-      log.debug("${hld.circulations?.circulation?.availableNow}");
-      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+      log.debug("BaseHostLMSService holdings record:: ${hld}");
+      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow}");
+      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow?.@value}");
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-        log.debug("Available now");
+        log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
         ItemLocation il = new ItemLocation( 
                                   reason: reason,
                                   location: hld.localLocation, 

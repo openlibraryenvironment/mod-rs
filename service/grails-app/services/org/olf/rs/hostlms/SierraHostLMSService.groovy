@@ -55,9 +55,9 @@ public class SierraHostLMSService extends BaseHostLMSService {
     Map<String,ItemLocation> availability_summary = [:]
 
     opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("${hld}");
+      log.debug("Process sierra OPAC holdings record:: ${hld}");
       if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
-        log.debug("Available now");
+        log.debug("SIERRA OPAC Record: Item Available now");
         ItemLocation il = new ItemLocation( 
                                             location: hld.localLocation?.toString(), 
                                             shelvingLocation:hld.localLocation?.toString(), 
