@@ -678,7 +678,13 @@ public class ReshareActionService {
         try {
 
           // Item Barcode - using Request human readable ID + volId for now
-          def temporaryItemBarcode = "${pr.hrid}-${vol.itemId}"
+          // If we only have one volume, just use the HRID
+          def temporaryItemBarcode = null;
+          if(pr.volumes?.size() > 0) {
+            temporaryItemBarcode = "${pr.hrid}-${vol.itemId}";
+          } else {
+            temporaryItemBarcode = pr.hrid;
+          }
 
           // Call the host lms to check the item out of the host system and in to reshare
           Map accept_result = host_lms.acceptItem(temporaryItemBarcode,
