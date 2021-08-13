@@ -676,11 +676,10 @@ public class ReshareActionService {
       // Iterate over volumes without temp item in for loop so we can break out if we need to
       for (def vol : volumesWithoutTemporaryItem) {
         try {
-
           // Item Barcode - using Request human readable ID + volId for now
           // If we only have one volume, just use the HRID
           def temporaryItemBarcode = null;
-          if(pr.volumes?.size() > 0) {
+          if(pr.volumes?.size() > 1) {
             temporaryItemBarcode = "${pr.hrid}-${vol.itemId}";
           } else {
             temporaryItemBarcode = pr.hrid;
