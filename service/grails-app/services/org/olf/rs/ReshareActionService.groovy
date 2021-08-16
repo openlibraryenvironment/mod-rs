@@ -676,9 +676,14 @@ public class ReshareActionService {
       // Iterate over volumes without temp item in for loop so we can break out if we need to
       for (def vol : volumesWithoutTemporaryItem) {
         try {
-
           // Item Barcode - using Request human readable ID + volId for now
-          def temporaryItemBarcode = "${pr.hrid}-${vol.itemId}"
+          // If we only have one volume, just use the HRID
+          def temporaryItemBarcode = null;
+          if(pr.volumes?.size() > 1) {
+            temporaryItemBarcode = "${pr.hrid}-${vol.itemId}";
+          } else {
+            temporaryItemBarcode = pr.hrid;
+          }
 
           // Call the host lms to check the item out of the host system and in to reshare
           Map accept_result = host_lms.acceptItem(temporaryItemBarcode,

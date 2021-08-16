@@ -49,19 +49,19 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response) {
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract holdings from marcxml record ${z_response}");
 
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record);
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
     }
     return availability_summary;
 
   }
 
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record) {
+  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -81,6 +81,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     //             <subfield code="d">BOOK</subfield>
     //             <subfield code="f">2</subfield>
     //           </datafield>
+    log.debug("extractAvailableItemsFromMARCXMLRecord (SymphonyHostLMSService)");
     Map<String,ItemLocation> availability_summary = [:]
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {

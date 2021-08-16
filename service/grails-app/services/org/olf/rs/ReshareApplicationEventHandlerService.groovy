@@ -175,7 +175,7 @@ public class ReshareApplicationEventHandlerService {
           * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
           */
         if( req.pickupLocationCode ) {
-          DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+          DirectoryEntry pickup_loc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: req.pickupLocationCode])
           
           if(pickup_loc != null) {
             req.resolvedPickupLocation = pickup_loc;
@@ -993,7 +993,6 @@ public class ReshareApplicationEventHandlerService {
             auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
             pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
             pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
-            pr.requesterRequestedCancellation = true
             pr.save(flush: true, failOnError: true)
             break;
 

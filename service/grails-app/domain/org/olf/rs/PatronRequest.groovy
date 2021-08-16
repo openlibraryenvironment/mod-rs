@@ -174,9 +174,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * in which case the request gets closed. 
    */ 
 
-  // Boolean to flag whether a request is currently in the process of cancellation
-  boolean requesterRequestedCancellation = false;
-
   //Boolean to flag whether a request continues after the current cancellation with supplier
   boolean requestToContinue = true;
 
@@ -302,8 +299,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     resolvedPickupLocation (nullable: true)
 
     resolvedPatron (nullable: true)
-    // these 2 are Boolean - does not support nullable - must be true or false - comment out to remove warning
-    // requesterRequestedCancellation (nullable: false)
+    // this is Boolean - does not support nullable - must be true or false - comment out to remove warning
     // requestToContinue (nullable: false)
 
     activeLoan(nullable: true)
@@ -401,7 +397,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocationCode column : 'pr_pref_service_point_code'
     resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
     resolvedPatron column : 'pr_resolved_patron_fk'
-    requesterRequestedCancellation column: 'pr_requester_requested_cancellation'
     requestToContinue column: 'pr_request_to_continue'
     previousStates column: 'pr_previous_states'
     activeLoan column: 'pr_active_loan'
