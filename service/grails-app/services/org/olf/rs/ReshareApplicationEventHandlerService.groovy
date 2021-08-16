@@ -175,7 +175,7 @@ public class ReshareApplicationEventHandlerService {
           * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
           */
         if( req.pickupLocationCode ) {
-          DirectoryEntry pickup_loc = DirectoryEntry.findByLmsLocationCode(req.pickupLocationCode)
+          DirectoryEntry pickup_loc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: req.pickupLocationCode])
           
           if(pickup_loc != null) {
             req.resolvedPickupLocation = pickup_loc;
