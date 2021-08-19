@@ -106,6 +106,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String patronNote
   String pickupLocation
   String pickupLocationCode
+  String pickupLocationSlug
   DirectoryEntry resolvedPickupLocation
 
   // A json blob containing the response to a lookup in the shared index.
@@ -296,6 +297,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronNote (nullable: true, blank:false)
     pickupLocation (nullable: true, blank:false)
     pickupLocationCode (nullable: true)
+    pickupLocationSlug (nullable: true)
     resolvedPickupLocation (nullable: true)
 
     resolvedPatron (nullable: true)
@@ -395,6 +397,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronNote column : 'pr_patron_note'
     pickupLocation column : 'pr_pref_service_point'
     pickupLocationCode column : 'pr_pref_service_point_code'
+    pickupLocationSlug column : 'pr_pickup_location_slug'
     resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
     resolvedPatron column : 'pr_resolved_patron_fk'
     requestToContinue column: 'pr_request_to_continue'
