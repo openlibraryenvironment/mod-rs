@@ -170,21 +170,21 @@ public class ReshareApplicationEventHandlerService {
         log.debug("set req.hrid to ${req.hrid}");
 
         
-        // If we were supplied a pickup location code, attempt to resolve it here
-        /*TODO the lmsLocationCode might not be unique... probably need to search for DirectoryEntry with tag "pickup",
-          * where slug==requesterSlug OR ownerAtTopOfHeirachy==requesterSlug... Probably needs custom find method on DirectoryEntry
-          */
-        if( req.pickupLocationCode ) {
-          DirectoryEntry pickup_loc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: req.pickupLocationCode])
+        // If we were supplied a pickup location, attempt to resolve it here
+        DirectoryEntry pickup_loc
+        if ( req.pickupLocationSlug ) {
+          pickup_loc = DirectoryEntry.findBySlug(req.pickupLocationSlug)
+        } else if ( req.pickupLocationCode ) { // deprecated
+          pickup_loc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: req.pickupLocationCode])
+        }
           
-          if(pickup_loc != null) {
-            req.resolvedPickupLocation = pickup_loc;
-            def pickup_symbols = pickup_loc?.symbols?.findResults {
-              it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
-            }
-            // TODO this deserves a better home
-            req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
+        if(pickup_loc != null) {
+          req.resolvedPickupLocation = pickup_loc;
+          def pickup_symbols = pickup_loc?.symbols?.findResults {
+            it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
           }
+          // TODO this deserves a better home
+          req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
         }
 
         if ( req.requestingInstitutionSymbol != null ) {
