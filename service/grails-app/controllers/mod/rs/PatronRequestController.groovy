@@ -122,7 +122,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
                 if  (val) {
                   patron_request.cancellationReason = val;
-                  patron_request.save(flush:true, failOnError:true);
+                  patron_request.save(failOnError:true);
                 }
               }
               result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
