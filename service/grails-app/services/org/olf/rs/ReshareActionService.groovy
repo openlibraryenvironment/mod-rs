@@ -878,7 +878,7 @@ public class ReshareActionService {
         log.error("Action ${action} should not be able to send a cancel message")
         break;
     }
-    pr.save(flush:true, failOnError:true);
+    pr.save(failOnError:true);
     
     sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
   }
