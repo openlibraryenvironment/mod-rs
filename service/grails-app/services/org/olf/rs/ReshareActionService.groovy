@@ -693,7 +693,7 @@ public class ReshareActionService {
                                                   pr.title, // title,
                                                   pr.isbn, // isbn,
                                                   pr.localCallNumber, // call_number,
-                                                  pr.pickupLocationCode, // pickup_location,
+                                                  pr.resolvedPickupLocation?.lmsLocationCode, // pickup_location,
                                                   null) // requested_action
 
           if ( accept_result?.result == true ) {
