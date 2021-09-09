@@ -387,10 +387,6 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_VALIDATED (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
       }
     }
   }
