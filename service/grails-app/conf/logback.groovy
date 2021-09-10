@@ -79,6 +79,7 @@ if (Environment.isDevelopmentMode() ) {
 else {
   logger ('com.k_int', INFO)
   logger ('org.olf', INFO)
+  logger ('mod.rs', INFO)
 }
 
 root(WARN, ['STDOUT'])
