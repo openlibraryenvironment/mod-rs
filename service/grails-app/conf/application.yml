@@ -157,7 +157,6 @@ dataSource:
   url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
   properties:
-    ApplicationName: mod-rs
     initialSize: 5
     maxActive: ${db.maxpoolsize:5}
     minIdle: 5
@@ -176,6 +175,9 @@ dataSource:
     abandonWhenPercentageFull: 50
     jdbcInterceptors: ConnectionState
     defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+    dbProperties:
+      ApplicationName: mod-rs
+
 
 events:
   consumer:
@@ -209,7 +211,7 @@ events:
 environments:
   test:
     dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-test"
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}"
       properties:
         initialSize: 7
         minIdle: 2
@@ -223,7 +225,7 @@ environments:
 
   development:
     dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-dev"
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}"
       # logSql: true
       # formatSql: true
     # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
