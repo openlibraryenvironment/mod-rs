@@ -154,9 +154,10 @@ dataSource:
   password: "${db.password:folio_admin}"
   driverClassName: org.postgresql.Driver
   dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
-  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}?ApplicationName=mod-rs"
+  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
   properties:
+    ApplicationName: mod-rs
     initialSize: 5
     maxActive: ${db.maxpoolsize:5}
     minIdle: 5
