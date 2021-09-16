@@ -292,15 +292,17 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
                 "en"
               );
 
-              Map email_params = [
-                notificationId: '1',
-                to: emailAddresses?.join(','),
-                header: tmplResult.result.header,
-                body: tmplResult.result.body,
-                outputFormat: "text/html"
-              ]
-    
-              Map email_result = emailService.sendEmail(email_params);
+              emailAddresses.each { to ->
+                Map email_params = [
+                  notificationId: '1',
+                  to: to,
+                  header: tmplResult.result.header,
+                  body: tmplResult.result.body,
+                  outputFormat: "text/html"
+                ]
+
+                Map email_result = emailService.sendEmail(email_params);
+              }
             }
           }
           else {
