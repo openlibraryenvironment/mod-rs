@@ -37,7 +37,7 @@ public class OkapiSettingsService {
   private Map getSettingInternal(String setting) {
 
     String lookup_prop = 'code';
-    if ( setting=='localSettings' ) {
+    if ( setting=='localeSettings' ) {
       lookup_prop='configName'
     }
 
