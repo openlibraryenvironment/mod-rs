@@ -693,25 +693,51 @@ public class ReshareApplicationEventHandlerService {
    * HRIDs as the requesting agency ID instead of a UUID. For now, isolating all the request lookup functionality
    * in this method - which will try both approaches to give us some flexibility in adapting to different schemes.
    * @Param  id - a UUID OR a HRID String
+   * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
    */
-  PatronRequest lookupPatronRequest(String id) {
-    return PatronRequest.findByIdOrHrid(id,id);
-  }
-
-  PatronRequest lookupPatronRequest(String id, boolean isRequester) {
-    def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
-                                                      [id:id, isreq:isRequester])
-
-    if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
-      throw RuntimeException("Could not resolve patronRequest with id ${id}")
-    } else if (patronRequestList.size() == 1) {
-      return patronRequestList[0];
+  PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
+    // return PatronRequest.findByIdOrHrid(id,id);
+    return PatronRequest.createCriteria().get {
+      or {
+        eq('id', id)
+        eq('hrid', id)
+      }
+      lock with_lock
     }
-    return null;
   }
 
-  PatronRequest lookupPatronRequestByPeerId(String id) {
-    return PatronRequest.findByPeerRequestIdentifier(id);
+  PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
+
+    // def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
+    //                                                   [id:id, isreq:isRequester])
+    // if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
+    //   throw RuntimeException("Could not resolve patronRequest with id ${id}")
+    // } else if (patronRequestList.size() == 1) {
+    //   return patronRequestList[0];
+    // }
+    // return null;
+
+    return PatronRequest.createCriteria().get {
+      and {
+        or {
+          eq('id', id)
+          eq('hrid', id)
+        }
+        eq('isRequester', isRequester)
+      }
+      lock with_lock
+    }
+
+  }
+
+  PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
+    // return PatronRequest.findByPeerRequestIdentifier(id);
+    
+    return PatronRequest.createCriteria().get {
+      eq('peerRequestIdentifier', id)
+      lock with_lock
+    }
+
   }
   
   def handleResOverdue(Map eventData) {
@@ -755,7 +781,7 @@ public class ReshareApplicationEventHandlerService {
       }
         
 
-      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId, true)
+      PatronRequest pr = lookupPatronRequestWithRole(eventData.header.requestingAgencyRequestId, true)
       if ( pr == null )
         throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 
