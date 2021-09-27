@@ -6,7 +6,9 @@ import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import org.olf.rs.Counter
 import org.olf.okapi.modules.directory.Symbol;
-import java.util.concurrent.ThreadLocalRandom;
+// import java.util.concurrent.ThreadLocalRandom;
+import groovy.json.JsonSlurper
+
 
 /**
  * This service takes responsibility for assembling/aggregating all the data needed
@@ -16,6 +18,9 @@ public class StatisticsService {
 
   def grailsApplication
   def dataSource
+  private static final long MAX_CACHE_AGE = 60 * 5 * 1000; // 5mins
+
+  private Map<String, Map> stats_cache = [:]
 
   public incrementCounter(String context) {
     Counter c = Counter.findByContext(context) ?: new Counter(context:context, value:0)
@@ -48,36 +53,72 @@ public class StatisticsService {
     return result;
   }
 
-  /**
-   * Dummy implementation
-   */
   public Map<String, Object> refreshStatsFor(Symbol symbol) {
 
     log.debug("StatisticsService::refreshStatsForrefreshStatsFor(${symbol})");
+    Map result = null;
+  
+    if ( symbol != null ) {
+      String symbol_str = "${symbol.authority.symbol}:${symbol.symbol}".toString()
+      result = stats_cache[symbol_str]
 
-    // symbol.owner.customProperties.value.each { it ->
-    //   log.debug("refreshStatsFor cp ${it}");
-    // }
+      if ( ( result == null ) ||
+           ( System.currentTimeMillis() - result.timestamp > MAX_CACHE_AGE ) ) {
+  
+        // symbol.owner.customProperties.value.each { it ->
+        //   log.debug("refreshStatsFor cp ${it}");
+        // }
+  
+        // symbol.owner.services.each { it ->
+        //   log.debug("refreshStatsFor service ${it}");
+        // }
+  
+        // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
+        try {
+          def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
+          def stats_url = symbol.owner.services.find { it.service.businessFunction?.value == 'RS_STATS' }
+          log.debug("URL for stats is : ${stats_url}, ratio is ${ratio}");
 
-    // symbol.owner.services.each { it ->
-    //   log.debug("refreshStatsFor service ${it}");
-    // }
+          if ( stats_url ) {
+            String stats_json = new java.net.URL(stats_url).text
+            result = processRatioInfo(stats_json, ratio);
+            stats_cache[symbol_str] = result;
+          }
+        }
+        catch ( Exception e ) {
+          e.printStackTrace();
+        }
+      }
 
-    // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
-    def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
-    def stats_url = symbol.owner.services.find { it.service.businessFunction?.value == 'RS_STATS' }
+      log.debug("Result of refreshStatsFor : ${result}");
+    }
+    return result;
+  }
 
+  // Extract into more testable lump
+  public Map processRatioInfo(String stats_json, String ratio) {
     log.debug("Loan to borrow ratio is : ${ratio}");
-    log.debug("URL for stats is : ${stats_url}");
+    log.debug("Stats output is : ${stats_json}");
 
-    Map<String, Object> result = [
-      lbr_loan:1,
-      lbr_borrow:1,
-      current_loan_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1),
-      current_borrowing_level:ThreadLocalRandom.current().nextInt(0, 1000 + 1)
-    ]
+    def current_stats = new JsonSlurper().parseText(stats_json)
 
-    log.debug("Result of refreshStatsFor : ${result}");
+    Map result = null;
+
+    String[] parsed_ratio = ratio.split(':')
+    long ratio_loan = Long.parseLong(parsed_ratio[0])
+    long ratio_borrow = Long.parseLong(parsed_ratio[1])
+
+    if ( current_stats ) {
+      long current_loans = current_stats.current.find { it.context=='/activeLoans' } ?.value
+      long current_borrowing = current_stats.current.find { it.context=='/activeBorrowing' } ?.value
+      result = [
+        timestamp: System.currentTimeMillis(),
+        lbr_loan:ratio_loan,
+        lbr_borrow:ratio_borrow,
+        current_loan_level:current_loans,
+        current_borrowing_level:current_borrowing
+      ]
+    }
     return result;
   }
 }
