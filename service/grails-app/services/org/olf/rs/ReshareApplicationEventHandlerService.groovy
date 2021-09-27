@@ -813,26 +813,26 @@ public class ReshareApplicationEventHandlerService {
           def itemId = eventData?.deliveryInfo?.itemId
           if (itemId) {
             if (itemId instanceof Collection) {
-            // Item ids coming in, handle those
-            itemId.each {iid ->
-              def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
-              if (matcher.size() > 0) {
-                // At this point we have an itemId of the form "multivol:<name>,<id>"
-                def iidId = matcher[0][2]
-                def iidName = matcher[0][1]
-  
-                // Check if a RequestVolume exists for this itemId, and if not, create one
-                RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
-                if (!rv) {
-                  rv = new RequestVolume(
-                    name: iidName ?: pr.volume ?: iidId,
-                    itemId: iidId,
-                    status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
-                  )
-                  pr.addToVolumes(rv)
+              // Item ids coming in, handle those
+              itemId.each {iid ->
+                def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
+                if (matcher.size() > 0) {
+                  // At this point we have an itemId of the form "multivol:<name>,<id>"
+                  def iidId = matcher[0][2]
+                  def iidName = matcher[0][1]
+    
+                  // Check if a RequestVolume exists for this itemId, and if not, create one
+                  RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+                  if (!rv) {
+                    rv = new RequestVolume(
+                      name: iidName ?: pr.volume ?: iidId,
+                      itemId: iidId,
+                      status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+                    )
+                    pr.addToVolumes(rv)
+                  }
                 }
               }
-            }
             } else {
               // We have a single string, this is the usual standard case and should be handled as a single request volume
               // Check if a RequestVolume exists for this itemId, and if not, create one
