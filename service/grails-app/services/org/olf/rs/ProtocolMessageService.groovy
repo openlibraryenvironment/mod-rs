@@ -247,7 +247,7 @@ and sa.service.businessFunction.value=:ill
         request.body = message
 
         response.failure { FromServer fs ->
-          log.error("Failure response from remote ISO18626 servicei (${address}): ${fs.getStatusCode()} ${fs}");
+          throw new RuntimeException("Failure response from remote ISO18626 service (${address}): ${fs.getStatusCode()} ${fs}");
         }
       }
     }
