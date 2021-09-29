@@ -316,7 +316,7 @@ public class FolioSharedIndexService implements SharedIndexActions {
                           e.printStackTrace()
                         }
 
-                        log.debug("adding ${local_symbol} - with policy ${hr.illPolicy?.name}");
+                        log.debug("adding ${local_symbol} - ${instance_identifier} with policy ${hr.illPolicy?.name}");
                         result.add([
                                     symbol:local_symbol, 
                                     illPolicy:hr.illPolicy?.name,

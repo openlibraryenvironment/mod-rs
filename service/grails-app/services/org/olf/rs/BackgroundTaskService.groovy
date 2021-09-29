@@ -182,10 +182,11 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
             // DateTime start = DateTime.now()
             // DateTime start = new DateTime(current_systime)
             // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
-            def system_timezone = okapiSettingsService.getSetting('localeSettings');
-            log.debug("Got system locale settings : ${system_timezone}");
+            JsonSlurper jsonSlurper = new JsonSlurper()
+            def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+            log.debug("Got system locale settings : ${tenant_locale}");
 
-            DateTime start = new DateTime(TimeZone.getTimeZone("EST"), current_systime)
+            DateTime start = new DateTime(TimeZone.getTimeZone(tenant_locale?.timezone), current_systime)
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = null;
 
@@ -292,15 +293,17 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
                 "en"
               );
 
-              Map email_params = [
-                notificationId: '1',
-                to: emailAddresses?.join(','),
-                header: tmplResult.result.header,
-                body: tmplResult.result.body,
-                outputFormat: "text/html"
-              ]
-    
-              Map email_result = emailService.sendEmail(email_params);
+              emailAddresses.each { to ->
+                Map email_params = [
+                  notificationId: '1',
+                  to: to,
+                  header: tmplResult.result.header,
+                  body: tmplResult.result.body,
+                  outputFormat: "text/html"
+                ]
+
+                Map email_result = emailService.sendEmail(email_params);
+              }
             }
           }
           else {

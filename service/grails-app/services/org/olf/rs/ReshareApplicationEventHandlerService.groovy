@@ -387,10 +387,6 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_VALIDATED (${req?.state?.code})");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
       }
     }
   }
@@ -697,25 +693,51 @@ public class ReshareApplicationEventHandlerService {
    * HRIDs as the requesting agency ID instead of a UUID. For now, isolating all the request lookup functionality
    * in this method - which will try both approaches to give us some flexibility in adapting to different schemes.
    * @Param  id - a UUID OR a HRID String
+   * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
    */
-  PatronRequest lookupPatronRequest(String id) {
-    return PatronRequest.findByIdOrHrid(id,id);
-  }
-
-  PatronRequest lookupPatronRequest(String id, boolean isRequester) {
-    def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
-                                                      [id:id, isreq:isRequester])
-
-    if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
-      throw RuntimeException("Could not resolve patronRequest with id ${id}")
-    } else if (patronRequestList.size() == 1) {
-      return patronRequestList[0];
+  PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
+    // return PatronRequest.findByIdOrHrid(id,id);
+    return PatronRequest.createCriteria().get {
+      or {
+        eq('id', id)
+        eq('hrid', id)
+      }
+      lock with_lock
     }
-    return null;
   }
 
-  PatronRequest lookupPatronRequestByPeerId(String id) {
-    return PatronRequest.findByPeerRequestIdentifier(id);
+  PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
+
+    // def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
+    //                                                   [id:id, isreq:isRequester])
+    // if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
+    //   throw RuntimeException("Could not resolve patronRequest with id ${id}")
+    // } else if (patronRequestList.size() == 1) {
+    //   return patronRequestList[0];
+    // }
+    // return null;
+
+    return PatronRequest.createCriteria().get {
+      and {
+        or {
+          eq('id', id)
+          eq('hrid', id)
+        }
+        eq('isRequester', isRequester)
+      }
+      lock with_lock
+    }
+
+  }
+
+  PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
+    // return PatronRequest.findByPeerRequestIdentifier(id);
+    
+    return PatronRequest.createCriteria().get {
+      eq('peerRequestIdentifier', id)
+      lock with_lock
+    }
+
   }
   
   def handleResOverdue(Map eventData) {
@@ -757,137 +779,140 @@ public class ReshareApplicationEventHandlerService {
         result.errorType = "BadlyFormedMessage"
         throw new Exception("requestingAgencyRequestId missing");
       }
-        
 
-      PatronRequest pr = lookupPatronRequest(eventData.header.requestingAgencyRequestId, true)
-      if ( pr == null )
-        throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
-
-      // if eventData.deliveryInfo.itemId then we should stash the item id
-
-      if (eventData?.deliveryInfo ) {
-
-        if (eventData?.deliveryInfo?.loanCondition) {
-          log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
-          incomingStatus = [status: "Conditional"]
-
-
-          // Save the loan condition to the patron request
-          String loanCondition = eventData?.deliveryInfo?.loanCondition
-          Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
-          String note = eventData.messageInfo?.note
-
-          addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
-        }
-
-        // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
-        if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
-          pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
-        }
-
-        // Could recieve a single string or an array here as per the standard/our profile
-        def itemId = eventData?.deliveryInfo?.itemId
-        if (itemId) {
-          if (itemId instanceof Collection) {
-          // Item ids coming in, handle those
-          itemId.each {iid ->
-            def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
-            if (matcher.size() > 0) {
-              // At this point we have an itemId of the form "multivol:<name>,<id>"
-              def iidId = matcher[0][2]
-              def iidName = matcher[0][1]
-
+      PatronRequest.withTransaction { status ->
+          
+        PatronRequest pr = lookupPatronRequestWithRole(eventData.header.requestingAgencyRequestId, true, true)
+  
+        if ( pr == null )
+          throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+  
+        // if eventData.deliveryInfo.itemId then we should stash the item id
+  
+        if (eventData?.deliveryInfo ) {
+  
+          if (eventData?.deliveryInfo?.loanCondition) {
+            log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
+            incomingStatus = [status: "Conditional"]
+  
+  
+            // Save the loan condition to the patron request
+            String loanCondition = eventData?.deliveryInfo?.loanCondition
+            Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+            String note = eventData.messageInfo?.note
+  
+            addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
+          }
+  
+          // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
+          if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
+            pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
+          }
+  
+          // Could recieve a single string or an array here as per the standard/our profile
+          def itemId = eventData?.deliveryInfo?.itemId
+          if (itemId) {
+            if (itemId instanceof Collection) {
+              // Item ids coming in, handle those
+              itemId.each {iid ->
+                def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
+                if (matcher.size() > 0) {
+                  // At this point we have an itemId of the form "multivol:<name>,<id>"
+                  def iidId = matcher[0][2]
+                  def iidName = matcher[0][1]
+    
+                  // Check if a RequestVolume exists for this itemId, and if not, create one
+                  RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+                  if (!rv) {
+                    rv = new RequestVolume(
+                      name: iidName ?: pr.volume ?: iidId,
+                      itemId: iidId,
+                      status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
+                    )
+                    pr.addToVolumes(rv)
+                  }
+                }
+              }
+            } else {
+              // We have a single string, this is the usual standard case and should be handled as a single request volume
               // Check if a RequestVolume exists for this itemId, and if not, create one
-              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
+              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == itemId };
               if (!rv) {
                 rv = new RequestVolume(
-                  name: iidName ?: pr.volume ?: iidId,
-                  itemId: iidId,
+                  name: pr.volume ?: itemId,
+                  itemId: itemId,
                   status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
                 )
                 pr.addToVolumes(rv)
               }
             }
           }
-          } else {
-            // We have a single string, this is the usual standard case and should be handled as a single request volume
-            // Check if a RequestVolume exists for this itemId, and if not, create one
-            RequestVolume rv = pr.volumes.find {rv -> rv.itemId == itemId };
-            if (!rv) {
-              rv = new RequestVolume(
-                name: pr.volume ?: itemId,
-                itemId: itemId,
-                status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
-              )
-              pr.addToVolumes(rv)
-            }
+        }
+  
+        // Awesome - managed to look up patron request - see if we can action
+        if ( eventData.messageInfo?.reasonForMessage != null) {
+  
+          // If there is a note, create notification entry
+          if (eventData.messageInfo?.note) {
+            incomingNotificationEntry(pr, eventData, true)
+          }
+  
+          switch ( eventData.messageInfo?.reasonForMessage ) {
+            case 'RequestResponse':
+              break;
+            case 'StatusRequestResponse':
+              break;
+            case 'RenewResponse':
+              break;
+            case 'CancelResponse':
+              switch (eventData.messageInfo.answerYesNo) {
+                case 'Y':
+                  log.debug("Affirmative cancel response received")
+                  // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
+                  break;
+                case 'N':
+                  log.debug("Negative cancel response received")
+                  def previousState = lookupStatus('PatronRequest', pr.previousStates[pr.state.code])
+                  auditEntry(pr, pr.state, previousState, "Supplier denied cancellation.", null)
+                  pr.previousStates[pr.state.code] = null
+                  pr.state = previousState
+                  break;
+                default:
+                  log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
+              }
+              break;
+            case 'StatusChange':
+              break;
+            case 'Notification':
+              // If this note starts with #ReShareAddLoanCondition# then we know that we have to add another loan condition to the request -- might just work automatically.
+              auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
+              break;
+            default:
+              result.status = "ERROR"
+              result.errorType = "UnsupportedReasonForMessageType"
+              result.errorValue = eventData.messageInfo.reasonForMessage
+              throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
+            break;
           }
         }
-      }
-
-      // Awesome - managed to look up patron request - see if we can action
-      if ( eventData.messageInfo?.reasonForMessage != null) {
-
-        // If there is a note, create notification entry
-        if (eventData.messageInfo?.note) {
-          incomingNotificationEntry(pr, eventData, true)
+        else {
+          result.status = "ERROR"
+          result.errorType = "BadlyFormedMessage"
+          throw new Exception("No reason for message");
         }
-
-        switch ( eventData.messageInfo?.reasonForMessage ) {
-          case 'RequestResponse':
-            break;
-          case 'StatusRequestResponse':
-            break;
-          case 'RenewResponse':
-            break;
-          case 'CancelResponse':
-            switch (eventData.messageInfo.answerYesNo) {
-              case 'Y':
-                log.debug("Affirmative cancel response received")
-                // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
-                break;
-              case 'N':
-                log.debug("Negative cancel response received")
-                def previousState = lookupStatus('PatronRequest', pr.previousStates[pr.state.code])
-                auditEntry(pr, pr.state, previousState, "Supplier denied cancellation.", null)
-                pr.previousStates[pr.state.code] = null
-                pr.state = previousState
-                break;
-              default:
-                log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
-            }
-            break;
-          case 'StatusChange':
-            break;
-          case 'Notification':
-            // If this note starts with #ReShareAddLoanCondition# then we know that we have to add another loan condition to the request -- might just work automatically.
-            auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
-            break;
-          default:
-            result.status = "ERROR"
-            result.errorType = "UnsupportedReasonForMessageType"
-            result.errorValue = eventData.messageInfo.reasonForMessage
-            throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
-          break;
+        
+        if ( eventData.statusInfo?.dueDate ) {
+          pr.dueDateRS = eventData.statusInfo.dueDate;        
+        } else {
+          log.debug("No duedate found in eventData.statusInfo");
         }
+  
+        if ( incomingStatus != null ) {
+          handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
+        }
+  
+        pr.save(flush:true, failOnError:true);
       }
-      else {
-        result.status = "ERROR"
-        result.errorType = "BadlyFormedMessage"
-        throw new Exception("No reason for message");
-      }
-      
-      if ( eventData.statusInfo?.dueDate ) {
-        pr.dueDateRS = eventData.statusInfo.dueDate;        
-      } else {
-        log.debug("No duedate found in eventData.statusInfo");
-      }
-
-      if ( incomingStatus != null ) {
-        handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
-      }
-
-      pr.save(flush:true, failOnError:true);
     } catch ( Exception e ) {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
@@ -927,87 +952,91 @@ public class ReshareApplicationEventHandlerService {
         throw new Exception("supplyingAgencyRequestId missing");
       }
 
-      PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId)
-      if ( pr == null ) {
-        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\", trying to locate by peerId.")
-        pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId)
-      }
-      if (pr == null) {
-        throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
-      } else {
-        log.debug("Lookup by peerID successful.")
-      }
+      PatronRequest.withTransaction { status ->
+  
+        PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId, true)
 
-      // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
-      // Needs to look for action and try to do something with that.
-
-      if ( eventData.activeSection?.action != null ) {
-
-        // If there's a note, create a notification entry
-        if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
-          incomingNotificationEntry(pr, eventData, false)
+        if ( pr == null ) {
+          log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\", trying to locate by peerId.")
+          pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId, true)
         }
-
-        switch ( eventData.activeSection?.action ) {
-          case 'Received':
-            auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
-            pr.save(flush: true, failOnError: true)
-            break;
-          case 'ShippedReturn':
-            def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
-            pr.volumes?.each {vol ->
-              vol.status = vol.lookupStatus('awaiting_lms_check_in')
-            }
-
-            auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
-            pr.state = new_state;
-            pr.save(flush: true, failOnError: true)
-            break;
-          case 'Notification':
-            Map messageData = eventData.activeSection
-
-            /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
-             * then we'll need to check whether or not we need to change state.
-            */
-            if ((messageData.note != null) &&
-                (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
-              // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
-              if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-                def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
-                auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
-                pr.previousStates[pr.state.code] = null;
-                pr.state = new_state;
-                markAllLoanConditionsAccepted(pr)
-              } else {
-                // Loan conditions were already marked as agreed
-                auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
+        if (pr == null) {
+          throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
+        } else {
+          log.debug("Lookup by peerID successful.")
+        }
+  
+        // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
+        // Needs to look for action and try to do something with that.
+  
+        if ( eventData.activeSection?.action != null ) {
+  
+          // If there's a note, create a notification entry
+          if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
+            incomingNotificationEntry(pr, eventData, false)
+          }
+  
+          switch ( eventData.activeSection?.action ) {
+            case 'Received':
+              auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
+              pr.save(flush: true, failOnError: true)
+              break;
+            case 'ShippedReturn':
+              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
+              pr.volumes?.each {vol ->
+                vol.status = vol.lookupStatus('awaiting_lms_check_in')
               }
-            } else {
-              auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
-            }
-            pr.save(flush: true, failOnError: true)
-            break;
-
-          case 'Cancel':
-            // We cannot cancel a shipped item
-            auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
-            pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
-            pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
-            pr.save(flush: true, failOnError: true)
-            break;
-
-          default:
-            result.status = "ERROR"
-            result.errorType = "UnsupportedActionType"
-            result.errorValue = eventData.activeSection.action
-            throw new Exception("Unhandled action: ${eventData.activeSection.action}");
-            break;
+  
+              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
+              pr.state = new_state;
+              pr.save(flush: true, failOnError: true)
+              break;
+            case 'Notification':
+              Map messageData = eventData.activeSection
+  
+              /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
+               * then we'll need to check whether or not we need to change state.
+              */
+              if ((messageData.note != null) &&
+                  (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
+                // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
+                if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
+                  def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
+                  auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
+                  pr.previousStates[pr.state.code] = null;
+                  pr.state = new_state;
+                  markAllLoanConditionsAccepted(pr)
+                } else {
+                  // Loan conditions were already marked as agreed
+                  auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
+                }
+              } else {
+                auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
+              }
+              pr.save(flush: true, failOnError: true)
+              break;
+  
+            case 'Cancel':
+              // We cannot cancel a shipped item
+              auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
+              pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
+              pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
+              pr.save(flush: true, failOnError: true)
+              break;
+  
+            default:
+              result.status = "ERROR"
+              result.errorType = "UnsupportedActionType"
+              result.errorValue = eventData.activeSection.action
+              throw new Exception("Unhandled action: ${eventData.activeSection.action}");
+              break;
+          }
         }
-      }
-      else {
-        result.status = "ERROR"
-        result.errorType = "BadlyFormedMessage"
-        throw new Exception("No action in active section");
+        else {
+          result.status = "ERROR"
+          result.errorType = "BadlyFormedMessage"
+          throw new Exception("No action in active section");
+        }
       }
     } catch ( Exception e ) {
       log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);

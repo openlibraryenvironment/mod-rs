@@ -116,8 +116,6 @@ dependencies {
   profile "org.grails.profiles:rest-api"
 
 
-  runtime "com.zaxxer:HikariCP:3.2.0"
-
 
 
   /************** Testing ************/
@@ -139,8 +137,9 @@ dependencies {
   compile "org.springframework.boot:spring-boot-starter-undertow" // Replaces spring-boot-starter-tomcat
   compile "org.hibernate:hibernate-core:5.4.19.Final"             // Update to latest 5.4
   compile "org.hibernate:hibernate-java8:5.4.19.Final"
-  runtime "com.zaxxer:HikariCP:3.4.5"                             // Replaces Tomcat JDBC pool
-  runtime "org.postgresql:postgresql:42.2.14"
+  runtime "com.zaxxer:HikariCP:5.0.0"
+  // runtime "com.zaxxer:HikariCP:3.4.5"                             // Replaces Tomcat JDBC pool
+  runtime "org.postgresql:postgresql:42.2.23"
 
   compile ('org.grails.plugins:database-migration:3.1.0') {       // Required by Grails Okapi
     exclude group: 'org.liquibase', module: 'liquibase-core'
