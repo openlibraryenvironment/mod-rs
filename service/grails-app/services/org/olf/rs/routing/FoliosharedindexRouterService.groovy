@@ -68,6 +68,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
           } 
+
           if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
