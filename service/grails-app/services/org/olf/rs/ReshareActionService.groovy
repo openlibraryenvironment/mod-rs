@@ -1051,6 +1051,6 @@ public class ReshareActionService {
     if(date == null) {
       throw new Exception("Unable to parse " + dateString + " to date");
     }
-
+    return date
   }
 }
