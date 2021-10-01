@@ -26,5 +26,7 @@ class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<
       datestr|expected_time
       '2021-09-30T00:00:00GMT' | 1632960000000
       '2021-09-30T00:00:00UTC' | 1632960000000
+      '2021-09-30T00:00:00EST' | 1632978000000
+      '2021-09-30T00:00:00BST' | 1632956400000
   }
 }
