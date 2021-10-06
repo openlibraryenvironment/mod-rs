@@ -79,8 +79,10 @@ public class StatisticsService {
 
           if ( ratio == null )
             ratio = "1:1"
+          else
+            log.warn('Unable to find policy.ill.InstitutionalLoanToBorrowRatio in custom properties, using 1:1 as a default');
 
-          def stats_url = symbol.owner.services.find { it.service.businessFunction?.value == 'RS_STATS' }
+          def stats_url = symbol.owner.services.find { it.service.businessFunction?.value?.toUpperCase() == 'RS_STATS' }
           log.debug("URL for stats is : ${stats_url}, ratio is ${ratio}");
 
           if ( ( ratio != null ) && ( stats_url != null ) ) {
@@ -89,7 +91,11 @@ public class StatisticsService {
             stats_cache[symbol_str] = result;
           }
           else {
-            log.warn("No stats service available for ${symbol}.");
+            log.warn("No stats service available for ${symbol}. Found the following services");
+            symbol.owner.services.each {
+              log.warn("    -> declared service: ${it.service.businessFunction}/${it.service.businessFunction?.value} != RS_STATS");
+            }
+            
             // No stats available so return data which will place this symbol at parity
             result = [
               timestamp: System.currentTimeMillis(),
