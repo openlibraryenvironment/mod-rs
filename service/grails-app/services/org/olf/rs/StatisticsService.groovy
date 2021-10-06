@@ -8,6 +8,7 @@ import org.olf.rs.Counter
 import org.olf.okapi.modules.directory.Symbol;
 // import java.util.concurrent.ThreadLocalRandom;
 import groovy.json.JsonSlurper
+import org.olf.okapi.modules.directory.ServiceAccount
 
 
 /**
@@ -82,7 +83,9 @@ public class StatisticsService {
           else
             log.warn('Unable to find policy.ill.InstitutionalLoanToBorrowRatio in custom properties, using 1:1 as a default');
 
-          def stats_url = symbol.owner.services.find { it.service.businessFunction?.value?.toUpperCase() == 'RS_STATS' }
+          ServiceAccount sa = symbol.owner.services.find { it.service.businessFunction?.value?.toUpperCase() == 'RS_STATS' }
+          String stats_url = sa?.service.address
+
           log.debug("URL for stats is : ${stats_url}, ratio is ${ratio}");
 
           if ( ( ratio != null ) && ( stats_url != null ) ) {
