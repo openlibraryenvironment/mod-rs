@@ -431,4 +431,20 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'
   }
 
+  void "Test the status endpoint for tenant #tenant_id"() {
+    when:"We fetch the status report"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def resp = doGet("${baseUrl}/rs/externalApi/statusReport".toString())
+    then:"Correct counts"
+      resp != null;
+      log.debug("Got status report: ${resp}");
+    where:
+      tenant_id | _
+      'RSInstOne' | _
+  }
 }

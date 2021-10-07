@@ -11,6 +11,7 @@ import org.olf.rs.ConfirmationMessageService
 import groovy.util.logging.Slf4j
 import org.olf.rs.Counter
 import grails.gorm.multitenancy.CurrentTenant
+import org.olf.rs.PatronRequest
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
@@ -149,5 +150,13 @@ class ExternalApiController {
     }
     log.debug("Returning symbol : ${result}");
     return result;
+  }
+
+  def statusReport() {
+    Map result = ['summary':[]]
+    PatronRequest.executeQuery('select pr.state.code, count(*) from PatronRequest as pr group by pr.state.code').each { sg ->
+      result.summary.add(['state':sg[0], 'count':sg[1]]);
+    }
+    render result as JSON
   }
 }

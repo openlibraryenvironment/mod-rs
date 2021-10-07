@@ -34,7 +34,8 @@ def targetDir = BuildSettings.TARGET_DIR
 
 logger ('org.hibernate.orm.deprecation', ERROR)
 
-if (Environment.isDevelopmentMode() ) {
+if ( ( Environment.isDevelopmentMode() ) ||
+     ( Environment.getCurrent() == Environment.TEST ) ) {
   logger ('com.k_int', DEBUG)
   logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
   logger ('com.k_int.okapi', WARN)

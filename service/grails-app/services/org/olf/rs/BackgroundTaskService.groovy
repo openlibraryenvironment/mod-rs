@@ -33,7 +33,6 @@ public class BackgroundTaskService {
   def groovyPageRenderer
   def templatingService
 
-  static boolean running = false;
   OkapiClient okapiClient
   EmailService emailService
   PatronNoticeService patronNoticeService
@@ -77,18 +76,6 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
       patronNoticeService.processQueue(tenant)
-    }
-
-
-    // If somehow we get asked to perform the background tasks, but a thread is already running, then just return
-    synchronized ( this ) {
-      if ( running == true ) {
-        log.debug("BackgroundTaskService::performReshareTasks already running - return");
-        return;
-      }
-      else {
-        running = true;
-      }
     }
 
     try {
@@ -215,7 +202,6 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
       log.error("Exception running background tasks",e);
     }
     finally {
-      running = false;
       // log.debug("BackgroundTaskService::performReshareTasks exiting");
     }
   }
