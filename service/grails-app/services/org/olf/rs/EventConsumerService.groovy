@@ -14,6 +14,8 @@ import groovy.json.JsonSlurper
 import grails.web.databinding.DataBinder
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import grails.gorm.multitenancy.Tenants
+import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
+import com.k_int.web.toolkit.custprops.types.CustomPropertyText
 
 
 
@@ -241,6 +243,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
         // Root level custom properties object is a custom properties container
         // We iterate over each custom property to see if it's one we want to process
+
+        boolean existing_custprop_updated = false;
+
+        // replace any existing property
         de.customProperties?.value.each { cp ->
           if ( cp.definition.name == k ) {
             log.debug("updating customProperties.${k}.value to ${v} - custprop type is ${cp.definition.type?.toString()}");
@@ -252,6 +258,24 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               // cp.value = v
               mergeCustpropWithString(cp, v)
             }
+            existing_custprop_updated = true
+          }
+        }
+
+        // IF we didn't update an existing property, we need to add a new one
+        if ( existing_custprop_updated == false ) {
+          log.debug("Need to add new custom property: ${k} -> ${v}");
+          CustomPropertyDefinition cpd = CustomPropertyDefinition.findByName(k);
+          if ( cpd != null ) {
+            if ( v instanceof String ) {
+              de.customProperties?.value.add( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v))
+            }
+            else {
+              log.warn("List props are not supported at this time")
+            }
+          }
+          else {
+            log.warn("No definition for custprop ${k}. Skipping");
           }
         }
       }
