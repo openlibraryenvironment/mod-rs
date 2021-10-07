@@ -74,14 +74,18 @@ public class StatisticsService {
         //   log.debug("refreshStatsFor service ${it}");
         // }
   
-        // symbol.owner.customProperties is a CustomPropertyContainer which means it's a list of custom properties
+        // symbol.owner.customProperties is a CustomPropertyContainer which means it's value is a list of custom properties
         try {
-          def ratio = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
+          def ratio_custprop = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
+          String ratio = ratio_custprop?.value
 
-          if ( ratio == null )
-            ratio = "1:1"
-          else
+          if ( ratio == null ) {
             log.warn('Unable to find policy.ill.InstitutionalLoanToBorrowRatio in custom properties, using 1:1 as a default');
+            ratio = "1:1"
+            symbol.owner.customProperties.value.each { cp ->
+              log.info("    custom properties that are present: ${cp.definition?.name} -> ${cp.value}");
+            }
+          }
 
           ServiceAccount sa = symbol.owner.services.find { it.service.businessFunction?.value?.toUpperCase() == 'RS_STATS' }
           String stats_url = sa?.service.address
@@ -112,7 +116,7 @@ public class StatisticsService {
           }
         }
         catch ( Exception e ) {
-          e.printStackTrace();
+          log.error("Exception processing stats",e);
         }
       }
       log.debug("Result of refreshStatsFor : ${result}");
