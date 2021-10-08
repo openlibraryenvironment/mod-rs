@@ -12,14 +12,16 @@ import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StateModel
 import org.olf.okapi.modules.directory.Symbol;
 import groovy.json.JsonOutput;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.ZoneOffset
 import org.olf.okapi.modules.directory.DirectoryEntry
-import java.time.Instant;
 import org.olf.rs.lms.HostLMSActions;
 import com.k_int.web.toolkit.settings.AppSetting;
 import com.k_int.web.toolkit.custprops.CustomProperty;
 import org.olf.rs.patronstore.PatronStoreActions;
-import java.text.SimpleDateFormat
 
 
 /**
@@ -1032,24 +1034,16 @@ public class ReshareActionService {
   }
   
   protected Date parseDateString(String dateString) {
-    def formatList = [
-      "yyyy-MM-dd'T'HH:mm:ssZ",
-      "yyyy-MM-dd HH:mm:ss"
-    ];
-    Date date = null;
-    formatList.any {
-      SimpleDateFormat format = new SimpleDateFormat(it);
-      try {
-        date = format.parse(dateString); 
-      } catch(Exception e) {
-        log.debug("Unable to parse date ${dateString} with format '${it}' ${e.getMessage()}");
-      }
-      if(date != null) {
-        return true;
-      }      
+    if (dateString == null) {
+      throw new Exception("Attempted to parse null as date")
     }
-    if(date == null) {
-      throw new Exception("Unable to parse " + dateString + " to date");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd[ ]['T']HH:mm[:ss][.SSS][z][XXX][Z]")
+    Date date
+    try {
+      date = Date.from(ZonedDateTime.parse(dateString, formatter).toInstant())
+    } catch(Exception e) {
+      log.debug("Failed to parse ${dateString} as ZonedDateTime, falling back to LocalDateTime")
+      date = Date.from(LocalDateTime.parse(dateString, formatter).toInstant(ZoneOffset.UTC))
     }
     return date
   }
