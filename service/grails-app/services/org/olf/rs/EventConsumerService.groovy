@@ -270,8 +270,13 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             if ( v instanceof String ) {
               de.customProperties?.value.add( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v))
             }
-            else {
-              log.warn("List props are not supported at this time")
+            else if ( v instanceof List ) {
+              if ( v.size() == 1 ) {
+                de.customProperties?.value.add( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v[0]))
+              }
+              else {
+                log.warn("List props size > 1 are not supported at this time")
+              }
             }
           }
           else {
@@ -291,6 +296,9 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     if ( cp_value instanceof com.k_int.web.toolkit.custprops.types.CustomPropertyText ) {
       // We're only concerned with single values for now.
       cp_value.value = binding_value.get(0)?.toString();
+    }
+    else {
+      log.warn("Re-binding lists is not currently supported");
     }
   }
 
