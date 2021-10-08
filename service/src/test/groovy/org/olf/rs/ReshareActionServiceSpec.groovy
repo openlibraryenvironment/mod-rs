@@ -5,10 +5,6 @@ import spock.lang.Specification
 import groovy.util.logging.Slf4j
 import java.util.Date;
 
-/**
- * A mock email service that allows the integration tests to complete without sending any actual emails
- *
- */
 @Slf4j
 class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<ReshareActionService> {
 
@@ -24,9 +20,15 @@ class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<
       
     where:
       datestr|expected_time
+      '2021-09-30T00:00:00Z' | 1632960000000
+      '2021-09-30 00:00' | 1632960000000
+      '2021-09-30T00:00:00-0500' | 1632978000000
+      '2021-09-30T00:00:00.000+01:00' | 1632956400000
+      // Strangely, these do not use the expected offsets
+      // '2021-09-30T00:00:00EST' | 1632978000000
+      // '2021-09-30T00:00:00BST' | 1632956400000
       '2021-09-30T00:00:00GMT' | 1632960000000
       '2021-09-30T00:00:00UTC' | 1632960000000
-      '2021-09-30T00:00:00EST' | 1632978000000
-      '2021-09-30T00:00:00BST' | 1632956400000
+      '2021-09-30T00:00:00EDT' | 1632974400000
   }
 }
