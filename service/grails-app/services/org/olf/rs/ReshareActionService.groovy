@@ -347,8 +347,8 @@ public class ReshareActionService {
     if(!pr?.parsedDueDateRS) {
       return;
     }
-    nowDate = new Date();
-    if(nowDate.compareTo(pr.parsedDueDateRS) < 0) {
+    def nowDate = new Date();
+    if(nowDate.compareTo(pr.parsedDueDateRS) > 0) {
       pr.overdue = true;
       Status s = Status.lookup('PatronRequest', 'REQ_OVERDUE');
       pr.state = s;
