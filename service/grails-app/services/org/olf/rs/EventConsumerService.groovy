@@ -268,11 +268,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
           CustomPropertyDefinition cpd = CustomPropertyDefinition.findByName(k);
           if ( cpd != null ) {
             if ( v instanceof String ) {
-              de.customProperties?.value.add( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v))
+              de.customProperties?.addToValue( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v))
             }
             else if ( v instanceof List ) {
               if ( v.size() == 1 ) {
-                de.customProperties?.value.add( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v[0]))
+                de.customProperties?.addToValue( new com.k_int.web.toolkit.custprops.types.CustomPropertyText(definition:cpd, value: v[0]))
               }
               else {
                 log.warn("List props size > 1 are not supported at this time")
