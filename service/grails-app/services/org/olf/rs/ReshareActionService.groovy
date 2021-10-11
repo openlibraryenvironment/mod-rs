@@ -334,7 +334,6 @@ public class ReshareActionService {
         log.warn("Unable to locate RES_AWAIT_SHIPPING OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
       }
     }
-    checkRequestOverdue(pr);
 
     return result;
   }
@@ -343,21 +342,6 @@ public class ReshareActionService {
     boolean result = false;
     log.debug("supplierCannotSupply(${pr})");
     return result;
-  }
-  
-  public void checkRequestOverdue(PatronRequest pr) {
-    if(!pr?.parsedDueDateRS) {
-      return;
-    }
-    def nowDate = new Date();
-    if(nowDate.compareTo(pr.parsedDueDateRS) > 0) {
-      pr.overdue = true;
-      Status s = Status.lookup('PatronRequest', 'REQ_OVERDUE');
-      pr.state = s;
-      pr.save(flush:true, failOnError:true);
-    } 
-    
-    
   }
  
   public Map notiftyPullSlipPrinted(PatronRequest pr) {
@@ -766,7 +750,6 @@ public class ReshareActionService {
         pr.needsAttention=true;
         pr.save(flush:true, failOnError:true);
     }
-    checkRequestOverdue(pr);
 
     return result;
   }
