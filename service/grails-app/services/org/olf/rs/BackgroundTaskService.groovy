@@ -133,6 +133,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
           } else {
             patronRequest.state = overdueState;
             reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
+            log.debug("PatronRequest ${patronRequest.id} is overdue -- currently ${currentDate} and due on ${patronRequest.parsedDueDateRS}");
             patronRequest.save(flush:true, failOnError:true);
           }
         }
