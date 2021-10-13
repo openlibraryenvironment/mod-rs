@@ -154,8 +154,30 @@ dataSource:
   password: "${db.password:folio_admin}"
   driverClassName: org.postgresql.Driver
   dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
-  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}"
+  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}?ApplicationName=mod-rs"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
+  properties:
+    initialSize: 5
+    maxActive: ${db.maxpoolsize:5}
+    minIdle: 5
+    maxIdle: 10
+    maxWait: 10000
+    maxAge: 600000
+    timeBetweenEvictionRunsMillis: 5000
+    minEvictableIdleTimeMillis: 60000
+    validationQuery: SELECT 1
+    validationInterval: 30000
+    testOnBorrow: true
+    testWhileIdle: true
+    testOnReturn: false
+    removeAbandoned: true
+    removeAbandonedTimeout: 60
+    abandonWhenPercentageFull: 50
+    jdbcInterceptors: ConnectionState
+    defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+    dbProperties:
+      ApplicationName: mod-rs
+
 
 events:
   consumer:
@@ -189,7 +211,7 @@ events:
 environments:
   test:
     dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}"
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-test"
       properties:
         initialSize: 7
         minIdle: 2
@@ -201,32 +223,9 @@ environments:
         testOnReturn: false
         defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
-  production:
-    dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}"
-      properties:
-        initialSize: 7
-        maxActive: 50
-        minIdle: 5
-        maxIdle: 25
-        maxWait: 10000
-        maxAge: 600000
-        timeBetweenEvictionRunsMillis: 5000
-        minEvictableIdleTimeMillis: 60000
-        validationQuery: SELECT 1
-        validationInterval: 30000
-        testOnBorrow: true
-        testWhileIdle: true
-        testOnReturn: false
-        removeAbandoned: true
-        removeAbandonedTimeout: 60
-        abandonWhenPercentageFull: 50
-        jdbcInterceptors: ConnectionState
-        defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
-
   development:
     dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}"
+      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-dev"
       # logSql: true
       # formatSql: true
     # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
