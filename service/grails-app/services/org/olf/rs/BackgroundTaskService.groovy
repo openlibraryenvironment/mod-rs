@@ -170,11 +170,20 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
             // DateTime start = DateTime.now()
             // DateTime start = new DateTime(current_systime)
             // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
-            JsonSlurper jsonSlurper = new JsonSlurper()
-            def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
-            log.debug("Got system locale settings : ${tenant_locale}");
 
-            DateTime start = new DateTime(TimeZone.getTimeZone(tenant_locale?.timezone), current_systime)
+            TimeZone tz;
+            try {
+              JsonSlurper jsonSlurper = new JsonSlurper();
+              def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+              log.debug("Got system locale settings : ${tenant_locale}");
+              tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+            }
+            catch ( Exception e ) {
+              log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
+              tz = TimeZone.getTimeZone('UTC');
+            }
+
+            DateTime start = new DateTime(tz, current_systime);
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = null;
 
