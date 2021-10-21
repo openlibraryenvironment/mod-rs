@@ -85,7 +85,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true, null, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_PENDING', '0060', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
@@ -93,11 +93,11 @@ public class HousekeepingService {
         Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
         Status.lookupOrCreate('PatronRequest', 'REQ_LOCAL_REVIEW', '0079', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_FILLED_LOCALLY', '0081', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_FILLED_LOCALLY', '0081', true, null, true);
         // This one doesn't appear to be in use
         // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true, null, true);
+        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true, null, true);
         Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true, true);
 
         // Responder / Lender State Model
@@ -110,12 +110,12 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
         Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
-        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true);
+        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true, null, true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
-        Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true);
+        Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true, null, true);
         Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
-        Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true);
+        Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true, null, true);
         Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
         Status.lookupOrCreate('Responder', 'RES_OVERDUE', '9997', true);
 

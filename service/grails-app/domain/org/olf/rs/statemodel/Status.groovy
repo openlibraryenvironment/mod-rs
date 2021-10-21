@@ -16,12 +16,16 @@ class Status implements MultiTenant<Status> {
   Boolean visible
   Boolean needsAttention
 
+  // Set up boolean to indicate whether a state is terminal or not.
+  Boolean terminal
+
   static constraints = {
                owner (nullable: false)
                code (nullable: false, blank:false)
             presSeq (nullable: true, blank:false)
             visible (nullable: true)
      needsAttention (nullable: true)
+           terminal (nullable: true)
   }
 
   static mapping = {
@@ -32,11 +36,12 @@ class Status implements MultiTenant<Status> {
                 presSeq column : 'st_presentation_sequence'
                 visible column : 'st_visible'
          needsAttention column : 'st_needs_attention'
+               terminal column : 'st_terminal'
   }
 
-  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null, needsAttention=null) {
+  public static Status lookupOrCreate(String model, String code, presSeq=null, visible=null, needsAttention=null, terminal=false) {
     StateModel sm = StateModel.findByShortcode(model) ?: new StateModel(shortcode: model).save(flush:true, failOnError:true)
-    Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention).save(flush:true, failOnError:true)
+    Status s = Status.findByOwnerAndCode(sm, code) ?: new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention, terminal:terminal).save(flush:true, failOnError:true)
     return s;
   }
 
