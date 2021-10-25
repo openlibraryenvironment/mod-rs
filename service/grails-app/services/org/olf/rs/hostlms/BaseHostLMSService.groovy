@@ -31,24 +31,25 @@ import org.olf.rs.HostLMSLocation;
 public abstract class BaseHostLMSService implements HostLMSActions {
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
-  def lookup_strategies = [
-    [ 
-      name:'Local_identifier_By_Z3950',
-      precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
-      stragegy: { pr, service -> return service.z3950ItemsByIdentifier(pr) }
-    ],
-    [ 
-      name:'ISBN_identifier_By_Z3950',
-      precondition: { pr -> return ( pr.isbn != null ) },
-      stragegy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
-    ],
-    [ 
-      name:'Local_identifier_By_Title',
-      precondition: { pr -> return ( pr.title != null ) },
-      stragegy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
-    ],
-
-  ]
+  List getLookupStrategies() {
+    return [
+      [
+        name:'Local_identifier_By_Z3950',
+        precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
+        strategy: { pr, service -> return service.z3950ItemsByIdentifier(pr) }
+      ],
+      [
+        name:'ISBN_identifier_By_Z3950',
+        precondition: { pr -> return ( pr.isbn != null ) },
+        strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
+      ],
+      [
+        name:'Local_identifier_By_Title',
+        precondition: { pr -> return ( pr.title != null ) },
+        strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
+      ],
+    ]
+  }
 
   void validatePatron(String patronIdentifier) {
   }
@@ -84,6 +85,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     log.debug("determineBestLocation(${pr})");
 
     ItemLocation location = null;
+    def lookup_strategies = this.getLookupStrategies();
     Iterator i = lookup_strategies.iterator();
     
     while ( ( location==null ) && ( i.hasNext() ) ) {
@@ -92,7 +94,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( next_strategy.precondition(pr) == true ) {
         log.debug("Strategy ${next_strategy.name} passed precondition");
         try {
-          def strategy_result = next_strategy.stragegy(pr, this);
+          def strategy_result = next_strategy.strategy(pr, this);
           if ( strategy_result instanceof ItemLocation ) {
             log.debug("Legacy strategy - return top holding");
             location = strategy_result;

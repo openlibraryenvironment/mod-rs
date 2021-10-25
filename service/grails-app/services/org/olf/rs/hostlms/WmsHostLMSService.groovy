@@ -31,59 +31,29 @@ public class WmsHostLMSService extends BaseHostLMSService {
       ]).circulationClient;
   }
 
-  def lookup_strategies = [
-    [ 
-      name:'Adapter_By_OCLC_Number',
-      precondition: { pr -> return ( pr.oclcNumber != null ) },
-      strategy: { pr, service -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=1") }
-    ],
-    [ 
-      name:'Adapter_By_Title_And_Identifier',
-      precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
-      strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
-    ],
+  List getLookupStrategies() {
     [
-      name:'Adapter_By_Identifier',
-      precondition: { pr -> return ( pr.isbn != null ) },
-      strategy: { pr, service -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
-    ],
-    [
-      name:'Adapter_By_Title',
-      precondition: { pr -> return ( pr.title != null ) },
-      strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=1") }
-    ],
-  ]
-
-  ItemLocation determineBestLocation(PatronRequest pr) {
-
-    log.debug("determineBestLocation(${pr})");
-
-    ItemLocation location = null;
-    Iterator i = lookup_strategies.iterator();
-    
-    while ( ( location==null ) && ( i.hasNext() ) ) {
-      def next_strategy = i.next();
-      log.debug("Next lookup strategy: ${next_strategy.name}");
-      if ( next_strategy.precondition(pr) == true ) {
-        log.debug("Strategy ${next_strategy.name} passed precondition");
-        try {
-          location = next_strategy.strategy(pr, this);
-        }
-        catch ( Exception e ) {
-          log.error("Problem attempting strategy ${next_strategy.name}",e);
-        }
-        finally {
-          log.debug("Completed strategy ${next_strategy.name}");
-        }
-     
-      }
-      else {
-        log.debug("Strategy did not pass precondition");
-      }
-    }
-    
-    log.debug("determineBestLocation returns ${location}");
-    return location;
+      [
+        name:'Adapter_By_OCLC_Number',
+        precondition: { pr -> return ( pr.oclcNumber != null ) },
+        strategy: { pr, service -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=1") }
+      ],
+      [
+        name:'Adapter_By_Title_And_Identifier',
+        precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
+        strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
+      ],
+      [
+        name:'Adapter_By_Identifier',
+        precondition: { pr -> return ( pr.isbn != null ) },
+        strategy: { pr, service -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=1") }
+      ],
+      [
+        name:'Adapter_By_Title',
+        precondition: { pr -> return ( pr.title != null ) },
+        strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=1") }
+      ],
+    ]
   }
 
   ItemLocation lookupViaConnector(String query) {
