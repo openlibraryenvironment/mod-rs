@@ -93,14 +93,15 @@ public class KohaHostLMSService extends BaseHostLMSService {
         log.debug("Found holdings tag : ${df} ${tag_data}");
 
         try {
-          if ( tag_data['7'] != null ){
+          if ( tag_data['7'] != null ) {
             if ( tag_data['7'] == '0' ) {
               log.debug("Assuming ${tag_data['7']}");
-              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['o'] )
+            } else {
+              log.debug("Subfield '7' is not zero (${tag_data['7']})");
             }
-          }
-          else {
-            log.debug("No subfield b present - unable to determine number of copies available");
+          } else {
+            log.debug("No subfield '7' present - unable to determine number of copies available");
           }
         }
         catch ( Exception e ) {
