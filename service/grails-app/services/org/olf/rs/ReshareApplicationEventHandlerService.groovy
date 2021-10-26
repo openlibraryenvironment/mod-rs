@@ -542,10 +542,6 @@ public class ReshareApplicationEventHandlerService {
       }
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
       }
     }
   }
@@ -1124,10 +1120,6 @@ public class ReshareApplicationEventHandlerService {
         req.save(flush:true, failOnError: true)
       } else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
-        log.debug("The current request IDs are")
-        PatronRequest.list().each {
-          log.debug("  -> ${it.id} ${it.title}");
-        }
       }
     }
   }
