@@ -230,6 +230,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   private void bindCustomProperties(DirectoryEntry de, Map payload) {
     log.debug("Iterate over custom properties sent in directory entry payload ${payload.customProperties}");
 
+    cleanCustomProperties(de);
+
     payload?.customProperties?.each { k, v ->
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
       // we need to see if we can find
@@ -324,6 +326,40 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                                     final String toVersion, 
                                     final String fromVersion) {
     log.info("onTenantLoadReference(${tenantId},${value},${existing_tenant},${upgrading},${toVersion},${fromVersion})");
+  }
+
+  private void cleanCustomProperties(DirectoryEntry de) {
+
+    // Fror each of these custprops - we should have a scalar, not a set
+    ['local_institutionalPatronId',
+     'policy.ill.loan_policy',
+     'policy.ill.last_resort',
+     'policy.ill.returns',
+     'policy.ill.InstitutionalLoanToBorrowRatio'].each { k ->
+
+      boolean first = true;
+      boolean updated = false;
+
+      List cps_to_remove = []
+
+      de.customProperties?.value.each { cp ->
+        if ( cp.definition.name == k ) {
+          if ( first ) {
+            first=false;
+          }
+          else {
+            // Extra value - dispose of it.
+            cps_to_remove.add(cp);
+            // de.customProperties?.removeFromValue(cp)
+          }
+        }
+      }
+
+      cps_to_remove.each { cp ->
+        de.customProperties?.removeFromValue(cp)
+        updated = true;
+      }
+    }
   }
 
 }
