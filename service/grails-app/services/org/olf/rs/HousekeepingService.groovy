@@ -109,7 +109,7 @@ public class HousekeepingService {
         Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
         Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
         Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
-        Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true);
+        Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true, null, true);
         Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true, null, true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
         Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
