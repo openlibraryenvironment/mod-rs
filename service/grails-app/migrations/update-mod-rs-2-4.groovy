@@ -29,4 +29,16 @@ databaseChangeLog = {
     }
   }
 
+  changeSet(author: "efreestone (manual)", id: "2021-10-28-1025-001") {
+    grailsChange {
+      change {
+        sql.execute("""
+          UPDATE ${database.defaultSchemaName}.status AS st
+          SET st_terminal = true
+          WHERE st_code = 'RES_UNFILLED'
+        """.toString())
+      }
+    }
+  }
+
 }
