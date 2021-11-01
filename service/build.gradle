@@ -154,7 +154,7 @@ dependencies {
 
 
   // Custom non profile deps.
-  compile 'org.apache.kafka:kafka-clients:2.8.0'
+  compile 'org.apache.kafka:kafka-clients:2.8.1'
   runtime "org.grails.plugins:async"
   runtime "org.grails.plugins:events"
   compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'

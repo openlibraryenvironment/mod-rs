@@ -193,7 +193,7 @@ events:
       id: ModRSConsumer
     'auto.offset.reset': 'earliest'
 
-      
+# see https://kafka.apache.org/28/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
   publisher:
     zk:
       connect: 'localhost:2181'
@@ -203,6 +203,10 @@ events:
       serializer: org.apache.kafka.common.serialization.StringSerializer
     value:
       serializer: org.apache.kafka.common.serialization.StringSerializer
+    acks: 'all'
+    retries: 0
+    'linger.ms': 1
+    
 
 ##
 # The settings below are loaded per environment. i.e. Anything declared under 'environments.production' will override

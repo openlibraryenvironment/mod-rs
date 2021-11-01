@@ -38,11 +38,12 @@ public class EventPublicationService {
         new ProducerRecord<String, String>(topic, key, compoundMessage), { RecordMetadata metadata, Exception e ->
           // println "The offset of the record we just sent is: ${metadata?.offset()}"
           if ( e != null ) {
+            println("Exception sending to kafka ${e}");
             e.printStackTrace()
           }
         }
     )
-    // log.debug("Send returned, callback will be called once complete");
+    log.debug("publishAsJSON - producer.send completed");
   }
 
   @javax.annotation.PreDestroy
