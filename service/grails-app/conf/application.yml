@@ -194,6 +194,7 @@ events:
     'auto.offset.reset': 'earliest'
 
 # see https://kafka.apache.org/28/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
+# Setting linger to 1 will cause a 1ms delay in sending to batch up groups of messages.
   publisher:
     zk:
       connect: 'localhost:2181'
