@@ -57,6 +57,7 @@ public class AppListenerService implements ApplicationListener {
             ]
           ]
           );
+      log.debug("AppListenerService::afterInsert event published");
     }
   }
 
