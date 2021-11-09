@@ -714,7 +714,7 @@ public class ReshareApplicationEventHandlerService {
     // return null;
 
     log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
-    result = PatronRequest.createCriteria().get {
+    PatronRequest result = PatronRequest.createCriteria().get {
       and {
         or {
           eq('id', id)
