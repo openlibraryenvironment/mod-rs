@@ -713,7 +713,8 @@ public class ReshareApplicationEventHandlerService {
     // }
     // return null;
 
-    return PatronRequest.createCriteria().get {
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
+    result = PatronRequest.createCriteria().get {
       and {
         or {
           eq('id', id)
@@ -723,6 +724,9 @@ public class ReshareApplicationEventHandlerService {
       }
       lock with_lock
     }
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
+
+    return result;
 
   }
 

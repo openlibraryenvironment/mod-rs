@@ -59,9 +59,9 @@ class ExternalApiController {
         String recipient;
 
         if ( iso18626_msg.request != null ) {
-          log.debug("Process inbound request message");
   
           def mr = iso18626_msg.request;
+          log.debug("Process inbound request message. supplying agency id is ${mr.header.supplyingAgencyId}");
 
           // Look in request.header.supplyingAgencyId for the intended recipient
           recipient = getSymbolFor(mr.header.supplyingAgencyId)
@@ -79,9 +79,9 @@ class ExternalApiController {
           }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
-          log.debug("Process inbound supplyingAgencyMessage message");
   
           def msam = iso18626_msg.supplyingAgencyMessage;
+          log.debug("Process inbound supplyingAgencyMessage message. requestingAgencyId is ${msam.header.requestingAgencyId}");
   
           // Look in request.header.requestingAgencyId for the intended recipient
           recipient = getSymbolFor(msam.header.requestingAgencyId)
@@ -99,9 +99,9 @@ class ExternalApiController {
           }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
-          log.debug("Process inbound requestingAgencyMessage message");
   
           def mram = iso18626_msg.requestingAgencyMessage;
+          log.debug("Process inbound requestingAgencyMessage message. SupplyingAgencyId is ${mram.header.supplyingAgencyId}");
 
           // Look in request.header.supplyingAgencyId for the intended recipient
           recipient = getSymbolFor(mram.header.supplyingAgencyId);
