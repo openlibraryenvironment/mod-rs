@@ -24,6 +24,8 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.olf.rs.circ.client.CirculationClient;
 
+import java.text.Normalizer;
+
 
 
 /**
@@ -83,6 +85,26 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
       return [ matcher.group(1), matcher.group(2)];
     }
     return null;
+  }
+
+  public Map acceptItem(String item_id,
+                        String request_id,
+                        String user_id,
+                        String author,
+                        String title,
+                        String isbn,
+                        String call_number,
+                        String pickup_location,
+                        String requested_action) {
+    return super.acceptItem(item_id, request_id, user_id, stripDiacritics(author),
+     stripDiacritics(title), isbn, call_number, pickup_location, requested_action);
+
+  }
+
+  private String stripDiacritics(String input) {
+    input = Normalizer.normalize(input, Normalizer.Form.NFD);
+    input = input.replaceAll("[^\\p{ASCII}]", ""); //Remove all non ASCII chars
+    return input;
   }
 
 }
