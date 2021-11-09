@@ -96,6 +96,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
                         String call_number,
                         String pickup_location,
                         String requested_action) {
+    log.debug("Calling VoyagerHostLMSService::acceptItem");
     return super.acceptItem(item_id, request_id, user_id, stripDiacritics(author),
      stripDiacritics(title), isbn, call_number, pickup_location, requested_action);
 
