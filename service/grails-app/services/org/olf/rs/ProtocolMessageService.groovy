@@ -10,6 +10,11 @@ import static groovyx.net.http.ContentTypes.XML
 import groovyx.net.http.*
 import java.time.Instant
 
+import groovyx.net.http.ApacheHttpBuilder
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.client.config.RequestConfig
+
+
 
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
@@ -22,6 +27,10 @@ class ProtocolMessageService {
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   EventPublicationService eventPublicationService
   def grailsApplication
+
+  // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
+  // later on
+  private static int MAX_HTTP_TIME = 10 * 1000;
 
   /**
    * @param eventData : A map structured as followed 
@@ -236,7 +245,16 @@ and sa.service.businessFunction.value=:ill
     log.debug("ISO18626 Message: ${message} ${additionalHeaders}")
 
     if ( address != null ) {
-      def iso18626_response = configure {
+      def iso18626_response = ApacheHttpBuilder.configure {
+
+        client.clientCustomizer { HttpClientBuilder builder ->
+          RequestConfig.Builder requestBuilder = RequestConfig.custom()
+          requestBuilder.connectTimeout = MAX_HTTP_TIME;
+          requestBuilder.connectionRequestTimeout = MAX_HTTP_TIME;
+          requestBuilder.socketTimeout = MAX_HTTP_TIME;
+          builder.defaultRequestConfig = requestBuilder.build()
+        }
+
         request.uri = address
         request.contentType = XML[0]
         request.headers['accept'] = 'application/xml'
