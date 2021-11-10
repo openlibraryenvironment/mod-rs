@@ -11,8 +11,12 @@ import groovy.xml.StreamingMarkupBuilder
 class ConfirmationMessageService {
 
   // ToDo this method is currently also only used for logging purposes, consider removal
-  public def confirmationMessageReadable(def confirmationMessage) {
+  public def confirmationMessageReadable(def confirmationMessage, boolean add_prolog = false) {
     StringWriter sw = new StringWriter();
+
+    if ( add_prolog ) 
+      sw << '<?xml version="1.0" encoding="utf-8"?>'
+
     sw << new StreamingMarkupBuilder().bind (confirmationMessage)
     String message = sw.toString();
 

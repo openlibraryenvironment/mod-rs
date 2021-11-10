@@ -47,7 +47,6 @@ class ExternalApiController {
 
 
   def iso18626() {
-    def result=[status:'ok']
     log.debug("externalApiController::index(${params})");
 
     try {
@@ -71,12 +70,11 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
   
@@ -91,12 +89,11 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
   
@@ -111,12 +108,11 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else {
           render(status: 400, text: 'The sent request is not valid')

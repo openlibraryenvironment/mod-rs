@@ -56,6 +56,11 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('org.olf.rs.EventConsumerService', DEBUG)
   logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
   logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
+
+  // Log HTTPBuilderNG traffic
+  // logger 'org.apache.http', INFO
+  // logger 'org.apache.http.headers', TRACE
+  // logger 'org.apache.http.wire', TRACE
   
   // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
   // logger ('com.k_int.okapi.OkapiClient', WARN)
