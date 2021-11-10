@@ -242,18 +242,19 @@ and sa.service.businessFunction.value=:ill
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
-    log.debug("ISO18626 Message: ${message} ${additionalHeaders}")
+    log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 
     if ( address != null ) {
-      def iso18626_response = ApacheHttpBuilder.configure {
+      // def http_client = ApacheHttpBuilder.configure {
+      def http_client = configure {
 
-        client.clientCustomizer { HttpClientBuilder builder ->
-          RequestConfig.Builder requestBuilder = RequestConfig.custom()
-          requestBuilder.connectTimeout = MAX_HTTP_TIME;
-          requestBuilder.connectionRequestTimeout = MAX_HTTP_TIME;
-          requestBuilder.socketTimeout = MAX_HTTP_TIME;
-          builder.defaultRequestConfig = requestBuilder.build()
-        }
+        // client.clientCustomizer { HttpClientBuilder builder ->
+        //   RequestConfig.Builder requestBuilder = RequestConfig.custom()
+          // requestBuilder.connectTimeout = MAX_HTTP_TIME;
+          // requestBuilder.connectionRequestTimeout = MAX_HTTP_TIME;
+          // requestBuilder.socketTimeout = MAX_HTTP_TIME;
+        //   builder.defaultRequestConfig = requestBuilder.build()
+        // }
 
         request.uri = address
         request.contentType = XML[0]
@@ -261,13 +262,18 @@ and sa.service.businessFunction.value=:ill
         additionalHeaders?.each { k,v ->
           request.headers[k] = v
         }
-      }.post {
+      }
+
+      def iso18626_response = http_client.post {
         request.body = message
 
         response.failure { FromServer fs ->
+          log.debug("Got failure response from remote ISO18626 site (${address}): ${fs.getStatusCode()} ${fs}");
           throw new RuntimeException("Failure response from remote ISO18626 service (${address}): ${fs.getStatusCode()} ${fs}");
         }
       }
+
+      log.debug("Got response message: ${iso18626_response}");
     }
     else {
       throw new RuntimeException("No address given for sendISO18626Message. messageData: ${eventData}");
