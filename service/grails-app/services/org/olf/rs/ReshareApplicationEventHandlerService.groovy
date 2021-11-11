@@ -471,7 +471,9 @@ public class ReshareApplicationEventHandlerService {
 
                 if ( s != null ) {
                   req.resolvedSupplier = s;
+                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");
                   prr.lock();
+                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - OBTAINED");
                   prr.peerSymbol = s
                   prr.save(flush:true, failOnError:true)
 
@@ -544,6 +546,7 @@ public class ReshareApplicationEventHandlerService {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
       }
     }
+    log.debug("LOCKING: PatronRequest Transaction completed");
   }
 
 
@@ -692,8 +695,8 @@ public class ReshareApplicationEventHandlerService {
    * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
    */
   PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
 
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       or {
         eq('id', id)
@@ -701,13 +704,13 @@ public class ReshareApplicationEventHandlerService {
       }
       lock with_lock
     }
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
     return result;
   }
 
   PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
 
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       and {
         or {
@@ -719,19 +722,19 @@ public class ReshareApplicationEventHandlerService {
       lock with_lock
     }
 
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
 
     return result;
   }
 
   PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
     
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       eq('peerRequestIdentifier', id)
       lock with_lock
     }
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
     return result;
   }
   
@@ -1204,11 +1207,13 @@ public class ReshareApplicationEventHandlerService {
     try {
       while ( ( result == null ) && (retries < MAX_RETRIES) ) {
         if ( wth_lock ) {
+          log.debug("LOCKING: get PatronRequest[${pr_id}] - attempt lock");
           result = PatronRequest.lock(pr_id)
         }
         else {
           result = PatronRequest.get(pr_id)
         }
+
         if ( result == null ) {
           log.debug("Waiting to see if request has become available: Try ${retries}")
           //Thread.sleep(2000);
@@ -1223,7 +1228,7 @@ public class ReshareApplicationEventHandlerService {
       log.error("Problem", e)
     }
     finally {
-      log.debug("Delayed get returning ${result}")
+      log.debug("LOCKING Delayed get PatronRequest[${pr_id}] returning ${result} - with_lock=${wth_lock}")
     }
     return result;
   }
