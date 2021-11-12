@@ -27,6 +27,7 @@ public class EventPublicationService {
   }
 
   public void publishAsJSON(String topic, String key, Map data) {
+
     if ( key == null )
       key = new Random().nextLong()
 

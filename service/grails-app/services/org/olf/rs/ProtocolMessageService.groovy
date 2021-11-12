@@ -10,6 +10,11 @@ import static groovyx.net.http.ContentTypes.XML
 import groovyx.net.http.*
 import java.time.Instant
 
+import groovyx.net.http.ApacheHttpBuilder
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.client.config.RequestConfig
+
+
 
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
@@ -22,6 +27,10 @@ class ProtocolMessageService {
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   EventPublicationService eventPublicationService
   def grailsApplication
+
+  // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
+  // later on
+  private static int MAX_HTTP_TIME = 10 * 1000;
 
   /**
    * @param eventData : A map structured as followed 
@@ -233,23 +242,43 @@ and sa.service.businessFunction.value=:ill
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
-    log.debug("ISO18626 Message: ${message} ${additionalHeaders}")
+    log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 
     if ( address != null ) {
-      def iso18626_response = configure {
+
+      HttpBuilder http_client = ApacheHttpBuilder.configure {
+      // HttpBuilder http_client = configure {
+
+        client.clientCustomizer { HttpClientBuilder builder ->
+          RequestConfig.Builder requestBuilder = RequestConfig.custom()
+          requestBuilder.connectTimeout = MAX_HTTP_TIME;
+          requestBuilder.connectionRequestTimeout = MAX_HTTP_TIME;
+          requestBuilder.socketTimeout = MAX_HTTP_TIME;
+          builder.defaultRequestConfig = requestBuilder.build()
+        }
+
         request.uri = address
         request.contentType = XML[0]
-        request.headers['accept'] = 'application/xml'
+        request.headers['accept'] = 'application/xml, text/xml'
         additionalHeaders?.each { k,v ->
           request.headers[k] = v
         }
-      }.post {
+      }
+
+      def iso18626_response = http_client.post {
         request.body = message
 
         response.failure { FromServer fs ->
+          log.error("Got failure response from remote ISO18626 site (${address}): ${fs.getStatusCode()} ${fs}");
           throw new RuntimeException("Failure response from remote ISO18626 service (${address}): ${fs.getStatusCode()} ${fs}");
         }
+
+        response.success { FromServer fs ->
+          log.debug("Got OK response: ${fs}");
+        }
       }
+
+      log.debug("Got response message: ${iso18626_response}");
     }
     else {
       throw new RuntimeException("No address given for sendISO18626Message. messageData: ${eventData}");

@@ -47,7 +47,6 @@ class ExternalApiController {
 
 
   def iso18626() {
-    def result=[status:'ok']
     log.debug("externalApiController::index(${params})");
 
     try {
@@ -59,9 +58,9 @@ class ExternalApiController {
         String recipient;
 
         if ( iso18626_msg.request != null ) {
-          log.debug("Process inbound request message");
   
           def mr = iso18626_msg.request;
+          log.debug("Process inbound request message. supplying agency id is ${mr?.header?.supplyingAgencyId}");
 
           // Look in request.header.supplyingAgencyId for the intended recipient
           recipient = getSymbolFor(mr.header.supplyingAgencyId)
@@ -71,17 +70,16 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
-          log.debug("Process inbound supplyingAgencyMessage message");
   
           def msam = iso18626_msg.supplyingAgencyMessage;
+          log.debug("Process inbound supplyingAgencyMessage message. requestingAgencyId is ${msam?.header?.requestingAgencyId}");
   
           // Look in request.header.requestingAgencyId for the intended recipient
           recipient = getSymbolFor(msam.header.requestingAgencyId)
@@ -91,17 +89,16 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
-          log.debug("Process inbound requestingAgencyMessage message");
   
           def mram = iso18626_msg.requestingAgencyMessage;
+          log.debug("Process inbound requestingAgencyMessage message. SupplyingAgencyId is ${mram?.header?.supplyingAgencyId}");
 
           // Look in request.header.supplyingAgencyId for the intended recipient
           recipient = getSymbolFor(mram.header.supplyingAgencyId);
@@ -111,12 +108,11 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
   
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
   
-          render( contentType:"text/xml" ) {
-            confirmationMessage
-          }
+          render(text: message, contentType: "application/xml", encoding: "UTF-8")
+          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else {
           render(status: 400, text: 'The sent request is not valid')
@@ -128,6 +124,7 @@ class ExternalApiController {
       }
     }
     catch ( Exception e ) {
+      log.error("Exception receiving ISO message",e);
       e.printStackTrace()
     }
 

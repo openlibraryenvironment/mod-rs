@@ -692,28 +692,23 @@ public class ReshareApplicationEventHandlerService {
    * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
    */
   PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
-    // return PatronRequest.findByIdOrHrid(id,id);
-    return PatronRequest.createCriteria().get {
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
+
+    PatronRequest result = PatronRequest.createCriteria().get {
       or {
         eq('id', id)
         eq('hrid', id)
       }
       lock with_lock
     }
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
+    return result;
   }
 
   PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
 
-    // def patronRequestList = PatronRequest.executeQuery('select pr from PatronRequest as pr where (pr.id=:id OR pr.hrid=:id) and pr.isRequester=:isreq',
-    //                                                   [id:id, isreq:isRequester])
-    // if (patronRequestList.size() != 1 && patronRequestList.size() != 0) {
-    //   throw RuntimeException("Could not resolve patronRequest with id ${id}")
-    // } else if (patronRequestList.size() == 1) {
-    //   return patronRequestList[0];
-    // }
-    // return null;
-
-    return PatronRequest.createCriteria().get {
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
+    PatronRequest result = PatronRequest.createCriteria().get {
       and {
         or {
           eq('id', id)
@@ -724,16 +719,20 @@ public class ReshareApplicationEventHandlerService {
       lock with_lock
     }
 
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
+
+    return result;
   }
 
   PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
-    // return PatronRequest.findByPeerRequestIdentifier(id);
     
-    return PatronRequest.createCriteria().get {
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
+    PatronRequest result = PatronRequest.createCriteria().get {
       eq('peerRequestIdentifier', id)
       lock with_lock
     }
-
+    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
+    return result;
   }
   
   def handleResOverdue(Map eventData) {
