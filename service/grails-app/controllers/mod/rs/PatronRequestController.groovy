@@ -16,6 +16,7 @@ import org.olf.rs.ReshareActionService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.lms.ItemLocation;
 
+import groovy.json.JsonOutput
 
 @Slf4j
 @CurrentTenant
@@ -117,7 +118,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
                 break;
               case 'requesterCancel':
-                patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
+
                 if (request.JSON.actionParams.reason) {
                   def cat = RefdataCategory.findByDesc('cancellationReasons');
                   def val = RefdataValue.findByOwnerAndValue(cat, request.JSON.actionParams.reason);
@@ -125,8 +126,16 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                     patron_request.cancellationReason = val;
                   }
                 }
-                reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
-                result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
+
+                // If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
+                if (patron_request.resolvedSupplier?.id) {
+                  patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
+                  reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
+                  result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
+                } else {
+                  // In this case, just directly send request to state "cancelled"
+                  result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCELLED');
+                }
                 break;
               case 'supplierConditionalSupply':
                 if ( request.JSON.actionParams.pickLocation != null ) {
