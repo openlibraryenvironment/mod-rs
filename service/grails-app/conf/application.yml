@@ -206,7 +206,7 @@ events:
       serializer: org.apache.kafka.common.serialization.StringSerializer
     acks: 'all'
     retries: 0
-    'linger.ms': 1
+    'linger.ms': 50
     
 
 ##

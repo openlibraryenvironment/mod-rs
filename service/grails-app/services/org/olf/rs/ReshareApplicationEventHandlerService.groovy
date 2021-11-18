@@ -293,6 +293,7 @@ public class ReshareApplicationEventHandlerService {
       else {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req?.isRequester}");
       }
+      log.debug("LOCKING: handleNewPatronRequestIndication transaction has completed");
     }
   }
 
@@ -389,6 +390,7 @@ public class ReshareApplicationEventHandlerService {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_VALIDATED (${req?.state?.code})");
       }
     }
+    log.debug("LOCKING: sourcePatronRequest transaction has completed");
   }
 
   // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
@@ -427,9 +429,11 @@ public class ReshareApplicationEventHandlerService {
             if ( prr != null ) {
               String next_responder = prr.directoryId
 
+              log.debug("Attempt to resolve symbol \"${next_responder}\"");
               Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
-              log.debug("Responder symbol is ${s} with status ${s?.owner?.status?.value}");
+              log.debug("Resolved next_responder to ${s} with status ${s?.owner?.status?.value}");
               def ownerStatus = s.owner?.status?.value;
+
               if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
                 log.debug("Responder is local") //, going to review state");
                 boolean do_local_review = true;
@@ -447,6 +451,7 @@ public class ReshareApplicationEventHandlerService {
                 } else {
                   auditEntry(req, req.state, req.state, "Local auto-responder off - requires manual checking", null);
                 }
+
                 if(do_local_review) {
                   def current_state = req.state;
                   req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
@@ -466,12 +471,12 @@ public class ReshareApplicationEventHandlerService {
                    ( s != null ) &&
                    ( prr.peerSymbol == null ) ) {
 
-                log.debug("Attempt to resolve symbol \"${next_responder}\"");
-                log.debug("Resolved to symbol ${s}");
 
                 if ( s != null ) {
                   req.resolvedSupplier = s;
+                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");
                   prr.lock();
+                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - OBTAINED");
                   prr.peerSymbol = s
                   prr.save(flush:true, failOnError:true)
 
@@ -544,6 +549,7 @@ public class ReshareApplicationEventHandlerService {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
       }
     }
+    log.debug("LOCKING: sendToNextLender PatronRequest Transaction completed");
   }
 
 
@@ -682,6 +688,7 @@ public class ReshareApplicationEventHandlerService {
       log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");
     }
 
+    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage exiting");
     return result;
   }
 
@@ -692,8 +699,8 @@ public class ReshareApplicationEventHandlerService {
    * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
    */
   PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
 
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       or {
         eq('id', id)
@@ -701,13 +708,13 @@ public class ReshareApplicationEventHandlerService {
       }
       lock with_lock
     }
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
     return result;
   }
 
   PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
 
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       and {
         or {
@@ -719,39 +726,39 @@ public class ReshareApplicationEventHandlerService {
       lock with_lock
     }
 
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
 
     return result;
   }
 
   PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
     
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
     PatronRequest result = PatronRequest.createCriteria().get {
       eq('peerRequestIdentifier', id)
       lock with_lock
     }
-    log.debug("ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
+    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
     return result;
   }
   
   def handleResOverdue(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleOverdue handler called with eventData ${eventData}");
 
-   PatronRequest.withNewTransaction { transactionStatus ->
-     def pr = delayedGet(eventData.payload.id, true);
-     if(pr == null) {
-       log.warn("Unable to locate request for ID ${eventData.payload.id}");
-     } else if(pr.isRequester) {
-       log.debug("pr ${pr.id} is requester, not sending protocol message");
-     } else {
-       log.debug("Sending protocol message with overdue status change from PatronRequest ${pr.id}");
-       Map params = [ note : "Request is Overdue"]
-       //reshareActionService.sendSupplyingAgencyMessage(pr, "Notification", null, params)
-       reshareActionService.sendStatusChange(pr, 'Overdue', "Request is Overdue");
-     }
-   }
-    
+    PatronRequest.withNewTransaction { transactionStatus ->
+      def pr = delayedGet(eventData.payload.id, true);
+      if(pr == null) {
+        log.warn("Unable to locate request for ID ${eventData.payload.id}");
+      } else if(pr.isRequester) {
+        log.debug("pr ${pr.id} is requester, not sending protocol message");
+      } else {
+        log.debug("Sending protocol message with overdue status change from PatronRequest ${pr.id}");
+        Map params = [ note : "Request is Overdue"]
+        //reshareActionService.sendSupplyingAgencyMessage(pr, "Notification", null, params)
+        reshareActionService.sendStatusChange(pr, 'Overdue', "Request is Overdue");
+      }
+    }
+    log.debug("LOCKING: handleResOverdue transaction has completed");
   }
 
   /**
@@ -908,6 +915,9 @@ public class ReshareApplicationEventHandlerService {
   
         pr.save(flush:true, failOnError:true);
       }
+
+      log.debug("LOCKING: handleSupplyingAgencyMessage transaction has completed");
+
     } catch ( Exception e ) {
       log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
     }
@@ -1033,6 +1043,7 @@ public class ReshareApplicationEventHandlerService {
           throw new Exception("No action in active section");
         }
       }
+      log.debug("LOCKING: handleRequestingAgencyMessage transaction has completetd");
     } catch ( Exception e ) {
       log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
     }
@@ -1093,6 +1104,7 @@ public class ReshareApplicationEventHandlerService {
         req.save(flush: true, failOnError: true);
       }
     }
+    log.debug("LOCKING: handleCancelRequestReceived transaction has completed");
   }
 
   private void handleCancelledWithSupplier(eventData) {
@@ -1121,6 +1133,7 @@ public class ReshareApplicationEventHandlerService {
         log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
       }
     }
+    log.debug("LOCKING: handleCancelledWithSupplier transaction has completed");
   }
 
 
@@ -1204,11 +1217,13 @@ public class ReshareApplicationEventHandlerService {
     try {
       while ( ( result == null ) && (retries < MAX_RETRIES) ) {
         if ( wth_lock ) {
+          log.debug("LOCKING: get PatronRequest[${pr_id}] - attempt lock");
           result = PatronRequest.lock(pr_id)
         }
         else {
           result = PatronRequest.get(pr_id)
         }
+
         if ( result == null ) {
           log.debug("Waiting to see if request has become available: Try ${retries}")
           //Thread.sleep(2000);
@@ -1223,7 +1238,7 @@ public class ReshareApplicationEventHandlerService {
       log.error("Problem", e)
     }
     finally {
-      log.debug("Delayed get returning ${result}")
+      log.debug("LOCKING Delayed get PatronRequest[${pr_id}] returning ${result} - with_lock=${wth_lock}")
     }
     return result;
   }
@@ -1475,6 +1490,7 @@ public class ReshareApplicationEventHandlerService {
       req.state=new_state
       req.save(flush:true, failOnError: true)
     }
+    log.debug("LOCKING: handleResponderItemCheckedIn transaction has completed");
   }
 
   public void markAllLoanConditionsAccepted(PatronRequest pr) {
