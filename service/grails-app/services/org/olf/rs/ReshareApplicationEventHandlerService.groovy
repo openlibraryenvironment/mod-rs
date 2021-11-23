@@ -905,6 +905,11 @@ public class ReshareApplicationEventHandlerService {
         
         if ( eventData.statusInfo?.dueDate ) {
           pr.dueDateRS = eventData.statusInfo.dueDate;        
+          try {
+            pr.parsedDueDateRS = reshareActionService.parseDateString(pr.dueDateRS);
+          } catch(Exception e) {
+            log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
+          }
         } else {
           log.debug("No duedate found in eventData.statusInfo");
         }
