@@ -204,7 +204,9 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
         
+        AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'patronReturnedItem', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'requesterReceived', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'shippedReturn', 'M')
         
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'fillLocally', 'M')
