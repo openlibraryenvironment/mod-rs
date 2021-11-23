@@ -159,7 +159,9 @@ public class HousekeepingService {
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_COMPLETE', 'message', 'M')
+
         AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'supplierCheckOutOfReshare', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'message', 'M')
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
