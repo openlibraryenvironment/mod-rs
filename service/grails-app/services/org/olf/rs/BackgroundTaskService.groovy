@@ -114,13 +114,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
         def results = criteria.list {
           lt("parsedDueDateRS", currentDate) //current date is later than due date
           state {
-            ne("code","RES_OVERDUE" ) //status is not already overdue            
-          }
-          state {
-            ne("code","RES_COMPLETE") //if the request is already complete, ignore it
-          }
-          state {
-            ne("code","RES_ITEM_RETURNED") //if the request item has already sent back, ignore it
+            eq("code","RES_ITEM_SHIPPED") //only marked items as overdue once shipped
           }
           ne("isRequester", true) //request is not request-side (we want supply-side)
         }
