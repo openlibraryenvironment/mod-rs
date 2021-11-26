@@ -275,7 +275,8 @@ public class ReshareActionService {
               statisticsService.incrementCounter('/activeLoans');
               pr.activeLoan=true
               pr.needsAttention=false;
-              if(!pr?.dueDateRS) {
+              AppSetting useLMSDueDate = AppSetting.findByKey('ncip_use_due_date');
+              if (!pr?.dueDateRS && useLMSDueDate?.value != 'off') {
                 pr.dueDateRS = pr.dueDateFromLMS;
               }
               

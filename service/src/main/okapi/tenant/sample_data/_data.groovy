@@ -223,6 +223,15 @@ try {
                                   key: 'ncip_app_profile',
                                   defValue: 'EZBORROW').save(flush:true, failOnError: true);
 
+  def use_due_on = RefdataValue.lookupOrCreate('NCIPDueDate', 'On');
+  RefdataValue.lookupOrCreate('NCIPDueDate', 'Off');
+  AppSetting ncip_use_due_date = AppSetting.findByKey('ncip_use_due_date') ?: new AppSetting(
+                                  section:'localNCIP',
+                                  settingType:'Refdata',
+                                  vocab:'NCIPDueDate',
+                                  key: 'ncip_use_due_date',
+                                  value: use_due_on?.value).save(flush: true, failOnError: true);
+
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'ALMA');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'Aleph');
   RefdataValue.lookupOrCreate('HostLMSIntegrationAdapter', 'FOLIO');
