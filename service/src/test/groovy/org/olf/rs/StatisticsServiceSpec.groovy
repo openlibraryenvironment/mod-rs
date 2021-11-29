@@ -19,7 +19,7 @@ class StatisticsServiceSpec extends Specification implements ServiceUnitTest<Sta
       log.info("got result: ${result}");
 
     expect:
-      result.timestamp < System.currentTimeMillis();
+      result.timestamp <= System.currentTimeMillis();
       result.lbr_loan == 1
       result.lbr_borrow == 3
       result.current_loan_level == 29
