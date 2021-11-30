@@ -121,4 +121,3 @@ the above won't be able to find your database. Try:
 Links:
 http://shared-index.reshare-dev.indexdata.com/inventory?sort=Title
 http://vufind.aws.indexdata.com/vufindfolio/Search/Results?lookfor=&type=AllFields&limit=20
-
