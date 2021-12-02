@@ -7,11 +7,14 @@ import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.SharedIndexService;
 import org.olf.rs.StatisticsService
+import org.olf.rs.DirectoryEntryService
+
 
 public class FoliosharedindexRouterService implements RequestRouter {
 
   SharedIndexService sharedIndexService
   StatisticsService statisticsService
+  DirectoryEntryService directoryEntryService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
     log.debug("FoliosharedindexRouterService::findMoreSuppliers");
@@ -45,19 +48,16 @@ public class FoliosharedindexRouterService implements RequestRouter {
       log.debug("Considering rota entry: ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
-      Symbol s = ( av_stmt.symbol != null ) ? resolveCombinedSymbol(av_stmt.symbol) : null;
+      Symbol s = ( av_stmt.symbol != null ) ? directoryEntryService.resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
         log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
 
         // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
         // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
-        def entry_loan_policy = s.owner.customProperties?.value?.find { it.definition.name=='ill.loan_policy' }
-        log.debug("Symbols.owner.custprops['ill.loan_policy] : ${entry_loan_policy}");
+        def isLending = directoryEntryService.directoryEntryIsLending(s.owner);
 
-        if ( ( entry_loan_policy == null ) ||
-             ( entry_loan_policy.value?.value == 'lending_all_types' ) ) {
-
+        if ( isLending ) {
           Map peer_stats = statisticsService.getStatsFor(s);
 
           def loadBalancingScore = null;
@@ -93,7 +93,8 @@ public class FoliosharedindexRouterService implements RequestRouter {
           result.add(rota_entry)
         }
         else {
-          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy.value?.value}");
+          def entry_loan_policy = directoryEntryService.parseCustomPropertyValue(s.owner, directoryEntryService.ill_policy_custprop_key)
+          log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy}");
         }
       }
       else {
@@ -105,27 +106,4 @@ public class FoliosharedindexRouterService implements RequestRouter {
     log.debug("createRankedRota returns ${sorted_result}");
     return sorted_result;
   }
-
-  public Symbol resolveCombinedSymbol(String combinedString) {
-    Symbol result = null;
-    if ( combinedString != null ) {
-      String[] name_components = combinedString.split(':');
-      if ( name_components.length == 2 ) {
-        result = resolveSymbol(name_components[0], name_components[1]);
-      }
-    }
-    return result;
-  }
-
-  public Symbol resolveSymbol(String authorty, String symbol) {
-    Symbol result = null;
-    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
-    if ( symbol_list.size() == 1 ) {
-      result = symbol_list.get(0);
-    }
-
-    return result;
-  }
-
 }

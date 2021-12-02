@@ -2,9 +2,13 @@ package org.olf.rs.routing;
 
 import org.olf.rs.routing.RequestRouter;
 import org.olf.rs.routing.RankedSupplier;
-import com.k_int.web.toolkit.settings.AppSetting
+import com.k_int.web.toolkit.settings.AppSetting;
+import org.olf.okapi.modules.directory.Symbol;
+import groovy.json.JsonOutput;
+import org.olf.rs.DirectoryEntryService
 
 public class StaticRouterService implements RequestRouter {
+  DirectoryEntryService directoryEntryService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
 
@@ -17,24 +21,18 @@ public class StaticRouterService implements RequestRouter {
       String[] components = static_routing_str.split(',')  // TYPE:NAMESPACE:SYMBOL,TYPE:NAMESPACE:SYMBOL
       components.each { static_option ->
         String[] option_parts = static_option.split(':');
+        Symbol s
+        String symbolString = ''
+
         if ( option_parts.size() == 2 ) {
           // We assume SYMBOL if only 2 parts
-          result.add(new RankedSupplier(supplier_symbol:"${option_parts[0]}:${option_parts[1]}",
-                                        copy_identifier:'', 
-                                        instance_identifier:'',
-                                        ill_policy:'Will lend',
-                                        rank:0, 
-                                        rankReason:'static rank'));
-
+          s = directoryEntryService.resolveSymbol(option_parts[0], option_parts[1]);
+          symbolString = "${option_parts[0]}:${option_parts[1]}" 
         }
         else if ( option_parts.size() == 3 ) {
           if ( option_parts[0] == 'SYMBOL' ) {
-            result.add(new RankedSupplier(supplier_symbol:"${option_parts[1]}:${option_parts[2]}", 
-                                          copy_identifier:'', 
-                                          instance_identifier:'', 
-                                          ill_policy:'Will lend', 
-                                          rank:0, 
-                                          rankReason:'static rank'));
+            s = directoryEntryService.resolveSymbol(option_parts[1], option_parts[2]);
+            symbolString = "${option_parts[1]}:${option_parts[2]}" 
           }
           else {
             log.warn("Unhandled static routing option: ${option_parts[0]} in ${static_option} of ${static_routing_str}");
@@ -42,6 +40,17 @@ public class StaticRouterService implements RequestRouter {
         }
         else {
           log.warn("Unable to parse TYPE:NAMESPACE:VALUE triple in ${static_option} of ${static_routing_str}");
+        }
+
+        // At this point we should have a Symbol s we can use to add entries to the rota
+        if (s && directoryEntryService.directoryEntryIsLending(s.owner)) {
+          result.add(new RankedSupplier(supplier_symbol:symbolString,
+                                        copy_identifier:'', 
+                                        instance_identifier:'',
+                                        ill_policy:'Will lend',
+                                        rank:0, 
+                                        rankReason:'static rank'));
+
         }
       }
     }
