@@ -869,6 +869,26 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
   }
 
+  public boolean manualClose(PatronRequest pr, Map actionParams) {
+    if (!(actionParams?.terminalState ==~ /[A-Z_]+/)) {
+      log.warn("Attemped manualClose action with state containing invalid character: ${actionParams?.terminalState}");
+      return false;
+    }
+
+    Status s = Status.lookup(pr.isRequester ? 'PatronRequest' : 'Responder', actionParams?.terminalState);
+
+    if (!(s && s.terminal)) {
+      log.warn("Attemped manualClose action with non-terminal state: ${s.toString()} ${actionParams?.terminalState}");
+      return false;
+    }
+
+    auditEntry(pr, pr.state, s, 'Manually closed', null);
+    pr.state = s;
+    pr.save(failOnError:true);
+    sendMessage(pr, [note: 'The other party to this request has manually closed it.']);
+    return true;
+  }
+
   public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
     String note = messageParams?.note
     boolean result = false;

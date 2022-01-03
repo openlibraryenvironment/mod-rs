@@ -545,6 +545,13 @@
     },
 
     {
+      "permissionName": "rs.status.get",
+      "displayName": "status get",
+      "description": "get states",
+      "visible": false
+    },
+
+    {
       "permissionName": "rs.iso18626.get",
       "displayName": "iso18626 get",
       "description": "get iso18626",
@@ -720,6 +727,7 @@
         "rs.refdata.write",
         "rs.settings.write",
         "rs.statistics.write",
+        "rs.status.get",
         "rs.iso18626.write",
         "rs.externalapi.write",
         "rs.directoryentry.write",

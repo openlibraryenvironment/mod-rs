@@ -59,6 +59,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                     result.message='NCIP CheckoutItem call failed.'
                 }
                 break;
+              case 'manualClose':
+                result.status = reshareActionService.manualClose(patron_request, request.JSON.actionParams);
+                if (result.status == false) {
+                  response.status = 400;
+                }
+                break;
               case 'message':
                 result.status = reshareActionService.sendMessage(patron_request, request.JSON.actionParams);
                 patron_request.save(flush:true, failOnError:true);

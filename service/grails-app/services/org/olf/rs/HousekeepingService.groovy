@@ -121,88 +121,113 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'manualClose', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierMarkShipped', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CHECKED_IN_TO_RESHARE', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierMarkShipped', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_SHIP', 'supplierAddCondition', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'respondYes', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_IDLE', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierCannotSupply', 'M')
         AvailableAction.ensure( 'Responder', 'RES_IDLE', 'supplierConditionalSupply', 'M')
         //AvailableAction.ensure( 'Responder', 'RES_IDLE', 'dummyAction', 'S')
 
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierMarkConditionsAgreed', 'M')
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_PENDING_CONDITIONAL_ANSWER', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'supplierRespondToCancel', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_CANCEL_REQUEST_RECEIVED', 'manualClose', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierPrintPullSlip', 'M')
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierAddCondition', 'M')
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_NEW_AWAIT_PULL_SLIP', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCheckInToReshare', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierCannotSupply', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PICKING', 'supplierAddCondition', 'M')
 
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_ITEM_SHIPPED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'supplierCheckOutOfReshare', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_ITEM_RETURNED', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_COMPLETE', 'message', 'M')
 
         AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'supplierCheckOutOfReshare', 'M')
+        AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'manualClose', 'M')
         AvailableAction.ensure( 'Responder', 'RES_OVERDUE', 'message', 'M')
 
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterAgreeConditions', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterRejectConditions', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'requesterCancel', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'borrowerCheck', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_IDLE', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'requesterCancel', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheck', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'borrowerCheckOverride', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_INVALID_PATRON', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CANCEL_PENDING', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_VALIDATED', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'requesterCancel', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'message', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'requesterReceived', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'requesterManualCheckIn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'manualClose', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'patronReturnedItem', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'manualClose', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_CHECKED_IN', 'message', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'shippedReturn', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', 'manualClose', 'M')
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_REQUEST_COMPLETE', 'message', 'M')
         
@@ -210,12 +235,15 @@ public class HousekeepingService {
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'patronReturnedItem', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'requesterReceived', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'shippedReturn', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_OVERDUE', 'manualClose', 'M')
         
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'fillLocally', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'cancelLocal', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'localSupplierCannotSupply', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_LOCAL_REVIEW', 'manualClose', 'M')
         
         AvailableAction.ensure( 'PatronRequest', 'REQ_FILLED_LOCALLY', 'message', 'M')
+        AvailableAction.ensure( 'PatronRequest', 'REQ_FILLED_LOCALLY', 'manualClose', 'M')
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
         def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)
