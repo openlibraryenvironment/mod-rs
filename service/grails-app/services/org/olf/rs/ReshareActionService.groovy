@@ -884,6 +884,7 @@ public class ReshareActionService {
 
     auditEntry(pr, pr.state, s, 'Manually closed', null);
     pr.state = s;
+    pr.manuallyClosed = true;
     pr.save(failOnError:true);
     sendMessage(pr, [note: 'The other party to this request has manually closed it.']);
     return true;
