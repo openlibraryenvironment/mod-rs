@@ -162,6 +162,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // and the GORM event handler applicationEventListenerService
   boolean stateHasChanged = false;
 
+  // A transient property to indicate a forced state change to a terminal state
+  boolean manuallyClosed = false;
+
   // For a RESPONDER/SUPPLIER/LENDER - which local LMS location will the item be picked from, the shelving location and the call number
   HostLMSLocation pickLocation;
   String pickShelvingLocation;
@@ -198,7 +201,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   RefdataValue cancellationReason
   
 
-  static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata'];
+  static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
   static hasMany = [
