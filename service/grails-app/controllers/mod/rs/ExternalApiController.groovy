@@ -35,7 +35,8 @@ class ExternalApiController {
     try {
       result = [
         asAt:new Date(),
-        current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] }
+        current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
+        requestsByState: generateRequestsByState()
       ]
     }
     catch ( Exception e ) {
@@ -43,6 +44,14 @@ class ExternalApiController {
     }
 
     render result as JSON
+  }
+
+  private Map generateRequestsByState() {
+    Map result = [:]
+    PatronRequest.executeQuery('select pr.state.owner.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.state.owner.shortcode, pr.state.code').each { sl ->
+      result[sl[0]+':'+sl[1]] = sl[2]
+    }
+    return result;
   }
 
 
