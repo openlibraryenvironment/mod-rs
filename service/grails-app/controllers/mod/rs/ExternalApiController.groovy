@@ -27,20 +27,22 @@ class ExternalApiController {
   def index() {
   }
 
+  // ToDo this method needs a TTL cache and some debounce mechanism as it increases in complexity
   def statistics() {
 
-    def result=[
-    ]
+    Map result=[:]
    
     try {
       result = [
         asAt:new Date(),
         current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
-        requestsByState: generateRequestsByState()
+        requestsByState: generateRequestsByState(),
+        requestsByTag: generateRequestsByStateTag()
       ]
     }
     catch ( Exception e ) {
-      result.error=e.message;
+      log.error("Error in statistics",e);
+      result.error=e?.toString()
     }
 
     render result as JSON
@@ -50,6 +52,14 @@ class ExternalApiController {
     Map result = [:]
     PatronRequest.executeQuery('select pr.state.owner.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.state.owner.shortcode, pr.state.code').each { sl ->
       result[sl[0]+':'+sl[1]] = sl[2]
+    }
+    return result;
+  }
+
+  private Map generateRequestsByStateTag() {
+    Map result = [:]
+    PatronRequest.executeQuery('select tag.value, count(pr.id) from PatronRequest as pr join pr.state.tags as tag group by tag.value').each { sl ->
+      result[sl[0]] = sl[1]
     }
     return result;
   }

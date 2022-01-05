@@ -69,55 +69,58 @@ public class HousekeepingService {
         // Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
         // Requester / Borrower State Model
-        Status.lookupOrCreate('PatronRequest', 'REQ_IDLE', '0005', true, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_VALIDATED', '0010', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_INVALID_PATRON', '0011', true, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CANCEL_PENDING', '0027', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER', '0028', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
-        Status.lookupOrCreate('PatronRequest', 'REQ_OVERDUE', '0036', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_RECALLED', '0037', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true, null, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_PENDING', '0060', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_UNFILLED', '0075', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_SHIPPED', '0076', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_LOCAL_REVIEW', '0079', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_FILLED_LOCALLY', '0081', true, null, true);
+        Status.ensure('PatronRequest', 'REQ_IDLE', '0005', true, true);
+        Status.ensure('PatronRequest', 'REQ_VALIDATED', '0010', true);
+        Status.ensure('PatronRequest', 'REQ_INVALID_PATRON', '0011', true, true);
+        Status.ensure('PatronRequest', 'REQ_SOURCING_ITEM', '0015', true);
+        Status.ensure('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', '0020', true);
+        Status.ensure('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER', '0025', true, null, null, null );
+        Status.ensure('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED', '0026', true, true);
+        Status.ensure('PatronRequest', 'REQ_CANCEL_PENDING', '0027', true);
+        Status.ensure('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER', '0028', true);
+        Status.ensure('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
+        Status.ensure('PatronRequest', 'REQ_OVERDUE', '0036', true);
+        Status.ensure('PatronRequest', 'REQ_RECALLED', '0037', true);
+        Status.ensure('PatronRequest', 'REQ_BORROWING_LIBRARY_RECEIVED', '0040', true, true);
+        Status.ensure('PatronRequest', 'REQ_AWAITING_RETURN_SHIPPING', '0045', true);
+        Status.ensure('PatronRequest', 'REQ_SHIPPED_TO_SUPPLIER', '0046', true);
+        Status.ensure('PatronRequest', 'REQ_BORROWER_RETURNED', '0050', true);
+        Status.ensure('PatronRequest', 'REQ_REQUEST_COMPLETE', '0055', true, null, true);
+        Status.ensure('PatronRequest', 'REQ_PENDING', '0060', true);
+        Status.ensure('PatronRequest', 'REQ_WILL_SUPPLY', '0065', true);
+        Status.ensure('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY', '0070', true);
+        Status.ensure('PatronRequest', 'REQ_UNFILLED', '0075', true);
+
+        // Add in the ability to tag states with meaningful semantics for reporting
+        // model, code, presSeq, visible, needsAttention, terminal, tags
+        Status.ensure('PatronRequest', 'REQ_SHIPPED', '0076', true, null, null, [ 'ACTIVE_BORROW' ]);
+        Status.ensure('PatronRequest', 'REQ_CHECKED_IN', '0077', true);
+        Status.ensure('PatronRequest', 'REQ_LOCAL_REVIEW', '0079', true);
+        Status.ensure('PatronRequest', 'REQ_FILLED_LOCALLY', '0081', true, null, true);
         // This one doesn't appear to be in use
         // Status.lookupOrCreate('PatronRequest', 'REQ_AWAIT_RETURN_SHIPPING', '0078', true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_END_OF_ROTA', '0080', true, null, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_CANCELLED', '9998', true, null, true);
-        Status.lookupOrCreate('PatronRequest', 'REQ_ERROR', '9999', true, true);
+        Status.ensure('PatronRequest', 'REQ_END_OF_ROTA', '0080', true, null, true);
+        Status.ensure('PatronRequest', 'REQ_CANCELLED', '9998', true, null, true);
+        Status.ensure('PatronRequest', 'REQ_ERROR', '9999', true, true);
 
         // Responder / Lender State Model
-        Status.lookupOrCreate('Responder', 'RES_IDLE', '0005', true);
-        Status.lookupOrCreate('Responder', 'RES_PENDING_CONDITIONAL_ANSWER', '0006', true);
-        Status.lookupOrCreate('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_PICKING', '0015', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true, true);
-        Status.lookupOrCreate('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
-        Status.lookupOrCreate('Responder', 'RES_AWAIT_SHIP', '0021', true);
-        Status.lookupOrCreate('Responder', 'RES_HOLD_PLACED', '0025', true);
-        Status.lookupOrCreate('Responder', 'RES_UNFILLED', '0030', true, null, true);
-        Status.lookupOrCreate('Responder', 'RES_NOT_SUPPLIED', '0035', true, null, true);
-        Status.lookupOrCreate('Responder', 'RES_ITEM_SHIPPED', '0040', true);
-        Status.lookupOrCreate('Responder', 'RES_ITEM_RETURNED', '0040', true);
-        Status.lookupOrCreate('Responder', 'RES_COMPLETE', '0040', true, null, true);
-        Status.lookupOrCreate('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
-        Status.lookupOrCreate('Responder', 'RES_CANCELLED', '9999', true, null, true);
-        Status.lookupOrCreate('Responder', 'RES_ERROR', '9999', true, true);
-        Status.lookupOrCreate('Responder', 'RES_OVERDUE', '9997', true);
+        Status.ensure('Responder', 'RES_IDLE', '0005', true);
+        Status.ensure('Responder', 'RES_PENDING_CONDITIONAL_ANSWER', '0006', true);
+        Status.ensure('Responder', 'RES_NEW_AWAIT_PULL_SLIP', '0010', true);
+        Status.ensure('Responder', 'RES_AWAIT_PICKING', '0015', true);
+        Status.ensure('Responder', 'RES_AWAIT_PROXY_BORROWER', '0016', true, true);
+        Status.ensure('Responder', 'RES_CHECKED_IN_TO_RESHARE', '0020', true);
+        Status.ensure('Responder', 'RES_AWAIT_SHIP', '0021', true);
+        Status.ensure('Responder', 'RES_HOLD_PLACED', '0025', true);
+        Status.ensure('Responder', 'RES_UNFILLED', '0030', true, null, true);
+        Status.ensure('Responder', 'RES_NOT_SUPPLIED', '0035', true, null, true);
+        Status.ensure('Responder', 'RES_ITEM_SHIPPED', '0040', true, null, null, [ 'ACTIVE_LOAN' ] );
+        Status.ensure('Responder', 'RES_ITEM_RETURNED', '0040', true);
+        Status.ensure('Responder', 'RES_COMPLETE', '0040', true, null, true);
+        Status.ensure('Responder', 'RES_CANCEL_REQUEST_RECEIVED', '9998', true, true);
+        Status.ensure('Responder', 'RES_CANCELLED', '9999', true, null, true);
+        Status.ensure('Responder', 'RES_ERROR', '9999', true, true);
+        Status.ensure('Responder', 'RES_OVERDUE', '9997', true);
 
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'message', 'M')
         AvailableAction.ensure( 'Responder', 'RES_AWAIT_PROXY_BORROWER', 'supplierAddCondition', 'M')
