@@ -440,11 +440,14 @@ class RSLifecycleSpec extends HttpSpec {
                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
                  ])
       def resp = doGet("${baseUrl}/rs/externalApi/statusReport".toString())
+      def stats_resp = doGet("${baseUrl}/rs/externalApi/statistics".toString())
     then:"Correct counts"
       resp != null;
       log.debug("Got status report: ${resp}");
+      log.debug("Got statistics : ${stats_resp}");
     where:
       tenant_id | _
       'RSInstOne' | _
   }
+
 }
