@@ -1,0 +1,14 @@
+#!/bin/bash
+
+## Set OKAPI_HOST, ut are we running WSL
+if [ -z "${WSL_HOST+x}" ]; then
+  # Not running in a WSL HOST
+  OKAPI_HOST="localhost"
+else
+  # Running ina WSL environment
+  OKAPI_HOST=${WSL_HOST}
+fi
+export OKAPI_HOST
+export OKAPI_PORT="9130"
+export OKAPI_PROTOCOL="http"
+export OKAPI_URL="${OKAPI_PROTOCOL}://${OKAPI_HOST}:${OKAPI_PORT}"
