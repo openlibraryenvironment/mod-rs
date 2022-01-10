@@ -351,6 +351,7 @@ public class ReshareActionService {
 
     Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
     if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
+      auditEntry(pr, pr.state, s, 'Pull slip printed', null);
       pr.state = s;
       pr.save(flush:true, failOnError:true);
       result.status = true;
