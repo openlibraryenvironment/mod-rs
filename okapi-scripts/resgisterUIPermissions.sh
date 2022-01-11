@@ -5,7 +5,7 @@ TENANT=${TENANT:-'diku'}
 
 # setOkapiUrl sets the variable OKAPI_URL
 . ./setOkapiUrl
-echo $OKAPI_URL
+echo OKAPI Url: $OKAPI_URL
 
 # Get hold of an auth token
 AUTH_TOKEN=`./okapi-login`

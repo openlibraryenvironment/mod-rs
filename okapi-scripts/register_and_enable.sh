@@ -1,4 +1,9 @@
 BASEDIR=$(dirname "$0")
+
+# setOkapiUrl sets the variable OKAPI_URL
+. ./setOkapiUrl
+echo OKAPI URL: ${OKAPI_URL}
+
 echo $BASEDIR
 pushd "$BASEDIR/../service"
 
@@ -21,19 +26,24 @@ SVC_ID=`echo $DEP_DESC | jq -rc '.srvcId'`
 INS_ID=`echo $DEP_DESC | jq -rc '.instId'`
 
 echo Remove any existing module ${SVC_ID}/${INS_ID}
-curl -XDELETE "http://localhost:9130/_/proxy/tenants/diku/modules/${SVC_ID}"
-curl -XDELETE "http://localhost:9130/_/discovery/modules/${SVC_ID}/${INS_ID}"
-curl -XDELETE "http://localhost:9130/_/proxy/modules/${SVC_ID}"
+echo Waiting for curl -XDELETE "${OKAPI_URL}/_/proxy/tenants/diku/modules/${SVC_ID}"
+curl -XDELETE "${OKAPI_URL}/_/proxy/tenants/diku/modules/${SVC_ID}"
+
+echo Waiting for curl -XDELETE "${OKAPI_URL}/_/discovery/modules/${SVC_ID}/${INS_ID}"
+curl -XDELETE "${OKAPI_URL}/_/discovery/modules/${SVC_ID}/${INS_ID}"
+
+echo Waiting for curl -XDELETE "${OKAPI_URL}/_/proxy/modules/${SVC_ID}"
+curl -XDELETE "${OKAPI_URL}/_/proxy/modules/${SVC_ID}"
 
 # ./gradlew clean generateDescriptors
 echo Install latest module ${SVC_ID}/${INS_ID} 
-curl -XPOST http://localhost:9130/_/proxy/modules -d @"${DESCRIPTORDIR}/ModuleDescriptor.json"
+curl -XPOST ${OKAPI_URL}/_/proxy/modules -d @"${DESCRIPTORDIR}/ModuleDescriptor.json"
 
 echo Install deployment descriptor
-curl -XPOST http://localhost:9130/_/discovery/modules -d "$DEP_DESC"
+curl -XPOST ${OKAPI_URL}/_/discovery/modules -d "$DEP_DESC"
 
 echo Activate for tenant diku
-# curl -XPOST http://localhost:9130/_/proxy/tenants/diku/modules -d `echo $DEP_DESC | jq -rc '{id: .srvcId}'`
-curl -XPOST 'http://localhost:9130/_/proxy/tenants/diku/install?tenantParameters=loadSample%3Dtrue,loadReference%3Dtrue' -d `echo $DEP_DESC | jq -c '[{id: .srvcId, action: "enable"}]'`
+# curl -XPOST ${OKAPI_URL}/_/proxy/tenants/diku/modules -d `echo $DEP_DESC | jq -rc '{id: .srvcId}'`
+curl -XPOST ${OKAPI_URL}'/_/proxy/tenants/diku/install?tenantParameters=loadSample%3Dtrue,loadReference%3Dtrue' -d `echo $DEP_DESC | jq -c '[{id: .srvcId, action: "enable"}]'`
 
 popd
