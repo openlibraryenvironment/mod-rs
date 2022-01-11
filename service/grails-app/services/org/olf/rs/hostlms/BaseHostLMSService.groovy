@@ -182,47 +182,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
 
     ItemLocation result = null;
-
-    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
-    // TNS: tcp:aleph.library.nyu.edu:9992/TNSEZB
-    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=water&maximumRecords=1%27
-    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=4%20%22Head%20Cases:%20stories%20of%20brain%20injury%20and%20its%20aftermath%22&maximumRecords=1%27
-    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
-    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
-
-    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
-    String z3950_server = getZ3950Server();
-
-    if ( z3950_server != null ) {
-      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
-      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
-
-      def z_response = HttpBuilder.configure {
-        request.uri = z3950_proxy
-      }.get {
-          request.uri.path = '/'
-          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-          request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=12 '+pr.supplierUniqueRecordId,
-                               'maximumRecords':'1' ]
-
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
-          }
-
-          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
-      }
-
-      log.debug("Got Z3950 response: ${z_response}");
-
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
-        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().iterator().next()
-
-        log.debug("At end, availability summary: ${availability_summary}");
-      }
+    List<ItemLocation> result_list = z3950ItemsByIdentifier(pr);
+    if(result_list.size() > 0) {
+      result = result_list[0];
     }
 
     return result;
