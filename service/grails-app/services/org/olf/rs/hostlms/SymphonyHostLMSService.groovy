@@ -90,7 +90,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
                                'x-pquery': '@attr 1=1016 '+search_id,
                                'maximumRecords':'1' ]
 
-          if ( super.getHoldingsQueryRecsyn() ) {
+          if ( getHoldingsQueryRecsyn() ) {
             request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
 
