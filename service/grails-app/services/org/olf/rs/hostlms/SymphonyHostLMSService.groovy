@@ -91,7 +91,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
                                'maximumRecords':'1' ]
 
           if ( super.getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = super.getHoldingsQueryRecsyn();
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
           }
 
           log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
