@@ -75,7 +75,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
 
     String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
-    String z3950_server = getZ3950Server();
+    String z3950_server = super.getZ3950Server();
 
     if ( z3950_server != null ) {
       // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
@@ -90,8 +90,8 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
                                'x-pquery': '@attr 1=1016 '+search_id,
                                'maximumRecords':'1' ]
 
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+          if ( super.getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = super.getHoldingsQueryRecsyn();
           }
 
           log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
