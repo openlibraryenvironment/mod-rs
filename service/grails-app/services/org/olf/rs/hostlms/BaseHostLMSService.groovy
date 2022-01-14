@@ -637,7 +637,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  private String getZ3950Server() {
+  protected String getZ3950Server() {
     return AppSetting.findByKey('z3950_server_address')?.value
   }
 
