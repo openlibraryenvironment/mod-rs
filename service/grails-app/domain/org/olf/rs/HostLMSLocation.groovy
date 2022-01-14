@@ -4,7 +4,6 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
 import java.time.LocalDateTime
-import grails.gorm.MultiTenant
 import org.olf.okapi.modules.directory.DirectoryEntry
 
 class HostLMSLocation implements MultiTenant<HostLMSLocation> {

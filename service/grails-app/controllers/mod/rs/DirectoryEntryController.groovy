@@ -1,4 +1,4 @@
-package org.olf
+package mod.rs
 
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
