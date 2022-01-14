@@ -887,7 +887,7 @@ public class ReshareActionService {
     pr.state = s;
     pr.manuallyClosed = true;
     pr.save(failOnError:true);
-    sendMessage(pr, [note: 'The other party to this request has manually closed it.']);
+    sendMessage(pr, [note: "The ${pr.isRequester ? 'requester' : 'supplier'} has manually closed this request."]);
     return true;
   }
 
