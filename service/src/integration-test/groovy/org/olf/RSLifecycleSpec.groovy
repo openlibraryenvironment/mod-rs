@@ -21,7 +21,6 @@ import grails.web.databinding.GrailsWebDataBinder
 import org.olf.rs.EventPublicationService
 import org.grails.orm.hibernate.HibernateDatastore
 import javax.sql.DataSource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.olf.rs.EmailService
 import org.olf.rs.HostLMSService

@@ -14,8 +14,6 @@ import groovy.util.logging.Slf4j
 import groovy.json.JsonSlurper
 
 import grails.core.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-
 
 /**
  * A mock email service that allows the integration tests to complete without sending any actual emails

@@ -2,7 +2,7 @@ package org.olf.rs.hostlms;
 
 import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
-import org.olf.rs.ItemLocation;
+import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.xml.StreamingMarkupBuilder
@@ -10,7 +10,6 @@ import static groovyx.net.http.HttpBuilder.configure
 import groovyx.net.http.FromServer;
 import com.k_int.web.toolkit.refdata.RefdataValue
 import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.circ.client.LookupUser;
