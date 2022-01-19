@@ -1,23 +1,20 @@
-package mod.rs
+package mod.rs;
 
-import org.olf.rs.PatronRequest
-import org.olf.rs.PatronRequestRota
-
-import com.k_int.okapi.OkapiTenantAwareController
-import com.k_int.web.toolkit.refdata.RefdataCategory
-import com.k_int.web.toolkit.refdata.RefdataValue
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.util.logging.Slf4j
-import org.olf.okapi.modules.directory.DirectoryEntry
-import org.olf.rs.workflow.*;
-import grails.converters.JSON
-import org.olf.rs.statemodel.StateTransition
+import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestRota;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
-import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.statemodel.ActionService;
+import org.olf.rs.statemodel.Status;
 
-import groovy.json.JsonOutput
+import com.k_int.okapi.OkapiTenantAwareController;
+import com.k_int.web.toolkit.refdata.RefdataCategory;
+import com.k_int.web.toolkit.refdata.RefdataValue;
+
+import grails.converters.JSON;
+import grails.gorm.multitenancy.CurrentTenant;
+import groovy.util.logging.Slf4j;
 
 @Slf4j
 @CurrentTenant
@@ -51,6 +48,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             log.debug("Apply action ${request.JSON.action} to ${patron_request}");
 			
 			if (actionService.isValid(patron_request.isRequester, patron_request.state, request.JSON.action)) {
+				// Save the current state, as we will use this for auditing purposes
+				Status currentState = patron_request.state;
 	            switch ( request.JSON.action ) {
 	              case 'supplierPrintPullSlip':
 	                result = reshareActionService.notiftyPullSlipPrinted(patron_request);
@@ -104,7 +103,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	              case 'supplierCannotSupply':
 	                reshareActionService.sendResponse(patron_request, 'Unfilled', request.JSON.actionParams);
 	                reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                      reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+	                                      currentState, 
 	                                      reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED'), 
 	                                      'Request manually flagged unable to supply', null);
 	                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_UNFILLED')
@@ -113,7 +112,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	              case 'requesterAgreeConditions':
 	                reshareActionService.sendLoanConditionResponse(patron_request, request.JSON.actionParams)
 	                reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                      reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+	                                      currentState, 
 	                                      reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY'), 
 	                                      'Agreed to loan conditions', null);
 	                result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_EXPECTS_TO_SUPPLY');
@@ -122,7 +121,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                patron_request.previousStates['REQ_CANCEL_PENDING'] = patron_request.state.code;
 	                reshareActionService.sendCancel(patron_request, request.JSON.action, request.JSON.actionParams)
 	                reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                      reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED'), 
+	                                      currentState, 
 	                                      reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CANCEL_PENDING'), 
 	                                      'Rejected loan conditions', null);
 	                result.status = reshareActionService.simpleTransition(patron_request, request.JSON.actionParams, 'PatronRequest', 'REQ_CANCEL_PENDING');
@@ -161,7 +160,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                    if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
 	                      // The supplying agency wants to continue with the request
 	                      reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+	                                          currentState, 
 	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 
 	                                          'Request responded to conditionally, request continuing', null);
 	                      patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP')
@@ -171,7 +170,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                      // In this case we want to "pretend" the previous state was actually the next one, for later when it looks up the previous state
 	                      patron_request.previousStates.put('RES_PENDING_CONDITIONAL_ANSWER', 'RES_NEW_AWAIT_PULL_SLIP')
 	                      reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_IDLE'), 
+	                                          currentState, 
 	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
 	                                          'Request responded to conditionally, placed in hold state', null);
 	                      patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
@@ -197,14 +196,14 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                if (request.JSON.actionParams.isNull('holdingState') || request.JSON.actionParams.holdingState == "no") {
 	                      // The supplying agency wants to continue with the request
 	                      reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          patron_request.state, 
-	                                          patron_request.state, 
+	                                          currentState, 
+	                                          currentState, 
 	                                          'Added loan condition to request, request continuing', null);
 	                    } else {
 	                      // The supplying agency wants to go into a holding state
 	                      patron_request.previousStates.put('RES_PENDING_CONDITIONAL_ANSWER', patron_request.state.code);
 	                      reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          patron_request.state, 
+	                                          currentState, 
 	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'), 
 	                                          'Condition added to request, placed in hold state', null);
 	                      patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER')
@@ -214,7 +213,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	              case 'supplierMarkShipped':
 	                reshareActionService.sendResponse(patron_request, 'Loaned', request.JSON.actionParams);
 	                reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                      patron_request.state,
+	                                      currentState,
 	                                      reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED'), 
 	                                      'Shipped', null);
 	                patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_ITEM_SHIPPED')
@@ -223,7 +222,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	              case 'supplierMarkConditionsAgreed':
 	                def s = reshareApplicationEventHandlerService.lookupStatus('Responder', patron_request.previousStates['RES_PENDING_CONDITIONAL_ANSWER']);
 	                reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                      reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_PENDING_CONDITIONAL_ANSWER'),
+	                                      currentState,
 	                                      s,
 	                                      'Conditions manually marked as agreed', null);
 	                patron_request.state=s;
@@ -242,13 +241,13 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                if (request.JSON?.actionParams?.cancelResponse == "no") {
 	                  def s = reshareApplicationEventHandlerService.lookupStatus('Responder', patron_request.previousStates[patron_request.state.code]);
 	                  reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          patron_request.state, s, 'Cancellation denied', null);
+	                                          currentState, s, 'Cancellation denied', null);
 	                  patron_request.previousStates[patron_request.state.code] = null
 	                  patron_request.state = s;
 	                } else {
 	                  patron_request.state=reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED')
 	                  reshareApplicationEventHandlerService.auditEntry(patron_request, 
-	                                          patron_request.state, 
+	                                          currentState, 
 	                                          reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_CANCELLED'), 
 	                                          'Cancellation accepted', null);
 	                }
@@ -306,12 +305,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                  // The Host LMS check call has failed, stay in current state
 	                  patron_request.needsAttention=true;
 	                  String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
-	                  reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+	                  reshareApplicationEventHandlerService.auditEntry(patron_request, currentState, patron_request.state, message, null);
 	                } else {
 	                  // The call succeeded but patron is invalid
 	                  def invalid_patron_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
 	                  String message = "Failed to validate patron with id: \"${patron_request.patronIdentifier}\".${borrower_check?.status != null ? " (Patron state=${borrower_check.status})" : ""}".toString()
-	                  reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, invalid_patron_state, message, null);
+	                  reshareApplicationEventHandlerService.auditEntry(patron_request, currentState, invalid_patron_state, message, null);
 	                  patron_request.state = invalid_patron_state;
 	                  patron_request.needsAttention=true;
 	                }
@@ -330,7 +329,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                  // The Host LMS check call has failed, stay in current state
 	                  patron_request.needsAttention=true;
 	                  String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+borrower_check?.problems
-	                  reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
+	                  reshareApplicationEventHandlerService.auditEntry(patron_request, currentState, patron_request.state, message, null);
 	                }
 	                patron_request.save(flush: true, failOnError: true)
 	                break;
@@ -343,7 +342,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                }
 	                def unfilled_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_UNFILLED');     
 	                reshareApplicationEventHandlerService.auditEntry(patron_request,
-	                  patron_request.state, unfilled_state, "Request locally flagged as unable to supply", null);
+	                  currentState, unfilled_state, "Request locally flagged as unable to supply", null);
 	                patron_request.state = unfilled_state;
 	                patron_request.save(flush:true, failOnError:true);
 	                break;
@@ -364,7 +363,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	                    audit_text += ": ${reason}";
 	                  }
 	                }
-	                reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, cancel_state, audit_text, null);
+	                reshareApplicationEventHandlerService.auditEntry(patron_request, currentState, cancel_state, audit_text, null);
 	                patron_request.save(flush:true, failOnError:true);
 	                break;
 	              default:
