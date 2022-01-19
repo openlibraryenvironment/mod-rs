@@ -1283,7 +1283,7 @@ public class ReshareApplicationEventHandlerService {
 
   private void autoRespond(PatronRequest pr, String auto_respond_variant) {
     log.debug("autoRespond....");
-	Status currentStatus = pr.state;
+	Status currentState = pr.state;
 	
     // Use the hostLMSService to determine the best location to send a pull-slip to
     ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr)
@@ -1295,12 +1295,12 @@ public class ReshareApplicationEventHandlerService {
 
       // set localCallNumber to whatever we managed to look up
       if ( routeRequestToLocation(pr, location) ) {
-        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
+        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'ExpectToSupply', [:])
       }
       else {
-        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
+        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
         log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
@@ -1311,7 +1311,7 @@ public class ReshareApplicationEventHandlerService {
       if ( auto_respond_variant=='on:_will_supply_and_cannot_supply') {
         log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
-        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
+        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
     }
