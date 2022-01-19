@@ -164,6 +164,8 @@ public class ReshareApplicationEventHandlerService {
       if ( ( req != null ) && 
            ( req.state?.code == 'REQ_IDLE' ) && 
            ( req.isRequester == true) ) {
+	    // Save the current state
+		Status currentState = req.state;
 
         // Generate a human readabe ID to use
         req.hrid=generateHrid()
@@ -204,7 +206,7 @@ public class ReshareApplicationEventHandlerService {
               log.debug("Got request ${req}");
               log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
               def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
-              auditEntry(req, req.state, validated_state, 'Request Validated', null);
+              auditEntry(req, currentState, validated_state, 'Request Validated', null);
               req.state = validated_state;
               patronNoticeService.triggerNotices(req, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
             } else if (s == null) {
@@ -213,14 +215,14 @@ public class ReshareApplicationEventHandlerService {
               log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
               req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
               auditEntry(req, 
-                          lookupStatus('PatronRequest', 'REQ_IDLE'), 
+                          currentState, 
                           lookupStatus('PatronRequest', 'REQ_ERROR'), 
                           'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
             } else {
               // If we're here then the requesting institution symbol was fine but the patron is invalid
               def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
               String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
-              auditEntry(req, req.state, invalid_patron_state, message, null);
+              auditEntry(req, currentState, invalid_patron_state, message, null);
               req.state = invalid_patron_state;
               req.needsAttention=true;
             }
@@ -228,12 +230,12 @@ public class ReshareApplicationEventHandlerService {
             // unexpected error in Host LMS call
             req.needsAttention=true;
             String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
-            auditEntry(req, req.state, req.state, message, null);
+            auditEntry(req, currentState, req.state, message, null);
           }
         } else {
           req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
           req.needsAttention=true;
-          auditEntry(req, lookupStatus('PatronRequest', 'REQ_IDLE'), lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
+          auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
         }
 
         // This is a bit dirty - some clients continue to send req.systemInstanceIdentifier rather than req.bibliographicRecordId
@@ -520,12 +522,15 @@ public class ReshareApplicationEventHandlerService {
             }
           }
 
+		  // Save the current status
+		  Status currentState = req.state;
+		  
           // ToDo - there are three possible states here,not two - Send, End of Rota, Error
           // Did we send a request?
           if ( request_sent ) {
             log.debug("sendToNextLender sent to next lender.....");
             req.state = lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER'), 
+            auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER'), 
                        'Sent to next lender', null);
             req.save(flush:true, failOnError:true)
           }
@@ -533,7 +538,7 @@ public class ReshareApplicationEventHandlerService {
             // END OF ROTA
             log.warn("sendToNextLender reached the end of the lending string.....");
             req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
+            auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
             req.save(flush:true, failOnError:true)
           }
         }
@@ -1278,7 +1283,8 @@ public class ReshareApplicationEventHandlerService {
 
   private void autoRespond(PatronRequest pr, String auto_respond_variant) {
     log.debug("autoRespond....");
-
+	Status currentStatus = pr.state;
+	
     // Use the hostLMSService to determine the best location to send a pull-slip to
     ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr)
 
@@ -1289,12 +1295,12 @@ public class ReshareApplicationEventHandlerService {
 
       // set localCallNumber to whatever we managed to look up
       if ( routeRequestToLocation(pr, location) ) {
-        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
+        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
         log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'ExpectToSupply', [:])
       }
       else {
-        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
+        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
         log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
@@ -1305,7 +1311,7 @@ public class ReshareApplicationEventHandlerService {
       if ( auto_respond_variant=='on:_will_supply_and_cannot_supply') {
         log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
         reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
-        auditEntry(pr, lookupStatus('Responder', 'RES_IDLE'), lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
+        auditEntry(pr, currentStatus, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
         pr.state=lookupStatus('Responder', 'RES_UNFILLED')
       }
     }
