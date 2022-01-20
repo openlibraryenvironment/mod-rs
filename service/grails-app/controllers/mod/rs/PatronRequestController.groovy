@@ -376,6 +376,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 				result.message='A valid action was not supplied, isRequester: ' + patron_request.isRequester +
 				               ' Current state: ' + patron_request.state.code +
 							   ' Action being performed: ' + request.JSON.action;
+                reshareApplicationEventHandlerService.auditEntry(patron_request, currentState, currentState, result.message, null);
             }
 		  } else {
 			response.status = 400;
@@ -412,7 +413,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
     def result = [:];
 
     if ( params.patronRequestId ) {
-      def patron_request = PatronRequest.get(params.patronRequestId)
+      PatronRequest patron_request = PatronRequest.get(params.patronRequestId)
 
       if (  patron_request != null ) {
         result.actions=patron_request.getValidActions();
