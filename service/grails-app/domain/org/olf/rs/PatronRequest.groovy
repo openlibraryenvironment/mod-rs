@@ -441,6 +441,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     }
   }
 
+  def beforeValidate() {
+
+    if ( title?.length() > 255 ) 
+      title = title.take(255);
+  }
+
   def getValidActions() {
     return AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state])
   }
