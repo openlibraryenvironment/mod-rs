@@ -15,12 +15,19 @@ public class ActionService {
 
 		// Can only continue if we have been supplied the values
 		if (action && status) {
-			// Get hold of the state model id		
-			StateModel stateModel = StateModel.stateModelCode(isRequester);
-			if ( stateModel ) {
-				// It is a valid state model
-				// Now is this a valid action for this state
-				isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1); 
+			// The action message is available to all states except the terminal ones and the actions messageSeen and messageAllSeen are available for all states
+			if (((action == "message") && !status.terminal) ||
+				(action == "messageSeen") ||
+				(action == "messagesAllSeen")) {
+				isValid = true;
+			} else {
+				// Get hold of the state model id		
+				StateModel stateModel = StateModel.stateModelCode(isRequester);
+				if ( stateModel ) {
+					// It is a valid state model
+					// Now is this a valid action for this state
+					isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1); 
+				}
 			}
 		}
 		return(isValid);
