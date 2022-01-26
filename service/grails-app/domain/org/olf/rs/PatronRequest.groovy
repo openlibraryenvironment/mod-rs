@@ -442,9 +442,18 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   def beforeValidate() {
-
-    if ( title?.length() > 255 ) 
-      title = title.take(255);
+    // Truncate all necessary fields which could be "over"filled from citation and log the truncation
+    truncateAndLog("title", title)
+    truncateAndLog("author", author)
+    truncateAndLog("subtitle", subtitle)
+    truncateAndLog("sponsoringBody", sponsoringBody)
+    truncateAndLog("publisher", publisher)
+    truncateAndLog("placeOfPublication", placeOfPublication)
+  
+    truncateAndLog("titleOfComponent", titleOfComponent)
+    truncateAndLog("authorOfComponent", authorOfComponent)
+    truncateAndLog("sponsor", sponsor)
+    truncateAndLog("informationSource", informationSource)
   }
 
   def getValidActions() {
@@ -456,5 +465,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       'title': this.title,
       'systemInstanceIdentifier': this.systemInstanceIdentifier
     ]
+  }
+
+  private String truncateAndLog(String fieldName, String field, int truncateLength = 255) {
+    if ( field?.length() > truncateLength ) {
+      String truncatedField = "${field.take(truncateLength - 3)}..."
+      log.warn("${fieldName} ${field} more than ${truncateLength} characters. Truncated to ${truncatedField}")
+      this[fieldName] = truncatedField;
+    }
   }
 }
