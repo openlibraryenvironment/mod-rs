@@ -124,12 +124,44 @@ public class StatisticsService {
     return result;
   }
 
-  // Extract into more testable lump
   public Map processRatioInfo(String stats_json, String ratio) {
-    log.debug("Loan to borrow ratio is : ${ratio}");
-    log.debug("Stats output is : ${stats_json}");
-
     def current_stats = new JsonSlurper().parseText(stats_json)
+    if ( current_stats.requestsByTag != null )
+      return processDymamicRatioInfo(current_stats,ratio);
+    else
+      return processCounterBasedRatioInfo(current_stats,ratio);
+  }
+
+  // Extract into more testable lump
+  public Map processDynamicRatioInfo(Map current_stats, String ratio) {
+    log.debug("Loan to borrow ratio is : ${ratio}");
+    log.debug("Stats output is : ${current_stats}");
+
+    Map result = null;
+
+    String[] parsed_ratio = ratio.split(':')
+    long ratio_loan = Long.parseLong(parsed_ratio[0])
+    long ratio_borrow = Long.parseLong(parsed_ratio[1])
+
+    if ( current_stats ) {
+      long current_loans = current_stats.requestsByTag.ACTIVE_LOAN
+      long current_borrowing = current_stats.requestsByTag.BORROW
+      result = [
+        timestamp: System.currentTimeMillis(),
+        lbr_loan:ratio_loan,
+        lbr_borrow:ratio_borrow,
+        current_loan_level:current_loans,
+        current_borrowing_level:current_borrowing,
+        reason:'Statistics collected from stats service'
+      ]
+    }
+    return result;
+  }
+
+  public Map processCounterBasedRatioInfo(Map current_stats, String ratio) {
+
+    log.debug("Loan to borrow ratio is : ${ratio}");
+    log.debug("Stats output is : ${current_stats}");
 
     Map result = null;
 
