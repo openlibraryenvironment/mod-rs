@@ -2,7 +2,7 @@ package org.olf.rs.hostlms;
 
 import org.olf.rs.PatronRequest
 import groovyx.net.http.HttpBuilder
-import org.olf.rs.ItemLocation;
+import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.xml.StreamingMarkupBuilder
@@ -10,7 +10,6 @@ import static groovyx.net.http.HttpBuilder.configure
 import groovyx.net.http.FromServer;
 import com.k_int.web.toolkit.refdata.RefdataValue
 import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.circ.client.LookupUser;
@@ -44,6 +43,75 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
   @Override
   protected String getHoldingsQueryRecsyn() {
     return 'marcxml';
+  }
+
+  @Override
+  public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
+
+    ItemLocation result = null;
+    List<ItemLocation> result_list = z3950ItemsByIdentifier(pr);
+    if(result_list.size() > 0) {
+      result = result_list[0];
+    }
+
+    return result;
+  }
+
+  //Override to search on attribute 1016, and prepend '^C' to search string
+  @Override
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+
+    List<ItemLocation> result = [];
+
+    String id_prefix = "^C";
+    String search_id = id_prefix + pr.supplierUniqueRecordId;
+
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+    // TNS: tcp:aleph.library.nyu.edu:9992/TNSEZB
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=water&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=4%20%22Head%20Cases:%20stories%20of%20brain%20injury%20and%20its%20aftermath%22&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+
+    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
+    String z3950_server = super.getZ3950Server();
+
+    if ( z3950_server != null ) {
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=1016 ${search_id}");
+
+      def z_response = HttpBuilder.configure {
+        request.uri = z3950_proxy
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=1016 '+search_id,
+                               'maximumRecords':'1' ]
+
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+          }
+
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=1016 ${search_id}")
+        if ( availability_summary.size() > 0 ) {
+          availability_summary.values().each { v ->
+            result.add(v);
+          }
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
+    }
+
+    return result;
   }
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above

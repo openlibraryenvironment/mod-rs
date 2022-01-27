@@ -1,5 +1,5 @@
 import groovy.transform.*
-import org.olf.rs.workflow.StateTransition
+import org.olf.rs.statemodel.StateTransition
 
 @Field StateTransition stateTransition
 json g.render(stateTransition, [expand: ['action'

@@ -14,6 +14,9 @@ import com.k_int.web.toolkit.refdata.Defaults
 
 class StateModel implements MultiTenant<StateModel> {
 
+  public static String MODEL_REQUESTER = "PatronRequest";
+  public static String MODEL_RESPONDER = "Responder";
+  
   String id
   String shortcode
   String name
@@ -30,6 +33,7 @@ class StateModel implements MultiTenant<StateModel> {
                    name column : 'sm_name'
   }
 
+  static public StateModel getStateModel(boolean isRequester) {
+	  return(StateModel.findByShortcode(isRequester ? MODEL_REQUESTER : MODEL_RESPONDER));
+  }
 }
-
-

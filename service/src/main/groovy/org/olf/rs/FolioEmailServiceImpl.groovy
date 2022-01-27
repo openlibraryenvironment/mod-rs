@@ -5,7 +5,6 @@ import com.k_int.okapi.OkapiClient
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import grails.core.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * 

@@ -1,8 +1,8 @@
 package org.olf.rs
 
 import grails.gorm.MultiTenant;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.olf.rs.statemodel.Status;
-import java.time.LocalDateTime
 
 class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
 
@@ -30,6 +30,9 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
   /** JSON Payload */
   String auditData;
 
+  /** ID of user who performed action if available **/
+  String user;
+
   static constraints = {
     dateCreated   (nullable : true) // Because this isn't set until after validation!
     duration      (nullable : true)
@@ -38,6 +41,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
     toStatus      (nullable : true)
     message       (nullable : true)
     auditData     (nullable : true)
+    user          (nullable : true)
   }
 
   static mapping = {
@@ -50,5 +54,15 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
     toStatus      column : "pra_to_status_fk"
     message       column : "pra_message", type: 'text'
     auditData     column : "pra_audit_data", type: 'text'
+    user          column : 'pra_user'
+  }
+
+  def beforeInsert() {
+    try {
+      def uid = RequestContextHolder.currentRequestAttributes().getHeader('X-Okapi-User-Id');
+      if (uid) {
+        this.user = uid;
+      }
+    } catch (Exception e) {}
   }
 }

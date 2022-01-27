@@ -6,8 +6,6 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 
 import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
-import grails.gorm.MultiTenant
-
 
 class RequestVolume implements MultiTenant<RequestVolume> {
 

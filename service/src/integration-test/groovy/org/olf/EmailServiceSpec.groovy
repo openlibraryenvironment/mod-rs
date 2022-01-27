@@ -7,7 +7,6 @@ import geb.spock.*
 import groovy.util.logging.Slf4j
 import spock.lang.Shared
 import grails.gorm.multitenancy.Tenants
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.olf.rs.EmailService
 
