@@ -21,6 +21,7 @@ import grails.web.databinding.GrailsWebDataBinder
 import org.olf.rs.EventPublicationService
 import org.grails.orm.hibernate.HibernateDatastore
 import javax.sql.DataSource
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.olf.rs.EmailService
 import org.olf.rs.HostLMSService
@@ -32,6 +33,8 @@ import org.olf.rs.routing.RankedSupplier
 @Integration
 @Stepwise
 class RSLifecycleSpec extends HttpSpec {
+
+  private static String LONG_300_CHAR_TITLE = '123456789A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I123456789J123456789k123456789l123456789m123456789n123456789o123456789p123456789q123456789r123456789s123456789t123456789U123456789V123456789W123456789Y123456789Y12345XXXXX'
   
   // Warning: You will notice that these directory entries carry and additional customProperty: AdditionalHeaders
   // When okapi fronts the /rs/externalApi/iso18626 endpoint it does so through a root path like 
@@ -387,9 +390,10 @@ class RSLifecycleSpec extends HttpSpec {
                                           String p_systemInstanceIdentifier,
                                           String p_patron_id,
                                           String p_patron_reference,
-                                          String requesting_symbol) {
+                                          String requesting_symbol,
+                                          String[] tags) {
     when:"post new request"
-      log.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
+      log.debug("Create a new request ${tenant_id} ${tags} ${p_title} ${p_patron_id}");
 
       // Create a request from OCLC:PPPA TO OCLC:AVL
       def req_json_data = [
@@ -400,7 +404,7 @@ class RSLifecycleSpec extends HttpSpec {
         patronReference:p_patron_reference,
         patronIdentifier:p_patron_id,
         isRequester:true,
-        tags: [ 'RS-TESTCASE-2' ]
+        tags: tags
       ]
 
       setHeaders([
@@ -426,8 +430,9 @@ class RSLifecycleSpec extends HttpSpec {
       assert peer_request != null
 
     where:
-      tenant_id   | peer_tenant   | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol
-      'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'
+      tenant_id   | peer_tenant   | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | tags
+      'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'       | [ 'RS-TESTCASE-2' ]
+      'RSInstOne' | 'RSInstThree' | LONG_300_CHAR_TITLE   | 'Author, Some'   | '1234-5678-9123-4579'      | '1234-567a' | 'RS-LIFECYCLE-TEST-00003' | 'ISIL:RST1'       | [ 'RS-TESTCASE-3' ]
   }
 
   void "Test the status endpoint for tenant #tenant_id"() {
@@ -439,14 +444,11 @@ class RSLifecycleSpec extends HttpSpec {
                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
                  ])
       def resp = doGet("${baseUrl}/rs/externalApi/statusReport".toString())
-      def stats_resp = doGet("${baseUrl}/rs/externalApi/statistics".toString())
     then:"Correct counts"
       resp != null;
       log.debug("Got status report: ${resp}");
-      log.debug("Got statistics : ${stats_resp}");
     where:
       tenant_id | _
       'RSInstOne' | _
   }
-
 }
