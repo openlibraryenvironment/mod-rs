@@ -23,27 +23,29 @@ import com.k_int.web.toolkit.settings.AppSetting;
 import com.k_int.web.toolkit.custprops.CustomProperty;
 import org.olf.rs.patronstore.PatronStoreActions;
 
-
 /**
  * Handle user events.
  *
- * wheras ReshareApplicationEventHandlerService is about detecting and handling system generated events - incoming protocol messages etc
- * this class is the home for user triggered activities - checking an item into reshare, marking the pull slip as printed etc.
+ * wheras ReshareApplicationEventHandlerService is about detecting and handling
+ * system generated events - incoming protocol messages etc this class is the
+ * home for user triggered activities - checking an item into reshare, marking
+ * the pull slip as printed etc.
  */
 public class ReshareActionService {
 
-  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
-  ProtocolMessageService protocolMessageService
-  ProtocolMessageBuildingService protocolMessageBuildingService
-  HostLMSService hostLMSService
-  StatisticsService statisticsService
-  PatronStoreService patronStoreService
+	ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+	ProtocolMessageService protocolMessageService
+	ProtocolMessageBuildingService protocolMessageBuildingService
+	HostLMSService hostLMSService
+	StatisticsService statisticsService
+	PatronStoreService patronStoreService
 
-
-  /* WARNING: this method is NOT responsible for saving or for managing state changes.
-   * It simply performs the lookupAction and appends relevant info to the patron request
-   */
-  public Map lookupPatron(PatronRequest pr, Map actionParams) {
+	/*
+	 * WARNING: this method is NOT responsible for saving or for managing state
+	 * changes. It simply performs the lookupAction and appends relevant info to the
+	 * patron request
+	 */
+	public Map lookupPatron(PatronRequest pr, Map actionParams) {
     if(patronStoreService) {
       log.debug("Patron Store Services are initialized");
     } else {
@@ -85,7 +87,7 @@ public class ReshareActionService {
     return result
   }
 
-  public boolean isValidPatron(Map patron_record) {
+	public boolean isValidPatron(Map patron_record) {
     boolean result = false;
     log.debug("Check isValidPatron: ${patron_record}");
     if ( patron_record != null ) {
@@ -96,7 +98,7 @@ public class ReshareActionService {
     return result;
   }
 
-  private Patron lookupOrCreatePatronProxy(Map patron_details) {
+	private Patron lookupOrCreatePatronProxy(Map patron_details) {
     Patron result = null;
     PatronStoreActions patronStoreActions;
     patronStoreActions = patronStoreService.getPatronStoreActions();
@@ -118,254 +120,13 @@ public class ReshareActionService {
     return result;
   }
 
-  /*
-    Expects actionParams: {
-      itemBarcodes: [
-        {itemId: "12345", name: "abcde"},
-        {itemId: "54321", name: "edcba"},
-        {itemId: "124234", name: "whatever", "_delete"}
-        ...
-      ]
-    }
-  */
-  public boolean checkInToReshare(PatronRequest pr, Map actionParams) {
-    log.debug("checkInToReshare(${pr})");
-    boolean result = false;
+	public boolean supplierCannotSupply(PatronRequest pr, Map actionParams) {
+		boolean result = false;
+		log.debug("supplierCannotSupply(${pr})");
+		return result;
+	}
 
-    if ( actionParams?.itemBarcodes.size() != 0 ) {
-      if ( pr.state.code=='RES_AWAIT_PICKING' ||
-           pr.state.code=='RES_AWAIT_PROXY_BORROWER' ||
-           pr.state.code=='RES_AWAIT_SHIP') {
-
-        // TODO For now we still use this, so just set to first item in array for now. Should be removed though
-        pr.selectedItemBarcode = actionParams?.itemBarcodes[0]?.itemId;
-
-
-        // We now want to update the patron request's "volumes" field to reflect the incoming params
-        // In order to then use the updated list later, we mimic those actions on a dummy list, 
-
-        actionParams?.itemBarcodes.each { ib ->
-          RequestVolume rv = pr.volumes.find {rv -> rv.itemId == ib.itemId };
-          // If there's no rv and the delete is true then just skip creation
-          if (!rv && !ib._delete) {
-            rv = new RequestVolume(
-              name: ib.name ?: pr.volume ?: ib.itemId,
-              itemId: ib.itemId,
-              status: RequestVolume.lookupStatus('awaiting_lms_check_out')
-            )
-            pr.addToVolumes(rv)
-          }
-
-          if (rv) {
-            if (ib._delete && rv.status.value == 'awaiting_lms_check_out') {
-              // Remove if deleted by incoming call and NCIP call hasn't succeeded yet
-              pr.removeFromVolumes(rv);
-            } else if (ib.name && rv.name != ib.name) {
-              // Allow changing of label up to shipping
-              rv.name = ib.name;
-            }
-          }
-          pr.save(failOnError: true)
-        }
-
-        // At this point we should have an accurate list of the calls that need to run/have succeeded
-        def volumesNotCheckedIn = pr.volumes.findAll {rv ->
-          rv.status.value == 'awaiting_lms_check_out'
-        }
-
-        if (volumesNotCheckedIn.size() > 0) {
-          HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-          if ( host_lms ) {
-            // Call the host lms to check the item out of the host system and in to reshare
-
-            /*
-            * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
-            * Instead use institutionalPatronID saved on DirEnt or default from settings.
-            */
-
-            /* 
-            * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
-            * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
-            * Finally we can extract the value from that custprop.
-            * Here that value is a string, but in the refdata case we'd need value?.value
-            */
-            CustomProperty institutionalPatronId = extractCustomPropertyFromDirectoryEntry(pr.resolvedRequester?.owner, 'local_institutionalPatronId')
-            String institutionalPatronIdValue = institutionalPatronId?.value
-            if (!institutionalPatronIdValue) {
-              // If nothing on the Directory Entry then fallback to the default in settings
-              AppSetting default_institutional_patron_id = AppSetting.findByKey('default_institutional_patron_id')
-              institutionalPatronIdValue = default_institutional_patron_id?.value
-            }
-
-            // At this point we have a list of NCIP calls to make.
-            // We should make those calls and track which succeeded/failed
-            // TODO perhaps test by inserting a temporary % chance of NCIP failure in manual adapter
-            
-
-            // Store a string and a Date to save onto the PR at the end
-            Date parsedDate
-            String stringDate
-
-            // Iterate over volumes not yet checked in in for loop so we can break out if we need to
-            for (def vol : volumesNotCheckedIn) {
-
-              /*
-              * Be aware that institutionalPatronIdValue here may well be blank or null.
-              * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
-              * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block 
-              */
-              def checkout_result = host_lms.checkoutItem(pr.hrid,
-                                                          vol.itemId,
-                                                          institutionalPatronIdValue,
-                                                          pr.resolvedRequester)
-
-              // If the host_lms adapter gave us a specific status to transition to, use it
-              if ( checkout_result?.status ) {
-                // the host lms service gave us a specific status to change to
-                Status s = Status.lookup('Responder', checkout_result?.status);
-                String message = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString()
-                auditEntry(pr, pr.state, s, message, null);
-                pr.state = s;
-                pr.save(flush:true, failOnError:true);
-
-                // We're in a new status, break out of the loop to deal with that,
-                // we can deal with the other checkouts later
-                break;
-              }
-
-              // Otherwise, if the checkout succeeded or failed, set appropriately
-              
-              if ( checkout_result.result == true ) {
-                RefdataValue volStatus = checkout_result.reason=='spoofed' ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete') 
-                if (volStatus) {
-                  vol.status = volStatus
-                }
-                vol.save(failOnError: true)
-                auditEntry(pr, pr.state, pr.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
-
-                // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
-                try {
-                  Date tempParsedDate = parseDateString(checkout_result?.dueDate)
-                  if (!pr.parsedDueDateFromLMS || parsedDate.before(pr.parsedDueDateFromLMS)) {
-                    parsedDate = tempParsedDate
-                    stringDate = checkout_result?.dueDate
-                  }
-                } catch(Exception e) {
-                  log.warn("Unable to parse ${checkout_result?.dueDate} to date: ${e.getMessage()}");
-                }
-
-              }
-              else {
-                auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
-              }
-            }
-
-            // Save the earliest Date we found as the dueDate
-            pr.dueDateFromLMS = stringDate;
-            pr.parsedDueDateFromLMS = parsedDate;
-            pr.save(flush:true, failOnError:true);
-
-            // At this point we should have all volumes checked out. Check that again
-            volumesNotCheckedIn = pr.volumes.findAll {rv ->
-              rv.status.value == 'awaiting_lms_check_out'
-            }
-
-            Status s = null;
-            if (volumesNotCheckedIn.size() == 0) {
-              statisticsService.incrementCounter('/activeLoans');
-              pr.activeLoan=true
-              pr.needsAttention=false;
-              AppSetting useLMSDueDate = AppSetting.findByKey('ncip_use_due_date');
-              if (!pr?.dueDateRS && useLMSDueDate?.value != 'off') {
-                pr.dueDateRS = pr.dueDateFromLMS;
-              }
-              
-              try {
-                pr.parsedDueDateRS = parseDateString(pr.dueDateRS);
-              } catch(Exception e) {
-                log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
-              }
-
-              pr.overdue=false;
-              s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-
-              // Log message differs from "fill request" to "add additional items"
-              def auditLogMessage = (pr.state.code=='RES_AWAIT_PICKING' ||
-              pr.state.code=='RES_AWAIT_PROXY_BORROWER') ? 'Fill request completed.' :
-              'Additional items successfully checked in to ReShare'
-
-              auditEntry(pr, pr.state, s, auditLogMessage, null);
-              pr.state = s;
-              result = true;
-            } else {
-              // If status is in RES_AWAIT_SHIP, send back to RES_AWAIT_PICKING til all checked in
-              if (pr.state.code == 'RES_AWAIT_SHIP') {
-                s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
-                pr.state = s;
-                auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare, returning to RES_AWAIT_PICKING. Review configuration and try again or deconfigure host LMS integration in settings.", null);
-              } else {
-                auditEntry(pr, pr.state, pr.state, "One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.", null);
-              }
-              pr.needsAttention=true;
-            }
-            pr.save(flush: true, failOnError: true)
-          }
-          else {
-            auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
-            pr.needsAttention=true;
-            pr.save(flush:true, failOnError:true);
-          }
-        } else {
-          // If we have deleted all failing requests, we can move to next state
-          if (pr.state.code != 'RES_AWAIT_SHIP') {
-            Status s = Status.lookup('Responder', 'RES_AWAIT_SHIP');
-            // Log message differs from "fill request" to "add additional items"
-            def auditLogMessage = ('Fill request completed.')
-            auditEntry(pr, pr.state, s, auditLogMessage, null);
-            pr.state = s;
-          }
-
-          // Make sure we save pr in case names have changed or status has changed
-          pr.save(flush:true, failOnError:true);
-          result = true
-          log.info("No item ids remain not checked into ReShare, return true");
-        }
-      }
-      else {
-        log.warn("Unable to locate RES_AWAIT_SHIPPING OR request not currently RES_AWAIT_PICKING(${pr.state.code})");
-      }
-    }
-
-    return result;
-  }
-
-  public boolean supplierCannotSupply(PatronRequest pr, Map actionParams) {
-    boolean result = false;
-    log.debug("supplierCannotSupply(${pr})");
-    return result;
-  }
- 
-  public Map notiftyPullSlipPrinted(PatronRequest pr) {
-    log.debug("notiftyPullSlipPrinted(${pr})");
-    Map result = [status:false];
-
-    Status s = Status.lookup('Responder', 'RES_AWAIT_PICKING');
-    if ( s && pr.state.code=='RES_NEW_AWAIT_PULL_SLIP') {
-      auditEntry(pr, pr.state, s, 'Pull slip printed', null);
-      pr.state = s;
-      pr.save(flush:true, failOnError:true);
-      result.status = true;
-    }
-    else {
-      log.warn("Unable to locate RES_AWAIT_PICKING OR request not currently RES_NEW_AWAIT_PULL_SLIP(${pr.state.code})");
-      result.code=-1; // Wrong state
-      result.message="Unable to locate RES_AWAIT_PICKING OR request not currently RES_NEW_AWAIT_PULL_SLIP(${pr?.state?.code})"
-    }
-
-    return result;
-  }
-
-  public boolean notifySupplierShip(PatronRequest pr) {
+	public boolean notifySupplierShip(PatronRequest pr) {
     log.debug("notifySupplierShip(${pr})");
     boolean result = false;
     Status s = Status.lookup('Responder', 'RES_ITEM_SHIPPED');
@@ -381,8 +142,7 @@ public class ReshareActionService {
     return result;
   }
 
-
-  /**
+	/**
    *  send a message.
    *  It appears this method can be called from multiple places including controllers and other services.
    *  Previously, we relied upon groovy magic to allow actionParams be a controller params object or a standard
@@ -412,7 +172,7 @@ public class ReshareActionService {
         result = sendSupplyingAgencyMessage(pr, "Notification", null, actionParams)
       }
 
-      if ( result == true) {
+      if ( result == false) {
         log.warn("Unable to send protocol notification message");
       }
     }
@@ -420,37 +180,7 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean sendLoanConditionResponse(PatronRequest pr, Object actionParams) {
-    /* This method will send a specialised notification message containing some unique human readable key at the beginning
-     * This will indicate an agreement to the loan conditions.
-    */
-    
-    log.debug("actionConditionResponse(${pr})");
-    boolean result = false;
-    String responseKey = "#ReShareLoanConditionAgreeResponse#"
-
-    if (actionParams.isNull("note")) {
-      actionParams.note = responseKey
-    } else {
-      actionParams.note = "${responseKey} ${actionParams.note}"
-    }
-    
-    // Only the requester should ever be able to send one of these messages, otherwise something has gone wrong.
-    if (pr.isRequester == true) {
-      result = sendRequestingAgencyMessage(pr, "Notification", actionParams)
-    } else {
-      log.warn("The supplying agency should not be able to call sendLoanConditionResponse.");
-    }
-
-    def conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(pr, pr.resolvedSupplier)
-    conditions.each {cond ->
-      cond.setAccepted(true)
-      cond.save(flush: true, failOnError: true)
-    }
-    return result;
-  }
-
-  public boolean sendSupplierConditionalWarning(PatronRequest pr, Object actionParams) {
+	public boolean sendSupplierConditionalWarning(PatronRequest pr, Object actionParams) {
     /* This method will send a specialised notification message either warning the requesting agency that their request is in statis until confirmation
      * is received that the loan conditions are agreed to, or warning that the conditions are assumed to be agreed to by default.
     */
@@ -475,7 +205,7 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams) {
+	public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams) {
     /* This method will send a cancellation response iso18626 message */
     
     log.debug("sendSupplierCancelResponse(${pr})");
@@ -508,100 +238,11 @@ public class ReshareActionService {
     return result;
   }
 
-  public boolean changeMessageSeenState(PatronRequest pr, Object actionParams) {
-    log.debug("actionMessage(${pr})");
-    boolean result = false;
+	private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+		reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data);
+	}
 
-    if (actionParams.isNull("id")){
-      return result
-    }
-    if (actionParams.isNull("seenStatus")){
-      log.warn("No seen status was sent to changeMessageSeenState")
-      return result
-    }
-
-    def id = actionParams.id
-    PatronRequestNotification message = PatronRequestNotification.findById(id)
-    if ( message == null ) {
-      log.warn("Unable to locate PatronRequestNotification corresponding to ID or hrid in requestingAgencyRequestId \"${id}\"");
-      return result
-    }
-
-    message.setSeen(actionParams.seenStatus)
-    message.save(flush:true, failOnError:true)
-
-    result = true;
-    return result;
-  }
-
-  private void markAsReadLogic(PatronRequestNotification message, String valueKey, boolean seenStatus) {
-    switch (valueKey) {
-      case 'on':
-        message.setSeen(seenStatus)
-        break;
-      case 'on_(excluding_action_messages)':
-        if (message.attachedAction == 'Notification') {
-          message.setSeen(seenStatus)
-        }
-        break;
-      case 'off':
-        log.debug("chat setting off")
-        break;
-      default:
-        // This shouldn't ever be reached
-        log.error("Something went wrong determining auto mark as read setting")
-    }
-  }
-
-  public boolean markAllMessagesReadStatus(PatronRequest pr, Object actionParams = {}) {
-    log.debug("markAllAsRead(${pr})");
-    boolean result = false;
-    boolean excluding = false;
-    if (actionParams.isNull("seenStatus")){
-      return result
-    }
-
-    if (actionParams.excludes) {
-      excluding = actionParams.excludes;
-    }
-
-    def messages = pr.notifications
-    messages.each{message -> 
-    // Firstly we only want to be setting messages as read/unread that aren't already, and that we didn't send
-      if (message.seen != actionParams.seenStatus && !message.isSender) {
-        // Next we check if we care about the user defined settings
-        if (excluding) {
-          // Find the chat_auto_read AppSetting
-          AppSetting chat_auto_read = AppSetting.findByKey('chat_auto_read')?: null;
-
-          // If the setting does not exist then assume we want to mark all as read
-          if (!chat_auto_read) {
-            log.warn("Couldn't find chat auto mark as read setting, assuming needs to mark all as read")
-            message.setSeen(actionParams.seenStatus)
-          } else {
-            if (chat_auto_read.value) {
-              markAsReadLogic(message, chat_auto_read.value, actionParams.seenStatus)
-            } else {
-              markAsReadLogic(message, chat_auto_read.defValue, actionParams.seenStatus)
-            }
-          }
-        } else {
-          // Sometimes we want to just mark all as read without caring about the user defined setting
-          message.setSeen(actionParams.seenStatus)
-        }
-      }
-    }
-
-    pr.save(flush:true, failOnError:true)
-    result = true;
-    return result;
-  }
-
-  private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
-    reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data);
-  }
-
-  private Symbol resolveSymbol(String authorty, String symbol) {
+	private Symbol resolveSymbol(String authorty, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
                                                    [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
@@ -612,18 +253,18 @@ public class ReshareActionService {
     return result;
   }
 
-  private Symbol resolveCombinedSymbol(String combinedString) {
-    Symbol result = null;
-    if ( combinedString != null ) {
-      String[] name_components = combinedString.split(':');
-      if ( name_components.length == 2 ) {
-        result = resolveSymbol(name_components[0], name_components[1]);
-      }
-    }
-    return result;
-  }
+	private Symbol resolveCombinedSymbol(String combinedString) {
+		Symbol result = null;
+		if (combinedString != null) {
+			String[] name_components = combinedString.split(':');
+			if (name_components.length == 2) {
+				result = resolveSymbol(name_components[0], name_components[1]);
+			}
+		}
+		return result;
+	}
 
-  public simpleTransition(PatronRequest pr, Map params, String state_model, String target_status, String p_message=null) {
+	public simpleTransition(PatronRequest pr, Map params, String state_model, String target_status, String p_message=null) {
 
     if( pr == null ) {
       log.warn("Cannot transition status for null request object");
@@ -648,8 +289,7 @@ public class ReshareActionService {
     }
   }
 
-
-  public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
+	public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
     boolean result = false;
 
     // Increment the active borrowing counter
@@ -756,95 +396,7 @@ public class ReshareActionService {
     return result;
   }
 
-
-  /** 
-   * At the end of the process, check the item back into the HOST lms
-   */
-  public boolean checkOutOfReshare(PatronRequest patron_request, Map params) {
-    boolean result = false;
-    log.debug("checkOutOfReshare(${patron_request?.id}, ${params}");
-
-    def volumesNotCheckedOut = patron_request.volumes.findAll {rv ->
-      rv.status.value == 'awaiting_lms_check_in'
-    }
-    try {
-      // Call the host lms to check the item out of reshare and in to the host system
-      HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-      if ( host_lms ) {
-        // Iterate over volumes not yet checked out in for loop so we can break out if we need to
-        for (def vol : volumesNotCheckedOut) {
-          def check_in_result = host_lms.checkInItem(vol.itemId)
-          if(check_in_result?.result == true) {
-            String message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
-            auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
-            
-            def newVolStatus = check_in_result.reason=='spoofed' ? vol.lookupStatus('lms_check_in_(no_integration)') : vol.lookupStatus('completed')
-            vol.status = newVolStatus
-            vol.save(failOnError: true)
-          } else {
-            patron_request.needsAttention=true;
-            auditEntry(
-              patron_request,
-              patron_request.state,
-              patron_request.state,
-              "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
-              null);
-          }
-        }
-      } else {
-        auditEntry(
-          patron_request,
-          patron_request.state,
-          patron_request.state,
-          'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.',
-          null);
-        patron_request.needsAttention=true;
-      }
-    }
-    catch ( Exception e ) {
-      log.error("NCIP Problem",e);
-      patron_request.needsAttention=true;
-      auditEntry(patron_request,
-        patron_request.state,
-        patron_request.state,
-        "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+e.message,
-        null);
-      result = false;
-    }
-    patron_request.save(flush:true, failOnError:true);
-
-    // At this point we should have all volumes checked out. Check that again
-    volumesNotCheckedOut = patron_request.volumes.findAll {rv ->
-      rv.status.value == 'awaiting_lms_check_in'
-    }
-
-    if (volumesNotCheckedOut.size() == 0) {
-      statisticsService.decrementCounter('/activeLoans');
-      patron_request.needsAttention=false;
-      patron_request.activeLoan=false;
-      // Let the user know if the success came from a real call or a spoofed one
-      String message = "Complete request succeeded. Host LMS integration: CheckinItem call succeeded for all items."
-      auditEntry(patron_request, patron_request.state, patron_request.state, message, null);
-      result = true;
-    } else {
-      String message = "Host LMS integration: NCIP CheckinItem calls failed for some items."
-      auditEntry(patron_request,
-        patron_request.state,
-        patron_request.state,
-        message,
-        null);
-      patron_request.needsAttention=true;
-      patron_request.save(flush:true, failOnError:true);
-    }
-
-    return result;
-  }
-
-  public void handleItemReturned(PatronRequest patron_request, Map params) {
-    log.debug("handleItemReturned(${patron_request?.id}, ${params}");
-  }
-
-  public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
+	public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
     log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
 
     // Decrement the active borrowing counter - we are returning the item
@@ -853,7 +405,7 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
   }
 
-  public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
+	public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
     switch (action) {
       case 'requesterRejectedConditions':
         pr.requestToContinue = true;
@@ -870,28 +422,7 @@ public class ReshareActionService {
     sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
   }
 
-  public boolean manualClose(PatronRequest pr, Map actionParams) {
-    if (!(actionParams?.terminalState ==~ /[A-Z_]+/)) {
-      log.warn("Attemped manualClose action with state containing invalid character: ${actionParams?.terminalState}");
-      return false;
-    }
-
-    Status s = Status.lookup(pr.isRequester ? 'PatronRequest' : 'Responder', actionParams?.terminalState);
-
-    if (!(s && s.terminal)) {
-      log.warn("Attemped manualClose action with non-terminal state: ${s.toString()} ${actionParams?.terminalState}");
-      return false;
-    }
-
-    auditEntry(pr, pr.state, s, 'Manually closed', null);
-    pr.state = s;
-    pr.manuallyClosed = true;
-    pr.save(failOnError:true);
-    sendMessage(pr, [note: "The ${pr.isRequester ? 'requester' : 'supplier'} has manually closed this request."]);
-    return true;
-  }
-
-  public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
+	public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
     String note = messageParams?.note
     boolean result = false;
 
@@ -929,14 +460,13 @@ public class ReshareActionService {
     return result;
   }
 
-
-  public void sendResponse(PatronRequest pr,
+	public void sendResponse(PatronRequest pr,
                             String status,
                             Map responseParams) {
     sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
   }
 
-  public void addCondition(PatronRequest pr, Map responseParams) {
+	public void addCondition(PatronRequest pr, Map responseParams) {
     Map conditionParams = responseParams
     log.debug("addCondition::(${pr})")
 
@@ -953,7 +483,7 @@ public class ReshareActionService {
     }
   }
 
-  public void sendStatusChange(PatronRequest pr,
+	public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {
     Map params = [:]
@@ -964,11 +494,13 @@ public class ReshareActionService {
     sendSupplyingAgencyMessage(pr, 'StatusChange', status, params);
   }
 
-  // see http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
-  // http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
-  // RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled, RetryPossible,
-  // Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
-  public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
+	// see
+	// http://biblstandard.dk/ill/dk/examples/request-without-additional-information.xml
+	// http://biblstandard.dk/ill/dk/examples/supplying-agency-message-delivery-next-day.xml
+	// RequestReceived, ExpectToSupply, WillSupply, Loaned, Overdue, Recalled,
+	// RetryPossible,
+	// Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn, Cancelled
+	public boolean sendSupplyingAgencyMessage(PatronRequest pr, 
                                          String reason_for_message,
                                          String status,
                                          Map messageParams) {
@@ -1000,22 +532,8 @@ public class ReshareActionService {
 
     return result;
   }
-  
-  /* 
-   * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
-   * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
-   * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
-   */
-  public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
-    if (!de || ! cpName) {
-      return null
-    }
-    def custProps = de.customProperties?.value ?: []
-    CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
-    return cp
-  }
 
-  public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
+	public void outgoingNotificationEntry(PatronRequest pr, String note, Map actionMap, Symbol message_sender, Symbol message_receiver, Boolean isRequester) {
 
     String attachedAction = actionMap.action
     String actionStatus = actionMap.status
@@ -1038,8 +556,8 @@ public class ReshareActionService {
     pr.addToNotifications(outboundMessage)
     //outboundMessage.save(flush:true, failOnError:true)
   }
-  
-  protected Date parseDateString(String dateString) {
+
+	protected Date parseDateString(String dateString) {
     if (dateString == null) {
       throw new Exception("Attempted to parse null as date")
     }
