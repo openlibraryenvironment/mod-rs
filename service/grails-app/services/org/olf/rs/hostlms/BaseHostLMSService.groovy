@@ -781,9 +781,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("BaseHostLMSService holdings record:: ${hld}");
-      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow}");
-      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow?.@value}");
-      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+      boolean available = hld.circulations?.circulation?.any { circ -> circ?.availableNow?.@value == '1' };
+      log.debug("avail now:: ${available}");
+      if (available) {
         log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
         ItemLocation il = new ItemLocation( 
                                   reason: reason,
