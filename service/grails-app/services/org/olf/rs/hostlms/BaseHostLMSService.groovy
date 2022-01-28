@@ -43,7 +43,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
       ],
       [
-        name:'Local_identifier_By_Title',
+        name:'Title_By_Z3950',
         precondition: { pr -> return ( pr.title != null ) },
         strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
       ],
