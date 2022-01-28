@@ -127,7 +127,7 @@ public class StatisticsService {
   public Map processRatioInfo(String stats_json, String ratio) {
     def current_stats = new JsonSlurper().parseText(stats_json)
     if ( current_stats.requestsByTag != null )
-      return processDymamicRatioInfo(current_stats,ratio);
+      return processDynamicRatioInfo(current_stats,ratio);
     else
       return processCounterBasedRatioInfo(current_stats,ratio);
   }
