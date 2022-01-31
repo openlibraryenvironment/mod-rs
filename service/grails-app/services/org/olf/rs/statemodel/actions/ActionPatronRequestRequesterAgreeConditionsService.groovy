@@ -10,13 +10,20 @@ import org.olf.rs.statemodel.Status;
 
 public class ActionPatronRequestRequesterAgreeConditionsService extends AbstractAction {
 
-	/**
-	 * Method that all classes derive from this one that actually performs the action
-	 * @param request The request the action is being performed against
-	 * @param parameters Any parameters required for the action
-	 * @param actionResultDetails The result of performing the action
-	 * @return The actionResultDetails 
-	 */
+	static String[] TO_STATES = [
+								 Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY
+								];
+	
+	@Override
+	String name() {
+		return("requesterAgreeConditions");
+	}
+
+	@Override
+	String[] toStates() {
+		return(TO_STATES);
+	}
+
 	@Override
 	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
 

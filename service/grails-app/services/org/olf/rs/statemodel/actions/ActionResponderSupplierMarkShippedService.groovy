@@ -7,13 +7,26 @@ import org.olf.rs.statemodel.Status;
 
 public class ActionResponderSupplierMarkShippedService extends ActionResponderService {
 
-	/**
-	 * Method that all classes derive from this one that actually performs the action
-	 * @param request The request the action is being performed against
-	 * @param parameters Any parameters required for the action
-	 * @param actionResultDetails The result of performing the action
-	 * @return The actionResultDetails 
-	 */
+	static String[] TO_STATES = [
+								 Status.RESPONDER_ITEM_SHIPPED
+								];
+	
+	@Override
+	String name() {
+		return("supplierMarkShipped");
+	}
+
+	@Override
+	String[] toStates() {
+		return(TO_STATES);
+	}
+
+	@Override
+	Boolean canLeadToSameState() {
+	    // We do not return the same state, so we need to override and return false
+		return(false);
+	}
+
 	@Override
 	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
 
