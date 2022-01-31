@@ -43,7 +43,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
       ],
       [
-        name:'Local_identifier_By_Title',
+        name:'Title_By_Z3950',
         precondition: { pr -> return ( pr.title != null ) },
         strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
       ],
@@ -781,9 +781,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("BaseHostLMSService holdings record:: ${hld}");
-      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow}");
-      log.debug("avail now:: ${hld.circulations?.circulation?.availableNow?.@value}");
-      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+      boolean available = hld.circulations?.circulation?.any { circ -> circ?.availableNow?.@value == '1' };
+      if (available) {
         log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
         ItemLocation il = new ItemLocation( 
                                   reason: reason,
