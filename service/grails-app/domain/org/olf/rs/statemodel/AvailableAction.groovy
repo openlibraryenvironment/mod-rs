@@ -3,13 +3,17 @@ package org.olf.rs.statemodel
 import org.apache.commons.logging.LogFactory;
 
 import grails.gorm.MultiTenant;
-import grails.util.Holders;;
+import grails.util.Holders;
+
 /**
  *
  */
 class AvailableAction implements MultiTenant<AvailableAction> {
   private static final logger = LogFactory.getLog(this);
-	
+
+  /** Query which returns all the states than an action may come from */
+  private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
+  
   public static String TRIGGER_TYPE_MANUAL = "M";
   public static String TRIGGER_TYPE_SYSTEM = "S";
   
@@ -27,7 +31,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
   String actionBody
 
   /** Holds map of the action to the bean that will do the processing for this action */
-  static Map serviceActions = [ : ];
+  private static Map serviceActions = [ : ];
 
   static constraints = {
              model (nullable: false)
@@ -72,7 +76,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 
   }
 
-  	static AbstractAction getServiceAction(String actionCode, boolean isRequester) {
+  	public static AbstractAction getServiceAction(String actionCode, boolean isRequester) {
 		// Get gold of the state model
 		StateModel stateModel = StateModel.getStateModel(isRequester);
 
@@ -91,6 +95,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 		return(serviceActions[beanName]);
 	}
 
+	public static String[] getFromStates(String stateModel, String action, String triggerType = TRIGGER_TYPE_MANUAL) {
+		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));
+	}
 
   public String toString() {
     return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()
