@@ -116,6 +116,20 @@ class Status implements MultiTenant<Status> {
     }
     return result;
   }
+
+  public static List<String> getTerminalStates(String stateModelCode) {
+    List<String> result = new ArrayList<String>();
+    StateModel stateModel = StateModel.findByShortcode(stateModelCode);
+    if ( stateModel ) {
+      Status[] states = Status.findAllByOwnerAndTerminal(stateModel, true);
+	  if (states) {
+		  states.each {  state ->
+			  result.add(state.code);
+		  }
+	  }
+    }
+    return(result);
+  }
 }
 
 
