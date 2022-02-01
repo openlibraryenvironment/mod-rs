@@ -6,7 +6,7 @@ import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
-public class ActionResponderSupplierConditionalSupplyService extends ActionResponderService {
+public class ActionResponderSupplierConditionalSupplyService extends ActionResponderConditionService {
 
 	static String[] TO_STATES = [
 								 Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
@@ -29,7 +29,7 @@ public class ActionResponderSupplierConditionalSupplyService extends ActionRespo
 		// Check the pickup location and route
 		if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
 			reshareActionService.sendResponse(request, 'ExpectToSupply', parameters);
-			reshareActionService.sendSupplierConditionalWarning(request, parameters);
+			sendSupplierConditionalWarning(request, parameters);
   
 			if (parameters.isNull('holdingState') || parameters.holdingState == "no") {
 				// The supplying agency wants to continue with the request

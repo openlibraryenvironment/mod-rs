@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest;
-import org.olf.rs.StatisticsService;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
@@ -15,7 +14,6 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 
 	HostLMSService hostLMSService;
 	DirectoryEntryService directoryEntryService;
-	StatisticsService statisticsService;
 
 	static String[] TO_STATES = [
 								 Status.RESPONDER_COMPLETE
@@ -48,14 +46,14 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 					def check_in_result = host_lms.checkInItem(vol.itemId)
 					if (check_in_result?.result == true) {
 						String message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
-						reshareActionService.auditEntry(request, request.state, request.state, message, null);
+						reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
 				
 						def newVolStatus = check_in_result.reason=='spoofed' ? vol.lookupStatus('lms_check_in_(no_integration)') : vol.lookupStatus('completed')
 						vol.status = newVolStatus
 						vol.save(failOnError: true)
 					} else {
 						request.needsAttention=true;
-						reshareActionService.auditEntry(
+						reshareApplicationEventHandlerService.auditEntry(
 							request,
 							request.state,
 							request.state,
@@ -64,7 +62,7 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 					}
 				}
 			} else {
-				reshareActionService.auditEntry(
+				reshareApplicationEventHandlerService.auditEntry(
 					request,
 					request.state,
 					request.state,
@@ -76,7 +74,7 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 		catch ( Exception e ) {
 			log.error("NCIP Problem",e);
 			request.needsAttention=true;
-			reshareActionService.auditEntry(
+			reshareApplicationEventHandlerService.auditEntry(
 				request,
 				request.state,
 				request.state,
@@ -97,11 +95,11 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 			
 			// Let the user know if the success came from a real call or a spoofed one
 			String message = "Complete request succeeded. Host LMS integration: CheckinItem call succeeded for all items.";
-			reshareActionService.auditEntry(request, request.state, request.state, message, null);
+			reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
 			result = true;
 		} else {
 			String message = "Host LMS integration: NCIP CheckinItem calls failed for some items."
-			reshareActionService.auditEntry(request,
+			reshareApplicationEventHandlerService.auditEntry(request,
 				request.state,
 				request.state,
 				message,

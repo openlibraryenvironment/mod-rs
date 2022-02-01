@@ -9,7 +9,7 @@ import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.refdata.RefdataCategory;
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
-public class ActionPatronRequestRequesterCancelService extends AbstractAction {
+public class ActionPatronRequestRequesterCancelService extends ActionPatronRequestCancelService {
 
 	static String[] TO_STATES = [
 								 Status.PATRON_REQUEST_CANCEL_PENDING,
@@ -47,7 +47,7 @@ public class ActionPatronRequestRequesterCancelService extends AbstractAction {
 		// If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
 		if (request.resolvedSupplier?.id) {
 			request.previousStates[Status.PATRON_REQUEST_CANCEL_PENDING] = request.state.code;
-			reshareActionService.sendCancel(request, "requesterCancel", parameters)
+			sendCancel(request, "requesterCancel", parameters)
 			actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING);
 		} else {
 			// In this case, just directly send request to state "cancelled"

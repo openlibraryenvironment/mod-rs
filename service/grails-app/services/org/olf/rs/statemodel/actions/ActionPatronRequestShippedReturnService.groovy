@@ -25,7 +25,11 @@ public class ActionPatronRequestShippedReturnService extends AbstractAction {
 	@Override
 	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
 
-		reshareActionService.sendRequesterShippedReturn(request, parameters);
+		// Decrement the active borrowing counter - we are returning the item
+		statisticsService.decrementCounter('/activeBorrowing');
+	
+		reshareActionService.sendRequestingAgencyMessage(request, 'ShippedReturn', parameters);
+	
 		actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER);
 		actionResultDetails.responseResult.status = true;
 
