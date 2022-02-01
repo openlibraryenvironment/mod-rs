@@ -120,28 +120,6 @@ public class ReshareActionService {
     return result;
   }
 
-	public boolean supplierCannotSupply(PatronRequest pr, Map actionParams) {
-		boolean result = false;
-		log.debug("supplierCannotSupply(${pr})");
-		return result;
-	}
-
-	public boolean notifySupplierShip(PatronRequest pr) {
-    log.debug("notifySupplierShip(${pr})");
-    boolean result = false;
-    Status s = Status.lookup('Responder', 'RES_ITEM_SHIPPED');
-    if ( s && pr.state.code=='RES_AWAIT_SHIP') {
-      pr.state = s;
-      pr.save(flush:true, failOnError:true);
-      result = true;
-    }
-    else {
-      log.warn("Unable to locate RES_AWAIT_SHIP OR request not currently RES_AWAIT_SHIP(${pr.state.code})");
-    }
-
-    return result;
-  }
-
 	/**
    *  send a message.
    *  It appears this method can be called from multiple places including controllers and other services.
@@ -177,31 +155,6 @@ public class ReshareActionService {
       }
     }
 
-    return result;
-  }
-
-	public boolean sendSupplierConditionalWarning(PatronRequest pr, Object actionParams) {
-    /* This method will send a specialised notification message either warning the requesting agency that their request is in statis until confirmation
-     * is received that the loan conditions are agreed to, or warning that the conditions are assumed to be agreed to by default.
-    */
-    
-    log.debug("supplierConditionalNotification(${pr})");
-    boolean result = false;
-
-    Map warningParams = [:]
-
-    if (actionParams.isNull("holdingState") || actionParams.holdingState == 'no') {
-      warningParams.note = "#ReShareSupplierConditionsAssumedAgreed#"
-    } else {
-      warningParams.note = "#ReShareSupplierAwaitingConditionConfirmation#"
-    }
-    
-    // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
-    if (pr.isRequester == false) {
-      result = sendSupplyingAgencyMessage(pr, "Notification", null, warningParams)
-    } else {
-      log.warn("The requesting agency should not be able to call sendSupplierConditionalWarning.");
-    }
     return result;
   }
 
@@ -242,6 +195,7 @@ public class ReshareActionService {
 		reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data);
 	}
 
+	// Unused ??
 	private Symbol resolveSymbol(String authorty, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
@@ -253,6 +207,7 @@ public class ReshareActionService {
     return result;
   }
 
+	// Unused ??
 	private Symbol resolveCombinedSymbol(String combinedString) {
 		Symbol result = null;
 		if (combinedString != null) {
@@ -263,164 +218,6 @@ public class ReshareActionService {
 		}
 		return result;
 	}
-
-	public simpleTransition(PatronRequest pr, Map params, String state_model, String target_status, String p_message=null) {
-
-    if( pr == null ) {
-      log.warn("Cannot transition status for null request object");
-      return;
-    }
-    
-    log.debug("request to transition ${pr} to ${state_model}/${target_status}");
-    def new_state = reshareApplicationEventHandlerService.lookupStatus(state_model, target_status);
-
-    if (  new_state != null )  {
-      String message = p_message ?: "Simple Transition ${pr.state?.code} to ${new_state.code}".toString()
-
-      auditEntry(pr,
-        pr.state,
-        new_state,
-        message, null);
-      pr.state=new_state;
-      pr.save(flush:true, failOnError:true);
-      log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-    } else {
-      log.warn("Unable to find state for state model ${state_model}, state name ${target_status}");
-    }
-  }
-
-	public boolean sendRequesterReceived(PatronRequest pr, Object actionParams) {
-    boolean result = false;
-
-    // Increment the active borrowing counter
-    statisticsService.incrementCounter('/activeBorrowing');
-
-    // Check the item in to the local LMS
-    HostLMSActions host_lms = hostLMSService.getHostLMSActions();
-    if ( host_lms ) {
-      def volumesWithoutTemporaryItem = pr.volumes.findAll {rv ->
-        rv.status.value == 'awaiting_temporary_item_creation'
-      }
-      // Iterate over volumes without temp item in for loop so we can break out if we need to
-      for (def vol : volumesWithoutTemporaryItem) {
-        try {
-          // Item Barcode - using Request human readable ID + volId for now
-          // If we only have one volume, just use the HRID
-          def temporaryItemBarcode = null;
-          if(pr.volumes?.size() > 1) {
-            temporaryItemBarcode = "${pr.hrid}-${vol.itemId}";
-          } else {
-            temporaryItemBarcode = pr.hrid;
-          }
-
-          // Call the host lms to check the item out of the host system and in to reshare
-          Map accept_result = host_lms.acceptItem(temporaryItemBarcode,
-                                                  pr.hrid,
-                                                  pr.patronIdentifier, // user_idA
-                                                  pr.author, // author,
-                                                  pr.title, // title,
-                                                  pr.isbn, // isbn,
-                                                  pr.localCallNumber, // call_number,
-                                                  pr.resolvedPickupLocation?.lmsLocationCode, // pickup_location,
-                                                  null) // requested_action
-
-          if ( accept_result?.result == true ) {
-            // Let the user know if the success came from a real call or a spoofed one
-            String message = "Receive succeeded for item id: ${vol.itemId}. ${accept_result.reason=='spoofed' ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}"
-            def newVolState = accept_result.reason=='spoofed' ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms')
-
-            auditEntry(pr,
-              pr.state,
-              pr.state,
-              message, 
-              null);
-            vol.status=newVolState;
-            vol.save(failOnError: true)
-          }
-          else {
-            String message = "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "
-            // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is.
-            // IF THIS NEEDS TO GO INTO ANOTHER STATE, WE SHOULD DO IT AFTER ALL VOLS HAVE BEEN ATTEMPTED
-            auditEntry(pr,
-              pr.state,
-              pr.state,
-              message+accept_result?.problems, 
-              null);
-          }
-        }
-        catch ( Exception e ) {
-          log.error("NCIP Problem",e);
-          auditEntry(pr, pr.state, pr.state, "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+e.message, null);
-        }
-      }
-      pr.save(flush:true, failOnError:true);
-
-      // At this point we should have all volumes' temporary items created. Check that again
-      volumesWithoutTemporaryItem = pr.volumes.findAll {rv ->
-        rv.status.value == 'awaiting_temporary_item_creation'
-      }
-
-      if (volumesWithoutTemporaryItem.size() == 0) {
-        // Mark item as awaiting circ
-        def new_state = reshareApplicationEventHandlerService.lookupStatus('PatronRequest', 'REQ_CHECKED_IN');
-        // Let the user know if the success came from a real call or a spoofed one
-        String message = "Host LMS integration: AcceptItem call succeeded for all items."
-
-        auditEntry(pr,
-          pr.state,
-          new_state,
-          message, 
-          null);
-        pr.state=new_state;
-        pr.needsAttention=false;
-        pr.save(flush:true, failOnError:true);
-        log.debug("Saved new state ${new_state.code} for pr ${pr.id}");
-        result = true;
-        sendRequestingAgencyMessage(pr, 'Received', actionParams);
-      } else {
-        String message = "Host LMS integration: AcceptItem call failed for some items."
-        auditEntry(pr,
-          pr.state,
-          pr.state,
-          message,
-          null);
-        pr.needsAttention=true;
-        pr.save(flush:true, failOnError:true);
-      }
-    } else {
-        auditEntry(pr, pr.state, pr.state, 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.', null);
-        pr.needsAttention=true;
-        pr.save(flush:true, failOnError:true);
-    }
-
-    return result;
-  }
-
-	public void sendRequesterShippedReturn(PatronRequest pr, Object actionParams) {
-    log.debug("sendRequestingAgencyMessage(${pr?.id}, ${actionParams}");
-
-    // Decrement the active borrowing counter - we are returning the item
-    statisticsService.decrementCounter('/activeBorrowing');
-
-    sendRequestingAgencyMessage(pr, 'ShippedReturn', actionParams);
-  }
-
-	public boolean sendCancel(PatronRequest pr, String action, Object actionParams) {
-    switch (action) {
-      case 'requesterRejectedConditions':
-        pr.requestToContinue = true;
-        break;
-      case 'requesterCancel':
-        pr.requestToContinue = false;
-        break;
-      default:
-        log.error("Action ${action} should not be able to send a cancel message")
-        break;
-    }
-    pr.save(failOnError:true);
-    
-    sendRequestingAgencyMessage(pr, 'Cancel', actionParams)
-  }
 
 	public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
     String note = messageParams?.note
@@ -466,23 +263,7 @@ public class ReshareActionService {
     sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
   }
 
-	public void addCondition(PatronRequest pr, Map responseParams) {
-    Map conditionParams = responseParams
-    log.debug("addCondition::(${pr})")
-
-    if (!responseParams.isNull("note")){
-      conditionParams.note = "#ReShareAddLoanCondition# ${responseParams.note}"
-    } else {
-      conditionParams.note = "#ReShareAddLoanCondition#"
-    }
-
-    if (!conditionParams.isNull("loanCondition")) {
-      sendMessage(pr, conditionParams);
-    } else {
-      log.warn("addCondition not handed any conditions")
-    }
-  }
-
+  // Unused ??
 	public void sendStatusChange(PatronRequest pr,
                             String status,
                             String note = null) {

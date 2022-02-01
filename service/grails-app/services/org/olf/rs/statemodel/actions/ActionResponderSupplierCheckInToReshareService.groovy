@@ -4,7 +4,6 @@ import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest;
 import org.olf.rs.RequestVolume;
-import org.olf.rs.StatisticsService;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
@@ -26,7 +25,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 	
 	HostLMSService hostLMSService;
 	DirectoryEntryService directoryEntryService;
-	StatisticsService statisticsService;
 	
 	@Override
 	String name() {
@@ -147,7 +145,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 					                vol.status = volStatus;
 					            }
 					            vol.save(failOnError: true);
-					            reshareActionService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
+					            reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkout_result.reason=='spoofed' ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
 					
 					            // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
 					            try {
@@ -160,7 +158,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 					                log.warn("Unable to parse ${checkout_result?.dueDate} to date: ${e.getMessage()}");
 					            }
 				            } else {
-								reshareActionService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
+								reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+checkout_result.problems?.toString(), null);
 							}
 						}
 		

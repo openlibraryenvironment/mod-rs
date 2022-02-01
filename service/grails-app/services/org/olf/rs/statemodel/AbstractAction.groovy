@@ -3,14 +3,16 @@ package org.olf.rs.statemodel;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.StatisticsService;
 
 public abstract class AbstractAction {
 
 	private static final String POSSIBLE_FROM_STATES_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate and aa.triggerType = :triggerType'
 	
-	// We automatically inject these 2 services as most actions use them
+	// We automatically inject these 3 services as some if not all actions use them
 	ReshareActionService reshareActionService;
 	ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+	StatisticsService statisticsService;
 	
 	/**
 	 * Method that all classes derive from this one that actually performs the action

@@ -5,7 +5,7 @@ import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
-public class ActionResponderSupplierAddConditionService extends ActionResponderService {
+public class ActionResponderSupplierAddConditionService extends ActionResponderConditionService {
 
 	static String[] TO_STATES = [
 								 Status.RESPONDER_PENDING_CONDITIONAL_ANSWER
@@ -25,8 +25,22 @@ public class ActionResponderSupplierAddConditionService extends ActionResponderS
 	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
 
 		// Add the condition and send it to the requester
-		reshareActionService.addCondition(request, parameters);
-		reshareActionService.sendSupplierConditionalWarning(request, parameters);
+		Map conditionParams = parameters
+	
+		if (!parameters.isNull("note")){
+			conditionParams.note = "#ReShareAddLoanCondition# ${parameters.note}"
+		} else {
+			conditionParams.note = "#ReShareAddLoanCondition#";
+		}
+
+		if (!conditionParams.isNull("loanCondition")) {
+			reshareActionService.sendMessage(request, conditionParams);
+		} else {
+			log.warn("addCondition not handed any conditions");
+		}
+
+		// Send over the supplier conditional warning	
+		sendSupplierConditionalWarning(request, parameters);
 		
 		// Do we need to hold the request
 		if (parameters.isNull('holdingState') || parameters.holdingState == "no") {
