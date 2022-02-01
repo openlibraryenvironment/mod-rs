@@ -17,7 +17,11 @@ class UrlMappings {
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
     }
 
-    '/rs/noticePolicies' (resources: 'noticePolicy')
+	"/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
+	"/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
+	"/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
+	
+	    '/rs/noticePolicies' (resources: 'noticePolicy')
 
     "/rs/shipments" (resources: 'shipment' )
     "/rs/timers" (resources: 'timer' )
