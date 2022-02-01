@@ -144,8 +144,8 @@ public class StatisticsService {
     long ratio_borrow = Long.parseLong(parsed_ratio[1])
 
     if ( current_stats ) {
-      long current_loans = current_stats.requestsByTag.ACTIVE_LOAN
-      long current_borrowing = current_stats.requestsByTag.BORROW
+      long current_loans = current_stats.requestsByTag.ACTIVE_LOAN ?: 0
+      long current_borrowing = current_stats.requestsByTag.ACTIVE_BORROW ?: 0
       result = [
         timestamp: System.currentTimeMillis(),
         lbr_loan:ratio_loan,
