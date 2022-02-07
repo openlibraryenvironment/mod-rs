@@ -751,15 +751,30 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .includeBibliographicDescription()
                         .setApplicationProfileType(ncip_app_profile);
 
-          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem request ${checkinItem}");
+          log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
-          log.debug("[${CurrentTenant.get()}] NCIP2 checkinItem response ${response}");
+          log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}");
 
 
           log.debug(response?.toString());
-          if ( response.has('problems') ) {
+          if ( response.has('problems') ) {            
             // If there is a problem block, something went wrong, so change response to false.
             result.result = false;
+            
+            // If the problem block is just because the item is already checked in, then make response true
+            try {
+              JSONArray problemJsonArray = response.getJSONObject('problems');
+              for(int i = 0; i < problemJsonArray.length();i++) {
+                JSONObject problemJson = problemJsonArray.getJSONObject(i);
+                if(problemJson.has("type") && problemJson.getString("type").equalsIgnoreCase("Item Not Checked Out")) {
+                  result.result = true; 
+                  log.debug("[${CurrentTenant.get()}] NCIP checkinItem not needed: already checked in")
+                  break;
+                }
+              }
+            } catch(Exception e) {
+              log.debug("[${CurrentTenant.get()}] Error getting problem type: ${e.getLocalizedMessage()}");
+            }
             result.problems = response.get('problems')
           }
           break;
