@@ -231,7 +231,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   private void bindCustomProperties(DirectoryEntry de, Map payload) {
     log.debug("Iterate over custom properties sent in directory entry payload ${payload.customProperties}");
 
-    cleanCustomProperties(de);
+    cleanAllCustomProperties(de);
 
     payload?.customProperties?.each { k, v ->
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
@@ -362,6 +362,31 @@ public class EventConsumerService implements EventPublisher, DataBinder {
       }
     }
   }
+
+  private void cleanAllCustomProperties(DirectoryEntry de) {
+
+    boolean updated = false;
+    List props_seen = []
+    List cps_to_remove = []
+
+    de.customProperties?.value.each { cp ->
+      if ( props_seen.contains(cp.definition.name) ) {
+        log.debug("Removing unwanted prop value for ${cp.definition.name}");
+        cps_to_remove.add(cp);
+      }
+      else {
+        log.debug("Add ${cp.definition.name} to list of props see - this is the first one so it survives");
+        props_seen.add(cp.definition.name);
+      }
+    }
+
+    cps_to_remove.each { cp ->
+      de.customProperties?.removeFromValue(cp)
+      updated = true;
+    }
+
+  }
+
 
   /**
    *  Sometimes a symbol can be removed in the record without the local cache copy of that relationship being removed. This function
