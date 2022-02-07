@@ -10,23 +10,36 @@ import com.k_int.web.toolkit.tags.Tag
 
 class Status implements MultiTenant<Status> {
 
-  public static String PATRON_REQUEST_AWAITING_RETURN_SHIPPING = "REQ_AWAITING_RETURN_SHIPPING";
-  public static String PATRON_REQUEST_CANCEL_PENDING           = "REQ_CANCEL_PENDING";
-  public static String PATRON_REQUEST_CANCELLED                = "REQ_CANCELLED";
-  public static String PATRON_REQUEST_CHECKED_IN               = "REQ_CHECKED_IN";
-  public static String PATRON_REQUEST_END_OF_ROTA              = "REQ_END_OF_ROTA";
-  public static String PATRON_REQUEST_EXPECTS_TO_SUPPLY        = "REQ_EXPECTS_TO_SUPPLY";
-  public static String PATRON_REQUEST_FILLED_LOCALLY           = "REQ_FILLED_LOCALLY";
-  public static String PATRON_REQUEST_INVALID_PATRON           = "REQ_INVALID_PATRON";
-  public static String PATRON_REQUEST_REQUEST_COMPLETE         = "REQ_REQUEST_COMPLETE";
-  public static String PATRON_REQUEST_SHIPPED_TO_SUPPLIER      = "REQ_SHIPPED_TO_SUPPLIER";
-  public static String PATRON_REQUEST_UNFILLED                 = "REQ_UNFILLED";
-  public static String PATRON_REQUEST_VALIDATED                = "REQ_VALIDATED";
+  public static String PATRON_REQUEST_AWAITING_RETURN_SHIPPING    = "REQ_AWAITING_RETURN_SHIPPING";
+  public static String PATRON_REQUEST_CANCEL_PENDING              = "REQ_CANCEL_PENDING";
+  public static String PATRON_REQUEST_CANCELLED                   = "REQ_CANCELLED";
+  public static String PATRON_REQUEST_CANCELLED_WITH_SUPPLIER     = "REQ_CANCELLED_WITH_SUPPLIER";
+  public static String PATRON_REQUEST_CHECKED_IN                  = "REQ_CHECKED_IN";
+  public static String PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED = "REQ_CONDITIONAL_ANSWER_RECEIVED";
+  public static String PATRON_REQUEST_END_OF_ROTA                 = "REQ_END_OF_ROTA";
+  public static String PATRON_REQUEST_ERROR                       = "REQ_ERROR";
+  public static String PATRON_REQUEST_EXPECTS_TO_SUPPLY           = "REQ_EXPECTS_TO_SUPPLY";
+  public static String PATRON_REQUEST_FILLED_LOCALLY              = "REQ_FILLED_LOCALLY";
+  public static String PATRON_REQUEST_IDLE                        = "REQ_IDLE";
+  public static String PATRON_REQUEST_INVALID_PATRON              = "REQ_INVALID_PATRON";
+  public static String PATRON_REQUEST_LOCAL_REVIEW                = "REQ_LOCAL_REVIEW";
+  public static String PATRON_REQUEST_OVERDUE                     = "REQ_OVERDUE";
+  public static String PATRON_REQUEST_RECALLED                    = "REQ_RECALLED";
+  public static String PATRON_REQUEST_REQUEST_COMPLETE            = "REQ_REQUEST_COMPLETE";
+  public static String PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    = "REQ_REQUEST_SENT_TO_SUPPLIER";
+  public static String PATRON_REQUEST_SHIPPED                     = "REQ_SHIPPED";
+  public static String PATRON_REQUEST_SHIPPED_TO_SUPPLIER         = "REQ_SHIPPED_TO_SUPPLIER";
+  public static String PATRON_REQUEST_SOURCING_ITEM               = "REQ_SOURCING_ITEM";
+  public static String PATRON_REQUEST_SUPPLIER_IDENTIFIED         = "REQ_SUPPLIER_IDENTIFIED";
+  public static String PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER  = "REQ_UNABLE_TO_CONTACT_SUPPLIER";
+  public static String PATRON_REQUEST_UNFILLED                    = "REQ_UNFILLED";
+  public static String PATRON_REQUEST_VALIDATED                   = "REQ_VALIDATED";
 
   public static String RESPONDER_AWAIT_PICKING              = "RES_AWAIT_PICKING";
   public static String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
   public static String RESPONDER_AWAIT_SHIP                 = "RES_AWAIT_SHIP";
   public static String RESPONDER_AWAITING_RETURN_SHIPPING   = "RES_AWAITING_RETURN_SHIPPING";
+  public static String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
   public static String RESPONDER_CANCELLED                  = "RES_CANCELLED";
   public static String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
   public static String RESPONDER_COMPLETE                   = "RES_COMPLETE";
