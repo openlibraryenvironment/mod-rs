@@ -37,7 +37,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 		return([]);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// We do not want want this event to appear anywhere 
 		return(model == StateModel.MODEL_RESPONDER);	
 	}

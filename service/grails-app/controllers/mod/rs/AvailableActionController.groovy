@@ -1,6 +1,7 @@
 package mod.rs;
 
 import org.olf.rs.statemodel.AbstractAction;
+import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.GraphVizBuilder;
 import org.olf.rs.statemodel.StateModel;
@@ -77,8 +78,9 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 	 */
 	def createGraph() {
 
-		// The actions we will build a graph for
+		// The actions and events we will build a graph for
 		List<AbstractAction> actions = new ArrayList<AbstractAction>();
+		List<AbstractEvent> events = new ArrayList<AbstractEvent>();
 		
 		// Determine the appropriate list of actions
 		Map<String, AbstractAction> abstractActions = Holders.grailsApplication.mainContext.getBeansOfType(AbstractAction);
@@ -93,13 +95,24 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		}
 
 		abstractActions.each{ beanName, abstractAction ->
-			// Is ths for the right state model
+			// Is this action for the right state model
 			if (beanName.startsWith(nameStartsWith)) {
 				// Is it one we will ignore
 				if (!ignoredActions.contains(abstractAction.name())) {
 					// It is an action we want to take notice off
 					actions.add(abstractAction);
 				}
+			}
+		}
+
+		// Determine the appropriate list of events
+		Map<String, AbstractEvent> abstractEvents = Holders.grailsApplication.mainContext.getBeansOfType(AbstractEvent);
+
+		// Is this event for this state model
+		abstractEvents.each{ beanName, abstractEvent ->
+			// Is this for the right state model
+			if (abstractEvent.supportsModel(params.stateModel)) {
+				events.add(abstractEvent);
 			}
 		}
 
@@ -114,12 +127,12 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 			} catch (Exception e) {
 			}
 		}		
-		// Tell it to build the graph
-		GraphVizBuilder.createGraph(params.stateModel, actions, outputStream, height);
+		// Tell it to build the graph, it should return the dot file in the output stream
+		GraphVizBuilder.createGraph(params.stateModel, actions, events, outputStream, height);
 		
 		// Hopefully we have what we want in the output stream
 		outputStream.flush();
 		response.status = 200;
-		response.setContentType("image/png");
+		response.setContentType("text/plain");
 	}
 }
