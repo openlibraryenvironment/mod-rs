@@ -169,8 +169,16 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+      def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 };
+      if (withHoldings.size() < 1) {
+        log.warn("BaseHostLMSService failed to find an OPAC record with holdings");
+        return null;
+      } else if (withHoldings.size() > 1) {
+        log.warn("BaseHostLMSService found multiple OPAC records with holdings");
+        return null;
+      }
       log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
-      availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord, reason);
+      availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
     }
     else {
       log.warn("BaseHostLMSService expected the response to contain an OPAC record, but none was found");
@@ -399,8 +407,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       log.debug("Got Z3950 response: ${z_response}");
 
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
+      if ( (z_response?.numberOfRecords?.text() as int) > 0 ) {
         Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
         if ( availability_summary.size() > 0 ) {
           availability_summary.values().each { v ->
