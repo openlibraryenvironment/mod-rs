@@ -16,7 +16,7 @@ public abstract class EventTriggerNoticesService extends AbstractEvent {
 		return(EventFetchRequestMethod.PAYLOAD_ID);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// This event 
 		return(model == StateModel.MODEL_REQUESTER);	
 	}
