@@ -1,31 +1,23 @@
 package org.olf.rs;
 
-
-import grails.events.annotation.Subscriber
-import groovy.lang.Closure
-import grails.gorm.multitenancy.Tenants
-import org.olf.rs.PatronRequest
-import org.olf.rs.PatronRequestNotification
-import org.olf.rs.PatronRequestLoanCondition
-import org.olf.rs.statemodel.Status
-import org.olf.rs.statemodel.StateModel
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.okapi.modules.directory.DirectoryEntry;
-import org.olf.rs.routing.RankedSupplier;
-import groovy.json.JsonOutput;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 
-import groovy.sql.Sql
-import com.k_int.web.toolkit.settings.AppSetting
-import com.k_int.web.toolkit.refdata.*
-import static groovyx.net.http.HttpBuilder.configure
+import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.routing.RequestRouter
+import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionResult;
+import org.olf.rs.statemodel.EventFetchRequestMethod;
+import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.events.EventMessageRequestIndService;
+import org.olf.rs.statemodel.events.EventNoImplementationService;
+import org.olf.rs.statemodel.events.EventSupplyingAgencyMessageIndService;
 
-import groovy.json.JsonSlurper
+import grails.events.annotation.Subscriber;
+import grails.gorm.multitenancy.Tenants;
+import grails.util.Holders
+import groovy.json.JsonOutput;
 
 /**
  * Handle application events.
@@ -40,523 +32,118 @@ public class ReshareApplicationEventHandlerService {
 
   private static final int MAX_RETRIES = 10;
   
-  ProtocolMessageService protocolMessageService
-  ProtocolMessageBuildingService protocolMessageBuildingService
-  SharedIndexService sharedIndexService
-  HostLMSService hostLMSService
-  ReshareActionService reshareActionService
-  StatisticsService statisticsService
-  PatronNoticeService patronNoticeService
-  RequestRouterService requestRouterService
+  	EventNoImplementationService eventNoImplementationService;
+	EventSupplyingAgencyMessageIndService eventSupplyingAgencyMessageIndService;
+	EventMessageRequestIndService eventMessageRequestIndService;
 
-  // This map maps events to handlers - it is essentially an indirection mecahnism that will eventually allow
-  // RE:Share users to add custom event handlers and override the system defaults. For now, we provide static
-  // implementations of the different indications.
-  private static Map<String,Closure> handlers = [
-    'NewPatronRequest_ind':{ service, eventData ->
-      service.handleNewPatronRequestIndication(eventData);
-    },
-    'STATUS_REQ_VALIDATED_ind': { service, eventData ->
-      // This isn't really right - if we are a responder, we don't ever want to locate other responders.
-      // This should be refactored to handleValidated which checks to see if we are a responder and then
-      // acts accordingly. This close to all hands demo, I've changed service.sourcePatronRequest itself
-      // to check for isRequester and do nothing in that case.
-      service.sourcePatronRequest(eventData);
-    },
-    'STATUS_REQ_SOURCING_ITEM_ind': { service, eventData ->
-      // STATUS_REQ_SOURCING_ITEM is a transitional state whilst the function sourcePatronRequest does it's work. At the end
-      // of sourcePatronRequest that function will update state to REQ_SUPPLIER_IDENTIFIED or REQ_END_OF_ROTA
-      service.log.debug("Request is in the transitional state REQ_SOURCING_ITEM shortly to REQ_SUPPLIER_IDENTIFIED");
-    },
-    'STATUS_REQ_UNFILLED_ind': { service, eventData ->
-      service.sendToNextLender(eventData);
-    },
-    'STATUS_REQ_CANCELLED_ind': { service, eventData ->
-      service.triggerNotices(eventData.payload.id, "Request cancelled");
-    },
-    'STATUS_REQ_CANCELLED_WITH_SUPPLIER_ind': { service, eventData ->
-      service.handleCancelledWithSupplier(eventData);
-    },
-    'STATUS_REQ_END_OF_ROTA_ind': { service, eventData ->
-      service.triggerNotices(eventData.payload.id, "End of rota");
-    },
-    'STATUS_REQ_SUPPLIER_IDENTIFIED_ind': { service, eventData ->
-      service.sendToNextLender(eventData);
-    },
-    'STATUS_RESPONDER_ERROR_ind': { service, eventData ->
-      // There was an error from the responder - log and move to next lending string 
-      // or end of rota.
-    },
-    'STATUS_RESPONDER_NOT_SUPPLIED_ind': { service, eventData ->
-      // Responder sent back a negative response - next lending string entry or end of rota.
-    },
-    'STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_ind': { service, eventData ->
-    },
-    'STATUS_REQ_SHIPPED_ind': { service, eventData ->
-    },
-    'STATUS_REQ_BORROWING_LIBRARY_RECEIVED_ind': { service, eventData ->
-    },
-    'STATUS_REQ_AWAITING_RETURN_SHIPPING_ind': { service, eventData ->
-    },
-    'STATUS_REQ_BORROWER_RETURNED_ind': { service, eventData ->
-    },
-    'STATUS_RES_OVERDUE_ind': { service, eventData ->
-      log.debug("Overdue event handler called");
-      service.handleResOverdue(eventData);
-    },
-    'MESSAGE_REQUEST_ind': { service, eventData ->
-      // This is called on an incoming REQUEST - can be loopback, ISO18626, ISO10161, etc.
-      service.handleRequestMessage(eventData);
-    },
-    'SUPPLYING_AGENCY_MESSAGE_ind': { service, eventData ->
-      service.handleSupplyingAgencyMessage(eventData);
-    },
-    'STATUS_RES_CANCEL_REQUEST_RECEIVED_ind': { service, eventData ->
-      service.handleCancelRequestReceived(eventData);
-    },
-    'STATUS_RES_CHECKED_IN_TO_RESHARE_ind': { service, eventData ->
-      service.handleResponderItemCheckedIn(eventData);
-    }
+  	/** Holds map of the event to the bean that will do the processing for this event */
+  	private static Map serviceEvents = [ : ];
 
-  ]
+  	@Subscriber('PREventIndication')
+	public handleApplicationEvent(Map eventData) {
+		log.debug("ReshareApplicationEventHandlerService::handleApplicationEvent(${eventData})");
+		if (eventData?.event) {
+			// Get hold of the bean and store it in our map, if we previously havn't been through here
+			if (serviceEvents[eventData.event] == null) {
+				// Determine the bean name, if we had a separate event table we could store it as a transient against that
+				// We split the event name on the underscores then capitalize each word and then join it back together, prefixing it with "event" and postfixing it with "Service"
+				String[] eventNameWords = eventData.event.toLowerCase().split("_");
+				String eventNameNormalised = "";
+				eventNameWords.each{ word ->
+					eventNameNormalised += word.capitalize();
+				}
+				
+				String beanName = "event" + eventNameNormalised + "Service";
+	
+				// Now setup the link to the service action that actually does the work
+				try {
+					serviceEvents[eventData.event] = Holders.grailsApplication.mainContext.getBean(beanName);
+				} catch (Exception e) {
+					log.error("Unable to locate event bean: " + beanName);
+				}
+			}
+			
+			// Did we find the bean
+			AbstractEvent eventBean = serviceEvents[eventData.event];
+			if (eventBean == null) {
+				log.error("Unable to find the bean for event: " + eventData.event);
 
-  @Subscriber('PREventIndication')
-  public handleApplicationEvent(Map eventData) {
-    log.debug("ReshareApplicationEventHandlerService::handleApplicationEvent(${eventData})");
-    Closure c = handlers[eventData.event]
-    if ( c != null ) {
-      // System has a closure registered for event, call it
-      log.debug("Found closure for event ${eventData.event}. Calling");
-      if ( eventData.tenant ) {
-        try {
-          Tenants.withId(eventData.tenant) {
-            c.call(this, eventData);
-          }
-        }
-        catch ( Exception e ) {
-          log.error("Problem trying to invoke event handler for ${eventData.event}",e)
-          throw e;
-        }
-      }
-    }
-    else {
-      log.warn("Event ${eventData.event} no handler found");
-    }
-  }
-
-  public void triggerNotices(String prId, String trigger) {
-    def req = delayedGet(prId, true);
-    patronNoticeService.triggerNotices(req, RefdataValue.lookupOrCreate('noticeTriggers', trigger));
-  }
-
-  // Notify us of a new patron request in the database - regardless of role
-  //
-  // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
-  // Called when a new patron request indication happens - usually
-  // New patron requests must have a  req.requestingInstitutionSymbol
-  public void handleNewPatronRequestIndication(eventData) {
-    log.debug("ReshareApplicationEventHandlerService::handleNewPatronRequestIndication(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-      def req = delayedGet(eventData.payload.id, true);
-      log.debug("handleNewPatronRequestIndication - located request ${req}, isRequester:${req?.isRequester}, state:${req?.state?.code}");
-
-      // If the role is requester then validate the request and set the state to validated
-      if ( ( req != null ) && 
-           ( req.state?.code == 'REQ_IDLE' ) && 
-           ( req.isRequester == true) ) {
-	    // Save the current state
-		Status currentState = req.state;
-
-        // Generate a human readabe ID to use
-        req.hrid=generateHrid()
-        log.debug("set req.hrid to ${req.hrid}");
-
-        
-        // If we were supplied a pickup location, attempt to resolve it here
-        DirectoryEntry pickup_loc
-        if ( req.pickupLocationSlug ) {
-          pickup_loc = DirectoryEntry.findBySlug(req.pickupLocationSlug)
-        } else if ( req.pickupLocationCode ) { // deprecated
-          pickup_loc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: req.pickupLocationCode])
-        }
-          
-        if(pickup_loc != null) {
-          req.resolvedPickupLocation = pickup_loc;
-          def pickup_symbols = pickup_loc?.symbols?.findResults {
-            it?.priority == 'shipping' ? it?.authority?.symbol+':'+it?.symbol : null
-          }
-          // TODO this deserves a better home
-          req.pickupLocation = pickup_symbols.size > 0 ? "${pickup_loc.name} --> ${pickup_symbols[0]}" : pickup_loc.name
-        }
-
-        if ( req.requestingInstitutionSymbol != null ) {
-          // We need to validate the requsting location - and check that we can act as requester for that symbol
-          Symbol s = resolveCombinedSymbol(req.requestingInstitutionSymbol);
-          if (s != null) {
-            // We do this separately so that an invalid patron does not stop information being appended to the request
-            req.resolvedRequester = s
-          }
-
-          def lookup_patron = reshareActionService.lookupPatron(req, null)
-          if ( lookup_patron.callSuccess ) {
-            boolean patronValid = lookup_patron.patronValid
-          
-            // If s != null and patronValid == true then the request has passed validation
-            if ( s != null && patronValid) {
-              log.debug("Got request ${req}");
-              log.debug(" -> Request is currently REQ_IDLE - transition to REQ_VALIDATED");
-              def validated_state = lookupStatus('PatronRequest', 'REQ_VALIDATED')
-              auditEntry(req, currentState, validated_state, 'Request Validated', null);
-              req.state = validated_state;
-              patronNoticeService.triggerNotices(req, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
-            } else if (s == null) {
-              // An unknown requesting institution symbol is a bigger deal than an invalid patron
-              req.needsAttention=true;
-              log.warn("Unkown requesting institution symbol : ${req.requestingInstitutionSymbol}");
-              req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-              auditEntry(req, 
-                          currentState, 
-                          lookupStatus('PatronRequest', 'REQ_ERROR'), 
-                          'Unknown Requesting Institution Symbol: '+req.requestingInstitutionSymbol, null);
-            } else {
-              // If we're here then the requesting institution symbol was fine but the patron is invalid
-              def invalid_patron_state = lookupStatus('PatronRequest', 'REQ_INVALID_PATRON')
-              String message = "Failed to validate patron with id: \"${req.patronIdentifier}\".${lookup_patron?.status != null ? " (Patron state=${lookup_patron.status})" : ""}".toString()
-              auditEntry(req, currentState, invalid_patron_state, message, null);
-              req.state = invalid_patron_state;
-              req.needsAttention=true;
-            }
-          } else {
-            // unexpected error in Host LMS call
-            req.needsAttention=true;
-            String message = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. '+lookup_patron?.problems
-            auditEntry(req, currentState, req.state, message, null);
-          }
-        } else {
-          req.state = lookupStatus('PatronRequest', 'REQ_ERROR');
-          req.needsAttention=true;
-          auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_ERROR'), 'No Requesting Institution Symbol', null);
-        }
-
-        // This is a bit dirty - some clients continue to send req.systemInstanceIdentifier rather than req.bibliographicRecordId
-        // If we find we are missing a bib record id but do have a system instance identifier, copy it over. Needs sorting properly post PALCI go live
-        if ( ( req.bibliographicRecordId == null ) && ( req.systemInstanceIdentifier != null ) ) {
-          req.bibliographicRecordId = req.systemInstanceIdentifier
-        }
-
-        if ( ( req.bibliographicRecordId != null ) && ( req.bibliographicRecordId.length() > 0 ) ) {
-          log.debug("calling fetchSharedIndexRecords");
-          List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: req.bibliographicRecordId]);
-          if (bibRecords?.size() == 1) {
-            req.bibRecord = bibRecords[0];
-            //If our OCLC field isn't set, let's try to set it from our bibrecord
-            if(!req.oclcNumber) {
-              try {
-                def slurper = new JsonSlurper();
-                def bibJson = slurper.parseText(bibRecords[0]);
-                for(identifier in bibJson.identifiers) {
-                  def oclcId = getOCLCId(identifier.value);
-                  if(oclcId) {
-                    log.debug("Setting request oclcNumber to ${oclcId}");
-                    req.oclcNumber = oclcId;
-                    break;
-                  }
-                }         
-              } catch(Exception e) {
-                log.warn("Unable to parse bib json: ${e}");
-              }
-            }
-          }
-
-        }
-        else {
-          log.debug("No req.bibliographicRecordId : ${req.bibliographicRecordId}");
-        }
-
-        req.save(flush:true, failOnError:true)
-      }
-      else if ( ( req != null ) && ( req.state?.code == 'RES_IDLE' ) && ( req.isRequester == false ) ) {
-        try {
-          log.debug("Launch auto responder for request");
-          String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
-          if ( auto_respond?.toLowerCase().startsWith('on') ) {
-            autoRespond(req, auto_respond.toLowerCase())
-          }
-          else {
-            auditEntry(req, req.state, req.state, "Auto responder is ${auto_respond} - manual checking needed", null);
-            req.needsAttention=true;
-          }
-          req.save(flush:true, failOnError:true);
-        }
-        catch ( Exception e ) {
-          log.error("Problem in auto respond",e);
-        }
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_IDLE (${req?.state?.code}) isRequester=${req?.isRequester}");
-      }
-      log.debug("LOCKING: handleNewPatronRequestIndication transaction has completed");
-    }
-  }
-
-  // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM, 
-  // and then on to REQ_SUPPLIER_IDENTIFIED if a rota could be established
-  public void sourcePatronRequest(eventData) {
-    log.debug("ReshareApplicationEventHandlerService::sourcePatronRequest(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      PatronRequest req = delayedGet(eventData.payload.id, true);
-      if ( ( req.isRequester == true ) && ( req != null ) && ( req.state?.code == 'REQ_VALIDATED' ) ) {
-
-        log.debug("Got request ${req}");
-        log.debug(" -> Request is currently VALIDATED - transition to REQ_SOURCING_ITEM");
-        req.state = lookupStatus('PatronRequest', 'REQ_SOURCING_ITEM');
-        req.save(flush:true, failOnError:true)
-
-        if(req.rota?.size() != 0) {
-          log.debug("Found a potential supplier for ${req}");
-          log.debug(" -> Request is currently REQ_SOURCING_ITEM - transition to REQ_SUPPLIER_IDENTIFIED");
-          def old_state = req.state;
-          req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-          auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 'Request supplied with Lending String', null);
-          req.save(flush:true, failOnError:true)
-        } else {
-          def operation_data = [:]
-          operation_data.candidates=[]
-
-          // We will shortly refactor this block to use requestRouterService to get the next block of requests
-
-          RequestRouter selected_router = requestRouterService.getRequestRouter();
-
-          if ( selected_router == null ) 
-            throw new RuntimeException('Unable to locate router');
-
-          List<RankedSupplier> possible_suppliers = selected_router.findMoreSuppliers(req.getDescriptiveMetadata(), []);
-
-          log.debug("Created ranked rota: ${possible_suppliers}")
-
-          if (  possible_suppliers.size() > 0 ) {
-
-            int ctr = 0
-
-            // Pre-process the list of candidates
-            possible_suppliers?.each { ranked_supplier ->
-              if ( ranked_supplier.supplier_symbol != null ) {
-                operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Added"]);
-                if ( ranked_supplier.ill_policy == 'Will lend' ) {
-                  log.debug("Adding to rota: ${ranked_supplier}");
-
-                  // Pull back any data we need from the shared index in order to sort the list of candidates
-                  req.addToRota (new PatronRequestRota(
-                                                       patronRequest:req,
-                                                       rotaPosition:ctr++, 
-                                                       directoryId:ranked_supplier.supplier_symbol,
-                                                       instanceIdentifier:ranked_supplier.instance_identifier,
-                                                       copyIdentifier:ranked_supplier.copy_identifier,
-                                                       state: lookupStatus('PatronRequest', 'REQ_IDLE'),
-                                                       loadBalancingScore:ranked_supplier.rank,
-                                                       loadBalancingReason:ranked_supplier.rankReason))
-                }
-                else {
-                  log.warn("ILL Policy was not Will lend");
-                  operation_data.candidates.add([symbol:ranked_supplier.supplier_symbol, message:"Skipping - illPolicy is \"${ranked_supplier.ill_policy}\""]);
-                }
-              }
-              else {
-                log.warn("requestRouterService returned an entry without a supplier symbol");
-              }
-            }
-
-            // Procesing
-
-            def old_state = req.state;
-            req.state = lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED');
-            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_SUPPLIER_IDENTIFIED'), 
-                       'Ratio-Ranked lending string calculated by '+selected_router.getRouterInfo()?.description, null);
-            req.save(flush:true, failOnError:true)
-          }
-          else {
-            // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
-            log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
-            def old_state = req.state;
-            req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, old_state, lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'Unable to locate lenders', null);
-            req.save(flush:true, failOnError:true)
-          }
-        }
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != REQ_VALIDATED (${req?.state?.code})");
-      }
-    }
-    log.debug("LOCKING: sourcePatronRequest transaction has completed");
-  }
-
-  // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
-  public void sendToNextLender(eventData) {
-    log.debug("ReshareApplicationEventHandlerService::sendToNextLender(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def req = delayedGet(eventData.payload.id, true);
-      // We must have found the request, and it as to be in a state of supplier identifier or unfilled
-      if ( ( req != null ) && 
-           ( ( req.state?.code == 'REQ_SUPPLIER_IDENTIFIED' ) ||
-             ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' ) ||
-             ( req.state?.code == 'REQ_UNFILLED' ) ) ) {
-        log.debug("Got request ${req} (HRID Is ${req.hrid}) (Status code is ${req.state?.code})");
-        
-        if ( req.rota.size() > 0 ) {
-
-          Map request_message_request = protocolMessageBuildingService.buildRequestMessage(req);
-          log.debug("Built request message request: ${request_message_request}")
-
-          boolean request_sent = false;
-
-          // There may be problems with entries in the lending string, so we loop through the rota
-          // until we reach the end, or we find a potential lender we can talk to. The request must
-          // also explicitly state a requestingInstitutionSymbol
-          while ( ( !request_sent ) && 
-                  ( req.rota.size() > 0 ) &&
-                  ( ( req.rotaPosition?:-1 ) < req.rota.size() ) && 
-                  ( req.requestingInstitutionSymbol != null ) ) {
-
-            // We have rota entries left, work out the next one
-            req.rotaPosition = (req.rotaPosition!=null ? req.rotaPosition+1 : 0 )
-
-            // get the responder
-            PatronRequestRota prr = req.rota.find( { it.rotaPosition == req.rotaPosition } )
-            if ( prr != null ) {
-              String next_responder = prr.directoryId
-
-              log.debug("Attempt to resolve symbol \"${next_responder}\"");
-              Symbol s = ( next_responder != null ) ? resolveCombinedSymbol(next_responder) : null;
-              log.debug("Resolved next_responder to ${s} with status ${s?.owner?.status?.value}");
-              def ownerStatus = s.owner?.status?.value;
-
-              if ( ownerStatus == "Managed" || ownerStatus == "managed" ) {
-                log.debug("Responder is local") //, going to review state");
-                boolean do_local_review = true;
-                //Check to see if we're going to try to automatically check for local
-                //copies
-                String local_auto_respond = AppSetting.findByKey('auto_responder_local')?.value;
-                if(local_auto_respond?.toLowerCase()?.startsWith('on')) {
-                  boolean has_local_copy = checkForLocalCopy(req);
-                  if(!has_local_copy) {
-                    do_local_review = false;
-                    auditEntry(req, req.state, req.state, "Local auto-responder did not locate a local copy - sent to next lender", null);
-                  } else {
-                    auditEntry(req, req.state, req.state, "Local auto-responder located a local copy - requires review", null);
-                  }
-                } else {
-                  auditEntry(req, req.state, req.state, "Local auto-responder off - requires manual checking", null);
-                }
-
-                if(do_local_review) {
-                  def current_state = req.state;
-                  req.state = lookupStatus('PatronRequest', 'REQ_LOCAL_REVIEW');
-                  auditEntry(req, current_state, req.state, 'Sent to local review', null);
-                  req.save(flush:true, failOnError:true);
-                  return; //Nothing more to do here
-                } else {
-                  prr.state = lookupStatus('Responder', 'RES_NOT_SUPPLIED');
-                  prr.save(flush: true, failOnError: true);
-                  log.debug("Cannot fill locally, skipping");
-                  continue;
-                }
-              }
-
-              // Fill out the directory entry reference if it's not currently set, and try to send.
-              if ( ( next_responder != null ) && 
-                   ( s != null ) &&
-                   ( prr.peerSymbol == null ) ) {
-
-
-                if ( s != null ) {
-                  req.resolvedSupplier = s;
-                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");
-                  prr.lock();
-                  log.debug("LOCKING: PatronRequestRota[${prr.id}] - OBTAINED");
-                  prr.peerSymbol = s
-                  prr.save(flush:true, failOnError:true)
-
-                  request_message_request.header.supplyingAgencyId = [
-                    agencyIdType:s.authority?.symbol,
-                    agencyIdValue:s.symbol,
-                  ]
-
-                }
-                else {
-                  log.warn("Cannot understand or resolve symbol ${next_responder}");
-                }
-
-                if ( ( prr.instanceIdentifier != null ) && ( prr.instanceIdentifier.length() > 0 ) ) {
-                  // update request_message_request.supplierUniqueRecordId to the system number specified in the rota
-                  request_message_request.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
-                }
-                request_message_request.bibliographicInfo.supplyingInstitutionSymbol = next_responder;
-
-                // Probably need a lender_is_valid check here
-                def send_result = protocolMessageService.sendProtocolMessage(req.requestingInstitutionSymbol, next_responder, request_message_request)
-                if ( send_result.status=='SENT' ) {
-                  prr.state = lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
-                  request_sent = true;
-                }
-                else {
-                  prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
-                  prr.note = "Result of send : ${send_result.status}"
-                }
-              }
-              else {
-                log.warn("Lender at position ${req.rotaPosition} invalid, skipping");
-                prr.state = lookupStatus('PatronRequest', 'REQ_UNABLE_TO_CONTACT_SUPPLIER');
-                prr.note = "Send not attempted: Unable to resolve symbol for : ${next_responder}";
-              }
-
-              prr.save(flush:true, failOnError:true);
-            }
-            else {
-              log.error("Unable to find rota entry at position ${req.rotaPosition} (Size=${req.rota.size()}) ${( req.rotaPosition?:-1 < req.rota.size() )}. Try next");
-            }
-          }
-
-		  // Save the current status
-		  Status currentState = req.state;
-		  
-          // ToDo - there are three possible states here,not two - Send, End of Rota, Error
-          // Did we send a request?
-          if ( request_sent ) {
-            log.debug("sendToNextLender sent to next lender.....");
-            req.state = lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER');
-            auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_REQUEST_SENT_TO_SUPPLIER'), 
-                       'Sent to next lender', null);
-            req.save(flush:true, failOnError:true)
-          }
-          else {
-            // END OF ROTA
-            log.warn("sendToNextLender reached the end of the lending string.....");
-            req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-            auditEntry(req, currentState, lookupStatus('PatronRequest', 'REQ_END_OF_ROTA'), 'End of rota', null);
-            req.save(flush:true, failOnError:true)
-          }
-        }
-        else {
-          log.warn("Cannot send to next lender - rota is empty");
-          req.state = lookupStatus('PatronRequest', 'REQ_END_OF_ROTA');
-          req.save(flush:true, failOnError:true)
-        }
-        
-        log.debug(" -> Request is currently REQ_SUPPLIER_IDENTIFIED - transition to REQUEST_SENT_TO_SUPPLIER");
-      }
-      else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not supported. Supported states are REQ_SUPPLIER_IDENTIFIED and REQ_CANCELLED_WITH_SUPPLIER");
-      }
-    }
-    log.debug("LOCKING: sendToNextLender PatronRequest Transaction completed");
-  }
-
+				// We shall use the NoImplementation bean for this event instead
+				eventBean = eventNoImplementationService;
+				serviceEvents[eventData.event] = eventBean;
+			}
+			
+			try {
+				// Ensure we are talking to the right tenant database
+				Tenants.withId(eventData.tenant) {
+					// If the event handler is doing its own transaction handler, then we just call it, we do not expect it to return us anything
+					if (eventBean.fetchRequestMethod() == EventFetchRequestMethod.HANDLED_BY_EVENT_HANDLER) {
+						// This typically happens when the method is called directly as a response is required directly
+						// So it is really handling the mapping for the whole model, rather than individual events
+						eventBean.processEvent(null, eventData, null);
+					} else {
+						// Start the transaction as the event is not handling it itself
+						PatronRequest.withNewTransaction { transactionStatus ->
+							PatronRequest request = null;
+							String requestId = null;
+							
+							// Get hold of the request
+							switch (eventBean.fetchRequestMethod()) {
+								case EventFetchRequestMethod.NEW:
+									request = new PatronRequest(eventData.bibliographicInfo);
+									break;
+										
+								case EventFetchRequestMethod.PAYLOAD_ID:
+									requestId = eventData.payload.id;
+									request = delayedGet(requestId, true);
+									break;
+							}
+		
+							// Did we obtain a request
+							if (request == null) {
+								log.error("Within event \"" + eventData.event + "\", failed to obtain request with id: \"" + requestId + "\" using method Event " + eventBean.fetchRequestMethod().toString());
+							} else {
+								// Create ourselves a new result details
+								EventResultDetails resultDetails = new EventResultDetails();
+								Status currentState = request.state;
+						
+								// Default a few fields
+								resultDetails.newStatus = currentState;
+								resultDetails.result = ActionResult.SUCCESS;
+								resultDetails.auditMessage = "Executing event: " + eventData.event;
+								resultDetails.auditData = eventData;
+		
+								// Now do whatever work is required of this event
+								resultDetails = eventBean.processEvent(request, eventData, resultDetails);
+	
+								// Do we want to save the request and create an audit entry
+								if (resultDetails.saveData == true) {
+									// Set the status of the request
+									request.state = resultDetails.newStatus;
+							
+									// Create the audit entry
+									auditEntry(
+										request,
+										currentState,
+										request.state,
+										resultDetails.auditMessage,
+										resultDetails.auditData);
+							
+									// Finally Save the request
+									request.save(flush:true, failOnError:true);
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				log.error("Problem trying to invoke event handler for ${eventData.event}", e);
+				throw e;
+			}
+		} else {
+			log.error("No event specified in the event data: " + eventData.toString());
+		}
+	}
 
   /**
    * A new request has been received from an external PEER institution using some comms protocol. 
@@ -565,136 +152,10 @@ public class ReshareApplicationEventHandlerService {
    */
   def handleRequestMessage(Map eventData) {
 
-    def result = [:]
-
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
-
-    // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
-    if ( ( eventData.bibliographicInfo != null ) &&
-         ( eventData.header != null ) ) {
-
-      Map header = eventData.header;
-
-      Symbol resolvedSupplyingAgency = resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue)
-      Symbol resolvedRequestingAgency = resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue)
-
-      log.debug("*** Create new request***");
-      PatronRequest pr = new PatronRequest(eventData.bibliographicInfo)
-
-      // Add publisher information to Patron Request
-      Map publicationInfo = eventData.publicationInfo
-      if (publicationInfo.publisher) {
-        pr.publisher = publicationInfo.publisher
-      }
-      pr.publicationType = pr.lookupPublicationType( publicationInfo.publicationType )
-      if (publicationInfo.publicationType) {
-        pr.publicationType = pr.lookupPublicationType( publicationInfo.publicationType )
-      }
-      if (publicationInfo.publicationDate) {
-        pr.publicationDate = publicationInfo.publicationDate
-      }
-      if (publicationInfo.publicationDateOfComponent) {
-        pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
-      }
-      if (publicationInfo.placeOfPublication) {
-        pr.placeOfPublication = publicationInfo.placeOfPublication
-      }
-      // Add service information to Patron Request
-      Map serviceInfo = eventData.serviceInfo
-      if (serviceInfo.serviceType) {
-        pr.serviceType = pr.lookupServiceType( serviceInfo.serviceType )
-      }
-      if (serviceInfo.needBeforeDate) {
-        // This will come in as a string, will need parsing
-        try {
-          pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate)
-        } catch (Exception e) {
-          log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}")
-        }
-      }
-      if (serviceInfo.note) {
-       pr.patronNote = serviceInfo.note
-      }
-
-      // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
-      if ( eventData.requestedDeliveryInfo?.address instanceof Map ) {
-        if ( eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map ) {
-          log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-          // We join all the lines of physical address and stuff them into pickup location for now.
-          String stringified_pickup_location = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect{k,v -> v}.join(' ');
-
-          // If we've not been given any address information, don't translate that into a pickup location
-          if ( stringified_pickup_location?.trim()?.length() > 0 ) 
-            pr.pickupLocation = stringified_pickup_location
-        }
-      }
-
-      // Add patron information to Patron Request
-      Map patronInfo = eventData.patronInfo
-      if (patronInfo.patronId) {
-        pr.patronIdentifier = patronInfo.patronId
-      }
-      if (patronInfo.surname) {
-        pr.patronSurname = patronInfo.surname
-      }
-      if (patronInfo.givenName) {
-        pr.patronGivenName = patronInfo.givenName
-      }
-      if (patronInfo.patronType) {
-        pr.patronType = patronInfo.patronType
-      }
-      if (patronInfo.patronReference) {
-        pr.patronReference = patronInfo.patronReference
-      }
-      
-      pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}"
-      pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}"
-
-      pr.resolvedRequester = resolvedRequestingAgency;
-      pr.resolvedSupplier = resolvedSupplyingAgency;
-      pr.peerRequestIdentifier = header.requestingAgencyRequestId
-
-      // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
-      // able to use that for our request.
-      pr.hrid = header.requestingAgencyRequestId
-
-      if ( ( pr.bibliographicRecordId != null ) && ( pr.bibliographicRecordId.length() > 0 ) ) {
-        log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
-        List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
-        if (bibRecords?.size() > 0) {
-          pr.bibRecord = bibRecords[0];
-          if ( bibRecords?.size() > 1 ) {
-             auditEntry(pr, null, pr.state, "WARNING: shared index ID ${pr.bibliographicRecordId} matched multiple records", null);
-          }
-        }
-      }
-
-      log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
-
-      pr.state = lookupStatus('Responder', 'RES_IDLE')
-      pr.isRequester=false;
-      auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
-
-      log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
-      pr.save(flush:true, failOnError:true)
-
-      result.messageType = "REQUEST"
-      result.supIdType = header.supplyingAgencyId.agencyIdType
-      result.supId = header.supplyingAgencyId.agencyIdValue
-      result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
-      result.reqAgencyId = header.requestingAgencyId.agencyIdValue
-      result.reqId = header.requestingAgencyRequestId
-      result.timeRec = header.timestamp
-
-      result.status = 'OK'
-      result.newRequestId = pr.id;
-    }
-    else {
-      log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");
-    }
-
-    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage exiting");
-    return result;
+	// Just call it directly
+	EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
+    return eventResultDetails.responseResult;
   }
 
   /** We aren't yet sure how human readable IDs will pan out in the system and there is a desire to use
@@ -717,25 +178,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  PatronRequest lookupPatronRequestWithRole(String id, boolean isRequester, boolean with_lock=false) {
-
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${isRequester},${with_lock})");
-    PatronRequest result = PatronRequest.createCriteria().get {
-      and {
-        or {
-          eq('id', id)
-          eq('hrid', id)
-        }
-        eq('isRequester', isRequester)
-      }
-      lock with_lock
-    }
-
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
-
-    return result;
-  }
-
   PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
     
     log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
@@ -747,25 +189,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
   
-  def handleResOverdue(Map eventData) {
-    log.debug("ReshareApplicationEventHandlerService::handleOverdue handler called with eventData ${eventData}");
-
-    PatronRequest.withNewTransaction { transactionStatus ->
-      def pr = delayedGet(eventData.payload.id, true);
-      if(pr == null) {
-        log.warn("Unable to locate request for ID ${eventData.payload.id}");
-      } else if(pr.isRequester) {
-        log.debug("pr ${pr.id} is requester, not sending protocol message");
-      } else {
-        log.debug("Sending protocol message with overdue status change from PatronRequest ${pr.id}");
-        Map params = [ note : "Request is Overdue"]
-        //reshareActionService.sendSupplyingAgencyMessage(pr, "Notification", null, params)
-        reshareActionService.sendStatusChange(pr, 'Overdue', "Request is Overdue");
-      }
-    }
-    log.debug("LOCKING: handleResOverdue transaction has completed");
-  }
-
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
@@ -773,179 +196,9 @@ public class ReshareApplicationEventHandlerService {
    */
   def handleSupplyingAgencyMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
-    def result = [:]
-
-    /* Occasionally the incoming status is not granular enough, so we deal with it separately in order
-     * to be able to cater to "in-between" statuses, such as Conditional--which actually comes in as "ExpectsToSupply"
-    */
-    Map incomingStatus = eventData.statusInfo;
-
-    try {
-      if ( eventData.header?.requestingAgencyRequestId == null ) {
-        result.status = "ERROR"
-        result.errorType = "BadlyFormedMessage"
-        throw new Exception("requestingAgencyRequestId missing");
-      }
-
-      PatronRequest.withTransaction { status ->
-          
-        PatronRequest pr = lookupPatronRequestWithRole(eventData.header.requestingAgencyRequestId, true, true)
-  
-        if ( pr == null )
-          throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
-  
-        // if eventData.deliveryInfo.itemId then we should stash the item id
-  
-        if (eventData?.deliveryInfo ) {
-  
-          if (eventData?.deliveryInfo?.loanCondition) {
-            log.debug("Loan condition found: ${eventData?.deliveryInfo?.loanCondition}")
-            incomingStatus = [status: "Conditional"]
-  
-  
-            // Save the loan condition to the patron request
-            String loanCondition = eventData?.deliveryInfo?.loanCondition
-            Symbol relevantSupplier = resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
-            String note = eventData.messageInfo?.note
-  
-            addLoanConditionToRequest(pr, loanCondition, relevantSupplier, note)
-          }
-  
-          // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
-          if (!pr.selectedItemBarcode && eventData.deliveryInfo.itemId) {
-            pr.selectedItemBarcode = eventData.deliveryInfo.itemId;
-          }
-  
-          // Could recieve a single string or an array here as per the standard/our profile
-          def itemId = eventData?.deliveryInfo?.itemId
-          if (itemId) {
-            if (itemId instanceof Collection) {
-              // Item ids coming in, handle those
-              itemId.each {iid ->
-                def matcher = iid =~ /multivol:(.*),((?!\s*$).+)/
-                if (matcher.size() > 0) {
-                  // At this point we have an itemId of the form "multivol:<name>,<id>"
-                  def iidId = matcher[0][2]
-                  def iidName = matcher[0][1]
-    
-                  // Check if a RequestVolume exists for this itemId, and if not, create one
-                  RequestVolume rv = pr.volumes.find {rv -> rv.itemId == iidId };
-                  if (!rv) {
-                    rv = new RequestVolume(
-                      name: iidName ?: pr.volume ?: iidId,
-                      itemId: iidId,
-                      status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
-                    )
-                    pr.addToVolumes(rv)
-                  }
-                }
-              }
-            } else {
-              // We have a single string, this is the usual standard case and should be handled as a single request volume
-              // Check if a RequestVolume exists for this itemId, and if not, create one
-              RequestVolume rv = pr.volumes.find {rv -> rv.itemId == itemId };
-              if (!rv) {
-                rv = new RequestVolume(
-                  name: pr.volume ?: itemId,
-                  itemId: itemId,
-                  status: RequestVolume.lookupStatus('awaiting_temporary_item_creation')
-                )
-                pr.addToVolumes(rv)
-              }
-            }
-          }
-        }
-  
-        // Awesome - managed to look up patron request - see if we can action
-        if ( eventData.messageInfo?.reasonForMessage != null) {
-  
-          // If there is a note, create notification entry
-          if (eventData.messageInfo?.note) {
-            incomingNotificationEntry(pr, eventData, true)
-          }
-  
-          switch ( eventData.messageInfo?.reasonForMessage ) {
-            case 'RequestResponse':
-              break;
-            case 'StatusRequestResponse':
-              break;
-            case 'RenewResponse':
-              break;
-            case 'CancelResponse':
-              switch (eventData.messageInfo.answerYesNo) {
-                case 'Y':
-                  log.debug("Affirmative cancel response received")
-                  // The cancel response ISO18626 message should contain a status of "Cancelled", and so this case will be handled by handleStatusChange
-                  break;
-                case 'N':
-                  log.debug("Negative cancel response received")
-                  def previousState = lookupStatus('PatronRequest', pr.previousStates[pr.state.code])
-                  auditEntry(pr, pr.state, previousState, "Supplier denied cancellation.", null)
-                  pr.previousStates[pr.state.code] = null
-                  pr.state = previousState
-                  break;
-                default:
-                  log.error("handleSupplyingAgencyMessage does not know how to deal with a CancelResponse answerYesNo of ${eventData.messageInfo.answerYesNo}")
-              }
-              break;
-            case 'StatusChange':
-              break;
-            case 'Notification':
-              // If this note starts with #ReShareAddLoanCondition# then we know that we have to add another loan condition to the request -- might just work automatically.
-              auditEntry(pr, pr.state, pr.state, "Notification message received from supplying agency: ${eventData.messageInfo.note}", null)
-              break;
-            default:
-              result.status = "ERROR"
-              result.errorType = "UnsupportedReasonForMessageType"
-              result.errorValue = eventData.messageInfo.reasonForMessage
-              throw new Exception("Unhandled reasonForMessage: ${eventData.messageInfo.reasonForMessage}");
-            break;
-          }
-        }
-        else {
-          result.status = "ERROR"
-          result.errorType = "BadlyFormedMessage"
-          throw new Exception("No reason for message");
-        }
-        
-        if ( eventData.statusInfo?.dueDate ) {
-          pr.dueDateRS = eventData.statusInfo.dueDate;        
-          try {
-            pr.parsedDueDateRS = reshareActionService.parseDateString(pr.dueDateRS);
-          } catch(Exception e) {
-            log.warn("Unable to parse ${pr.dueDateRS} to date: ${e.getMessage()}");
-          }
-        } else {
-          log.debug("No duedate found in eventData.statusInfo");
-        }
-  
-        if ( incomingStatus != null ) {
-          handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
-        }
-  
-        pr.save(flush:true, failOnError:true);
-      }
-
-      log.debug("LOCKING: handleSupplyingAgencyMessage transaction has completed");
-
-    } catch ( Exception e ) {
-      log.error("Problem processing SupplyingAgencyMessage: ${e.message}", e);
-    }
-
-    if (result.status != "ERROR") {
-      result.status = "OK"
-    }
-
-    result.messageType = "SUPPLYING_AGENCY_MESSAGE"
-    result.supIdType = eventData.header.supplyingAgencyId.agencyIdType
-    result.supId = eventData.header.supplyingAgencyId.agencyIdValue
-    result.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType
-    result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
-    result.reqId = eventData.header.requestingAgencyRequestId
-    result.timeRec = eventData.header.timestamp
-    result.reasonForMessage = eventData.messageInfo.reasonForMessage
-
-    return result;
+	// Just call it directly
+	EventResultDetails eventResultDetails = eventSupplyingAgencyMessageIndService.processEvent(null, eventData, new EventResultDetails());
+    return eventResultDetails.responseResult;
   }
 
 
@@ -1074,147 +327,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void handleCancelRequestReceived(eventData) {
-
-    log.debug("handleCancelRequestReceived::(${eventData.payload.id})")
-
-    PatronRequest.withNewTransaction { transaction_status ->
-      def req = delayedGet(eventData.payload.id, true);
-
-      String auto_cancel = AppSetting.findByKey('auto_responder_cancel')?.value
-      if ( auto_cancel?.toLowerCase().startsWith('on') ) {
-        log.debug("Auto cancel is on");
-        // System has auto-respond cancel on
-        if ( req.state?.code=='RES_ITEM_SHIPPED' ) {
-          // Revert the state to it's original before the cancel request was received - previousState
-          def new_state = lookupStatus('Responder', req.previousStates['RES_CANCEL_REQUEST_RECEIVED']);
-          auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state ", null)
-          req.state=new_state
-          req.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = null;
-          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'no'])
-        }
-        else {
-          def new_state = lookupStatus('Responder', 'RES_CANCELLED')
-          if ( new_state ) {
-            req.state=new_state
-            auditEntry(req, req.state, new_state, "AutoResponder:Cancel is ON - responding YES to cancel request", null);
-          }
-          else {
-            log.error("Accepting requester cancellation--unable to find state: RES_CANCELLED")
-            auditEntry(req, req.state, req.state, "AutoResponder:Cancel is ON - responding YES to cancel request (ERROR locating RES_CANCELLED state)", null);
-          }
-          reshareActionService.sendSupplierCancelResponse(req, [cancelResponse:'yes'])
-        }
-        req.save(flush: true, failOnError: true);
-      }
-      else {
-        // Set needs attention=true
-        auditEntry(req, req.state, req.state, "Cancellation Request Recieved", null);
-        req.needsAttention=true;
-        req.save(flush: true, failOnError: true);
-      }
-    }
-    log.debug("LOCKING: handleCancelRequestReceived transaction has completed");
-  }
-
-  private void handleCancelledWithSupplier(eventData) {
-    log.debug("ReshareApplicationEventHandlerService::handleCancelledWithSupplier(${eventData})");
-    PatronRequest.withNewTransaction { transaction_status ->
-
-      def c_res = PatronRequest.executeQuery('select count(pr) from PatronRequest as pr')[0];
-      log.debug("lookup ${eventData.payload.id} - currently ${c_res} patron requests in the system");
-
-      def req = delayedGet(eventData.payload.id, true);
-      // We must have found the request, and it as to be in a state of cancelled with supplier
-      if (( req != null ) && ( req.state?.code == 'REQ_CANCELLED_WITH_SUPPLIER' )) {
-        log.debug("Got request ${req} (HRID Is ${req.hrid})");
-
-        if (req.requestToContinue == true) {
-          log.debug("Request to continue, sending to next lender")
-          auditEntry(req, req.state, req.state, 'Request to continue, sending to next lender', null);
-          req.state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
-        } else {
-          log.debug("Cancelling request")
-          auditEntry(req, req.state, lookupStatus('PatronRequest', 'REQ_CANCELLED'), 'Request cancelled', null);
-          req.state = lookupStatus('PatronRequest', 'REQ_CANCELLED')
-        }
-        req.save(flush:true, failOnError: true)
-      } else {
-        log.warn("Unable to locate request for ID ${eventData.payload.id} OR state (${req?.state?.code}) is not REQ_CANCELLED_WITH_SUPPLIER.");
-      }
-    }
-    log.debug("LOCKING: handleCancelledWithSupplier transaction has completed");
-  }
-
-
-
-
-  // ISO18626 states are RequestReceived ExpectToSupply WillSupply Loaned Overdue Recalled RetryPossible Unfilled CopyCompleted LoanCompleted CompletedWithoutReturn Cancelled
-
-  private void handleStatusChange(PatronRequest pr, Map statusInfo, String supplyingAgencyRequestId) {
-    log.debug("handleStatusChange(${pr.id},${statusInfo})");
-
-    // Get the rota entry for the current peer
-    PatronRequestRota prr = pr.rota.find( { it.rotaPosition == pr.rotaPosition } )
-
-    if ( statusInfo.status ) {
-      switch ( statusInfo.status ) {
-        case 'ExpectToSupply':
-          def new_state = lookupStatus('PatronRequest', 'REQ_EXPECTS_TO_SUPPLY')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state
-          break;
-        case 'Unfilled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_UNFILLED')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state;
-          break;
-        case 'Conditional':
-          log.debug("Moving to state REQ_CONDITIONAL_ANSWER_RECEIVED")
-          def new_state = lookupStatus('PatronRequest', 'REQ_CONDITIONAL_ANSWER_RECEIVED')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state
-          break;
-        case 'Loaned':
-          def new_state = lookupStatus('PatronRequest', 'REQ_SHIPPED')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state
-          break;
-        case 'Overdue':
-          def new_state = lookupStatus('PatronRequest', 'REQ_OVERDUE')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state;
-          break;
-        case 'Recalled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_RECALLED')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state;
-          break;
-        case 'Cancelled':
-          def new_state = lookupStatus('PatronRequest', 'REQ_CANCELLED_WITH_SUPPLIER')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state
-          break;
-        case 'LoanCompleted':
-          def new_state = lookupStatus('PatronRequest', 'REQ_REQUEST_COMPLETE')
-          auditEntry(pr, pr.state, new_state, 'Protocol message', null);
-          pr.state=new_state
-          if ( prr != null ) prr.state = new_state
-          break;
-        default:
-          log.error("Unhandled statusInfo.status ${statusInfo.status}");
-          break;
-      }
-    }
-  }
-
   /**
    * Sometimes, we might receive a notification before the source transaction has committed. THats rubbish - so here we retry
    * up to 5 times.
@@ -1281,59 +393,6 @@ public class ReshareApplicationEventHandlerService {
     }
   }
 
-  private void autoRespond(PatronRequest pr, String auto_respond_variant) {
-    log.debug("autoRespond....");
-	Status currentState = pr.state;
-	
-    // Use the hostLMSService to determine the best location to send a pull-slip to
-    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr)
-
-    log.debug("result of determineBestLocation = ${location}");
-
-    // Were we able to locate a copy?
-    if ( location != null ) {
-
-      // set localCallNumber to whatever we managed to look up
-      if ( routeRequestToLocation(pr, location) ) {
-        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_NEW_AWAIT_PULL_SLIP'), 'autoRespond will-supply, determine location='+location, null);
-        log.debug("Send ExpectToSupply response to ${pr.requestingInstitutionSymbol}");
-        reshareActionService.sendResponse(pr,  'ExpectToSupply', [:])
-      }
-      else {
-        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder Failed to route to location '+location, null);
-        log.debug("Send unfilled(No Copy) response to ${pr.requestingInstitutionSymbol}");
-        reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
-        pr.state=lookupStatus('Responder', 'RES_UNFILLED')
-      }
-    }
-    else {
-      // No - is the auto responder set up to sent not-supplied?
-      if ( auto_respond_variant=='on:_will_supply_and_cannot_supply') {
-        log.debug("Send unfilled(No copy) response to ${pr.requestingInstitutionSymbol}");
-        reshareActionService.sendResponse(pr,  'Unfilled', ['reason':'No copy'])
-        auditEntry(pr, currentState, lookupStatus('Responder', 'RES_UNFILLED'), 'AutoResponder cannot locate a copy.', null);
-        pr.state=lookupStatus('Responder', 'RES_UNFILLED')
-      }
-    }
-  }
-
-  //Check to see if we can find a local copy of the item. If yes, then we go
-  //ahead and transitition to local review. If not, transitition to send-to-next-lender
-
-  private boolean checkForLocalCopy(PatronRequest pr) {
-    log.debug("Checking to see if we have a local copy available");
-
-    //Let's still go ahead and try to call the LMS Adapter to find a copy of the request
-    ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr);
-    log.debug("Got ${location} as a result of local host lms lookup");
-    
-    if(location != null) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   /**
    * The auto responder has determined that a local copy is available. update the state of the request and
    * mark the pick location as the selected location.
@@ -1364,28 +423,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  public Symbol resolveSymbol(String authorty, String symbol) {
-    Symbol result = null;
-    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
-    if ( symbol_list.size() == 1 ) {
-      result = symbol_list.get(0);
-    }
-
-    return result;
-  }
-
-  public Symbol resolveCombinedSymbol(String combinedString) {
-    Symbol result = null;
-    if ( combinedString != null ) {
-      String[] name_components = combinedString.split(':');
-      if ( name_components.length == 2 ) {
-        result = resolveSymbol(name_components[0], name_components[1]);
-      }
-    }
-    return result;
-  }
-
   public Status lookupStatus(String model, String code) {
     Status result = null;
     List<Status> qr = Status.executeQuery('select s from Status as s where s.owner.shortcode=:model and s.code=:code',[model:model, code:code]);
@@ -1395,25 +432,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-
-  private String generateHrid() {
-    String result = null;
-
-    AppSetting prefix_setting = AppSetting.findByKey('request_id_prefix')
-    log.debug("Got app setting ${prefix_setting} ${prefix_setting?.value} ${prefix_setting?.defValue}");
-
-    String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: ''
-
-    // Use this to make sessionFactory.currentSession work as expected
-    PatronRequest.withSession { session ->
-      log.debug("Generate hrid");
-      def sql = new Sql(session.connection())
-      def query_result = sql.rows("select nextval('pr_hrid_seq')".toString());
-      log.debug("Query result: ${query_result.toString()}");
-      result = hrid_prefix + query_result[0].get('nextval')?.toString();
-    }
-    return result;
-  }
 
   public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()
@@ -1459,49 +477,32 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
-  public String stripOutSystemCode(String string) {
-    String returnString = string
-    def systemCodes = [
-      "#ReShareAddLoanCondition#", 
-      "#ReShareLoanConditionAgreeResponse#",
-      "#ReShareSupplierConditionsAssumedAgreed#",
-      "#ReShareSupplierAwaitingConditionConfirmation#"
-      ]
-      systemCodes.each {code ->
-        if (string.contains(code)) {
-          returnString.replace(code, "")
-        }
-      }
-      return returnString
-  }
-
   public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
-    def loanCondition = new PatronRequestLoanCondition()
-    loanCondition.setPatronRequest(pr)
-    loanCondition.setCode(code)
-    if (note != null) {
-      loanCondition.setNote(stripOutSystemCode(note))
-    }
-    loanCondition.setRelevantSupplier(relevantSupplier)
-
-    pr.addToConditions(loanCondition)
+	  def loanCondition = new PatronRequestLoanCondition();
+	  loanCondition.setPatronRequest(pr);
+	  loanCondition.setCode(code);
+	  if (note != null) {
+		  loanCondition.setNote(stripOutSystemCode(note));
+	  }
+	  loanCondition.setRelevantSupplier(relevantSupplier);
+  
+	  pr.addToConditions(loanCondition);
   }
-
-  /**
-   * It's not clear if the system will ever need to differentiate between the status of checked in and
-   * await shipping, so for now we leave the 2 states in place and just automatically transition  between them
-   * this method exists largely as a place to put functions and workflows that diverge from that model
-   */
-  private void handleResponderItemCheckedIn(eventData) {
-    log.debug("handleResponderItemCheckedIn checked in - transition to await shipping");
-    PatronRequest.withNewTransaction { transaction_status ->
-      def req = delayedGet(eventData.payload.id, true);
-      def new_state = lookupStatus('Responder', 'RES_AWAIT_SHIP')
-      auditEntry(req, req.state, new_state, 'Request awaits shipping', null);
-      req.state=new_state
-      req.save(flush:true, failOnError: true)
-    }
-    log.debug("LOCKING: handleResponderItemCheckedIn transaction has completed");
+  
+  private String stripOutSystemCode(String string) {
+	  String returnString = string;
+	  def systemCodes = [
+		  "#ReShareAddLoanCondition#",
+		  "#ReShareLoanConditionAgreeResponse#",
+		  "#ReShareSupplierConditionsAssumedAgreed#",
+		  "#ReShareSupplierAwaitingConditionConfirmation#"
+	  ];
+	  systemCodes.each {code ->
+		  if (string.contains(code)) {
+			  returnString.replace(code, "");
+		  }
+	  }
+	  return returnString;
   }
 
   public void markAllLoanConditionsAccepted(PatronRequest pr) {
@@ -1519,14 +520,26 @@ public class ReshareApplicationEventHandlerService {
     }
     return returnList.join(",");
   }
-
-  public static String getOCLCId( String id ) {
-    def pattern = ~/^(ocn|ocm)(\d+)/;
-    def matcher = id =~ pattern;
-    if(matcher.find()) {
-      return matcher.group(2);
-    }
-    return null;
-  }
   
+	public Symbol resolveSymbol(String authorty, String symbol) {
+		Symbol result = null;
+	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
+	                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
+	    if ( symbol_list.size() == 1 ) {
+			result = symbol_list.get(0);
+	    }
+	
+	    return result;
+	}
+
+	public Symbol resolveCombinedSymbol(String combinedString) {
+		Symbol result = null;
+		if ( combinedString != null ) {
+			String[] name_components = combinedString.split(':');
+			if ( name_components.length == 2 ) {
+				result = resolveSymbol(name_components[0], name_components[1]);
+			}
+		}
+		return result;
+	}
 }
