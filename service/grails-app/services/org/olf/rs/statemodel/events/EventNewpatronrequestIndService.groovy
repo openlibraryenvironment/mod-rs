@@ -79,7 +79,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 		return(FROM_STATES[model]);
 	}
 
-	boolean supportsModel(String model) {
+	boolean SupportsModel(String model) {
 		// This event 
 		return((model == StateModel.MODEL_REQUESTER) || (StateModel.MODEL_RESPONDER));	
 	}
@@ -198,7 +198,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 				log.debug("Launch auto responder for request");
 				String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
 				if (auto_respond?.toLowerCase().startsWith('on')) {
-					autoRespond(request, auto_respond.toLowerCase(), eventResultDetails);
+					autoRespond(request, auto_respond.toLowerCase(), eventResultDetails)
 				} else {
 					eventResultDetails.auditMessage = "Auto responder is ${auto_respond} - manual checking needed";
 					request.needsAttention=true;
@@ -219,7 +219,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 		AppSetting prefix_setting = AppSetting.findByKey('request_id_prefix');
 		log.debug("Got app setting ${prefix_setting} ${prefix_setting?.value} ${prefix_setting?.defValue}");
 	
-		String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: '';
+		String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: ''
 	
 		// Use this to make sessionFactory.currentSession work as expected
 		PatronRequest.withSession { session ->
