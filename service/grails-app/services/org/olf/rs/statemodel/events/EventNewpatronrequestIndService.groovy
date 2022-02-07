@@ -79,7 +79,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 		return(FROM_STATES[model]);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// This event 
 		return((model == StateModel.MODEL_REQUESTER) || (StateModel.MODEL_RESPONDER));	
 	}
@@ -198,7 +198,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 				log.debug("Launch auto responder for request");
 				String auto_respond = AppSetting.findByKey('auto_responder_status')?.value
 				if (auto_respond?.toLowerCase().startsWith('on')) {
-					autoRespond(req, auto_respond.toLowerCase())
+					autoRespond(request, auto_respond.toLowerCase(), eventResultDetails);
 				} else {
 					eventResultDetails.auditMessage = "Auto responder is ${auto_respond} - manual checking needed";
 					request.needsAttention=true;
@@ -207,7 +207,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 				log.error("Problem in auto respond", e);
 			}
 		} else {
-			log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${req?.isRequester}");
+			log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${request?.isRequester}");
 		}
 	  
 		return(eventResultDetails);
@@ -219,7 +219,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 		AppSetting prefix_setting = AppSetting.findByKey('request_id_prefix');
 		log.debug("Got app setting ${prefix_setting} ${prefix_setting?.value} ${prefix_setting?.defValue}");
 	
-		String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: ''
+		String hrid_prefix = prefix_setting.value ?: prefix_setting.defValue ?: '';
 	
 		// Use this to make sessionFactory.currentSession work as expected
 		PatronRequest.withSession { session ->

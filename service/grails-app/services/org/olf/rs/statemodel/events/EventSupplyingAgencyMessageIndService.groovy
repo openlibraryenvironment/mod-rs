@@ -36,7 +36,7 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 		return(null);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// We do not want want this event to appear anywhere 
 		return(false);	
 	}

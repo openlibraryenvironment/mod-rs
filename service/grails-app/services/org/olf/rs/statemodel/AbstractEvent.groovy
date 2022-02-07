@@ -68,5 +68,5 @@ public abstract class AbstractEvent {
 	 * @param model The model that they want to know whether we support or not
 	 * @return true if we support the model, false if we do not	
 	 */
-	abstract boolean SupportsModel(String model);
+	abstract boolean supportsModel(String model);
 }

@@ -31,7 +31,7 @@ public class EventNoImplementationService extends AbstractEvent {
 		return(FROM_STATES);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// As this is the fallback for all those not implemented, we support all models 
 		return(true);	
 	}

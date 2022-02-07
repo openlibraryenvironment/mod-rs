@@ -34,7 +34,7 @@ public class EventStatusResOverdueIndService extends AbstractEvent {
 		return(FROM_STATES);
 	}
 
-	boolean SupportsModel(String model) {
+	boolean supportsModel(String model) {
 		// This event 
 		return(model == StateModel.MODEL_RESPONDER);	
 	}
