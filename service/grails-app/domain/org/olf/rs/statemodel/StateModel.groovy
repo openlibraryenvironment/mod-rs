@@ -33,7 +33,7 @@ class StateModel implements MultiTenant<StateModel> {
                    name column : 'sm_name'
   }
 
-  static public StateModel getStateModel(boolean isRequester) {
+  static public StateModel stateModelCode(boolean isRequester) {
 	  return(StateModel.findByShortcode(isRequester ? MODEL_REQUESTER : MODEL_RESPONDER));
   }
 }

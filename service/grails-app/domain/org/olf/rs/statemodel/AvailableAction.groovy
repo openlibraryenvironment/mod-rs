@@ -1,18 +1,17 @@
 package org.olf.rs.statemodel
 
-import org.apache.commons.logging.LogFactory;
+import grails.gorm.multitenancy.Tenants;
+import grails.gorm.MultiTenant
+import com.k_int.web.toolkit.refdata.RefdataValue
+import com.k_int.web.toolkit.custprops.CustomProperties
+import com.k_int.web.toolkit.refdata.CategoryId
+import com.k_int.web.toolkit.refdata.Defaults
 
-import grails.gorm.MultiTenant;
-import grails.util.Holders;;
 /**
  *
  */
 class AvailableAction implements MultiTenant<AvailableAction> {
-  private static final logger = LogFactory.getLog(this);
-	
-  public static String TRIGGER_TYPE_MANUAL = "M";
-  public static String TRIGGER_TYPE_SYSTEM = "S";
-  
+
   String id
   StateModel model
   Status fromState
@@ -25,9 +24,6 @@ class AvailableAction implements MultiTenant<AvailableAction> {
   String actionType
 
   String actionBody
-
-  /** Holds map of the action to the bean that will do the processing for this action */
-  static Map serviceActions = [ : ];
 
   static constraints = {
              model (nullable: false)
@@ -71,26 +67,6 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     return result;
 
   }
-
-  	static AbstractAction getServiceAction(String actionCode, boolean isRequester) {
-		// Get gold of the state model
-		StateModel stateModel = StateModel.getStateModel(isRequester);
-
-		// Determine the bean name, if we had a separate action table we could store it as a transient against that		
-		String beanName = "action" + stateModel.shortcode.capitalize() + actionCode.capitalize() + "Service";
-
-		// Get hold of the bean and store it in our map, if we previously havn't been through here
-		if (serviceActions[beanName] == null) {
-			// Now setup the link to the service action that actually does the work
-			try {
-				serviceActions[beanName] = Holders.grailsApplication.mainContext.getBean(beanName);
-			} catch (Exception e) {
-				logger.error("Unable to locate action bean: " + beanName);
-			}
-		}
-		return(serviceActions[beanName]);
-	}
-
 
   public String toString() {
     return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()
