@@ -717,7 +717,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   public Map checkInItem(String item_id) {
     Map result = [
       result: true,
-      reason: 'spoofed'
+      reason: 'spoofed',
+      already_checked_in: false
     ]
 
     AppSetting check_in_setting = AppSetting.findByKey('check_in_item')
@@ -757,17 +758,19 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
 
           log.debug(response?.toString());
-          if ( response.has('problems') ) {            
+          if ( response != null && response.has('problems') ) {            
             // If there is a problem block, something went wrong, so change response to false.
             result.result = false;
             
             // If the problem block is just because the item is already checked in, then make response true
             try {
               JSONArray problemJsonArray = response.getJSONObject('problems');
-              for(int i = 0; i < problemJsonArray.length();i++) {
-                JSONObject problemJson = problemJsonArray.getJSONObject(i);
+              if(problemJsonArray.length() == 1) //Only if this is our ONLY problem
+              {
+                JSONObject problemJson = problemJsonArray.getJSONObject(0);
                 if(problemJson.has("type") && problemJson.getString("type").equalsIgnoreCase("Item Not Checked Out")) {
                   result.result = true; 
+                  result.already_checked_in = true;
                   log.debug("[${CurrentTenant.get()}] NCIP checkinItem not needed: already checked in")
                   break;
                 }

@@ -45,7 +45,12 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 				for (def vol : volumesNotCheckedOut) {
 					def check_in_result = host_lms.checkInItem(vol.itemId)
 					if (check_in_result?.result == true) {
-						String message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+						String message;
+						if(check_in_result?.already_checked_in == true) {	
+							message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
+						} else {
+							message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+						}
 						reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
 				
 						def newVolStatus = check_in_result.reason=='spoofed' ? vol.lookupStatus('lms_check_in_(no_integration)') : vol.lookupStatus('completed')
