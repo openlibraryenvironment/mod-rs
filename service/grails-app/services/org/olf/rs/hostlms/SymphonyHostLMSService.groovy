@@ -45,18 +45,6 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     return 'marcxml';
   }
 
-  @Override
-  public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
-
-    ItemLocation result = null;
-    List<ItemLocation> result_list = z3950ItemsByIdentifier(pr);
-    if(result_list.size() > 0) {
-      result = result_list[0];
-    }
-
-    return result;
-  }
-
   //Override to search on attribute 1016, and prepend '^C' to search string
   @Override
   public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
