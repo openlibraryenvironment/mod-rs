@@ -55,10 +55,10 @@ public class GraphVizBuilder {
 		events.each { event ->
 			String[] fromStates = event.fromStates(stateModelCode);
 			String[] toStates = event.possibleToStates(stateModelCode);
-			if (fromStates && (fromStates.size() == 0)) {
+			if ((fromStates == null) || (fromStates.size() == 0)) {
 				fromStates = defaultEventToFromStates;
 			}
-			if (toStates && (toStates.size() == 0)) {
+			if ((toStates == null) || (toStates.size() == 0)) {
 				toStates = defaultEventToFromStates;
 			}
 			BuildLinks(links, event.name(), fromStates, toStates, Color.PURPLE, Color.BLACK, terminalStates);
