@@ -44,6 +44,7 @@ class Status implements MultiTenant<Status> {
   public static String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
   public static String RESPONDER_COMPLETE                   = "RES_COMPLETE";
   public static String RESPONDER_IDLE                       = "RES_IDLE";
+  public static String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
   public static String RESPONDER_ITEM_SHIPPED               = "RES_ITEM_SHIPPED";
   public static String RESPONDER_NEW_AWAIT_PULL_SLIP        = "RES_NEW_AWAIT_PULL_SLIP";
   public static String RESPONDER_NOT_SUPPLIED               = "RES_NOT_SUPPLIED";
