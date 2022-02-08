@@ -12,6 +12,7 @@ import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 import org.olf.rs.statemodel.events.EventNoImplementationService;
+import org.olf.rs.statemodel.events.EventRequestingAgencyMessageIndService;
 import org.olf.rs.statemodel.events.EventSupplyingAgencyMessageIndService;
 
 import grails.events.annotation.Subscriber;
@@ -33,6 +34,7 @@ public class ReshareApplicationEventHandlerService {
   private static final int MAX_RETRIES = 10;
   
   	EventNoImplementationService eventNoImplementationService;
+	EventRequestingAgencyMessageIndService eventRequestingAgencyMessageIndService;
 	EventSupplyingAgencyMessageIndService eventSupplyingAgencyMessageIndService;
 	EventMessageRequestIndService eventMessageRequestIndService;
 
@@ -158,37 +160,6 @@ public class ReshareApplicationEventHandlerService {
     return eventResultDetails.responseResult;
   }
 
-  /** We aren't yet sure how human readable IDs will pan out in the system and there is a desire to use
-   * HRIDs as the requesting agency ID instead of a UUID. For now, isolating all the request lookup functionality
-   * in this method - which will try both approaches to give us some flexibility in adapting to different schemes.
-   * @Param  id - a UUID OR a HRID String
-   * IMPORTANT: If calling with_lock true the caller must establish transaction boundaries
-   */
-  PatronRequest lookupPatronRequest(String id, boolean with_lock=false) {
-
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques(${id},${with_lock})");
-    PatronRequest result = PatronRequest.createCriteria().get {
-      or {
-        eq('id', id)
-        eq('hrid', id)
-      }
-      lock with_lock
-    }
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronReques returns ${result}");
-    return result;
-  }
-
-  PatronRequest lookupPatronRequestByPeerId(String id, boolean with_lock) {
-    
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId(${id},${with_lock})");
-    PatronRequest result = PatronRequest.createCriteria().get {
-      eq('peerRequestIdentifier', id)
-      lock with_lock
-    }
-    log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestByPeerId returns ${result}");
-    return result;
-  }
-  
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in 
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
@@ -208,123 +179,10 @@ public class ReshareApplicationEventHandlerService {
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
   def handleRequestingAgencyMessage(Map eventData) {
-
-    def result = [:]
-
     log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
-
-    try {
-      if ( eventData.header?.supplyingAgencyRequestId == null ) {
-        result.status = "ERROR"
-        result.errorType = "BadlyFormedMessage"
-        throw new Exception("supplyingAgencyRequestId missing");
-      }
-
-      PatronRequest.withTransaction { status ->
-  
-        PatronRequest pr = lookupPatronRequest(eventData.header.supplyingAgencyRequestId, true)
-
-        if ( pr == null ) {
-          log.warn("Unable to locate PatronRequest corresponding to ID or Hrid in supplyingAgencyRequestId \"${eventData.header.supplyingAgencyRequestId}\", trying to locate by peerId.")
-          pr = lookupPatronRequestByPeerId(eventData.header.requestingAgencyRequestId, true)
-        }
-        if (pr == null) {
-          throw new Exception("Unable to locate PatronRequest corresponding to peerRequestIdentifier in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
-        } else {
-          log.debug("Lookup by peerID successful.")
-        }
-  
-        // TODO Handle incoming reasons other than notification for RequestingAgencyMessage
-        // Needs to look for action and try to do something with that.
-  
-        if ( eventData.activeSection?.action != null ) {
-  
-          // If there's a note, create a notification entry
-          if (eventData.activeSection?.note != null && eventData.activeSection?.note != "") {
-            incomingNotificationEntry(pr, eventData, false)
-          }
-  
-          switch ( eventData.activeSection?.action ) {
-            case 'Received':
-              auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null)
-              pr.save(flush: true, failOnError: true)
-              break;
-            case 'ShippedReturn':
-              def new_state = lookupStatus('Responder', 'RES_ITEM_RETURNED')
-              pr.volumes?.each {vol ->
-                vol.status = vol.lookupStatus('awaiting_lms_check_in')
-              }
-  
-              auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null)
-              pr.state = new_state;
-              pr.save(flush: true, failOnError: true)
-              break;
-            case 'Notification':
-              Map messageData = eventData.activeSection
-  
-              /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
-               * then we'll need to check whether or not we need to change state.
-              */
-              if ((messageData.note != null) &&
-                  (messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
-                // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
-                if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-                  def new_state = lookupStatus('Responder', pr.previousStates[pr.state.code])
-                  auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null)
-                  pr.previousStates[pr.state.code] = null;
-                  pr.state = new_state;
-                  markAllLoanConditionsAccepted(pr)
-                } else {
-                  // Loan conditions were already marked as agreed
-                  auditEntry(pr, pr.state, pr.state, "Requester agreed to loan conditions, no action required on supplier side", null)
-                }
-              } else {
-                auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null)
-              }
-              pr.save(flush: true, failOnError: true)
-              break;
-  
-            case 'Cancel':
-              // We cannot cancel a shipped item
-              auditEntry(pr, pr.state, lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED'), "Requester requested cancellation of the request", null)
-              pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
-              pr.state = lookupStatus('Responder', 'RES_CANCEL_REQUEST_RECEIVED')
-              pr.save(flush: true, failOnError: true)
-              break;
-  
-            default:
-              result.status = "ERROR"
-              result.errorType = "UnsupportedActionType"
-              result.errorValue = eventData.activeSection.action
-              throw new Exception("Unhandled action: ${eventData.activeSection.action}");
-              break;
-          }
-        }
-        else {
-          result.status = "ERROR"
-          result.errorType = "BadlyFormedMessage"
-          throw new Exception("No action in active section");
-        }
-      }
-      log.debug("LOCKING: handleRequestingAgencyMessage transaction has completetd");
-    } catch ( Exception e ) {
-      log.error("Problem processing RequestingAgencyMessage: ${e.message}", e);
-    }
-
-    if (result.status != "ERROR") {
-      result.status = "OK"
-    }
-
-    result.messageType = "REQUESTING_AGENCY_MESSAGE"
-    result.supIdType = eventData.header.supplyingAgencyId.agencyIdType
-    result.supId = eventData.header.supplyingAgencyId.agencyIdValue
-    result.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType
-    result.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue
-    result.reqId = eventData.header.requestingAgencyRequestId
-    result.timeRec = eventData.header.timestamp
-    result.action = eventData.activeSection?.action
-
-    return result;
+	// Just call it directly
+	EventResultDetails eventResultDetails = eventRequestingAgencyMessageIndService.processEvent(null, eventData, new EventResultDetails());
+	return eventResultDetails.responseResult;
   }
 
   /**
@@ -431,7 +289,6 @@ public class ReshareApplicationEventHandlerService {
     }
     return result;
   }
-
 
   public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
     def inboundMessage = new PatronRequestNotification()

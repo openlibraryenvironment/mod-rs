@@ -5,6 +5,7 @@ public class Events {
 	static public String EVENT_MESSAGE_REQUEST_INDICATION                       = "MESSAGE_REQUEST_ind";
 	static public String EVENT_NEW_PATRON_REQUEST_INDICATION                    = "NewPatronRequest_ind";
 	static public String EVENT_NO_IMPLEMENTATION                                = "Event No Implementation";
+	static public String EVENT_REQUESTING_AGENCY_MESSAGE_INDICATION             = "REQUESTING_AGENCY_MESSAGE_ind";
 	static public String EVENT_STATUS_REQ_AWAITING_RETURN_SHIPPING_INDICATION   = "STATUS_REQ_AWAITING_RETURN_SHIPPING_ind";
 	static public String EVENT_STATUS_REQ_BORROWER_RETURNED_INDICATION          = "STATUS_REQ_BORROWER_RETURNED_ind";
 	static public String EVENT_STATUS_REQ_BORROWING_LIBRARY_RECEIVED_INDICATION = "STATUS_REQ_BORROWING_LIBRARY_RECEIVED_ind";
