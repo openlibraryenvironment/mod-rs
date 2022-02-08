@@ -233,7 +233,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 	}
 	
 	private String getOCLCId( String id ) {
-		def pattern = ~/^(ocn|ocm)(\d+)/;
+		def pattern = ~/^(ocn|ocm|on)(\d+)/;
 		def matcher = id =~ pattern;
 		if(matcher.find()) {
 			return matcher.group(2);
