@@ -1,9 +1,6 @@
 package org.olf.rs;
 
 import org.olf.okapi.modules.directory.Symbol;
-
-import com.k_int.web.toolkit.custprops.CustomProperty
-
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import groovy.util.logging.Slf4j
 
@@ -60,20 +57,6 @@ public class DirectoryEntryService {
     }
 
     return result;
-  }
-
-  /* 
-   * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
-   * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
-   * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
-   */
-  public CustomProperty extractCustomPropertyFromDirectoryEntry(DirectoryEntry de, String cpName) {
-    if (!de || ! cpName) {
-      return null
-    }
-    def custProps = de.customProperties?.value ?: []
-    CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
-    return cp
   }
 
 }

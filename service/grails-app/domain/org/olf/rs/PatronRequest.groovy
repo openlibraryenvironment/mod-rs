@@ -23,7 +23,7 @@ import groovy.sql.Sql;
 
 class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
-  private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate and aa.triggerType = :triggerType'
+  private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate'
 
   // internal ID of the patron request
   String id
@@ -457,7 +457,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   def getValidActions() {
-    return AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL])
+    return AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state])
   }
 
   public Map getDescriptiveMetadata() {
