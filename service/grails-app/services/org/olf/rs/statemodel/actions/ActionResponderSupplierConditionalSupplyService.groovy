@@ -34,7 +34,7 @@ public class ActionResponderSupplierConditionalSupplyService extends ActionRespo
 			if (parameters.isNull('holdingState') || parameters.holdingState == "no") {
 				// The supplying agency wants to continue with the request
 				actionResultDetails.auditMessage = 'Request responded to conditionally, request continuing';
-				actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+				// Status is set to Status.RESPONDER_NEW_AWAIT_PULL_SLIP in validatePickupLocationAndRoute
 			} else {
 				// The supplying agency wants to go into a holding state
 				// In this case we want to "pretend" the previous state was actually the next one, for later when it looks up the previous state
