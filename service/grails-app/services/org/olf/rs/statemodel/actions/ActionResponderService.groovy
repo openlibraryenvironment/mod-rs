@@ -5,6 +5,8 @@ import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.Status;
 
 public abstract class ActionResponderService extends AbstractAction {
 
@@ -24,7 +26,10 @@ public abstract class ActionResponderService extends AbstractAction {
 													 shelvingLocation: parameters.pickShelvingLocation,
 													 callNumber: parameters.callnumber);
 
-			if (!reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
+			if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
+				// Set the status
+				actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+			} else {
 				actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
 				actionResultDetails.auditMessage = 'Failed to route request to given location';
 				actionResultDetails.responseResult.code = -2; // No location specified

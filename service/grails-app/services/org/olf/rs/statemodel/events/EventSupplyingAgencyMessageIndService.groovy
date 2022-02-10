@@ -16,7 +16,21 @@ import org.olf.rs.statemodel.Status;
 public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 
 	ReshareActionService reshareActionService;
+
+	static String[] fromStates = [
+	];
 	
+	static String[] toStates = [
+		Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+		Status.PATRON_REQUEST_UNFILLED,
+		Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+		Status.PATRON_REQUEST_SHIPPED,
+		Status.PATRON_REQUEST_OVERDUE,
+		Status.PATRON_REQUEST_RECALLED,
+		Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
+		Status.PATRON_REQUEST_REQUEST_COMPLETE
+	];
+	 	
 	String name() {
 		return(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION);
 	}
@@ -27,18 +41,16 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 	}
 
 	String[] toStates(String model) {
-		// We are dealing with the whole model so just return null as no sensible interpretation can be made of what we return
-		return(null);
+		return(toStates);
 	}
 		
 	String[] fromStates(String model) {
-		// We are dealing with the whole model so just return null as no sensible interpretation can be made of what we return
-		return(null);
+		return(fromStates);
 	}
 
 	boolean supportsModel(String model) {
 		// We do not want want this event to appear anywhere 
-		return(false);	
+		return(model == StateModel.MODEL_REQUESTER);	
 	}
 	
 	EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
