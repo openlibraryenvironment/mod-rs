@@ -169,8 +169,16 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+      def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 };
+      if (withHoldings.size() < 1) {
+        log.warn("BaseHostLMSService failed to find an OPAC record with holdings");
+        return null;
+      } else if (withHoldings.size() > 1) {
+        log.warn("BaseHostLMSService found multiple OPAC records with holdings");
+        return null;
+      }
       log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
-      availability_summary = extractAvailableItemsFromOpacRecord(z_response?.records?.record?.recordData?.opacRecord, reason);
+      availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
     }
     else {
       log.warn("BaseHostLMSService expected the response to contain an OPAC record, but none was found");
@@ -178,20 +186,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return availability_summary;
   }
 
-  public ItemLocation z3950ItemByIdentifier(PatronRequest pr) {
-
-    ItemLocation result = null;
-    List<ItemLocation> result_list = z3950ItemsByIdentifier(pr);
-    if(result_list.size() > 0) {
-      result = result_list[0];
-    }
-
-    return result;
-  }
-
-
   /**
-   * The method above z3950ItemByIdentifier returns the first available holding of an item, this is not ideal
+   * The previous implementation z3950ItemByIdentifier returns the first available holding of an item, this is not ideal
    * when there are several locations holding an item and an institution wishes to express a preference as to
    * which locations are to be preferred for lending. This variant of the method returns all possible locations
    * it is the callers job to rank the response records.
@@ -248,135 +244,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-
-  public ItemLocation z3950ItemByTitle(PatronRequest pr) {
-
-    ItemLocation result = null;
-
-    String z3950_server = getZ3950Server();
-
-    if ( z3950_server != null ) {
-      def z_response = HttpBuilder.configure {
-        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
-      }.get {
-          request.uri.path = '/'
-          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-          request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
-                               'maximumRecords':'3' ]
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
-            log.debug("Using recordSchema ${getHoldingsQueryRecsyn()}" );
-          } else {
-            log.debug("No recordSchema found");
-          }
-          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
-      }
-  
-      log.debug("Got Z3950 response: ${z_response}");
-  
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by @attr 1=4 ${pr.title?.trim()}")
-
-        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().iterator().next()
-
-        log.debug("At end, availability summary: ${availability_summary}");
-      }
-      else {
-        log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
-      }
-    }
-    return result;
-  }
-
-
-  public List<ItemLocation> z3950ItemsByTitle(PatronRequest pr) {
-
-    List<ItemLocation> result = [];
-
-    String z3950_server = getZ3950Server();
-
-    if ( z3950_server != null ) {
-      def z_response = HttpBuilder.configure {
-        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
-      }.get {
-          request.uri.path = '/'
-          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-          request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=4 "'+pr.title?.trim()+'"',
-                               'maximumRecords':'3' ]
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
-            log.debug("Using recordSchema ${getHoldingsQueryRecsyn()}" );
-          } else {
-            log.debug("No recordSchema found");
-          }
-          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
-      }
-
-      log.debug("Got Z3950 response: ${z_response}");
-
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by @attr 1=4 ${pr.title?.trim()}")
-
-        if ( availability_summary.size() > 0 ) {
-          // result = availability_summary.values().iterator().next()
-          availability_summary.values().each { v ->
-            result.add(v);
-          }
-          
-        }
-
-        log.debug("At end, availability summary: ${availability_summary}");
-      }
-      else {
-        log.debug("Title lookup returned ${z_response?.numberOfRecords} matches. Unable to determin availability");
-      }
-    }
-    return result;
-  }
-
-
-  public ItemLocation z3950ItemByPrefixQuery(PatronRequest pr, String prefix_query_string) {
-
-    ItemLocation result = null;
-
-    String z3950_server = getZ3950Server();
-
-    if ( z3950_server != null ) {
-      def z_response = HttpBuilder.configure {
-        request.uri = 'http://reshare-mp.folio-dev.indexdata.com:9000'
-      }.get {
-          request.uri.path = '/'
-          request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': prefix_query_string,
-                               'maximumRecords':'3' ]
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
-          }
-          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
-      }
-  
-      log.debug("Got Z3950 response: ${z_response}");
-  
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
-        Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
-        if ( ( result == null ) && ( availability_summary.size() > 0 ) )
-          result = availability_summary.values().iterator().next()
-  
-        log.debug("At end, availability summary: ${availability_summary}, result=${result}");
-      }
-      else {
-        log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
-      }
-    }
-    return result;
-  }
-
   public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string) {
 
     List<ItemLocation> result = [];
@@ -399,8 +266,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       log.debug("Got Z3950 response: ${z_response}");
 
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
+      if ( (z_response?.numberOfRecords?.text() as int) > 0 ) {
         Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
         if ( availability_summary.size() > 0 ) {
           availability_summary.values().each { v ->
@@ -502,6 +368,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             JSONArray priv = response.getJSONArray('privileges')
             // Return a status of BLOCKED if the user is blocked, else OK for now
             result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+            result.userProfile=(priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
             result.result=true
             result.userid=response.opt('userId') ?: response.opt('userid')
             result.givenName=response.opt('firstName')
