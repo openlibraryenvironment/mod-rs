@@ -1,12 +1,14 @@
 #! /bin/sh
 USAGE="Usage: `basename $0` [-h] [-u username] [-p password] [-t tenant]"
 
+# We may not be run from this directory
+SCRIPT_DIRECTORY=`dirname "$0"`
 TENANT="diku"
 UN="diku_admin"
 PW="admin"
 
 # setOkapiUrl sets the variable OKAPI_URL
-. ./setOkapiUrl
+. ${SCRIPT_DIRECTORY}/setOkapiUrl
 
 if [ -f .okapirc ]; then
   . ./.okapirc
