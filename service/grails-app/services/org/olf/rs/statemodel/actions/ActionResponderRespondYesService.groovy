@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.Status;
 
 public class ActionResponderRespondYesService extends ActionResponderService {
@@ -13,7 +14,7 @@ public class ActionResponderRespondYesService extends ActionResponderService {
 	
 	@Override
 	String name() {
-		return("respondYes");
+		return(Actions.ACTION_RESPONDER_RESPOND_YES);
 	}
 
 	@Override

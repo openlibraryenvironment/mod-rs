@@ -6,6 +6,7 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -19,7 +20,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 	
 	@Override
 	String name() {
-		return("requesterReceived");
+		return(Actions.ACTION_REQUESTER_REQUESTER_RECEIVED);
 	}
 
 	@Override

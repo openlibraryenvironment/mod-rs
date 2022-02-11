@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -11,7 +12,7 @@ public abstract class ActionManualCloseService extends AbstractAction {
 
 	@Override
 	String name() {
-		return("supplierMarkConditionsAgreed");
+		return(Actions.ACTION_MANUAL_CLOSE);
 	}
 
 	@Override

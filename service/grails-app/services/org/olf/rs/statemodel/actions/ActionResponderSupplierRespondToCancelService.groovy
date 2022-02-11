@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -19,7 +20,7 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
 	
 	@Override
 	String name() {
-		return("supplierRespondToCancel");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL);
 	}
 
 	@Override

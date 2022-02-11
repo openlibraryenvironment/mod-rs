@@ -85,7 +85,10 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 				if (pr == null) {
 					throw new Exception("Unable to locate PatronRequest corresponding to ID or hrid in requestingAgencyRequestId \"${eventData.header.requestingAgencyRequestId}\"");
 				}
-		  
+
+				// Save the current status
+				Status currentState = pr.state;
+						  
 				// if eventData.deliveryInfo.itemId then we should stash the item id
 				if (eventData?.deliveryInfo ) {
 		  
@@ -145,16 +148,18 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 						}
 					}
 				}
-		  
+
+				// Get hold of what message type this is		  
+				String messageType = eventData.messageInfo?.reasonForMessage;
+						  
 				// Awesome - managed to look up patron request - see if we can action
-				if (eventData.messageInfo?.reasonForMessage != null) {
-		  
+				if (messageType != null) {
 					// If there is a note, create notification entry
 					if (eventData.messageInfo?.note) {
 						reshareApplicationEventHandlerService.incomingNotificationEntry(pr, eventData, true);
 					}
-		  
-					switch (eventData.messageInfo?.reasonForMessage) {
+
+					switch (messageType) {
 						case 'RequestResponse':
 							break;
 						case 'StatusRequestResponse':
@@ -212,6 +217,10 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 					handleStatusChange(pr, incomingStatus, eventData.header.supplyingAgencyRequestId);
 				}
 		  
+				// Adding an audit entry so we can see what states we are going to for the event
+				// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//				reshareApplicationEventHandlerService.auditEntry(pr, currentState, pr.state, "Incomnig message: " + messageType + ", State change: " + currentState.code + " -> "  + pr.state.code, null);   
+		
 				pr.save(flush:true, failOnError:true);
 			}
 		
@@ -224,7 +233,8 @@ public class EventSupplyingAgencyMessageIndService extends AbstractEvent {
 		if (result.status != "ERROR") {
 			result.status = "OK";
 		}
-		
+
+				
 		result.messageType = "SUPPLYING_AGENCY_MESSAGE";
 		result.supIdType = eventData.header.supplyingAgencyId.agencyIdType;
 		result.supId = eventData.header.supplyingAgencyId.agencyIdValue;

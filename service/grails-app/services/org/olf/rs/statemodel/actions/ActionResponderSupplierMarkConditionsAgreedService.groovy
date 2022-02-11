@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -17,7 +18,7 @@ public class ActionResponderSupplierMarkConditionsAgreedService extends ActionRe
 	
 	@Override
 	String name() {
-		return("supplierMarkConditionsAgreed");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED);
 	}
 
 	@Override

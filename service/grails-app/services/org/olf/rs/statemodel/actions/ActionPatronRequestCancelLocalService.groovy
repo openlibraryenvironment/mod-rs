@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -17,7 +18,7 @@ public class ActionPatronRequestCancelLocalService extends AbstractAction {
 	
 	@Override
 	String name() {
-		return("cancelLocal");
+		return(Actions.ACTION_REQUESTER_CANCEL_LOCAL);
 	}
 
 	@Override

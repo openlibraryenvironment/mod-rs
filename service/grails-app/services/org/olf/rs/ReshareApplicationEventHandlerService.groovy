@@ -117,12 +117,16 @@ public class ReshareApplicationEventHandlerService {
 		
 								// Now do whatever work is required of this event
 								resultDetails = eventBean.processEvent(request, eventData, resultDetails);
-	
+
 								// Do we want to save the request and create an audit entry
 								if (resultDetails.saveData == true) {
 									// Set the status of the request
 									request.state = resultDetails.newStatus;
 							
+									// Adding an audit entry so we can see what states we are going to for the event
+									// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//									auditEntry(request, currentState, request.state, "Event: " + eventData.event + ", State change: " + currentState.code + " -> "  + request.state.code, null);   
+
 									// Create the audit entry
 									auditEntry(
 										request,

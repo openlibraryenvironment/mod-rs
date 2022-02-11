@@ -7,6 +7,7 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -21,7 +22,7 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
 	
 	@Override
 	String name() {
-		return("supplierCheckOutOfReshare");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -12,7 +13,7 @@ public class ActionPatronRequestBorrowerCheckOverrideService extends AbstractAct
 	
 	@Override
 	String name() {
-		return("borrowerCheckOverride");
+		return(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE);
 	}
 
 	@Override

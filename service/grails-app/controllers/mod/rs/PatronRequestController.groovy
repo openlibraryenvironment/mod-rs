@@ -53,7 +53,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 				            	   			 ' Current state: ' + patron_request.state.code +
 											 ' Action being performed: ' + request.JSON.action;
 						    reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, result.message, null);
+							patron_request.save(flush:true, failOnError:true);
 						}
+						
 					} else {
 						response.status = 400;
 						result.message='Unable to lock request with id: ' + params.patronRequestId;

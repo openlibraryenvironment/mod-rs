@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -15,7 +16,7 @@ public class ActionResponderSupplierConditionalSupplyService extends ActionRespo
 	
 	@Override
 	String name() {
-		return("supplierConditionalSupply");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY);
 	}
 
 	@Override

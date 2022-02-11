@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 
 public abstract class ActionMessageService extends AbstractAction {
 
@@ -12,7 +13,7 @@ public abstract class ActionMessageService extends AbstractAction {
 	
 	@Override
 	String name() {
-		return("message");
+		return(Actions.ACTION_MESSAGE);
 	}
 
 	@Override
