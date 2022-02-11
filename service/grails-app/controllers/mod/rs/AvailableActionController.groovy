@@ -101,6 +101,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 				if (!ignoredActions.contains(abstractAction.name())) {
 					// It is an action we want to take notice off
 					actions.add(abstractAction);
+					log.info("Adding action: " + abstractAction.name());
 				}
 			}
 		}

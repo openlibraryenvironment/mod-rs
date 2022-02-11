@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -15,7 +16,7 @@ public class ActionPatronRequestLocalSupplierCannotSupplyService extends Abstrac
 	
 	@Override
 	String name() {
-		return("localSupplierCannotSupply");
+		return(Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY);
 	}
 
 	@Override

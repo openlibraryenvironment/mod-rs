@@ -84,6 +84,10 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 		  
 					switch (eventData.activeSection?.action) {
 						case 'Received':
+							// Adding an audit entry so we can see what states we are going to for the event
+							// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, pr.state, "Incomnig message: Received, State change: " + pr.state.code + " -> "  + pr.state.code, null);   
+
 							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, pr.state, "Shipment received by requester", null);
 							pr.save(flush: true, failOnError: true);
 							break;
@@ -93,7 +97,11 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 							pr.volumes?.each {vol ->
 								vol.status = vol.lookupStatus('awaiting_lms_check_in');
 							}
-		  
+
+							// Adding an audit entry so we can see what states we are going to for the event
+							// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, pr.state, "Incomnig message: ShippedReturn, State change: " + pr.state.code + " -> "  + new_state.code, null);
+
 							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, new_state, "Item(s) Returned by requester", null);
 							pr.state = new_state;
 							pr.save(flush: true, failOnError: true);
@@ -105,14 +113,15 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 							/* If the message is preceded by #ReShareLoanConditionAgreeResponse#
 							 * then we'll need to check whether or not we need to change state.
 							 */
+							Status originalState = pr.state;
 							if ((messageData.note != null) &&
 								(messageData.note.startsWith("#ReShareLoanConditionAgreeResponse#"))) {
 								// First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
 								if (pr.state.code == "RES_PENDING_CONDITIONAL_ANSWER") {
-									Status new_state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, pr.previousStates[pr.state.code])
-									reshareApplicationEventHandlerService.auditEntry(pr, pr.state, new_state, "Requester agreed to loan conditions, moving request forward", null);
-									pr.previousStates[pr.state.code] = null;
-									pr.state = new_state;
+									 pr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, pr.previousStates[pr.state.code])
+
+									reshareApplicationEventHandlerService.auditEntry(pr, originalState, pr.state, "Requester agreed to loan conditions, moving request forward", null);
+									pr.previousStates[originalState.code] = null;
 									reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(pr);
 								} else {
 									// Loan conditions were already marked as agreed
@@ -121,14 +130,25 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 							} else {
 								reshareApplicationEventHandlerService.auditEntry(pr, pr.state, pr.state, "Notification message received from requesting agency: ${messageData.note}", null);
 							}
+							
+							// Adding an audit entry so we can see what states we are going to for the event
+							// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, pr.state, "Incomnig message: Notification, State change: " + originalState.code + " -> "  + pr.state.code, null);
+
 							pr.save(flush: true, failOnError: true);
 							break;
 		  
 						case 'Cancel':
 							// We cannot cancel a shipped item
-							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED), "Requester requested cancellation of the request", null);
+							Status newState = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED);
+							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, newState, "Requester requested cancellation of the request", null);
 							pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
-							pr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED);
+							
+							// Adding an audit entry so we can see what states we are going to for the event
+							// Do not commit this uncommented, here to aid seeing what transition changes we allow
+//							reshareApplicationEventHandlerService.auditEntry(pr, newState, newState, "Incomnig message: Cancel, State change: " + pr.state.code + " -> "  + newState.code, null);
+
+							pr.state = newState;
 							pr.save(flush: true, failOnError: true);
 							break;
 		  

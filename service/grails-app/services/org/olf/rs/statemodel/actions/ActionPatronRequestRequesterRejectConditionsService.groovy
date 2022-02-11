@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -14,7 +15,7 @@ public class ActionPatronRequestRequesterRejectConditionsService extends ActionP
 	
 	@Override
 	String name() {
-		return("requesterRejectConditions");
+		return(Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS);
 	}
 
 	@Override

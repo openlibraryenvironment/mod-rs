@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequestNotification;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 
 public abstract class ActionMessageSeenService extends AbstractAction {
 
@@ -13,7 +14,7 @@ public abstract class ActionMessageSeenService extends AbstractAction {
 
 	@Override
 	String name() {
-		return("messageSeen");
+		return(Actions.ACTION_MESSAGE_SEEN);
 	}
 	
 	@Override

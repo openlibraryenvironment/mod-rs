@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequestNotification;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -14,7 +15,7 @@ public abstract class ActionMessagesAllSeenService extends AbstractAction {
 								];
 	@Override
 	String name() {
-		return("messagesAllSeen");
+		return(Actions.ACTION_MESSAGES_ALL_SEEN);
 	}
 
 	@Override

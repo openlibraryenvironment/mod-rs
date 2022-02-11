@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -13,7 +14,7 @@ public class ActionResponderSupplierAddConditionService extends ActionResponderC
 	
 	@Override
 	String name() {
-		return("supplierAddCondition");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -28,7 +29,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 	
 	@Override
 	String name() {
-		return("supplierCheckInToReshare");
+		return(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
 	}
 
 	@Override
