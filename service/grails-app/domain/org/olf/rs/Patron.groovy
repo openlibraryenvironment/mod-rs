@@ -10,6 +10,7 @@ class Patron implements MultiTenant<Patron> {
   String surname
   Date dateCreated
   Date lastUpdated
+  String userProfile
   
   static constraints = {
     hostSystemIdentifier  (nullable : false, blank: false, unique: true)
@@ -25,5 +26,6 @@ class Patron implements MultiTenant<Patron> {
     hostSystemIdentifier   column : 'pat_host_system_identifier'
     givenname              column : 'pat_given_name'
     surname                column : 'pat_surame'
+    userProfile            column : 'pat_user_profile'
   }
 }

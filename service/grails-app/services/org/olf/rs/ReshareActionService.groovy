@@ -98,7 +98,7 @@ public class ReshareActionService {
     return result;
   }
 
-	private Patron lookupOrCreatePatronProxy(Map patron_details) {
+  private Patron lookupOrCreatePatronProxy(Map patron_details) {
     Patron result = null;
     PatronStoreActions patronStoreActions;
     patronStoreActions = patronStoreService.getPatronStoreActions();
@@ -109,13 +109,16 @@ public class ReshareActionService {
     } catch(Exception e) {
       log.error("Unable to update or create Patron Store: ${e}");
     }
+
     if ( ( patron_details != null ) && 
          ( patron_details.userid != null ) &&
          ( patron_details.userid.trim().length() > 0 ) ) {
       result = Patron.findByHostSystemIdentifier(patron_details.userid) ?: new Patron(
-                                                           hostSystemIdentifier:patron_details.userid, 
-                                                           givenname: patron_details.givenName, 
-                                                           surname: patron_details.surname).save()
+                                                           hostSystemIdentifier: patron_details.userid, 
+                                                                      givenname: patron_details.givenName, 
+                                                                        surname: patron_details.surname,
+                                                                    userProfile: patron_details.userProfile
+                                                 ).save()
     }
     return result;
   }

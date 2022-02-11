@@ -5,4 +5,5 @@ databaseChangeLog = {
   include file: 'update-mod-rs-2-3.groovy'
   include file: 'update-mod-rs-2-4.groovy'
   include file: 'update-mod-rs-2-6.groovy'
+  include file: 'update-mod-rs-2-7.groovy'
 }
