@@ -1,0 +1,32 @@
+# We start on the responder side
+responder
+
+#Reply with answerYes
+answerYes.json
+
+#Print the pull slip
+printPullSlip.json
+
+# Check the item into reshare
+supplierCheckInToReshare.json
+
+# Mark it as shipped
+supplierMarkShipped.json
+
+# We now move to the requester
+requester
+
+# And receive the request
+requesterReceived.json
+
+# It is returned by the patron
+patronReturnedItem.json
+
+# Return it back to the responder
+shippedReturn.json
+
+# Now we want to perform the actions against the responder
+responder
+
+# Now check it out of reshare
+supplierCheckOutOfReshare.json
