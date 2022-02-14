@@ -69,7 +69,7 @@ CURRENT_ID=${REQUESTER_ID}
 # Read from the file
 while read -r LINE
 do
-	# Ignore comment lines and lines that only contain blank characters
+	# Ignore comment lines and lines that only contain just whitespace characters
 	if [[ ! ${LINE} == \#* ]] && [[ ${LINE} = *[^[:space:]]* ]]
 	then
 		if [ "requester" = "${LINE}" ];
