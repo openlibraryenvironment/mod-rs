@@ -40,7 +40,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract available items from TLC marcxml record ${z_response}, reason ${reason}");
     if ( (z_response?.numberOfRecords?.text() as int) != 1 ) {
-      log.warn("Multiple records seen in response from TLC Z39.50 server, unable to extra available items. Record: ${z_response}");
+      log.warn("Multiple records seen in response from TLC Z39.50 server, unable to extract available items. Record: ${z_response}");
       return null;
     }
 
