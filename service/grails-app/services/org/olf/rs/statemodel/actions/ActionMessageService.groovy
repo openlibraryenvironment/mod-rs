@@ -31,6 +31,7 @@ public abstract class ActionMessageService extends AbstractAction {
 		} else {
 			// Send the message
 	        actionResultDetails.responseResult.status = reshareActionService.sendMessage(request, parameters);
+			actionResultDetails.auditMessage = "Message sent: " + parameters.note; 
 		}
 		return(actionResultDetails);
 	}
