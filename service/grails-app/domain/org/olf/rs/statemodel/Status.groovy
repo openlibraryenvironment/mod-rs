@@ -55,6 +55,7 @@ class Status implements MultiTenant<Status> {
   StateModel owner
   String code
   String presSeq
+  // Used when retrieving termination status for closing the request manually, if it is not true, it will not be returned
   Boolean visible
   Boolean needsAttention
 
@@ -91,10 +92,12 @@ class Status implements MultiTenant<Status> {
   // Assert is a helper method that helps us ensure refdata is up to date - create any missing entries, update any ones
   // where the tags have changed and return the located value
   public static Status ensure(String model, String code, presSeq=null, visible=null, needsAttention=null, terminal=false, tags=null) {
+	boolean modified = false;
     StateModel sm = StateModel.findByShortcode(model) ?: new StateModel(shortcode: model).save(flush:true, failOnError:true)
     Status s = Status.findByOwnerAndCode(sm, code)
     if ( s == null ) {
-      s = new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention, terminal:terminal, tags: tags).save(flush:true, failOnError:true)
+      s = new Status(owner:sm, code:code, presSeq:presSeq, visible:visible, needsAttention:needsAttention, terminal:terminal, tags: tags);
+	  modified = true;
     }
     else {
       // We already know about this status code - just check if we need to install any new tags
@@ -105,11 +108,27 @@ class Status implements MultiTenant<Status> {
           if ( s.tags.find { it.value == tag } == null ) {
             def tag_obj = Tag.findByNormValue(Tag.normalizeValue(tag)) ?: new Tag(value:tag);
             s.tags.add(tag_obj);
-            s.save(flush:true, failOnError:true)
+			modified = true;
           }
         }
       }
+	  
+	  // Check if the visibility has changed
+	  if (visible == null) {
+		  if (s.visible != null) {
+			  s.visible = visible;
+			  modified = true;
+		  }
+	  } else if ((s.visible == null) || (s.visible != visible)) {
+		  s.visible = visible;
+		  modified = true;
+	  }
     }
+
+	// If we have modified the record then save it	
+	if (modified == true) {
+	  s.save(flush:true, failOnError:true);
+	}
     return s;
   }
 
