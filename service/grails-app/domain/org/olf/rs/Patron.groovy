@@ -16,6 +16,7 @@ class Patron implements MultiTenant<Patron> {
     hostSystemIdentifier  (nullable : false, blank: false, unique: true)
     givenname             (nullable : true,  blank: false)
     surname               (nullable : true,  blank: false)
+    userProfile           (nullable : true,  blank: false)
   }
 
   static mapping = {
