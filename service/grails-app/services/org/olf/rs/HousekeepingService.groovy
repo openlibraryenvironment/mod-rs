@@ -205,7 +205,7 @@ public class HousekeepingService {
 
         AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'requesterCancel', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SOURCING_ITEM', 'manualClose', 'M')
-
+		
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'requesterCancel', 'M')
         AvailableAction.ensure( 'PatronRequest', 'REQ_SUPPLIER_IDENTIFIED', 'manualClose', 'M')
 
@@ -250,6 +250,9 @@ public class HousekeepingService {
 
         def alc = Counter.findByContext('/activeLoans') ?: new Counter(context:'/activeLoans', value:0, description:'Current (Aggregate) Lending Level').save(flush:true, failOnError:true)
         def abc = Counter.findByContext('/activeBorrowing') ?: new Counter(context:'/activeBorrowing', value:0, description:'Current (Aggregate) Borrowing Level').save(flush:true, failOnError:true)
+		
+		// Generate the timer tasks
+		Timer.ensure("CheckForStaleSupplierRequests", "Check supplier requests have not become stale", "FREQ=DAILY", "CheckForStaleSupplierRequests");
       }
 
     }

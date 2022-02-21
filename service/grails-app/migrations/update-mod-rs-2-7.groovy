@@ -54,5 +54,27 @@ databaseChangeLog = {
 		// Now we have no duplicates, we can add the unique index
 		addUniqueConstraint(columnNames: "sym_authority_fk, sym_symbol", tableName: "symbol")
 	}
+	
+	changeSet(author: "cwoodfield", id: "202202211400-001") {
+
+		// Adding column tr_code
+		addColumn(tableName: "timer") {
+            column(name: "tr_code", type: "VARCHAR(255)")
+		}
+
+		// Adding column tr_next_exec
+		addColumn(tableName: "timer") {
+            column(name: "tr_next_exec", type: "BIGINT")
+		}
+		
+		// now set the next execution field with the last execution field
+		grailsChange {
+			change {
+				// Update the entry so that the last de_published_last_update field is updated if it is not null
+				sql.execute("""UPDATE ${database.defaultSchemaName}.timer
+							   SET tr_next_exec = tr_last_exec""".toString());
+			}
+		}
+	}
 }
 

@@ -1,26 +1,23 @@
 package org.olf.rs;
 
-import grails.gorm.multitenancy.Tenants
-import org.olf.rs.HostLMSLocation 
-import org.olf.rs.PatronRequest
-import org.olf.rs.statemodel.AvailableAction
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.okapi.modules.directory.DirectoryEntry;
+import java.lang.management.ManagementFactory;
+import java.text.NumberFormat;
 
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import com.k_int.okapi.OkapiClient
-import groovy.json.JsonSlurper
-import org.olf.rs.EmailService
-import java.util.UUID;
-import groovy.text.GStringTemplateEngine;
-import com.k_int.web.toolkit.settings.AppSetting
-import java.util.TimeZone;
-import java.text.NumberFormat;
+import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.Timers.AbstractTimer
+import org.olf.rs.statemodel.AvailableAction
 import org.olf.templating.*
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
+
+import com.k_int.okapi.OkapiClient
+import com.k_int.web.toolkit.settings.AppSetting
+
+import grails.gorm.multitenancy.Tenants
+import grails.util.Holders;
+import groovy.json.JsonSlurper
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -55,6 +52,9 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     group by pr.pickLocation.code
 '''
 
+  // Holds the services that we have discovered that perform tasks for the timers
+  private static Map serviceTimers = [ : ];
+  
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
 
@@ -140,16 +140,32 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
 
         // Dump all timers whilst we look into timer execution
         Timer.list().each { ti ->
-          def remaining_min = ((ti.lastExecution?:0)-current_systime)/60000
-          log.debug("Declared timer: ${ti.id}, ${ti.lastExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}min");
+          def remaining_min = ((ti.nextExecution?:0)-current_systime)/60000
+          log.debug("Declared timer: ${ti.id}, ${ti.nextExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}min");
         }
 
-        Timer.executeQuery('select t from Timer as t where ( ( t.lastExecution is null ) OR ( t.lastExecution < :now ) ) and t.enabled=:en', 
+        Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en', 
                            [now:current_systime, en: true]).each { timer ->
           try {
             log.debug("** Timer task ${timer.id} firing....");
 
-            if ( ( timer.lastExecution == 0 ) || ( timer.lastExecution == null ) ) {
+            TimeZone tz;
+            try {
+              JsonSlurper jsonSlurper = new JsonSlurper();
+              def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+              log.debug("Got system locale settings : ${tenant_locale}");
+              tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+            }
+            catch ( Exception e ) {
+              log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
+              tz = TimeZone.getTimeZone('UTC');
+            }
+
+			// The date we start processing tis in the local time zone
+            timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
+			
+
+            if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
               // First time we have seen this timer - we don't know when it is next due - so work that out
               // as tho we just run the timer.
             }
@@ -165,19 +181,17 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
             // DateTime start = new DateTime(current_systime)
             // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
 
-            TimeZone tz;
-            try {
-              JsonSlurper jsonSlurper = new JsonSlurper();
-              def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
-              log.debug("Got system locale settings : ${tenant_locale}");
-              tz = TimeZone.getTimeZone(tenant_locale?.timezone);
-            }
-            catch ( Exception e ) {
-              log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
-              tz = TimeZone.getTimeZone('UTC');
-            }
-
             DateTime start = new DateTime(tz, current_systime);
+			// If the frequency, is daily, monthly or yearly then we need to clear the time part
+			if (rule_to_parse.contains(Freq.DAILY.toString()) ||
+				rule_to_parse.contains(Freq.MONTHLY.toString()) ||
+				rule_to_parse.contains(Freq.WEEKLY.toString()) ||
+				rule_to_parse.contains(Freq.YEARLY.toString())) {
+				// Set it to the start of the day, otherwise we will have jobs happening during the day
+				start = start.startOfDay();
+			}
+
+			// Now work out what the next execution time will be			
             RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
             def nextInstance = null;
 
@@ -189,7 +203,7 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
             }
             log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
             log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
-            timer.lastExecution = nextInstance.getTimestamp();
+            timer.nextExecution = nextInstance.getTimestamp();
             timer.save(flush:true, failOnError:true)
           }
           catch ( Exception e ) {
@@ -210,24 +224,46 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
     }
   }
 
-  private runTimer(Timer t) {
-    try {
-      switch ( t.taskCode ) {
-        case 'PrintPullSlips':
-          log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
-          JsonSlurper jsonSlurper = new JsonSlurper()
-          Map task_config = jsonSlurper.parseText(t.taskConfig)
-          checkPullSlips(task_config)
-          break;
-        default:
-          log.debug("Unhandled timer task code ${t.taskCode}");
-          break;
-      }
-    }
-    catch ( Exception e ) {
-      log.error("ERROR running timer",e)
-    }
-  }
+  	private runTimer(Timer t) {
+		try {
+			if (t.taskCode != null) {
+				switch ( t.taskCode ) {
+					case 'PrintPullSlips':
+				  		log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
+						JsonSlurper jsonSlurper = new JsonSlurper()
+						Map task_config = jsonSlurper.parseText(t.taskConfig)
+						checkPullSlips(task_config)
+						break;
+		  
+					default:
+						// Get hold of the bean and store it in our map, if we previously havn't been through here
+						if (serviceTimers[t.taskCode] == null) {
+							// We capitalize the task code and then prefix it with "timer" and postfix with "Service"
+							String beanName = "timer" + t.taskCode.capitalize() + "Service";
+
+							// Now setup the link to the service action that actually does the work
+							try {
+								serviceTimers[t.taskCode] = Holders.grailsApplication.mainContext.getBean(beanName);
+							} catch (Exception e) {
+								log.error("Unable to locate timer bean: " + beanName);
+							}
+						}
+						
+						// Did we find the bean
+						AbstractTimer timerBean = serviceTimers[t.taskCode];
+						if (timerBean == null) {
+							log.debug("Unhandled timer task code ${t.taskCode}");
+						} else {
+							// juat call the performTask method, with the timers config
+							timerBean.performTask(t.taskConfig);
+						}
+						break;
+				}
+			}
+		} catch ( Exception e ) {
+			log.error("ERROR running timer",e)
+		}
+  	}
 
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
