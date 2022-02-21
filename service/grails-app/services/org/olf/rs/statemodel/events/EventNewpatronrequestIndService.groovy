@@ -23,7 +23,7 @@ import groovy.sql.Sql;
 public class EventNewpatronrequestIndService extends AbstractEvent {
 
 	HostLMSService hostLMSService;
-	PatronNoticeService patronNoticeService;
+	// PatronNoticeService patronNoticeService;
 	ReshareActionService reshareActionService;
 	SharedIndexService sharedIndexService;
 	
@@ -134,7 +134,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 						log.debug("Got request ${request}");
 						log.debug(" -> Request is currently " + Status.PATRON_REQUEST_IDLE + " - transition to " + Status.PATRON_REQUEST_VALIDATED);
 						eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED);
-						patronNoticeService.triggerNotices(request, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
+						// patronNoticeService.triggerNotices(request, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
 					} else if (s == null) {
 						// An unknown requesting institution symbol is a bigger deal than an invalid patron
 						request.needsAttention=true;
