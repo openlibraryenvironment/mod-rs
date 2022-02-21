@@ -2,6 +2,9 @@ package org.olf.rs.statemodel.events;
 
 import org.olf.rs.statemodel.Events;
 import com.k_int.web.toolkit.refdata.RefdataValue;
+import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronNoticeService;
 
 public class EventStatusReqSupplierIdentifiedIndService extends EventSendToNextLenderService {
 
