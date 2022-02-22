@@ -13,6 +13,7 @@ json g.render(patronRequest, [expand: ['state',
                                        'cancellationReason',
                                        'conditions',
                                        'resolvedRequester',
+                                       'resolvedPatron',
                                        'resolvedSupplier',
                                        'resolvedPickupLocation'
                                        ],
