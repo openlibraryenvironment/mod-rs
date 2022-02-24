@@ -8,5 +8,5 @@ public abstract class AbstractTimer {
 	 * @param config The config as configured against the timer
 	 * @return Nothing 
 	 */
-	abstract void performTask(String config);
+	public abstract void performTask(String config);
 }

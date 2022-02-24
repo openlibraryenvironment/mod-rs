@@ -9,6 +9,9 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.Counter;
+import org.olf.rs.referenceData.CustomTextProperties;
+import org.olf.rs.referenceData.NamingAuthority;
+import org.olf.rs.referenceData.Settings;
 import org.olf.rs.statemodel.StateTransition;
 import org.olf.rs.statemodel.AvailableAction;
 
@@ -68,6 +71,15 @@ public class HousekeepingService {
         // Status.lookupOrCreate('PatronRequest', 'WILL_SUPPLY');
         // Status.lookupOrCreate('PatronRequest', 'END_OF_ROTA');
 
+		// Load the Custom text properties
+		CustomTextProperties.loadAll();
+		
+		// Add the Settings, when I get an hour or 2 will convert the rest of this file
+		Settings.loadAll();
+		
+		// Add the naming authorities
+		NamingAuthority.loadAll();
+		
         // Requester / Borrower State Model
         Status.ensure('PatronRequest', 'REQ_IDLE', '0005', true, true);
         Status.ensure('PatronRequest', 'REQ_VALIDATED', '0010', true);
