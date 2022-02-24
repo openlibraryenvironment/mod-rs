@@ -150,7 +150,7 @@ try {
                                   section:'hostLMSIntegration',
                                   settingType:'Refdata',
                                   vocab:'CheckInOnReturn',
-                                  key: 'check_in_on_return'),
+                                  key: 'check_in_on_return',
                                   defValue:checkInOnReturnOff.value).save(flush:true, failOnError: true);
                 
   RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
