@@ -40,7 +40,11 @@ public class KohaHostLMSService extends BaseHostLMSService {
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
-    log.debug("Extract holdings from marcxml record ${z_response}");
+    log.debug("Extract holdings from Koha marcxml record ${z_response}");
+    if ( (z_response?.numberOfRecords?.text() as int) != 1 ) {
+      log.warn("Multiple records seen in response from Koha Z39.50 server, unable to extract available items. Record: ${z_response}");
+      return null;
+    }
 
     Map<String, ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {

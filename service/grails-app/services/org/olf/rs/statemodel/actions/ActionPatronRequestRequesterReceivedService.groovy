@@ -79,7 +79,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 						vol.status = newVolState;
 						vol.save(failOnError: true);
 					} else {
-						String message = "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. ";
+						String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";
 						// PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is.
 						// IF THIS NEEDS TO GO INTO ANOTHER STATE, WE SHOULD DO IT AFTER ALL VOLS HAVE BEEN ATTEMPTED
 						reshareApplicationEventHandlerService.auditEntry(request,
@@ -90,7 +90,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 					}
 				} catch (Exception e) {
 					log.error("NCIP Problem",e);
-					reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP AcceptItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null);
+					reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null);
 				}
 			}
 		    request.save(flush:true, failOnError:true);
