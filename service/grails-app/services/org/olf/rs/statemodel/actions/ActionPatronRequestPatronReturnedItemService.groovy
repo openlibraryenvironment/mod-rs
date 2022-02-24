@@ -7,7 +7,12 @@ import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
+import org.olf.rs.HostLMSService;
+import com.k_int.web.toolkit.settings.AppSetting;
+
 public class ActionPatronRequestPatronReturnedItemService extends AbstractAction {
+
+	HostLMSService hostLMSService;
 
 	static String[] TO_STATES = [
 								 Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING
@@ -35,6 +40,24 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 		// Just set the status
 		actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING);
 		actionResultDetails.responseResult.status = true;
+
+		AppSetting check_in_on_return = AppSetting.findByKey('check_in_on_return');
+
+
+		if( check_in_on_return?.value != 'off' ) {
+			Map result_map = [:];
+			try {
+				result_map = hostLMSService.checkInRequestVolumes(request);
+			} catch( Exception e) {
+				log.error("Error attempting NCIP CheckinItem for request {$request.id}: {$e.getMessage()}");	
+				result_map.result = false;
+			}
+			if(result_map.result) {
+				log.debug("Successfully checked in volumes for request {$request.id}")
+			} else {
+				log.debug("Failed to check in volumes for request {$request.id}")
+			}
+		}
 		
 		return(actionResultDetails);
 	}

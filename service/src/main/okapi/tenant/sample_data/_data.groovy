@@ -143,7 +143,16 @@ try {
                                   vocab:'CheckInMethod',
                                   key: 'check_in_item').save(flush:true, failOnError: true);
 
-
+  def checkInOnReturnOff = RefdataValue.lookupOrCreate('CheckInOnReturn', 'Off');
+  RefdataValue.lookupOrCreate('CheckInOnReturn', 'On');
+  
+  AppSetting check_in_on_return = AppSetting.findByKey('check_in_on_return') ?: new AppSetting(
+                                  section:'hostLMSIntegration',
+                                  settingType:'Refdata',
+                                  vocab:'CheckInOnReturn',
+                                  key: 'check_in_on_return'),
+                                  defValue:checkInOnReturnOff.value).save(flush:true, failOnError: true);
+                
   RefdataValue.lookupOrCreate('AcceptItemMethod', 'None');
   RefdataValue.lookupOrCreate('AcceptItemMethod', 'NCIP');
   
