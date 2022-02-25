@@ -45,7 +45,7 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 
 
 		if( check_in_on_return?.value != 'off' ) {
-			log.debug("Attemping NCIP CheckInItem for volumes for request {$request?.id}");
+			log.debug("Attempting NCIP CheckInItem for volumes for request {$request?.id}");
 			Map result_map = [:];
 			try {
 				result_map = hostLMSService.checkInRequestVolumes(request);
