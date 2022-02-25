@@ -84,7 +84,7 @@ public class TimerCheckForStaleSupplierRequestsService extends AbstractTimer {
 		int idleDays = settingsService.getSettingAsInt(Settings.SETTING_STALE_REQUEST_2_DAYS, defaultIdleDays);
 		
 		// The number must be positive
-		if (numberOfIdleDays < 0) {
+		if (idleDays < 0) {
 			// It is negative so reset to the default
 			idleDays = defaultIdleDays;
 		}
