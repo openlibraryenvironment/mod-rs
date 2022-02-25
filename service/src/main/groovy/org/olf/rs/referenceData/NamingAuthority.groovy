@@ -20,7 +20,7 @@ public class NamingAuthority {
 	}
 	
 	/**
-	 * Loads the settings into the database	
+	 * Loads the naming authorities into the database	
 	 */
 	public void load() {
 		try {
