@@ -40,6 +40,7 @@ public class Settings {
 	public static String VOCABULARY_CHAT_AUTO_READ               = "ChatAutoRead";
 	public static String VOCABULARY_CHECK_IN_METHOD              = "CheckInMethod";
 	public static String VOCABULARY_CHECK_OUT_METHOD             = "CheckOutMethod";
+	public static String VOCABULARY_CHECK_IN_ON_RETURN		       = "CheckInOnReturn";
 	public static String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER = "HostLMSIntegrationAdapter";
 	public static String VOCABULARY_LOAN_CONDITIONS              = "loanConditions";
 	public static String VOCABULARY_LOAN_POLICY                  = "LoanPolicy";
@@ -80,6 +81,7 @@ public class Settings {
 	public static String SETTING_BORROWER_CHECK       = "borrower_check";
 	public static String SETTING_CHECK_IN_ITEM        = "check_in_item";
 	public static String SETTING_CHECK_OUT_ITEM       = "check_out_item";
+	public static String SETTING_CHECK_IN_ON_RETURN   = "check_in_on_return";
 	public static String SETTING_HOST_LMS_INTEGRATION = "host_lms_integration";
 
 	// Settings for the requests section
@@ -219,6 +221,11 @@ public class Settings {
 			RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_METHOD, "NCIP");
 			
 			ensureAppSetting(SETTING_CHECK_IN_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, VOCABULARY_CHECK_IN_METHOD);
+
+			def checkInOnReturnOff = RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_ON_RETURN, 'Off');
+      RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_ON_RETURN, 'On');
+
+			ensureAppSetting(SETTING_CHECK_IN_ON_RETURN, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, VOCABULARY_CHECK_IN_ON_RETURN, null, checkInOnReturnOff?.value);
 		  
 			RefdataValue.lookupOrCreate(VOCABULARY_ACCEPT_ITEM_METHOD, "None");
 			RefdataValue.lookupOrCreate(VOCABULARY_ACCEPT_ITEM_METHOD, "NCIP");
