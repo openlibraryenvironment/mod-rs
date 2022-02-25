@@ -223,7 +223,7 @@ public class Settings {
 			ensureAppSetting(SETTING_CHECK_IN_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, VOCABULARY_CHECK_IN_METHOD);
 
 			def checkInOnReturnOff = RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_ON_RETURN, 'Off');
-      RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_ON_RETURN, 'On');
+			RefdataValue.lookupOrCreate(VOCABULARY_CHECK_IN_ON_RETURN, 'On');
 
 			ensureAppSetting(SETTING_CHECK_IN_ON_RETURN, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, VOCABULARY_CHECK_IN_ON_RETURN, null, checkInOnReturnOff?.value);
 		  
@@ -345,21 +345,6 @@ public class Settings {
 			ensureAppSetting(SETTING_ROUTING_ADAPTER, SECTION_ROUTING, SETTING_TYPE_REF_DATA, VOCABULARY_REQUEST_ROUTING_ADAPTER, null, folio_si_routing_adapter.value);
 			ensureAppSetting(SETTING_STATIC_ROUTES, SECTION_ROUTING, SETTING_TYPE_STRING, null, null, "");
 		  
-			// To delete an unwanted action add State Model, State, Action to this array
-			[
-				[ "PatronRequest", "REQ_LOCAL_REVIEW", "requesterCancel" ],
-				[ "PatronRequest", "REQ_LOCAL_REVIEW", "supplierCannotSupply" ]
-			].each { action_to_remove ->
-				log.info("Remove available action ${action_to_remove}");
-				try {
-					AvailableAction.executeUpdate("""delete from AvailableAction
-													 where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)""",
-												  [code:action_to_remove[2],fs:action_to_remove[1],sm:action_to_remove[0]]);
-				} catch ( Exception e ) {
-					log.error("Unable to delete action ${action_to_remove} - ${e.message}", e);
-				}
-			}
-			
 			// This looks slightly odd, but rather than litter this file with an ever growing list of
 			// random delete statements, if you wish to delete
 			// deprecated refdata values, add a new line to the array here consisting of [ "VALUE", "CATEGORY" ]
