@@ -8,16 +8,18 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.Timers.AbstractTimer
-import org.olf.rs.statemodel.AvailableAction
-import org.olf.templating.*
+import org.olf.rs.Timers.AbstractTimer;
+import org.olf.rs.statemodel.AvailableAction;
+import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.Status;
+import org.olf.templating.*;
 
-import com.k_int.okapi.OkapiClient
-import com.k_int.web.toolkit.settings.AppSetting
+import com.k_int.okapi.OkapiClient;
+import com.k_int.web.toolkit.settings.AppSetting;
 
-import grails.gorm.multitenancy.Tenants
+import grails.gorm.multitenancy.Tenants;
 import grails.util.Holders;
-import groovy.json.JsonSlurper
+import groovy.json.JsonSlurper;
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
@@ -42,13 +44,13 @@ public class BackgroundTaskService {
 Select pr 
 from PatronRequest as pr
 where ( pr.pickLocation.id in ( :loccodes ) )
-and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 '''
 
   private static String PULL_SLIP_SUMMARY = '''
     Select count(pr.id), pr.pickLocation.code
     from PatronRequest as pr
-    where pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
+    where pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
     group by pr.pickLocation.code
 '''
 
@@ -114,14 +116,14 @@ and pr.state.code='RES_NEW_AWAIT_PULL_SLIP'
         def results = criteria.list {
           lt("parsedDueDateRS", currentDate) //current date is later than due date
           state {
-            eq("code","RES_ITEM_SHIPPED") //only marked items as overdue once shipped
+            eq("code",Status.RESPONDER_ITEM_SHIPPED) //only marked items as overdue once shipped
           }
           ne("isRequester", true) //request is not request-side (we want supply-side)
         }
         results.each { patronRequest ->
           log.debug("Found PatronRequest ${patronRequest.id} with state ${patronRequest.state?.code}");
           def previousState = patronRequest.state;
-          def overdueState = reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE');
+          def overdueState = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE);
           if(overdueState == null) {
             log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");            
           } else {

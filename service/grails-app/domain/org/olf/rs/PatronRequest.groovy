@@ -1,20 +1,20 @@
 package org.olf.rs
 
-import javax.persistence.Transient
-import grails.databinding.BindInitializer
-import grails.gorm.multitenancy.Tenants;
-import grails.gorm.MultiTenant
-import com.k_int.web.toolkit.refdata.RefdataValue
-import com.k_int.web.toolkit.custprops.CustomProperties
-import com.k_int.web.toolkit.refdata.CategoryId
-import com.k_int.web.toolkit.refdata.Defaults
-import org.olf.rs.statemodel.Status;
-import org.olf.rs.statemodel.AvailableAction;
-import com.k_int.web.toolkit.tags.Tag
-import org.olf.okapi.modules.directory.Symbol;
 import java.time.LocalDate;
+
 import org.olf.okapi.modules.directory.DirectoryEntry;
-import groovy.sql.Sql;
+import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.statemodel.AvailableAction;
+import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.Status;
+
+import com.k_int.web.toolkit.custprops.CustomProperties;
+import com.k_int.web.toolkit.refdata.CategoryId;
+import com.k_int.web.toolkit.refdata.Defaults;
+import com.k_int.web.toolkit.refdata.RefdataValue;
+import com.k_int.web.toolkit.tags.Tag;
+
+import grails.gorm.MultiTenant;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -427,10 +427,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   def beforeInsert() {
     if ( this.state == null ) {
       if ( this.isRequester ) {
-        this.state = Status.lookup('PatronRequest', 'REQ_IDLE');
+        this.state = Status.lookup(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE);
       }
       else {
-        this.state = Status.lookup('Responder', 'RES_IDLE');
+        this.state = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_IDLE);
       }
     }
   }
