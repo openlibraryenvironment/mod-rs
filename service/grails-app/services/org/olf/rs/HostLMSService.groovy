@@ -53,7 +53,7 @@ public class HostLMSService {
     resultMap.hostLMS = false;
     resultMap.errors = [];
     resultMap.complete = [:];
-    def volumesNotCheckedIn = request.volumes.findAll { rv.status.value == 'awaiting_lms_check_in'; }
+    def volumesNotCheckedIn = request.volumes.findAll { rv -> rv.status.value == 'awaiting_lms_check_in'; }
     HostLMSActions host_lms = getHostLMSActions();
     if (host_lms) {
       resultMap.hostLMS = true;
