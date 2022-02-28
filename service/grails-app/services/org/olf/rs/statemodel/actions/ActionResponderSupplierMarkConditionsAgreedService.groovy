@@ -9,7 +9,6 @@ import org.olf.rs.statemodel.Status;
 public class ActionResponderSupplierMarkConditionsAgreedService extends ActionResponderService {
 
 	static String[] TO_STATES = [Status.RESPONDER_AWAIT_PICKING,
-								 Status.RESPONDER_AWAIT_PROXY_BORROWER,
 								 Status.RESPONDER_AWAIT_SHIP,
 								 Status.RESPONDER_CHECKED_IN_TO_RESHARE,
 								 Status.RESPONDER_IDLE,
