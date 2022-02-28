@@ -227,12 +227,13 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  private void error(PatronRequest pr, String message) {
-    Status old_state = pr.state;
-    Status new_state = pr.isRequester ? lookupStatus('PatronRequest', 'REQ_ERROR') : lookupStatus('Responder', 'RES_ERROR');
-    pr.state = new_state;
-    auditEntry(pr, old_state, new_state, message, null);
-  }
+// what calls this, as I don't think it gets called  
+//  private void error(PatronRequest pr, String message) {
+//    Status old_state = pr.state;
+//    Status new_state = pr.isRequester ? lookupStatus('PatronRequest', 'REQ_ERROR') : lookupStatus('Responder', 'RES_ERROR');
+//    pr.state = new_state;
+//    auditEntry(pr, old_state, new_state, message, null);
+//  }
 
   public void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
 
