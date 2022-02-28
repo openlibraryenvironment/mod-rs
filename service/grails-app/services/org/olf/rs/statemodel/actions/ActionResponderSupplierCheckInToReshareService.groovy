@@ -44,7 +44,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 	
 	    if (parameters?.itemBarcodes.size() != 0) {
 	        if (request.state.code == Status.RESPONDER_AWAIT_PICKING ||
-	            request.state.code == Status.RESPONDER_AWAIT_PROXY_BORROWER ||
 	            request.state.code == Status.RESPONDER_AWAIT_SHIP) {
 				
 		        // TODO For now we still use this, so just set to first item in array for now. Should be removed though
@@ -193,8 +192,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 				            actionResultDetails.newStatus = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP);
 				
 				            // Log message differs from "fill request" to "add additional items"
-				            actionResultDetails.auditMessage = (request.state.code == Status.RESPONDER_AWAIT_PICKING ||
-																request.state.code == Status.RESPONDER_AWAIT_PROXY_BORROWER) ?
+				            actionResultDetails.auditMessage = (request.state.code == Status.RESPONDER_AWAIT_PICKING) ?
 															 'Fill request completed.' :
 															 'Additional items successfully checked in to ReShare';
 				            result = true;
