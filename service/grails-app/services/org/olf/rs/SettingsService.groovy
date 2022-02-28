@@ -40,7 +40,7 @@ public class SettingsService {
 		if (settingValue == null) {
 			// They must both be null
 			result = (value == null);
-		} else {
+		} else if (value != null) {
 			// They must have the same value
 			result = (settingValue == value);
 		}  
