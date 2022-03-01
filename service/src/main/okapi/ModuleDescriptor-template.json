@@ -208,14 +208,24 @@
           "permissionsRequired": [ "rs.shipments" ]
         },
         {
-          "methods": [ "GET", "POST", "PUT", "DELETE" ],
-          "pathPattern": "/rs/hostLMSLocations*",
-          "permissionsRequired": [ "rs.hostlmslocations" ]
-        },
-        {
           "methods": [ "GET" ],
           "pathPattern": "/rs/hostLMSLocations*",
           "permissionsRequired": [ "rs.hostlmslocations.get" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/hostLMSLocations*",
+          "permissionsRequired": [ "rs.hostlmslocations.put" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/hostLMSLocations*",
+          "permissionsRequired": [ "rs.hostlmslocations.post" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/hostLMSLocations*",
+          "permissionsRequired": [ "rs.hostlmslocations.delete" ]
         },
         {
           "methods": [ "GET" ],
@@ -706,10 +716,49 @@
       "visible": false
     },
     {
-      "permissionName": "rs.hostlmslocations",
-      "displayName": "hostlmslocations",
-      "description": "hostlmslocations",
+      "permissionName": "rs.hostlmslocations.get",
+      "displayName": "get hostlmslocations",
+      "description": "get hostlmslocations",
       "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmslocations.post",
+      "displayName": "post hostlmslocations",
+      "description": "post hostlmslocations",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmslocations.put",
+      "displayName": "put hostlmslocations",
+      "description": "put hostlmslocations",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmslocations.delete",
+      "displayName": "delete hostlmslocations",
+      "description": "delete hostlmslocations",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmslocations.read",
+      "displayName": "read hostlmslocations",
+      "description": "read hostlmslocations",
+      "visible": false,
+      "subPermissions" : [
+        "rs.hostlmslocations.get"
+      ]
+    },
+    {
+      "permissionName": "rs.hostlmslocations.write",
+      "displayName": "write hostlmslocations",
+      "description": "write hostlmslocations",
+      "visible": false,
+      "subPermissions" : [
+        "rs.hostlmslocations.read",
+        "rs.hostlmslocations.post",
+        "rs.hostlmslocations.put",
+        "rs.hostlmslocations.delete"
+      ]
     },
     {
       "permissionName": "rs.timers",
@@ -735,7 +784,7 @@
         "rs.kiwt",
         "rs.shipments",
         "rs.noticePolicies",
-        "rs.hostlmslocations",
+        "rs.hostlmslocations.write",
         "rs.timers"
       ]
     },
