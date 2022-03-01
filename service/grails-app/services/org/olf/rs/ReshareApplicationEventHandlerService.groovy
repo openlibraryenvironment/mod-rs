@@ -388,6 +388,9 @@ public class ReshareApplicationEventHandlerService {
 	    if ( symbol_list.size() == 1 ) {
 			result = symbol_list.get(0);
 	    }
+            else {
+              log.warn("Missing or multiple symbol match for : ${authorty}:${authorty} (${symbol_list?.size()})");
+            }
 	
 	    return result;
 	}
@@ -399,7 +402,13 @@ public class ReshareApplicationEventHandlerService {
 			if ( name_components.length == 2 ) {
 				result = resolveSymbol(name_components[0], name_components[1]);
 			}
+                        else {
+                          log.warn("unexpected number of name components attempting to parse ${combinedString}: ${name_components}");
+                        }
 		}
+                else {
+                        log.warn("resolveCombinedSymbol called with NULL string");
+                }
 		return result;
 	}
 }
