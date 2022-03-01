@@ -54,8 +54,6 @@ public class StatusData {
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, '0006', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, '0010', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, '0015', true);
-        Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PROXY_BORROWER, '0016', true, true);
-        Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, '0020', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, '0021', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_HOLD_PLACED, '0025', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED, '0030', true, null, true);

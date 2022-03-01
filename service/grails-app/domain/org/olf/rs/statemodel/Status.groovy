@@ -40,12 +40,10 @@ class Status implements MultiTenant<Status> {
   public static String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
 
   public static String RESPONDER_AWAIT_PICKING              = "RES_AWAIT_PICKING";
-  public static String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
   public static String RESPONDER_AWAIT_SHIP                 = "RES_AWAIT_SHIP";
   public static String RESPONDER_AWAITING_RETURN_SHIPPING   = "RES_AWAITING_RETURN_SHIPPING";
   public static String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
   public static String RESPONDER_CANCELLED                  = "RES_CANCELLED";
-  public static String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
   public static String RESPONDER_COMPLETE                   = "RES_COMPLETE";
   public static String RESPONDER_ERROR                      = "RES_ERROR";
   public static String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
@@ -57,7 +55,12 @@ class Status implements MultiTenant<Status> {
   public static String RESPONDER_OVERDUE                    = "RES_OVERDUE";
   public static String RESPONDER_PENDING_CONDITIONAL_ANSWER = "RES_PENDING_CONDITIONAL_ANSWER";
   public static String RESPONDER_UNFILLED                   = "RES_UNFILLED";
-    
+
+  // These 2 are no longer used but have left here in case they are to be used in the future,
+  // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database
+  public static String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
+  public static String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
+  
   String id
   StateModel owner
   String code
