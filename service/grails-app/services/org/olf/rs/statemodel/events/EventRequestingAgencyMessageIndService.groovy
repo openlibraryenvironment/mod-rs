@@ -142,7 +142,7 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 							// We cannot cancel a shipped item
 							Status newState = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED);
 							reshareApplicationEventHandlerService.auditEntry(pr, pr.state, newState, "Requester requested cancellation of the request", null);
-							pr.previousStates['RES_CANCEL_REQUEST_RECEIVED'] = pr.state.code;
+							pr.previousStates[Status.RESPONDER_CANCEL_REQUEST_RECEIVED] = pr.state.code;
 							
 							// Adding an audit entry so we can see what states we are going to for the event
 							// Do not commit this uncommented, here to aid seeing what transition changes we allow
