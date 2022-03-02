@@ -402,14 +402,14 @@ public class EventConsumerService implements EventPublisher, DataBinder {
       List symbols_to_remove = []
 
       de.symbols.each { dbsymbol ->
-        log.debug("Verify symbol ${dbsymbol}");
+        log.debug("Verify symbol ${dbsymbol} (${dbsymbol?.authority?.symbol}:${dbsymbol?.symbol})");
         // Look in payload.symbols for a map entry where dbsymbol.symbol == entry.symbol and dbsymbol.authority.symbol == entry.authority
         def located_map_entry = payload.symbols.find { ( ( it.symbol == dbsymbol.symbol ) && ( it.authority == dbsymbol.authority.symbol ) ) }
         if ( located_map_entry ) {
           // DB symbol still present in data, no action needed
         }
         else {
-          log.warn("Residual symbol still in db : ${dbsymbol} - should be removed")
+          log.warn("Residual symbol still in db : ${dbsymbol} but not in updated record from mod-directory - should be removed")
           symbols_to_remove.add(dbsymbol);
         }
       }
