@@ -181,6 +181,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
 		// I didn't go through changing everywhere result was mentioned to eventResultDetails.responseResult
 		eventResultDetails.responseResult = result;
+
+                log.debug("EventMessageRequestIndService::processEvent complete");
 		return(eventResultDetails);
 	}
 }

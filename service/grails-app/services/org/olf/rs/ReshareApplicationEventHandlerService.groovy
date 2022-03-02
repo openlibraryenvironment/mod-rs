@@ -159,8 +159,11 @@ public class ReshareApplicationEventHandlerService {
   def handleRequestMessage(Map eventData) {
 
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
+
 	// Just call it directly
 	EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
+
+    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage returning");
     return eventResultDetails.responseResult;
   }
 
