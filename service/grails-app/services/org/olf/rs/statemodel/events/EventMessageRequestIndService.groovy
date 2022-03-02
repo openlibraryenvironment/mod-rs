@@ -12,7 +12,9 @@ import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
+import groovy.util.logging.Slf4j
 
+@Slf4j
 public class EventMessageRequestIndService extends AbstractEvent {
 
 	ReshareActionService reshareActionService;
