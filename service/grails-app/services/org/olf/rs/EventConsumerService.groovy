@@ -417,7 +417,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
       symbols_to_remove.each { symbol_to_remove ->
         try {
           log.debug("Remove ${symbol_to_remove}");
-          symbol_to_remove.delete()
+          // symbol_to_remove.delete()
+          de.removeFromSymbols(symbol_to_remove);
         }
         catch ( Exception e ) {
           log.error("problem deleting symbol",e);

@@ -389,7 +389,7 @@ public class ReshareApplicationEventHandlerService {
 			result = symbol_list.get(0);
 	    }
             else {
-              log.warn("Missing or multiple symbol match for : ${authorty}:${authorty} (${symbol_list?.size()})");
+              log.warn("Missing or multiple symbol match for : ${authorty}:${symbol} (${symbol_list?.size()})");
             }
 	
 	    return result;
