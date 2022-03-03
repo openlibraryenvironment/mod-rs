@@ -106,7 +106,7 @@ public class HostLMSService {
     //Make sure we don't have any hanging volumes
     volumesNotCheckedIn = request.volumes.findAll { rv -> rv.status.value == 'awaiting_lms_check_in'; }
 
-    if(volumesNotCheckedOut.size() == 0) {
+    if(volumesNotCheckedIn.size() == 0) {
       statisticsService.decrementCounter('/activeLoans');
       request.needsAttention = false;
       request.activeLoan = false;

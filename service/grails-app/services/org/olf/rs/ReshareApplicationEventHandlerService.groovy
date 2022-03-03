@@ -14,11 +14,11 @@ import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 import org.olf.rs.statemodel.events.EventNoImplementationService;
 import org.olf.rs.statemodel.events.EventRequestingAgencyMessageIndService;
 import org.olf.rs.statemodel.events.EventSupplyingAgencyMessageIndService;
-
 import grails.events.annotation.Subscriber;
 import grails.gorm.multitenancy.Tenants;
 import grails.util.Holders
 import groovy.json.JsonOutput;
+import groovy.util.logging.Slf4j
 
 /**
  * Handle application events.
@@ -29,6 +29,8 @@ import groovy.json.JsonOutput;
  *
  * StateModel: https://app.diagrams.net/#G1fC5Xtj5fbk_Z7dIgjqgP3flBQfTSz-1s
  */
+
+@Slf4j
 public class ReshareApplicationEventHandlerService {
 
   private static final int MAX_RETRIES = 10;
@@ -159,8 +161,11 @@ public class ReshareApplicationEventHandlerService {
   def handleRequestMessage(Map eventData) {
 
     log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
+
 	// Just call it directly
 	EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
+
+    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage returning");
     return eventResultDetails.responseResult;
   }
 
