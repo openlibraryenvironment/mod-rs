@@ -45,7 +45,7 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 
 
 		if( check_in_on_return?.value != 'off' ) {
-			log.debug("Attempting NCIP CheckInItem for volumes for request {$request?.id}");
+			log.debug("Attempting NCIP CheckInItem after setting item returned for volumes for request {$request?.id}");
 			Map result_map = [:];
 			try {
 				result_map = hostLMSService.checkInRequestVolumes(request);
@@ -58,6 +58,8 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 			} else {
 				log.debug("Failed to check in volumes for request {$request.id}")
 			}
+		} else {
+			log.debug("NOT Attempting NCIP CheckInItem after setting item returned for volumes for request {$request?.id}");
 		}
 		
 		return(actionResultDetails);
