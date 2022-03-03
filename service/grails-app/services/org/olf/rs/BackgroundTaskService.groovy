@@ -8,7 +8,7 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.Timers.AbstractTimer;
+import org.olf.rs.timers.AbstractTimer;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
