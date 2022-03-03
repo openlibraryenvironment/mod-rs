@@ -10,56 +10,56 @@ import com.k_int.web.toolkit.tags.Tag
 
 class Status implements MultiTenant<Status> {
 
-  public static String PATRON_REQUEST_AWAITING_RETURN_SHIPPING    = "REQ_AWAITING_RETURN_SHIPPING";
-  public static String PATRON_REQUEST_BORROWER_RETURNED           = "REQ_BORROWER_RETURNED";
-  public static String PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED  = "REQ_BORROWING_LIBRARY_RECEIVED";
-  public static String PATRON_REQUEST_CANCEL_PENDING              = "REQ_CANCEL_PENDING";
-  public static String PATRON_REQUEST_CANCELLED                   = "REQ_CANCELLED";
-  public static String PATRON_REQUEST_CANCELLED_WITH_SUPPLIER     = "REQ_CANCELLED_WITH_SUPPLIER";
-  public static String PATRON_REQUEST_CHECKED_IN                  = "REQ_CHECKED_IN";
-  public static String PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED = "REQ_CONDITIONAL_ANSWER_RECEIVED";
-  public static String PATRON_REQUEST_END_OF_ROTA                 = "REQ_END_OF_ROTA";
-  public static String PATRON_REQUEST_ERROR                       = "REQ_ERROR";
-  public static String PATRON_REQUEST_EXPECTS_TO_SUPPLY           = "REQ_EXPECTS_TO_SUPPLY";
-  public static String PATRON_REQUEST_FILLED_LOCALLY              = "REQ_FILLED_LOCALLY";
-  public static String PATRON_REQUEST_IDLE                        = "REQ_IDLE";
-  public static String PATRON_REQUEST_INVALID_PATRON              = "REQ_INVALID_PATRON";
-  public static String PATRON_REQUEST_LOCAL_REVIEW                = "REQ_LOCAL_REVIEW";
-  public static String PATRON_REQUEST_OVERDUE                     = "REQ_OVERDUE";
-  public static String PATRON_REQUEST_PENDING                     = "REQ_PENDING";
-  public static String PATRON_REQUEST_RECALLED                    = "REQ_RECALLED";
-  public static String PATRON_REQUEST_REQUEST_COMPLETE            = "REQ_REQUEST_COMPLETE";
-  public static String PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    = "REQ_REQUEST_SENT_TO_SUPPLIER";
-  public static String PATRON_REQUEST_SHIPPED                     = "REQ_SHIPPED";
-  public static String PATRON_REQUEST_SHIPPED_TO_SUPPLIER         = "REQ_SHIPPED_TO_SUPPLIER";
-  public static String PATRON_REQUEST_SOURCING_ITEM               = "REQ_SOURCING_ITEM";
-  public static String PATRON_REQUEST_SUPPLIER_IDENTIFIED         = "REQ_SUPPLIER_IDENTIFIED";
-  public static String PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER  = "REQ_UNABLE_TO_CONTACT_SUPPLIER";
-  public static String PATRON_REQUEST_UNFILLED                    = "REQ_UNFILLED";
-  public static String PATRON_REQUEST_VALIDATED                   = "REQ_VALIDATED";
-  public static String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
+  public static final String PATRON_REQUEST_AWAITING_RETURN_SHIPPING    = "REQ_AWAITING_RETURN_SHIPPING";
+  public static final String PATRON_REQUEST_BORROWER_RETURNED           = "REQ_BORROWER_RETURNED";
+  public static final String PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED  = "REQ_BORROWING_LIBRARY_RECEIVED";
+  public static final String PATRON_REQUEST_CANCEL_PENDING              = "REQ_CANCEL_PENDING";
+  public static final String PATRON_REQUEST_CANCELLED                   = "REQ_CANCELLED";
+  public static final String PATRON_REQUEST_CANCELLED_WITH_SUPPLIER     = "REQ_CANCELLED_WITH_SUPPLIER";
+  public static final String PATRON_REQUEST_CHECKED_IN                  = "REQ_CHECKED_IN";
+  public static final String PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED = "REQ_CONDITIONAL_ANSWER_RECEIVED";
+  public static final String PATRON_REQUEST_END_OF_ROTA                 = "REQ_END_OF_ROTA";
+  public static final String PATRON_REQUEST_ERROR                       = "REQ_ERROR";
+  public static final String PATRON_REQUEST_EXPECTS_TO_SUPPLY           = "REQ_EXPECTS_TO_SUPPLY";
+  public static final String PATRON_REQUEST_FILLED_LOCALLY              = "REQ_FILLED_LOCALLY";
+  public static final String PATRON_REQUEST_IDLE                        = "REQ_IDLE";
+  public static final String PATRON_REQUEST_INVALID_PATRON              = "REQ_INVALID_PATRON";
+  public static final String PATRON_REQUEST_LOCAL_REVIEW                = "REQ_LOCAL_REVIEW";
+  public static final String PATRON_REQUEST_OVERDUE                     = "REQ_OVERDUE";
+  public static final String PATRON_REQUEST_PENDING                     = "REQ_PENDING";
+  public static final String PATRON_REQUEST_RECALLED                    = "REQ_RECALLED";
+  public static final String PATRON_REQUEST_REQUEST_COMPLETE            = "REQ_REQUEST_COMPLETE";
+  public static final String PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    = "REQ_REQUEST_SENT_TO_SUPPLIER";
+  public static final String PATRON_REQUEST_SHIPPED                     = "REQ_SHIPPED";
+  public static final String PATRON_REQUEST_SHIPPED_TO_SUPPLIER         = "REQ_SHIPPED_TO_SUPPLIER";
+  public static final String PATRON_REQUEST_SOURCING_ITEM               = "REQ_SOURCING_ITEM";
+  public static final String PATRON_REQUEST_SUPPLIER_IDENTIFIED         = "REQ_SUPPLIER_IDENTIFIED";
+  public static final String PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER  = "REQ_UNABLE_TO_CONTACT_SUPPLIER";
+  public static final String PATRON_REQUEST_UNFILLED                    = "REQ_UNFILLED";
+  public static final String PATRON_REQUEST_VALIDATED                   = "REQ_VALIDATED";
+  public static final String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
 
-  public static String RESPONDER_AWAIT_PICKING              = "RES_AWAIT_PICKING";
-  public static String RESPONDER_AWAIT_SHIP                 = "RES_AWAIT_SHIP";
-  public static String RESPONDER_AWAITING_RETURN_SHIPPING   = "RES_AWAITING_RETURN_SHIPPING";
-  public static String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
-  public static String RESPONDER_CANCELLED                  = "RES_CANCELLED";
-  public static String RESPONDER_COMPLETE                   = "RES_COMPLETE";
-  public static String RESPONDER_ERROR                      = "RES_ERROR";
-  public static String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
-  public static String RESPONDER_IDLE                       = "RES_IDLE";
-  public static String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
-  public static String RESPONDER_ITEM_SHIPPED               = "RES_ITEM_SHIPPED";
-  public static String RESPONDER_NEW_AWAIT_PULL_SLIP        = "RES_NEW_AWAIT_PULL_SLIP";
-  public static String RESPONDER_NOT_SUPPLIED               = "RES_NOT_SUPPLIED";
-  public static String RESPONDER_OVERDUE                    = "RES_OVERDUE";
-  public static String RESPONDER_PENDING_CONDITIONAL_ANSWER = "RES_PENDING_CONDITIONAL_ANSWER";
-  public static String RESPONDER_UNFILLED                   = "RES_UNFILLED";
+  public static final String RESPONDER_AWAIT_PICKING              = "RES_AWAIT_PICKING";
+  public static final String RESPONDER_AWAIT_SHIP                 = "RES_AWAIT_SHIP";
+  public static final String RESPONDER_AWAITING_RETURN_SHIPPING   = "RES_AWAITING_RETURN_SHIPPING";
+  public static final String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
+  public static final String RESPONDER_CANCELLED                  = "RES_CANCELLED";
+  public static final String RESPONDER_COMPLETE                   = "RES_COMPLETE";
+  public static final String RESPONDER_ERROR                      = "RES_ERROR";
+  public static final String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
+  public static final String RESPONDER_IDLE                       = "RES_IDLE";
+  public static final String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
+  public static final String RESPONDER_ITEM_SHIPPED               = "RES_ITEM_SHIPPED";
+  public static final String RESPONDER_NEW_AWAIT_PULL_SLIP        = "RES_NEW_AWAIT_PULL_SLIP";
+  public static final String RESPONDER_NOT_SUPPLIED               = "RES_NOT_SUPPLIED";
+  public static final String RESPONDER_OVERDUE                    = "RES_OVERDUE";
+  public static final String RESPONDER_PENDING_CONDITIONAL_ANSWER = "RES_PENDING_CONDITIONAL_ANSWER";
+  public static final String RESPONDER_UNFILLED                   = "RES_UNFILLED";
 
   // These 2 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database
-  public static String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
-  public static String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
+  public static final String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
+  public static final String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
   
   String id
   StateModel owner
