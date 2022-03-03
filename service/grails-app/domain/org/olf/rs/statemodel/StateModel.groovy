@@ -14,8 +14,8 @@ import com.k_int.web.toolkit.refdata.Defaults
 
 class StateModel implements MultiTenant<StateModel> {
 
-  public static String MODEL_REQUESTER = "PatronRequest";
-  public static String MODEL_RESPONDER = "Responder";
+  public static final String MODEL_REQUESTER = "PatronRequest";
+  public static final String MODEL_RESPONDER = "Responder";
   
   String id
   String shortcode
