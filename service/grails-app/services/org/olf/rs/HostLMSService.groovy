@@ -21,6 +21,7 @@ public class HostLMSService {
 
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  StatisticsService statisticsService
 
   public HostLMSActions getHostLMSActionsFor(String lms) {
     log.debug("HostLMSService::getHostLMSActionsFor(${lms})");
