@@ -1,0 +1,26 @@
+{
+    "extends": "recommended",
+    "rules": {
+		"Comments.JavadocEmptyLastLine": "off",
+		"Convention.CompileStatic": "off",
+		"Design.Instanceof": "off",
+		"Dry.DuplicateMapLiteral": "off",
+		"Dry.DuplicateNumberLiteral": "off",
+		"Exceptions.CatchException": "off",
+		"Exceptions.ThrowException": "off",
+		"Exceptions.ThrowRuntimeException": "off",
+		"Formatting.ClassEndsWithBlankLine": "off",
+		"Formatting.LineLength": "off",
+		"Groovyism.ClosureAsLastMethodParameter": "off",
+		"Size.MethodSize": "off",
+		"Size.NestedBlockDepth": {
+			"maxNestedBlockDepth": 10
+		},
+		"Unnecessary.UnnecessaryElseStatement": "off",
+		"Unnecessary.UnnecessaryGetter": "off",
+		"Unnecessary.UnnecessaryObjectReferences": "off",
+		"Unnecessary.UnnecessaryPublicModifier": "off",
+        "Unnecessary.UnnecessaryReturnKeyword": "off",
+		"Unnecessary.UnnecessarySemicolon": "off"
+    }
+}

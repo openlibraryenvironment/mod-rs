@@ -6,43 +6,53 @@ import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
+/**
+ * This event service id for those events that have not been implemented
+ * @author Chas
+ *
+ */
 public class EventNoImplementationService extends AbstractEvent {
 
-	static String[] FROM_STATES = [
-	];
+    private static final String[] FROM_STATES = [
+    ];
 
-	static String[] TO_STATES = [
-	];
+    private static final String[] TO_STATES = [
+    ];
 
-	String name() {
-		return(Events.EVENT_NO_IMPLEMENTATION);
-	}
+    @Override
+    String name() {
+        return(Events.EVENT_NO_IMPLEMENTATION);
+    }
 
-	EventFetchRequestMethod fetchRequestMethod() {
-		// We assume anything that is not implemented will have the request id in the payload
-		return(EventFetchRequestMethod.PAYLOAD_ID);
-	}
+    @Override
+    EventFetchRequestMethod fetchRequestMethod() {
+        // We assume anything that is not implemented will have the request id in the payload
+        return(EventFetchRequestMethod.PAYLOAD_ID);
+    }
 
-	String[] toStates(String model) {
-		return(TO_STATES);
-	}
-		
-	String[] fromStates(String model) {
-		return(FROM_STATES);
-	}
+    @Override
+    String[] toStates(String model) {
+        return(TO_STATES);
+    }
 
-	boolean supportsModel(String model) {
-		// As this is the fallback for all those not implemented, we support all models 
-		return(true);	
-	}
-	
-	EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+    @Override
+    String[] fromStates(String model) {
+        return(FROM_STATES);
+    }
 
-		// There is nothing to do
-		log.error("Event " + eventData.event.toString() + " has not been implemented");
-		
-		// No need to save the request or add an audit entry
-		eventResultDetails.saveData = false;
-		return(eventResultDetails);
-	}
+    @Override
+    boolean supportsModel(String model) {
+        // As this is the fallback for all those not implemented, we support all models
+        return(true);
+    }
+
+    @Override
+    EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+        // There is nothing to do
+        //log.error('Event ' + eventData.event + ' has not been implemented');
+
+        // No need to save the request or add an audit entry
+        eventResultDetails.saveData = false;
+        return(eventResultDetails);
+    }
 }
