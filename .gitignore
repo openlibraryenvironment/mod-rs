@@ -1,4 +1,7 @@
 /.*
 !/.gitignore
 !/.github
+!/.groovylintrc.json
 Vagrantfile
+tools/testing/zk-single-kafka-single
+*.log
