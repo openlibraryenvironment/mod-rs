@@ -22,12 +22,16 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import grails.gorm.multitenancy.Tenants.CurrentTenant
 import org.olf.rs.HostLMSLocation;
+import org.olf.rs.HostLMSShelvingLocation;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
  *
  */
 public abstract class BaseHostLMSService implements HostLMSActions {
+
+  private static String SHELVING_LOC_QRY = 'select sl from HostLMSShelvingLocation as sl where sl.location = :loc and sl.code=:sl'
+
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
   List getLookupStrategies() {
@@ -140,6 +144,25 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                                                         code:o.location,
                                                                         name:o.location,
                                                                         icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+
+      HostLMSShelvingLocation sl = null;
+
+      // create a HostLMSShelvingLocation in respect of shelvingLocation
+      if ( o?.shelvingLocation != null ) {
+        List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [loc: loc, sl: o.shelvingLocation])
+        switch ( shelving_loc_list.size() ) {
+          case 0:
+            sl = new HostLMSShelvingLocation( location:loc, code: o.shelvingLocation, name: o.shelvingLocation).save(flush:true, failOnError:true);
+            break;
+          case 1:
+            sl = shelving_loc_list.get(0);
+            break;
+          default:
+            throw new RuntimeException("Multiple shelving locations match ${o.location}.${o.shelvingLocation}");
+            break;
+        }
+      }
+
       o.preference = loc.supplyPreference ?: 0
     }
 
