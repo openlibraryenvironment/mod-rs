@@ -8,20 +8,27 @@ import org.olf.rs.statemodel.StateModel;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
+/**
+ * Base event class for notices
+ * @author Chas
+ *
+ */
 public abstract class EventTriggerNoticesService extends AbstractEvent {
 
-	PatronNoticeService patronNoticeService;
-	
-	EventFetchRequestMethod fetchRequestMethod() {
-		return(EventFetchRequestMethod.PAYLOAD_ID);
-	}
+    PatronNoticeService patronNoticeService;
 
-	boolean supportsModel(String model) {
-		// This event 
-		return(model == StateModel.MODEL_REQUESTER);	
-	}
-	
-	public void triggerNotice(PatronRequest request, String trigger) {
-		patronNoticeService.triggerNotices(request, RefdataValue.lookupOrCreate('noticeTriggers', trigger));
-	}
+    @Override
+    EventFetchRequestMethod fetchRequestMethod() {
+        return(EventFetchRequestMethod.PAYLOAD_ID);
+    }
+
+    @Override
+    boolean supportsModel(String model) {
+        // This event
+        return(model == StateModel.MODEL_REQUESTER);
+    }
+
+    public void triggerNotice(PatronRequest request, String trigger) {
+        patronNoticeService.triggerNotices(request, RefdataValue.lookupOrCreate('noticeTriggers', trigger));
+    }
 }

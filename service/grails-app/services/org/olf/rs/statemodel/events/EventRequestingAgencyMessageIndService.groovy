@@ -10,31 +10,36 @@ import org.olf.rs.statemodel.Status;
 
 public class EventRequestingAgencyMessageIndService extends AbstractEvent {
 
-	static String[] fromStates = [
+	private static final String[] fromStates = [
 	];
 	
-	static String[] toStates = [
+	private static final String[] toStates = [
 		Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
 		Status.RESPONDER_ITEM_RETURNED
 	];
 	 	
+    @Override
 	String name() {
 		return(Events.EVENT_REQUESTING_AGENCY_MESSAGE_INDICATION);
 	}
 
+    @Override
 	EventFetchRequestMethod fetchRequestMethod() {
 		// We are dealing with the transaction directly
 		return(EventFetchRequestMethod.HANDLED_BY_EVENT_HANDLER);
 	}
 
+    @Override
 	String[] toStates(String model) {
 		return(toStates);
 	}
 		
+    @Override
 	String[] fromStates(String model) {
 		return(fromStates);
 	}
 
+    @Override
 	boolean supportsModel(String model) {
 		// We do not want want this event to appear anywhere 
 		return(model == StateModel.MODEL_RESPONDER);	
@@ -45,6 +50,7 @@ public class EventRequestingAgencyMessageIndService extends AbstractEvent {
    * eventData.header?.supplyingAgencyRequestId to find our own ID for the request.
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
+    @Override
 	EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
 
 		// In our scenario the request will be null, as we do everything ourselves, so never reference that parameter

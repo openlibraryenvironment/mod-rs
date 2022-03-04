@@ -5,35 +5,44 @@ import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
+/**
+ * Event service that is triggered when the end of rota is reached
+ * @author Chas
+ *
+ */
 public class EventStatusReqEndOfRotaIndService extends EventTriggerNoticesService {
 
-	static String[] FROM_STATES = [
-	];
+    private static final String[] FROM_STATES = [
+    ];
 
-	static String[] TO_STATES = [
-	];
+    private static final String[] TO_STATES = [
+    ];
 
-	String name() {
-		return(Events.EVENT_STATUS_REQ_END_OF_ROTA_INDICATION);
-	}
+    @Override
+    String name() {
+        return(Events.EVENT_STATUS_REQ_END_OF_ROTA_INDICATION);
+    }
 
-	EventFetchRequestMethod fetchRequestMethod() {
-		return(EventFetchRequestMethod.PAYLOAD_ID);
-	}
+    @Override
+    EventFetchRequestMethod fetchRequestMethod() {
+        return(EventFetchRequestMethod.PAYLOAD_ID);
+    }
 
-	String[] toStates(String model) {
-		return(TO_STATES);
-	}
-		
-	String[] fromStates(String model) {
-		return(FROM_STATES);
-	}
+    @Override
+    String[] toStates(String model) {
+        return(TO_STATES);
+    }
 
-	EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+    @Override
+    String[] fromStates(String model) {
+        return(FROM_STATES);
+    }
 
-		// all we need to do is call triggerNotice
-		triggerNotice(request, "End of rota");
-		
-		return(eventResultDetails);
-	}
+    @Override
+    EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+        // all we need to do is call triggerNotice
+        triggerNotice(request, 'End of rota');
+
+        return(eventResultDetails);
+    }
 }
