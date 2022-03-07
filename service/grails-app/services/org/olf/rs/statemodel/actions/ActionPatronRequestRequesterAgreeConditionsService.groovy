@@ -9,51 +9,55 @@ import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
+/**
+ * This action performs the agreeing of conditions by the requester
+ * @author Chas
+ *
+ */
 public class ActionPatronRequestRequesterAgreeConditionsService extends AbstractAction {
 
-	static String[] TO_STATES = [
-								 Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY
-								];
-	
-	@Override
-	String name() {
-		return(Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS);
-	}
+    private static final String[] TO_STATES = [
+        Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY
+    ];
 
-	@Override
-	String[] toStates() {
-		return(TO_STATES);
-	}
+    @Override
+    String name() {
+        return(Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS);
+    }
 
-	@Override
-	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
+    @Override
+    String[] toStates() {
+        return(TO_STATES);
+    }
 
-		// If we are not the requester, flag it as an error
-		if (!request.isRequester) {
-			actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
-			actionResultDetails.auditMessage = 'Only the responder can accept the conditions';
-		} else {
-			String responseKey = "#ReShareLoanConditionAgreeResponse#";
-	
-			if (parameters.isNull("note")) {
-				parameters.note = responseKey;
-			} else {
-				parameters.note = "${responseKey} ${parameters.note}";
-			}
-		
-			// Inform the responder
-			reshareActionService.sendRequestingAgencyMessage(request, "Notification", parameters);
-	
-			def conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(request, request.resolvedSupplier);
-			conditions.each {condition ->
-				condition.setAccepted(true);
-				condition.save(flush: true, failOnError: true);
-			}
-			
-			actionResultDetails.auditMessage = 'Agreed to loan conditions';
-			actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
-		}
+    @Override
+    ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        // If we are not the requester, flag it as an error
+        if (request.isRequester) {
+            String responseKey = '#ReShareLoanConditionAgreeResponse#';
 
-		return(actionResultDetails);
-	}
+            if (parameters.isNull('note')) {
+                parameters.note = responseKey;
+            } else {
+                parameters.note = "${responseKey} ${parameters.note}";
+            }
+
+            // Inform the responder
+            reshareActionService.sendRequestingAgencyMessage(request, 'Notification', parameters);
+
+            PatronRequestLoanCondition[] conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(request, request.resolvedSupplier);
+            conditions.each { condition ->
+                condition.accepted = true;
+                condition.save(flush: true, failOnError: true);
+            }
+
+            actionResultDetails.auditMessage = 'Agreed to loan conditions';
+            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+        } else {
+            actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
+            actionResultDetails.auditMessage = 'Only the responder can accept the conditions';
+        }
+
+        return(actionResultDetails);
+    }
 }

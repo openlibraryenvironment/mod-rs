@@ -7,39 +7,45 @@ import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
+/**
+ * Performs a check against the host LMS to validate the patron, overriding to be a valid patron ...
+ * @author Chas
+ *
+ */
 public class ActionPatronRequestBorrowerCheckOverrideService extends AbstractAction {
 
-	static String[] TO_STATES = [Status.PATRON_REQUEST_VALIDATED];
-	
-	@Override
-	String name() {
-		return(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE);
-	}
+    private static final String[] TO_STATES = [
+        Status.PATRON_REQUEST_VALIDATED
+    ];
 
-	@Override
-	String[] toStates() {
-		return(TO_STATES);
-	}
+    @Override
+    String name() {
+        return(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE);
+    }
 
-	@Override
-	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
+    @Override
+    String[] toStates() {
+        return(TO_STATES);
+    }
 
-		Map localParameters = parameters;
-		localParameters.override = true;
+    @Override
+    ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        Map localParameters = parameters;
+        localParameters.override = true;
 
-		// Perform the borrower check
-		Map borrower_check = reshareActionService.lookupPatron(request, localParameters);
-		
-		// borrower_check.patronValid should ALWAYS be true in this action
-		actionResultDetails.responseResult.status = borrower_check?.callSuccess
-		if (actionResultDetails.responseResult.status) {
-			actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED);
-		} else {
-			// The Host LMS check call has failed, stay in current state
-			request.needsAttention = true;
-			actionResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + borrower_check?.problems;
-		}
+        // Perform the borrower check
+        Map borrowerCheck = reshareActionService.lookupPatron(request, localParameters);
 
-		return(actionResultDetails);
-	}
+        // borrowerCheck.patronValid should ALWAYS be true in this action
+        actionResultDetails.responseResult.status = borrowerCheck?.callSuccess
+        if (actionResultDetails.responseResult.status) {
+            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED);
+        } else {
+            // The Host LMS check call has failed, stay in current state
+            request.needsAttention = true;
+            actionResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + borrowerCheck?.problems;
+        }
+
+        return(actionResultDetails);
+    }
 }

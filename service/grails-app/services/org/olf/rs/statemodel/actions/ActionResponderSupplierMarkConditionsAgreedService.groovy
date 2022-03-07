@@ -6,43 +6,48 @@ import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
+/**
+ * Requester has agreed to the conditions, which is being manually marked by the responder
+ * @author Chas
+ *
+ */
 public class ActionResponderSupplierMarkConditionsAgreedService extends ActionResponderService {
 
-	static String[] TO_STATES = [Status.RESPONDER_AWAIT_PICKING,
-								 Status.RESPONDER_AWAIT_SHIP,
-								 Status.RESPONDER_CHECKED_IN_TO_RESHARE,
-								 Status.RESPONDER_IDLE,
-								 Status.RESPONDER_NEW_AWAIT_PULL_SLIP
-								];
-	
-	@Override
-	String name() {
-		return(Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED);
-	}
+    private static final String[] TO_STATES = [
+        Status.RESPONDER_AWAIT_PICKING,
+        Status.RESPONDER_AWAIT_SHIP,
+        Status.RESPONDER_CHECKED_IN_TO_RESHARE,
+        Status.RESPONDER_IDLE,
+        Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+    ];
 
-	@Override
-	String[] toStates() {
-		return(TO_STATES);
-	}
+    @Override
+    String name() {
+        return(Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED);
+    }
 
-	@Override
-	Boolean canLeadToSameState() {
-	    // We do not return the same state, so we need to override and return false
-		return(false);
-	}
+    @Override
+    String[] toStates() {
+        return(TO_STATES);
+    }
 
-	@Override
-	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
-		
-		// Mark all conditions as accepted
-		reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(request)
+    @Override
+    Boolean canLeadToSameState() {
+        // We do not return the same state, so we need to override and return false
+        return(false);
+    }
 
-		actionResultDetails.auditMessage = 'Conditions manually marked as agreed';
-		actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER]);
+    @Override
+    ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        // Mark all conditions as accepted
+        reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(request)
 
-		// No longer need to have the state saved prior to the conditions being added
-		request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER] = null;
-		
-		return(actionResultDetails);
-	}
+        actionResultDetails.auditMessage = 'Conditions manually marked as agreed';
+        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER]);
+
+        // No longer need to have the state saved prior to the conditions being added
+        request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER] = null;
+
+        return(actionResultDetails);
+    }
 }
