@@ -54,7 +54,13 @@ public class HostLMSService {
     resultMap.hostLMS = false;
     resultMap.errors = [];
     resultMap.complete = [:];
-    def volumesNotCheckedIn = request.volumes.findAll { rv -> rv.status.value == 'awaiting_lms_check_in'; }
+    /* 
+    Since we don't throw errors for checking in already-checked-in items there's no
+    reason not to just try and check in all of the volumes
+    */
+    //def volumesNotCheckedIn = request.volumes.findAll { rv -> rv.status.value == 'awaiting_lms_check_in'; }
+    def volumesNotCheckedIn = request.volumes.findAll();
+    def totalVolumes = volumesNotCheckedIn.size();
     HostLMSActions host_lms = getHostLMSActions();
     if (host_lms) {
       resultMap.hostLMS = true;
@@ -112,10 +118,14 @@ public class HostLMSService {
       request.needsAttention = false;
       request.activeLoan = false;
 
-      String message = "Complete request succeeded. Host LMS integration: CheckinItem call succeeded for all items.";
-      resultMap.complete.message = message;
-      resultMap.complete.state = request.state;
-      reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
+      if(totalVolumes > 0) {
+        String message = "Complete request succeeded. Host LMS integration: CheckinItem call succeeded for all items.";
+        resultMap.complete.message = message;
+        resultMap.complete.state = request.state;
+        reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
+      } else {
+        log.debug("No items found to check in for request ${request.id}");
+      }
       result = true;
     } else {
       def errorMap = [:];
