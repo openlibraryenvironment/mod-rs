@@ -10,42 +10,46 @@ import org.olf.rs.statemodel.Status;
 import com.k_int.web.toolkit.refdata.RefdataCategory;
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
+/**
+ * Action class that deals with the patron requesting a local cancel
+ * @author Chas
+ *
+ */
 public class ActionPatronRequestCancelLocalService extends AbstractAction {
 
-	static String[] TO_STATES = [
-								 Status.PATRON_REQUEST_CANCELLED
-								];
-	
-	@Override
-	String name() {
-		return(Actions.ACTION_REQUESTER_CANCEL_LOCAL);
-	}
+    private static final String[] TO_STATES = [
+        Status.PATRON_REQUEST_CANCELLED
+    ];
 
-	@Override
-	String[] toStates() {
-		return(TO_STATES);
-	}
+    @Override
+    String name() {
+        return(Actions.ACTION_REQUESTER_CANCEL_LOCAL);
+    }
 
-	@Override
-	Boolean canLeadToSameState() {
-	    // We do not return the same state, so we need to override and return false
-		return(false);
-	}
-	
-	@Override
-	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
+    @Override
+    String[] toStates() {
+        return(TO_STATES);
+    }
 
-		actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED);
-		actionResultDetails.auditMessage = "Local request cancelled";
-		if (parameters.reason) {
-			def cat = RefdataCategory.findByDesc('cancellationReasons');
-			def reason = RefdataValue.findByOwnerAndValue(cat, parametes.reason);
-			if (reason) {
-				request.cancellationReason = reason;
-				actionResultDetails.auditMessage += ": ${reason}";
-			}
-		}
-	
-		return(actionResultDetails);
-	}
+    @Override
+    Boolean canLeadToSameState() {
+        // We do not return the same state, so we need to override and return false
+        return(false);
+    }
+
+    @Override
+    ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED);
+        actionResultDetails.auditMessage = 'Local request cancelled';
+        if (parameters.reason) {
+            RefdataCategory cat = RefdataCategory.findByDesc('cancellationReasons');
+            RefdataValue reason = RefdataValue.findByOwnerAndValue(cat, parameters.reason);
+            if (reason) {
+                request.cancellationReason = reason;
+                actionResultDetails.auditMessage += ": ${reason}";
+            }
+        }
+
+        return(actionResultDetails);
+    }
 }

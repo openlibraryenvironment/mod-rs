@@ -3,6 +3,7 @@
     "rules": {
 		"Comments.JavadocEmptyLastLine": "off",
 		"Convention.CompileStatic": "off",
+		"Design.AbstractClassWithoutAbstractMethod": "off",
 		"Design.Instanceof": "off",
 		"Dry.DuplicateMapLiteral": "off",
 		"Dry.DuplicateNumberLiteral": "off",

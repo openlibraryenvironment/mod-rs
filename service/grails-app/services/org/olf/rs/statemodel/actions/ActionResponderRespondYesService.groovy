@@ -6,31 +6,35 @@ import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.Status;
 
+/**
+ * Performs an answer will supply action for the responder
+ * @author Chas
+ *
+ */
 public class ActionResponderRespondYesService extends ActionResponderService {
 
-	static String[] TO_STATES = [
-		Status.RESPONDER_NEW_AWAIT_PULL_SLIP
-	];
-	
-	@Override
-	String name() {
-		return(Actions.ACTION_RESPONDER_RESPOND_YES);
-	}
+    private static final String[] TO_STATES = [
+        Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+    ];
 
-	@Override
-	String[] toStates() {
-		return(TO_STATES);
-	}
+    @Override
+    String name() {
+        return(Actions.ACTION_RESPONDER_RESPOND_YES);
+    }
 
-	@Override
-	ActionResultDetails performAction(PatronRequest request, def parameters, ActionResultDetails actionResultDetails) {
+    @Override
+    String[] toStates() {
+        return(TO_STATES);
+    }
 
-		// Check the pickup location and route
-		if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
-			// Status is set to Status.RESPONDER_NEW_AWAIT_PULL_SLIP in validatePickupLocationAndRoute
-			reshareActionService.sendResponse(request, 'ExpectToSupply', parameters);
-		}
+    @Override
+    ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        // Check the pickup location and route
+        if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
+            // Status is set to Status.RESPONDER_NEW_AWAIT_PULL_SLIP in validatePickupLocationAndRoute
+            reshareActionService.sendResponse(request, 'ExpectToSupply', parameters);
+        }
 
-		return(actionResultDetails);
-	}
+        return(actionResultDetails);
+    }
 }
