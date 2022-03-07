@@ -631,7 +631,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             
             // If the problem block is just because the item is already checked in, then make response true
             try {
-              JSONArray problemJsonArray = response.getJSONObject('problems');
+              JSONArray problemJsonArray = response.getJSONArray('problems');
               if(problemJsonArray.length() == 1) //Only if this is our ONLY problem
               {
                 JSONObject problemJson = problemJsonArray.getJSONObject(0);
