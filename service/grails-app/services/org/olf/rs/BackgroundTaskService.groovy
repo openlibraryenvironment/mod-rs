@@ -8,10 +8,10 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.timers.AbstractTimer;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.timers.AbstractTimer;
 import org.olf.templating.*;
 
 import com.k_int.okapi.OkapiClient;
@@ -41,7 +41,7 @@ public class BackgroundTaskService {
 
   private static config_test_count = 0;
   private static String PULL_SLIP_QUERY='''
-Select pr 
+Select pr
 from PatronRequest as pr
 where ( pr.pickLocation.id in ( :loccodes ) )
 and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
@@ -56,7 +56,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
-  
+
   def performReshareTasks(String tenant) {
     log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
 
@@ -90,10 +90,10 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
         // Generate and log patron requests at a pick location we don't know about
         reportMissingPickLocations()
-  
+
         // Find all patron requesrs where the current state has a System action attached that can be executed.
         PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each {  pr ->
-          AvailableAction aa = (AvailableAction) pr[1] 
+          AvailableAction aa = (AvailableAction) pr[1]
           log.debug("Apply system action ${pr[1]} to patron request ${pr[0]}");
           switch ( aa.actionType ) {
             case 'S':
@@ -106,9 +106,9 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
               log.debug("No action type for action ${aa}");
               break;
           }
-          
+
         }
-        
+
         //Find any supplier-side PatronRequests that have become overdue
         log.debug("Checking for overdue PatronRequests");
         Date currentDate = new Date();
@@ -125,7 +125,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
           def previousState = patronRequest.state;
           def overdueState = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE);
           if(overdueState == null) {
-            log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");            
+            log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");
           } else {
             patronRequest.state = overdueState;
             reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
@@ -146,76 +146,79 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
           log.debug("Declared timer: ${ti.id}, ${ti.nextExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}min");
         }
 
-        Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en', 
-                           [now:current_systime, en: true]).each { timer ->
-          try {
-            log.debug("** Timer task ${timer.id} firing....");
+        Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
+                           [now:current_systime, en: true]);
+        if ((timers != null) && (timers.size()> 0)) {
+            timers.each { timer ->
+              try {
+                log.debug("** Timer task ${timer.id} firing....");
 
-            TimeZone tz;
-            try {
-              JsonSlurper jsonSlurper = new JsonSlurper();
-              def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
-              log.debug("Got system locale settings : ${tenant_locale}");
-              tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                TimeZone tz;
+                try {
+                  JsonSlurper jsonSlurper = new JsonSlurper();
+                  def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+                  log.debug("Got system locale settings : ${tenant_locale}");
+                  tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                }
+                catch ( Exception e ) {
+                  log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
+                  tz = TimeZone.getTimeZone('UTC');
+                }
+
+    			// The date we start processing tis in the local time zone
+                timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
+
+
+                if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
+                  // First time we have seen this timer - we don't know when it is next due - so work that out
+                  // as tho we just run the timer.
+                }
+                else {
+                  runTimer(timer)
+                };
+
+                String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
+
+                // Calculate the next due date
+                RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
+                // DateTime start = DateTime.now()
+                // DateTime start = new DateTime(current_systime)
+                // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
+
+                DateTime start = new DateTime(tz, current_systime);
+    			// If the frequency, is daily, monthly or yearly then we need to clear the time part
+    			if (rule_to_parse.contains(Freq.DAILY.toString()) ||
+    				rule_to_parse.contains(Freq.MONTHLY.toString()) ||
+    				rule_to_parse.contains(Freq.WEEKLY.toString()) ||
+    				rule_to_parse.contains(Freq.YEARLY.toString())) {
+    				// Set it to the start of the day, otherwise we will have jobs happening during the day
+    				start = start.startOfDay();
+    			}
+
+    			// Now work out what the next execution time will be
+                RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
+                def nextInstance = null;
+
+                // Cycle forward to the next occurrence after this moment
+                int loopcount = 0;
+                while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) &&
+                        ( loopcount++ < 10 ) ) {
+                  nextInstance = rrule_iterator.nextDateTime();
+                }
+                log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
+                log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
+                timer.nextExecution = nextInstance.getTimestamp();
+                timer.save(flush:true, failOnError:true)
+              }
+              catch ( Exception e ) {
+                log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
+              }
+              finally {
+                // log.debug("Completed scheduled task checking");
+              }
             }
-            catch ( Exception e ) {
-              log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
-              tz = TimeZone.getTimeZone('UTC');
-            }
-
-			// The date we start processing tis in the local time zone
-            timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
-			
-
-            if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
-              // First time we have seen this timer - we don't know when it is next due - so work that out
-              // as tho we just run the timer.
-            }
-            else {
-              runTimer(timer)
-            };
-
-            String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
-
-            // Caclulate the next due date
-            RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
-            // DateTime start = DateTime.now()
-            // DateTime start = new DateTime(current_systime)
-            // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
-
-            DateTime start = new DateTime(tz, current_systime);
-			// If the frequency, is daily, monthly or yearly then we need to clear the time part
-			if (rule_to_parse.contains(Freq.DAILY.toString()) ||
-				rule_to_parse.contains(Freq.MONTHLY.toString()) ||
-				rule_to_parse.contains(Freq.WEEKLY.toString()) ||
-				rule_to_parse.contains(Freq.YEARLY.toString())) {
-				// Set it to the start of the day, otherwise we will have jobs happening during the day
-				start = start.startOfDay();
-			}
-
-			// Now work out what the next execution time will be			
-            RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-            def nextInstance = null;
-
-            // Cycle forward to the next occurrence after this moment
-            int loopcount = 0;
-            while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) && 
-                    ( loopcount++ < 10 ) ) {
-              nextInstance = rrule_iterator.nextDateTime();
-            }
-            log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
-            log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
-            timer.nextExecution = nextInstance.getTimestamp();
-            timer.save(flush:true, failOnError:true)
-          }
-          catch ( Exception e ) {
-            log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
-          }
-          finally {
-            // log.debug("Completed scheduled task checking");
-          }
         }
-        
+
       }
     }
     catch ( Exception e ) {
@@ -236,7 +239,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 						Map task_config = jsonSlurper.parseText(t.taskConfig)
 						checkPullSlips(task_config)
 						break;
-		  
+
 					default:
 						// Get hold of the bean and store it in our map, if we previously havn't been through here
 						if (serviceTimers[t.taskCode] == null) {
@@ -250,7 +253,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 								log.error("Unable to locate timer bean: " + beanName);
 							}
 						}
-						
+
 						// Did we find the bean
 						AbstractTimer timerBean = serviceTimers[t.taskCode];
 						if (timerBean == null) {
@@ -270,11 +273,11 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
     checkPullSlipsFor(timer_cfg.locations,
-                      timer_cfg.confirmNoPendingRequests?:true, 
+                      timer_cfg.confirmNoPendingRequests?:true,
                       timer_cfg.emailAddresses);
   }
 
-  private void checkPullSlipsFor(ArrayList loccodes, 
+  private void checkPullSlipsFor(ArrayList loccodes,
                                  boolean confirm_no_pending_slips,
                                  ArrayList emailAddresses) {
 
@@ -296,12 +299,12 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
           log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
           List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
-    
+
           if ( pending_ps_printing != null ) {
 
             if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
               log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
-              
+
               String locationsText = pslocs.inject('', { String output, HostLMSLocation loc ->
                 output + (output != '' ? ', ' : '') + (loc.name ?: loc.code)
               })
