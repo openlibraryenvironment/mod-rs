@@ -152,7 +152,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [loc: loc, sl: o.shelvingLocation])
         switch ( shelving_loc_list.size() ) {
           case 0:
-            sl = new HostLMSShelvingLocation( location:loc, code: o.shelvingLocation, name: o.shelvingLocation).save(flush:true, failOnError:true);
+            sl = new HostLMSShelvingLocation( location:loc, code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
             break;
           case 1:
             sl = shelving_loc_list.get(0);
