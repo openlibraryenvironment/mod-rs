@@ -55,14 +55,14 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
             }
             // Iterate over volumes without temp item in for loop so we can break out if we need to
             for (RequestVolume vol : volumesWithoutTemporaryItem) {
+							  String temporaryItemBarcode = null;
                 try {
                     // Item Barcode - using Request human readable ID + volId for now
                     // If we only have one volume, just use the HRID
-                    String temporaryItemBarcode = null;
                     if (request.volumes?.size() > 1) {
-                        temporaryItemBarcode = "${request.hrid}-${vol.itemId}";
+											temporaryItemBarcode = "${request.hrid}-${vol.itemId}";
                     } else {
-                        temporaryItemBarcode = request.hrid;
+											temporaryItemBarcode = request.hrid;
                     }
 
                     // Call the host lms to check the item out of the host system and in to reshare
