@@ -1,0 +1,11 @@
+# We start with the requester side
+requester
+
+# We will request to cancel it
+requesterCancel.json
+
+# Back to the responder
+responder
+
+# We will respond with YES
+supplierRespondToCancelYes.json

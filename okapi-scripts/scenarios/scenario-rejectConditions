@@ -1,0 +1,11 @@
+# We start on the responder side
+responder
+
+# Reply with conditions
+supplierConditionalSupply.json
+
+# Back to the requester
+requester
+
+# Reject the conditions
+requesterRejectConditions.json

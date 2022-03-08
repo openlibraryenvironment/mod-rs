@@ -1,0 +1,8 @@
+# Start with the responder
+responder
+
+# Reply with answerYes
+answerYes.json
+
+# Now send not supply
+supplierCannotSupply.json
