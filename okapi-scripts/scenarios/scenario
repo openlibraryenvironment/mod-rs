@@ -1,11 +1,38 @@
 # We start on the responder side
 responder
 
-#Reply with answerYes
-answerYes.json
+# Send conditions
+supplierConditionalSupply.json
+
+# back to the requester
+requester
+
+# Accept the conditions
+requesterAgreeConditions.json
+
+# Back to the responder
+responder
+
+# Flip back to the requester
+requester
+
+# We will request to cancel it
+requesterCancel.json
+
+# Back to the responder
+responder
+
+# We will respond with NO
+supplierRespondToCancelNo.json
+
+# We will add an additional condition
+supplierAddCondition.json
+
+# This time the supplier will mark them as agreed
+supplierMarkConditionsAgreed.json
 
 #Print the pull slip
-printPullSlip.json
+supplierPrintPullSlip.json
 
 # Check the item into reshare
 supplierCheckInToReshare.json

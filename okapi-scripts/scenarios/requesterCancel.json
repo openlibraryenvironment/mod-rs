@@ -1,0 +1,7 @@
+{
+    "action": "requesterCancel",
+    "actionParams": {
+        "reason": "patron_requested",
+        "note": "A cancellation note"
+    }
+}
