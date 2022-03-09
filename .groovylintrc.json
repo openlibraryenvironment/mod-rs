@@ -17,11 +17,15 @@
 		"Size.NestedBlockDepth": {
 			"maxNestedBlockDepth": 10
 		},
+		"Size.ParameterCount": {
+			"maxParameters": 10
+		},
 		"Unnecessary.UnnecessaryElseStatement": "off",
 		"Unnecessary.UnnecessaryGetter": "off",
 		"Unnecessary.UnnecessaryObjectReferences": "off",
 		"Unnecessary.UnnecessaryPublicModifier": "off",
         "Unnecessary.UnnecessaryReturnKeyword": "off",
-		"Unnecessary.UnnecessarySemicolon": "off"
+		"Unnecessary.UnnecessarySemicolon": "off",
+		"Unused.UnusedMethodParameter": "off"
     }
 }
