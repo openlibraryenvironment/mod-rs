@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
+import org.olf.rs.statemodel.Actions;
 
 /**
  * Abstract action class that deals with a cancel being requested
@@ -12,11 +13,11 @@ public abstract class ActionPatronRequestCancelService extends AbstractAction {
 
     public void sendCancel(PatronRequest request, String action, Object parameters) {
         switch (action) {
-            case 'requesterRejectedConditions':
+            case Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS:
                 request.requestToContinue = true;
                 break;
 
-            case 'requesterCancel':
+            case Actions.ACTION_REQUESTER_REQUESTER_CANCEL:
                 request.requestToContinue = false;
                 break;
 

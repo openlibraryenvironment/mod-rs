@@ -30,7 +30,7 @@ public class ActionPatronRequestRequesterRejectConditionsService extends ActionP
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         request.previousStates[Status.PATRON_REQUEST_CANCEL_PENDING] = request.state.code;
-        sendCancel(request, 'requesterRejectConditions', parameters);
+        sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS, parameters);
         actionResultDetails.auditMessage = 'Rejected loan conditions';
         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING);
 
