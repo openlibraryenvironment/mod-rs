@@ -255,7 +255,7 @@ public class ReshareActionService {
       result = true;
     }
     else {
-      log.warn("Unable to send protocol message");
+      log.warn("Unable to send protocol message (${send_result})");
     }
     return result;
   }
@@ -307,7 +307,7 @@ public class ReshareActionService {
         result = true;
       }
       else {
-        log.warn("Unable to send protocol message");
+        log.warn("Unable to send protocol message ${send_result}");
       }
     }
     else {

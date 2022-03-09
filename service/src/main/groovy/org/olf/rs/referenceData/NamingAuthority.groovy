@@ -13,7 +13,7 @@ public class NamingAuthority {
 	public org.olf.okapi.modules.directory.NamingAuthority ensureNamingAuthority(String symbol) {
 		org.olf.okapi.modules.directory.NamingAuthority result = org.olf.okapi.modules.directory.NamingAuthority.findBySymbol(symbol);
 		if (result == null) {
-			result = new NamingAuthority(symbol: symbol);
+			result = new org.olf.okapi.modules.directory.NamingAuthority(symbol: symbol);
 			result.save(flush:true, failOnError:true);
 		}
 		return result;

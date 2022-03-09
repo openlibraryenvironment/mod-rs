@@ -103,9 +103,8 @@ class ProtocolMessageService {
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
       result.status = "NOT SENT"
-      log.error("ISO18626 message failed to send.\n ${e.message}",e)
+      log.error("ISO18626 message failed to send. ${e}/${e?.class?.name}/${e.message}",e)
     }
-    log.debug("====================================================================")
     
     return result;
   }
@@ -281,6 +280,7 @@ and sa.service.businessFunction.value=:ill
       log.debug("Got response message: ${iso18626_response}");
     }
     else {
+      log.error("No address for message recipient");
       throw new RuntimeException("No address given for sendISO18626Message. messageData: ${eventData}");
     }
   }
