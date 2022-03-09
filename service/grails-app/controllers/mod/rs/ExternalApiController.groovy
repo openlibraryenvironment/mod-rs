@@ -146,6 +146,9 @@ class ExternalApiController {
       log.error("Exception receiving ISO message",e);
       e.printStackTrace()
     }
+    finally {
+      log.debug("ExternalApiController::iso18626 exiting cleanly");
+    }
 
   }
 
