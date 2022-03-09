@@ -51,7 +51,7 @@ public class ActionPatronRequestRequesterCancelService extends ActionPatronReque
         // If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
         if (request.resolvedSupplier?.id) {
             request.previousStates[Status.PATRON_REQUEST_CANCEL_PENDING] = request.state.code;
-            sendCancel(request, 'requesterCancel', parameters)
+            sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, parameters)
             actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING);
         } else {
             // In this case, just directly send request to state "cancelled"
