@@ -214,7 +214,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
                     request.needsAttention = true;
                 }
             } catch (Exception e) {
-                log.error('Problem in auto respond', e);
+                log.error("Problem in auto respond: ${e.getMessage()}", e);
             }
         } else {
             log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${request?.isRequester}");
