@@ -8,7 +8,6 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 
 class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
 
-  HostLMSLocation location
   String id
   String code
   String name
@@ -20,7 +19,6 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
   Long supplyPreference
 
   static constraints = {
-    location (nullable: false)
     code (nullable: false)
     name (nullable: true)
     dateCreated (nullable: true, bindable: false)
@@ -28,10 +26,17 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
     supplyPreference (nullable: true)
   }
 
+  static hasMany = [
+    sites : ShelvingLocationSite,
+  ]
+
+  static mappedBy = [
+    sites: 'shelvingLocation'
+  ]
+
   static mapping = {
-    table 'host_lms_shelving_location'
+    table 'host_lms_shelving_loc'
                                id column : 'hlsl_id', generator: 'uuid2', length:36
-                         location column : 'hlsl_host_lms_loc_fk'
                           version column : 'hlsl_version'
                              code column : 'hlsl_code'
                              name column : 'hlsl_name'

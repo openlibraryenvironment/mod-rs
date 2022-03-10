@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import grails.gorm.multitenancy.Tenants.CurrentTenant
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.HostLMSShelvingLocation;
+import org.olf.rs.ShelvingLocationSite;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -31,6 +32,7 @@ import org.olf.rs.HostLMSShelvingLocation;
 public abstract class BaseHostLMSService implements HostLMSActions {
 
   private static String SHELVING_LOC_QRY = 'select sl from HostLMSShelvingLocation as sl where sl.location = :loc and sl.code=:sl'
+  private static String SLS_QRY = 'select sls from ShelvingLocationSite as sls where sls.location = :loc and sls.shelvingLocation=:sl'
 
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
@@ -146,6 +148,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                                                                         icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
 
       HostLMSShelvingLocation sl = null;
+      ShelvingLocationSite sls = null;
 
       // create a HostLMSShelvingLocation in respect of shelvingLocation
       if ( o?.shelvingLocation != null ) {
@@ -159,6 +162,22 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             break;
           default:
             throw new RuntimeException("Multiple shelving locations match ${o.location}.${o.shelvingLocation}");
+            break;
+        }
+      }
+
+      // Create an instance of shelving location site to record the association
+      if ( ( sl != null ) && ( loc != null ) ) {
+        List<ShelvingLocationSite> slss = ShelvingLocationSite.executeQuery(SLS_QRY,[loc: loc, sl:sl]);
+        switch ( slss.size() ) {
+          case 0:
+            sls = new ShelvingLocationSite( location:loc, shelvingLocation:sl).save(flush:true, failOnError:true);
+            break;
+          case 1:
+            sls = shelving_loc_list.get(0);
+            break;
+          default:
+            throw new RuntimeException("Multiple shelving location sites match ${loc}.${sl}");
             break;
         }
       }

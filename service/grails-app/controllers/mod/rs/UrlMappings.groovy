@@ -17,15 +17,16 @@ class UrlMappings {
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
     }
 
-	"/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
-	"/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
-	"/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
+    "/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
+    "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
+    "/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
 	
-	    '/rs/noticePolicies' (resources: 'noticePolicy')
+    '/rs/noticePolicies' (resources: 'noticePolicy')
 
     "/rs/shipments" (resources: 'shipment' )
     "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
+    "/rs/shelvingLocations" (resources: 'shelvingLocations' )
     "/rs/sharedIndexQuery" (controller: 'sharedIndexQuery', action: 'query', parseRequest: false)
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 

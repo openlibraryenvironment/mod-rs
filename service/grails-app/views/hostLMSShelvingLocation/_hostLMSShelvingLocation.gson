@@ -1,0 +1,5 @@
+import groovy.transform.*
+import org.olf.rs.HostLMSShelvingLocation
+
+@Field HostLMSShelvingLocation hostLMSShelvingLocation
+json g.render(hostLMSShelvingLocation, [expand: ['sites'], excludes: [] ])
