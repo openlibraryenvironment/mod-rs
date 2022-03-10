@@ -103,5 +103,29 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   public String toString() {
     return "HostLMSLocation: ${code}".toString()
   }
+
+  def canDelete() {
+    def deleteValid = true
+    def prs = [];
+    PatronRequest.withSession {
+      def patronRequestsUsingThisLocation = PatronRequest.executeQuery("""
+        SELECT id FROM PatronRequest AS pr WHERE pr.pickLocation.id = :hostLMSId
+      """.toString(), [hostLMSId: id])
+
+      if (patronRequestsUsingThisLocation.size() > 0) {
+        deleteValid = false
+        prs = patronRequestsUsingThisLocation
+      }
+    }
+
+    [
+      deleteValid: deleteValid,
+      prs: prs
+    ]
+  }
+
+  def beforeDelete() {
+    canDelete().deleteValid
+  }
 }
 
