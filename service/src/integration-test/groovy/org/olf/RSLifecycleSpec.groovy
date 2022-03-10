@@ -451,4 +451,24 @@ class RSLifecycleSpec extends HttpSpec {
       tenant_id | _
       'RSInstOne' | _
   }
+
+  void "test API for creating shelving locations for #tenant_id"() {
+    when:"We post to the shelvingLocations endpoint for tenant"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id
+                 ])
+      def resp = doPost("${baseUrl}rs/shelvingLocations".toString(),
+                        [
+                          code:'stacks',
+                          name:'stacks',
+                          supplyPreference:1
+                        ])
+    then:"Created"
+      resp != null;
+      log.debug("Got create shelving locations response: ${resp}");
+    where:
+      tenant_id | _
+      'RSInstOne' | _
+  }
+
 }

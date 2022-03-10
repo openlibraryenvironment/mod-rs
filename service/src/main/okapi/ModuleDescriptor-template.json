@@ -228,6 +228,11 @@
           "permissionsRequired": [ "rs.hostlmslocations.delete" ]
         },
         {
+          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/shelvingLocations*",
+          "permissionsRequired": [ "rs.shelvingLocations" ]
+        },
+        {
           "methods": [ "GET" ],
           "pathPattern": "/rs/sharedIndexQuery*",
           "permissionsRequired": [ ]
@@ -761,6 +766,12 @@
       ]
     },
     {
+      "permissionName": "rs.shelvingLocations",
+      "displayName": "Shelving Locations",
+      "description": "Shelving Locations",
+      "visible": true
+    },
+    {
       "permissionName": "rs.timers",
       "displayName": "timers",
       "description": "timers",
@@ -785,10 +796,10 @@
         "rs.shipments",
         "rs.noticePolicies",
         "rs.hostlmslocations.write",
-        "rs.timers"
+        "rs.timers",
+        "rs.shelvingLocations"
       ]
     },
-
     {
       "permissionName": "module.rs-stripes.enabled",
       "displayName": "Stripes",

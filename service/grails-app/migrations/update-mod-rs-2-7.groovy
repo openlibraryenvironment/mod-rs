@@ -83,10 +83,9 @@ databaseChangeLog = {
     }
   }
 
-  changeSet(author: "ianibbo (manual)", id: "2022-02-04-1649-001") {
-    createTable(tableName: "host_lms_shelving_location") {
+  changeSet(author: "ianibbo (manual)", id: "2022-03-10-1649-001") {
+    createTable(tableName: "host_lms_shelving_loc") {
       column(name: "hlsl_id", type: "VARCHAR(36)") { constraints(nullable: "false") }
-      column(name: "hlsl_host_lms_loc_fk", type: "VARCHAR(36)") { constraints(nullable: "false") }
       column(name: "hlsl_version", type: "BIGINT") { constraints(nullable: "false") }
       column(name: "hlsl_code", type: "VARCHAR(255)") { constraints(nullable: "false") }
       column(name: "hlsl_name", type: "VARCHAR(255)")
