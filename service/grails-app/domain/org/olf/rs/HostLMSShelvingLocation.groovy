@@ -26,6 +26,14 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
     supplyPreference (nullable: true)
   }
 
+  static hasMany = [
+    sites : ShelvingLocationSite,
+  ]
+
+  static mappedBy = [
+    sites: 'shelvingLocation'
+  ]
+
   static mapping = {
     table 'host_lms_shelving_loc'
                                id column : 'hlsl_id', generator: 'uuid2', length:36

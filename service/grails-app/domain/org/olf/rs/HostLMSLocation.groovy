@@ -6,6 +6,38 @@ import grails.gorm.MultiTenant
 import java.time.LocalDateTime
 import org.olf.okapi.modules.directory.DirectoryEntry
 
+/**
+ *
+ *
+ *
+ * Note - because the domain language used here is god-awful. A HostLMSLocation is a record in an institutions library management system that
+ * represents "A location" - because there isn't a good definition this can mean different things in different LMS systems. For our purposes
+ * think of a "Location" as "A Building".
+ * 
+ * Libraries also have "Shelving Locations" - "The Stacks (A shelving location) at the St Georges Library (A location)"
+ *
+ * In SOME LMS systems the shelving locations are distributed over the locations - so we can have Stacks at Location A B and C and
+ * "Automated Storage" at location A and D. This gives us a M:N model Location -< JOIN >- ShelvingLocation. in other systems there is a more
+ * simple Location -< ShelvingLocation setup.
+ *
+ * We model the more complex situation here and have to live with the extra complexity for the simple model. Our model is
+ *   HOSTLMSLocation -1:M-< ShelvingLocationSite >-N:1- HostLMSShelvingLocation. 
+ *
+ * In instance terms
+ *   "St Georges Library" -<   "The Stacks at St Georges Library"   >-   "The Stacks"
+ *
+ * This allows us to state preferences at each level and override as needed. 
+ *
+ * In general
+ *     The HostLMSShelvingLocation is the default         - We will not lend ILL from <ShelvingLocation>"Reserves"
+ *                                                        - We will lend ILL from <ShelvingLocation> "Stacks"
+ *                                                        - We will not lend ILL from <ShelvingLocation> "Oversized"
+ *
+ *       The HostLMSLocation can override a shelving loc  - <Location>St Georges Library is flooded - by default no lending at all from here at the moment
+ *
+ *         ShelvingLocationSite can override that         - <Location>St Georges Library <ShelvingLocation>Annex is not flooded and can lend anyway (Override)
+ *
+ */
 class HostLMSLocation implements MultiTenant<HostLMSLocation> {
 
   String id
@@ -31,6 +63,15 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   // 0 - No preference / default
   // > 0 - Preference order
   Long supplyPreference
+
+  static hasMany = [
+    sites : ShelvingLocationSite,
+  ]
+
+  static mappedBy = [
+    sites: 'location'
+  ]
+
 
   DirectoryEntry correspondingDirectoryEntry
 
