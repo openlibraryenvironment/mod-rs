@@ -65,8 +65,14 @@ public class HostLMSService {
     if (host_lms) {
       resultMap.hostLMS = true;
       for( def vol : volumesNotCheckedIn ) {
+        String temporaryItemBarcode; //We want to match what we created for AcceptItem
+        if (request.volumes?.size() > 1) {
+          temporaryItemBarcode = "${request.hrid}-${vol.itemId}";
+        } else {
+          temporaryItemBarcode = request.hrid;
+        }
         def checkInMap = [:];
-        def check_in_result = host_lms.checkInItem(vol.itemId)
+        def check_in_result = host_lms.checkInItem(temporaryItemBarcode);
         checkInMap.result = check_in_result;
         checkInMap.volume = vol;
         String message;
