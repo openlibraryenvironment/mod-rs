@@ -80,7 +80,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                     if (acceptResult?.result == true) {
                         // Let the user know if the success came from a real call or a spoofed one
                         String message = "Receive succeeded for item id: ${vol.itemId}. ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
-                        RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_hostLMS');
+                        RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
 
                         reshareApplicationEventHandlerService.auditEntry(request,
                             request.state,
