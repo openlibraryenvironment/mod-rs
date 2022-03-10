@@ -87,6 +87,8 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                             request.state,
                             message,
                             null);
+
+												log.debug("State for volume ${vol.itemId} set to ${newVolState}");
                         vol.status = newVolState;
                         vol.save(failOnError: true);
                     } else {
