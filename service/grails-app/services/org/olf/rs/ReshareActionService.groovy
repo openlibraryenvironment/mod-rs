@@ -24,14 +24,58 @@ public class ReshareActionService {
 
     private static final String PROTOCOL_RESULT_SENT = 'SENT';
 
-    private static final String PROTOCOL_ERROR_UNABLE_TO_SEND = 'Unable to send protocol message (${send_result}';
+    private static final String PROTOCOL_ERROR_UNABLE_TO_SEND = 'Unable to send protocol message (${send_result})';
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
     ProtocolMessageService protocolMessageService
     ProtocolMessageBuildingService protocolMessageBuildingService
     HostLMSService hostLMSService
-    StatisticsService statisticsService
     PatronStoreService patronStoreService
+
+    /**
+     * Looks up a patron identifier to see if it is valid for requesting or not
+     * @param actionParams the parameters that we use to make our decision
+     *      patronIdentifier ... the id to be checked
+     *      override ... if the patron turns out to be invalid, this allows us to say they are valid
+     * @return a map containing the result of the call that can contain the following fields:
+     *      callSuccess ... was the call a success or not
+     *      patronDetails ... the details of the patron if the patron is a valid user
+     *      patronValid ... can the patron create requests
+     *      status ... the status of the patron
+     *
+     */
+    public Map lookupPatron(Map actionParams) {
+        // The result object
+        Map result = [callSuccess: false, patronValid: false ];
+        Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(actionParams.patronIdentifier);
+        if (patronDetails != null) {
+            if (patronDetails.result) {
+                result.callSuccess = true;
+
+                // Ensure the patron details has a user id
+                if (patronDetails.userid == null) {
+                    patronDetails.userid = actionParams.patronIdentifier;
+                }
+
+                // Is it a valid patron or are we overriding the fact it is valid
+                if (isValidPatron(patronDetails) || actionParams.override) {
+                    result.patronValid = true;
+                }
+            }
+
+            // If there are problems with the patron let the caller know
+            if (patronDetails.problems) {
+                result.problems = patronDetails.problems.toString();
+            }
+
+            // Set the status in the result
+            result.status = patronDetails.status;
+        }
+
+        // Let the caller know the patron details
+        result.patronDetails = patronDetails;
+        return(result);
+    }
 
     /*
      * WARNING: this method is NOT responsible for saving or for managing state
@@ -39,49 +83,42 @@ public class ReshareActionService {
      * patron request
      */
     public Map lookupPatron(PatronRequest pr, Map actionParams) {
-        if (patronStoreService) {
-            log.debug('Patron Store Services are initialized');
-    } else {
-            log.error('Patron Store Services are not initialized');
+        // Ensure actionParams exists as an object
+        if (actionParams == null) {
+            // Allocate an empty object so we can set the patronIdentifier
+            actionParams = [ : ];
         }
-        Map result = [callSuccess: false, patronValid: false ]
-        log.debug("lookupPatron(${pr})");
-        Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(pr.patronIdentifier)
-        log.debug("Result of patron lookup ${patronDetails}");
-        if (patronDetails.result) {
-            result.callSuccess = true
 
-            // Save patron details whether they're valid or not
-            if (patronDetails.userid == null) {
-                patronDetails.userid = pr.patronIdentifier
-            }
-            if ((patronDetails != null) && (patronDetails.userid != null)) {
-                pr.resolvedPatron = lookupOrCreatePatronProxy(patronDetails);
+        // before we call lookupPatron we need to set the patronIdentifier on the actionParams
+        actionParams.patronIdentifier = pr.patronIdentifier;
+        Map result = lookupPatron(actionParams);
+
+        if (result.patronDetails != null) {
+            if (result.patronDetails.userid != null) {
+                pr.resolvedPatron = lookupOrCreatePatronProxy(result.patronDetails);
                 if (pr.patronSurname == null) {
-                    pr.patronSurname = patronDetails.surname;
+                    pr.patronSurname = result.patronDetails.surname;
                 }
                 if (pr.patronGivenName == null) {
-                    pr.patronGivenName = patronDetails.givenName;
+                    pr.patronGivenName = result.patronDetails.givenName;
                 }
                 if (pr.patronEmail == null) {
-                    pr.patronEmail = patronDetails.email;
+                    pr.patronEmail = result.patronDetails.email;
                 }
             }
 
-            if (isValidPatron(patronDetails) || actionParams?.override) {
-                result.patronValid = true
-                // Let the user know if the success came from a real call or a spoofed one
-                String reason = patronDetails.reason == 'spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.'
-                String outcome = actionParams?.override ? 'validation overriden' : 'validated'
-                String message = "Patron ${outcome}. ${reason}"
+            // Is the patron is valid, add an audit entry
+            if (result.patronValid) {
+                String reason = result.patronDetails.reason == 'spoofed' ? '(No host LMS integration configured for borrower check call)' : 'Host LMS integration: borrower check call succeeded.';
+                String outcome = actionParams?.override ? 'validation overriden' : 'validated';
+                String message = "Patron ${outcome}. ${reason}";
                 auditEntry(pr, pr.state, pr.state, message, null);
             }
         }
-        if (patronDetails.problems) {
-            result.problems = patronDetails.problems.toString()
-        }
-        result.status = patronDetails?.status
-        return result
+
+        // Do not pass the actual patron details back
+        result.remove('patronDetails');
+        return(result);
     }
 
     public boolean isValidPatron(Map patronRecord) {
