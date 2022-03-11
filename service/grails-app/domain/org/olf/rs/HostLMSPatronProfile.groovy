@@ -4,15 +4,17 @@ import grails.gorm.MultiTenant
 
 class HostLMSPatronProfile implements MultiTenant<HostLMSPatronProfile> {
 
-  String id
-  String code
-  String name
-  Date dateCreated
-  Date lastUpdated
+  String id;
+  String code;
+  String name;
+  Date dateCreated;
+  Date lastUpdated;
+  Boolean canCreateRequests;
 
   static constraints = {
     code (nullable: false)
     name (nullable: true)
+    canCreateRequests (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
   }
@@ -23,6 +25,7 @@ class HostLMSPatronProfile implements MultiTenant<HostLMSPatronProfile> {
                           version column : 'hlpp_version'
                              code column : 'hlpp_code'
                              name column : 'hlpp_name'
+                canCreateRequests column : 'hlpp_can_create_requests'
                       dateCreated column : 'hlpp_date_created'
                       lastUpdated column : 'hlpp_last_updated'
   }
@@ -31,4 +34,5 @@ class HostLMSPatronProfile implements MultiTenant<HostLMSPatronProfile> {
     return "HostLMSPatronProfile: ${code}".toString()
   }
 }
+
 

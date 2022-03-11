@@ -1,5 +1,6 @@
 package mod.rs;
 
+import org.olf.rs.Patron;
 import org.olf.rs.ReshareActionService;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -10,17 +11,20 @@ import groovy.util.logging.Slf4j;
 
 @Slf4j
 @CurrentTenant
-class PatronController extends OkapiTenantAwareController  {
+class PatronController extends OkapiTenantAwareController<Patron>  {
+
+    PatronController() {
+        super(Patron)
+    }
 
     ReshareActionService reshareActionService;
 
     /**
      * Looks up the patron to see if the profile they belong to is allowed to make requests
      * @return a map containing the result of the call that can contain the following fields:
-     *      callSuccess ... was the call a success or not
-     *      patronDetails ... the details of the patron if the patron is a valid user
      *      patronValid ... can the patron create requests
-     *      status ... the status of the patron
+     *      problems ... An array of reasons that explains either a FAIL or the patron is not valid
+     *      status ... the status of the patron (FAIL or OK)
      */
     def canCreateRequest() {
         Map result = [ : ];
@@ -33,7 +37,8 @@ class PatronController extends OkapiTenantAwareController  {
             // Lookup the patron
             result = reshareActionService.lookupPatron([ patronIdentifier : params.patronIdentifier ]);
 
-            // Remove the patron details as they should not be passed back
+            // Remove the patron details and callSuccess as they should not be passed back
+            result.remove('callSuccess');
             result.remove('patronDetails');
         }
         render result as JSON;

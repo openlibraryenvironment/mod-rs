@@ -24,7 +24,8 @@ public class ReshareActionService {
 
     private static final String PROTOCOL_RESULT_SENT = 'SENT';
 
-    private static final String PROTOCOL_ERROR_UNABLE_TO_SEND = 'Unable to send protocol message (${send_result})';
+    private static final String PROTOCOL_ERROR_UNABLE_TO_SEND   = 'Unable to send protocol message (';
+    private static final String PROTOCOL_ERROR_UNABLE_TO_SEND_1 = ')';
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
     ProtocolMessageService protocolMessageService
@@ -41,7 +42,8 @@ public class ReshareActionService {
      *      callSuccess ... was the call a success or not
      *      patronDetails ... the details of the patron if the patron is a valid user
      *      patronValid ... can the patron create requests
-     *      status ... the status of the patron
+     *      problems ... An array of reasons that explains either a FAIL or the patron is not valid
+     *      status ... the status of the patron (FAIL or OK)
      *
      */
     public Map lookupPatron(Map actionParams) {
@@ -57,8 +59,18 @@ public class ReshareActionService {
                     patronDetails.userid = actionParams.patronIdentifier;
                 }
 
+                // Check the patron profile and record if we have not seen before
+                HostLMSPatronProfile patronProfile = null
+                if (patronDetails.userProfile != null) {
+                    patronProfile = HostLMSPatronProfile.findByCode(patronDetails.userProfile);
+                    if (patronProfile == null) {
+                        patronProfile = new HostLMSPatronProfile(code:patronDetails.userProfile, name:patronDetails.userProfile);
+                        patronProfile.save(flush:true, failOnError:true);
+                    }
+                }
+
                 // Is it a valid patron or are we overriding the fact it is valid
-                if (isValidPatron(patronDetails) || actionParams.override) {
+                if (isValidPatron(patronDetails, patronProfile) || actionParams.override) {
                     result.patronValid = true;
                 }
             }
@@ -84,14 +96,15 @@ public class ReshareActionService {
      */
     public Map lookupPatron(PatronRequest pr, Map actionParams) {
         // Ensure actionParams exists as an object
-        if (actionParams == null) {
+        Map params = actionParams;
+        if (params == null) {
             // Allocate an empty object so we can set the patronIdentifier
-            actionParams = [ : ];
+            params = [ : ];
         }
 
         // before we call lookupPatron we need to set the patronIdentifier on the actionParams
-        actionParams.patronIdentifier = pr.patronIdentifier;
-        Map result = lookupPatron(actionParams);
+        params.patronIdentifier = pr.patronIdentifier;
+        Map result = lookupPatron(params);
 
         if (result.patronDetails != null) {
             if (result.patronDetails.userid != null) {
@@ -119,17 +132,6 @@ public class ReshareActionService {
         // Do not pass the actual patron details back
         result.remove('patronDetails');
         return(result);
-    }
-
-    public boolean isValidPatron(Map patronRecord) {
-        boolean result = false;
-        log.debug("Check isValidPatron: ${patronRecord}");
-        if (patronRecord != null) {
-            if (patronRecord.status == 'OK') {
-                result = true;
-            }
-        }
-        return result;
     }
 
     /**
@@ -224,7 +226,7 @@ public class ReshareActionService {
             if (sendResult.status == PROTOCOL_RESULT_SENT) {
                 result = true;
             } else {
-                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND);
+                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
             }
         }
         return result;
@@ -283,7 +285,7 @@ public class ReshareActionService {
             if (sendResult.status == PROTOCOL_RESULT_SENT) {
                 result = true;
             } else {
-                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND);
+                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
             }
         } else {
             log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");
@@ -357,12 +359,30 @@ public class ReshareActionService {
                              surname: patronDetails.surname,
                          userProfile: patronDetails.userProfile
             ).save();
+        }
+        return result;
+    }
 
-          // Check the patron profile and record if we have not seen before
-          if ( patronDetails.userProfile != null ) {
-            HostLMSPatronProfile pp = HostLMSPatronProfile.findByCode(patronDetails.userProfile) ?:
-              new HostLMSPatronProfile(code:patronDetails.userProfile, name:patronDetails.userProfile).save(flush:true, failOnError:true);
-          }
+    private boolean isValidPatron(Map patronRecord, HostLMSPatronProfile patronProfile) {
+        boolean result = false;
+        log.debug("Check isValidPatron: ${patronRecord}");
+        if (patronRecord != null) {
+            /*
+             *  They can request if
+             * 1. It is a valid patron record (status = OK)
+             * 2. There is no patron profile or the canCreateRequests field is not set or true
+             */
+            if (patronRecord.status == 'OK') {
+                if ((patronProfile == null) ||
+                    (patronProfile.canCreateRequests == null) ||
+                    (patronProfile.canCreateRequests == true)) {
+                    result = true;
+                } else {
+                    patronRecord.problems = ['Patron profile is set to not allow creation of requests.'];
+                }
+            } else if (patronRecord.problems == null) {
+                patronRecord.problems = ['Record status is not valid.'];
+            }
         }
         return result;
     }
