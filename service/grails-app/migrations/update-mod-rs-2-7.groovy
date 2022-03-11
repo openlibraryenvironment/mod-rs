@@ -107,5 +107,17 @@ databaseChangeLog = {
     }
   }
 
+  changeSet(author: "ianibbo (manual)", id: "2022-03-11-0845-001") {
+    createTable(tableName: "host_lms_patron_profile") {
+      column(name: "hlpp_id", type: "VARCHAR(36)") { constraints(nullable: "false") }
+      column(name: "hlpp_version", type: "BIGINT")
+      column(name: "hlpp_code", type: "VARCHAR(255)") { constraints(nullable: "false") }
+      column(name: "hlpp_name", type: "VARCHAR(255)")
+      column(name: "hlpp_date_created", type: "timestamp")
+      column(name: "hlpp_last_updated", type: "timestamp")
+    }
+  }
+
+
 }
 
