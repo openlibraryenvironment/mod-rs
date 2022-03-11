@@ -357,6 +357,12 @@ public class ReshareActionService {
                              surname: patronDetails.surname,
                          userProfile: patronDetails.userProfile
             ).save();
+
+          // Check the patron profile and record if we have not seen before
+          if ( patronDetails.userProfile != null ) {
+            HostLMSPatronProfile pp = HostLMSPatronProfile.findByCode(patronDetails.userProfile) ?:
+              new HostLMSPatronProfile(code:patronDetails.userProfile, name:patronDetails.userProfile).save(flush:true, failOnError:true);
+          }
         }
         return result;
     }

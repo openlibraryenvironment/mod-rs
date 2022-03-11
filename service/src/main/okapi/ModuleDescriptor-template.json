@@ -232,6 +232,28 @@
           "pathPattern": "/rs/hostLMSLocations*",
           "permissionsRequired": [ "rs.hostlmslocations.delete" ]
         },
+
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/hostLMSPatronProfiles*",
+          "permissionsRequired": [ "rs.hostlmspatronprofiles.get" ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/rs/hostLMSPatronProfiles*",
+          "permissionsRequired": [ "rs.hostlmspatronprofiles.put" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/hostLMSPatronProfiles*",
+          "permissionsRequired": [ "rs.hostpatronprofiles.post" ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/rs/hostLMSPatronProfiles*",
+          "permissionsRequired": [ "rs.hostpatronprofiles.delete" ]
+        },
+
         {
           "methods": [ "GET", "POST", "PUT", "DELETE" ],
           "pathPattern": "/rs/shelvingLocations*",
@@ -725,30 +747,10 @@
       "description": "shipments",
       "visible": false
     },
-    {
-      "permissionName": "rs.hostlmslocations.get",
-      "displayName": "get hostlmslocations",
-      "description": "get hostlmslocations",
-      "visible": false
-    },
-    {
-      "permissionName": "rs.hostlmslocations.post",
-      "displayName": "post hostlmslocations",
-      "description": "post hostlmslocations",
-      "visible": false
-    },
-    {
-      "permissionName": "rs.hostlmslocations.put",
-      "displayName": "put hostlmslocations",
-      "description": "put hostlmslocations",
-      "visible": false
-    },
-    {
-      "permissionName": "rs.hostlmslocations.delete",
-      "displayName": "delete hostlmslocations",
-      "description": "delete hostlmslocations",
-      "visible": false
-    },
+    { "permissionName": "rs.hostlmslocations.get", "displayName": "get hostlmslocations", "description": "get hostlmslocations", "visible": false },
+    { "permissionName": "rs.hostlmslocations.post", "displayName": "post hostlmslocations", "description": "post hostlmslocations", "visible": false },
+    { "permissionName": "rs.hostlmslocations.put", "displayName": "put hostlmslocations", "description": "put hostlmslocations", "visible": false },
+    { "permissionName": "rs.hostlmslocations.delete", "displayName": "delete hostlmslocations", "description": "delete hostlmslocations", "visible": false },
     {
       "permissionName": "rs.hostlmslocations.read",
       "displayName": "read hostlmslocations",

@@ -180,6 +180,7 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
+      'diku' | 'diku'
   }
 
   void "test presence of HOST LMS adapters"(String name, boolean should_be_found) {
@@ -234,6 +235,7 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
+      'diku' | 'diku'
   }
 
 
@@ -452,6 +454,24 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | _
   }
 
+  // For diku tenant should return the sample data loaded
+  void "test API for retrieving shelving locations for #tenant_id"() {
+ 
+    when:"We post to the shelvingLocations endpoint for tenant"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id
+                 ])
+      def resp = doGet("${baseUrl}rs/shelvingLocations".toString());
+
+    then:"Got results"
+      resp != null;
+      log.debug("Got get shelving locations response: ${resp}");
+
+    where:
+      tenant_id | _
+      'diku' | _
+  }
+
   void "test API for creating shelving locations for #tenant_id"() {
     when:"We post to the shelvingLocations endpoint for tenant"
       setHeaders([
@@ -470,5 +490,42 @@ class RSLifecycleSpec extends HttpSpec {
       tenant_id | _
       'RSInstOne' | _
   }
+
+  void "test API for creating patron profiles for #tenant_id"() {
+    when:"We post to the hostLMSPatronProfiles endpoint for tenant"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id
+                 ])
+      def resp = doPost("${baseUrl}rs/hostLMSPatronProfiles".toString(),
+                        [
+                          code:'staff',
+                          name:'staff'
+                        ])
+    then:"Created"
+      resp != null;
+      log.debug("Got create hostLMSPatronProfiles response: ${resp}");
+    where:
+      tenant_id | _
+      'RSInstOne' | _
+  }
+
+  // For diku tenant should return the sample data loaded
+  void "test API for retrieving patron profiles for #tenant_id"() {
+
+    when:"We GET to the hostLMSPatronProfiles endpoint for tenant"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id
+                 ])
+      def resp = doGet("${baseUrl}rs/hostLMSPatronProfiles".toString());
+
+    then:"Got results"
+      resp != null;
+      log.debug("Got get hostLMSPatronProfiles response: ${resp}");
+
+    where:
+      tenant_id | _
+      'RSInstOne' | _
+  }
+
 
 }
