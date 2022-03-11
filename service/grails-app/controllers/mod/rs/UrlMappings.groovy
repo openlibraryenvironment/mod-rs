@@ -26,6 +26,7 @@ class UrlMappings {
     "/rs/shipments" (resources: 'shipment' )
     "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
+    "/rs/hostLMSPatronProfiles" (resources: 'hostLMSPatronProfile' )
     "/rs/shelvingLocations" (resources: 'shelvingLocations' )
     "/rs/sharedIndexQuery" (controller: 'sharedIndexQuery', action: 'query', parseRequest: false)
     "/rs/directoryEntry" (resources: 'directoryEntry' )

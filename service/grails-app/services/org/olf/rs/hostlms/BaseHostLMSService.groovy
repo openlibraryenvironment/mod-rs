@@ -384,6 +384,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         if ( ( ncip_server_address != null ) &&
              ( ncip_from_agency != null ) &&
              ( ncip_app_profile != null ) ) {
+
           log.debug("Request patron from ${ncip_server_address}");
           CirculationClient ncip_client = getCirculationClient(ncip_server_address);
           LookupUser lookupUser = new LookupUser()
