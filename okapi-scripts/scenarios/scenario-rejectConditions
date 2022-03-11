@@ -9,3 +9,10 @@ requester
 
 # Reject the conditions
 requesterRejectConditions.json
+
+# Back to responder to accept the cancel
+responder
+
+# We will respond with YES
+supplierRespondToCancelYes.json
+

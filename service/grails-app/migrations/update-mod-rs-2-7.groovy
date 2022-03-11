@@ -23,10 +23,10 @@ databaseChangeLog = {
 									     sym_symbol = '${duplicateData.symbol}' and
 										 de.de_id = s.sym_owner_fk""".toString(), { duplicateRow ->
 
-						// Now update the symbol on the record to make it unique	
+						// Now update the symbol on the record to make it unique
 						// This will not work if a directory entry has duplicate symbols for the same authority
 						// I did have it working off a running number, but since the same migration is running against mod-rs,
-						// needed to ensure that they would be changed to the same value on both modules 			  
+						// needed to ensure that they would be changed to the same value on both modules
 						sql.execute("""UPDATE ${database.defaultSchemaName}.symbol
 									   SET sym_symbol = '${duplicateData.symbol}-DUPLICATE-${duplicateRow.slug.toUpperCase()}'
 									   WHERE sym_id = '${duplicateRow.id}'""".toString());
@@ -40,7 +40,7 @@ databaseChangeLog = {
 									   	   SET de_published_last_update = ${updateTime}
 										   WHERE de_id = '${row.directoryEntryId}' and
 												 de_published_last_update is not null""".toString());
-											 
+
 							// Now if the direct entry has a parent we need to update that as well
 							row = sql.firstRow("""select de_parent directoryEntryId
 														 from ${database.defaultSchemaName}.directory_entry
@@ -54,7 +54,7 @@ databaseChangeLog = {
 		// Now we have no duplicates, we can add the unique index
 		addUniqueConstraint(columnNames: "sym_authority_fk, sym_symbol", tableName: "symbol")
 	}
-	
+
 	changeSet(author: "cwoodfield", id: "202202211400-001") {
 
 		// Adding column tr_code
@@ -66,7 +66,7 @@ databaseChangeLog = {
 		addColumn(tableName: "timer") {
             column(name: "tr_next_exec", type: "BIGINT")
 		}
-		
+
 		// now set the next execution field with the last execution field
 		grailsChange {
 			change {
@@ -118,6 +118,11 @@ databaseChangeLog = {
     }
   }
 
-
+    changeSet(author: "cwoodfield", id: "202203111200-001") {
+        // Adding column hlpp_can_create_requests to host_lms_patron_profile
+        addColumn(tableName: "host_lms_patron_profile") {
+            column(name: "hlpp_can_create_requests", type: "BOOLEAN")
+        }
+    }
 }
 

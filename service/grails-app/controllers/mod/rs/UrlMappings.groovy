@@ -17,10 +17,12 @@ class UrlMappings {
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
     }
 
+    "/rs/patron/$patronIdentifier/canCreateRequest" (controller: 'patron', action: 'canCreateRequest')
+
     "/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
     "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
     "/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
-	
+
     '/rs/noticePolicies' (resources: 'noticePolicy')
 
     "/rs/shipments" (resources: 'shipment' )
@@ -37,7 +39,7 @@ class UrlMappings {
         "/$domain/$property" (controller: 'refdata', action: 'lookup')
       }
     }
-    
+
     '/rs/status'(resources: 'status', excludes: ['update', 'patch', 'save', 'create', 'edit', 'delete'])
 
     "/rs/kiwt/config/$extended?" (controller: 'reshareConfig' , action: "resources")

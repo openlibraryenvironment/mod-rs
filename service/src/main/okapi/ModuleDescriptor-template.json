@@ -32,6 +32,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.validactions" ]
         },
         {
+          "methods" : [ "GET" ],
+          "pathPattern": "/rs/patron/{patronIdentifier}/canCreateRequest",
+          "permissionsRequired": [ "rs.patronrequests.item.post" ]
+        },
+        {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
           "permissionsRequired": [ "rs.patronrequests.item.put" ]
