@@ -758,6 +758,9 @@
         "rs.hostlmslocations.post",
         "rs.hostlmslocations.put",
         "rs.hostlmslocations.delete"
+      ],
+      "replaces" : [
+        "rs.hostlmslocations"
       ]
     },
     {
