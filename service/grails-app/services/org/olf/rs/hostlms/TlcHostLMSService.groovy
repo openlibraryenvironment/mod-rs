@@ -52,6 +52,11 @@ public class TlcHostLMSService extends BaseHostLMSService {
 
   }
 
+  @Override
+  protected String getNCIPTemplatePrefix() {
+    return "tlc";
+  }
+
 
 
   
