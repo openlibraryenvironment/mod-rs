@@ -37,6 +37,11 @@ apply plugin: 'org.grails.plugins.views-json'
 apply plugin: 'com.github.erdi.webdriver-binaries'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
+    grails { pathingJar = true }
+}
+
 eclipse {
   classpath {
     file {
