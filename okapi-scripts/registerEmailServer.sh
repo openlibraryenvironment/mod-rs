@@ -18,12 +18,12 @@ TENANT="diku"
 # The various parameters
 EMAIL_SMTP_HOST="smtp.gmail.com"
 EMAIL_SMTP_PORT="465"
-EMAIL_USERNAME="chas.woodfield@k-int.co.uk"
+EMAIL_USERNAME="<<USERNAME>>"
 EMAIL_PASSWORD="<Enter PASSWORD HERE>"
 EMAIL_START_TLS_OPTIONS="REQUIRED"
 EMAIL_TRUST_ALL="true"
 EMAIL_SMTP_SSL="true"
-EMAIL_FROM="chas.woodfield@k-int.co.uk"
+EMAIL_FROM="<<FROM_EMAIL_ADDRES_TO_USE>>"
 
 REQUEST='{ "module": "SMTP_SERVER", "configName": "smtp", "code": "EMAIL_SMTP_HOST", "description": "server smtp host", "default": true, "enabled": true, "value": "<<EMAIL_SMTP_HOST>>" }'
 REQUEST=${REQUEST/"<<EMAIL_SMTP_HOST>>"/"${EMAIL_SMTP_HOST}"}
