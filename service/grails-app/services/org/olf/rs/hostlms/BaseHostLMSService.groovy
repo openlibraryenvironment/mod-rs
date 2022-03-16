@@ -206,6 +206,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return null;
   }
 
+  // Override this method if our Host LMS Adapter needs a specific prefix for its templates
+  protected String getNCIPTemplatePrefix() {
+    return null;
+  }
+
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
@@ -605,9 +610,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncip_app_profile);
 
-          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem request ${acceptItem}");
+          if(getNCIPTemplatePrefix() != null) {
+            log.debug("[${CurrentTenant.get()}] setting NCIP template prefix to ${getNCIPTemplatePrefix()}");
+            acceptItem.setTemplatePrefix(getNCIPTemplatePrefix());
+          }
+
+          log.debug("[${CurrentTenant.get()}] NCIP acceptItem request ${acceptItem}");
           JSONObject response = ncip_client.send(acceptItem);
-          log.debug("[${CurrentTenant.get()}] NCIP2 acceptItem response ${response}");
+          log.debug("[${CurrentTenant.get()}] NCIP acceptItem response ${response}");
 
           if ( response.has('problems') ) {
             result.result = false;
