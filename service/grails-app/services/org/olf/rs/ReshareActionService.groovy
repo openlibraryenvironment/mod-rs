@@ -27,11 +27,12 @@ public class ReshareActionService {
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND   = 'Unable to send protocol message (';
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND_1 = ')';
 
-    ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
-    ProtocolMessageService protocolMessageService
-    ProtocolMessageBuildingService protocolMessageBuildingService
-    HostLMSService hostLMSService
-    PatronStoreService patronStoreService
+    ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+    ProtocolMessageService protocolMessageService;
+    ProtocolMessageBuildingService protocolMessageBuildingService;
+    HostLMSService hostLMSService;
+    PatronNoticeService patronNoticeService;
+    PatronStoreService patronStoreService;
 
     /**
      * Looks up a patron identifier to see if it is valid for requesting or not
@@ -66,6 +67,9 @@ public class ReshareActionService {
                     if (patronProfile == null) {
                         patronProfile = new HostLMSPatronProfile(code:patronDetails.userProfile, name:patronDetails.userProfile);
                         patronProfile.save(flush:true, failOnError:true);
+
+                        // Trigger a notice to be sent if it has been configured
+                        patronNoticeService.triggerNotices(patronProfile);
                     }
                 }
 

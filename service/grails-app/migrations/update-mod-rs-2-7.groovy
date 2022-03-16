@@ -124,5 +124,15 @@ databaseChangeLog = {
             column(name: "hlpp_can_create_requests", type: "BOOLEAN")
         }
     }
+
+    changeSet(author: "cwoodfield", id: "202203141200-001") {
+        // Make the field ne_patron_request_fk nullable, so we can make the table notice_event table more generic
+        dropNotNullConstraint(columnDataType: "VARCHAR(36)", columnName: "ne_patron_request_fk", tableName: "notice_event")
+
+        // Now add the column ne_json_data so we we can provide notices about anything
+        addColumn(tableName: "notice_event") {
+            column(name: "ne_json_data", type: "CLOB")
+        }
+    }
 }
 
