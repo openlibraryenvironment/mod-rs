@@ -129,6 +129,12 @@ public class Settings {
     public static final String NOTICE_TRIGGER_NEW_REQUEST        = 'New request';
     public static final String NOTICE_TRIGGER_REQUEST_CANCELLED  = 'Request cancelled';
 
+    // Loan Policy
+    public static final String LOAN_POLICY_LENDING_ALL_TYPES        = 'Lending all types';
+    public static final String LOAN_POLICY_NOT_LENDING              = 'Not Lending';
+    public static final String LOAN_POLICY_LENDING_PHYSICAL_ONLY    = 'Lending Physical only';
+    public static final String LOAN_POLICY_LENDING_ELECTRONIC_ONLY  = 'Lending Electronic only';
+
     public static void loadAll() {
         (new Settings()).load();
     }
@@ -336,10 +342,13 @@ public class Settings {
             RefdataValue.lookupOrCreate(VOCABULARY_LOAN_CONDITIONS, 'WatchLibraryUseOnly');
             RefdataValue.lookupOrCreate(VOCABULARY_LOAN_CONDITIONS, 'Other');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, 'Lending all types')
-            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, 'Not Lending')
-            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, 'Lendin Physical only')
-            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, 'Lending Electronic only')
+            // We need to rename "Lendin Physical Only" to Lending Physical Only"
+            renameRefdata(VOCABULARY_LOAN_POLICY, 'Lendin Physical Only', LOAN_POLICY_LENDING_PHYSICAL_ONLY);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, LOAN_POLICY_LENDING_ALL_TYPES);
+            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, LOAN_POLICY_NOT_LENDING);
+            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, LOAN_POLICY_LENDING_PHYSICAL_ONLY);
+            RefdataValue.lookupOrCreate(VOCABULARY_LOAN_POLICY, LOAN_POLICY_LENDING_ELECTRONIC_ONLY);
 
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_FORMATS, 'E-mail', 'email');
 
@@ -374,6 +383,19 @@ public class Settings {
             }
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
+        }
+    }
+
+    private void renameRefdata(String category, String oldValue, String newValue) {
+        RefdataCategory categoryRefdata = RefdataCategory.findByDesc(category);
+        if (categoryRefdata != null) {
+            String normValue = RefdataValue.normValue(oldValue);
+            RefdataValue valueRefData = RefdataValue.findByOwnerAndValue(categoryRefdata, normValue);
+            if (valueRefData != null) {
+                valueRefData.label = newValue;
+                valueRefData.value = RefdataValue.normValue(newValue);
+                valueRefData.save(flush:true, failOnError:true);
+            }
         }
     }
 }
