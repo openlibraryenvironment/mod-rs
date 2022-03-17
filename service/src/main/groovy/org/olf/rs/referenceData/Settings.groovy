@@ -135,6 +135,12 @@ public class Settings {
     public static final String LOAN_POLICY_LENDING_PHYSICAL_ONLY    = 'Lending Physical only';
     public static final String LOAN_POLICY_LENDING_ELECTRONIC_ONLY  = 'Lending Electronic only';
 
+    // State/Action configuration settings
+    private static final String SECTION_STATE_ACTION_CONFIG = 'state_action_config';
+    public static final String SETTING_COMBINE_FILL_AND_SHIP = 'combine_fill_and_ship';
+    public static final String SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP = 'combine_returned_by_patron_and_return_ship';
+
+
     public static void loadAll() {
         (new Settings()).load();
     }
@@ -366,6 +372,9 @@ public class Settings {
 
             ensureAppSetting(SETTING_ROUTING_ADAPTER, SECTION_ROUTING, SETTING_TYPE_REF_DATA, VOCABULARY_REQUEST_ROUTING_ADAPTER, null, folioSiRoutingAdapter.value);
             ensureAppSetting(SETTING_STATIC_ROUTES, SECTION_ROUTING, SETTING_TYPE_STRING, null, null, '');
+            
+            ensureAppSetting(SETTING_COMBINE_FILL_AND_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, VOCABULARY_YES_NO, yesNoNo.value)
+            ensureAppSetting(SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, VOCABULARY_YES_NO, yesNoNo.value)
 
             // This looks slightly odd, but rather than litter this file with an ever growing list of
             // random delete statements, if you wish to delete
