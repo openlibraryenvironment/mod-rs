@@ -357,12 +357,23 @@ public class ReshareActionService {
         if ((patronDetails != null) &&
             (patronDetails.userid != null) &&
             (patronDetails.userid.trim().length() > 0)) {
-            result = Patron.findByHostSystemIdentifier(patronDetails.userid) ?: new Patron(
-                hostSystemIdentifier: patronDetails.userid,
-                           givenname: patronDetails.givenName,
-                             surname: patronDetails.surname,
-                         userProfile: patronDetails.userProfile
-            ).save();
+            result = Patron.findByHostSystemIdentifier(patronDetails.userid);
+            if (result == null) {
+                result = new Patron(
+                    hostSystemIdentifier: patronDetails.userid,
+                               givenname: patronDetails.givenName,
+                                 surname: patronDetails.surname,
+                             userProfile: patronDetails.userProfile
+                );
+            } else {
+                // update the patron record
+                result.givenname = patronDetails.givenName;
+                result.surname = patronDetails.surname;
+                result.userProfile = patronDetails.userProfile;
+            }
+
+            // We have either created or updated, so save it now
+            result.save(flush:true, failOnError:true);
         }
         return result;
     }
