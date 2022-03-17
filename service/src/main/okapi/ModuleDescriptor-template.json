@@ -236,28 +236,22 @@
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/hostLMSPatronProfiles*",
-          "permissionsRequired": [ "rs.hostlmspatronprofiles.get" ]
+          "permissionsRequired": [ "rs.hostlmspatronprofiles.read" ]
         },
         {
-          "methods": [ "PUT" ],
+          "methods": [ "PUT", "POST", "DELETE" ],
           "pathPattern": "/rs/hostLMSPatronProfiles*",
-          "permissionsRequired": [ "rs.hostlmspatronprofiles.put" ]
+          "permissionsRequired": [ "rs.hostlmspatronprofiles.write" ]
         },
         {
-          "methods": [ "POST" ],
-          "pathPattern": "/rs/hostLMSPatronProfiles*",
-          "permissionsRequired": [ "rs.hostpatronprofiles.post" ]
-        },
-        {
-          "methods": [ "DELETE" ],
-          "pathPattern": "/rs/hostLMSPatronProfiles*",
-          "permissionsRequired": [ "rs.hostpatronprofiles.delete" ]
-        },
-
-        {
-          "methods": [ "GET", "POST", "PUT", "DELETE" ],
+          "methods": [ "GET" ],
           "pathPattern": "/rs/shelvingLocations*",
-          "permissionsRequired": [ "rs.shelvingLocations" ]
+          "permissionsRequired": [ "rs.shelvingLocations.read" ]
+        },
+        {
+          "methods": [ "POST", "PUT", "DELETE" ],
+          "pathPattern": "/rs/shelvingLocations*",
+          "permissionsRequired": [ "rs.shelvingLocations.write" ]
         },
         {
           "methods": [ "GET" ],
@@ -776,10 +770,34 @@
       ]
     },
     {
-      "permissionName": "rs.shelvingLocations",
-      "displayName": "Shelving Locations",
-      "description": "Shelving Locations",
-      "visible": true
+      "permissionName": "rs.hostlmspatronprofiles.read",
+      "displayName": "Read patron profiles",
+      "description": "Read patron profiles",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmspatronprofiles.write",
+      "displayName": "Write patron profiles",
+      "description": "Write patron profiles",
+      "visible": false,
+      "subPermissions" : [
+        "rs.hostlmspatronprofiles.read"
+      ]
+    },
+    {
+      "permissionName": "rs.shelvingLocations.read",
+      "displayName": "Read shelving locations",
+      "description": "Read shelving locations",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.shelvingLocations.write",
+      "displayName": "Write shelving locations",
+      "description": "Write shelving locations",
+      "visible": false,
+      "subPermissions" : [
+        "rs.shelvingLocations.read"
+      ]
     },
     {
       "permissionName": "rs.timers",
