@@ -134,5 +134,23 @@ databaseChangeLog = {
             column(name: "ne_json_data", type: "CLOB")
         }
     }
+
+    changeSet(author: "cwoodfield", id: "202203181000-001") {
+
+        // Adding column tmc_predefined_id to template_container
+        addColumn(tableName: "template_container") {
+            column(name: "tmc_predefined_id", type: "VARCHAR(64)")
+        }
+
+        // Adding column ltm_predefined_id to localized_template
+        addColumn(tableName: "localized_template") {
+            column(name: "ltm_predefined_id", type: "VARCHAR(64)")
+        }
+
+        // Adding column np_predefined_id to notice_policy
+        addColumn(tableName: "notice_policy") {
+            column(name: "np_predefined_id", type: "VARCHAR(64)")
+        }
+    }
 }
 
