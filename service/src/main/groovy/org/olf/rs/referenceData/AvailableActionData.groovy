@@ -164,6 +164,8 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL)
+        // Combined PATRON RETURED AND RETURN SHIPPED option.
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         // REQ_AWAITING_RETURN_SHIPPING OR "Awaiting return shipping"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL)
@@ -183,6 +185,8 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_OVERDUE, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_OVERDUE, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_OVERDUE, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
+        // Combined PATRON RETURED AND RETURN SHIPPED option.
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_OVERDUE, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         // REQ_LOCAL_REVIEW OR "Requires review - locally available"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_REQUESTER_FILL_LOCALLY, AvailableAction.TRIGGER_TYPE_MANUAL)

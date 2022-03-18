@@ -18,8 +18,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
 
 /**
  * Action that occurs when the responder checks the item into reshare from the LMS
- * @author Chas
- *
+ * @author Ethan Freestone
  */
 public class ActionResponderSupplierCheckInToReshareAndSupplierMarkShippedService extends ActionResponderService {
 
