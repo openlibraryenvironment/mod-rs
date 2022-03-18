@@ -1,0 +1,10 @@
+{
+  	"predefinedId" : "patronProfileContainer",
+	"name" : "New patron profile",
+	"description" : "A new patron profile has come to our attention",
+	"template" : {
+	  	"predefinedId" : "patronProfileTemplate",
+	  	"header": "New patron profile: {{patronProfile.name}}",
+		"templateBody" : "<div>A patron with the profile {{patronProfile.name}} submitted a request into the system today. This patron profile is not yet configured in your ReShare settings. If this patron profile is not permitted to place requests in ReShare, please log into ReShare and set the 'Can Create Requests' for this profile to false.</div><div>Thank you,</div>ReShare System Administrator</div><div><br></div><div>This is an auto-generated message. Please do not reply to this email.</div>"
+	}
+}

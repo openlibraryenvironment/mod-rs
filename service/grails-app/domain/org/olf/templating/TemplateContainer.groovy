@@ -1,28 +1,31 @@
 package org.olf.templating
-import grails.gorm.MultiTenant
-
-import org.olf.templating.Template
-
 import com.k_int.web.toolkit.refdata.Defaults
 import com.k_int.web.toolkit.refdata.RefdataValue
 
-import org.olf.templating.TemplatingService
+import grails.gorm.MultiTenant
 
 class TemplateContainer implements MultiTenant<TemplateContainer> {
-  String id
-  String name
+  String id;
+  String name;
 
   @Defaults(['Handlebars'])
-  RefdataValue templateResolver
-  
-  String description
+  RefdataValue templateResolver;
 
-  Date dateCreated
-  Date lastUpdated
+  String description;
 
-  String context
+  Date dateCreated;
+  Date lastUpdated;
+
+  String context;
+
+  /** If it is a predefined id this is the id allocated to it */
+  String predefinedId;
 
   static hasMany = [localizedTemplates: LocalizedTemplate];
+
+  static constraints = {
+    predefinedId (nullable: true)
+  }
 
   static mapping = {
                      id column: 'tmc_id', generator: 'uuid2', length:36
@@ -33,6 +36,7 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
             dateCreated column: 'tmc_date_created'
             lastUpdated column: 'tmc_last_updated'
                 context column: 'tmc_context'
+           predefinedId column: 'tmc_predefined_id', length: 64
     localizedTemplates cascade: 'all-delete-orphan'
   }
 }

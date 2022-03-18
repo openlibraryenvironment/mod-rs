@@ -6,6 +6,7 @@ import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
 import org.olf.rs.referenceData.Settings;
 import org.olf.rs.referenceData.StatusData;
+import org.olf.rs.referenceData.TemplateData;
 import org.olf.rs.referenceData.TimerData;
 import org.olf.rs.statemodel.Status;
 
@@ -33,7 +34,7 @@ public class HousekeepingService {
   }
 
   /**
-   * Put calls to estabish any required reference data in here. This method MUST be communtative - IE repeated calls must leave the 
+   * Put calls to estabish any required reference data in here. This method MUST be communtative - IE repeated calls must leave the
    * system in the same state. It will be called regularly throughout the lifecycle of a project. It is common to see calls to
    * lookupOrCreate, or "upsert" type functions in here."
    */
@@ -45,24 +46,27 @@ public class HousekeepingService {
 
 		// Load the Custom text properties
 		CustomTextProperties.loadAll();
-		
+
 		// Add the Settings, when I get an hour or 2 will convert the rest of this file
 		Settings.loadAll();
-		
+
 		// Add the naming authorities
 		NamingAuthority.loadAll();
 
 		// The status data
-		StatusData.loadAll();		
+		StatusData.loadAll();
 
 		// Load the Available actions
 		AvailableActionData.loadAll();
 
 		// Load the counter data
 		CounterData.loadAll();
-		
+
 		// Load the counter data
 		TimerData.loadAll();
+
+        // The predefined templates
+        TemplateData.loadAll();
       }
     }
   }

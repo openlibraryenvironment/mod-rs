@@ -12,12 +12,16 @@ class NoticePolicy implements MultiTenant<NoticePolicy> {
   Date dateCreated
   Date lastUpdated
 
+  /** If it is a predefined id this is the id allocated to it */
+  String predefinedId;
+
   static hasMany = [notices: NoticePolicyNotice];
 
   static constraints = {
     description (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
+    predefinedId (nullable: true)
   }
 
   static mapping = {
@@ -28,6 +32,7 @@ class NoticePolicy implements MultiTenant<NoticePolicy> {
     name column : 'np_name'
     description column : 'np_description'
     active column : 'np_active'
+    predefinedId column: 'np_predefined_id', length: 64
     notices cascade : 'all-delete-orphan'
   }
 }
