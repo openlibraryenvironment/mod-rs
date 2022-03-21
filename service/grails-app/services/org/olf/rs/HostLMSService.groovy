@@ -82,9 +82,9 @@ public class HostLMSService {
         String message;
         if(check_in_result?.result == true) {          
           if(check_in_result?.already_checked_in == true) {	
-            message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
+            message = "NCIP CheckinItem call succeeded for item: ${temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
           } else {
-            message = "NCIP CheckinItem call succeeded for item: ${vol.itemId}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+            message = "NCIP CheckinItem call succeeded for item: ${temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
           }          
           checkInMap.success = true;
           reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
@@ -94,12 +94,12 @@ public class HostLMSService {
         } else {
           request.needsAttention=true;
           checkInMap.success = false;
-          message = "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString();
+          message = "Host LMS integration: NCIP CheckinItem call failed for item: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString();
           reshareApplicationEventHandlerService.auditEntry(
             request,
             request.state,
             request.state,
-            "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
+            "Host LMS integration: NCIP CheckinItem call failed for item: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
             null);
         }
         checkInMap.message = message;
