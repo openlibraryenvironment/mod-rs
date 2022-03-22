@@ -18,14 +18,7 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
 
   String context;
 
-  /** If it is a predefined id this is the id allocated to it */
-  String predefinedId;
-
   static hasMany = [localizedTemplates: LocalizedTemplate];
-
-  static constraints = {
-    predefinedId (nullable: true)
-  }
 
   static mapping = {
                      id column: 'tmc_id', generator: 'uuid2', length:36
@@ -36,7 +29,6 @@ class TemplateContainer implements MultiTenant<TemplateContainer> {
             dateCreated column: 'tmc_date_created'
             lastUpdated column: 'tmc_last_updated'
                 context column: 'tmc_context'
-           predefinedId column: 'tmc_predefined_id', length: 64
     localizedTemplates cascade: 'all-delete-orphan'
   }
 }

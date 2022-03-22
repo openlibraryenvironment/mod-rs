@@ -2,6 +2,7 @@ package org.olf.rs.referenceData
 
 import org.olf.rs.NoticePolicy;
 import org.olf.rs.NoticePolicyNotice;
+import org.olf.rs.PredefinedId;
 import org.olf.templating.LocalizedTemplate;
 import org.olf.templating.Template;
 import org.olf.templating.TemplateContainer;
@@ -35,7 +36,7 @@ public class TemplateData {
     private void loadTemplate(String resourcePath) {
         URL resource = this.class.classLoader.getResource(resourcePath);
         if (resource == null) {
-            log.errorEnabled('Unable to find resource: ' + resourcePath);
+            log.error('Unable to find resource: ' + resourcePath);
         } else {
             InputStream stream = resource.openStream();
             try {
@@ -44,15 +45,18 @@ public class TemplateData {
                 // We now have a map in our hand that we will map into a template container
                 if (parsedJson.template == null) {
                     // Can't do anything without a template
-                    log.errorEnabled('No template supplied for resource: ' + resourcePath);
+                    log.error('No template supplied for resource: ' + resourcePath);
                 } else {
                     // Excellent start let us see if we already have this template
-                    LocalizedTemplate localizedTemplate = LocalizedTemplate.findByPredefinedId(parsedJson.template.predefinedId);
-                    if (localizedTemplate == null) {
+                    String localizedTemplateId = getReferencedId('localized_template', parsedJson.template.predefinedId);
+                    LocalizedTemplate localizedTemplate;
+                    if (localizedTemplateId == null) {
                         // didn't previously exist, so we need to create a new template
                         localizedTemplate = new LocalizedTemplate();
-                        localizedTemplate.predefinedId = parsedJson.template.predefinedId;
                         localizedTemplate.locality = 'en';
+                    } else {
+                        // It does already exist
+                        localizedTemplate = LocalizedTemplate.get(localizedTemplateId);
                     }
 
                     // Ensure the localized template has a template
@@ -68,15 +72,18 @@ public class TemplateData {
                     localizedTemplate.template.save(flush:true, failOnError:true);
 
                     // Now look to see if the container exists
-                    TemplateContainer  templateContainer = TemplateContainer.findByPredefinedId(parsedJson.predefinedId);
-                    if (templateContainer == null) {
+                    String templateContainerId = getReferencedId('template_container', parsedJson.predefinedId);
+                    TemplateContainer  templateContainer;
+                    if (templateContainerId == null) {
                         // We need to create a new template container
                         templateContainer = new TemplateContainer();
-                        templateContainer.predefinedId = parsedJson.predefinedId;
                         templateContainer.context = 'noticeTemplate';
 
                         // This appears to have a default, but dosn't seem to kick in before validation
                         templateContainer.templateResolver = RefdataValue.lookupOrCreate(VOCABULARY_TEMPLATE_RESOLVER, TEMPLATE_RESOLVER_HANDLEBARS);
+                    } else {
+                        // It does already exist
+                        templateContainer = TemplateContainer.get(templateContainerId);
                     }
 
                     // Set the name and description
@@ -85,6 +92,9 @@ public class TemplateData {
 
                     // Save the template container
                     templateContainer.save(flush:true, failOnError:true);
+
+                    // Create the mapping with the predefined id
+                    PredefinedId.ensureExists('template_container', parsedJson.predefinedId, templateContainer.id);
 
                     // Now add the  localized template
                     if (localizedTemplate.owner == null) {
@@ -96,15 +106,20 @@ public class TemplateData {
                     localizedTemplate.save(flush:true, failOnError:true);
                     templateContainer.save(flush:true, failOnError:true);
 
+                    // Create the mapping with the predefined id
+                    PredefinedId.ensureExists('localized_template', parsedJson.template.predefinedId, localizedTemplate.id);
+
                     // Now we have a template we now need to create a notice policy and notice policy notice records but we only do this once
-                    NoticePolicy noticePolicy = NoticePolicy.findByPredefinedId(parsedJson.predefinedId);
-                    if (noticePolicy == null) {
-                        noticePolicy = new NoticePolicy();
-                        noticePolicy.predefinedId = parsedJson.predefinedId;
+                    String noticePolicyId = getReferencedId('notice_policy', parsedJson.predefinedId);
+                    if (noticePolicyId == null) {
+                        NoticePolicy noticePolicy = new NoticePolicy();
                         noticePolicy.name = parsedJson.name;
                         noticePolicy.description = parsedJson.description;
                         noticePolicy.active = false;
                         noticePolicy.save(flush:true, failOnError:true);
+
+                        // Create the mapping with the predefined id
+                        PredefinedId.ensureExists('notice_policy', parsedJson.predefinedId, noticePolicy.id);
 
                         // Now for the NoticePolicyNotice
                         NoticePolicyNotice noticePolicyNotice = new NoticePolicyNotice();
@@ -119,11 +134,15 @@ public class TemplateData {
                     }
                 }
             } catch (Exception e) {
-                log.errorEnabled('Exception thrown while loading template from resource: ' + resourcePath, e);
+                log.error('Exception thrown while loading template from resource: ' + resourcePath, e);
             } finally {
                 // Close all the resources associated with the stream, may not need to do this ...
                 stream.close();
             }
         }
+    }
+
+    private String getReferencedId(String namespace, String predefinedId) {
+        return(PredefinedId.lookupReferenceId(namespace, predefinedId));
     }
 }
