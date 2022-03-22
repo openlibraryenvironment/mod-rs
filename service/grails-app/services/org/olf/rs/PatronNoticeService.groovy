@@ -43,8 +43,8 @@ public class PatronNoticeService {
 
         Map values = [
             email: getAdminEmail(),
-            patronProfile: [
-                name: hostLMSPatronProfile.name
+            user: [
+                patronProfile: hostLMSPatronProfile.name
             ]
         ];
 
@@ -124,6 +124,7 @@ public class PatronNoticeService {
                 id: pr.patronIdentifier,
                 givenName: pr?.patronGivenName ?: '',
                 surname: pr.patronSurname,
+                patronProfile: pr?.resolvedPatron?.userProfile ?: ''
             ],
             request: [
                 id: pr.hrid,
