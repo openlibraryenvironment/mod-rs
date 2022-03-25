@@ -14,6 +14,7 @@ import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 import org.olf.rs.statemodel.events.EventNoImplementationService;
 import org.olf.rs.statemodel.events.EventRequestingAgencyMessageIndService;
 import org.olf.rs.statemodel.events.EventSupplyingAgencyMessageIndService;
+
 import grails.events.annotation.Subscriber;
 import grails.gorm.multitenancy.Tenants;
 import grails.util.Holders
@@ -34,7 +35,7 @@ import groovy.util.logging.Slf4j
 public class ReshareApplicationEventHandlerService {
 
   private static final int MAX_RETRIES = 10;
-  
+
   	EventNoImplementationService eventNoImplementationService;
 	EventRequestingAgencyMessageIndService eventRequestingAgencyMessageIndService;
 	EventSupplyingAgencyMessageIndService eventSupplyingAgencyMessageIndService;
@@ -56,9 +57,9 @@ public class ReshareApplicationEventHandlerService {
 				eventNameWords.each{ word ->
 					eventNameNormalised += word.capitalize();
 				}
-				
+
 				String beanName = "event" + eventNameNormalised + "Service";
-	
+
 				// Now setup the link to the service action that actually does the work
 				try {
 					serviceEvents[eventData.event] = Holders.grailsApplication.mainContext.getBean(beanName);
@@ -66,7 +67,7 @@ public class ReshareApplicationEventHandlerService {
 					log.error("Unable to locate event bean: " + beanName);
 				}
 			}
-			
+
 			// Did we find the bean
 			AbstractEvent eventBean = serviceEvents[eventData.event];
 			if (eventBean == null) {
@@ -76,7 +77,7 @@ public class ReshareApplicationEventHandlerService {
 				eventBean = eventNoImplementationService;
 				serviceEvents[eventData.event] = eventBean;
 			}
-			
+
 			try {
 				// Ensure we are talking to the right tenant database
 				Tenants.withId(eventData.tenant) {
@@ -90,19 +91,19 @@ public class ReshareApplicationEventHandlerService {
 						PatronRequest.withNewTransaction { transactionStatus ->
 							PatronRequest request = null;
 							String requestId = null;
-							
+
 							// Get hold of the request
 							switch (eventBean.fetchRequestMethod()) {
 								case EventFetchRequestMethod.NEW:
 									request = new PatronRequest(eventData.bibliographicInfo);
 									break;
-										
+
 								case EventFetchRequestMethod.PAYLOAD_ID:
 									requestId = eventData.payload.id;
 									request = delayedGet(requestId, true);
 									break;
 							}
-		
+
 							// Did we obtain a request
 							if (request == null) {
 								log.error("Within event \"" + eventData.event + "\", failed to obtain request with id: \"" + requestId + "\" using method Event " + eventBean.fetchRequestMethod().toString());
@@ -110,13 +111,13 @@ public class ReshareApplicationEventHandlerService {
 								// Create ourselves a new result details
 								EventResultDetails resultDetails = new EventResultDetails();
 								Status currentState = request.state;
-						
+
 								// Default a few fields
 								resultDetails.newStatus = currentState;
 								resultDetails.result = ActionResult.SUCCESS;
 								resultDetails.auditMessage = "Executing event: " + eventData.event;
 								resultDetails.auditData = eventData;
-		
+
 								// Now do whatever work is required of this event
 								resultDetails = eventBean.processEvent(request, eventData, resultDetails);
 
@@ -124,10 +125,10 @@ public class ReshareApplicationEventHandlerService {
 								if (resultDetails.saveData == true) {
 									// Set the status of the request
 									request.state = resultDetails.newStatus;
-							
+
 									// Adding an audit entry so we can see what states we are going to for the event
 									// Do not commit this uncommented, here to aid seeing what transition changes we allow
-//									auditEntry(request, currentState, request.state, "Event: " + eventData.event + ", State change: " + currentState.code + " -> "  + request.state.code, null);   
+//									auditEntry(request, currentState, request.state, "Event: " + eventData.event + ", State change: " + currentState.code + " -> "  + request.state.code, null);
 
 									// Create the audit entry
 									auditEntry(
@@ -136,7 +137,7 @@ public class ReshareApplicationEventHandlerService {
 										request.state,
 										resultDetails.auditMessage,
 										resultDetails.auditData);
-							
+
 									// Finally Save the request
 									request.save(flush:true, failOnError:true);
 								}
@@ -154,7 +155,7 @@ public class ReshareApplicationEventHandlerService {
 	}
 
   /**
-   * A new request has been received from an external PEER institution using some comms protocol. 
+   * A new request has been received from an external PEER institution using some comms protocol.
    * We will need to create a request where isRequester==false
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
@@ -170,7 +171,7 @@ public class ReshareApplicationEventHandlerService {
   }
 
   /**
-   * An incoming message to the requesting agency FROM the supplying agency - so we look in 
+   * An incoming message to the requesting agency FROM the supplying agency - so we look in
    * eventData.header?.requestingAgencyRequestId to find our own ID for the request.
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
@@ -183,7 +184,7 @@ public class ReshareApplicationEventHandlerService {
 
 
 /**
-   * An incoming message to the supplying agency from the requesting agency - so we look in 
+   * An incoming message to the supplying agency from the requesting agency - so we look in
    * eventData.header?.supplyingAgencyRequestId to find our own ID for the request.
    * This should return everything that ISO18626Controller needs to build a confirmation message
    */
@@ -232,7 +233,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-// what calls this, as I don't think it gets called  
+// what calls this, as I don't think it gets called
 //  private void error(PatronRequest pr, String message) {
 //    Status old_state = pr.state;
 //    Status new_state = pr.isRequester ? lookupStatus('PatronRequest', 'REQ_ERROR') : lookupStatus('Responder', 'RES_ERROR');
@@ -272,10 +273,8 @@ public class ReshareApplicationEventHandlerService {
     // Only proceed if there is location
     if ( location && location.location ) {
       // We've been given a specific location, make sure we have a record for that location
-      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(location.location,location.location) ?: new HostLMSLocation(
-                                                                        code:location.location,
-                                                                        name:location.location,
-                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+      HostLMSLocation loc = HostLMSLocation.EnsureActive(location.location, location.location);
+
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc
       pr.pickShelvingLocation = location.shelvingLocation
@@ -334,9 +333,9 @@ public class ReshareApplicationEventHandlerService {
       inboundMessage.setAttachedAction(eventData.activeSection.action)
       inboundMessage.setMessageContent(eventData.activeSection.note)
     }
-    
+
     inboundMessage.setIsSender(false)
-    
+
     log.debug("Inbound Message: ${inboundMessage.messageContent}")
     pr.addToNotifications(inboundMessage)
     //inboundMessage.save(flush:true, failOnError:true)
@@ -350,10 +349,10 @@ public class ReshareApplicationEventHandlerService {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
-  
+
 	  pr.addToConditions(loanCondition);
   }
-  
+
   private String stripOutSystemCode(String string) {
 	  String returnString = string;
 	  def systemCodes = [
@@ -377,7 +376,7 @@ public class ReshareApplicationEventHandlerService {
       cond.save(flush: true, failOnError: true)
     }
   }
-  
+
   public String getRotaString( Set rota ) {
     def returnList = [];
     rota.each { entry ->
@@ -385,7 +384,7 @@ public class ReshareApplicationEventHandlerService {
     }
     return returnList.join(",");
   }
-  
+
 	public Symbol resolveSymbol(String authorty, String symbol) {
 		Symbol result = null;
 	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
@@ -396,7 +395,7 @@ public class ReshareApplicationEventHandlerService {
             else {
               log.warn("Missing or multiple symbol match for : ${authorty}:${symbol} (${symbol_list?.size()})");
             }
-	
+
 	    return result;
 	}
 
