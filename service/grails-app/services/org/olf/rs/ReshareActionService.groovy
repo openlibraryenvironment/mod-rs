@@ -70,6 +70,10 @@ public class ReshareActionService {
 
                         // Trigger a notice to be sent if it has been configured
                         patronNoticeService.triggerNotices(patronProfile);
+                    } else if (patronProfile.hidden == true) {
+                        // Unhide it as it is active again
+                        patronProfile.hidden = false;
+                        patronProfile.save(flush:true, failOnError:true);
                     }
                 }
 

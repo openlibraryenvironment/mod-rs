@@ -170,5 +170,22 @@ databaseChangeLog = {
         dropColumn(columnName: "ltm_predefined_id", tableName: "localized_template")
         dropColumn(columnName: "np_predefined_id", tableName: "notice_policy")
     }
-}
 
+    changeSet(author: "cwoodfield", id: "202203231700-001") {
+
+        // Adding column hlpp_hidden to host_lms_patron_profile
+        addColumn(tableName: "host_lms_patron_profile") {
+            column(name: "hlpp_hidden", type: "BOOLEAN")
+        }
+
+        // Adding column hlsl_hidden to host_lms_shelving_loc
+        addColumn(tableName: "host_lms_shelving_loc") {
+            column(name: "hlsl_hidden", type: "BOOLEAN")
+        }
+
+        // Adding column hll_hidden to host_lms_location
+        addColumn(tableName: "host_lms_location") {
+            column(name: "hll_hidden", type: "BOOLEAN")
+        }
+    }
+}

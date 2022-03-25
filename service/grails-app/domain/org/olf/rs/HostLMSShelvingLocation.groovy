@@ -1,10 +1,6 @@
 package org.olf.rs
 
-import com.k_int.web.toolkit.refdata.RefdataValue
-import grails.gorm.multitenancy.Tenants;
 import grails.gorm.MultiTenant
-import java.time.LocalDateTime
-import org.olf.okapi.modules.directory.DirectoryEntry
 
 class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
 
@@ -18,12 +14,16 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
   // > 0 - Preference order
   Long supplyPreference
 
+  /** The hidden field if set to true, means they have tried to delete it but it is still linked to another record, so we just mark it as hidden */
+  Boolean hidden;
+
   static constraints = {
     code (nullable: false)
     name (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
     supplyPreference (nullable: true)
+    hidden (nullable: true)
   }
 
   static hasMany = [
@@ -43,6 +43,7 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
                       dateCreated column : 'hlsl_date_created'
                       lastUpdated column : 'hlsl_last_updated'
                  supplyPreference column : 'hlsl_supply_preference'
+                           hidden column : 'hlsl_hidden', defaulValue: false
   }
 
   public String toString() {
