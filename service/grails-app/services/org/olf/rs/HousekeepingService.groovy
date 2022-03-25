@@ -4,6 +4,7 @@ import org.olf.rs.referenceData.AvailableActionData;
 import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
+import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.referenceData.Settings;
 import org.olf.rs.referenceData.StatusData;
 import org.olf.rs.referenceData.TemplateData;
@@ -46,6 +47,9 @@ public class HousekeepingService {
 
 		// Load the Custom text properties
 		CustomTextProperties.loadAll();
+
+        // Load the reference data (needs to be done before settings
+        RefdataValueData.loadAll();
 
 		// Add the Settings, when I get an hour or 2 will convert the rest of this file
 		Settings.loadAll();
