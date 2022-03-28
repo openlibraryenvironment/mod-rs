@@ -196,6 +196,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       // If after sorting high-low our higest ranking option has a preference of < 0 then we don't have
       // a location capable of supplying - return null;
       if ( result.preference < 0 ) {
+        log.debug("Returning null for supply location because preference value for ${result?.location} is ${result?.preference} ( < 0 )");
         result = null;
       }
     }
