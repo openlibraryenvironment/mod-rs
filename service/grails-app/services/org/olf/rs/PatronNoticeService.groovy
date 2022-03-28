@@ -6,7 +6,7 @@ import org.hibernate.LockOptions;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.olf.okapi.modules.directory.DirectoryEntry;
-import org.olf.rs.referenceData.Settings;
+import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.templating.TemplatingService;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
@@ -49,7 +49,7 @@ public class PatronNoticeService {
         ];
 
         // There is only one type of notice that can be sent for patron profiles, so it is hard coded here
-        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(Settings.VOCABULARY_NOTICE_TRIGGERS, Settings.NOTICE_TRIGGER_NEW_PATRON_PROFILE), null);
+        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE), null);
     }
 
     public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr = null) {
