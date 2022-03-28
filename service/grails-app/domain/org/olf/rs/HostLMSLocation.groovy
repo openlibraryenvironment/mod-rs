@@ -1,10 +1,8 @@
 package org.olf.rs
 
-import com.k_int.web.toolkit.refdata.RefdataValue
-import grails.gorm.multitenancy.Tenants;
-import grails.gorm.MultiTenant
-import java.time.LocalDateTime
-import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.DirectoryEntry;
+
+import grails.gorm.MultiTenant;
 
 /**
  *
@@ -13,7 +11,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry
  * Note - because the domain language used here is god-awful. A HostLMSLocation is a record in an institutions library management system that
  * represents "A location" - because there isn't a good definition this can mean different things in different LMS systems. For our purposes
  * think of a "Location" as "A Building".
- * 
+ *
  * Libraries also have "Shelving Locations" - "The Stacks (A shelving location) at the St Georges Library (A location)"
  *
  * In SOME LMS systems the shelving locations are distributed over the locations - so we can have Stacks at Location A B and C and
@@ -21,12 +19,12 @@ import org.olf.okapi.modules.directory.DirectoryEntry
  * simple Location -< ShelvingLocation setup.
  *
  * We model the more complex situation here and have to live with the extra complexity for the simple model. Our model is
- *   HOSTLMSLocation -1:M-< ShelvingLocationSite >-N:1- HostLMSShelvingLocation. 
+ *   HOSTLMSLocation -1:M-< ShelvingLocationSite >-N:1- HostLMSShelvingLocation.
  *
  * In instance terms
  *   "St Georges Library" -<   "The Stacks at St Georges Library"   >-   "The Stacks"
  *
- * This allows us to state preferences at each level and override as needed. 
+ * This allows us to state preferences at each level and override as needed.
  *
  * In general
  *     The HostLMSShelvingLocation is the default         - We will not lend ILL from <ShelvingLocation>"Reserves"
@@ -64,6 +62,9 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   // > 0 - Preference order
   Long supplyPreference
 
+  /** The hidden field if set to true, means they have tried to delete it but it is still linked to another record, so we just mark it as hidden */
+  Boolean hidden;
+
   static hasMany = [
     sites : ShelvingLocationSite,
   ]
@@ -84,6 +85,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     lastUpdated (nullable: true, bindable: false)
     supplyPreference (nullable: true)
     correspondingDirectoryEntry (nullable: true)
+    hidden (nullable: true)
   }
 
   static mapping = {
@@ -98,6 +100,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
                       lastUpdated column : 'hll_last_updated'
                  supplyPreference column : 'hll_supply_preference'
       correspondingDirectoryEntry column : 'hll_corresponding_de'
+                           hidden column : 'hll_hidden', defaulValue: false
   }
 
   public String toString() {
@@ -127,5 +130,25 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   def beforeDelete() {
     canDelete().deleteValid
   }
+
+    static HostLMSLocation EnsureActive(String code, String name) {
+        HostLMSLocation loc = HostLMSLocation.findByCodeOrName(code, name);
+
+        // Did we find a location
+        if (loc == null) {
+            // We do not so create a new one
+            loc = new HostLMSLocation(
+                code : code,
+                name : name,
+                icalRrule :'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO'
+            );
+            loc.save(flush : true, failOnError : true);
+        }  else if (loc.hidden == true) {
+            // It is hidden, so unhide it
+            loc.hidden = false;
+            loc.save(flush : true, failOnError : true);
+        }
+        return(loc);
+    }
 }
 

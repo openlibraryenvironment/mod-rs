@@ -1,29 +1,24 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
-import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.HostLMSActions;
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.circ.client.LookupUser;
-import org.olf.rs.circ.client.CheckoutItem;
-import org.olf.rs.circ.client.CheckinItem;
-import org.olf.rs.circ.client.AcceptItem;
-import org.olf.rs.circ.client.NCIP2Client;
-import org.olf.rs.circ.client.CirculationClient;
-import org.json.JSONObject;
 import org.json.JSONArray;
-import grails.gorm.multitenancy.Tenants.CurrentTenant
+import org.json.JSONObject;
+import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.HostLMSShelvingLocation;
+import org.olf.rs.PatronRequest
 import org.olf.rs.ShelvingLocationSite;
+import org.olf.rs.circ.client.AcceptItem;
+import org.olf.rs.circ.client.CheckinItem;
+import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.circ.client.LookupUser;
+import org.olf.rs.lms.HostLMSActions;
+import org.olf.rs.lms.ItemLocation;
+
+import com.k_int.web.toolkit.settings.AppSetting
+
+import grails.gorm.multitenancy.Tenants.CurrentTenant
+import groovyx.net.http.HttpBuilder
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -69,7 +64,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   Map placeHold(String instanceIdentifier, String itemIdentifier) {
     def result=[:]
     // For NCIP2:: issue RequestItem()
-    // RequestItem takes BibliographicId(A string, or name:value pair identifying an instance) or 
+    // RequestItem takes BibliographicId(A string, or name:value pair identifying an instance) or
     // ItemId(Item)(A String, or name:value pair identifying an item)
     log.debug("BaseHostLMSService::placeHold(${instanceIdentifier},${itemIdentifier}");
     result.status='HoldPlaced'
@@ -92,7 +87,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ItemLocation location = null;
     def lookup_strategies = this.getLookupStrategies();
     Iterator i = lookup_strategies.iterator();
-    
+
     while ( ( location==null ) && ( i.hasNext() ) ) {
       def next_strategy = i.next();
       log.debug("Next lookup strategy: ${next_strategy.name}");
@@ -115,20 +110,20 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         finally {
           log.debug("Completed strategy ${next_strategy.name}, location = ${location}");
         }
-     
+
       }
       else {
         log.debug("Strategy did not pass precondition");
       }
     }
-    
+
     log.debug("determineBestLocation returns ${location}");
     return location;
   }
 
 
   /**
-   * Cross reference the ItemLocation options returned from the local catalog with our internal information which 
+   * Cross reference the ItemLocation options returned from the local catalog with our internal information which
    * holds a preference order for supplying locations. Rank the locations according to our local info and return the
    * best option.
    */
@@ -142,10 +137,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     // Values < 0 are considered "DO NOT USE" - E.G. bindery
     options.each { o ->
       // See if we can find a HostLMSLocation for the given item - create one if not
-      HostLMSLocation loc = HostLMSLocation.findByCodeOrName(o.location,o.location) ?: new HostLMSLocation(
-                                                                        code:o.location,
-                                                                        name:o.location,
-                                                                        icalRrule:'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO').save(flush:true, failOnError:true);
+      HostLMSLocation loc = HostLMSLocation.EnsureActive(o.location, o.location);
 
       HostLMSShelvingLocation sl = null;
       ShelvingLocationSite sls = null;
@@ -157,9 +149,18 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           case 0:
             sl = new HostLMSShelvingLocation( location:loc, code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
             break;
+
           case 1:
             sl = shelving_loc_list.get(0);
+
+            // Is it hidden ?
+            if (sl.hidden == true) {
+                // we need to unhide it as it is active again
+                sl.hidden = false;
+                sl.save(flush : true, failOnError : true);
+            }
             break;
+
           default:
             throw new RuntimeException("Multiple shelving locations match ${o.location}.${o.shelvingLocation}");
             break;
@@ -379,14 +380,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
         AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
         AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-    
+
         String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
         String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
         String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
         String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
         // Will only be used by the client for WMS LMSs
         String registry_id = wms_registry_id?.value
-    
+
         if ( ( ncip_server_address != null ) &&
              ( ncip_from_agency != null ) &&
              ( ncip_app_profile != null ) ) {
@@ -406,8 +407,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
           JSONObject response = ncip_client.send(lookupUser);
           log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
-    
-  
+
+
           // {"firstName":"Stacey",
           //  "lastName":"Conrad",
           //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
@@ -480,8 +481,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                           String itemBarcode,
                           String borrowerBarcode,
                           Symbol requesterDirectorySymbol) {
-    
-    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");                        
+
+    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
     Map result = [
       result: true,
       reason: 'spoofed'
@@ -505,7 +506,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
     // set reason to ncip
     Map result = [reason: 'ncip'];
-    
+
     // borrowerBarcode could be null or blank, error out if so
     if (borrowerBarcode != null && borrowerBarcode != '') {
       log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
@@ -581,7 +582,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         case 'ncip':
           // set reason block to ncip from 'spoofed'
           result.reason = 'ncip'
-          
+
           AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
           AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
           AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
@@ -679,10 +680,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
 
           log.debug(response?.toString());
-          if ( response != null && response.has('problems') ) {            
+          if ( response != null && response.has('problems') ) {
             // If there is a problem block, something went wrong, so change response to false.
             result.result = false;
-            
+
             // If the problem block is just because the item is already checked in, then make response true
             try {
               JSONArray problemJsonArray = response.getJSONArray('problems');
@@ -690,7 +691,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
               {
                 JSONObject problemJson = problemJsonArray.getJSONObject(0);
                 if(problemJson.has("type") && problemJson.getString("type").equalsIgnoreCase("Item Not Checked Out")) {
-                  result.result = true; 
+                  result.result = true;
                   result.already_checked_in = true;
                   log.debug("[${CurrentTenant.get()}] NCIP checkinItem not needed: already checked in")
                   break;
@@ -723,10 +724,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       boolean available = hld.circulations?.circulation?.any { circ -> circ?.availableNow?.@value == '1' };
       if (available) {
         log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
-        ItemLocation il = new ItemLocation( 
+        ItemLocation il = new ItemLocation(
                                   reason: reason,
-                                  location: hld.localLocation, 
-                                  shelvingLocation:hld.shelvingLocation, 
+                                  location: hld.localLocation,
+                                  shelvingLocation:hld.shelvingLocation,
                                   callNumber:hld.callNumber )
         availability_summary[hld.localLocation] = il;
       }
@@ -775,9 +776,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             }
             else {
               log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
-              availability_summary[tag_data['a']] = new ItemLocation( 
-                                                            location: tag_data['a'], 
-                                                            shelvingLocation: tag_data['b'], 
+              availability_summary[tag_data['a']] = new ItemLocation(
+                                                            location: tag_data['a'],
+                                                            shelvingLocation: tag_data['b'],
                                                             callNumber:tag_data['c'],
                                                             reason: reason )
             }

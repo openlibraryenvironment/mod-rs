@@ -152,5 +152,40 @@ databaseChangeLog = {
             column(name: "np_predefined_id", type: "VARCHAR(64)")
         }
     }
-}
 
+    changeSet(author: "cwoodfield", id: "202203221200-001") {
+
+        // Now having a separate predefined ids table rather than a predefined id column on the various tables
+        createTable(tableName: "predefined_id") {
+            column(name: "pi_id", type: "VARCHAR(36)") { constraints(nullable: "false") }
+            column(name: "pi_references_id", type: "VARCHAR(36)") { constraints(nullable: "false") }
+            column(name: "pi_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+        }
+
+        // So drop the predefinedId columns created previously
+        // Could remove the previous changeset, and not have the drop but this keeps developer databases clean
+        dropColumn(columnName: "tmc_predefined_id", tableName: "template_container")
+        dropColumn(columnName: "ltm_predefined_id", tableName: "localized_template")
+        dropColumn(columnName: "np_predefined_id", tableName: "notice_policy")
+    }
+
+    changeSet(author: "cwoodfield", id: "202203231700-001") {
+
+        // Adding column hlpp_hidden to host_lms_patron_profile
+        addColumn(tableName: "host_lms_patron_profile") {
+            column(name: "hlpp_hidden", type: "BOOLEAN")
+        }
+
+        // Adding column hlsl_hidden to host_lms_shelving_loc
+        addColumn(tableName: "host_lms_shelving_loc") {
+            column(name: "hlsl_hidden", type: "BOOLEAN")
+        }
+
+        // Adding column hll_hidden to host_lms_location
+        addColumn(tableName: "host_lms_location") {
+            column(name: "hll_hidden", type: "BOOLEAN")
+        }
+    }
+}

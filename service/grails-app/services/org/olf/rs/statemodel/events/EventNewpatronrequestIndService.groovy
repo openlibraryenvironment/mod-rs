@@ -1,26 +1,26 @@
 package org.olf.rs.statemodel.events;
 
-import com.k_int.web.toolkit.refdata.RefdataValue;
-import com.k_int.web.toolkit.settings.AppSetting;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSService;
-import org.olf.rs.PatronNoticeService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SharedIndexService
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
-import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
+import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.Status;
+
+import com.k_int.web.toolkit.settings.AppSetting;
 
 import groovy.json.JsonSlurper;
 import groovy.sql.Sql;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This event service takes a new patron request and validates it and tries to determine the rota
@@ -206,11 +206,11 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
                    (request.isRequester == false)) {
             try {
                 log.debug('Launch auto responder for request');
-                String autoRespond = AppSetting.findByKey('auto_responder_status')?.value
-                if (autoRespond?.toLowerCase().startsWith('on')) {
-                    autoRespond(request, autoRespond.toLowerCase(), eventResultDetails);
+                String autoRespondSetting = AppSetting.findByKey('auto_responder_status')?.value
+                if (autoRespondSetting?.toLowerCase().startsWith('on')) {
+                    autoRespond(request, autoRespondSetting.toLowerCase(), eventResultDetails);
                 } else {
-                    eventResultDetails.auditMessage = "Auto responder is ${autoRespond} - manual checking needed";
+                    eventResultDetails.auditMessage = "Auto responder is ${autoRespondSetting} - manual checking needed";
                     request.needsAttention = true;
                 }
             } catch (Exception e) {
