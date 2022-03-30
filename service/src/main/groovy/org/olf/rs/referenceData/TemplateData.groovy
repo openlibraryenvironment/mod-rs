@@ -125,8 +125,8 @@ public class TemplateData {
                         NoticePolicyNotice noticePolicyNotice = new NoticePolicyNotice();
                         noticePolicyNotice.template = templateContainer;
                         noticePolicyNotice.realTime = true;
-                        noticePolicyNotice.format = RefdataValue.lookupOrCreate(Settings.VOCABULARY_NOTICE_FORMATS, 'E-mail', 'email');
-                        noticePolicyNotice.trigger = RefdataValue.lookupOrCreate(Settings.VOCABULARY_NOTICE_TRIGGERS, Settings.NOTICE_TRIGGER_NEW_PATRON_PROFILE);
+                        noticePolicyNotice.format = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_FORMATS, 'E-mail', 'email');
+                        noticePolicyNotice.trigger = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE);
                         noticePolicyNotice.noticePolicy = noticePolicy;
                         noticePolicyNotice.save(flush:true, failOnError:true);
                         noticePolicy.addToNotices(noticePolicyNotice);
