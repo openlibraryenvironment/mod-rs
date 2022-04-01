@@ -10,10 +10,10 @@ import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.events.EventISO18626IncomingRequesterService;
+import org.olf.rs.statemodel.events.EventISO18626IncomingResponderService;
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 import org.olf.rs.statemodel.events.EventNoImplementationService;
-import org.olf.rs.statemodel.events.EventRequestingAgencyMessageIndService;
-import org.olf.rs.statemodel.events.EventSupplyingAgencyMessageIndService;
 
 import grails.events.annotation.Subscriber;
 import grails.gorm.multitenancy.Tenants;
@@ -37,9 +37,9 @@ public class ReshareApplicationEventHandlerService {
   private static final int MAX_RETRIES = 10;
 
   	EventNoImplementationService eventNoImplementationService;
-	EventRequestingAgencyMessageIndService eventRequestingAgencyMessageIndService;
-	EventSupplyingAgencyMessageIndService eventSupplyingAgencyMessageIndService;
-	EventMessageRequestIndService eventMessageRequestIndService;
+    EventISO18626IncomingRequesterService eventISO18626IncomingRequesterService;
+    EventISO18626IncomingResponderService eventISO18626IncomingResponderService;
+    EventMessageRequestIndService eventMessageRequestIndService;
 
   	/** Holds map of the event to the bean that will do the processing for this event */
   	private static Map serviceEvents = [ : ];
@@ -178,7 +178,7 @@ public class ReshareApplicationEventHandlerService {
   def handleSupplyingAgencyMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleSupplyingAgencyMessage(${eventData})");
 	// Just call it directly
-	EventResultDetails eventResultDetails = eventSupplyingAgencyMessageIndService.processEvent(null, eventData, new EventResultDetails());
+	EventResultDetails eventResultDetails = eventISO18626IncomingRequesterService.processEvent(null, eventData, new EventResultDetails());
     return eventResultDetails.responseResult;
   }
 
@@ -191,7 +191,7 @@ public class ReshareApplicationEventHandlerService {
   def handleRequestingAgencyMessage(Map eventData) {
     log.debug("ReshareApplicationEventHandlerService::handleRequestingAgencyMessage(${eventData})")
 	// Just call it directly
-	EventResultDetails eventResultDetails = eventRequestingAgencyMessageIndService.processEvent(null, eventData, new EventResultDetails());
+	EventResultDetails eventResultDetails = eventISO18626IncomingResponderService.processEvent(null, eventData, new EventResultDetails());
 	return eventResultDetails.responseResult;
   }
 
