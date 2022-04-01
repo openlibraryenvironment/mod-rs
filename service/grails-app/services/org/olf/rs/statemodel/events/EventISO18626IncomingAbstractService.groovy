@@ -1,0 +1,227 @@
+package org.olf.rs.statemodel.events;
+
+import org.olf.rs.PatronRequest;
+import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionResult;
+import org.olf.rs.statemodel.ActionResultDetails
+import org.olf.rs.statemodel.ActionService
+import org.olf.rs.statemodel.EventFetchRequestMethod;
+import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.statemodel.StateModel;
+
+/**
+ * Contains the base methods and definitions required to interpret the 18626 protocol
+ * @author Chas
+ *
+ */
+public abstract class EventISO18626IncomingAbstractService extends AbstractEvent {
+
+    public static final String STATUS_ERROR = 'ERROR';
+    public static final String STATUS_OK    = 'OK';
+
+    public static final String ERROR_TYPE_BADLY_FORMED_MESSAGE   = 'BadlyFormedMessage';
+    public static final String ERROR_TYPE_INVALID_CANCEL_VALUE   = 'InvalidCancelValue';
+    public static final String ERROR_TYPE_NO_ACTION              = 'ActionNotSupplied';
+    public static final String ERROR_TYPE_NO_CANCEL_VALUE        = 'NoCancelValue';
+    public static final String ERROR_TYPE_NO_REASON_FOR_MESSAGE  = 'ReasonForMessageNotSupplied';
+    public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST = 'UnableToFindRequest';
+    public static final String ERROR_TYPE_UNABLE_TO_PROCESS      = 'UnableToProcess';
+
+    // The actions, I assume these are only applicable for receiving by the responder
+    public static final String ACTION_CANCEL          = 'Cancel';
+    public static final String ACTION_NOTIFICATION    = 'Notification';
+    public static final String ACTION_RECEIVED        = 'Received';
+    public static final String ACTION_RENEW           = 'Renew';          // Not yet implemented
+    public static final String ACTION_SHIPPED_FORWARD = 'ShippedForward'; // Not yet implemented
+    public static final String ACTION_SHIPPED_RETURN  = 'ShippedReturn';
+    public static final String ACTION_STATUS_REQUEST  = 'StatusRequest';  // Not yet implemented
+
+    // The message reasons, only applicable for receiving by a requester
+    public static final String MESSAGE_REASON_CANCEL_RESPONSE         = 'CancelResponse';
+    public static final String MESSAGE_REASON_NOTIFICATION            = 'Notification';
+    public static final String MESSAGE_REASON_RENEW_RESPONSE          = 'RenewResponse';
+    public static final String MESSAGE_REASON_REQUEST_RESPONSE        = 'RequestResponse';
+    public static final String MESSAGE_REASON_STATUS_CHANGE           = 'StatusChange';
+    public static final String MESSAGE_REASON_STATUS_REQUEST_RESPONSE = 'StatusRequestResponse';
+
+    // The service used to run the actions
+    ActionService actionService;
+
+    @Override
+    String[] toStates(String model) {
+        return([]);
+    }
+
+    @Override
+    String[] fromStates(String model) {
+        return([]);
+    }
+
+    @Override
+    boolean supportsModel(String model) {
+        return(isRequester() && (model == StateModel.MODEL_REQUESTER));
+    }
+
+    @Override
+    EventFetchRequestMethod fetchRequestMethod() {
+        // We are dealing with the transaction directly
+        return(EventFetchRequestMethod.HANDLED_BY_EVENT_HANDLER);
+    }
+
+    /**
+     * Retrieves the request id from the event data
+     * @param eventData The event data that holds the incoming message
+     * @return The request is if there was one
+     */
+    public abstract String getRequestId(Map eventData);
+
+    /**
+     * Retrieves the peer id if the request has one
+     * @param eventData The event data to retrieve the id from
+     * @return The peer id or null if there is not one
+     */
+
+    public abstract String getPeerId(Map eventData);
+
+    /**
+     * Are we interested in requester or responder requests
+     * @return true if we are just interested in requester side requests otherwise false for responder side requests
+     */
+    public abstract boolean isRequester();
+
+    /**
+     * For some reason they have the action to perform in different places for requester and responder messages
+     * @param eventData The event data to retrieve the action from
+     * @return the action that is to be performed
+     */
+    public abstract String getActionToPerform(Map eventData);
+
+    /**
+     * Creates the response map required for generating a response to the message
+     * @param eventData The event data to get the header information from
+     * @param success Was this a success or not
+     * @param errorType If it failed, this is the error it failed with
+     * @param errorValue If applicable the value it failed to interpret
+     * @return The map to be used to generate the response with
+     */
+    public abstract Map createResponseData(Map eventData, boolean success, String errorType, Object errorValue);
+
+    /**
+     * Processes the data received from an ISO18626 sender
+     * @param eventData The message that was sent
+     * @return map containing the details to be returned
+     */
+    public EventResultDetails processRequest(Map eventData, EventResultDetails eventResultDetails) {
+        // The status and error variables
+        boolean processedSuccessfully = true;
+        String errorType = null;
+        Object errorValue = null;
+        String requestId = getRequestId(eventData);
+
+        try {
+            // Do we have a request id
+            if (requestId == null) {
+                // We do not so it is an error
+                processedSuccessfully = false;
+                errorType = ERROR_TYPE_BADLY_FORMED_MESSAGE;
+            } else {
+                // We do have a request id so start a new transaction
+                PatronRequest.withTransaction { status ->
+                    // Lookup the request
+                    PatronRequest request = lookupPatronRequestWithRole(requestId, true);
+
+                    // Did we find the request
+                    if (request == null) {
+                        log.warn("Unable to locate PatronRequest corresponding to ID or Hrid \"${requestId}\".");
+                        String peerId = getPeerId(eventData);
+                        if (peerId != null) {
+                            log.warn("Looking to see if we can find the request by the requester id \"${peerId}\".");
+                            request = lookupPatronRequestByPeerId(peerId, true);
+                        }
+                    }
+
+                    // Did we manage to find the request
+                    if (request == null) {
+                        // We do not so it is an error
+                        processedSuccessfully = false;
+                        errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
+                    } else {
+                        // We now need to execute the action for the message
+                        String actionToPerform = getActionToPerform(eventData);
+
+                        // Ensure we have an action
+                        if (actionToPerform == null) {
+                            // We have not been supplied an action
+                            processedSuccessfully = false;
+                            errorType = isRequester() ? ERROR_TYPE_NO_REASON_FOR_MESSAGE : ERROR_TYPE_NO_ACTION;
+                        } else {
+                            // Now perform the action
+                            ActionResultDetails actionResults = actionService.performAction('ISO18626' + actionToPerform, request, eventData);
+
+                            // Deal with what we have been returned
+                            processedSuccessfully = actionResults.result == ActionResult.SUCCESS;
+                            errorType = actionResults.responseResult.errorType;
+                            errorValue = actionResults.responseResult.errorValue;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Just let the caller know we were unable to process it
+            processedSuccessfully = false;
+            errorType = ERROR_TYPE_UNABLE_TO_PROCESS;
+            log.error('Exceptiont thrown which processing ISO18626 message', e);
+        }
+
+        // Build up the response
+        eventResultDetails.responseResult = createResponseData(eventData, processedSuccessfully, errorType, errorValue);
+        return(eventResultDetails);
+    }
+
+    public Map responseData(Map eventData, String messageType, boolean success, String errorType, Object errorValue) {
+        Map data = [ : ];
+        data.messageType = messageType;
+        data.status = success ? STATUS_OK : STATUS_ERROR;
+        if (errorType != null) {
+            data.errorType = errorType;
+            if (errorValue != null) {
+                data.errorValue = errorType;
+            }
+        }
+
+        // Now for all the header details
+        data.supIdType = eventData.header.supplyingAgencyId.agencyIdType;
+        data.supId = eventData.header.supplyingAgencyId.agencyIdValue;
+        data.reqAgencyIdType = eventData.header.requestingAgencyId.agencyIdType;
+        data.reqAgencyId = eventData.header.requestingAgencyId.agencyIdValue;
+        data.reqId = eventData.header.requestingAgencyRequestId;
+        data.timeRec = eventData.header.timestamp;
+        return(data);
+    }
+
+    public PatronRequest lookupPatronRequestWithRole(String id, boolean withLock = false) {
+        log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${withLock})");
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                or {
+                    eq('id', id)
+                    eq('hrid', id)
+                }
+                eq('isRequester', isRequester())
+            }
+            lock withLock
+        }
+
+        log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole located ${result?.id}/${result?.hrid}");
+
+        return result;
+    }
+
+    public PatronRequest lookupPatronRequestByPeerId(String id, boolean withLock) {
+        PatronRequest result = PatronRequest.createCriteria().get {
+            eq('peerRequestIdentifier', id)
+            lock withLock
+        };
+        return result;
+    }
+}
