@@ -7,8 +7,9 @@ public class ItemLocation {
   public String shelvingLocation
   public String callNumber
   public Long preference
+  public Long shelvingPreference
 
   public String toString() {
-    return "ItemLocation(${location},${shelvingLocation},${callNumber},${preference},${reason})".toString()
+    return "ItemLocation(${location} (${preference}),${shelvingLocation} (${shelvingPreference}),${callNumber},${reason})".toString()
   }
 }
