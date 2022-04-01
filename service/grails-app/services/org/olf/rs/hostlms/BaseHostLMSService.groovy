@@ -26,10 +26,6 @@ import groovyx.net.http.HttpBuilder
  */
 public abstract class BaseHostLMSService implements HostLMSActions {
 
-  private static String SHELVING_LOC_QRY = 'select sl from HostLMSShelvingLocation as sl where sl.location = :loc and sl.code=:sl'
-  private static String SLS_QRY = 'select sls from ShelvingLocationSite as sls where sls.location = :loc and sls.shelvingLocation=:sl'
-
-
   // http://www.loc.gov/z3950/agency/defns/bib1.html
   List getLookupStrategies() {
     return [
@@ -129,6 +125,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    */
   private ItemLocation pickBestSupplyLocationFrom(List<ItemLocation> options) {
     ItemLocation result = null;
+    String SHELVING_LOC_QRY = 'select sl from HostLMSShelvingLocation as sl where sl.code=:sl';
+    String SLS_QRY = 'select sls from ShelvingLocationSite as sls where sls.location = :loc and sls.shelvingLocation=:sl';
 
     // Iterate through each option and see if we have a corresponding HostLMSlocation record for that location
     // If not, create one, as we may wish to record information about this location
@@ -144,10 +142,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       // create a HostLMSShelvingLocation in respect of shelvingLocation
       if ( o?.shelvingLocation != null ) {
-        List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [loc: loc, sl: o.shelvingLocation])
+        List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [sl: o.shelvingLocation]);
         switch ( shelving_loc_list.size() ) {
           case 0:
-            sl = new HostLMSShelvingLocation( location:loc, code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
+            sl = new HostLMSShelvingLocation( code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
             break;
 
           case 1:
@@ -175,7 +173,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             sls = new ShelvingLocationSite( location:loc, shelvingLocation:sl).save(flush:true, failOnError:true);
             break;
           case 1:
-            sls = shelving_loc_list.get(0);
+            sls = slss.get(0);
             break;
           default:
             throw new RuntimeException("Multiple shelving location sites match ${loc}.${sl}");
@@ -183,23 +181,26 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
       }
 
-      o.preference = loc.supplyPreference ?: 0
+      o.preference = loc.supplyPreference ?: 0;
+
+      // Fall back to the preference for the shelving location when no sls preference is defined
+      // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
+      o.shelvingPreference = sls.supplyPreference != null ? sls.supplyPreference : (sl.supplyPreference ?: 0);
     }
 
-    List<ItemLocation> sorted_options = options.sort { it.preference }.reverse()
-
-    log.debug("Preference order of locations: ${sorted_options}");
+    List<ItemLocation> sorted_options = options.findAll { it.preference >= 0 && it.shelvingPreference >= 0 }.sort {
+      a,b -> a.preference <=> b.preference ?: a.shelvingPreference <=> b.shelvingPreference;
+    }.reverse();
 
     if ( sorted_options.size() > 0 ) {
-      result = sorted_options[0]
-
-      // If after sorting high-low our higest ranking option has a preference of < 0 then we don't have
-      // a location capable of supplying - return null;
-      if ( result.preference < 0 ) {
-        log.debug("Returning null for supply location because preference value for ${result?.location} is ${result?.preference} ( < 0 )");
-        result = null;
+      log.debug("Preference order of locations: ${sorted_options}");
+      result = sorted_options[0];
+    } else {
+      if (options.size() > 0) {
+        log.debug("Returning null for supply location because all holdings have either a location or shelving location (site) preference value < 0: ${options}");
       }
     }
+
     return result;
   }
 
