@@ -35,8 +35,8 @@ REQUESTER_ID=`echo $RESPONSE | jq '.id'`
 REQUESTER_ID=${REQUESTER_ID//"\""/""}
 echo Requester Id: ${REQUESTER_ID}
 
-# Sleep for 5 secs to give it time to process
-sleep 5
+# Sleep for 15 secs to give it time to process
+sleep 15
 
 # Lookup responder request
 RESPONSE=$(curl --http1.1 -sSLf -H "x-okapi-token: $AUTH_TOKEN" -H 'accept: application/json' -H 'Content-type: application/json' \

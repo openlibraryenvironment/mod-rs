@@ -9,78 +9,85 @@ import grails.util.Holders;
  *
  */
 class AvailableAction implements MultiTenant<AvailableAction> {
-  private static final logger = LogFactory.getLog(this);
+    private static final logger = LogFactory.getLog(this);
 
-  /** Query which returns all the states than an action may come from */
-  private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
-  
-  public static String TRIGGER_TYPE_MANUAL = "M";
-  public static String TRIGGER_TYPE_SYSTEM = "S";
-  
-  String id
-  StateModel model
-  Status fromState
-  String actionCode
+    /** Query which returns all the states than an action may come from */
+    private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
 
-  // [S]ystem / [M]anual
-  String triggerType
+    public static String TRIGGER_TYPE_MANUAL = "M";
+    public static String TRIGGER_TYPE_SYSTEM = "S";
 
-  // [S]ervice / [C]losure / [N]one
-  String actionType
+    String id;
+    StateModel model;
+    Status fromState;
+    String actionCode;  // To be removed once the data has been added
 
-  String actionBody
+    /** The action / event that is the source for this available action */
+    ActionEvent actionEvent;
 
-  /** Holds map of the action to the bean that will do the processing for this action */
-  private static Map serviceActions = [ : ];
+    // [S]ystem / [M]anual
+    String triggerType;
 
-  static constraints = {
-             model (nullable: false)
-         fromState (nullable: false)
-        actionCode (nullable: false, blank:false)
-       triggerType (nullable: true, blank:false)
-        actionType (nullable: true, blank:false)
-        actionBody (nullable: true, blank:false)
-  }
+    // [S]ervice / [C]losure / [N]one
+    String actionType;
 
-  static mapping = {
-                     id column : 'aa_id', generator: 'uuid2', length:36
-                version column : 'aa_version'
-                  model column : 'aa_model'
-              fromState column : 'aa_from_state'
-             actionCode column : 'aa_action_code'
-            triggerType column : 'aa_trigger_type'
-             actionType column : 'aa_action_type'
-             actionBody column : 'aa_action_body'
-  }
+    String actionBody;
 
+    /** The default set of results to use for this action / event */
+    ActionEventResultList resultList;
 
-  public static AvailableAction ensure(String model, String state, String action, String triggerType=null, String actionType=null, String actionBody=null) {
+    /** Holds map of the action to the bean that will do the processing for this action */
+    private static Map serviceActions = [ : ];
 
-    AvailableAction result = null;
-
-    StateModel sm = StateModel.findByShortcode(model);
-    if ( sm ) {
-      Status s = Status.findByOwnerAndCode(sm, state);
-      if ( s ) {
-        result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action) ?: 
-                      new AvailableAction(
-                                          model:sm, 
-                                          fromState:s, 
-                                          actionCode:action,
-                                          triggerType: triggerType,
-                                          actionType: actionType,
-                                          actionBody: actionBody).save(flush:true, failOnError:true);
-      }
+    static constraints = {
+              model (nullable: false)
+          fromState (nullable: false)
+        actionEvent (nullable: true, unique: ['model', 'fromState']) // Only temporarily nullable, until the data gets added for it
+         actionCode (nullable: false, blank:false) // To be removed once the data has been added
+        triggerType (nullable: true, blank:false)
+         actionType (nullable: true, blank:false)
+         actionBody (nullable: true, blank:false)
+         resultList (nullable: true)
     }
-    return result;
 
-  }
+    static mapping = {
+                 id column : 'aa_id', generator: 'uuid2', length:36
+            version column : 'aa_version'
+              model column : 'aa_model'
+          fromState column : 'aa_from_state'
+         actionCode column : 'aa_action_code'  // To be removed once the data has been added
+        actionEvent column : 'aa_action_event'
+        triggerType column : 'aa_trigger_type'
+         actionType column : 'aa_action_type'
+         actionBody column : 'aa_action_body'
+         resultList column : 'aa_result_list'
+    }
+
+    public static AvailableAction ensure(String model, String state, String action, String triggerType=null, String actionType=null, String actionBody=null) {
+
+        AvailableAction result = null;
+        StateModel sm = StateModel.findByShortcode(model);
+        if (sm) {
+            Status s = Status.findByOwnerAndCode(sm, state);
+            if (s) {
+                result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action) ?:
+                    new AvailableAction(
+                        model:sm,
+                        fromState:s,
+                        actionCode:action,
+                        triggerType: triggerType,
+                        actionType: actionType,
+                        actionBody: actionBody).save(flush:true, failOnError:true);
+            }
+        }
+        return result;
+    }
 
   	public static AbstractAction getServiceAction(String actionCode, boolean isRequester) {
 		// Get gold of the state model
 		StateModel stateModel = StateModel.getStateModel(isRequester);
 
-		// Determine the bean name, if we had a separate action table we could store it as a transient against that		
+		// Determine the bean name, if we had a separate action table we could store it as a transient against that
 		String beanName = "action" + stateModel.shortcode.capitalize() + actionCode.capitalize() + "Service";
 
 		// Get hold of the bean and store it in our map, if we previously havn't been through here
@@ -99,9 +106,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));
 	}
 
-  public String toString() {
-    return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()
-  }
+    public String toString() {
+        return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()
+    }
 }
-
-
