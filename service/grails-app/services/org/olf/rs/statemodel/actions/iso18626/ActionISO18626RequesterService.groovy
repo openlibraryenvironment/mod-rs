@@ -65,7 +65,18 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
                                     itemId: iidId,
                                     status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
                                 );
+
                                 request.addToVolumes(rv);
+                                
+                                /*
+                                    This _should_ be handled on the following save,
+                                    but there seems to not be an intial save which
+                                    adds the temporary barcode necessary for acceptItem.
+                                    Since these are added sequentially, in known multivol cases
+                                    we can enforce the multivolume rule so that the first item
+                                    does not rely on `volumes.size() > 1`
+                                */
+                                rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(true)
                             }
                         }
                     }
@@ -79,7 +90,15 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
                             itemId: itemId,
                             status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
                         );
+
                         request.addToVolumes(rv);
+
+                        /*
+                            This _should_ be handled on the following save,
+                            but there seems to not be an intial save which
+                            adds the temporary barcode necessary for acceptItem.
+                        */
+                        rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode()
                     }
                 }
             }
