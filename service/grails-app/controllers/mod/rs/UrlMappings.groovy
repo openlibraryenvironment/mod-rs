@@ -30,6 +30,7 @@ class UrlMappings {
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
     "/rs/hostLMSPatronProfiles" (resources: 'hostLMSPatronProfile' )
     "/rs/shelvingLocations" (resources: 'shelvingLocations' )
+    "/rs/shelvingLocationSites" (resources: 'shelvingLocationSite')
     "/rs/sharedIndexQuery" (controller: 'sharedIndexQuery', action: 'query', parseRequest: false)
     "/rs/directoryEntry" (resources: 'directoryEntry' )
 

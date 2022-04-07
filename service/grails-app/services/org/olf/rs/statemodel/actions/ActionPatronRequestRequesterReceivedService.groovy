@@ -55,19 +55,10 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
             }
             // Iterate over volumes without temp item in for loop so we can break out if we need to
             for (RequestVolume vol : volumesWithoutTemporaryItem) {
-                String temporaryItemBarcode = null;
                 try {
-                    // Item Barcode - using Request human readable ID + volId for now
-                    // If we only have one volume, just use the HRID
-                    if (request.volumes?.size() > 1) {
-                        temporaryItemBarcode = "${request.hrid}-${vol.itemId}";
-                    } else {
-                        temporaryItemBarcode = request.hrid;
-                    }
-
                     // Call the host lms to check the item out of the host system and in to reshare
                     Map acceptResult = hostLMS.acceptItem(
-                        temporaryItemBarcode,
+                        vol.temporaryItemBarcode,
                         request.hrid,
                         request.patronIdentifier, // user_idA
                         request.author, // author,
@@ -79,7 +70,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 
                     if (acceptResult?.result == true) {
                         // Let the user know if the success came from a real call or a spoofed one
-                        String message = "Receive succeeded for item id: ${vol.itemId}. ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
+                        String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${vol.temporaryItemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
                         RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
 
                         reshareApplicationEventHandlerService.auditEntry(request,
@@ -92,7 +83,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                         vol.status = newVolState;
                         vol.save(failOnError: true);
                     } else {
-                        String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";
+                        String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";
                         // PR-658 wants us to set some state here but doesn't say what that state is. Currently we leave the state as is.
                         // IF THIS NEEDS TO GO INTO ANOTHER STATE, WE SHOULD DO IT AFTER ALL VOLS HAVE BEEN ATTEMPTED
                         reshareApplicationEventHandlerService.auditEntry(request,
@@ -103,7 +94,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                     }
                 } catch (Exception e) {
                     log.error('NCIP Problem', e);
-                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null);
+                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null);
                 }
             }
             request.save(flush:true, failOnError:true);

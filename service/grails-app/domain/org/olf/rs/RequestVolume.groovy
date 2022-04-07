@@ -19,6 +19,8 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   Date dateCreated
   Date lastUpdated
 
+  String temporaryItemBarcode
+
   /* 
     This allows us to check whether each item in turn has succeeded NCIP call
     -----SUPPLIER'S SIDE-----
@@ -48,15 +50,49 @@ class RequestVolume implements MultiTenant<RequestVolume> {
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
   }
+
+
+  // We need to ensure this is unique at the _very_ least per request -- better unique per reshare
+  // Bear in mind that we may have to swap generation in and out depending on user input in future
+  String generateTemporaryItemBarcode(def enforceMultivolGeneration = null) {
+    String temporaryItemBarcode
+
+    if(patronRequest.isRequester) {
+
+      // For multi volume requests we include itemId to ensure uniqueness
+      if (enforceMultivolGeneration || patronRequest.volumes.size() > 1) {
+
+        // We assume last 4 digits of barcode is sufficient for uniqueness...
+        // The below will not fail for itemId < 4
+        temporaryItemBarcode = "${patronRequest.hrid}-${itemId.drop(itemId.size() - 4)}";
+      } else {
+        // For requests with only one item, can use the hrid of the request
+        temporaryItemBarcode = patronRequest.hrid;
+      }
+
+    } else {
+      //Use the actual barcode for supply-side requests
+      temporaryItemBarcode = itemId;
+    }
+    
+    return temporaryItemBarcode;
+  }
+
+  def beforeValidate() {
+    if (!temporaryItemBarcode) {
+      temporaryItemBarcode = generateTemporaryItemBarcode()
+    }
+  }
   
   static mapping = {
-               id column : 'rv_id', generator: 'uuid2', length:36
-          version column : 'rv_version'
-      dateCreated column : 'rv_date_created'
-      lastUpdated column : 'rv_last_updated'
-             name column : 'rv_name'
-           itemId column : 'rv_item_id'
-    patronRequest column : 'rv_patron_request_fk'
-           status column : 'rv_status_fk'
+                       id column : 'rv_id', generator: 'uuid2', length:36
+                  version column : 'rv_version'
+             dateCreated column : 'rv_date_created'
+             lastUpdated column : 'rv_last_updated'
+                    name column : 'rv_name'
+                  itemId column : 'rv_item_id'
+           patronRequest column : 'rv_patron_request_fk'
+                  status column : 'rv_status_fk'
+    temporaryItemBarcode column: 'rv_temporary_item_barcode'
   }
 }

@@ -65,26 +65,16 @@ public class HostLMSService {
     if (host_lms) {
       resultMap.hostLMS = true;
       for( def vol : volumesNotCheckedIn ) {
-        String temporaryItemBarcode; //We want to match what we created for AcceptItem
-        if(request.isRequester) {
-          if (request.volumes?.size() > 1) {
-            temporaryItemBarcode = "${request.hrid}-${vol.itemId}";
-          } else {
-            temporaryItemBarcode = request.hrid;
-          }
-        } else { //Use the actual barcode for supply-side requests
-          temporaryItemBarcode = vol.itemId;
-        }
         def checkInMap = [:];
-        def check_in_result = host_lms.checkInItem(temporaryItemBarcode);
+        def check_in_result = host_lms.checkInItem(vol.temporaryItemBarcode);
         checkInMap.result = check_in_result;
         checkInMap.volume = vol;
         String message;
         if(check_in_result?.result == true) {          
           if(check_in_result?.already_checked_in == true) {	
-            message = "NCIP CheckinItem call succeeded for item: ${temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
+            message = "NCIP CheckinItem call succeeded for item: ${vol.temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
           } else {
-            message = "NCIP CheckinItem call succeeded for item: ${temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
+            message = "NCIP CheckinItem call succeeded for item: ${vol.temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
           }          
           checkInMap.success = true;
           reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
@@ -94,12 +84,12 @@ public class HostLMSService {
         } else {
           request.needsAttention=true;
           checkInMap.success = false;
-          message = "Host LMS integration: NCIP CheckinItem call failed for item: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString();
+          message = "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString();
           reshareApplicationEventHandlerService.auditEntry(
             request,
             request.state,
             request.state,
-            "Host LMS integration: NCIP CheckinItem call failed for item: ${temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
+            "Host LMS integration: NCIP CheckinItem call failed for item: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. "+check_in_result.problems?.toString(),
             null);
         }
         checkInMap.message = message;
