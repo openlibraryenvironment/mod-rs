@@ -378,4 +378,32 @@ databaseChangeLog = {
         // Amendments to timer
         addNotNullConstraint(columnDataType: "varchar(255)", columnName: "tr_task_code", tableName: "timer", validate: "true")
     }
+
+    changeSet(author: "Chas (generated)", id: "1649337411753-1") {
+        // Create the request_identifier table
+        createTable(tableName: "request_identifier") {
+            column(name: "ri_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "request_identifierPK")
+            }
+
+            column(name: "ri_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ri_identifier_type", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ri_patron_request", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "ri_identifier", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+        }
+
+        // The foreign key constraint for the request_identifier table
+        addForeignKeyConstraint(baseColumnNames: "ri_patron_request", baseTableName: "request_identifier", constraintName: "FK7n0txdwj2oeqa77ksiharg86k", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request", validate: "true")
+    }
 }

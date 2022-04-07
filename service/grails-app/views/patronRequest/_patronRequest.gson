@@ -15,7 +15,8 @@ json g.render(patronRequest, [expand: ['state',
                                        'resolvedRequester',
                                        'resolvedPatron',
                                        'resolvedSupplier',
-                                       'resolvedPickupLocation'
+                                       'resolvedPickupLocation',
+                                       'requestIdentifiers'
                                        ],
                               excludes: ['volumes', 'pickLocation']]) {
 
