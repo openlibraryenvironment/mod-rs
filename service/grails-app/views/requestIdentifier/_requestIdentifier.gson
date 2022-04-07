@@ -1,0 +1,5 @@
+import groovy.transform.*
+import org.olf.rs.RequestIdentifier;
+
+@Field RequestIdentifier requestIdentifier
+json g.render(requestIdentifier, [excludes: ['patronRequest']])

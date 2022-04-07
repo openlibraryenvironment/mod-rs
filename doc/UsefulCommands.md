@@ -17,7 +17,7 @@ docker ps| wc -l
 	mod-rs/.groovylintrc.json
 
 # To generate db changes
-	gradlew.bat -Dgrails.env=vagrant-db :dbmGormDiff -Pargs="--defaultSchema=diku_mod_rs"
+	gradlew.bat -Dgrails.env=vagrant-db :dbmGormDiff -Pargs="--defaultSchema=diku_mod_rs" > dbChanges.txt
 
 # Run migration and load reference data (change the port to 8080 for mod-directory)
 	curl -XPOST -H "Content-Type: application/json" -H "X-OKAPI-TENANT: diku" "http://localhost:8081/_/tenant" -d "{\"parameters\":[{\"key\": \"loadReference\", \"value\": true}]}"

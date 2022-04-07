@@ -18,7 +18,7 @@ import grails.gorm.MultiTenant;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
- * requesting that reshare locate and deliver a resource from a remote partner. 
+ * requesting that reshare locate and deliver a resource from a remote partner.
  */
 
 class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
@@ -60,7 +60,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * (on the supplier's side),
    * or from discovery (on the requester's side).
    * Once the supplier comes to scan and ship the items, at that point they can read this and make a decision about which
-   * items to include in the request, before attaching them to the request as 
+   * items to include in the request, before attaching them to the request as
    */
   String volume
   String issue
@@ -84,7 +84,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String quarter
   String bibliographicRecordId
   String supplierUniqueRecordId
-  
+
   // These fields reflect local resources we have correlated with the fields from a protocol message above
   String systemInstanceIdentifier
   String selectedItemBarcode
@@ -122,7 +122,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String localCallNumber
 
   String hrid;
-  
+
   Set rota = []
 
   // serviceType - added here as an example refdata item - more to show how than
@@ -175,8 +175,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
    * has requested a cancellation or not. On the requesting side, we DO have a state "REQ_CANCEL_PENDING".
    * We need to track whether this cancel is for this supplier only (in which case we then go to state CANCELLED_WITH_SUPPLIER,
    * which triggers sendToNextLender and continues the request) or whether this is actually a cancellation of the entire request,
-   * in which case the request gets closed. 
-   */ 
+   * in which case the request gets closed.
+   */
 
   //Boolean to flag whether a request continues after the current cancellation with supplier
   boolean requestToContinue = true;
@@ -192,14 +192,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   String dueDateFromLMS
   Date parsedDueDateFromLMS
-  
+
   String dueDateRS
   Date parsedDueDateRS
-  
+
   Boolean overdue
 
   RefdataValue cancellationReason
-  
+
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
 
@@ -208,6 +208,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     audit : PatronRequestAudit,
     conditions: PatronRequestLoanCondition,
     notifications: PatronRequestNotification,
+    requestIdentifiers: RequestIdentifier,
     rota  : PatronRequestRota,
     tags  : Tag,
     volumes: RequestVolume
@@ -218,6 +219,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     audit: 'patronRequest',
     conditions: 'patronRequest',
     notifications: 'patronRequest',
+    requestIdentifiers: 'patronRequest',
     volumes: 'patronRequest'
   ]
 
@@ -315,7 +317,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     cancellationReason(nullable: true)
     needsAttention(nullable: true)
-    
+
     overdue(nullable: true)
   }
 
@@ -413,11 +415,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     parsedDueDateFromLMS column: 'pr_parsed_due_date_lms'
     dueDateRS column: 'pr_due_date_rs'
     parsedDueDateRS column: 'pr_parsed_due_date_rs'
-    
+
     overdue column: 'pr_overdue'
 
     audit(sort:'dateCreated', order:'desc')
 
+    requestIdentifiers cascade: 'all-delete-orphan'
     volumes cascade: 'all-delete-orphan'
   }
 
@@ -449,7 +452,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     truncateAndLog("sponsoringBody", sponsoringBody)
     truncateAndLog("publisher", publisher)
     truncateAndLog("placeOfPublication", placeOfPublication)
-  
+
     truncateAndLog("titleOfComponent", titleOfComponent)
     truncateAndLog("authorOfComponent", authorOfComponent)
     truncateAndLog("sponsor", sponsor)
