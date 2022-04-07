@@ -245,12 +245,12 @@
         },
         {
           "methods": [ "GET" ],
-          "pathPattern": "/rs/shelvingLocations*",
+          "pathPattern": "/rs/shelvingLocation*",
           "permissionsRequired": [ "rs.shelvingLocations.read" ]
         },
         {
           "methods": [ "POST", "PUT", "DELETE" ],
-          "pathPattern": "/rs/shelvingLocations*",
+          "pathPattern": "/rs/shelvingLocation*",
           "permissionsRequired": [ "rs.shelvingLocations.write" ]
         },
         {
