@@ -1,10 +1,10 @@
 package org.olf.rs;
 
+import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
 
 import com.k_int.web.toolkit.custprops.CustomProperty
 
-import org.olf.okapi.modules.directory.DirectoryEntry;
 import groovy.util.logging.Slf4j
 
 
@@ -26,7 +26,7 @@ public class DirectoryEntryService {
     return (
       entry_loan_policy == null ||
       entry_loan_policy == 'lending_all_types' ||
-      entry_loan_policy == 'lendin_physical_only'
+      entry_loan_policy == 'lending_physical_only'
     )
   }
 
@@ -36,7 +36,7 @@ public class DirectoryEntryService {
       returnVal = dirEnt.customProperties?.value?.find { it.definition.name==key }?.value
     }
 
-    returnVal    
+    returnVal
   }
 
   // Methods to parse a string Symbol representation and return the Symbol itself
@@ -62,7 +62,7 @@ public class DirectoryEntryService {
     return result;
   }
 
-  /* 
+  /*
    * DirectoryEntries have a property customProperties of class com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
    * In turn, the CustomPropertyContainer hasMany values of class com.k_int.web.toolkit.custprops.CustomProperty
    * CustomProperties have a CustomPropertyDefinition, where the name lives, so we filter the list to find the matching custprop
