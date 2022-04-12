@@ -394,10 +394,14 @@ public class FolioSharedIndexService implements SharedIndexActions {
       ['RESHARE', 'ISIL'].each {
         log.debug("Trying to locate symbol ${si_location} in ns ${it}");
         if ( result == null ) {
-          List<Symbol> r2 = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol=:a and s.symbol=s',[a:it, s:si_location.trim().toUpperCase()]);
-          if ( r2.size() == 1 ) {
-            Symbol s = r2.get(0)
-            result = "${s.authority.symbol}:${s.symbol}".toString()
+          try {
+            List<Symbol> r2 = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol=:a and s.symbol=s',[a:it, s:si_location.trim().toUpperCase()]);
+            if ( r2.size() == 1 ) {
+              Symbol s = r2.get(0)
+              result = "${s.authority.symbol}:${s.symbol}".toString()
+            }
+          } catch(Exception e) {
+            log.error("Error trying to locate symbol ${si_location} in ${it}: ${e.getMessage()}")            
           }
         }
       }
