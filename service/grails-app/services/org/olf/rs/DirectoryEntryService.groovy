@@ -26,7 +26,7 @@ public class DirectoryEntryService {
     return (
       entry_loan_policy == null ||
       entry_loan_policy == 'lending_all_types' ||
-      entry_loan_policy == 'lendin_physical_only'
+      entry_loan_policy == 'lending_physical_only'
     )
   }
 
