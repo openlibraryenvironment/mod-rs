@@ -221,20 +221,22 @@ public class ReshareActionService {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
             String messageSenderSymbol = pr.requestingInstitutionSymbol;
-
             log.debug("ROTA: ${pr.rota}")
             log.debug("ROTA TYPE: ${pr.rota.getClass()}");
             PatronRequestRota prr = pr.rota.find({ rotaLocation -> rotaLocation.rotaPosition == rotaPosition });
             log.debug("ROTA at position ${pr.rotaPosition}: ${prr}");
-            String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
-
-            Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
-
-            Map sendResult = protocolMessageService.sendProtocolMessage(messageSenderSymbol, peerSymbol, eventData);
-            if (sendResult.status == PROTOCOL_RESULT_SENT) {
+            if ( prr != null ) {
+              String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
+              Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
+              Map sendResult = protocolMessageService.sendProtocolMessage(messageSenderSymbol, peerSymbol, eventData);
+              if (sendResult.status == PROTOCOL_RESULT_SENT) {
                 result = true;
-            } else {
+              } else {
                 log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
+              }
+            }
+            else {
+              log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
             }
         }
         return result;
