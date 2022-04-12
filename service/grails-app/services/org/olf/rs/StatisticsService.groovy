@@ -24,15 +24,29 @@ public class StatisticsService {
   private Map<String, Map> stats_cache = [:]
 
   public incrementCounter(String context) {
-    Counter c = Counter.findByContext(context) ?: new Counter(context:context, value:0)
-    c.value++
-    c.save(flush:true, failOnError:true);
+    Counter.withTransaction { status ->
+      Counter c = Counter.createCriteria().get {
+        eq('context', context)
+        lock true
+      }
+      if ( c == null )
+        c = new Counter(context:context, value:0)
+      c.value++
+      c.save(flush:true, failOnError:true);
+    }
   }
 
   public decrementCounter(String context) {
-    Counter c = Counter.findByContext(context) ?: new Counter(context:context, value:0)
-    c.value--
-    c.save(flush:true, failOnError:true);
+    Counter.withTransaction { status ->
+      Counter c = Counter.createCriteria().get {
+        eq('context', context)
+        lock true
+      }
+      if ( c == null )
+        c = new Counter(context:context, value:0)
+      c.value--
+      c.save(flush:true, failOnError:true);
+    }
   }
 
   /**
