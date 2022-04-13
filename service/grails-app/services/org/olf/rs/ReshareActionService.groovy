@@ -22,8 +22,6 @@ public class ReshareActionService {
 
     private static final String MESSAGE_NOTIFICATION = 'Notification';
 
-    private static final String PROTOCOL_RESULT_SENT = 'SENT';
-
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND   = 'Unable to send protocol message (';
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND_1 = ')';
 
@@ -221,25 +219,59 @@ public class ReshareActionService {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
             String messageSenderSymbol = pr.requestingInstitutionSymbol;
+
             log.debug("ROTA: ${pr.rota}")
             log.debug("ROTA TYPE: ${pr.rota.getClass()}");
             PatronRequestRota prr = pr.rota.find({ rotaLocation -> rotaLocation.rotaPosition == rotaPosition });
             log.debug("ROTA at position ${pr.rotaPosition}: ${prr}");
-            if ( prr != null ) {
-              String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
-              Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
-              Map sendResult = protocolMessageService.sendProtocolMessage(messageSenderSymbol, peerSymbol, eventData);
-              if (sendResult.status == PROTOCOL_RESULT_SENT) {
-                result = true;
-              } else {
-                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
-              }
-            }
-            else {
-              log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
-            }
+            String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
+
+            Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
+
+            // Now send the message
+            result = sendProtocolMessage(pr, messageSenderSymbol, peerSymbol, eventData, action);
         }
         return result;
+    }
+
+    public boolean sendProtocolMessage(PatronRequest request, String sendingSymbol, String receivingSymbol, Map eventData, String protocolAction, boolean resetSendAttempts = true) {
+        boolean result = false;
+
+        // Set the status to Waiting
+        request.networkStatus = NetworkStatus.Waiting;
+
+        // Set the lastSendAttempt
+        request.lastSendAttempt = new Date();
+
+        // Set the protocol action
+        request.lastProtocolAction = protocolAction;
+
+        // Do we need to rest the number of send attempts
+        if (resetSendAttempts) {
+            request.numberOfSendAttempts = 1;
+        }
+
+        Map sendResult  = protocolMessageService.sendProtocolMessage(sendingSymbol, receivingSymbol, eventData);
+        switch (sendResult.status) {
+            case ProtocolResultStatus.Sent:
+                request.networkStatus = NetworkStatus.Sent;
+                result = true;
+                break;
+
+            case ProtocolResultStatus.Timeout:
+                // Mark it down to a timeout
+                request.networkStatus = NetworkStatus.Timeout;
+                log.warn('Hit a timeout trying to send protocol message: ' + sendResult);
+                break;
+
+            case ProtocolResultStatus.Error:
+                // Mark it as a retry
+                request.networkStatus = NetworkStatus.Retry;
+                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
+                break;
+        }
+
+        return(result);
     }
 
     public void sendResponse(
@@ -286,23 +318,21 @@ public class ReshareActionService {
             (pr.resolvedRequester != null)) {
             Map supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
 
+            // Now send the message
             log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplyingMessageRequest}) for pr id ${pr.id}");
-            Map sendResult = protocolMessageService.sendProtocolMessage(
+            result = sendProtocolMessage(
+                pr,
                 pr.supplyingInstitutionSymbol,
                 pr.requestingInstitutionSymbol,
-                supplyingMessageRequest
+                supplyingMessageRequest,
+                reasonForMessage
             );
-            if (sendResult.status == PROTOCOL_RESULT_SENT) {
-                result = true;
-            } else {
-                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
-            }
         } else {
             log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");
         }
 
         return result;
-                                         }
+    }
 
     public void outgoingNotificationEntry(
         PatronRequest pr,
@@ -399,7 +429,7 @@ public class ReshareActionService {
                     (patronProfile.canCreateRequests == true)) {
                     result = true;
                 } else {
-                    patronRecord.problems = ['Patron profile is set to not allow creation of requests.'];
+                    patronRecord.problems = ["Patron profile (${patronProfile.code}) is set to not allow creation of requests."];
                 }
             } else if (patronRecord.problems == null) {
                 patronRecord.problems = ['Record status is not valid.'];

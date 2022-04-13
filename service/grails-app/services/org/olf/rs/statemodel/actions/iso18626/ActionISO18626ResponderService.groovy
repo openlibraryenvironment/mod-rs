@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 
@@ -11,11 +12,18 @@ import org.olf.rs.statemodel.ActionResultDetails;
  */
 public abstract class ActionISO18626ResponderService extends AbstractAction {
 
+    ProtocolMessageBuildingService protocolMessageBuildingService;
+
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        // Extract the sequence from the note
+        Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(parameters?.activeSection?.note);
+        String note = sequenceResult.note;
+        request.lastSequenceReceived = sequenceResult.sequence;
+
         // If there is a note, create notification entry
-        if (parameters?.activeSection?.note) {
-            reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, false);
+        if (note) {
+            reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, false, note);
         }
 
         return(actionResultDetails);

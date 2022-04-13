@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SharedIndexService
 import org.olf.rs.statemodel.AbstractEvent;
@@ -22,6 +23,7 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class EventMessageRequestIndService extends AbstractEvent {
 
+    ProtocolMessageBuildingService protocolMessageBuildingService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
 
@@ -80,38 +82,45 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             // Add publisher information to Patron Request
             Map publicationInfo = eventData.publicationInfo;
-            if (publicationInfo.publisher) {
-                pr.publisher = publicationInfo.publisher;
-            }
-            pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
-            if (publicationInfo.publicationType) {
+            if (publicationInfo != null) {
+                if (publicationInfo.publisher) {
+                    pr.publisher = publicationInfo.publisher;
+                }
                 pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
-            }
-            if (publicationInfo.publicationDate) {
-                pr.publicationDate = publicationInfo.publicationDate;
-            }
-            if (publicationInfo.publicationDateOfComponent) {
-                pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
-            }
-            if (publicationInfo.placeOfPublication) {
-                pr.placeOfPublication = publicationInfo.placeOfPublication;
+                if (publicationInfo.publicationType) {
+                    pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
+                }
+                if (publicationInfo.publicationDate) {
+                    pr.publicationDate = publicationInfo.publicationDate;
+                }
+                if (publicationInfo.publicationDateOfComponent) {
+                    pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
+                }
+                if (publicationInfo.placeOfPublication) {
+                    pr.placeOfPublication = publicationInfo.placeOfPublication;
+                }
             }
 
             // Add service information to Patron Request
             Map serviceInfo = eventData.serviceInfo;
-            if (serviceInfo.serviceType) {
-                pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
-            }
-            if (serviceInfo.needBeforeDate) {
-                // This will come in as a string, will need parsing
-                try {
-                    pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
-                } catch (Exception e) {
-                    log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+            if (serviceInfo != null) {
+                if (serviceInfo.serviceType) {
+                    pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
                 }
-            }
-            if (serviceInfo.note) {
-                pr.patronNote = serviceInfo.note;
+                if (serviceInfo.needBeforeDate) {
+                    // This will come in as a string, will need parsing
+                    try {
+                        pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
+                    } catch (Exception e) {
+                        log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+                    }
+                }
+                if (serviceInfo.note) {
+                    // We mave have a sequence number that needs to be extracted
+                    Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
+                    pr.patronNote = sequenceResult.note;
+                    pr.lastSequenceReceived = sequenceResult.sequence;
+                }
             }
 
             // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
@@ -130,20 +139,22 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             // Add patron information to Patron Request
             Map patronInfo = eventData.patronInfo;
-            if (patronInfo.patronId) {
-                pr.patronIdentifier = patronInfo.patronId;
-            }
-            if (patronInfo.surname) {
-                pr.patronSurname = patronInfo.surname;
-            }
-            if (patronInfo.givenName) {
-                pr.patronGivenName = patronInfo.givenName;
-            }
-            if (patronInfo.patronType) {
-                pr.patronType = patronInfo.patronType;
-            }
-            if (patronInfo.patronReference) {
-                pr.patronReference = patronInfo.patronReference;
+            if (patronInfo != null) {
+                if (patronInfo.patronId) {
+                    pr.patronIdentifier = patronInfo.patronId;
+                }
+                if (patronInfo.surname) {
+                    pr.patronSurname = patronInfo.surname;
+                }
+                if (patronInfo.givenName) {
+                    pr.patronGivenName = patronInfo.givenName;
+                }
+                if (patronInfo.patronType) {
+                    pr.patronType = patronInfo.patronType;
+                }
+                if (patronInfo.patronReference) {
+                    pr.patronReference = patronInfo.patronReference;
+                }
             }
 
             pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";

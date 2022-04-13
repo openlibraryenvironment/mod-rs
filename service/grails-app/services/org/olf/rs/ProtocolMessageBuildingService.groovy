@@ -1,13 +1,25 @@
 package org.olf.rs;
 
-import groovy.lang.Closure
-import org.olf.rs.PatronRequest
-import org.olf.rs.PatronRequestNotification
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.olf.okapi.modules.directory.Symbol;
 
-
-
 class ProtocolMessageBuildingService {
+
+    private static String LAST_SEQUENCE      = 'lastSeq';
+    private static String SEQUENCE           = 'seq';
+    private static String SEQUENCE_SEPARATOR = ':';
+    private static String SEQUENCE_WRAPPER   = '#';
+
+    private static String SEQUENCE_PREFIX      = SEQUENCE_WRAPPER + SEQUENCE + SEQUENCE_SEPARATOR;
+    private static String LAST_SEQUENCE_PREFIX = SEQUENCE_WRAPPER + LAST_SEQUENCE + SEQUENCE_SEPARATOR;
+
+    private static String ALL_REGEX           = '(.*)';
+    private static String NUMBER_REGEX        = '(\\d+)';
+    private static String END_OF_STRING_REGEX = '$'
+    private static String SEQUENCE_REGEX      = ALL_REGEX + SEQUENCE_PREFIX + NUMBER_REGEX + SEQUENCE_WRAPPER + END_OF_STRING_REGEX;
+    private static String LAST_SEQUENCE_REGEX = ALL_REGEX + LAST_SEQUENCE_PREFIX + NUMBER_REGEX + SEQUENCE_WRAPPER + END_OF_STRING_REGEX;
 
   /*
    * This method is purely for building out the structure of protocol messages
@@ -33,7 +45,7 @@ class ProtocolMessageBuildingService {
   }
 
 
-  public Map buildRequestMessage(PatronRequest req) {
+  public Map buildRequestMessage(PatronRequest req, boolean appendSequence = true) {
     Map message = buildSkeletonMessage('REQUEST')
 
     message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
@@ -74,7 +86,7 @@ class ProtocolMessageBuildingService {
       // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
       systemInstanceIdentifier: req.systemInstanceIdentifier,
       oclcNumber: req.oclcNumber,
-     
+
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -110,11 +122,11 @@ class ProtocolMessageBuildingService {
 
       // Note that the internal names sometimes differ from the protocol names--pay attention with these fields
       needBeforeDate: req.neededBy,
-      note: req.patronNote
+      note: buildNote(req, req.patronNote, appendSequence)
 
     ]
     // TODO SupplierInfo Section
-    
+
     /* message.supplierInfo = [
      * SortOrder
      * SupplierCode
@@ -174,17 +186,18 @@ class ProtocolMessageBuildingService {
     return message;
   }
 
-  public Map buildSupplyingAgencyMessage(PatronRequest pr, 
+  public Map buildSupplyingAgencyMessage(PatronRequest pr,
                                          String reason_for_message,
-                                         String status, 
-                                         Map messageParams) {
+                                         String status,
+                                         Map messageParams,
+                                         boolean appendSequence = true) {
 
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
     message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
     message.messageInfo = [
       reasonForMessage:reason_for_message,
-      note: messageParams?.note
+      note: buildNote(pr, messageParams?.note, appendSequence)
     ]
     message.statusInfo = [
       status:status
@@ -222,10 +235,10 @@ class ProtocolMessageBuildingService {
       if (messageParams.reason) {
         actionMap.data = messageParams.reason
       }
-  
+
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
-  
+
     switch (pr.volumes.size()) {
       case 0:
         break;
@@ -238,16 +251,16 @@ class ProtocolMessageBuildingService {
         message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}" }
         break;
     }
-    
+
     if( pr?.dueDateRS ) {
       message.statusInfo['dueDate'] = pr.dueDateRS
     }
-    
+
     return message
   }
 
 
-  public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note = null) {
+  public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note, boolean appendSequence = true) {
     Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
     Symbol message_sender_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender)
@@ -256,7 +269,7 @@ class ProtocolMessageBuildingService {
     message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
     message.activeSection = [
       action: action,
-      note: note
+      note: buildNote(pr, note, appendSequence)
     ]
 
     // Whenever a note is attached to the message, create a notification with action.
@@ -274,15 +287,99 @@ class ProtocolMessageBuildingService {
     return message
   }
 
+  /**
+   * Extracts the last sequence number from the note field
+   * @param note The note that may contain the last sequence
+   * @return A map containing the following fields
+   *    1. note without the sequence
+   *    2. sequence the found sequence
+   * if no sequence is found then the sequence will be null
+   */
+  public Map extractLastSequenceFromNote(String note) {
+      return(extractSequence(note, LAST_SEQUENCE_REGEX))
+  }
+
+  /**
+   * Extracts the sequence number from the note field
+   * @param note The note that may contain the last sequence
+   * @return A map containing the following fields
+   *    1. note without the sequence
+   *    2. sequence the found sequence
+   * if no sequence is found then the sequence will be null
+   */
+  public Map extractSequenceFromNote(String note) {
+      return(extractSequence(note, SEQUENCE_REGEX))
+  }
+
+  /**
+   * Extracts the sequence number from the note field
+   * @param note The note that may contain the last sequence
+   * @param sequenceRegex The regex used to obtain the sequence (group 2) and the note (group 1)
+   * @return A map containing the following fields
+   *    1. note without the sequence
+   *    2. sequence the found sequence
+   * if no sequence is found then the sequence will be null
+   */
+  private Map extractSequence(String note, String sequenceRegex) {
+      Map result = [ note: note];
+
+      // If we havn't been supplied a note then there is nothing to extract
+      if (note != null) {
+          // We use Pattern.DOTALL in case there are newlines in the string
+          Pattern pattern = Pattern.compile(sequenceRegex, Pattern.DOTALL);
+          Matcher matcher = pattern.matcher(note);
+          if (matcher.find())
+          {
+              try {
+                  // The sequence matches on the 2nd group
+                  String sequenceAsString = matcher.group(2);
+                  if (sequenceAsString != null) {
+                      // Convert to an integer
+                      result.sequence = sequenceAsString.toInteger();
+
+                      // Grab the actual note from the first group as the sequence is always at the end of the note
+                      result.note = matcher.group(1);
+
+                      // Need to ensure the note is not blank
+                      if (result.note.length() == 0) {
+                          // We need to make it null
+                          result.note = null;
+                      }
+                  }
+              } catch (Exception ) {
+                  // We ignore any exception thrown, as it means it wasn't what we were expecting
+              }
+          }
+      }
+
+      // Return the note and sequence to the caller
+      return(result);
+  }
+
+  private String buildNote(PatronRequest request, String note, boolean appendSequence) {
+      String constructedNote = note;
+
+      // Now do we need to append the sequence
+      if (appendSequence) {
+          String lastSequence = SEQUENCE_PREFIX + request.incrementLastSequence().toString() + SEQUENCE_WRAPPER;
+          if (constructedNote == null) {
+              constructedNote = lastSequence;
+          } else {
+              constructedNote += lastSequence;
+          }
+      }
+      return(constructedNote);
+  }
+
   private Map buildHeader(PatronRequest pr, String messageType, Symbol message_sender_symbol, Symbol peer_symbol) {
     Map supplyingAgencyId
     Map requestingAgencyId
     String requestingAgencyRequestId
     String supplyingAgencyRequestId
-    
+
     log.debug("ProtocolMessageBuildingService::buildHeader(${pr}, ${messageType}, ${message_sender_symbol}, ${peer_symbol})");
 
-    
+
     if (messageType == 'REQUEST' || messageType == 'REQUESTING_AGENCY_MESSAGE') {
 
       // Set the requestingAgencyId and the requestingAgencyRequestId

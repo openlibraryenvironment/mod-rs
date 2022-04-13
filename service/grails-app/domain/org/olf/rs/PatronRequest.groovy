@@ -200,6 +200,26 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   RefdataValue cancellationReason
 
+  /** The current status of any network messaging */
+  NetworkStatus networkStatus;
+
+  /** The date of when we last sent the request */
+  Date lastSendAttempt;
+
+  /** The date of when we plan to next attempt to send it */
+  Date nextSendAttempt;
+
+  /** The last protocol action that we attempted to send */
+  String lastProtocolAction;
+
+  /** The number of times we have attempted to send the last message, only set if we hit an error */
+  Integer numberOfSendAttempts;
+
+  /** So we can try and cater for timeout issues, we append a sequence number to the note */
+  Integer lastSequenceSent;
+
+  /** This is the last sequence number we received */
+  Integer lastSequenceReceived;
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
 
@@ -319,6 +339,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     needsAttention(nullable: true)
 
     overdue(nullable: true)
+
+    networkStatus (nullable: true)
+    lastSendAttempt (nullable: true)
+    nextSendAttempt (nullable: true)
+    lastProtocolAction (nullable: true)
+    numberOfSendAttempts (nullable: true)
+    lastSequenceSent (nullable: true)
+    lastSequenceReceived (nullable: true)
   }
 
   static mapping = {
@@ -418,6 +446,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     overdue column: 'pr_overdue'
 
+    networkStatus column: 'pr_network_status', length:32
+    lastSendAttempt column: 'pr_last_send_attempt'
+    nextSendAttempt column: 'pr_next_send_attempt'
+    lastProtocolAction column: 'pr_last_protocol_action', length:32
+    numberOfSendAttempts column: 'pr_number_of_send_attempts'
+    lastSequenceSent column: 'pr_last_sequence_sent'
+    lastSequenceReceived column: 'pr_last_sequence_received'
+
     audit(sort:'dateCreated', order:'desc')
 
     requestIdentifiers cascade: 'all-delete-orphan'
@@ -468,6 +504,18 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       'title': this.title,
       'systemInstanceIdentifier': this.systemInstanceIdentifier
     ]
+  }
+
+  public int incrementLastSequence() {
+      // Increase the sequence number on the request
+      if (lastSequenceSent == null) {
+          // First time it has been sent
+          lastSequenceSent = 0;
+      } else {
+          // Has been sent before
+          lastSequenceSent++;
+      }
+      return(lastSequenceSent);
   }
 
   private String truncateAndLog(String fieldName, String field, int truncateLength = 255) {

@@ -1,18 +1,15 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants
-import java.util.UUID
-import org.olf.okapi.modules.directory.ServiceAccount
-import groovy.xml.StreamingMarkupBuilder
-import java.text.SimpleDateFormat
-import static groovyx.net.http.HttpBuilder.configure
 import static groovyx.net.http.ContentTypes.XML
-import groovyx.net.http.*
+
 import java.time.Instant
 
-import groovyx.net.http.ApacheHttpBuilder
-import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.impl.client.HttpClientBuilder
+import org.olf.okapi.modules.directory.ServiceAccount
+
+import groovy.xml.StreamingMarkupBuilder
+import groovyx.net.http.*
 
 
 
@@ -33,7 +30,7 @@ class ProtocolMessageService {
   private static int MAX_HTTP_TIME = 10 * 1000;
 
   /**
-   * @param eventData : A map structured as followed 
+   * @param eventData : A map structured as followed
    *   event: {
    *     envelope:{
    *       sender:{
@@ -72,7 +69,7 @@ class ProtocolMessageService {
     log.debug("====================================================================")
     log.debug("Event Data: ${eventData}")
     // For now we want to be able to switch between local and actual addresses
-    
+
     def serviceAddress = null;
     if ( ill_services_for_peer.size() > 0 ) {
       serviceAddress = ill_services_for_peer[0].service.address
@@ -99,13 +96,19 @@ class ProtocolMessageService {
         }
       }
       sendISO18626Message(eventData, serviceAddress, additional_headers)
-      result.status = "SENT"
+      result.status = ProtocolResultStatus.Sent;
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
-      result.status = "NOT SENT"
+        if ((e.cause != null) && (e.cause instanceof java.net.SocketTimeoutException)) {
+            // We have hit a timeout
+            result.status = ProtocolResultStatus.Timeout;
+        } else {
+            // Everything else treated as not sent
+            result.status = ProtocolResultStatus.Error;
+        }
       log.error("ISO18626 message failed to send. ${e}/${e?.class?.name}/${e.message}",e)
     }
-    
+
     return result;
   }
 
@@ -139,9 +142,9 @@ class ProtocolMessageService {
   public Map handleIncomingMessage(Map eventData) {
     // Recipient must be a tenant in the SharedConfig
     log.debug("handleIncomingMessage called. (eventData.messageType:${eventData.messageType})")
-    
-    // Now we issue a protcolMessageIndication event so that any handlers written for the protocol message can be 
-    // called - this method should not do any work beyond understanding what event needs to be dispatched for the 
+
+    // Now we issue a protcolMessageIndication event so that any handlers written for the protocol message can be
+    // called - this method should not do any work beyond understanding what event needs to be dispatched for the
     // particular message coming in.
     if (eventData.tenant != null) {
       switch ( eventData.messageType ) {
@@ -160,9 +163,9 @@ class ProtocolMessageService {
     else {
       log.warn("NO tenant in incoming protocol message - don't know how to route it")
     }
-    
-    
-    
+
+
+
     return [
       confirmationId: UUID.randomUUID().toString()
     ]
@@ -182,10 +185,10 @@ class ProtocolMessageService {
     log.debug("symbol: ${symbol}, symbol components: ${symbol_components}");
     List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
 join sa.accountHolder.symbols as symbol
-where symbol.symbol=:sym 
+where symbol.symbol=:sym
 and symbol.authority.symbol=:auth
 and sa.service.businessFunction.value=:ill
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] ); 
+''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] );
 
     log.debug("Got service accounts: ${result}");
 
@@ -287,8 +290,8 @@ and sa.service.businessFunction.value=:ill
 
   void exec ( def del, Closure c ) {
     c.rehydrate(del, c.owner, c.thisObject)()
-  } 
-  
+  }
+
   void makeRequestBody(def del, eventData) {
     exec(del) {
       request {
@@ -446,10 +449,10 @@ and sa.service.businessFunction.value=:ill
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
 
-        // 
+        //
         supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
         bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
-        
+
 
         // Pretty sure this shouldn't be here
         systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
