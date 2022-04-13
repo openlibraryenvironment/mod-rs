@@ -319,7 +319,6 @@ public class ReshareActionService {
             Map supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
 
             // Now send the message
-            log.debug("calling protocolMessageService.sendProtocolMessage(${pr.supplyingInstitutionSymbol},${pr.requestingInstitutionSymbol},${supplyingMessageRequest}) for pr id ${pr.id}");
             result = sendProtocolMessage(
                 pr,
                 pr.supplyingInstitutionSymbol,
@@ -429,7 +428,7 @@ public class ReshareActionService {
                     (patronProfile.canCreateRequests == true)) {
                     result = true;
                 } else {
-                    patronRecord.problems = ["Patron profile (${patronProfile.code}) is set to not allow creation of requests."];
+                    patronRecord.problems = ["Patron profile (${patronProfile.code}) is configured to not allow requesting in ReShare."];
                 }
             } else if (patronRecord.problems == null) {
                 patronRecord.problems = ['Record status is not valid.'];
