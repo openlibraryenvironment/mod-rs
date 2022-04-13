@@ -2,10 +2,12 @@ package org.olf.rs.statemodel.events;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSService;
+import org.olf.rs.NetworkStatus;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
 import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ProtocolMessageService;
+import org.olf.rs.ReshareActionService;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -37,6 +39,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     HostLMSService hostLMSService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
+    ReshareActionService reshareActionService;
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
@@ -72,16 +75,20 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
             (request.state?.code == Status.PATRON_REQUEST_UNFILLED)) {
             log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
+            // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
+            request.networkStatus = NetworkStatus.Idle;
+
             if (request.rota.size() > 0) {
                 Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
                 log.debug("Built request message request: ${requestMessageRequest }");
 
-                boolean requestSent  = false;
+                boolean messageTried  = false;
+                boolean lookAtNextResponder = true;
 
                 // There may be problems with entries in the lending string, so we loop through the rota
                 // until we reach the end, or we find a potential lender we can talk to. The request must
                 // also explicitly state a requestingInstitutionSymbol
-                while ((!requestSent) &&
+                while (lookAtNextResponder &&
                        (request.rota.size() > 0) &&
                        ((request.rotaPosition ?: -1) < request.rota.size()) &&
                        (request.requestingInstitutionSymbol != null)) {
@@ -154,33 +161,39 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                             }
                             requestMessageRequest.bibliographicInfo.supplyingInstitutionSymbol = nextResponder;
 
+                            // No longer need to look at next responder
+                            lookAtNextResponder = false;
+
                             // Probably need a lender_is_valid check here
-                            Map sendResult  = protocolMessageService.sendProtocolMessage(request.requestingInstitutionSymbol, nextResponder, requestMessageRequest);
-                            if (sendResult.status == 'SENT') {
+                            if (reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest, 'Request')) {
+                                // We have managed to send a message
                                 prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
-                                requestSent  = true;
                             } else {
+                                messageTried = true;
                                 prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER);
-                                prr.note = "Result of send : ${sendResult.status}";
+                                prr.note = "Result of send : ${request.networkStatus.toString()}";
                             }
                         } else {
                             log.warn("Lender at position ${request.rotaPosition} invalid, skipping");
                             prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER);
                             prr.note = "Send not attempted: Unable to resolve symbol for : ${nextResponder}";
-                            }
+                        }
 
                         prr.save(flush:true, failOnError:true);
                     } else {
                         log.error("Unable to find rota entry at position ${request.rotaPosition} (Size=${request.rota.size()}) ${( request.rotaPosition ?: -1 < request.rota.size() )}. Try next");
                     }
-                       }
+                }
 
                 // ToDo - there are three possible states here,not two - Send, End of Rota, Error
                 // Did we send a request?
-                if (requestSent) {
+                if (request.networkStatus == NetworkStatus.Sent) {
                     log.debug('sendToNextLender sent to next lender.....');
                     eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
                     eventResultDetails.auditMessage = 'Sent to next lender';
+                } else if (messageTried) {
+                    // We will not set the state yet, just the audit message
+                    eventResultDetails.auditMessage = 'Problem sending to supplier, will reattempt';
                 } else {
                     // END OF ROTA
                     log.warn('sendToNextLender reached the end of the lending string.....');

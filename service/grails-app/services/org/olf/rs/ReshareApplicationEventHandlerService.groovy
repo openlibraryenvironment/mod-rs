@@ -297,7 +297,7 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-  public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester) {
+  public void incomingNotificationEntry(PatronRequest pr, Map eventData, Boolean isRequester, String note) {
     def inboundMessage = new PatronRequestNotification()
 
     inboundMessage.setPatronRequest(pr)
@@ -326,12 +326,12 @@ public class ReshareApplicationEventHandlerService {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
-      inboundMessage.setMessageContent(eventData.messageInfo.note)
+      inboundMessage.setMessageContent(note)
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.activeSection.action)
-      inboundMessage.setMessageContent(eventData.activeSection.note)
+      inboundMessage.setMessageContent(note)
     }
 
     inboundMessage.setIsSender(false)

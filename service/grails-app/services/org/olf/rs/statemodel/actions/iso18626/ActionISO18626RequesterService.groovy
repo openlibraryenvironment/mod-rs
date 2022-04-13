@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
+import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
@@ -20,10 +21,18 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
 
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
 
+    ProtocolMessageBuildingService protocolMessageBuildingService;
+
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Grab hold of the statusInfo as we may want to override it
         Map incomingStatus = parameters.statusInfo;
+
+        // Extract the sequence from the note
+        Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(parameters.messageInfo?.note);
+        String note = sequenceResult.note;
+        request.lastSequenceReceived = sequenceResult.sequence;
+
 
         // if parameters.deliveryInfo.itemId then we should stash the item id
         if (parameters?.deliveryInfo) {
@@ -35,7 +44,6 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
                 // Save the loan condition to the patron request
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
                 Symbol relevantSupplier = reshareApplicationEventHandlerService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
-                String note = parameters.messageInfo?.note;
 
                 reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
             }
@@ -67,7 +75,7 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
                                 );
 
                                 request.addToVolumes(rv);
-                                
+
                                 /*
                                     This _should_ be handled on the following save,
                                     but there seems to not be an intial save which
@@ -105,8 +113,8 @@ public abstract class ActionISO18626RequesterService extends AbstractAction {
         }
 
         // If there is a note, create notification entry
-        if (parameters.messageInfo?.note) {
-            reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, true);
+        if (note) {
+            reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, true, note);
         }
 
         // Is there a due date

@@ -406,4 +406,33 @@ databaseChangeLog = {
         // The foreign key constraint for the request_identifier table
         addForeignKeyConstraint(baseColumnNames: "ri_patron_request", baseTableName: "request_identifier", constraintName: "FK7n0txdwj2oeqa77ksiharg86k", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request", validate: "true")
     }
+
+    changeSet(author: "Chas (generated)", id: "1649670543538-1") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_protocol_action", type: "varchar(32)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_send_attempt", type: "timestamp")
+        }
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_sequence_received", type: "int4")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_sequence_sent", type: "int4")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_network_status", type: "varchar(32)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_next_send_attempt", type: "timestamp")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_number_of_send_attempts", type: "int4")
+        }
+    }
 }
