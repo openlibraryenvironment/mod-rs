@@ -43,7 +43,9 @@ public class ActionPatronRequestBorrowerCheckService extends AbstractAction {
         } else {
             // The call succeeded but patron is invalid
             actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
-            actionResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${borrowerCheck?.status != null ? " (Patron state = ${borrowerCheck.status})" : ''}";
+            String errors = (borrowerCheck?.problems == null) ? '' : (' (Errors: ' + borrowerCheck.problems + ')');
+            String status = borrowerCheck?.status == null ? '' : (' (Patron state = ' + borrowerCheck.status + ')');
+            actionResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}";
             request.needsAttention = true;
         }
 
