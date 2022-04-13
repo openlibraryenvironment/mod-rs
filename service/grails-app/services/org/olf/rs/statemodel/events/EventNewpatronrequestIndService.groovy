@@ -155,7 +155,9 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
                     } else {
                         // If we're here then the requesting institution symbol was fine but the patron is invalid
                         eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
-                        eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${lookupPatron?.status != null ? " (Patron state=${lookupPatron.status})" : ''}".toString();
+                        String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
+                        String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
+                        eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString();
                         request.needsAttention = true;
                     }
                 } else {

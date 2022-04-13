@@ -397,7 +397,7 @@ public class ReshareActionService {
                     (patronProfile.canCreateRequests == true)) {
                     result = true;
                 } else {
-                    patronRecord.problems = ['Patron profile is set to not allow creation of requests.'];
+                    patronRecord.problems = ["Patron profile (${patronProfile.code}) is set to not allow creation of requests."];
                 }
             } else if (patronRecord.problems == null) {
                 patronRecord.problems = ['Record status is not valid.'];
