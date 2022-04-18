@@ -180,48 +180,23 @@ public class ModsiSharedIndexService implements SharedIndexActions {
 
     if (holdingsRecords && instance) {
       log.debug("Response for holdings on ${id}\n\n${holdingsRecords}\n\n");
-
       holdingsRecords?.each { hr ->
         log.debug("Process holdings record ${hr}");
-        String location = hr.permanentLocationDeref;
-        String[] split_location = location.split('/')
-        if ( split_location.length == 4 ) {
-          // If we successfully parsed the location as a 4 part string: TempleI/TempleC/Temple/Temple
-
-          String local_symbol = convertSILocationToSymbol(split_location[0])
-          if ( local_symbol != null ) {
-
-            // Do we already have an entry in the result for the given location? If not, Add it
-            if ( result.find { it.symbol==local_symbol } == null ) {
-              // And we don't already have the location
-
-              // Iterate through identifiers to try and find one with the same identifierTypeObject.name as our symbol
-              // Very unsure about this, so wrapping for now
-              def instance_identifier = null;
-              try {
-                instance_identifier = instances?.identifiers.find { it.identifierTypeDeref?.equalsIgnoreCase(local_symbol)} ?. value
-              }
-              catch ( Exception e ) {
-                e.printStackTrace()
-              }
-
-              log.debug("adding ${local_symbol} - ${instance_identifier} with policy ${hr.illPolicyDerefs}");
-              result.add([
-                      symbol:local_symbol,
-                      illPolicy:hr.illPolicyDeref,
-                      instanceIdentifier:instance_identifier,
-                      copyIdentifier:null ])
-            }
-            else {
-              log.debug("Located existing entry in result for ${location} - not adding another");
-            }
-          }
-          else {
-            log.warn("Unable to resolve shared index symbol ${split_location}");
+        if (hr.institutionSymbol && hr.instanceIdentifier) {
+          // Do we already have an entry in the result for the given location? If not, Add it
+          if (result.find { it.symbol == hr.institutionSymbol } == null) {
+            log.debug("adding ${hr.institutionSymbol} - ${hr.instanceIdentifier} with policy ${hr.illPolicyDerefs}");
+            result.add([
+                    symbol            : hr.institutionSymbol,
+                    illPolicy         : hr.illPolicyDeref,
+                    instanceIdentifier: hr.instanceIdentifier,
+                    copyIdentifier    : null])
+          } else {
+            log.debug("Located existing entry in result for ${hr.institutionSymbol} - not adding another");
           }
         }
         else {
-          log.warn("Location code does not split into 4: ${location}");
+          log.error("Unexpected holdings record from shared index");
         }
       }
     }
@@ -232,39 +207,5 @@ public class ModsiSharedIndexService implements SharedIndexActions {
     log.debug("Result: ${result}");
     return result;
   }
-
-  private String convertSILocationToSymbol(String si_location) {
-    log.debug("convertSILocationToSymbol(${si_location})");
-    // return 'RESHARE:'+si_location
-    String result = null;
-    // Try to resolve the symbol without a namespace
-    List<Symbol> r = Symbol.findAllBySymbol(si_location.trim().toUpperCase())
-    if ( r.size() == 1 ) {
-      log.debug("Located unique symbol without namespace");
-      Symbol s = r.get(0)
-      result = "${s.authority.symbol}:${s.symbol}".toString()
-    }
-    else if ( r.size() > 1 ) {
-      log.debug("Symbol is not unique over namespace");
-      // The symbol was not uniqe over namespaces, try our priority list 
-      ['RESHARE', 'ISIL'].each {
-        log.debug("Trying to locate symbol ${si_location} in ns ${it}");
-        if ( result == null ) {
-          try {
-            List<Symbol> r2 = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol=:a and s.symbol=s',[a:it, s:si_location.trim().toUpperCase()]);
-            if ( r2.size() == 1 ) {
-              Symbol s = r2.get(0)
-              result = "${s.authority.symbol}:${s.symbol}".toString()
-            }
-          } catch(Exception e) {
-            log.error("Error trying to locate symbol ${si_location} in ${it}: ${e.getMessage()}")            
-          }
-        }
-      }
-    }
-    log.debug("convertSILocationToSymbol result: ${si_location}");
-    return result
-  }
-
 }
 
