@@ -4,6 +4,7 @@ import org.olf.rs.circ.client.NCIPClientWrapper;
 
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.PatronRequest;
 
 public class HorizonHostLMSService extends BaseHostLMSService {
 
@@ -13,24 +14,97 @@ public class HorizonHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  protected String getHoldingsQueryRecsyn() {
-    return 'marcxml';
+  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+
+    log.debug("extractAvailableItemsFromOpacRecord (HorizonHostLMSService)");
+    Map<String,ItemLocation> availability_summary = [:]
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("${hld}");
+      log.debug("${hld.circulations?.circulation?.availableNow}");
+      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
+      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
+        log.debug("Available now");
+        def shelvingLocation = hld.shelvingLocation?.text();
+        def location = hld.localLocation?.text();
+        if(!shelvingLocation) {
+          shelvingLocation = null; //No blank strings
+        }
+        def locParts = splitLocation(hld.localLocation?.text());
+        log.debug("splitLocation returned ${locParts}");
+        if(locParts) {
+          location = locParts[0];
+          shelvingLocation = locParts[1];
+        }
+        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
+        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
+        availability_summary[hld.localLocation] = il;
+      }
+    }
+
+    return availability_summary;
+  }
+
+  public static List<String> splitLocation(String loc) {
+    def pattern = /(.+)\s+-\s+(.+)/;
+    def matcher = loc =~ pattern;
+    if(matcher.find()) {
+      return [ matcher.group(1), matcher.group(2)];
+    }
+    return null;
   }
 
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
-    log.debug("Extract holdings from Horizon marcxml record ${z_response}");
-    if ( (z_response?.numberOfRecords?.text() as int) != 1 ) {
-      log.warn("Multiple records seen in response from Horizon Z39.50 server, unable to extract available items. Record: ${z_response}");
-      return null;
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+
+    List<ItemLocation> result = [];
+
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+    // TNS: tcp:aleph.library.nyu.edu:9992/TNSEZB
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=water&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=4%20%22Head%20Cases:%20stories%20of%20brain%20injury%20and%20its%20aftermath%22&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://aleph.library.nyu.edu:9992%2FTNSEZB&x-pquery=@attr%201=12%20000026460&maximumRecords=1%27
+    // http://reshare-mp.folio-dev.indexdata.com:9000/?x-target=http://temple-psb.alma.exlibrisgroup.com:1921%2F01TULI_INST&x-pquery=water&maximumRecords=1%27
+
+    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
+    String z3950_server = getZ3950Server();
+
+    if ( z3950_server != null ) {
+      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
+      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=100 ${pr.supplierUniqueRecordId}");
+
+      def z_response = HttpBuilder.configure {
+        request.uri = z3950_proxy
+      }.get {
+          request.uri.path = '/'
+          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
+          request.uri.query = ['x-target': z3950_server,
+                               'x-pquery': '@attr 1=100 '+pr.supplierUniqueRecordId,
+                               'maximumRecords':'1' ]
+
+          if ( getHoldingsQueryRecsyn() ) {
+            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
+          }
+
+          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
+      }
+
+      log.debug("Got Z3950 response: ${z_response}");
+
+      if ( z_response?.numberOfRecords == 1 ) {
+        // Got exactly 1 record
+        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
+        if ( availability_summary.size() > 0 ) {
+          availability_summary.values().each { v ->
+            result.add(v);
+          }
+        }
+
+        log.debug("At end, availability summary: ${availability_summary}");
+      }
     }
 
-    Map<String, ItemLocation> availability_summary = null;
-    if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
-    }
-    return availability_summary;
-
+    return result;
   }
 
 
