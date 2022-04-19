@@ -107,29 +107,41 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     return "HostLMSLocation: ${code}".toString()
   }
 
-  def canDelete() {
-    def deleteValid = true
-    def prs = [];
-    PatronRequest.withSession {
-      def patronRequestsUsingThisLocation = PatronRequest.executeQuery("""
-        SELECT id FROM PatronRequest AS pr WHERE pr.pickLocation.id = :hostLMSId
-      """.toString(), [hostLMSId: id])
+    def canDelete() {
+        def deleteValid = true;
+        def prs = [];
+        String error;
+        PatronRequest.withSession {
+            def patronRequestsUsingThisLocation = PatronRequest.executeQuery("""
+                SELECT id FROM PatronRequest AS pr WHERE pr.pickLocation.id = :hostLMSId
+                """.toString(), [hostLMSId: id]);
 
-      if (patronRequestsUsingThisLocation.size() > 0) {
-        deleteValid = false
-        prs = patronRequestsUsingThisLocation
-      }
+            if (patronRequestsUsingThisLocation.size() > 0) {
+                deleteValid = false;
+                error = 'There are ' + patronRequestsUsingThisLocation.size().toString() + ' associated with this location';
+                prs = patronRequestsUsingThisLocation;
+
+            } else {
+                // Is there an associated location site pointing at this record
+                long numberShelvingLocationSites = ShelvingLocationSite.countByLocation(this);
+                if (numberShelvingLocationSites > 0) {
+                    // There is at least 1 site that has this location associated with it
+                    deleteValid = false;
+                    error = "There are " + numberShelvingLocationSites.toString() + " location sites attached to this location";
+                }
+            }
+        }
+
+        return([
+            deleteValid: deleteValid,
+            prs: prs,
+            error: error
+        ]);
     }
 
-    [
-      deleteValid: deleteValid,
-      prs: prs
-    ]
-  }
-
-  def beforeDelete() {
-    canDelete().deleteValid
-  }
+    def beforeDelete() {
+        return(canDelete().deleteValid);
+    }
 
     static HostLMSLocation EnsureActive(String code, String name) {
         HostLMSLocation loc = HostLMSLocation.findByCodeOrName(code, name);

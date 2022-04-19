@@ -45,6 +45,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareController<T> {
                 // Delete the instance
                 deleteResource instance
             } else {
+                log.info('Marking ' + instance.class.name + ':' +params.getIdentifier() + ' as hidden because ' + deletable.error)
                 instance.hidden = true;
                 instance.save(flush:true, failOnError:true);
             }

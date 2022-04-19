@@ -49,5 +49,26 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
   public String toString() {
     return "HostLMSShelvingLocation: ${code}".toString()
   }
-}
 
+    def canDelete() {
+        def deleteValid = true;
+        def error;
+
+        // Is there an associated location site pointing at this record
+        long numberShelvingLocationSites = ShelvingLocationSite.countByShelvingLocation(this);
+        if (numberShelvingLocationSites > 0) {
+            // There is at least 1 site that has this shelving location associated with it
+            deleteValid = false;
+            error = "There are " + numberShelvingLocationSites.toString() + " location sites attached to this shelving location";
+        }
+
+        return([
+            deleteValid: deleteValid,
+            error: error
+        ]);
+    }
+
+    def beforeDelete() {
+        return(canDelete().deleteValid);
+    }
+}
