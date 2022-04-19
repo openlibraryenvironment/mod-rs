@@ -2,13 +2,16 @@ package org.olf.rs;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.patronstore.PatronStoreActions;
 import org.olf.rs.statemodel.Status;
+
+import groovy.json.JsonBuilder;
+import groovy.time.Duration;
 
 /**
  * Handle user events.
@@ -24,6 +27,8 @@ public class ReshareActionService {
 
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND   = 'Unable to send protocol message (';
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND_1 = ')';
+
+    private static DEFAULT_DELAY_PERIOD = new Duration(0, 0, 10, 0, 0);
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     ProtocolMessageService protocolMessageService;
@@ -205,8 +210,7 @@ public class ReshareActionService {
         return result;
     }
 
-    public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams) {
-        String note = messageParams?.note
+    public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams, Map retryEventData = null) {
         boolean result = false;
 
         Long rotaPosition = pr.rotaPosition;
@@ -226,15 +230,21 @@ public class ReshareActionService {
             log.debug("ROTA at position ${pr.rotaPosition}: ${prr}");
             String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
 
-            Map eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
+            Map eventData = retryEventData;
+
+            // If we have not been supplied with the event data, we need to generate it
+            if (eventData == null) {
+                String note = messageParams?.note
+                eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
+            }
 
             // Now send the message
-            result = sendProtocolMessage(pr, messageSenderSymbol, peerSymbol, eventData, action);
+            result = sendProtocolMessage(pr, messageSenderSymbol, peerSymbol, eventData, false);
         }
         return result;
     }
 
-    public boolean sendProtocolMessage(PatronRequest request, String sendingSymbol, String receivingSymbol, Map eventData, String protocolAction, boolean resetSendAttempts = true) {
+    public boolean sendProtocolMessage(PatronRequest request, String sendingSymbol, String receivingSymbol, Map eventData, boolean resetSendAttempts = true) {
         boolean result = false;
 
         // Set the status to Waiting
@@ -243,35 +253,60 @@ public class ReshareActionService {
         // Set the lastSendAttempt
         request.lastSendAttempt = new Date();
 
-        // Set the protocol action
-        request.lastProtocolAction = protocolAction;
-
         // Do we need to rest the number of send attempts
         if (resetSendAttempts) {
-            request.numberOfSendAttempts = 1;
+            request.numberOfSendAttempts = 0;
         }
 
         Map sendResult  = protocolMessageService.sendProtocolMessage(sendingSymbol, receivingSymbol, eventData);
         switch (sendResult.status) {
             case ProtocolResultStatus.Sent:
-                request.networkStatus = NetworkStatus.Sent;
+                // Mark, it as sent, no longer need the eventData
+                setNetworkStatus(request, NetworkStatus.Sent, null);
                 result = true;
                 break;
 
             case ProtocolResultStatus.Timeout:
-                // Mark it down to a timeout
-                request.networkStatus = NetworkStatus.Timeout;
+                // Mark it down to a timeout, need to save the event data for a potential retry
+                setNetworkStatus(request, NetworkStatus.Timeout, eventData, DEFAULT_DELAY_PERIOD);
                 log.warn('Hit a timeout trying to send protocol message: ' + sendResult);
                 break;
 
             case ProtocolResultStatus.Error:
-                // Mark it as a retry
-                request.networkStatus = NetworkStatus.Retry;
+                // Mark it as a retry, need to save the event data
+                setNetworkStatus(request, NetworkStatus.Retry, eventData, DEFAULT_DELAY_PERIOD);
                 log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
                 break;
         }
 
         return(result);
+    }
+
+    private void setNetworkStatus(PatronRequest request, NetworkStatus networkStatus, Map eventData, Duration delayPeriod) {
+        // Set the network status
+        request.networkStatus = networkStatus;
+
+        // Set when we retry
+        if (delayPeriod == null) {
+            // No delay period supplied
+            // No retyr required
+            request.nextSendAttempt = null;
+        } else {
+            // We have been supplied a delay period
+            request.nextSendAttempt = delayPeriod.plus(new Date());
+
+            // So we need to increment the number of resend attempts
+            request.numberOfSendAttempts++;
+        }
+
+        // Set the last protocol data
+        if (eventData == null) {
+            // Just set it to null as we have none
+            request.lastProtocolData = null;
+        } else {
+            // Convert the event data into a json string
+            request.lastProtocolData = (new JsonBuilder(eventData)).toString();
+        }
     }
 
     public void sendResponse(
@@ -306,7 +341,8 @@ public class ReshareActionService {
         PatronRequest pr,
         String reasonForMessage,
         String status,
-        Map messageParams
+        Map messageParams,
+        Map retryEventData = null
     ) {
 
         log.debug('sendResponse(....)');
@@ -316,7 +352,12 @@ public class ReshareActionService {
         // pr.peerRequestIdentifier
         if ((pr.resolvedSupplier != null) &&
             (pr.resolvedRequester != null)) {
-            Map supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
+            Map supplyingMessageRequest = retryEventData;
+
+            // If it is not a retry we need to generate the message
+            if (supplyingMessageRequest == null) {
+                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
+            }
 
             // Now send the message
             result = sendProtocolMessage(
@@ -324,7 +365,7 @@ public class ReshareActionService {
                 pr.supplyingInstitutionSymbol,
                 pr.requestingInstitutionSymbol,
                 supplyingMessageRequest,
-                reasonForMessage
+                false
             );
         } else {
             log.error("Unable to send protocol message - supplier(${pr.resolvedSupplier}) or requester(${pr.resolvedRequester}) is missing in PatronRequest ${pr.id}Returned");

@@ -165,7 +165,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                             lookAtNextResponder = false;
 
                             // Probably need a lender_is_valid check here
-                            if (reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest, 'Request')) {
+                            if (reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest)) {
                                 // We have managed to send a message
                                 prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
                             } else {
