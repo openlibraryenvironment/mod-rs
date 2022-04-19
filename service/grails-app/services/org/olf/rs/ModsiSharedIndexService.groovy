@@ -174,34 +174,35 @@ public class ModsiSharedIndexService implements SharedIndexActions {
     log.debug("sharedIndexHoldings(${id})");
     List<Map> result = [];
     Object cluster = fetchCluster(id);
-    Object payload = cluster?.records[0]?.inventoryPayload
-    Object holdingsRecords = payload?.holdingsRecords;
-    Object instance = payload?.instance;
+    if (!cluster || !(cluster?.records instanceof Collection)) {
+      log.error("Unexpected data back from shared index");
+      // Just sticking with the pattern established by the other implementation but perhaps we should actually throw at this point?
+      return result;
+    }
 
-    if (holdingsRecords && instance) {
-      log.debug("Response for holdings on ${id}\n\n${holdingsRecords}\n\n");
-      holdingsRecords?.each { hr ->
-        log.debug("Process holdings record ${hr}");
-        if (hr.institutionSymbol && hr.instanceIdentifier) {
+    cluster.records.each { record ->
+      Object inv = record?.inventoryPayload;
+      Object localId = inv?.localIdentifier;
+      Object sym = inv?.institutionDeref;
+
+      if (sym && localId && inv.holdingsRecords) {
+        log.debug("Response for holdings of ${id} at ${sym}\n\n${inv.holdingsRecords}\n\n");
+        inv.holdingsRecords?.each { hr ->
           // Do we already have an entry in the result for the given location? If not, Add it
-          if (result.find { it.symbol == hr.institutionSymbol } == null) {
-            log.debug("adding ${hr.institutionSymbol} - ${hr.instanceIdentifier} with policy ${hr.illPolicyDerefs}");
+          if (result.find { it.symbol == sym } == null) {
+            log.debug("adding holding for ${sym} - ${localId} with policy ${hr?.illPolicyDeref}");
             result.add([
-                    symbol            : hr.institutionSymbol,
-                    illPolicy         : hr.illPolicyDeref,
-                    instanceIdentifier: hr.instanceIdentifier,
+                    symbol            : sym,
+                    illPolicy         : hr?.illPolicyDeref,
+                    instanceIdentifier: localId,
                     copyIdentifier    : null])
           } else {
-            log.debug("Located existing entry in result for ${hr.institutionSymbol} - not adding another");
+            log.debug("Located existing entry in result for ${sym} - not adding another");
           }
         }
-        else {
-          log.error("Unexpected holdings record from shared index");
-        }
+      } else {
+        log.error("Unexpected data back from shared index");
       }
-    }
-    else {
-      log.error("Unexpected data back from shared index");
     }
 
     log.debug("Result: ${result}");
