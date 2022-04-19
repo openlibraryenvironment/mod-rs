@@ -209,8 +209,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** The date of when we plan to next attempt to send it */
   Date nextSendAttempt;
 
-  /** The last protocol action that we attempted to send */
-  String lastProtocolAction;
+  /** The event data used to send the protocol message, this column will only be populated when there is an error sending the data, will be cleared afterwards */
+  String lastProtocolData;
 
   /** The number of times we have attempted to send the last message, only set if we hit an error */
   Integer numberOfSendAttempts;
@@ -343,7 +343,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     networkStatus (nullable: true)
     lastSendAttempt (nullable: true)
     nextSendAttempt (nullable: true)
-    lastProtocolAction (nullable: true)
+    lastProtocolData (nullable: true)
     numberOfSendAttempts (nullable: true)
     lastSequenceSent (nullable: true)
     lastSequenceReceived (nullable: true)
@@ -449,7 +449,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     networkStatus column: 'pr_network_status', length:32
     lastSendAttempt column: 'pr_last_send_attempt'
     nextSendAttempt column: 'pr_next_send_attempt'
-    lastProtocolAction column: 'pr_last_protocol_action', length:32
+    lastProtocolData column: 'pr_last_protocol_data', length:20000
     numberOfSendAttempts column: 'pr_number_of_send_attempts'
     lastSequenceSent column: 'pr_last_sequence_sent'
     lastSequenceReceived column: 'pr_last_sequence_received'

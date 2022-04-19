@@ -435,4 +435,14 @@ databaseChangeLog = {
             column(name: "pr_number_of_send_attempts", type: "int4")
         }
     }
+
+    changeSet(author: "Chas (generated)", id: "1649859559363-1") {
+        // Slight change in plan, no longer need the action but the event data
+        dropColumn(columnName: "pr_last_protocol_action", tableName: "patron_request")
+
+        // This column will only be used i fthere is a network problem, once it has been resolved the data will be cleared
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_protocol_data", type: "varchar(20000)")
+        }
+    }
 }
