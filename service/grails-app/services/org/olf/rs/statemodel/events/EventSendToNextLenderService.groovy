@@ -79,9 +79,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
             request.networkStatus = NetworkStatus.Idle;
 
             if (request.rota.size() > 0) {
-                Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
-                log.debug("Built request message request: ${requestMessageRequest }");
-
                 boolean messageTried  = false;
                 boolean lookAtNextResponder = true;
 
@@ -139,6 +136,10 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                         if ((nextResponder != null) &&
                             (s != null) &&
                             (prr.peerSymbol == null)) {
+                            // Determine the message we will be sending, the id includes the rota position, so needs to be dtermined after the rota position has been calculated
+                            Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
+                            log.debug("Built request message request: ${requestMessageRequest }");
+
                             if (s != null) {
                                 request.resolvedSupplier = s;
                                 log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");

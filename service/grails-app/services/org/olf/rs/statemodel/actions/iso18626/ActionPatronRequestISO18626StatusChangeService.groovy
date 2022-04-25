@@ -33,13 +33,17 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // Call the base class first
-        actionResultDetails = super.performAction(request, parameters, actionResultDetails);
+        // We have a hack where we use this  message to verify that the last one sent was actually received or not
+        if (!checkForLastSequence(request, parameters.messageInfo?.note, actionResultDetails)) {
+            // A normal message
+            // Call the base class first
+            actionResultDetails = super.performAction(request, parameters, actionResultDetails);
 
-        // Only continue if successful
-        if (actionResultDetails.result == ActionResult.SUCCESS) {
-            // Add an audit entry
-            actionResultDetails.auditMessage = 'Status Change message recieved';
+            // Only continue if successful
+            if (actionResultDetails.result == ActionResult.SUCCESS) {
+                // Add an audit entry
+                actionResultDetails.auditMessage = 'Status Change message recieved';
+            }
         }
 
         // Now return the results to the caller

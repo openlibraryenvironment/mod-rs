@@ -21,7 +21,7 @@ public class SettingsService {
 				result = appSetting.defValue;
 			}
 		}
-		
+
 		// Return the result
 		return(result);
 	}
@@ -36,37 +36,44 @@ public class SettingsService {
 		boolean result = false;
 
 		String settingValue = getSettingValue(setting);
-		
+
 		if (settingValue == null) {
 			// They must both be null
 			result = (value == null);
 		} else if (value != null) {
 			// They must have the same value
 			result = (settingValue == value);
-		}  
-		
+		}
+
 		// Return the result
 		return(result);
 	}
 
 	/**
-	 * Retrieves a settings as an integer	
+	 * Retrieves a settings as an integer
 	 * @param setting the setting to be retrieved
 	 * @param defaultValue if the value is null, the default value to be returned (default: 0)
+	 * @param allowNegative If the value is false and the value is less than 0 then the default value is returned
 	 * @return The determined value, either from the setting or the default value
 	 */
-	public int getSettingAsInt(String setting, int defaultValue = 0) {
+	public int getSettingAsInt(String setting, int defaultValue = 0, boolean allowNegative = false) {
 		int value = defaultValue;
 		String settingString = getSettingValue(setting);
 		if (settingString != null) {
 			try {
 				// Now turn the string into an integer
 				value = settingString.toInteger();
+
+                // do we allow negative numbers
+                if (!allowNegative && (value < 0)) {
+                    // The value is negative, so reset to the default
+                    value = defaultValue;
+                }
 			} catch (Exception e) {
 				log.error("Unable to convert setting " + setting + " with value: " + settingString + " into an integer");
 			}
 		}
-		
+
 		return(value);
 	}
 }

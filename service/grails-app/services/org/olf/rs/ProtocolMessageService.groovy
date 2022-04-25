@@ -1,17 +1,18 @@
 package org.olf.rs
 
-import static groovyx.net.http.ContentTypes.XML
+import static groovyx.net.http.ContentTypes.XML;
 
-import java.time.Instant
+import java.time.Instant;
 
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.impl.client.HttpClientBuilder
-import org.olf.okapi.modules.directory.ServiceAccount
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.grails.databinding.xml.GPathResultMap;
+import org.olf.okapi.modules.directory.ServiceAccount;
+import org.olf.rs.referenceData.Settings;
+import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
-import groovy.xml.StreamingMarkupBuilder
-import groovyx.net.http.*
-
-
+import groovy.xml.StreamingMarkupBuilder;
+import groovyx.net.http.*;
 
 /**
  * Allow callers to request that a protocol message be sent to a remote (Or local) service. Callers
@@ -23,11 +24,68 @@ class ProtocolMessageService {
 
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   EventPublicationService eventPublicationService
+  SettingsService settingsService;
   def grailsApplication
 
   // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
   // later on
-  private static int MAX_HTTP_TIME = 10 * 1000;
+  private static int DEFAULT_TIMEOUT_PERIOD = 30;
+
+    /** The separator for the protocol id to may include to separate the id from the rota position */
+    private static String REQUESTER_ID_SEPARATOR = '~';
+    private static int REQUESTER_ID_SEPARATOR_LENGTH = REQUESTER_ID_SEPARATOR.length();
+
+    /**
+     * Extracts the id of the request from the protocol id
+     * @param protocolId The supplied protocol id
+     * @return null if it could not extract the id otherwise the id
+     */
+    public String extractIdFromProtocolId(String protocolId) {
+        String id = protocolId;
+        if (id != null) {
+            // The id may contains the id and rota position
+            int separatorPosition = id.indexOf(REQUESTER_ID_SEPARATOR);
+            if (separatorPosition > 0) {
+                // We found a separator so remove it and everything after it
+                id = id.substring(0, separatorPosition);
+            }
+        }
+    }
+
+    /**
+     * Attempts to extract the rota position from the protocol id
+     * @param protocolId The protocol id we have been supplied with
+     * @return a value less than 0 if a rota position was not found, otherwise the rota position
+     */
+    public long extractRotaPositionFromProtocolId(String protocolId) {
+        long rotaPosition = -1;
+        if (protocolId != null) {
+            // The id may contains the id and rota position
+            int separatorPosition = protocolId.indexOf(REQUESTER_ID_SEPARATOR);
+            if (separatorPosition > 0) {
+                // We found a separator so just take everything after it
+                String rotaPositionAsString = protocolId.substring(separatorPosition + REQUESTER_ID_SEPARATOR_LENGTH);
+
+                // Now turn it into an int
+                try {
+                    rotaPosition = rotaPositionAsString.toLong();
+                } catch (Exception e) {
+                    // We will ignore all exceptions as it wasn't a string for some reason
+                    log.error('Error converting ' + rotaPositionAsString + ' into a rota position from id ' + protocolId);
+                }
+            }
+        }
+        return(rotaPosition);
+    }
+
+    /**
+     * Builds the protocol id from the request
+     * @param request The request we want to build the protocol id from
+     * @return The protocol id
+     */
+    public String buildProtocolId(PatronRequest request) {
+        return((request.hrid ?: request.id) + REQUESTER_ID_SEPARATOR + request.rotaPosition.toString());
+    }
 
   /**
    * @param eventData : A map structured as followed
@@ -51,6 +109,7 @@ class ProtocolMessageService {
   public Map sendProtocolMessage(String message_sender_symbol, String peer_symbol, Map eventData) {
 
     Map result = [:]
+    Map auditMap = initialiseAuditMap(message_sender_symbol, peer_symbol, eventData);
 
     def responseConfirmed = messageConfirmation(eventData, "request")
     log.debug("sendProtocolMessage called for ${message_sender_symbol}, ${peer_symbol},${eventData}");
@@ -95,8 +154,8 @@ class ProtocolMessageService {
           }
         }
       }
-      sendISO18626Message(eventData, serviceAddress, additional_headers)
-      result.status = ProtocolResultStatus.Sent;
+      result.response = sendISO18626Message(eventData, serviceAddress, additional_headers, auditMap)
+      result.status = (result.response.messageStatus == EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR) ? ProtocolResultStatus.ProtocolError : ProtocolResultStatus.Sent;
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
         if ((e.cause != null) && (e.cause instanceof java.net.SocketTimeoutException)) {
@@ -239,23 +298,26 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
-  def sendISO18626Message(Map eventData, String address, Map additionalHeaders=[:]) {
+  Map sendISO18626Message(Map eventData, String address, Map additionalHeaders = [ : ], Map auditMap = [ : ]) {
 
+    Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ];
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 
     if ( address != null ) {
+      // It is stored as seconds in the settings, so need to multiply by 1000
+      int timeoutPeriod = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_TIMEOUT_PERIOD, DEFAULT_TIMEOUT_PERIOD, false) * 1000;
 
       HttpBuilder http_client = ApacheHttpBuilder.configure {
-      // HttpBuilder http_client = configure {
+        // HttpBuilder http_client = configure {
 
         client.clientCustomizer { HttpClientBuilder builder ->
           RequestConfig.Builder requestBuilder = RequestConfig.custom()
-          requestBuilder.connectTimeout = MAX_HTTP_TIME;
-          requestBuilder.connectionRequestTimeout = MAX_HTTP_TIME;
-          requestBuilder.socketTimeout = MAX_HTTP_TIME;
+          requestBuilder.connectTimeout = timeoutPeriod;
+          requestBuilder.connectionRequestTimeout = timeoutPeriod;
+          requestBuilder.socketTimeout = timeoutPeriod;
           builder.defaultRequestConfig = requestBuilder.build()
         }
 
@@ -267,18 +329,55 @@ and sa.service.businessFunction.value=:ill
         }
       }
 
+      Date transactionStarted = new Date();
       def iso18626_response = http_client.post {
         request.body = message
 
         response.failure { FromServer fs ->
+          logMessageAudit(transactionStarted, new Date(), address, fs.getStatusCode(), message, auditMap);
           log.error("Got failure response from remote ISO18626 site (${address}): ${fs.getStatusCode()} ${fs}");
           throw new RuntimeException("Failure response from remote ISO18626 service (${address}): ${fs.getStatusCode()} ${fs}");
         }
 
-        response.success { FromServer fs ->
+        response.success { FromServer fs, xml ->
+          logMessageAudit(transactionStarted, new Date(), address, fs.getStatusCode(), message, auditMap);
           log.debug("Got OK response: ${fs}");
+          if (xml == null) {
+              // We did not get an xml response
+              result.messageStatus = EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR;
+              result.errorData = EventISO18626IncomingAbstractService.ERROR_TYPE_NO_XML_SUPPLIED;
+              result.rawData = fs.toString();
+          } else {
+              GPathResultMap iso18626Response = new GPathResultMap(xml);
+              GPathResultMap responseNode = null
+              if (iso18626Response.requestConfirmation != null) {
+                  // We have a response to a request
+                  responseNode = iso18626Response.requestConfirmation;
+              } else if (iso18626Response.supplyingAgencyMessageConfirmation != null) {
+                  // We have response to a supplier message
+                  responseNode = iso18626Response.supplyingAgencyMessageConfirmation;
+              } else if (iso18626Response.requestingAgencyMessageConfirmation != null) {
+                  // We have a response to a requester message
+                  responseNode = iso18626Response.requestingAgencyMessageConfirmation;
+              }
+
+              // Did we find a response
+              if ((responseNode == null) || (responseNode?.confirmationHeader?.messageStatus == null)) {
+                  // We did mot, so mark it as an error
+                  result.messageStatus = EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR;
+                  result.errorData = EventISO18626IncomingAbstractService.ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE;
+              } else {
+                  // We did so pull back the status and any error data
+                  result.messageStatus = responseNode.confirmationHeader.messageStatus;
+                  result.errorData = responseNode.confirmationHeader.errorData;
+              }
+
+              // Pass back the raw xml, just in case the caller wants to do anything with it
+              result.rawData = groovy.xml.XmlUtil.serialize(xml);
+          }
         }
       }
+
 
       log.debug("Got response message: ${iso18626_response}");
     }
@@ -286,6 +385,35 @@ and sa.service.businessFunction.value=:ill
       log.error("No address for message recipient");
       throw new RuntimeException("No address given for sendISO18626Message. messageData: ${eventData}");
     }
+    return(result);
+  }
+
+  private Map initialiseAuditMap(String senderSymbol, String receiverSymbol, Map eventData) {
+      return([
+          senderSymbol: senderSymbol,
+          receiverSymbol: receiverSymbol,
+          messageType: eventData.messageType,
+          action: ((eventData.messageInfo?.reasonForMessage == null) ?
+                      ((eventData.activeSection?.action == null) ? '' : eventData.activeSection.action) :
+                      eventData.messageInfo.reasonForMessage)
+      ]);
+  }
+
+  private void logMessageAudit(Date timeStarted, Date timeEnded, String address, Integer result, String message, Map auditMap) {
+      String[] messageParts = [
+          'ProtocolMessageAudit',
+          auditMap.messageType,
+          auditMap.action,
+          auditMap.senderSymbol,
+          auditMap.receiverSymbol,
+          result.toString(),
+          timeStarted.toString(),
+          timeEnded.toString(),
+          (timeEnded.getTime() - timeStarted.getTime()).toString(),
+          address,
+          message.length().toString()
+      ]
+      log.info(messageParts.join(','));
   }
 
   void exec ( def del, Closure c ) {

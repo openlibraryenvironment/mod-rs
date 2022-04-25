@@ -1,10 +1,7 @@
 package org.olf.rs;
 
-import groovy.lang.Closure
-import org.olf.rs.PatronRequest
-import org.olf.okapi.modules.directory.Symbol
 import java.text.SimpleDateFormat
-import groovy.util.logging.Slf4j
+
 import groovy.xml.StreamingMarkupBuilder
 
 
@@ -14,7 +11,7 @@ class ConfirmationMessageService {
   public def confirmationMessageReadable(def confirmationMessage, boolean add_prolog = false) {
     StringWriter sw = new StringWriter();
 
-    if ( add_prolog ) 
+    if ( add_prolog )
       sw << '<?xml version="1.0" encoding="utf-8"?>'
 
     sw << new StreamingMarkupBuilder().bind (confirmationMessage)
@@ -33,7 +30,7 @@ class ConfirmationMessageService {
                         'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
                         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                         'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
-          
+
           switch (req_result.messageType) {
             // The main difference is which heading the confirmation body comes under
             case "REQUEST":
@@ -76,7 +73,7 @@ class ConfirmationMessageService {
         requestingAgencyRequestId(req_result.reqId)
         timestampReceived(req_result.timeRec)
         messageStatus(req_result.status)
-        if (req_result.status != "OK") {
+        if (req_result.errorType != null) {
           errorData {
             errorType(req_result.errorType)
             errorValue(req_result.errorValue)
@@ -95,7 +92,7 @@ class ConfirmationMessageService {
   // Clever bit of wizardry to allow us to inject the calling class into the builder
   void exec ( def del, Closure c ) {
     c.rehydrate(del, c.owner, c.thisObject)()
-  } 
+  }
 }
 
-  
+

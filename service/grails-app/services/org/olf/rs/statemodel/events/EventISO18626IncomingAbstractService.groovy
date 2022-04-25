@@ -19,6 +19,10 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String STATUS_ERROR = 'ERROR';
     public static final String STATUS_OK    = 'OK';
 
+    // A couple of additional status we use internally when we get an HTTP OK response
+    public static final String STATUS_PROTOCOL_ERROR = 'PROTOCOL_ERROR';
+
+    // ISO18626 Error codes
     public static final String ERROR_TYPE_BADLY_FORMED_MESSAGE   = 'BadlyFormedMessage';
     public static final String ERROR_TYPE_INVALID_CANCEL_VALUE   = 'InvalidCancelValue';
     public static final String ERROR_TYPE_NO_ACTION              = 'ActionNotSupplied';
@@ -27,6 +31,11 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST = 'UnableToFindRequest';
     public static final String ERROR_TYPE_UNABLE_TO_PROCESS      = 'UnableToProcess';
 
+    // Errors that we have added when we have received an OK response
+    public static final String ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE = 'NoConfirmationElementInResponse';
+    public static final String ERROR_TYPE_NO_ERROR                            = 'NoError';
+    public static final String ERROR_TYPE_NO_XML_SUPPLIED                     = 'NoXMLSupplied';
+
     // The actions, I assume these are only applicable for receiving by the responder
     public static final String ACTION_CANCEL          = 'Cancel';
     public static final String ACTION_NOTIFICATION    = 'Notification';
@@ -34,7 +43,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String ACTION_RENEW           = 'Renew';          // Not yet implemented
     public static final String ACTION_SHIPPED_FORWARD = 'ShippedForward'; // Not yet implemented
     public static final String ACTION_SHIPPED_RETURN  = 'ShippedReturn';
-    public static final String ACTION_STATUS_REQUEST  = 'StatusRequest';  // Not yet implemented
+    public static final String ACTION_STATUS_REQUEST  = 'StatusRequest';
 
     // The message reasons, only applicable for receiving by a requester
     public static final String MESSAGE_REASON_CANCEL_RESPONSE         = 'CancelResponse';
@@ -185,7 +194,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
         if (errorType != null) {
             data.errorType = errorType;
             if (errorValue != null) {
-                data.errorValue = errorType;
+                data.errorValue = errorValue;
             }
         }
 
