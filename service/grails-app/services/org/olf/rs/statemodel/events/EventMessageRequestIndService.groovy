@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolMessageBuildingService;
+import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SharedIndexService
 import org.olf.rs.statemodel.AbstractEvent;
@@ -24,6 +25,7 @@ import groovy.util.logging.Slf4j
 public class EventMessageRequestIndService extends AbstractEvent {
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
+    ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
 
@@ -166,7 +168,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
             // able to use that for our request.
-            pr.hrid = header.requestingAgencyRequestId;
+            pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
 
             if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {
                 log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");

@@ -5,9 +5,7 @@ import java.util.regex.Matcher;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
-import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.RequestVolume;
-import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
@@ -17,11 +15,9 @@ import org.olf.rs.statemodel.Status;
  * @author Chas
  *
  */
-public abstract class ActionISO18626RequesterService extends AbstractAction {
+public abstract class ActionISO18626RequesterService extends ActionISO18626Service {
 
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
-
-    ProtocolMessageBuildingService protocolMessageBuildingService;
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {

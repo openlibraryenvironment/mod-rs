@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.events;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
@@ -11,6 +12,8 @@ import org.olf.rs.statemodel.Events;
  */
 public class EventISO18626IncomingRequesterService extends EventISO18626IncomingAbstractService {
 
+    ProtocolMessageService protocolMessageService;
+
     @Override
     public String name() {
         return(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION);
@@ -18,7 +21,8 @@ public class EventISO18626IncomingRequesterService extends EventISO18626Incoming
 
     @Override
     public String getRequestId(Map eventData) {
-        return(eventData.header?.requestingAgencyRequestId);
+        // We need to remove the rota position from it
+        return(protocolMessageService.extractIdFromProtocolId(eventData.header?.requestingAgencyRequestId));
     }
 
     @Override

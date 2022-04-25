@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.patronstore.PatronStoreActions;
+import org.olf.rs.referenceData.Settings;
 import org.olf.rs.statemodel.Status;
 
 import groovy.json.JsonBuilder;
@@ -28,14 +29,13 @@ public class ReshareActionService {
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND   = 'Unable to send protocol message (';
     private static final String PROTOCOL_ERROR_UNABLE_TO_SEND_1 = ')';
 
-    private static DEFAULT_DELAY_PERIOD = new Duration(0, 0, 10, 0, 0);
-
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     ProtocolMessageService protocolMessageService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     HostLMSService hostLMSService;
     PatronNoticeService patronNoticeService;
     PatronStoreService patronStoreService;
+    SettingsService settingsService;
 
     /**
      * Looks up a patron identifier to see if it is valid for requesting or not
@@ -97,6 +97,7 @@ public class ReshareActionService {
 
         // Let the caller know the patron details
         result.patronDetails = patronDetails;
+
         return(result);
     }
 
@@ -222,26 +223,30 @@ public class ReshareActionService {
         } else if (pr.rota.empty()) {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
-            String messageSenderSymbol = pr.requestingInstitutionSymbol;
-
-            log.debug("ROTA: ${pr.rota}")
-            log.debug("ROTA TYPE: ${pr.rota.getClass()}");
-            PatronRequestRota prr = pr.rota.find({ rotaLocation -> rotaLocation.rotaPosition == rotaPosition });
-            log.debug("ROTA at position ${pr.rotaPosition}: ${prr}");
-            String peerSymbol = "${prr.peerSymbol.authority.symbol}:${prr.peerSymbol.symbol}";
 
             Map eventData = retryEventData;
+            Map symbols = requestingAgencyMessageSymbol(pr);
 
             // If we have not been supplied with the event data, we need to generate it
             if (eventData == null) {
                 String note = messageParams?.note
-                eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, messageSenderSymbol, peerSymbol, action, note);
+                eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, symbols.senderSymbol, symbols.receivingSymbol, action, note);
             }
 
             // Now send the message
-            result = sendProtocolMessage(pr, messageSenderSymbol, peerSymbol, eventData, false);
+            result = sendProtocolMessage(pr, symbols.senderSymbol, symbols.receivingSymbol, eventData, false);
         }
         return result;
+    }
+
+    public Map requestingAgencyMessageSymbol(PatronRequest request) {
+        Map symbols = [ senderSymbol: request.requestingInstitutionSymbol ];
+
+        PatronRequestRota patronRota = request.rota.find({ rotaLocation -> rotaLocation.rotaPosition == request.rotaPosition });
+        if (patronRota != null) {
+            symbols.receivingSymbol = "${patronRota.peerSymbol.authority.symbol}:${patronRota.peerSymbol.symbol}".toString();
+        }
+        return(symbols);
     }
 
     public boolean sendProtocolMessage(PatronRequest request, String sendingSymbol, String receivingSymbol, Map eventData, boolean resetSendAttempts = true) {
@@ -261,42 +266,90 @@ public class ReshareActionService {
         Map sendResult  = protocolMessageService.sendProtocolMessage(sendingSymbol, receivingSymbol, eventData);
         switch (sendResult.status) {
             case ProtocolResultStatus.Sent:
+                // TODO: Need to take into account a status of ERROR being returned in the protocol message, this assumed everything was received and processed without problems at the moment
                 // Mark, it as sent, no longer need the eventData
-                setNetworkStatus(request, NetworkStatus.Sent, null);
+                setNetworkStatus(request, NetworkStatus.Sent, null, false);
                 result = true;
                 break;
 
             case ProtocolResultStatus.Timeout:
                 // Mark it down to a timeout, need to save the event data for a potential retry
-                setNetworkStatus(request, NetworkStatus.Timeout, eventData, DEFAULT_DELAY_PERIOD);
-                log.warn('Hit a timeout trying to send protocol message: ' + sendResult);
+                setNetworkStatus(request, NetworkStatus.Timeout, eventData, true);
+                auditEntry(request, request.state, request.state, 'Encountered a network timeout while trying to send a message', null);
+                log.warn('Hit a timeout trying to send protocol message: ' + sendResult.toString());
                 break;
 
             case ProtocolResultStatus.Error:
                 // Mark it as a retry, need to save the event data
-                setNetworkStatus(request, NetworkStatus.Retry, eventData, DEFAULT_DELAY_PERIOD);
-                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
+                setNetworkStatus(request, NetworkStatus.Retry, eventData, true);
+                auditEntry(request, request.state, request.state, 'Encountered a network error while trying to send message', null);
+                log.warn(PROTOCOL_ERROR_UNABLE_TO_SEND + sendResult.toString() + PROTOCOL_ERROR_UNABLE_TO_SEND_1);
+                break;
+
+            case ProtocolResultStatus.ProtocolError:
+                log.error('Encountered a protocol error for request: ' + request.id);
+                setNetworkStatus(request, NetworkStatus.Error, eventData, false);
+                auditEntry(request, request.state, request.state, 'Protocol error interpreting response', sendResult.response);
+                // Should we set the status to error as it now requires manual intervention ?
                 break;
         }
 
         return(result);
     }
 
-    private void setNetworkStatus(PatronRequest request, NetworkStatus networkStatus, Map eventData, Duration delayPeriod) {
+    /**
+     * Sets the network status for the request, along with the next processing time if required
+     * @param request The request that needs to be updated
+     * @param networkStatus The network status to set it to
+     * @param eventData The event data used to generate the protocol message
+     * @param retry Whether we are going to retry or not
+     */
+    public void setNetworkStatus(PatronRequest request, NetworkStatus networkStatus, Map eventData, boolean retry) {
         // Set the network status
         request.networkStatus = networkStatus;
 
         // Set when we retry
-        if (delayPeriod == null) {
-            // No delay period supplied
-            // No retyr required
-            request.nextSendAttempt = null;
-        } else {
-            // We have been supplied a delay period
-            request.nextSendAttempt = delayPeriod.plus(new Date());
+        if (retry) {
+            // Retry required, so we need to increment the number of send attempts
+            if (request.numberOfSendAttempts == null) {
+                request.numberOfSendAttempts = 1;
+            } else {
+                request.numberOfSendAttempts++;
+            }
 
-            // So we need to increment the number of resend attempts
-            request.numberOfSendAttempts++;
+            // Have we reached the maximum number of retries
+            int maxSendAttempts = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, 0, false);
+
+            // Have we reached our maximum number
+            if ((maxSendAttempts > 0) && (request.numberOfSendAttempts > maxSendAttempts)) {
+                // We have so decrement our number of attempts as we have already incremented it
+                request.numberOfSendAttempts--;
+
+                // set the retry period to null
+                request.nextSendAttempt = null;
+
+                // Set the network status to error
+                request.networkStatus = NetworkStatus.Error;
+
+                // TODO: Should we set the status at this point to something like network error and introduce a new action ReSend to allow the user to recover ...
+
+                // Finally add an audit record to say what we have done
+                auditEntry(request, request.state, request.state, 'Maximum number of send attempts reached, setting network status to Error', null);
+            } else {
+                // We want to retry, get hold of the retry period
+                int retryMinutes = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_RETRY_PERIOD, 10, false);
+
+                // We have a multiplier to the retry minutes based on the number of times we have attempted to send it
+                // At a minimum the number of send attempts should be 1 (only includes those we have attempted and not the one we are about to do)
+                int retryMultiplier =  (int)((request.numberOfSendAttempts + 5) / 6);
+
+                // Now set when the next attempt will be
+                Duration retryDuration = new Duration(0, 0, retryMinutes * retryMultiplier, 0, 0);
+                request.nextSendAttempt = retryDuration.plus(new Date());
+            }
+        } else {
+            // No retry required
+            request.nextSendAttempt = null;
         }
 
         // Set the last protocol data
@@ -360,10 +413,11 @@ public class ReshareActionService {
             }
 
             // Now send the message
+            Map symbols = supplyingAgencyMessageSymbol(pr);
             result = sendProtocolMessage(
                 pr,
-                pr.supplyingInstitutionSymbol,
-                pr.requestingInstitutionSymbol,
+                symbols.senderSymbol,
+                symbols.receivingSymbol,
                 supplyingMessageRequest,
                 false
             );
@@ -372,6 +426,13 @@ public class ReshareActionService {
         }
 
         return result;
+    }
+
+    public Map supplyingAgencyMessageSymbol(PatronRequest request) {
+        return([
+             senderSymbol: request.supplyingInstitutionSymbol,
+             receivingSymbol: request.requestingInstitutionSymbol
+        ]);
     }
 
     public void outgoingNotificationEntry(

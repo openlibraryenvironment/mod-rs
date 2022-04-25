@@ -312,6 +312,16 @@ class ProtocolMessageBuildingService {
   }
 
   /**
+   * Builds the last sequence string for our hack to determine if the message was received or not
+   * @param request The request we want the last sequence we sent from
+   * @return The last sequence sent wrapped in the appropriate format to be set in the note field
+   */
+  public String buildLastSequence(PatronRequest request) {
+      String lastSequenceSent = request.lastSequenceSent == null ? "-1" : request.lastSequenceSent.toString();
+      return(LAST_SEQUENCE_PREFIX + lastSequenceSent + SEQUENCE_WRAPPER);
+  }
+
+  /**
    * Extracts the sequence number from the note field
    * @param note The note that may contain the last sequence
    * @param sequenceRegex The regex used to obtain the sequence (group 2) and the note (group 1)
@@ -384,7 +394,7 @@ class ProtocolMessageBuildingService {
 
       // Set the requestingAgencyId and the requestingAgencyRequestId
       requestingAgencyId = buildHeaderRequestingAgencyId(message_sender_symbol)
-      requestingAgencyRequestId = pr.hrid ?: pr.id
+      requestingAgencyRequestId = protocolMessageService.buildProtocolId(pr);
 
       if (messageType == 'REQUEST') {
         // If this message is a request then the supplying Agency details get filled out later and the supplying request id is null
