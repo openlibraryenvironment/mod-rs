@@ -41,8 +41,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
 					if ( patron_request ) {
 						log.debug("Apply action ${request.JSON.action} to ${patron_request}");
-			
-						if (actionService.isValid(patron_request.isRequester, patron_request.state, request.JSON.action)) {
+
+                        // Needs to fulfil the following criteria to be valid
+                        // 1. Is a valid action for the current status of the request
+                        // 2. Request has no network activity going on
+						if (patron_request.isNetworkActivityIdle() &&
+                            actionService.isValid(patron_request.isRequester, patron_request.state, request.JSON.action)) {
 							// Perform the requested action
 							ActionResultDetails resultDetails = actionService.performAction(request.JSON.action, patron_request, request.JSON.actionParams)
 							response.status = (resultDetails.result == ActionResult.SUCCESS ? 200 : (resultDetails.result == ActionResult.INVALID_PARAMETERS ? 400 : 500));
@@ -51,11 +55,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 							response.status = 400;
 							result.message = 'A valid action was not supplied, isRequester: ' + patron_request.isRequester +
 				            	   			 ' Current state: ' + patron_request.state.code +
+                                             ', network status: ' + patron_request.networkStatus.toString() +
 											 ' Action being performed: ' + request.JSON.action;
 						    reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, result.message, null);
 							patron_request.save(flush:true, failOnError:true);
 						}
-						
+
 					} else {
 						response.status = 400;
 						result.message='Unable to lock request with id: ' + params.patronRequestId;
