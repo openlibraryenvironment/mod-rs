@@ -22,6 +22,7 @@ public class Settings {
     private static final String SECTION_CHAT                 = 'chat';
     private static final String SECTION_HOST_LMS_INTEGRATION = 'hostLMSIntegration';
     private static final String SECTION_LOCAL_NCIP           = 'localNCIP';
+    private static final String SECTION_NETWORK              = 'network';
     private static final String SECTION_PATRON_STORE         = 'patronStore';
     private static final String SECTION_PULLSLIP_TEMPLATE    = 'pullslipTemplateConfig';
     private static final String SECTION_REQUESTS             = 'requests';
@@ -100,6 +101,11 @@ public class Settings {
     // State/Action configuration settings
     public static final String SETTING_COMBINE_FILL_AND_SHIP                      = 'combine_fill_and_ship';
     public static final String SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP = 'combine_returned_by_patron_and_return_ship';
+
+    // Network configuration settings
+    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS = 'network_maximum_send_attempts';
+    public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
+    public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
     public static void loadAll() {
         (new Settings()).load();
@@ -197,6 +203,9 @@ public class Settings {
             ensureAppSetting(SETTING_COMBINE_FILL_AND_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, RefdataValue.normValue(RefdataValueData.YES_NO_NO));
             ensureAppSetting(SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, RefdataValue.normValue(RefdataValueData.YES_NO_NO));
 
+            ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '0');
+            ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');
+            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
         }

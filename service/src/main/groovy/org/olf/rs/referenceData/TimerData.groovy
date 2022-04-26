@@ -15,15 +15,24 @@ public class TimerData {
             "CheckForStaleSupplierRequests",
             "Check supplier requests have not become stale",
             "FREQ=DAILY",
-            "CheckForStaleSupplierRequests");
+            "CheckForStaleSupplierRequests"
+        );
 
         // Timer to check for requests we need to retry
         Timer.ensure(
             "RequestNetworkRetry",
-            "Retry requests every that have the network status of Retry",
+            "Retry requests that have the network status of Retry",
             "FREQ=MINUTELY;INTERVAL=10",
-            "RequestNetworkRetry");
+            "RequestNetworkRetry"
+        );
 
+        // Timer to check for requests we need to check for timeout
+        Timer.ensure(
+            "RequestNetworkTimeout",
+            "Check to see if a timeout request has been received, set it to be resent",
+            "FREQ=MINUTELY;INTERVAL=10",
+            "RequestNetworkTimeout"
+        );
 	}
 
 	public static void loadAll() {
