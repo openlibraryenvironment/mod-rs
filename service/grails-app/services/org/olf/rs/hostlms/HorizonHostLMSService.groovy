@@ -20,13 +20,13 @@ public class HorizonHostLMSService extends BaseHostLMSService {
     Map<String,ItemLocation> availability_summary = [:]
 
     opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("${hld}");
+      log.debug("Holding record: ${hld}");
       log.debug("${hld.circulations?.circulation?.availableNow}");
       log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
         log.debug("Available now");
-        def shelvingLocation = hld.shelvingLocation?.text();
-        def location = hld.localLocation?.text();
+        def shelvingLocation = hld?.shelvingLocation?.text();
+        def location = hld?.localLocation?.text();
         if(!shelvingLocation) {
           shelvingLocation = null; //No blank strings
         }
