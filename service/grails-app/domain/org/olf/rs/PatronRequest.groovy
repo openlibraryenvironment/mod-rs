@@ -495,8 +495,18 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     truncateAndLog("informationSource", informationSource)
   }
 
+  boolean isNetworkActivityIdle() {
+      // It is idle with regard to the network, if the network status is Idle, Sent or null
+      return((networkStatus == null) || (networkStatus == NetworkStatus.Idle) || (networkStatus == NetworkStatus.Sent));
+  }
+
   def getValidActions() {
-    return AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL])
+      // We only have valid actions if network activity is idle
+      if (isNetworkActivityIdle()) {
+          return(AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]));
+      } else {
+          return([]);
+      }
   }
 
   public Map getDescriptiveMetadata() {
