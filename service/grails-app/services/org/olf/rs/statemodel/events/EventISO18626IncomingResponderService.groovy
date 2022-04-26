@@ -44,6 +44,12 @@ public class EventISO18626IncomingResponderService extends EventISO18626Incoming
     }
 
     @Override
+    public boolean isForCurrentRotaLocation(Map eventData, PatronRequest request) {
+        // As a responder we only have 1 rota location so it cannot be for any other
+        return(true);
+    }
+
+    @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         return(processRequest(eventData, eventResultDetails));
     }

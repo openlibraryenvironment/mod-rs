@@ -23,18 +23,18 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String STATUS_PROTOCOL_ERROR = 'PROTOCOL_ERROR';
 
     // ISO18626 Error codes
-    public static final String ERROR_TYPE_BADLY_FORMED_MESSAGE   = 'BadlyFormedMessage';
-    public static final String ERROR_TYPE_INVALID_CANCEL_VALUE   = 'InvalidCancelValue';
-    public static final String ERROR_TYPE_NO_ACTION              = 'ActionNotSupplied';
-    public static final String ERROR_TYPE_NO_CANCEL_VALUE        = 'NoCancelValue';
-    public static final String ERROR_TYPE_NO_REASON_FOR_MESSAGE  = 'ReasonForMessageNotSupplied';
-    public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST = 'UnableToFindRequest';
-    public static final String ERROR_TYPE_UNABLE_TO_PROCESS      = 'UnableToProcess';
-
-    // Errors that we have added when we have received an OK response
+    public static final String ERROR_TYPE_BADLY_FORMED_MESSAGE                = 'BadlyFormedMessage';
+    public static final String ERROR_TYPE_INVALID_CANCEL_VALUE                = 'InvalidCancelValue';
+    public static final String ERROR_TYPE_NO_ACTION                           = 'ActionNotSupplied';
+    public static final String ERROR_TYPE_NO_ACTIVE_REQUEST                   = 'NoActiveRequest';
+    public static final String ERROR_TYPE_NO_CANCEL_VALUE                     = 'NoCancelValue';
     public static final String ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE = 'NoConfirmationElementInResponse';
     public static final String ERROR_TYPE_NO_ERROR                            = 'NoError';
+    public static final String ERROR_TYPE_NO_REASON_FOR_MESSAGE               = 'ReasonForMessageNotSupplied';
     public static final String ERROR_TYPE_NO_XML_SUPPLIED                     = 'NoXMLSupplied';
+    public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST              = 'UnableToFindRequest';
+    public static final String ERROR_TYPE_UNABLE_TO_PROCESS                   = 'UnableToProcess';
+
 
     // The actions, I assume these are only applicable for receiving by the responder
     public static final String ACTION_CANCEL          = 'Cancel';
@@ -116,6 +116,14 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public abstract Map createResponseData(Map eventData, boolean success, String errorType, Object errorValue);
 
     /**
+     * Checks to ensure the incoming message is for the current rota location
+     * @param eventData The incoming message
+     * @param request The request we have found
+     * @return true if the message is for the current rota location
+     */
+    public abstract boolean isForCurrentRotaLocation(Map eventData, PatronRequest request);
+
+    /**
      * Processes the data received from an ISO18626 sender
      * @param eventData The message that was sent
      * @return map containing the details to be returned
@@ -155,22 +163,31 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
-                        // We now need to execute the action for the message
-                        String actionToPerform = getActionToPerform(eventData);
+                        // We need to determine if this request is for the current rota position
+                        if (isForCurrentRotaLocation(eventData, request)) {
+                            // We now need to execute the action for the message
+                            String actionToPerform = getActionToPerform(eventData);
 
-                        // Ensure we have an action
-                        if (actionToPerform == null) {
-                            // We have not been supplied an action
-                            processedSuccessfully = false;
-                            errorType = isRequester() ? ERROR_TYPE_NO_REASON_FOR_MESSAGE : ERROR_TYPE_NO_ACTION;
+                            // Ensure we have an action
+                            if (actionToPerform == null) {
+                                // We have not been supplied an action
+                                processedSuccessfully = false;
+                                errorType = isRequester() ? ERROR_TYPE_NO_REASON_FOR_MESSAGE : ERROR_TYPE_NO_ACTION;
+                            } else {
+                                // Now perform the action
+                                ActionResultDetails actionResults = actionService.performAction('ISO18626' + actionToPerform, request, eventData);
+
+                                // Deal with what we have been returned
+                                processedSuccessfully = actionResults.result == ActionResult.SUCCESS;
+                                errorType = actionResults.responseResult.errorType;
+                                errorValue = actionResults.responseResult.errorValue;
+                            }
                         } else {
-                            // Now perform the action
-                            ActionResultDetails actionResults = actionService.performAction('ISO18626' + actionToPerform, request, eventData);
-
-                            // Deal with what we have been returned
-                            processedSuccessfully = actionResults.result == ActionResult.SUCCESS;
-                            errorType = actionResults.responseResult.errorType;
-                            errorValue = actionResults.responseResult.errorValue;
+                            // We treat this as no active request
+                            processedSuccessfully = false;
+                            errorType = ERROR_TYPE_NO_ACTIVE_REQUEST;
+                            errorValue = 'requestingAgencyRequestId: ' + eventData.header?.requestingAgencyRequestId +
+                                         ', supplyingAgencyRequestId: ' + eventData.header?.supplyingAgencyRequestId;
                         }
                     }
                 }
@@ -179,7 +196,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
             // Just let the caller know we were unable to process it
             processedSuccessfully = false;
             errorType = ERROR_TYPE_UNABLE_TO_PROCESS;
-            log.error('Exceptiont thrown which processing ISO18626 message', e);
+            log.error('Exception thrown while processing ISO18626 message', e);
         }
 
         // Build up the response
