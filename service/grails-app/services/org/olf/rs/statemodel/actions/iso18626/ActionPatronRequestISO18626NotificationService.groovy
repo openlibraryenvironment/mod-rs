@@ -39,7 +39,7 @@ public class ActionPatronRequestISO18626NotificationService extends ActionISO186
         // Only continue if successful
         if (actionResultDetails.result == ActionResult.SUCCESS) {
             // Add an audit entry
-            actionResultDetails.auditMessage = "Notification message received from supplying agency: ${parameters.messageInfo.note}";
+            actionResultDetails.auditMessage = "Notification message received from supplying agency: ${protocolMessageBuildingService.extractSequenceFromNote(parameters.messageInfo?.note).note}";
         }
 
         // Now return the results to the caller
