@@ -20,6 +20,10 @@ jobs:
         run: |
           cd tools/testing
           docker-compose up -d
+      - name: Inject github build number
+        run: |
+          # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
+          echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
         with:
@@ -38,15 +42,15 @@ jobs:
       - name: Pre build info
         run: echo "ref:${{github.REF}} name:${{env.module_name}} ver:${{env.module_version}} is_snapshot:${{env.is_snapshot}}"
       - name: Docker Build
-        run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} .
+        run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }} .
       - if: env.is_snapshot == '1'
         name: Publish to snapshot
         run: |
           echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
-          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
-          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
-          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
           docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
         env:
           dockerRepo: docker.libsdev.k-int.com
@@ -55,14 +59,16 @@ jobs:
         run: |
           echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
-          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
-          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
-          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
           docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
         env:
           dockerRepo: docker.libsdev.k-int.com
-   
-          
+      - name: Publish Descriptor
+        run: |
+          echo Post to public registry
+          curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
 
 # Folio Docker image publishing
 # Snapshots to 
