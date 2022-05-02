@@ -42,7 +42,7 @@ jobs:
       - name: Pre build info
         run: echo "ref:${{github.REF}} name:${{env.module_name}} ver:${{env.module_version}} is_snapshot:${{env.is_snapshot}}"
       - name: Docker Build
-        run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }}
+        run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }} .
       - if: env.is_snapshot == '1'
         name: Publish to snapshot
         run: |
