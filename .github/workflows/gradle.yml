@@ -19,6 +19,7 @@ jobs:
       - name: Start containers
         run: |
           cd tools/testing
+          docker-compose down -v
           docker-compose up -d
       - name: Inject github build number
         run: |
