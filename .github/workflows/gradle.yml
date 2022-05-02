@@ -1,29 +1,69 @@
-name: Grails CI
+name: Build mod-rs
+
 on:
   push:
-    branches:
-      - master 
-  pull_request:
-    branches:
-      - master 
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./service
+
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
-      - uses: actions/cache@v1 
-        with:
-          path: ~/.gradle/caches  
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }} 
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Start containers
+        run: |
+          cd tools/testing
+          docker-compose up -d
       - name: Build with Gradle
-        run: ./gradlew clean build -x integrationTest
+        uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+        with:
+          arguments: build
+          build-root-directory: service
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "service/build/test-results/**/*.xml"
+      - name: Prepare env for docker build
+        run: | 
+          echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
+          echo "module_version=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
+          echo "is_snapshot=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | grep -i SNAPSHOT | wc -l)" >> $GITHUB_ENV
+      - name: Pre build info
+        run: echo "ref:${{github.REF}} name:${{env.module_name}} ver:${{env.module_version}} is_snapshot:${{env.is_snapshot}}"
+      - name: Docker Build
+        run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} .
+      - if: env.is_snapshot == '1'
+        name: Publish to snapshot
+        run: |
+          echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
+          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
+        env:
+          dockerRepo: docker.libsdev.k-int.com
+      - if: env.is_snapshot == '0'
+        name: Publish to release
+        run: |
+          echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
+          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker tag ${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}-${{ github.run_id }}
+          docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
+        env:
+          dockerRepo: docker.libsdev.k-int.com
+   
+          
+
+# Folio Docker image publishing
+# Snapshots to 
+# Releases to https://hub.docker.com/u/folioorg
