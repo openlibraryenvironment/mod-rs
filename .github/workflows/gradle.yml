@@ -35,6 +35,8 @@ jobs:
           echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
           echo "module_version=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
           echo "is_snapshot=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | grep -i SNAPSHOT | wc -l)" >> $GITHUB_ENV
+          # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
+          echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
       - name: Pre build info
         run: echo "ref:${{github.REF}} name:${{env.module_name}} ver:${{env.module_version}} is_snapshot:${{env.is_snapshot}}"
       - name: Docker Build
@@ -61,8 +63,10 @@ jobs:
           docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
         env:
           dockerRepo: docker.libsdev.k-int.com
-   
-          
+      - name: Publish Descriptor
+        run: |
+          echo Post to public registry
+          curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
 
 # Folio Docker image publishing
 # Snapshots to 
