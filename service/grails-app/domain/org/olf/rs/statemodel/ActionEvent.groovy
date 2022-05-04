@@ -49,17 +49,27 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         if (actionEvent == null) {
             // No we did not, so create a new one
             actionEvent = new ActionEvent (
-                code: code,
-                description: description,
-                isAction: isAction,
-                resultList: resultList
+                code: code
             );
-
-            // and save it
-            actionEvent.save(flush:true, failOnError:true);
         }
 
+        // Just update the other fields as something may have changed
+        actionEvent.description = description;
+        actionEvent.isAction = isAction;
+        actionEvent.resultList = resultList;
+
+        // and save it
+        actionEvent.save(flush:true, failOnError:true);
+
         // Return the actionEvent to the caller
+        return(actionEvent);
+    }
+
+    public static ActionEvent lookup(String code) {
+        ActionEvent actionEvent = null;
+        if (code != null) {
+            actionEvent = findByCode(code);
+        }
         return(actionEvent);
     }
 }

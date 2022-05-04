@@ -3,12 +3,17 @@ package org.olf.rs.statemodel;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 
+import grails.util.Holders;
+
 /**
  * Checks the incoming action to ensure it is valid and dispatches it to the appropriate service
  */
 public class ActionService {
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+
+    /** Holds map of the action to the bean that will do the processing for this action */
+    private Map serviceActions = [ : ];
 
     /**
      * Checks whether an action being performed is valid
@@ -32,9 +37,34 @@ public class ActionService {
                     // Now is this a valid action for this state
                     isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
                 }
-                }
+            }
         }
         return(isValid);
+    }
+
+    /**
+     * Obtains an instance of the service that will perform the requested action
+     * @param actionCode The action that is to be performed
+     * @param isRequester Whether it is for the requester or responder
+     * @return The instance of the service that will perform the action
+     */
+    public AbstractAction getServiceAction(String actionCode, boolean isRequester) {
+        // Get gold of the state model
+        StateModel stateModel = StateModel.getStateModel(isRequester);
+
+        // Determine the bean name, if we had a separate action table we could store it as a transient against that
+        String beanName = "action" + stateModel.shortcode.capitalize() + actionCode.capitalize() + "Service";
+
+        // Get hold of the bean and store it in our map, if we previously havn't been through here
+        if (serviceActions[beanName] == null) {
+            // Now setup the link to the service action that actually does the work
+            try {
+                serviceActions[beanName] = Holders.grailsApplication.mainContext.getBean(beanName);
+            } catch (Exception e) {
+                log.error("Unable to locate action bean: " + beanName);
+            }
+        }
+        return(serviceActions[beanName]);
     }
 
     /**
@@ -55,7 +85,7 @@ public class ActionService {
         resultDetails.auditData = parameters;
 
         // Get hold of the action
-        AbstractAction actionBean = AvailableAction.getServiceAction(action, request.isRequester);
+        AbstractAction actionBean = getServiceAction(action, request.isRequester);
         if (actionBean == null) {
             resultDetails.result = ActionResult.ERROR;
             resultDetails.auditMessage = 'Failed to find class for action: ' + action;

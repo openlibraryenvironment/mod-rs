@@ -6,14 +6,14 @@ import org.olf.rs.statemodel.Status;
 import groovy.util.logging.Slf4j
 
 /**
- * This service works at the module level, it's often called without a tenant context.
+ * Loads the Status data required for the system to process requests
  */
 @Slf4j
 public class StatusData {
 
 	public void load() {
-		log.info("Adding naming authorities to the database");
-		
+		log.info("Adding status records to the database");
+
         // Requester / Borrower State Model
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, '0005', true, true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED, '0010', true);
@@ -66,7 +66,7 @@ public class StatusData {
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_ERROR, '9999', true, true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE, '9997', true);
 	}
-	
+
 	public static void loadAll() {
 		(new StatusData()).load();
 	}

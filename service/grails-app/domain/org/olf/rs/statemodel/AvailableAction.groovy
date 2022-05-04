@@ -1,15 +1,11 @@
 package org.olf.rs.statemodel
 
-import org.apache.commons.logging.LogFactory;
-
 import grails.gorm.MultiTenant;
-import grails.util.Holders;
 
 /**
  *
  */
 class AvailableAction implements MultiTenant<AvailableAction> {
-    private static final logger = LogFactory.getLog(this);
 
     /** Query which returns all the states than an action may come from */
     private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
@@ -36,9 +32,6 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     /** The default set of results to use for this action / event */
     ActionEventResultList resultList;
 
-    /** Holds map of the action to the bean that will do the processing for this action */
-    private static Map serviceActions = [ : ];
-
     static constraints = {
               model (nullable: false)
           fromState (nullable: false)
@@ -63,44 +56,32 @@ class AvailableAction implements MultiTenant<AvailableAction> {
          resultList column : 'aa_result_list'
     }
 
-    public static AvailableAction ensure(String model, String state, String action, String triggerType=null, String actionType=null, String actionBody=null) {
+    public static AvailableAction ensure(String model, String state, String action, String triggerType, String resultListCode = null) {
 
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
             Status s = Status.findByOwnerAndCode(sm, state);
             if (s) {
-                result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action) ?:
-                    new AvailableAction(
-                        model:sm,
-                        fromState:s,
-                        actionCode:action,
-                        triggerType: triggerType,
-                        actionType: actionType,
-                        actionBody: actionBody).save(flush:true, failOnError:true);
+                result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action);
+                if (result == null) {
+                    // We didn't find it, so create a new one
+                    result = new AvailableAction(
+                        model: sm,
+                        fromState: s,
+                        actionCode: action
+                    );
+                }
+
+                // Update the other fields in case they have changed
+                result.actionEvent = ActionEvent.lookup(action);
+                result.triggerType = triggerType;
+                result.resultList = ActionEventResultList.lookup(resultListCode);
+                result.save(flush:true, failOnError:true);
             }
         }
         return result;
     }
-
-  	public static AbstractAction getServiceAction(String actionCode, boolean isRequester) {
-		// Get gold of the state model
-		StateModel stateModel = StateModel.getStateModel(isRequester);
-
-		// Determine the bean name, if we had a separate action table we could store it as a transient against that
-		String beanName = "action" + stateModel.shortcode.capitalize() + actionCode.capitalize() + "Service";
-
-		// Get hold of the bean and store it in our map, if we previously havn't been through here
-		if (serviceActions[beanName] == null) {
-			// Now setup the link to the service action that actually does the work
-			try {
-				serviceActions[beanName] = Holders.grailsApplication.mainContext.getBean(beanName);
-			} catch (Exception e) {
-				logger.error("Unable to locate action bean: " + beanName);
-			}
-		}
-		return(serviceActions[beanName]);
-	}
 
 	public static String[] getFromStates(String stateModel, String action, String triggerType = TRIGGER_TYPE_MANUAL) {
 		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));

@@ -6,9 +6,10 @@ import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
 import org.olf.rs.RequestVolume;
+import org.olf.rs.statemodel.ActionEventResult;
 import org.olf.rs.statemodel.ActionResultDetails;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.Actions;
+import org.olf.rs.statemodel.StatusService;
 
 /**
  * Action that deals with interpreting ISO18626 on the requester side
@@ -18,6 +19,8 @@ import org.olf.rs.statemodel.Status;
 public abstract class ActionISO18626RequesterService extends ActionISO18626Service {
 
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
+
+    StatusService statusService;
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
@@ -135,47 +138,22 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         log.debug("handleStatusChange(${request.id},${statusInfo})");
 
         if (statusInfo.status) {
-            switch (statusInfo.status) {
-                case 'ExpectToSupply':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
-                    break;
+            // Lookup what we should set the status to
+            ActionEventResult actionEventResult = statusService.findResult(request.state, Actions.ACTION_INCOMING_ISO18626, true, statusInfo.status);
 
-                case 'Unfilled':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNFILLED);
-                    break;
-
-                case 'Conditional':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED);
-                    break;
-
-                case 'Loaned':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED);
-                    break;
-
-                case 'Overdue':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_OVERDUE);
-                    break;
-
-                case 'Recalled':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_RECALLED);
-                    break;
-
-                case 'Cancelled':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER);
-                    break;
-
-                case 'LoanCompleted':
-                    actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_COMPLETE);
-                    break;
-
-                default:
-                    log.error("Unhandled statusInfo.status ${statusInfo.status}");
-                    break;
+            // Did we find a result
+            if (actionEventResult != null) {
+                // Is the status set on it
+                if (actionEventResult.status != null) {
+                    // It is so we will change to this state
+                    actionResultDetails.newStatus = actionEventResult.status;
+                }
             }
 
             // Get the rota entry for the current peer
             PatronRequestRota prr = request.rota.find({ rotaEntry -> rotaEntry.rotaPosition == request.rotaPosition });
             if (prr != null) {
+                // Why are we holding the state at the rota level ?
                 prr.state = actionResultDetails.newStatus;
             }
         }

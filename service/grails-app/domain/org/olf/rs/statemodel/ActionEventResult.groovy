@@ -64,18 +64,20 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         if (actionEventResult == null) {
             // No we did not, so create a new one
             actionEventResult = new ActionEventResult (
-                code: code,
-                description: description,
-                result: result,
-                qualifier: qualifier,
-                status: status,
-                saveRestoreState: saveRestoreState,
-                nextAactionEvent: nextAactionEvent
+                code: code
             );
-
-            // and save it
-            actionEventResult.save(flush:true, failOnError:true);
         }
+
+        // They may have changed something
+        actionEventResult.description = description;
+        actionEventResult.result = result;
+        actionEventResult.qualifier = qualifier;
+        actionEventResult.status = status;
+        actionEventResult.saveRestoreState = saveRestoreState;
+        actionEventResult.nextAactionEvent = nextAactionEvent;
+
+        // and save it
+        actionEventResult.save(flush:true, failOnError:true);
 
         // Return the result to the caller
         return(actionEventResult);

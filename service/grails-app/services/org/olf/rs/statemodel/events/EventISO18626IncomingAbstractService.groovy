@@ -199,6 +199,11 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
             log.error('Exception thrown while processing ISO18626 message', e);
         }
 
+        // Log our response to processing this message
+        log.info('Processed incoming ISO-18626 message, result: ' +  (processedSuccessfully ? 'OK' : 'ERROR') +
+                 ((errorType == null) ? '' : (', Error Type: ' + errorType)) +
+                 ((errorValue == null) ? '' : (', Error Value: ' + errorValue.toString())));
+
         // Build up the response
         eventResultDetails.responseResult = createResponseData(eventData, processedSuccessfully, errorType, errorValue);
         return(eventResultDetails);
