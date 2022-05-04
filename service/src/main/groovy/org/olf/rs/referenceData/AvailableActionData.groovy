@@ -1,5 +1,6 @@
 package org.olf.rs.referenceData
 
+import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
@@ -43,7 +44,7 @@ public class AvailableActionData {
                 log.error("Unable to delete action ${actionToRemove} - ${e.message}", e);
             }
         }
-        
+
         // The comments below are to make it easier to parse this file of statics
         // for a given state from the model OR frontend translation (May drift out of date)
 
@@ -67,7 +68,7 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL)
-        
+
         // RES_CANCEL_REQUEST_RECEIVED OR "Cancel request received"
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
@@ -122,7 +123,7 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_BORROWER_CHECK, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
-        
+
         // REQ_INVALID_PATRON OR "Invalid patron"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BORROWER_CHECK, AvailableAction.TRIGGER_TYPE_MANUAL)
@@ -155,11 +156,11 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
 
-        // REQ_BORROWING_LIBRARY_RECEIVED OR "Awaiting local item creation" 
+        // REQ_BORROWING_LIBRARY_RECEIVED OR "Awaiting local item creation"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL)
-        
+
         // REQ_CHECKED_IN OR "In local circulation process"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
@@ -197,5 +198,102 @@ public class AvailableActionData {
         // REQ_FILLED_LOCALLY OR "Filled locally"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_FILLED_LOCALLY, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_FILLED_LOCALLY, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL)
+
+        // These ones are for when the state is specified in the message from the responder for ISO-18626, hence trigger is system
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_BORROWER_RETURNED,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_BORROWER_RETURNED_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_BORROWING_LIBRARY_RECEIVED_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_CANCEL_PENDING,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_CHECKED_IN,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_CHECKED_IN_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_EXPECTS_TO_SUPPLY_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_OVERDUE,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_OVERDUE_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_RECALLED,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_RECALLED_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_SENT_TO_SUPPLIER_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_SHIPPED,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_SHIPPED_ISO18626
+        );
+
+        AvailableAction.ensure(
+            StateModel.MODEL_REQUESTER,
+            Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER,
+            Actions.ACTION_INCOMING_ISO18626,
+            AvailableAction.TRIGGER_TYPE_SYSTEM,
+            ActionEventResultList.REQUESTER_SHIPPED_TO_SUPPLIER_ISO18626
+        );
     }
 }

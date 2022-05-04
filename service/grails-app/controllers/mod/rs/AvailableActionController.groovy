@@ -1,7 +1,8 @@
 package mod.rs;
 
 import org.olf.rs.statemodel.AbstractAction;
-import org.olf.rs.statemodel.AbstractEvent
+import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.GraphVizBuilder;
 import org.olf.rs.statemodel.StateModel;
@@ -17,6 +18,8 @@ import groovy.util.logging.Slf4j;
 @CurrentTenant
 class AvailableActionController extends OkapiTenantAwareController<AvailableAction>  {
 
+    ActionService actionService;
+
 	AvailableActionController() {
 		super(AvailableAction)
 	}
@@ -31,7 +34,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		def result = [:]
 		if (request.method == 'GET') {
 			if (params.stateModel && params.actionCode) {
-				AbstractAction actionBean = AvailableAction.getServiceAction(params.actionCode, params.stateModel == StateModel.MODEL_REQUESTER);
+				AbstractAction actionBean = actionService.getServiceAction(params.actionCode, params.stateModel == StateModel.MODEL_REQUESTER);
 				if (actionBean == null) {
 					result.message = "Can find no class for the action " + params.actionCode + " for the state model " + params.stateModel;
 				} else {
@@ -45,7 +48,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		}
 		render result as JSON;
     }
-	
+
 	/**
 	 * Gets hold of the states an action can be called from
 	 * Example call: curl --http1.1 -sSLf -H "accept: application/json" -H "Content-type: application/json" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 30 -XGET http://localhost:8081/rs/availableAction/fromStates/Responder/respondYes
@@ -56,7 +59,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		def result = [:]
 		if (request.method == 'GET') {
 			if (params.stateModel && params.actionCode) {
-				AbstractAction actionBean = AvailableAction.getServiceAction(params.actionCode, params.stateModel == StateModel.MODEL_REQUESTER);
+				AbstractAction actionBean = actionService.getServiceAction(params.actionCode, params.stateModel == StateModel.MODEL_REQUESTER);
 				if (actionBean == null) {
 					result.message = "Can find no class for the action " + params.actionCode + " for the state model " + params.stateModel;
 				} else {
@@ -70,7 +73,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		}
 		render result as JSON;
     }
-	
+
 	/**
 	 * Builds a graph of the state models actions
 	 * Example call: curl --http1.1 -sSLf -H "accept: image/png" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/createGraph/PatronRequest?height=4000&excludeActions=requesterCancel,borrowerCheck
@@ -81,7 +84,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		// The actions and events we will build a graph for
 		List<AbstractAction> actions = new ArrayList<AbstractAction>();
 		List<AbstractEvent> events = new ArrayList<AbstractEvent>();
-		
+
 		// Determine the appropriate list of actions
 		Map<String, AbstractAction> abstractActions = Holders.grailsApplication.mainContext.getBeansOfType(AbstractAction);
 
@@ -127,10 +130,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 				height = params.height as int;
 			} catch (Exception e) {
 			}
-		}		
+		}
 		// Tell it to build the graph, it should return the dot file in the output stream
 		GraphVizBuilder.createGraph(params.stateModel, actions, events, outputStream, height);
-		
+
 		// Hopefully we have what we want in the output stream
 		outputStream.flush();
 		response.status = 200;

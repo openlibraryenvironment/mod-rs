@@ -1,5 +1,7 @@
 package org.olf.rs
 
+import org.olf.rs.referenceData.ActionEventData;
+import org.olf.rs.referenceData.ActionEventResultData;
 import org.olf.rs.referenceData.AvailableActionData;
 import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
@@ -60,7 +62,13 @@ public class HousekeepingService {
 		// The status data
 		StatusData.loadAll();
 
-		// Load the Available actions
+        // Load the action event results data, must be loaded after the Status data
+        ActionEventResultData.loadAll();
+
+        // The ActionEvent data, must be loaded after ActionEventResultData
+        ActionEventData.loadAll();
+
+		// Load the Available actions, must be loaded after ActionEventResultData and ActionEventData
 		AvailableActionData.loadAll();
 
 		// Load the counter data
