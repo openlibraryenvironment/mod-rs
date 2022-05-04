@@ -6,10 +6,7 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
-
-import com.k_int.web.toolkit.settings.AppSetting;
 
 /**
  * Action that performs the returned item action for the requester
@@ -66,7 +63,6 @@ public class ActionPatronRequestPatronReturnedItemAndShippedReturnService extend
       // At least one of our two calls failed
       if (resultDetails.result != ActionResult.SUCCESS) {
         // Failed so copy back the appropriate details so it can be diagnosed
-        actionResultDetails.responseResult = resultDetails.responseResult;
         actionResultDetails.responseResult = resultDetails.responseResult;
         actionResultDetails.result = resultDetails.result;
         actionResultDetails.auditMessage = resultDetails.auditMessage
