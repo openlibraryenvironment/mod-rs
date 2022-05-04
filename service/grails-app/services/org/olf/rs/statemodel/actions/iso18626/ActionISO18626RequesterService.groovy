@@ -147,7 +147,15 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 if (actionEventResult.status != null) {
                     // It is so we will change to this state
                     actionResultDetails.newStatus = actionEventResult.status;
+                } else {
+                    String error = 'actionEventResult status is null, so not setting for qualifier' + statusInfo.status;
+                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, error, null);
+                    log.error(error);
                 }
+            } else {
+                String error = 'No actionEventResult found for status: ' + request.state.code + ', action: ' + Actions.ACTION_INCOMING_ISO18626 + ', qualifier: ' + statusInfo.status;
+                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, error, null);
+                log.error("No actionEventResult found for status: " + request.state.code + ", action: " + Actions.ACTION_INCOMING_ISO18626 + ", qualifier: " + statusInfo.status);
             }
 
             // Get the rota entry for the current peer
