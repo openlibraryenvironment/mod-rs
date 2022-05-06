@@ -8,7 +8,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.grails.databinding.xml.GPathResultMap;
 import org.olf.okapi.modules.directory.ServiceAccount;
-import org.olf.rs.referenceData.Settings;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
 import groovy.xml.StreamingMarkupBuilder;
@@ -308,7 +308,7 @@ and sa.service.businessFunction.value=:ill
 
     if ( address != null ) {
       // It is stored as seconds in the settings, so need to multiply by 1000
-      int timeoutPeriod = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_TIMEOUT_PERIOD, DEFAULT_TIMEOUT_PERIOD, false) * 1000;
+      int timeoutPeriod = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_TIMEOUT_PERIOD, DEFAULT_TIMEOUT_PERIOD, false) * 1000;
 
       HttpBuilder http_client = ApacheHttpBuilder.configure {
         // HttpBuilder http_client = configure {

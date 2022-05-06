@@ -1,6 +1,7 @@
 package org.olf.rs.referenceData;
 
-import com.k_int.web.toolkit.refdata.RefdataValue;
+import org.olf.rs.ReferenceDataService;
+
 import com.k_int.web.toolkit.settings.AppSetting;
 
 import groovy.util.logging.Slf4j;
@@ -11,7 +12,7 @@ import groovy.util.logging.Slf4j;
  *
  */
 @Slf4j
-public class Settings {
+public class SettingsData {
 
     private static final String SETTING_TYPE_PASSWORD = 'Password';
     private static final String SETTING_TYPE_REF_DATA = 'Refdata';
@@ -108,7 +109,7 @@ public class Settings {
     public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
     public static void loadAll() {
-        (new Settings()).load();
+        (new SettingsData()).load();
     }
 
     /**
@@ -143,13 +144,16 @@ public class Settings {
     public void load() {
         try {
             log.info('Adding settings to the database');
+            // We are not a service, so we need to look it up
+            ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
+
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_NCIP_SERVER_ADDRESS, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_NCIP_FROM_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_TO_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_APP_PROFILE, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, 'EZBORROW');
-            ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, RefdataValue.normValue(RefdataValueData.NCIP_DUE_DATE_ON));
+            ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
@@ -164,16 +168,16 @@ public class Settings {
             ensureAppSetting(SETTING_BORROWER_CHECK, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_BORROWER_CHECK_METHOD);
             ensureAppSetting(SETTING_CHECK_OUT_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_OUT_METHOD);
             ensureAppSetting(SETTING_CHECK_IN_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_IN_METHOD);
-            ensureAppSetting(SETTING_CHECK_IN_ON_RETURN, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_IN_ON_RETURN, null, RefdataValue.normValue(RefdataValueData.CHECK_IN_ON_RETURN_OFF));
+            ensureAppSetting(SETTING_CHECK_IN_ON_RETURN, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_IN_ON_RETURN, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_CHECK_IN_ON_RETURN, RefdataValueData.CHECK_IN_ON_RETURN_OFF).value);
             ensureAppSetting(SETTING_ACCEPT_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_ACCEPT_ITEM_METHOD);
-            ensureAppSetting(SETTING_HOST_LMS_INTEGRATION, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, null, RefdataValue.normValue(RefdataValueData.HOST_LMS_INTEGRATION_ADAPTER_MANUAL));
+            ensureAppSetting(SETTING_HOST_LMS_INTEGRATION, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, RefdataValueData.HOST_LMS_INTEGRATION_ADAPTER_MANUAL).value);
 
             ensureAppSetting(SETTING_REQUEST_ID_PREFIX, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_REQUEST_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_LAST_RESORT_LENDERS, SECTION_REQUESTS, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID, SECTION_REQUESTS, SETTING_TYPE_STRING);
 
-            ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, RefdataValue.normValue(RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO));
+            ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO).value);
             ensureAppSetting(SETTING_SHARED_INDEX_BASE_URL, SECTION_SHARED_INDEX, SETTING_TYPE_STRING, null, 'http://shared-index.reshare-dev.indexdata.com:9130');
             ensureAppSetting(SETTING_SHARED_INDEX_USER, SECTION_SHARED_INDEX, SETTING_TYPE_STRING, null, 'diku_admin');
             ensureAppSetting(SETTING_SHARED_INDEX_PASS, SECTION_SHARED_INDEX, SETTING_TYPE_PASSWORD, null, '');
@@ -184,24 +188,24 @@ public class Settings {
             ensureAppSetting(SETTING_PATRON_STORE_USER, SECTION_PATRON_STORE, SETTING_TYPE_STRING, null, 'diku_admin');
             ensureAppSetting(SETTING_PATRON_STORE_PASS, SECTION_PATRON_STORE, SETTING_TYPE_PASSWORD, null, '');
             ensureAppSetting(SETTING_PATRON_STORE_GROUP, SECTION_PATRON_STORE, SETTING_TYPE_STRING, null, 'bdc2b6d4-5ceb-4a12-ab46-249b9a68473e');
-            ensureAppSetting(SETTING_PATRON_STORE, SECTION_PATRON_STORE, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_PATRON_STORE_ADAPTER, null, RefdataValue.normValue(RefdataValueData.PATRON_STORE_ADAPTER_MANUAL));
+            ensureAppSetting(SETTING_PATRON_STORE, SECTION_PATRON_STORE, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_PATRON_STORE_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_PATRON_STORE_ADAPTER, RefdataValueData.PATRON_STORE_ADAPTER_MANUAL).value);
 
-            ensureAppSetting(SETTING_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER, null, RefdataValue.normValue(RefdataValueData.AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY));
-            ensureAppSetting(SETTING_AUTO_RESPONDER_CANCEL, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_CANCEL, null, RefdataValue.normValue(RefdataValueData.AUTO_RESPONDER_CANCEL_ON));
-            ensureAppSetting(SETTING_AUTO_RESPONDER_LOCAL, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_LOCAL, null, RefdataValue.normValue(RefdataValueData.AUTO_RESPONDER_LOCAL_OFF));
+            ensureAppSetting(SETTING_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER, RefdataValueData.AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY).value);
+            ensureAppSetting(SETTING_AUTO_RESPONDER_CANCEL, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_CANCEL, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_CANCEL, RefdataValueData.AUTO_RESPONDER_CANCEL_ON).value);
+            ensureAppSetting(SETTING_AUTO_RESPONDER_LOCAL, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_LOCAL, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_LOCAL, RefdataValueData.AUTO_RESPONDER_LOCAL_OFF).value);
 
             // Setup the Stale request settings (added the numbers so they appear in the order I want them in
-            ensureAppSetting(SETTING_STALE_REQUEST_1_ENABLED, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, RefdataValue.normValue(RefdataValueData.YES_NO_NO));
+            ensureAppSetting(SETTING_STALE_REQUEST_1_ENABLED, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_STALE_REQUEST_2_DAYS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '3');
-            ensureAppSetting(SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, RefdataValue.normValue(RefdataValueData.YES_NO_YES));
+            ensureAppSetting(SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_YES).value);
 
             ensureAppSetting(SETTING_CHAT_AUTO_READ, SECTION_CHAT, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHAT_AUTO_READ, 'on');
 
-            ensureAppSetting(SETTING_ROUTING_ADAPTER, SECTION_ROUTING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_REQUEST_ROUTING_ADAPTER, null, RefdataValue.normValue(RefdataValueData.REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX));
+            ensureAppSetting(SETTING_ROUTING_ADAPTER, SECTION_ROUTING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_REQUEST_ROUTING_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_REQUEST_ROUTING_ADAPTER, RefdataValueData.REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX).value);
             ensureAppSetting(SETTING_STATIC_ROUTES, SECTION_ROUTING, SETTING_TYPE_STRING, null, null, '');
 
-            ensureAppSetting(SETTING_COMBINE_FILL_AND_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, RefdataValue.normValue(RefdataValueData.YES_NO_NO));
-            ensureAppSetting(SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, RefdataValue.normValue(RefdataValueData.YES_NO_NO));
+            ensureAppSetting(SETTING_COMBINE_FILL_AND_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
             ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '0');
             ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');

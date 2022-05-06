@@ -5,7 +5,7 @@ import org.dmfs.rfc5545.Duration;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.SettingsService
-import org.olf.rs.referenceData.Settings;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
@@ -42,7 +42,7 @@ public class TimerCheckForStaleSupplierRequestsService extends AbstractTimer {
 
 	@Override
 	public void performTask(String config) {
-		if (settingsService.hasSettingValue(Settings.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES)) {
+		if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES)) {
 			// We look to see if a request has been sitting at a supplier for more than X days without the pull slip being printed
 			List<Status> validStatus = [ ];
 
@@ -56,7 +56,7 @@ public class TimerCheckForStaleSupplierRequestsService extends AbstractTimer {
 			DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
 
 			// if we are ignoring weekends then the calculation for the idle start date will be slightly different
-			if (settingsService.hasSettingValue(Settings.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES) && (numberOfIdleDays > 0)) {
+			if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES) && (numberOfIdleDays > 0)) {
 				// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
 				for (int i = 0; i < numberOfIdleDays; i++) {
 					idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
@@ -89,6 +89,6 @@ public class TimerCheckForStaleSupplierRequestsService extends AbstractTimer {
 	 */
 	private int numberOfIdleDays() {
 		// Get hold of the number of idle days
-		return(settingsService.getSettingAsInt(Settings.SETTING_STALE_REQUEST_2_DAYS, DEFAULT_IDLE_DAYS, false));
+		return(settingsService.getSettingAsInt(SettingsData.SETTING_STALE_REQUEST_2_DAYS, DEFAULT_IDLE_DAYS, false));
 	}
 }

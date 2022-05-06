@@ -7,7 +7,7 @@ import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
 import org.olf.rs.referenceData.RefdataValueData;
-import org.olf.rs.referenceData.Settings;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.referenceData.StatusData;
 import org.olf.rs.referenceData.TemplateData;
 import org.olf.rs.referenceData.TimerData;
@@ -54,7 +54,7 @@ public class HousekeepingService {
         RefdataValueData.loadAll();
 
 		// Add the Settings, when I get an hour or 2 will convert the rest of this file
-		Settings.loadAll();
+		SettingsData.loadAll();
 
 		// Add the naming authorities
 		NamingAuthority.loadAll();

@@ -1,9 +1,12 @@
 package org.olf.rs.referenceData;
 
+import org.olf.rs.ReferenceDataService;
 import org.olf.rs.statemodel.ActionEventResult;
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
+
+import com.k_int.web.toolkit.refdata.RefdataValue
 
 import groovy.util.logging.Slf4j
 
@@ -21,6 +24,16 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
         qualifier: 'Cancelled',
         saveRestoreState: null,
+        nextAactionEvent: null
+    ];
+
+    private static Map requesterISO18626CancelNo = [
+        code: 'requesterISO18626CancelNo',
+        description: 'An incoming ISO-18626 message for the requester has said that we are not cancelling the request',
+        result: true,
+        status: Status.PATRON_REQUEST_CANCEL_PENDING,
+        qualifier: 'cancelNo',
+        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
         nextAactionEvent: null
     ];
 
@@ -132,6 +145,7 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Cancelled,
+            requesterISO18626CancelNo,
             requesterISO18626Loaned
         ]
     ];
@@ -239,12 +253,18 @@ public class ActionEventResultData {
 	public void load() {
 		log.info("Adding action and event result lists to the database");
 
+        // We are not a service, so we need to look it up
+        ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
+
         allResultLists.each { resultList ->
             // Process all the possible outcomes for this result list
             List<ActionEventResult> resultItems = new ArrayList<ActionEventResult>();
             resultList.results.each { result ->
+                // Lookup the save / restore state
+                RefdataValue saveRestoreState = referenceDataService.lookup(RefdataValueData.VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, result.saveRestoreState);
+
                 // We need to lookup the status
-                resultItems.add(ActionEventResult.ensure(result.code, result.description, result.result, Status.lookup(resultList.model, result.status), result.qualifier, result.saveRestoreState, result.nextAactionEvent));
+                resultItems.add(ActionEventResult.ensure(result.code, result.description, result.result, Status.lookup(resultList.model, result.status), result.qualifier, saveRestoreState, result.nextAactionEvent));
             }
 
             // Now create the result list
