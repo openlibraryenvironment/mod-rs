@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest
 
 import static groovyx.net.http.HttpBuilder.configure
 
-public class ModsiSharedIndexService implements SharedIndexActions {
+public class ModmetastorageSharedIndexService implements SharedIndexActions {
 
  /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
@@ -89,7 +89,7 @@ public class ModsiSharedIndexService implements SharedIndexActions {
         def r1 = configure {
           request.headers['X-Okapi-Tenant'] = shared_index_tenant;
           request.headers['X-Okapi-Token'] = token;
-          request.uri = shared_index_base_url+'/shared-index/clusters/'+(id.trim());
+          request.uri = shared_index_base_url+'/meta-storage/clusters/'+(id.trim());
         }.get() {
           response.success { FromServer fs, Object body ->
             log.debug("Success response from shared index");
@@ -119,7 +119,7 @@ public class ModsiSharedIndexService implements SharedIndexActions {
 
     List<String> result = [];
     Object cluster = fetchCluster(id);
-    Object instance = cluster?.records[0]?.inventoryPayload?.instance;
+    Object instance = cluster?.records[0]?.payload?.inventory?.instance;
     if (!instance) {
       log.debug("Unable to retrieve shared index record, systemInstanceIdentifier not specified and other fields not supported by this implementation");
     } else {
@@ -181,7 +181,7 @@ public class ModsiSharedIndexService implements SharedIndexActions {
     }
 
     cluster.records.each { record ->
-      Object inv = record?.inventoryPayload;
+      Object inv = record?.payload?.inventory;
       Object localId = inv?.localIdentifier;
       Object sym = inv?.institutionDeref;
 
