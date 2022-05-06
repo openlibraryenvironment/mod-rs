@@ -28,13 +28,14 @@ public abstract class ActionManualCloseService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        if (parameters?.terminalState ==~ /[A-Z_]+/) {
-            Status closeStatus = Status.lookup(request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER, parameters?.terminalState);
+        if ((parameters?.terminalState != null) && (parameters.terminalState ==~ /[A-Z_]+/)) {
+            Status closeStatus = Status.lookup(request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER, parameters.terminalState);
 
             // Have we been supplied a valid close status
             if (closeStatus && closeStatus.terminal) {
                 reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER} has manually closed this request."]);
                 actionResultDetails.auditMessage = 'Manually closed';
+                actionResultDetails.qualifier = parameters.terminalState;
                 actionResultDetails.newStatus = closeStatus;
             } else {
                 actionResultDetails.result = ActionResult.INVALID_PARAMETERS;

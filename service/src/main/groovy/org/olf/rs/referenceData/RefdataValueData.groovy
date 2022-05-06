@@ -19,29 +19,34 @@ public class RefdataValueData {
     private static final String OFF = 'Off';
     private static final String ON  = 'On';
 
-    public static final String VOCABULARY_ACCEPT_ITEM_METHOD           = 'AcceptItemMethod';
-    public static final String VOCABULARY_AUTO_RESPONDER               = 'AutoResponder';
-    public static final String VOCABULARY_AUTO_RESPONDER_CANCEL        = 'AutoResponder_Cancel';
-    public static final String VOCABULARY_AUTO_RESPONDER_LOCAL         = 'AutoResponder_Local';
-    public static final String VOCABULARY_BORROWER_CHECK_METHOD        = 'BorrowerCheckMethod';
-    public static final String VOCABULARY_CANCELLATION_REASONS         = 'cancellationReasons';
-    public static final String VOCABULARY_CANNOT_SUPPLY_REASONS        = 'cannotSupplyReasons';
-    public static final String VOCABULARY_CHAT_AUTO_READ               = 'ChatAutoRead';
-    public static final String VOCABULARY_CHECK_IN_METHOD              = 'CheckInMethod';
-    public static final String VOCABULARY_CHECK_OUT_METHOD             = 'CheckOutMethod';
-    public static final String VOCABULARY_CHECK_IN_ON_RETURN           = 'CheckInOnReturn';
-    public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER = 'HostLMSIntegrationAdapter';
-    public static final String VOCABULARY_LOAN_CONDITIONS              = 'loanConditions';
-    public static final String VOCABULARY_LOAN_POLICY                  = 'LoanPolicy';
-    public static final String VOCABULARY_NCIP_DUE_DATE                = 'NCIPDueDate';
-    public static final String VOCABULARY_NOTICE_FORMATS               = 'noticeFormats';
-    public static final String VOCABULARY_NOTICE_TRIGGERS              = 'noticeTriggers';
-    public static final String VOCABULARY_PATRON_STORE_ADAPTER         = 'PatronStoreAdapter';
-    public static final String VOCABULARY_PULL_SLIP_TEMPLATE           = 'pullslipTemplate';
-    public static final String VOCABULARY_REQUEST_ROUTING_ADAPTER      = 'RequestRoutingAdapter';
-    public static final String VOCABULARY_SHARED_INDEX_ADAPTER         = 'SharedIndexAdapter';
-    public static final String VOCABULARY_YES_NO                       = 'YesNo';
-    public static final String VOCABULARY_YES_NO_OTHER                 = 'YNO';
+    public static final String VOCABULARY_ACCEPT_ITEM_METHOD               = 'AcceptItemMethod';
+    public static final String VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE = 'ActopnEventResultSaveRestore';
+    public static final String VOCABULARY_AUTO_RESPONDER                   = 'AutoResponder';
+    public static final String VOCABULARY_AUTO_RESPONDER_CANCEL            = 'AutoResponder_Cancel';
+    public static final String VOCABULARY_AUTO_RESPONDER_LOCAL             = 'AutoResponder_Local';
+    public static final String VOCABULARY_BORROWER_CHECK_METHOD            = 'BorrowerCheckMethod';
+    public static final String VOCABULARY_CANCELLATION_REASONS             = 'cancellationReasons';
+    public static final String VOCABULARY_CANNOT_SUPPLY_REASONS            = 'cannotSupplyReasons';
+    public static final String VOCABULARY_CHAT_AUTO_READ                   = 'ChatAutoRead';
+    public static final String VOCABULARY_CHECK_IN_METHOD                  = 'CheckInMethod';
+    public static final String VOCABULARY_CHECK_OUT_METHOD                 = 'CheckOutMethod';
+    public static final String VOCABULARY_CHECK_IN_ON_RETURN               = 'CheckInOnReturn';
+    public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER     = 'HostLMSIntegrationAdapter';
+    public static final String VOCABULARY_LOAN_CONDITIONS                  = 'loanConditions';
+    public static final String VOCABULARY_LOAN_POLICY                      = 'LoanPolicy';
+    public static final String VOCABULARY_NCIP_DUE_DATE                    = 'NCIPDueDate';
+    public static final String VOCABULARY_NOTICE_FORMATS                   = 'noticeFormats';
+    public static final String VOCABULARY_NOTICE_TRIGGERS                  = 'noticeTriggers';
+    public static final String VOCABULARY_PATRON_STORE_ADAPTER             = 'PatronStoreAdapter';
+    public static final String VOCABULARY_PULL_SLIP_TEMPLATE               = 'pullslipTemplate';
+    public static final String VOCABULARY_REQUEST_ROUTING_ADAPTER          = 'RequestRoutingAdapter';
+    public static final String VOCABULARY_SHARED_INDEX_ADAPTER             = 'SharedIndexAdapter';
+    public static final String VOCABULARY_YES_NO                           = 'YesNo';
+    public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
+
+    // Action Event Result Save / Restore
+    public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
+    public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE    = 'Save';
 
     // Auto Responder
     public static final String AUTO_RESPONDER_OFF                          = OFF;
@@ -148,6 +153,9 @@ public class RefdataValueData {
     private void load() {
         try {
             log.info('Adding RefdataValue values to the database');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE);
+            RefdataValue.lookupOrCreate(VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE);
 
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_DUE_DATE, NCIP_DUE_DATE_ON);
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_DUE_DATE, NCIP_DUE_DATE_OFF);

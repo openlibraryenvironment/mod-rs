@@ -55,6 +55,7 @@ public class ActionPatronRequestISO18626CancelResponseService extends ActionISO1
                         // Is this always the correct way of doing it ?
                         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, request.previousStates[request.state.code]);
                         actionResultDetails.auditMessage = 'Supplier denied cancellation.';
+                        actionResultDetails.qualifier = 'cancelNo';
                         request.previousStates[request.state.code] = null;
                         break;
 

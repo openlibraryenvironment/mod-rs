@@ -56,7 +56,7 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         nextAactionEvent column : 'aer_next_action_event'
     }
 
-    public static ActionEventResult ensure(String code, String description, boolean result, Status status = null, String qualifier = null, String saveRestoreState = null, ActionEvent nextAactionEvent = null) {
+    public static ActionEventResult ensure(String code, String description, boolean result, Status status = null, String qualifier = null, RefdataValue saveRestoreState = null, ActionEvent nextAactionEvent = null) {
         // Lookup to see if the code exists
         ActionEventResult actionEventResult = findByCode(code);
 

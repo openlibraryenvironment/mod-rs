@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.patronstore.PatronStoreActions;
-import org.olf.rs.referenceData.Settings;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.Status;
 
 import groovy.json.JsonBuilder;
@@ -318,7 +318,7 @@ public class ReshareActionService {
             }
 
             // Have we reached the maximum number of retries
-            int maxSendAttempts = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, 0, false);
+            int maxSendAttempts = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, 0, false);
 
             // Have we reached our maximum number
             if ((maxSendAttempts > 0) && (request.numberOfSendAttempts > maxSendAttempts)) {
@@ -337,7 +337,7 @@ public class ReshareActionService {
                 auditEntry(request, request.state, request.state, 'Maximum number of send attempts reached, setting network status to Error', null);
             } else {
                 // We want to retry, get hold of the retry period
-                int retryMinutes = settingsService.getSettingAsInt(Settings.SETTING_NETWORK_RETRY_PERIOD, 10, false);
+                int retryMinutes = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_RETRY_PERIOD, 10, false);
 
                 // We have a multiplier to the retry minutes based on the number of times we have attempted to send it
                 // At a minimum the number of send attempts should be 1 (only includes those we have attempted and not the one we are about to do)
