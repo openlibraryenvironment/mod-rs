@@ -20,7 +20,7 @@ public class StatusData {
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, '0011', true, true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SOURCING_ITEM, '0015', true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED, '0020', true);
-        Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, '0025', true, null, null, null );
+        Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, '0025', true, null, false, null );
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, '0026', true, true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, '0027', true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER, '0028', true);
@@ -39,7 +39,7 @@ public class StatusData {
 
         // Add in the ability to tag states with meaningful semantics for reporting
         // model, code, presSeq, visible, needsAttention, terminal, tags
-        Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED, '0076', true, null, null, [ 'ACTIVE_BORROW' ]);
+        Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED, '0076', true, null, false, [ 'ACTIVE_BORROW' ]);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, '0077', true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, '0079', true);
         Status.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_FILLED_LOCALLY, '0081', true, null, true);
@@ -58,7 +58,7 @@ public class StatusData {
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_HOLD_PLACED, '0025', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED, '0030', true, null, true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NOT_SUPPLIED, '0035', false, null, true);
-        Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_ITEM_SHIPPED, '0040', true, null, null, [ 'ACTIVE_LOAN' ] );
+        Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_ITEM_SHIPPED, '0040', true, null, false, [ 'ACTIVE_LOAN' ] );
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_ITEM_RETURNED, '0040', true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_COMPLETE, '0040', true, null, true);
         Status.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, '9998', true, true);
