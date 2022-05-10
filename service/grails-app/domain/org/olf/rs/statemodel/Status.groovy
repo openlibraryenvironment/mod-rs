@@ -84,7 +84,7 @@ class Status implements MultiTenant<Status> {
             presSeq (nullable: true, blank:false)
             visible (nullable: true)
      needsAttention (nullable: true)
-           terminal (nullable: true)
+           terminal (nullable: false)
   }
 
   static mapping = {

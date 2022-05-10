@@ -445,4 +445,8 @@ databaseChangeLog = {
             column(name: "pr_last_protocol_data", type: "varchar(20000)")
         }
     }
+
+    changeSet(author: "jskomorowski (manual)", id: "20220510-1100-001") {
+        addNotNullConstraint(tableName: "status", columnName: "st_terminal", defaultNullValue: false)
+    }
 }
