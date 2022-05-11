@@ -30,12 +30,14 @@ public class HorizonHostLMSService extends BaseHostLMSService {
         if(!shelvingLocation) {
           shelvingLocation = null; //No blank strings
         }
+        /*
         def locParts = splitLocation(hld.localLocation?.text());
         log.debug("splitLocation returned ${locParts}");
         if(locParts) {
           location = locParts[0];
           shelvingLocation = locParts[1];
         }
+        */
         log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
         ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
         availability_summary[hld.localLocation] = il;

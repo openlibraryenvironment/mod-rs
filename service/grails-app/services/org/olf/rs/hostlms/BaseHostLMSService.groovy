@@ -418,7 +418,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( ( response ) && ( ! response.has('problems') ) ) {
             JSONArray priv = response.getJSONArray('privileges')
             // Return a status of BLOCKED if the user is blocked, else OK for now
-            result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+            result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
             result.userProfile=(priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
             result.result=true
             result.userid=response.opt('userId') ?: response.opt('userid')
