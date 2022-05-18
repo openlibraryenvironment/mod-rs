@@ -2,6 +2,8 @@
   	"predefinedId" : "patronProfileContainer",
 	"name" : "New patron profile",
 	"description" : "A new patron profile has come to our attention",
+	"active": false,
+	"triggerType": "New patron profile",
 	"template" : {
 	  	"predefinedId" : "patronProfileTemplate",
 	  	"header": "New patron profile: {{user.patronProfile}}",

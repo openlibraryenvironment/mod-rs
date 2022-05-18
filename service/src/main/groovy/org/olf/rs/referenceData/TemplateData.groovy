@@ -31,6 +31,12 @@ public class TemplateData {
 
         // The newPatronProfile
         loadTemplate('templates/newPatronProfile.json');
+
+        // A new host LMS location
+        loadTemplate('templates/newHostLMSLocation.json');
+
+        // A new host LMS shelving location
+        loadTemplate('templates/newHostLMSShelvingLocation.json');
     }
 
     private void loadTemplate(String resourcePath) {
@@ -115,7 +121,7 @@ public class TemplateData {
                         NoticePolicy noticePolicy = new NoticePolicy();
                         noticePolicy.name = parsedJson.name;
                         noticePolicy.description = parsedJson.description;
-                        noticePolicy.active = false;
+                        noticePolicy.active = parsedJson.active;
                         noticePolicy.save(flush:true, failOnError:true);
 
                         // Create the mapping with the predefined id
@@ -126,7 +132,7 @@ public class TemplateData {
                         noticePolicyNotice.template = templateContainer;
                         noticePolicyNotice.realTime = true;
                         noticePolicyNotice.format = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_FORMATS, 'E-mail', 'email');
-                        noticePolicyNotice.trigger = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE);
+                        noticePolicyNotice.trigger = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, parsedJson.triggerType);
                         noticePolicyNotice.noticePolicy = noticePolicy;
                         noticePolicyNotice.save(flush:true, failOnError:true);
                         noticePolicy.addToNotices(noticePolicyNotice);
