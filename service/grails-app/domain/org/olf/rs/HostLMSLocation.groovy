@@ -142,25 +142,5 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
     def beforeDelete() {
         return(canDelete().deleteValid);
     }
-
-    static HostLMSLocation EnsureActive(String code, String name) {
-        HostLMSLocation loc = HostLMSLocation.findByCodeOrName(code, name);
-
-        // Did we find a location
-        if (loc == null) {
-            // We do not so create a new one
-            loc = new HostLMSLocation(
-                code : code,
-                name : name,
-                icalRrule :'RRULE:FREQ=MINUTELY;INTERVAL=10;WKST=MO'
-            );
-            loc.save(flush : true, failOnError : true);
-        }  else if (loc.hidden == true) {
-            // It is hidden, so unhide it
-            loc.hidden = false;
-            loc.save(flush : true, failOnError : true);
-        }
-        return(loc);
-    }
 }
 

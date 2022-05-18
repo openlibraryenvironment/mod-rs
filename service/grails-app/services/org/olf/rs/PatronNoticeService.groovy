@@ -52,6 +52,34 @@ public class PatronNoticeService {
         triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE), null);
     }
 
+    public void triggerNotices(HostLMSLocation hostLMSLocation) {
+        // We need to find the email address for the institution
+
+        Map values = [
+            email: getAdminEmail(),
+            item: [
+                location: hostLMSLocation.name
+            ]
+        ];
+
+        // There is only one type of notice that can be sent for patron profiles, so it is hard coded here
+        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION), null);
+    }
+
+    public void triggerNotices(HostLMSShelvingLocation hostLMSShelvingLocation) {
+        // We need to find the email address for the institution
+
+        Map values = [
+            email: getAdminEmail(),
+            item: [
+                shelvingLocation: hostLMSShelvingLocation.name
+            ]
+        ];
+
+        // There is only one type of notice that can be sent for patron profiles, so it is hard coded here
+        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION), null);
+    }
+
     public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr = null) {
         NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger)
         ne.save(flush:true, failOnError:true)
@@ -135,7 +163,9 @@ public class PatronNoticeService {
             item: [
                 barcode: pr?.selectedItemBarcode ?: '',
                 title: pr.title,
-                materialType: pr?.publicationType?.label ?: ''
+                materialType: pr?.publicationType?.label ?: '',
+                location: pr?.pickLocation?.name,
+                shelvingLocation: pr?.pickShelvingLocation
             ]
         ];
         return(values);

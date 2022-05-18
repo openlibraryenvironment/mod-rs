@@ -4,7 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSLocation;
+import org.olf.rs.HostLMSLocationService;
 import org.olf.rs.HostLMSShelvingLocation;
+import org.olf.rs.PatronNoticeService;
 import org.olf.rs.PatronRequest
 import org.olf.rs.ShelvingLocationSite;
 import org.olf.rs.circ.client.AcceptItem;
@@ -25,6 +27,9 @@ import groovyx.net.http.HttpBuilder
  *
  */
 public abstract class BaseHostLMSService implements HostLMSActions {
+
+  HostLMSLocationService hostLMSLocationService;
+  PatronNoticeService patronNoticeService;
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
   List getLookupStrategies() {
@@ -135,7 +140,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     // Values < 0 are considered "DO NOT USE" - E.G. bindery
     options.each { o ->
       // See if we can find a HostLMSLocation for the given item - create one if not
-      HostLMSLocation loc = HostLMSLocation.EnsureActive(o.location, o.location);
+      HostLMSLocation loc = hostLMSLocationService.EnsureActive(o.location, o.location);
 
       HostLMSShelvingLocation sl = null;
       ShelvingLocationSite sls = null;
@@ -146,6 +151,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         switch ( shelving_loc_list.size() ) {
           case 0:
             sl = new HostLMSShelvingLocation( code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
+            patronNoticeService.triggerNotices(sl);
             break;
 
           case 1:

@@ -40,6 +40,7 @@ public class ReshareApplicationEventHandlerService {
     EventISO18626IncomingRequesterService eventISO18626IncomingRequesterService;
     EventISO18626IncomingResponderService eventISO18626IncomingResponderService;
     EventMessageRequestIndService eventMessageRequestIndService;
+    HostLMSLocationService hostLMSLocationService;
 
   	/** Holds map of the event to the bean that will do the processing for this event */
   	private static Map serviceEvents = [ : ];
@@ -273,7 +274,7 @@ public class ReshareApplicationEventHandlerService {
     // Only proceed if there is location
     if ( location && location.location ) {
       // We've been given a specific location, make sure we have a record for that location
-      HostLMSLocation loc = HostLMSLocation.EnsureActive(location.location, location.location);
+      HostLMSLocation loc = hostLMSLocationService.EnsureActive(location.location, location.location);
 
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc
