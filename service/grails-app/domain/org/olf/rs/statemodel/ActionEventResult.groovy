@@ -28,35 +28,55 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
     /** The status the request should change to, given the result and qualifier, if no status specified then it stays in the same state */
     Status status;
 
+    /** When we are set to save the status, this allows us to set it to a specific status instead of the current request status */
+    Status overrideSaveStatus;
+
     /** Do we need to save or restore the status */
     RefdataValue saveRestoreState;
 
+    /** The status the request must currently be in */
+    Status fromStatus;
+
     /** Is there a follow on action or event to be executed, will be passed the same parameters passed to this action, so could have been modified ... */
-    ActionEvent nextAactionEvent;
+    ActionEvent nextActionEvent;
 
     static constraints = {
-                    code (nullable: false, blank:false, unique: true)
-             description (nullable: false, blank:false)
-                  result (nullable: false)
-               qualifier (nullable: true)
-                  status (nullable: true)
-        saveRestoreState (nullable: true)
-        nextAactionEvent (nullable: true)
+                      code (nullable: false, blank:false, unique: true)
+               description (nullable: false, blank:false)
+                    result (nullable: false)
+                 qualifier (nullable: true)
+                    status (nullable: true)
+          saveRestoreState (nullable: true)
+        overrideSaveStatus (nullable: true)
+                fromStatus (nullable: true)
+           nextActionEvent (nullable: true)
     }
 
     static mapping = {
-                      id column : 'aer_id', generator: 'uuid2', length: 36
-                 version column : 'aer_version'
-                    code column : 'aer_code', length: 64
-             description column : 'aer_description'
-                  result column : 'aer_result'
-               qualifier column : 'aer_qualifier', length: 64
-                  status column : 'aer_status'
-        saveRestoreState column : 'aer_save_restore_state'
-        nextAactionEvent column : 'aer_next_action_event'
+                        id column : 'aer_id', generator: 'uuid2', length: 36
+                   version column : 'aer_version'
+                      code column : 'aer_code', length: 64
+               description column : 'aer_description'
+                    result column : 'aer_result'
+                 qualifier column : 'aer_qualifier', length: 64
+                    status column : 'aer_status'
+          saveRestoreState column : 'aer_save_restore_state'
+        overrideSaveStatus column : 'aer_override_save_state'
+                fromStatus column : 'aer_from_state'
+           nextActionEvent column : 'aer_next_action_event'
     }
 
-    public static ActionEventResult ensure(String code, String description, boolean result, Status status = null, String qualifier = null, RefdataValue saveRestoreState = null, ActionEvent nextAactionEvent = null) {
+    public static ActionEventResult ensure(
+        String code,
+        String description,
+        boolean result,
+        Status status = null,
+        String qualifier = null,
+        RefdataValue saveRestoreState = null,
+        Status overrideSaveStatus = null,
+        Status fromStatus = null,
+        ActionEvent nextActionEvent = null
+    ) {
         // Lookup to see if the code exists
         ActionEventResult actionEventResult = findByCode(code);
 
@@ -74,7 +94,9 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         actionEventResult.qualifier = qualifier;
         actionEventResult.status = status;
         actionEventResult.saveRestoreState = saveRestoreState;
-        actionEventResult.nextAactionEvent = nextAactionEvent;
+        actionEventResult.overrideSaveStatus = overrideSaveStatus;
+        actionEventResult.fromStatus = fromStatus;
+        actionEventResult.nextActionEvent = nextActionEvent;
 
         // and save it
         actionEventResult.save(flush:true, failOnError:true);
@@ -83,5 +105,3 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         return(actionEventResult);
     }
 }
-
-

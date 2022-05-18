@@ -8,18 +8,42 @@ import grails.gorm.MultiTenant;
 
 class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
+    static public final String REQUESTER_AGREE_CONDITIONS                    = 'requesterAgreeConditions';
     static public final String REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626   = 'requesterAwaitingReturnShippingISO18626';
     static public final String REQUESTER_BORROWER_RETURNED_ISO18626          = 'requesterBorrowerReturnedISO18626';
     static public final String REQUESTER_BORROWING_LIBRARY_RECEIVED_ISO18626 = 'requesterBorrowingLibraryReceivedISO18626';
+    static public final String REQUESTER_CANCEL                              = 'requesterCancel';
     static public final String REQUESTER_CANCEL_PENDING_ISO18626             = 'requesterCancelPendingISO18626';
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
+    static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
+    static public final String REQUESTER_NO_STATUS_CHANGE                    = 'requesterNoStatusChange';
     static public final String REQUESTER_OVERDUE_ISO18626                    = 'requesterOverdueISO18626';
+    static public final String REQUESTER_PATRON_RETURNED                     = 'requesterPatronReturned';
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
+    static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
+    static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
     static public final String REQUESTER_SENT_TO_SUPPLIER_ISO18626           = 'requesterSentToSupplierISO18626';
     static public final String REQUESTER_SHIPPED_ISO18626                    = 'requesterShippedISO18626';
+    static public final String REQUESTER_SHIPPED_RETURN                      = 'requesterShippedReturn';
     static public final String REQUESTER_SHIPPED_TO_SUPPLIER_ISO18626        = 'requesterShippedToSupplierISO18626';
+
+    // The responder lists
+    static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';
+    static public final String RESPONDER_ANWSER_YES                     = 'responderAnswerYes';
+    static public final String RESPONDER_CANCEL                         = 'responderCancel';
+    static public final String RESPONDER_CANCEL_RECEIVED_ISO18626       = 'responderCancelReceivedISO18626';
+    static public final String RESPONDER_CHECK_INTO_RESHARE             = 'responderCheckInToReshare';
+    static public final String RESPONDER_CLOSE_MANUAL                   = 'responderCloseManual';
+    static public final String RESPONDER_ITEM_RETURNED                  = 'responderItemReturned';
+    static public final String RESPONDER_MARK_CONDITIONS_AGREED         = 'responderMarkConditionsAgreed';
+    static public final String RESPONDER_MARK_SHIPPED                   = 'responderMarkShipped';
+    static public final String RESPONDER_NO_STATUS_CHANGE               = 'responderNoStatusChange';
+    static public final String RESPONDER_NOTIFICATION_RECEIVED_ISO18626 = 'responderNotificationReceivedISO18626';
+    static public final String RESPONDER_PRINT_PULL_SLIP                = 'responderPrintPullSlip';
+    static public final String RESPONDER_RECEIVED_ISO18626              = 'responderReceivedISO18626';
+    static public final String RESPONDER_SHIPPED_RETURN_ISO18626        = 'responderShippedReturnISO18626';
 
     /** The id of the list */
     String id;
@@ -50,10 +74,20 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
              description column : 'aerl_description'
     }
 
-    public ActionEventResult lookupResult(boolean successful, String qualifier) {
+    public ActionEventResult lookupResult(boolean successful, String qualifier, Status fromStatus) {
         // look through the results to see if we have an appropriate one
         return(results.find { result ->
             if (successful == result.result) {
+                // Do we have a from state on the result
+                if (result.fromStatus != null) {
+                    // Return false if they do not match with the passed in one
+                    if (!result.fromStatus.id.equals(fromStatus.id)) {
+                        // Different from status
+                        return(false);
+                    }
+                }
+
+                // Check the qualifier now
                 if (qualifier == null) {
                     return(result.qualifier == null);
                 } else {
