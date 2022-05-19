@@ -90,10 +90,12 @@ public class RefdataValueData {
     public static final String NCIP_DUE_DATE_ON  = ON;
 
     // Notice triggers
-    public static final String NOTICE_TRIGGER_END_OF_ROTA        = 'End of rota';
-    public static final String NOTICE_TRIGGER_NEW_PATRON_PROFILE = 'New patron profile';
-    public static final String NOTICE_TRIGGER_NEW_REQUEST        = 'New request';
-    public static final String NOTICE_TRIGGER_REQUEST_CANCELLED  = 'Request cancelled';
+    public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
+    public static final String NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION          = 'New Host LMS Location';
+    public static final String NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION = 'New Host LMS Shelving Location';
+    public static final String NOTICE_TRIGGER_NEW_PATRON_PROFILE             = 'New patron profile';
+    public static final String NOTICE_TRIGGER_NEW_REQUEST                    = 'New request';
+    public static final String NOTICE_TRIGGER_REQUEST_CANCELLED              = 'Request cancelled';
 
     // Patron store adapter
     public static final String PATRON_STORE_ADAPTER_FOLIO  = 'FOLIO';
@@ -248,6 +250,8 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_END_OF_ROTA);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_REQUEST_CANCELLED);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_PATRON_PROFILE);
+            RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION);
+            RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION);
 
             ensureRefdataProperty('policy.ill.returns', false, 'YNO', 'Accept Returns');
             ensureRefdataProperty('policy.ill.loan_policy', false, 'LoanPolicy', 'ILL Loan Policy');
