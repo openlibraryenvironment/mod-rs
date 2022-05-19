@@ -14,6 +14,29 @@ public class HorizonHostLMSService extends BaseHostLMSService {
   }
 
   @Override
+  //We need to also eliminate any holdings of type "Internet"
+  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    Map<String, ItemLocation> availability_summary = null;
+    if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
+      def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 &&
+       it?.recordData?.opacRecord?.holdings?.holding?.localLocation.text() != "Internet" };
+      if (withHoldings.size() < 1) {
+        log.warn("BaseHostLMSService failed to find an OPAC record with holdings");
+        return null;
+      } else if (withHoldings.size() > 1) {
+        log.warn("BaseHostLMSService found multiple OPAC records with holdings");
+        return null;
+      }
+      log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
+      availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
+    }
+    else {
+      log.warn("BaseHostLMSService expected the response to contain an OPAC record, but none was found");
+    }
+    return availability_summary;
+  }
+
+  @Override
   public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
     log.debug("extractAvailableItemsFromOpacRecord (HorizonHostLMSService)");
