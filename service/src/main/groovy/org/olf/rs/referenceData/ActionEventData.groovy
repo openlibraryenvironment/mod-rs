@@ -44,7 +44,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_RENEW_RESPONSE, 'An ISO-18626 Renew Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, 'An ISO-18626 Request Response has been received', true, null);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, 'An ISO-18626 Status Change has been received', true, null);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, 'An ISO-18626 Status Change has been received', true, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, 'An ISO-18626 Status Request Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, 'The local library cannot supply', true, ActionEventResultList.REQUESTER_LOCAL_CANNOT_SUPPLY);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, 'The patron has returned the item(s) to the requesting libarary', true, ActionEventResultList.REQUESTER_PATRON_RETURNED);

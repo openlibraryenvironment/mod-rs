@@ -54,7 +54,7 @@ public class ActionResponderSupplierAddConditionService extends ActionResponderC
             actionResultDetails.auditMessage = 'Added loan condition to request, request continuing';
         } else {
             // The supplying agency wants to go into a holding state
-            request.previousStates.put(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, request.state.code)
+//            request.previousStates.put(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, request.state.code)
             actionResultDetails.auditMessage = 'Condition added to request, placed in hold state';
             actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER);
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOLDING

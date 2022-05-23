@@ -57,7 +57,7 @@ public class TimerRequestNetworkTimeoutService extends AbstractTimerRequestNetwo
             symbols = reshareActionService.supplyingAgencyMessageSymbol(request);
         }
 
-        // Attempt to send the message, this is just a quick check to see if they receieved the previous message, bwfore we attempt to resend it
+        // Attempt to send the message, this is just a quick check to see if they receieved the previous message, before we attempt to resend it
         Map sendResult = protocolMessageService.sendProtocolMessage(symbols.senderSymbol, symbols.receivingSymbol, message);
 
         // Was it successfully sent

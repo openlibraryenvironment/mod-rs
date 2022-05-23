@@ -209,7 +209,7 @@ public class ActionEventResultData {
         result: true,
         status: Status.PATRON_REQUEST_CANCEL_PENDING,
         qualifier: null,
-        saveRestoreState: null,
+        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
         nextActionEvent: null
     ];
 
