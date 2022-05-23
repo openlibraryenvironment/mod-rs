@@ -134,17 +134,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                                                                       institutionalPatronIdValue,
                                                                       request.resolvedRequester);
 
-                            // If the host_lms adapter gave us a specific status to transition to, use it
-                            if (checkoutResult?.status) {
-                                // the host lms service gave us a specific status to change to
-                                actionResultDetails.newStatus = Status.lookup(StateModel.MODEL_RESPONDER, checkoutResult?.status);
-                                actionResultDetails.auditMessage = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString()
-
-                                // We're in a new status, break out of the loop to deal with that,
-                                // we can deal with the other checkouts later
-                                break;
-                            }
-
                             // Otherwise, if the checkout succeeded or failed, set appropriately
                             if (checkoutResult.result == true) {
                                 RefdataValue volStatus = checkoutResult.reason == REASON_SPOOFED ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete');
