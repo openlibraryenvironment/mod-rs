@@ -10,17 +10,24 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
     static public final String REQUESTER_AGREE_CONDITIONS                    = 'requesterAgreeConditions';
     static public final String REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626   = 'requesterAwaitingReturnShippingISO18626';
+    static public final String REQUESTER_BORROWER_CHECK                      = 'requesterBorrowerCheck';
     static public final String REQUESTER_BORROWER_RETURNED_ISO18626          = 'requesterBorrowerReturnedISO18626';
     static public final String REQUESTER_BORROWING_LIBRARY_RECEIVED_ISO18626 = 'requesterBorrowingLibraryReceivedISO18626';
     static public final String REQUESTER_CANCEL                              = 'requesterCancel';
+    static public final String REQUESTER_CANCEL_LOCAL                        = 'requesterCancelLocal';
     static public final String REQUESTER_CANCEL_PENDING_ISO18626             = 'requesterCancelPendingISO18626';
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
     static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
+    static public final String REQUESTER_FILLED_LOCALLY                      = 'requesterFilledLocally';
+    static public final String REQUESTER_LOCAL_CANNOT_SUPPLY                 = 'requesterLocalCannotSupply';
+    static public final String REQUESTER_MANUAL_CHECK_IN                     = 'requesterManualCheckIn';
     static public final String REQUESTER_NO_STATUS_CHANGE                    = 'requesterNoStatusChange';
+    static public final String REQUESTER_NOTIFICATION_RECEIVED_ISO18626      = 'requesterNotificationReceivedISO18626';
     static public final String REQUESTER_OVERDUE_ISO18626                    = 'requesterOverdueISO18626';
     static public final String REQUESTER_PATRON_RETURNED                     = 'requesterPatronReturned';
+    static public final String REQUESTER_PATRON_RETURNED_SHIPPED             = 'requesterPatronReturnedShipped';
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
     static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
     static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
@@ -30,13 +37,17 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_SHIPPED_TO_SUPPLIER_ISO18626        = 'requesterShippedToSupplierISO18626';
 
     // The responder lists
+    static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
     static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';
     static public final String RESPONDER_ANWSER_YES                     = 'responderAnswerYes';
     static public final String RESPONDER_CANCEL                         = 'responderCancel';
     static public final String RESPONDER_CANCEL_RECEIVED_ISO18626       = 'responderCancelReceivedISO18626';
+    static public final String RESPONDER_CANNOT_SUPPLY                  = 'responderCannotSupply';
+    static public final String RESPONDER_CHECK_IN_AND_SHIP              = 'responderCheckInAndShip';
     static public final String RESPONDER_CHECK_INTO_RESHARE             = 'responderCheckInToReshare';
     static public final String RESPONDER_CLOSE_MANUAL                   = 'responderCloseManual';
     static public final String RESPONDER_ITEM_RETURNED                  = 'responderItemReturned';
+    static public final String RESPONDER_MANUAL_CHECK_OUT               = 'responderManualCheckOut';
     static public final String RESPONDER_MARK_CONDITIONS_AGREED         = 'responderMarkConditionsAgreed';
     static public final String RESPONDER_MARK_SHIPPED                   = 'responderMarkShipped';
     static public final String RESPONDER_NO_STATUS_CHANGE               = 'responderNoStatusChange';
@@ -44,6 +55,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String RESPONDER_PRINT_PULL_SLIP                = 'responderPrintPullSlip';
     static public final String RESPONDER_RECEIVED_ISO18626              = 'responderReceivedISO18626';
     static public final String RESPONDER_SHIPPED_RETURN_ISO18626        = 'responderShippedReturnISO18626';
+    static public final String RESPONDER_STATUS_REQUEST_ISO18626        = 'responderStausRequestISO18626';
 
     /** The id of the list */
     String id;

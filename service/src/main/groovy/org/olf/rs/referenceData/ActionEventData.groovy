@@ -20,40 +20,41 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_ISO18626_CANCEL, 'An ISO-18626 Cancel Request has been received', true, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_ISO18626_RECEIVED, 'An ISO-18626 received has arrived at the responder', true, null);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_ISO18626_SHIPPED_RETURN, 'An ISO-18626 shipped return has arrived at the responder', true, ActionEventResultList.RESPONDER_SHIPPED_RETURN_ISO18626);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_ISO18626_STATUS_REQUEST, 'An ISO-18626 status request has arrived at the responder', true, ActionEventResultList.RESPONDER_STATUS_REQUEST_ISO18626);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_ITEM_RETURNED, 'The responder has received the returned item(s)', true, null);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, ActionEventResultList.RESPONDER_ANWSER_YES);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, 'The responder has added a loan condition', true, null);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, 'The responder is saying they cannot supply the item(s)', true, null);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, 'The responder has added a loan condition', true, ActionEventResultList.RESPONDER_ADD_CONDITIONAL);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, 'The responder is saying they cannot supply the item(s)', true, ActionEventResultList.RESPONDER_CANNOT_SUPPLY);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, 'The item(s) has been checked out of the responders LMS to Reshare', true, ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, 'The item(s) have been checked into reshare from the responders LMS and shipped to the requester', true, ActionEventResultList.RESPONDER_CHECK_IN_AND_SHIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, 'The item(s) has been checked backed into the responders LMS from Reshare', true, ActionEventResultList.RESPONDER_ITEM_RETURNED);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, 'The responder is specifying conditions before they supply the item(s)', true, ActionEventResultList.RESPONDER_ANWSER_CONDITIONAL);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MANUAL_CHECKOUT, 'Fill in the description for this action, where is it checked out from ?', true, null);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MANUAL_CHECKOUT, 'Responder hs checked the item(s) out of the local LMS', true, ActionEventResultList.RESPONDER_MANUAL_CHECK_OUT);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED, 'The requester has informed the responder that they will agree to the conditions outside of any protocol in use', true, ActionEventResultList.RESPONDER_MARK_CONDITIONS_AGREED);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, 'The responder has shipped the item(s) to the requester', true, ActionEventResultList.RESPONDER_MARK_SHIPPED);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'The responder has printed the pull slip', true, ActionEventResultList.RESPONDER_PRINT_PULL_SLIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, 'The responder is responding to a request to cancel the request from the requester', true, ActionEventResultList.RESPONDER_CANCEL);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, 'The item(s) have been checked into reshare from the responders LMS and shipped to the requester', true, null);
 
         // Requester Actions
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, null);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, 'Check that the borrower id is valid and they are able to request an item, if they are not valid or cannot request an item the librarian can override this to say they are', true, null);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, null);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, null);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, ActionEventResultList.REQUESTER_BORROWER_CHECK);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, 'Check that the borrower id is valid and they are able to request an item, if they are not valid or cannot request an item the librarian can override this to say they are', true, ActionEventResultList.REQUESTER_BORROWER_CHECK);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, ActionEventResultList.REQUESTER_CANCEL_LOCAL);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, ActionEventResultList.REQUESTER_FILLED_LOCALLY);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, 'An ISO-18626 Cancel Response has been received', true, ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_RENEW_RESPONSE, 'An ISO-18626 Renew Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, 'An ISO-18626 Request Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, 'An ISO-18626 Status Change has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, 'An ISO-18626 Status Request Response has been received', true, null);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, 'The local library cannot supply', true, null);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, 'The local library cannot supply', true, ActionEventResultList.REQUESTER_LOCAL_CANNOT_SUPPLY);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, 'The patron has returned the item(s) to the requesting libarary', true, ActionEventResultList.REQUESTER_PATRON_RETURNED);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED, 'The patron has returned the item(s) and they have been shipped back to the responder', true, ActionEventResultList.REQUESTER_PATRON_RETURNED_SHIPPED);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS, 'The requester has agreed to the conditions imposed by the responder', true, ActionEventResultList.REQUESTER_AGREE_CONDITIONS);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_CANCEL, 'The requester is asking the responder to cancel the request', true, ActionEventResultList.REQUESTER_CANCEL);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN, 'Fill in the description for this action, where is it checked in from ?', true, null);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN, 'Requester has received the item(s) from the responder and checked them in manually', true, ActionEventResultList.REQUESTER_MANUAL_CHECK_IN);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, 'The requester has received the item(s) from the responder', true, ActionEventResultList.REQUESTER_RECEIVED);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS, 'The requester has rejected the conditions imposed by the responder', true, ActionEventResultList.REQUESTER_REJECT_CONDITIONS);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_SHIPPED_RETURN, 'The requester has returned the item(s) to the responder', true, ActionEventResultList.REQUESTER_SHIPPED_RETURN);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED, 'The patron has returned the item(s) and they have been shipped back to the responder', true, null);
 
         // Both Requester and Responder actions
         ActionEvent.ensure(Actions.ACTION_INCOMING_ISO18626, 'An incoming ISO 18626 message', true, null);

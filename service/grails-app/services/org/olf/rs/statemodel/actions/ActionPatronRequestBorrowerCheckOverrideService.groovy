@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
@@ -44,6 +45,7 @@ public class ActionPatronRequestBorrowerCheckOverrideService extends AbstractAct
             // The Host LMS check call has failed, stay in current state
             request.needsAttention = true;
             actionResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + borrowerCheck?.problems;
+            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
         }
 
         return(actionResultDetails);

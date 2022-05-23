@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -41,33 +42,36 @@ public class ActionPatronRequestPatronReturnedItemAndShippedReturnService extend
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-      // Create ourselves an ActionResultDetails that we will pass to each of the actions we want to call
-      ActionResultDetails resultDetails = new ActionResultDetails();
+        // Create ourselves an ActionResultDetails that we will pass to each of the actions we want to call
+        ActionResultDetails resultDetails = new ActionResultDetails();
 
-      // Default the result as being a success
-      resultDetails.result = ActionResult.SUCCESS;
+        // Default the result as being a success
+        resultDetails.result = ActionResult.SUCCESS;
 
-      // mark returned by patron
-      if (actionPatronRequestPatronReturnedItemService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-        // Copy in the new status in case the second action fails
-        actionResultDetails.newStatus = resultDetails.newStatus;
+        // mark returned by patron
+        if (actionPatronRequestPatronReturnedItemService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
+            // Copy in the new status in case the second action fails
+            actionResultDetails.newStatus = resultDetails.newStatus;
 
-        // Now we can mark it as being return shipped
-        if (actionPatronRequestShippedReturnService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-          // Its a success, so copy in the new status and response result
-          actionResultDetails.newStatus = resultDetails.newStatus;
-          actionResultDetails.responseResult = resultDetails.responseResult;
+            // Now we can mark it as being return shipped
+            if (actionPatronRequestShippedReturnService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
+                // Its a success, so copy in the new status and response result
+                actionResultDetails.newStatus = resultDetails.newStatus;
+                actionResultDetails.responseResult = resultDetails.responseResult;
+            } else {
+                // Set the qualifier as the item has been returned by the patron
+                actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SHIP_ITEM;
+            }
         }
-      }
 
-      // At least one of our two calls failed
-      if (resultDetails.result != ActionResult.SUCCESS) {
-        // Failed so copy back the appropriate details so it can be diagnosed
-        actionResultDetails.responseResult = resultDetails.responseResult;
-        actionResultDetails.result = resultDetails.result;
-        actionResultDetails.auditMessage = resultDetails.auditMessage
-      }
+        // At least one of our two calls failed
+        if (resultDetails.result != ActionResult.SUCCESS) {
+            // Failed so copy back the appropriate details so it can be diagnosed
+            actionResultDetails.responseResult = resultDetails.responseResult;
+            actionResultDetails.result = resultDetails.result;
+            actionResultDetails.auditMessage = resultDetails.auditMessage
+        }
 
-      return(actionResultDetails);
+        return(actionResultDetails);
     }
 }

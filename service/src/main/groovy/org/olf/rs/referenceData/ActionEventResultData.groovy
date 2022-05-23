@@ -39,12 +39,25 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterISO18626Conditional = [
-        code: 'requesterISO18626LoanConditional',
+        code: 'requesterISO18626Conditional',
         description: 'An incoming ISO-18626 message for the requester has said that the status is Conditional',
         result: true,
         status: Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
-        qualifier: 'Conditional',
+        qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONAL,
         saveRestoreState: null,
+        fromStatus: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterISO18626NotificationConditionalExpectToSupply = [
+        code: 'requesterISO18626Conditional',
+        description: 'An incoming ISO-18626 message for the requester has said that the status is Conditional',
+        result: true,
+        status: Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONAL,
+//        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+        saveRestoreState: null,
+        fromStatus: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
         nextActionEvent: null
     ];
 
@@ -160,11 +173,81 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterBorrowerCheckOK = [
+        code: 'requesterBorrowerCheckOK',
+        description: 'The borrower id has been verified',
+        result: true,
+        status: Status.PATRON_REQUEST_VALIDATED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterBorrowerCheckInvalidPatronOK = [
+        code: 'requesterBorrowerCheckInvalidPatronOK',
+        description: 'The borrower id is not valid',
+        result: true,
+        status: Status.PATRON_REQUEST_INVALID_PATRON,
+        qualifier: ActionEventResultQualifier.QUALIFIER_INVALID_PATRON,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterBorrowerCheckHostLMSCallFailedOK = [
+        code: 'requesterBorrowerCheckHostLMSCallFailedOK',
+        description: 'Failed to talk to the host LMS to validate the patron',
+        result: true,
+        status: null,
+        qualifier: ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterCancelOK = [
         code: 'requesterCancelOK',
         description: 'Requester has said they want to cancel the request',
         result: true,
         status: Status.PATRON_REQUEST_CANCEL_PENDING,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterCancelLocalOK = [
+        code: 'requesterCancelLocalOK',
+        description: 'Requester is cancelling the request for a local item',
+        result: true,
+        status: Status.PATRON_REQUEST_CANCELLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterFillLocallyOK = [
+        code: 'requesterFillLocallyOK',
+        description: 'Requester is is fulfilling the request locally',
+        result: true,
+        status: Status.PATRON_REQUEST_FILLED_LOCALLY,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterLocalCannotSupplyOK = [
+        code: 'requesterLocalCannotSupplyOK',
+        description: 'Lcal supplier cannot supply',
+        result: true,
+        status: Status.PATRON_REQUEST_UNFILLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterManualCheckInOK = [
+        code: 'requesterManualCheckInOK',
+        description: 'Requester has manuually checked the item(s) into the local LMS',
+        result: true,
+        status: Status.PATRON_REQUEST_CHECKED_IN,
         qualifier: null,
         saveRestoreState: null,
         nextActionEvent: null
@@ -230,6 +313,36 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterPatronReturnedShippedOK = [
+        code: 'requesterPatronReturnedShippedOK',
+        description: 'The patron returned the item(s) and they have been shipped back to the responder',
+        result: true,
+        status: Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterPatronReturnedShippedShipItemFailure = [
+        code: 'requesterPatronReturnedShippedShipItemFailure',
+        description: 'The patron returned the item(s) but then we failed to return it to the supplier',
+        result: false,
+        status: Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING,
+        qualifier: ActionEventResultQualifier.QUALIFIER_SHIP_ITEM,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterPatronReturnedShippedFailure = [
+        code: 'requesterPatronReturnedShippedFailure',
+        description: 'We failed to receive the item back from the patron',
+        result: false,
+        status: null,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterRejectConditionsOK = [
         code: 'requesterRejectConditionsOK',
         description: 'Requester has rejected the conditions from the responder',
@@ -261,6 +374,27 @@ public class ActionEventResultData {
     ];
 
     // The responder actions
+    private static Map responderAddConditionalHoldingOK = [
+        code: 'responderAddConditionalHoldingOK',
+        description: 'Responder has added a conditional to the request placing the request on hold',
+        result: true,
+        status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+        qualifier: ActionEventResultQualifier.QUALIFIER_HOLDING,
+        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+        overrideSaveStatus: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderAddConditionalOK = [
+        code: 'responderAddConditionalOK',
+        description: 'Responder has added a conditional without placing the request on hold',
+        result: true,
+        status: null,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map responderAnwserYesOK = [
         code: 'responderAnwserYesOK',
         description: 'Responder has said that they will supply',
@@ -312,6 +446,46 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map responderCannotSupplyOK = [
+        code: 'responderCannotSupplyOK',
+        description: 'Responder is unable to supply the items',
+        result: true,
+        status: Status.RESPONDER_UNFILLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCheckInAndShipOK = [
+        code: 'responderCheckInAndShipOK',
+        description: 'Responder has successfully checked the item(s) out of the LMS into reshare and shipped the item',
+        result: true,
+        status: Status.RESPONDER_ITEM_SHIPPED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCheckInAndShipFailure = [
+        code: 'responderCheckInAndShipFailure',
+        description: 'Responder has failed to check the item(s) out of the LMS',
+        result: false,
+        status: Status.RESPONDER_AWAIT_PICKING,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCheckInAndShipCheckedInFailure = [
+        code: 'responderCheckInAndShipCheckedInFailure',
+        description: 'Responder has successfully checked the item(s) into reshare but failed to ship the item(s)',
+        result: false,
+        status: Status.RESPONDER_AWAIT_SHIP,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CHECKED_IN,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map responderCheckInToReshareOK = [
         code: 'responderCheckInToReshareOK',
         description: 'Responder has successfully checked the items out of the LMS into reshare',
@@ -327,6 +501,16 @@ public class ActionEventResultData {
         description: 'Responder has failed to check out 1 or more items out of the LMS into reshare',
         result: false,
         status: Status.RESPONDER_AWAIT_PICKING,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderManualCheckOutOK = [
+        code: 'responderManualCheckOutOK',
+        description: 'Responder has manually checked it out from the LMS',
+        result: false,
+        status: Status.RESPONDER_AWAIT_SHIP,
         qualifier: null,
         saveRestoreState: null,
         nextActionEvent: null
@@ -451,7 +635,8 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -482,7 +667,8 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -491,7 +677,8 @@ public class ActionEventResultData {
         description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterISO18626Loaned
+            requesterISO18626Loaned,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -502,7 +689,18 @@ public class ActionEventResultData {
         results: [
             requesterISO18626Conditional,
             requesterISO18626Loaned,
-            requesterISO18626Unfilled
+            requesterISO18626Unfilled,
+            defaultNoStatusChangeOK
+        ]
+    ];
+
+    private static Map requesterNotificationReceivedISO18626 = [
+        code: ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626,
+        description: 'An incoming ISO18626 notifications has been received by the requester',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            requesterISO18626NotificationConditionalExpectToSupply,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -513,7 +711,8 @@ public class ActionEventResultData {
         results: [
             requesterISO18626LoanCompleted,
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -524,7 +723,8 @@ public class ActionEventResultData {
         results: [
             requesterISO18626LoanCompleted,
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -535,7 +735,8 @@ public class ActionEventResultData {
         results: [
             requesterISO18626Conditional,
             requesterISO18626ExpectToSupply,
-            requesterISO18626Unfilled
+            requesterISO18626Unfilled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -545,7 +746,8 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -556,7 +758,8 @@ public class ActionEventResultData {
         results: [
             requesterISO18626LoanCompleted,
             requesterISO18626Overdue,
-            requesterISO18626Recalled
+            requesterISO18626Recalled,
+            defaultNoStatusChangeOK
         ]
     ];
 
@@ -606,16 +809,63 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map requesterBorrowerCheckList = [
+        code: ActionEventResultList.REQUESTER_BORROWER_CHECK,
+        description: 'Requester is validating the user against the LMS',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterBorrowerCheckOK,
+            requesterBorrowerCheckInvalidPatronOK,
+            requesterBorrowerCheckHostLMSCallFailedOK
+        ]
+    ];
+
     private static Map requesterCancelList = [
         code: ActionEventResultList.REQUESTER_CANCEL,
-        description: 'Requester has that the request be cancelled',
+        description: 'Requester has requested that the request be cancelled',
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterCancelOK
         ]
     ];
 
-    private static Map requesterCloseManualList = [
+    private static Map requesterCancelLocalList = [
+        code: ActionEventResultList.REQUESTER_CANCEL_LOCAL,
+        description: 'Requester has requested that the request be cancelled',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterCancelLocalOK
+        ]
+    ];
+
+    private static Map requesterFilledLocallyList = [
+        code: ActionEventResultList.REQUESTER_FILLED_LOCALLY,
+        description: 'Requester has fulfilled the request locally',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterFillLocallyOK
+        ]
+    ];
+
+    private static Map requesterLocalCannotSupplyList = [
+        code: ActionEventResultList.REQUESTER_LOCAL_CANNOT_SUPPLY,
+        description: 'It cannot be supplied locally',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterLocalCannotSupplyOK
+        ]
+    ];
+
+    private static Map requesterManualCheckInList = [
+        code: ActionEventResultList.REQUESTER_MANUAL_CHECK_IN,
+        description: 'Requester has manually chcked the item(s) into the local LMS',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterManualCheckInOK
+        ]
+    ];
+
+    private static Map requesterManualCloseList = [
         code: ActionEventResultList.REQUESTER_CLOSE_MANUAL,
         description: 'Requester is manually closing down the request',
         model: StateModel.MODEL_REQUESTER,
@@ -646,6 +896,17 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map requesterPatronReturnedShippedList = [
+        code: ActionEventResultList.REQUESTER_PATRON_RETURNED_SHIPPED,
+        description: 'Patron has returned and it has been returned to the responder',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterPatronReturnedShippedOK,
+            requesterPatronReturnedShippedShipItemFailure,
+            requesterPatronReturnedShippedFailure
+        ]
+    ];
+
     private static Map requesterReceivedList = [
         code: ActionEventResultList.REQUESTER_RECEIVED,
         description: 'Requester has received the item',
@@ -670,6 +931,16 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterShippedReturnOK
+        ]
+    ];
+
+    private static Map responderAddConditionalList = [
+        code: ActionEventResultList.RESPONDER_ADD_CONDITIONAL,
+        description: 'The responder is adding a conditional',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderAddConditionalHoldingOK,
+            responderAddConditionalOK
         ]
     ];
 
@@ -702,6 +973,26 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map responderCannotSupplyList = [
+        code: ActionEventResultList.RESPONDER_CANNOT_SUPPLY,
+        description: 'The responder cannot supply the item(s)',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderCannotSupplyOK
+        ]
+    ];
+
+    private static Map responderCheckInAndShipList = [
+        code: ActionEventResultList.RESPONDER_CHECK_IN_AND_SHIP,
+        description: 'The responder checks the item(s) into reshare and ships them',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderCheckInAndShipOK,
+            responderCheckInAndShipFailure,
+            responderCheckInAndShipCheckedInFailure
+        ]
+    ];
+
     private static Map responderCheckInToReshareList = [
         code: ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE,
         description: 'The responder has said that they will supply the item(s) ',
@@ -731,6 +1022,15 @@ public class ActionEventResultData {
         model: StateModel.MODEL_RESPONDER,
         results: [
             responderItemReturnedOK
+        ]
+    ];
+
+    private static Map responderManualCheckOutList = [
+        code: ActionEventResultList.RESPONDER_MANUAL_CHECK_OUT,
+        description: 'The responder has manually checked the item(s) out of the LMS',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderManualCheckOutOK
         ]
     ];
 
@@ -774,21 +1074,31 @@ public class ActionEventResultData {
     private static Map[] allResultLists = [
         // Requester lists
         requesterAgreeConditionsList,
+        requesterBorrowerCheckList,
         requesterCancelList,
-        requesterCloseManualList,
+        requesterCancelLocalList,
+        requesterFilledLocallyList,
+        requesterLocalCannotSupplyList,
+        requesterManualCheckInList,
+        requesterManualCloseList,
         requesterNoStatusChangeList,
         requesterPatronReturnedList,
+        requesterPatronReturnedShippedList,
         requesterReceivedList,
         requesterRejectConditionsList,
         requesterShippedReturnList,
 
         // Responder lists
+        responderAddConditionalList,
         responderAnswerConditionalList,
         responderAnswerYesList,
         responderCancelList,
+        responderCannotSupplyList,
+        responderCheckInAndShipList,
         responderCheckInToReshareList,
         responderCloseManualList,
         responderItemReturnedList,
+        responderManualCheckOutList,
         responderMarkConditionsAgreedList,
         responderMarkShippedList,
         responderNoStatusChangeList,
@@ -802,6 +1112,7 @@ public class ActionEventResultData {
         requesterCheckedInISO18626,
         requesterConditionalAnswerReceivedISO18626,
         requesterExpectToSupplyISO18626,
+        requesterNotificationReceivedISO18626,
         requesterOverdueISO18626,
         requesterRecalledISO18626,
         requesterSentToSupplierISO18626,
