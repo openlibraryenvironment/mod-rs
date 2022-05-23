@@ -187,11 +187,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
       }
 
-      o.preference = loc.supplyPreference ?: 0;
+      o.preference = loc?.supplyPreference ?: 0;
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
-      o.shelvingPreference = sls.supplyPreference != null ? sls.supplyPreference : (sl.supplyPreference ?: 0);
+      o.shelvingPreference = sls?.supplyPreference != null ? sls?.supplyPreference : (sl?.supplyPreference ?: 0);
     }
 
     List<ItemLocation> sorted_options = options.findAll { it.preference >= 0 && it.shelvingPreference >= 0 }.sort {
@@ -287,7 +287,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( z_response?.numberOfRecords == 1 ) {
         // Got exactly 1 record
         Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
-        if ( availability_summary.size() > 0 ) {
+        if ( availability_summary?.size() > 0 ) {
           availability_summary.values().each { v ->
             result.add(v);
           }
@@ -324,7 +324,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       if ( (z_response?.numberOfRecords?.text() as int) > 0 ) {
         Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
-        if ( availability_summary.size() > 0 ) {
+        if ( availability_summary?.size() > 0 ) {
           availability_summary.values().each { v ->
             result.add(v)
           }
