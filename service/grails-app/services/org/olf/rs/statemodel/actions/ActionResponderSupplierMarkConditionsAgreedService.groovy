@@ -44,10 +44,6 @@ public class ActionResponderSupplierMarkConditionsAgreedService extends ActionRe
 
         actionResultDetails.auditMessage = 'Conditions manually marked as agreed';
         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER]);
-
-        // No longer need to have the state saved prior to the conditions being added
-        request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER] = null;
-
         return(actionResultDetails);
     }
 }

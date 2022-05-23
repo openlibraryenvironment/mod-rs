@@ -3,6 +3,11 @@ package org.olf.rs.statemodel;
 public class Actions {
 
 	// Responder actions
+    static public final String ACTION_RESPONDER_ISO18626_CANCEL                              = "ISO18626Cancel";
+    static public final String ACTION_RESPONDER_ISO18626_NOTIFICATION                        = "ISO18626Notification";
+    static public final String ACTION_RESPONDER_ISO18626_RECEIVED                            = "ISO18626Received";
+    static public final String ACTION_RESPONDER_ISO18626_SHIPPED_RETURN                      = "ISO18626ShippedReturn";
+    static public final String ACTION_RESPONDER_ISO18626_STATUS_REQUEST                      = "ISO18626StatusRequest";
 	static public final String ACTION_RESPONDER_ITEM_RETURNED                   			 = "itemReturned";
 	static public final String ACTION_RESPONDER_RESPOND_YES                     			 = "respondYes";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_CONDITION          			 = "supplierAddCondition";
@@ -22,6 +27,12 @@ public class Actions {
 	static public final String ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE      	 = "borrowerCheckOverride";
 	static public final String ACTION_REQUESTER_CANCEL_LOCAL                 	 = "cancelLocal";
 	static public final String ACTION_REQUESTER_FILL_LOCALLY                 	 = "fillLocally";
+    static public final String ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE         = "ISO18626CancelResponse";
+    static public final String ACTION_REQUESTER_ISO18626_NOTIFICATION            = "ISO18626Notification";
+    static public final String ACTION_REQUESTER_ISO18626_RENEW_RESPONSE          = "ISO18626RenewResponse";
+    static public final String ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE        = "ISO18626RequestResponse";
+    static public final String ACTION_REQUESTER_ISO18626_STATUS_CHANGE           = "ISO18626StatusChange";
+    static public final String ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE = "ISO18626StatusRequestResponse";
 	static public final String ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY 	 = "localSupplierCannotSupply";
 	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM         	 = "patronReturnedItem";
 	static public final String ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS   	 = "requesterAgreeConditions";

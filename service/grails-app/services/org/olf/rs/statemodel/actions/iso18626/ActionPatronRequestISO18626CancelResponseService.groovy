@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StateModel;
@@ -55,8 +56,7 @@ public class ActionPatronRequestISO18626CancelResponseService extends ActionISO1
                         // Is this always the correct way of doing it ?
                         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, request.previousStates[request.state.code]);
                         actionResultDetails.auditMessage = 'Supplier denied cancellation.';
-                        actionResultDetails.qualifier = 'cancelNo';
-                        request.previousStates[request.state.code] = null;
+                        actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
                         break;
 
                     default:

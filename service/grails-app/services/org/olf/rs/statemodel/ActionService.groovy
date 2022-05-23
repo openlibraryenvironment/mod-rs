@@ -11,6 +11,7 @@ import grails.util.Holders;
 public class ActionService {
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+    StatusService statusService;
 
     /** Holds map of the action to the bean that will do the processing for this action */
     private Map serviceActions = [ : ];
@@ -24,19 +25,12 @@ public class ActionService {
 
         // Can only continue if we have been supplied the values
         if (action && status) {
-            // The action message is available to all states except the terminal ones and the actions messageSeen and messageAllSeen are available for all states
-            if (((action == Actions.ACTION_MESSAGE) && !status.terminal) ||
-                (action == Actions.ACTION_MESSAGE_SEEN) ||
-                (action == Actions.ACTION_MESSAGES_ALL_SEEN)) {
-                isValid = true;
-            } else {
-                // Get hold of the state model id
-                StateModel stateModel = StateModel.getStateModel(isRequester);
-                if (stateModel) {
-                    // It is a valid state model
-                    // Now is this a valid action for this state
-                    isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
-                }
+            // Get hold of the state model id
+            StateModel stateModel = StateModel.getStateModel(isRequester);
+            if (stateModel) {
+                // It is a valid state model
+                // Now is this a valid action for this state
+                isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
             }
         }
         return(isValid);
@@ -91,11 +85,31 @@ public class ActionService {
             resultDetails.auditMessage = 'Failed to find class for action: ' + action;
         } else {
             // Just tell the class to do its stuff
-            actionBean.performAction(request, parameters, resultDetails);
+            resultDetails = actionBean.performAction(request, parameters, resultDetails);
+        }
+
+        // Now lookup what we will set the status to
+        Status newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS);
+        String newStatusId = newStatus.id;
+
+        // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
+        if (!resultDetails.newStatus.id.equals(newStatusId)) {
+            String message = 'Hard coded status (' + resultDetails.newStatus.code +
+                             ') is not the same as the calculated status (' + newStatus.code +
+                              ') for action ' + action +
+                              ' with result ' + resultDetails.result.toString() +
+                              ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
+            log.error(message);
+            reshareApplicationEventHandlerService.auditEntry(
+                request,
+                currentState,
+                currentState,
+                message,
+                null);
         }
 
         // Set the status of the request
-        request.state = resultDetails.newStatus;
+        request.state = newStatus;
 
         // Adding an audit entry so we can see what states we are going to for the event
         // Do not commit this uncommented, here to aid seeing what transition changes we allow

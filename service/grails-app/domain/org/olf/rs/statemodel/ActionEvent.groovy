@@ -41,7 +41,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
          resultList column: 'ae_result_list'
     }
 
-    public static ActionEvent ensure(String code, String description, boolean isAction, ActionEventResultList resultList) {
+    public static ActionEvent ensure(String code, String description, boolean isAction, String resultListCode) {
         // Lookup to see if the code exists
         ActionEvent actionEvent = findByCode(code);
 
@@ -56,7 +56,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         // Just update the other fields as something may have changed
         actionEvent.description = description;
         actionEvent.isAction = isAction;
-        actionEvent.resultList = resultList;
+        actionEvent.resultList = ActionEventResultList.lookup(resultListCode);
 
         // and save it
         actionEvent.save(flush:true, failOnError:true);

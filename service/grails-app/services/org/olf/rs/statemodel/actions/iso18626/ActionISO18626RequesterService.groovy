@@ -138,6 +138,9 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         log.debug("handleStatusChange(${request.id},${statusInfo})");
 
         if (statusInfo.status) {
+            // Set the qualifier on the result
+            actionResultDetails.qualifier = statusInfo.status;
+
             // Lookup what we should set the status to
             ActionEventResult actionEventResult = statusService.findResult(request.state, Actions.ACTION_INCOMING_ISO18626, true, statusInfo.status);
 
