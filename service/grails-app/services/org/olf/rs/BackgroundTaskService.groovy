@@ -8,7 +8,6 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.timers.AbstractTimer;
@@ -90,24 +89,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
         // Generate and log patron requests at a pick location we don't know about
         reportMissingPickLocations()
-
-        // Find all patron requesrs where the current state has a System action attached that can be executed.
-        PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each {  pr ->
-          AvailableAction aa = (AvailableAction) pr[1]
-          log.debug("Apply system action ${pr[1]} to patron request ${pr[0]}");
-          switch ( aa.actionType ) {
-            case 'S':
-              log.debug("service action");
-              break;
-            case 'C':
-              log.debug("closure action");
-              break;
-            default:
-              log.debug("No action type for action ${aa}");
-              break;
-          }
-
-        }
 
         //Find any supplier-side PatronRequests that have become overdue
         log.debug("Checking for overdue PatronRequests");
