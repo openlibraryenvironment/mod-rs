@@ -21,7 +21,7 @@ import grails.util.Holders;
 import groovy.json.JsonSlurper;
 
 /**
- * The interface between mod-rs and the shared index is defined by this service.
+ * This handles the background tasks, these are triggered by the folio 2 minute timer
  *
  */
 public class BackgroundTaskService {
