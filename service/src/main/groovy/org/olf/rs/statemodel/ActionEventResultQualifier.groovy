@@ -15,6 +15,7 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_CLOSE_UNFILLED       = 'RES_UNFILLED';
     static public final String QUALIFIER_CONDITIONAL          = 'Conditional';
     static public final String QUALIFIER_CONDITIONS_AGREED    = 'conditionsAgreed';
+    static public final String QUALIFIER_EXPECT_TO_SUPPLY     = 'ExpectToSupply';
     static public final String QUALIFIER_HOLDING              = 'holding';
     static public final String QUALIFIER_HOST_LMS_CALL_FAILED = 'hostLMSCallFailed';
     static public final String QUALIFIER_INVALID_PATRON       = 'invalidPatron';

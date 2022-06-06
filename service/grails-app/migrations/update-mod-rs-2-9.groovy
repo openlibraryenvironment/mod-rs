@@ -26,4 +26,9 @@ databaseChangeLog = {
 
         addForeignKeyConstraint(baseColumnNames: "aer_from_state", baseTableName: "action_event_result", constraintName: "FKde3d1w46dlb59n70g1uxsutma", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
     }
+
+    changeSet(author: "Chas", id: "20220606170500-01") {
+        // Need a unique index on the 2 fields
+        addUniqueConstraint(columnNames: "action_event_result_list_results_id, action_event_result_id", tableName: "action_event_result_list_action_event_result")
+    }
 }
