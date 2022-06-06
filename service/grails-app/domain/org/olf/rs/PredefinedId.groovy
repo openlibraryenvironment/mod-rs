@@ -20,8 +20,12 @@ class PredefinedId implements MultiTenant<PredefinedId> {
         return(UUID.nameUUIDFromBytes(predefinedId.getBytes()).toString());
     }
 
+    static PredefinedId lookupReference(String namespace, String id) {
+        return(get(createUUIDv3(namespace, id)));
+    }
+
     static String lookupReferenceId(String namespace, String id) {
-        PredefinedId predefinedId = get(createUUIDv3(namespace, id));
+        PredefinedId predefinedId = lookupReference(namespace, id);
 
         // Return the id it references, if the association has been created
         return(predefinedId?.referencesId);
@@ -30,12 +34,15 @@ class PredefinedId implements MultiTenant<PredefinedId> {
     static void ensureExists(String namespace, String id, String referencesId) {
 
         // Create a new reference, but not if it already exists
-        if (lookupReferenceId(namespace, id) == null) {
+        PredefinedId predefinedId = lookupReference(namespace, id);
+        if (predefinedId == null) {
             // Dosn't already exist, so create
-            PredefinedId predefinedId = new PredefinedId();
+            predefinedId = new PredefinedId();
             predefinedId.id = createUUIDv3(namespace, id);
-            predefinedId.referencesId = referencesId;
-            predefinedId.save(flush:true, failOnError:true);
         }
+
+        // We always update the reference in case it has changed
+        predefinedId.referencesId = referencesId;
+        predefinedId.save(flush:true, failOnError:true);
     }
 }

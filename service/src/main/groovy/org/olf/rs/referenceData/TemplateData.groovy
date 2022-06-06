@@ -55,14 +55,12 @@ public class TemplateData {
                 } else {
                     // Excellent start let us see if we already have this template
                     String localizedTemplateId = getReferencedId('localized_template', parsedJson.template.predefinedId);
-                    LocalizedTemplate localizedTemplate;
-                    if (localizedTemplateId == null) {
+                    LocalizedTemplate localizedTemplate = ((localizedTemplateId == null) ? null : LocalizedTemplate.get(localizedTemplateId));
+
+                    if (localizedTemplate == null) {
                         // didn't previously exist, so we need to create a new template
                         localizedTemplate = new LocalizedTemplate();
                         localizedTemplate.locality = 'en';
-                    } else {
-                        // It does already exist
-                        localizedTemplate = LocalizedTemplate.get(localizedTemplateId);
                     }
 
                     // Ensure the localized template has a template
@@ -79,17 +77,15 @@ public class TemplateData {
 
                     // Now look to see if the container exists
                     String templateContainerId = getReferencedId('template_container', parsedJson.predefinedId);
-                    TemplateContainer  templateContainer;
-                    if (templateContainerId == null) {
+                    TemplateContainer templateContainer = ((templateContainerId == null) ? null : TemplateContainer.get(templateContainerId));
+
+                    if (templateContainer == null) {
                         // We need to create a new template container
                         templateContainer = new TemplateContainer();
                         templateContainer.context = 'noticeTemplate';
 
                         // This appears to have a default, but dosn't seem to kick in before validation
                         templateContainer.templateResolver = RefdataValue.lookupOrCreate(VOCABULARY_TEMPLATE_RESOLVER, TEMPLATE_RESOLVER_HANDLEBARS);
-                    } else {
-                        // It does already exist
-                        templateContainer = TemplateContainer.get(templateContainerId);
                     }
 
                     // Set the name and description
@@ -117,6 +113,15 @@ public class TemplateData {
 
                     // Now we have a template we now need to create a notice policy and notice policy notice records but we only do this once
                     String noticePolicyId = getReferencedId('notice_policy', parsedJson.predefinedId);
+                    if (noticePolicyId != null) {
+                        // Check it exists
+                        if (NoticePolicy.get(noticePolicyId) == null) {
+                            // Dosn't exists, so reset the policyId back to null
+                            noticePolicyId = null;
+                        }
+                    }
+
+                    // Does the notice policy exist
                     if (noticePolicyId == null) {
                         NoticePolicy noticePolicy = new NoticePolicy();
                         noticePolicy.name = parsedJson.name;
