@@ -90,7 +90,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
           topics = tenant_list.collect { "${it}_mod_rs_PatronRequestEvents".toString() } +
                    tenant_list.collect { "${it}_mod_directory_DirectoryEntryUpdate".toString() }
 
-        log.debug("Listening out for topics : ${topics}");
+        log.info("this instance of mod-rs (${grailsApplication.config?.info?.app?.version}) is listening out for topics : ${topics}");
+
         tenant_list_updated = false;
         consumer.subscribe(topics)
         while ( ( tenant_list_updated == false ) && ( running == true ) ) {
