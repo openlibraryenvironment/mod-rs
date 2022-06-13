@@ -146,7 +146,7 @@ public class ReshareApplicationEventHandlerService {
                                     }
 
 									// Set the status of the request
-									request.state = resultDetails.newStatus;
+									request.state = newStatus;
 
 									// Adding an audit entry so we can see what states we are going to for the event
 									// Do not commit this uncommented, here to aid seeing what transition changes we allow
