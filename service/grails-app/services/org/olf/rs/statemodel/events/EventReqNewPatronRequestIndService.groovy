@@ -9,8 +9,8 @@ import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SharedIndexService
-import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
@@ -23,41 +23,20 @@ import groovy.json.JsonSlurper;
 import groovy.sql.Sql;
 
 /**
- * This event service takes a new patron request and validates it and tries to determine the rota
+ * This event service takes a new requester patron request and validates it and tries to determine the rota
  * @author Chas
  */
-public class EventNewpatronrequestIndService extends AbstractEvent {
+public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
-    private static final String[] PATRON_REQUEST_FROM_STATES = [
+    private static final String[] FROM_STATES = [
         Status.PATRON_REQUEST_IDLE
     ];
 
-    private static final String[] RESPONDER_FROM_STATES = [
-        Status.RESPONDER_IDLE
-    ];
-
-    private static final Map FROM_STATES =  [ : ];
-
-    private static final String[] PATRON_REQUEST_TO_STATES = [
+    private static final String[] TO_STATES = [
         Status.PATRON_REQUEST_ERROR,
         Status.PATRON_REQUEST_INVALID_PATRON,
         Status.PATRON_REQUEST_VALIDATED
     ];
-
-    private static final String[] RESPONDER_TO_STATES = [
-        Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
-        Status.RESPONDER_UNFILLED
-    ];
-
-    private static final Map TO_STATES = [ : ];
-
-    static {
-        FROM_STATES.put(StateModel.MODEL_REQUESTER, PATRON_REQUEST_FROM_STATES);
-        FROM_STATES.put(StateModel.MODEL_RESPONDER, RESPONDER_FROM_STATES);
-
-        TO_STATES.put(StateModel.MODEL_REQUESTER, PATRON_REQUEST_TO_STATES);
-        TO_STATES.put(StateModel.MODEL_RESPONDER, RESPONDER_TO_STATES);
-    }
 
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
@@ -66,7 +45,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 
     @Override
     String name() {
-        return(Events.EVENT_NEW_PATRON_REQUEST_INDICATION);
+        return(Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION);
     }
 
     @Override
@@ -81,31 +60,28 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
 
     @Override
     String[] toStates(String model) {
-        return(TO_STATES[model]);
+        return(TO_STATES);
     }
 
     @Override
     String[] fromStates(String model) {
-        return(FROM_STATES[model]);
+        return(FROM_STATES);
     }
 
     @Override
     boolean supportsModel(String model) {
         // This event
-        return((model == StateModel.MODEL_REQUESTER) || (StateModel.MODEL_RESPONDER));
+        return((model == StateModel.MODEL_REQUESTER));
     }
 
-    // Notify us of a new patron request in the database - regardless of role
+    // Notify us of a new requester patron request in the database
     //
     // Requests are created with a STATE of IDLE, this handler validates the request and sets the state to VALIDATED, or ERROR
     // Called when a new patron request indication happens - usually
     // New patron requests must have a  request.requestingInstitutionSymbol
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
-        // If the role is requester then validate the request and set the state to validated
-        if ((request != null) &&
-            (request.state?.code == Status.PATRON_REQUEST_IDLE) &&
-            (request.isRequester == true)) {
+        if (request != null) {
             // Generate a human readabe ID to use
             request.hrid = generateHrid()
             log.debug("set request.hrid to ${request.hrid}");
@@ -151,10 +127,12 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
                         request.needsAttention = true;
                         log.warn("Unkown requesting institution symbol : ${request.requestingInstitutionSymbol}");
                         eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_ERROR);
+                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
                         eventResultDetails.auditMessage = 'Unknown Requesting Institution Symbol: ' + request.requestingInstitutionSymbol;
                     } else {
                         // If we're here then the requesting institution symbol was fine but the patron is invalid
                         eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
+                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
                         String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
                         String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
                         eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString();
@@ -167,6 +145,7 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
                 }
             } else {
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_ERROR);
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
                 request.needsAttention = true;
                 eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
             }
@@ -203,21 +182,6 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
             } else {
                 log.debug("No request.bibliographicRecordId : ${request.bibliographicRecordId}");
             }
-        } else if ((request != null) &&
-                   (request.state?.code == Status.RESPONDER_IDLE) &&
-                   (request.isRequester == false)) {
-            try {
-                log.debug('Launch auto responder for request');
-                String autoRespondSetting = AppSetting.findByKey('auto_responder_status')?.value
-                if (autoRespondSetting?.toLowerCase().startsWith('on')) {
-                    autoRespond(request, autoRespondSetting.toLowerCase(), eventResultDetails);
-                } else {
-                    eventResultDetails.auditMessage = "Auto responder is ${autoRespondSetting} - manual checking needed";
-                    request.needsAttention = true;
-                }
-            } catch (Exception e) {
-                log.error("Problem in auto respond: ${e.getMessage()}", e);
-            }
         } else {
             log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${request?.isRequester}");
         }
@@ -251,42 +215,5 @@ public class EventNewpatronrequestIndService extends AbstractEvent {
             return matcher.group(2);
         }
         return(null);
-    }
-
-    private void autoRespond(PatronRequest request, String autoRespondVariant, EventResultDetails eventResultDetails) {
-        log.debug('autoRespond....');
-
-        // Use the hostLMSService to determine the best location to send a pull-slip to
-        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(request);
-
-        log.debug("result of determineBestLocation = ${location}");
-
-        // Were we able to locate a copy?
-        boolean unfilled = false;
-        if (location != null) {
-            // set localCallNumber to whatever we managed to look up
-            if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
-                eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
-                log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                reshareActionService.sendResponse(request,  'ExpectToSupply', [:])
-            } else {
-                unfilled = true;
-                eventResultDetails.auditMessage = 'AutoResponder Failed to route to location ' + location;
-            }
-        } else {
-            // No - is the auto responder set up to sent not-supplied?
-            if (autoRespondVariant == 'on:_will_supply_and_cannot_supply') {
-                unfilled = true;
-                eventResultDetails.auditMessage = 'AutoResponder cannot locate a copy.';
-            }
-        }
-
-        // If it was unfilled then send a response
-        if (unfilled == true) {
-            log.debug("Send unfilled(No copy) response to ${request.requestingInstitutionSymbol}");
-            reshareActionService.sendResponse(request,  'Unfilled', ['reason':'No copy']);
-            eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED);
-        }
     }
 }

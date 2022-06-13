@@ -6,6 +6,7 @@ import org.olf.rs.RequestRouterService;
 import org.olf.rs.routing.RankedSupplier;
 import org.olf.rs.routing.RequestRouter;
 import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
@@ -69,11 +70,13 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
         // We only deal with requester requests that are in the state validated
         if ((request.isRequester == true) && (request.state?.code == Status.PATRON_REQUEST_VALIDATED)) {
             eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SOURCING_ITEM);
+            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SOURCING;
             eventResultDetails.auditMessage = 'Sourcing potential items';
 
             if (request.rota?.size() != 0) {
                 log.debug(' -> Request is currently ' + Status.PATRON_REQUEST_SOURCING_ITEM + ' - transition to ' + Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
+                eventResultDetails.qualifier = null;
                 eventResultDetails.auditMessage = 'Request supplied with Lending String';
             } else {
                 Map operationData = [ : ];
@@ -122,11 +125,13 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
 
                     // Procesing
                     eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
+                    eventResultDetails.qualifier = null;
                     eventResultDetails.auditMessage = 'Ratio-Ranked lending string calculated by ' + selectedRouter.getRouterInfo()?.description;
                 } else {
                     // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
                     log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
                     eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                     eventResultDetails.auditMessage =  'Unable to locate lenders';
                 }
             }

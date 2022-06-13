@@ -16,6 +16,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_CANCEL                              = 'requesterCancel';
     static public final String REQUESTER_CANCEL_LOCAL                        = 'requesterCancelLocal';
     static public final String REQUESTER_CANCEL_PENDING_ISO18626             = 'requesterCancelPendingISO18626';
+    static public final String REQUESTER_CANCEL_WITH_SUPPLER_INDICATION      = 'requesterCancelWithSupplierIndList';
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
     static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
@@ -35,16 +36,23 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_SHIPPED_ISO18626                    = 'requesterShippedISO18626';
     static public final String REQUESTER_SHIPPED_RETURN                      = 'requesterShippedReturn';
     static public final String REQUESTER_SHIPPED_TO_SUPPLIER_ISO18626        = 'requesterShippedToSupplierISO18626';
+    static public final String REQUESTER_SEND_TO_NEXT_LOCATION               = 'requesterSendToNextLocationList';
+    static public final String REQUESTER_VALIDATE_INDICATION                 = 'requesterValidateIndList';
+
+    // Requester event lists
+    static public final String REQUESTER_EVENT_NEW_PATRON_REQUEST = 'requesterNewPatronRequestIndList';
 
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
     static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';
     static public final String RESPONDER_ANWSER_YES                     = 'responderAnswerYes';
     static public final String RESPONDER_CANCEL                         = 'responderCancel';
+    static public final String RESPONDER_CANCEL_RECEIVED_INDICATION     = 'responderCancelRequestReceivedInd';
     static public final String RESPONDER_CANCEL_RECEIVED_ISO18626       = 'responderCancelReceivedISO18626';
     static public final String RESPONDER_CANNOT_SUPPLY                  = 'responderCannotSupply';
     static public final String RESPONDER_CHECK_IN_AND_SHIP              = 'responderCheckInAndShip';
     static public final String RESPONDER_CHECK_INTO_RESHARE             = 'responderCheckInToReshare';
+    static public final String RESPONDER_CHECKED_INTO_RESHARE_IND       = 'responderCheckedIntoReshareInd';
     static public final String RESPONDER_CLOSE_MANUAL                   = 'responderCloseManual';
     static public final String RESPONDER_ITEM_RETURNED                  = 'responderItemReturned';
     static public final String RESPONDER_MANUAL_CHECK_OUT               = 'responderManualCheckOut';
@@ -56,6 +64,10 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String RESPONDER_RECEIVED_ISO18626              = 'responderReceivedISO18626';
     static public final String RESPONDER_SHIPPED_RETURN_ISO18626        = 'responderShippedReturnISO18626';
     static public final String RESPONDER_STATUS_REQUEST_ISO18626        = 'responderStausRequestISO18626';
+
+    // Responder event lists
+    static public final String RESPONDER_EVENT_NEW_PATRON_REQUEST = 'responderNewPatronRequestIndList';
+
 
     /** The id of the list */
     String id;

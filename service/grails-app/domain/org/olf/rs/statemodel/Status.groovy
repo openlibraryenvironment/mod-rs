@@ -172,7 +172,7 @@ class Status implements MultiTenant<Status> {
       StateModel stateModel = StateModel.findByShortcode(modelCode);
       if (stateModel) {
           DetachedCriteria<Status> activeCriteria = where {
-              owner.id == stateModel.id && stage == StatusStage.ACTIVE
+              owner.id == stateModel.id && ((stage == StatusStage.ACTIVE) || (stage == StatusStage.ACTIVE_SHIPPED))
           }
           result = activeCriteria.list();
       }

@@ -10,6 +10,7 @@ import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.StateModel;
@@ -122,6 +123,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
 
                             if (doLocalReview) {
                                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW);
+                                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW;
                                 eventResultDetails.auditMessage = 'Sent to local review';
                                 return(eventResultDetails);  //Nothing more to do here
                             } else {
@@ -199,6 +201,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                     // END OF ROTA
                     log.warn('sendToNextLender reached the end of the lending string.....');
                     eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                     eventResultDetails.auditMessage = 'End of rota';
                 }
             } else {

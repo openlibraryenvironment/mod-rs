@@ -1,24 +1,14 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants;
-import grails.util.Holders;
-import groovy.util.logging.Slf4j;
-import org.olf.rs.PatronRequest;
-import org.grails.datastore.mapping.engine.event.PostDeleteEvent
-import org.grails.datastore.mapping.engine.event.PostInsertEvent
-import org.grails.datastore.mapping.engine.event.PreInsertEvent
-import org.grails.datastore.mapping.engine.event.PostUpdateEvent
-import org.grails.datastore.mapping.engine.event.SaveOrUpdateEvent
-
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
-
-import javax.annotation.PostConstruct;
-import groovy.transform.CompileStatic
+import org.grails.datastore.mapping.engine.event.PostInsertEvent
+import org.grails.datastore.mapping.engine.event.PostUpdateEvent
+import org.grails.datastore.mapping.engine.event.PreInsertEvent
+import org.grails.datastore.mapping.engine.event.SaveOrUpdateEvent
+import org.olf.rs.statemodel.Events;
 import org.springframework.context.ApplicationListener
-import org.springframework.context.ApplicationEvent
 
-import org.grails.orm.hibernate.AbstractHibernateDatastore
-import grails.gorm.transactions.Transactional
+import grails.gorm.multitenancy.Tenants;
 
 
 /**
@@ -44,11 +34,12 @@ public class AppListenerService implements ApplicationListener {
       String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
+      String eventName = (pr.isRequester ? Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION : Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION);
       eventPublicationService.publishAsJSON(
           topic,
           null,             // key
           [
-            event:'NewPatronRequest_ind',
+            event:eventName,
             tenant: tenant,
             oid:'org.olf.rs.PatronRequest:'+pr.id,
             payload:[

@@ -142,7 +142,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             actionResultDetails.qualifier = statusInfo.status;
 
             // Lookup what we should set the status to
-            ActionEventResult actionEventResult = statusService.findResult(request.state, Actions.ACTION_INCOMING_ISO18626, true, statusInfo.status);
+            ActionEventResult actionEventResult = statusService.findResult(request.state, Actions.ACTION_INCOMING_ISO18626, true, statusInfo.status, true);
 
             // Did we find a result
             if (actionEventResult != null) {

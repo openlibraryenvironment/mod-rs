@@ -29,9 +29,10 @@ public class StatusService {
      * @param actionCode The action code that has been performed
      * @param successful Was the execution of the action successful
      * @param qualifier A qualifier for looking up the result
+     * @param availableActionMustExist If trye it means an AvailableAction record must exist
      * @return An ActionEventResult that informs us what to do on completion of the ActionEvent
      */
-    public ActionEventResult findResult(Status fromStatus, String actionCode, boolean successful, String qualifier) {
+    public ActionEventResult findResult(Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
         // We return null if we could not find a status
         ActionEventResult actionEventResult = null;
 
@@ -40,14 +41,25 @@ public class StatusService {
             // Get hold of the ActionEvent
             ActionEvent actionEvent = ActionEvent.lookup(actionCode);
             if (actionEvent != null) {
-                // Get hold of the AvailableAction
-                AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, fromStatus.owner);
-                if (availableAction != null) {
-                    // Now do we have a resultList on the availableAction
-                    if (availableAction.resultList != null) {
-                        actionEventResult = availableAction.resultList.lookupResult(successful, qualifier, fromStatus);
+                boolean carryOn = true;
+                if (availableActionMustExist) {
+                    // Get hold of the AvailableAction
+                    AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, fromStatus.owner);
+                    if (availableAction != null) {
+                        // Now do we have a resultList on the availableAction
+                        if (availableAction.resultList != null) {
+                            actionEventResult = availableAction.resultList.lookupResult(successful, qualifier, fromStatus);
+                        }
+                    } else {
+                        carryOn = false;
+                        log.error('Looking up the to status, but unable to find an AvailableAction for Model: ' + fromStatus.owner.shortcode +
+                                     ', fromStatus: ' + fromStatus.code +
+                                     ', action: ' + actionCode);
                     }
+                }
 
+                // Do we carry on or was there a problem with the AvailableAction
+                if (carryOn) {
                     // Did we find a result
                     if (actionEventResult == null) {
                         // We didn't find one on the availableAction, so look at the actionEvent
@@ -64,10 +76,6 @@ public class StatusService {
                                 ', qualifier: ' + qualifier);
                         }
                     }
-                } else {
-                    log.error('Looking up the to status, but unable to find an AvailableAction for Model: ' + fromStatus.owner.shortcode +
-                                 ', fromStatus: ' + fromStatus.code +
-                                 ', action: ' + actionCode);
                 }
             } else {
                 log.error('Looking up the to status, but unable to find ActionEvent for code: ' +  actionCode);
@@ -86,14 +94,15 @@ public class StatusService {
      * @param action The action that has been performed
      * @param qualifier The qualifier for looking up the status
      * @param successful Were we successful performing the action
+     * @param availableActionMustExist If trye it means an AvailableAction record must exist
      * @return The determined status
      */
-    public Status lookupStatus(PatronRequest request, String action, String qualifier, boolean successful) {
+    public Status lookupStatus(PatronRequest request, String action, String qualifier, boolean successful, boolean availableActionMustExist) {
         // We default to staying at the current status
         Status newStatus = request.state;
 
         // Now lets see if we can find the ActionEventResult record
-        ActionEventResult actionEventResult = findResult(request.state, action, successful, qualifier);
+        ActionEventResult actionEventResult = findResult(request.state, action, successful, qualifier, availableActionMustExist);
 
         // Did we find a result
         if (actionEventResult != null) {
