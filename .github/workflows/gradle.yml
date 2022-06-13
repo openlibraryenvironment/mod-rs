@@ -66,10 +66,14 @@ jobs:
           docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
         env:
           dockerRepo: docker.libsdev.k-int.com
-      - name: Publish Descriptor
+      - name: Publish Descriptor to ID Reshare OKAPI
         run: |
-          echo Post to public registry
+          echo Post to ID Reshare registry
           curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
+      - name: Publish Descriptor to ID Reshare OKAPI
+        run: |
+          echo Post to FOLIO module registry
+          curl -i -XPOST http://folio-registry.aws.indexdata.com:80/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
 
 # Folio Docker image publishing
 # Snapshots to 
