@@ -65,29 +65,30 @@ public class ActionEventData {
 
         // All the various events
         ActionEvent.ensure(Events.EVENT_MESSAGE_REQUEST_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_NEW_PATRON_REQUEST_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_NO_IMPLEMENTATION, 'Fill in description for this event', false, null);
+        ActionEvent.ensure(Events.EVENT_NO_IMPLEMENTATION, 'Dummy event for all those status that do not have an indication event', false, null);
+        ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION, 'A new patron request for the requester has been created', false, ActionEventResultList.REQUESTER_EVENT_NEW_PATRON_REQUEST);
         ActionEvent.ensure(Events.EVENT_REQUESTING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_AWAITING_RETURN_SHIPPING_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_BORROWER_RETURNED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_BORROWING_LIBRARY_RECEIVED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCEL_PENDING_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCELLED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCELLED_WITH_SUPPLIER_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_END_OF_ROTA_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SHIPPED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SOURCING_ITEM_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SUPPLIER_IDENTIFIED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_UNFILLED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_REQ_VALIDATED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RESPONDER_ERROR_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RESPONDER_NOT_SUPPLIED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RES_CANCEL_REQUEST_RECEIVED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RES_CANCELLED_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RES_IDLE_INDICATION, 'Fill in description for this event', false, null);
-        ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Fill in description for this event', false, null);
+        ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION, 'A new patron requester for the responder has been created', false, ActionEventResultList.RESPONDER_EVENT_NEW_PATRON_REQUEST);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_AWAITING_RETURN_SHIPPING_INDICATION, 'Status has changed to Return Shipping', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_BORROWER_RETURNED_INDICATION, 'Status has changed to Borrower Returned', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_BORROWING_LIBRARY_RECEIVED_INDICATION, 'Status has changed to Corrowing Library Received', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCEL_PENDING_INDICATION, 'Status has changed to Cancel Pending', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCELLED_INDICATION, 'Status has changed to Cancelled', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_CANCELLED_WITH_SUPPLIER_INDICATION, 'Status has changed to cancelled with supplier', false, ActionEventResultList.REQUESTER_CANCEL_WITH_SUPPLER_INDICATION);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_END_OF_ROTA_INDICATION, 'Status has changed to End of Rota', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_REQUEST_SENT_TO_SUPPLIER_INDICATION, 'Status has changed to Sent to Supplier', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SHIPPED_INDICATION, 'Status has changed to Shipped', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SOURCING_ITEM_INDICATION, 'Status has changed to Sourcing', false, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_SUPPLIER_IDENTIFIED_INDICATION, 'A supplier has been identified for the request', false, ActionEventResultList.REQUESTER_SEND_TO_NEXT_LOCATION);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_UNFILLED_INDICATION, 'Requester status has changed to unfilled', false, ActionEventResultList.REQUESTER_SEND_TO_NEXT_LOCATION);
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_VALIDATED_INDICATION, 'Requester status has changed to validate', false, ActionEventResultList.REQUESTER_VALIDATE_INDICATION);
+        ActionEvent.ensure(Events.EVENT_STATUS_RESPONDER_ERROR_INDICATION, 'Status has changed to Error', false, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RESPONDER_NOT_SUPPLIED_INDICATION, 'Status has changed to Not Supplied', false, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_CANCEL_REQUEST_RECEIVED_INDICATION, 'Responder status has changed to Cancel Request Received', false, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_INDICATION);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_CANCELLED_INDICATION, 'Status has changed to Cancelled', false, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION, 'Status has changed to Checked into Reshare', false, ActionEventResultList.RESPONDER_CHECKED_INTO_RESHARE_IND);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_IDLE_INDICATION, 'Status has changed to Idle', false, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, null);
 	}
 

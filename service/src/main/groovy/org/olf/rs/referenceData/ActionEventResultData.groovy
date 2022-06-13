@@ -373,6 +373,117 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    // Requester Events
+    private static Map requesterCancelledWithSupplierIndOK = [
+        code: 'requesterCancelledWithSupplierIndOK',
+        description: 'Event triggered by a change of state to Cancelled with supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_CANCELLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterCancelledWithSupplierIndOKcontinue = [
+        code: 'requesterCancelledWithSupplierIndOKcontinue',
+        description: 'Event triggered by a change of state to Cancelled with supplier but we want to continue with next supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_UNFILLED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterNewPatronRequestIndOK = [
+        code: 'requesterNewPatronRequestIndOK',
+        description: 'Event triggered by a new patron request',
+        result: true,
+        status: Status.PATRON_REQUEST_VALIDATED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterNewPatronRequestIndOKnoInstitutionSymbol = [
+        code: 'requesterNewPatronRequestIndOKnoInstitutionSymbol',
+        description: 'Event triggered by a new patron request, but there is no institution symbol',
+        result: true,
+        status: Status.PATRON_REQUEST_ERROR,
+        qualifier: ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterNewPatronRequestIndOKinvalidPatron = [
+        code: 'requesterNewPatronRequestIndOKinvalidPatron',
+        description: 'Event triggered by a new patron request, but the patron is invalid',
+        result: true,
+        status: Status.PATRON_REQUEST_INVALID_PATRON,
+        qualifier: ActionEventResultQualifier.QUALIFIER_INVALID_PATRON,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterValidateIndIndOK = [
+        code: 'requesterValidateIndIndOK',
+        description: 'Event triggered by a status change to Validate',
+        result: true,
+        status: Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterValidateIndIndOKsourcing = [
+        code: 'requesterValidateIndIndOKsourcing',
+        description: 'Event triggered by a status change to Validate and the item is being sourced',
+        result: true,
+        status: Status.PATRON_REQUEST_SOURCING_ITEM,
+        qualifier: ActionEventResultQualifier.QUALIFIER_SOURCING,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterValidateIndIndOKendOfRota = [
+        code: 'requesterValidateIndIndOKendOfRota',
+        description: 'Event triggered by a status change to Validate nut no locations were found',
+        result: true,
+        status: Status.PATRON_REQUEST_END_OF_ROTA,
+        qualifier: ActionEventResultQualifier.QUALIFIER_END_OF_ROTA,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterSendToNextLocationOK = [
+        code: 'requesterSendToNextLocationOK',
+        description: 'Event triggered by a status that sends to the next location',
+        result: true,
+        status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterSendToNextLocationOKlocalReview = [
+        code: 'requesterSendToNextLocationOKlocalReview',
+        description: 'Event triggered by a status that sends to the next location, but now needs to goto local review',
+        result: true,
+        status: Status.PATRON_REQUEST_LOCAL_REVIEW,
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterSendToNextLocationOKendOfRota = [
+        code: 'requesterSendToNextLocationOKendOfRota',
+        description: 'Event triggered by a status that sends to the next location, but now at end of rota',
+        result: true,
+        status: Status.PATRON_REQUEST_END_OF_ROTA,
+        qualifier: ActionEventResultQualifier.QUALIFIER_END_OF_ROTA,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     // The responder actions
     private static Map responderAddConditionalHoldingOK = [
         code: 'responderAddConditionalHoldingOK',
@@ -602,6 +713,78 @@ public class ActionEventResultData {
         result: true,
         status: Status.RESPONDER_AWAIT_PICKING,
         qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+
+    // Responder Events
+    private static Map responderCancelRequestReceivedIndOK = [
+        code: 'responderCancelRequestReceivedIndOK',
+        description: 'Event triggered by a new cancel request being received',
+        result: true,
+        status: null, // No state change
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCancelRequestReceivedIndOKcancelled = [
+        code: 'responderCancelRequestReceivedIndOKcancelled',
+        description: 'Event triggered by a new cancel request being received and autorespond is set to Yes',
+        result: true,
+        status: Status.RESPONDER_CANCELLED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CANCELLED,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCancelRequestReceivedIndOKshipped = [
+        code: 'responderCancelRequestReceivedIndOKshipped',
+        description: 'Event triggered by a new cancel request being received and autorespond is set to Yes but the item has been shipped',
+        result: true,
+        status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_SHIPPED,
+        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+        nextActionEvent: null
+    ];
+
+    private static Map responderCheckedIntoReshareIndOK = [
+        code: 'responderCheckedIntoReshareIndOK',
+        description: 'Status change to Checked into Reshare',
+        result: true,
+        status: Status.RESPONDER_AWAIT_SHIP,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderNewPatronRequestIndOK = [
+        code: 'responderNewPatronRequestIndOK',
+        description: 'Event triggered by a new incoming request',
+        result: true,
+        status: Status.RESPONDER_IDLE,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderNewPatronRequestIndOKlocated = [
+        code: 'responderNewPatronRequestIndOKlocated',
+        description: 'Event triggered by a new incoming request and the item has been located',
+        result: true,
+        status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map responderNewPatronRequestIndOKunfilled = [
+        code: 'responderNewPatronRequestIndOKunfilled',
+        description: 'Event triggered by a new incoming request and the item was not found',
+        result: true,
+        status: Status.RESPONDER_UNFILLED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
         saveRestoreState: null,
         nextActionEvent: null
     ];
@@ -838,6 +1021,16 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map requesterCancelWithSupplierIndList = [
+        code: ActionEventResultList.REQUESTER_CANCEL_WITH_SUPPLER_INDICATION,
+        description: 'Status has changed to cancelled with supplier',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterCancelledWithSupplierIndOK,
+            requesterCancelledWithSupplierIndOKcontinue
+        ]
+    ];
+
     private static Map requesterFilledLocallyList = [
         code: ActionEventResultList.REQUESTER_FILLED_LOCALLY,
         description: 'Requester has fulfilled the request locally',
@@ -875,6 +1068,17 @@ public class ActionEventResultData {
             requesterManualCloseEndOfRotaOK,
             requesterManualCloseLocallyFilledOK,
             requesterManualCloseFailure
+        ]
+    ];
+
+    private static Map requesterNewPatronRequestIndList = [
+        code: ActionEventResultList.REQUESTER_EVENT_NEW_PATRON_REQUEST,
+        description: 'Event for new patron request indication',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterNewPatronRequestIndOK,
+            requesterNewPatronRequestIndOKnoInstitutionSymbol,
+            requesterNewPatronRequestIndOKinvalidPatron
         ]
     ];
 
@@ -934,6 +1138,28 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map requesterSendToNextLocationList = [
+        code: ActionEventResultList.REQUESTER_SEND_TO_NEXT_LOCATION,
+        description: 'Status has changed to Supplier Identified',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterSendToNextLocationOK,
+            requesterSendToNextLocationOKlocalReview,
+            requesterSendToNextLocationOKendOfRota
+        ]
+    ];
+
+    private static Map requesterValidateIndList = [
+        code: ActionEventResultList.REQUESTER_VALIDATE_INDICATION,
+        description: 'Status has changed to Validate',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterValidateIndIndOK,
+            requesterValidateIndIndOKsourcing,
+            requesterValidateIndIndOKendOfRota
+        ]
+    ];
+
     private static Map responderAddConditionalList = [
         code: ActionEventResultList.RESPONDER_ADD_CONDITIONAL,
         description: 'The responder is adding a conditional',
@@ -973,6 +1199,17 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map responderCancelRequestReceivedIndList = [
+        code: ActionEventResultList.RESPONDER_CANCEL_RECEIVED_INDICATION,
+        description: 'Event has been triggered for an incoming cancel request',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderCancelRequestReceivedIndOK,
+            responderCancelRequestReceivedIndOKcancelled,
+            responderCancelRequestReceivedIndOKshipped
+        ]
+    ];
+
     private static Map responderCannotSupplyList = [
         code: ActionEventResultList.RESPONDER_CANNOT_SUPPLY,
         description: 'The responder cannot supply the item(s)',
@@ -1000,6 +1237,15 @@ public class ActionEventResultData {
         results: [
             responderCheckInToReshareFailure,
             responderCheckInToReshareOK
+        ]
+    ];
+
+    private static Map responderCheckedIntoReshareIndList = [
+        code: ActionEventResultList.RESPONDER_CHECKED_INTO_RESHARE_IND,
+        description: 'Status has changed to Checked into Reshare',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderCheckedIntoReshareIndOK
         ]
     ];
 
@@ -1061,6 +1307,17 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map responderNewPatronRequestIndList = [
+        code: ActionEventResultList.RESPONDER_EVENT_NEW_PATRON_REQUEST,
+        description: 'Event for new incoming request indication',
+        model: StateModel.MODEL_RESPONDER,
+        results: [
+            responderNewPatronRequestIndOK,
+            responderNewPatronRequestIndOKlocated,
+            responderNewPatronRequestIndOKunfilled
+        ]
+    ];
+
     private static Map responderNoStatusChangeList = [
         code: ActionEventResultList.RESPONDER_NO_STATUS_CHANGE,
         description: 'Default for when we do not have a status change for the responder',
@@ -1077,30 +1334,37 @@ public class ActionEventResultData {
         requesterBorrowerCheckList,
         requesterCancelList,
         requesterCancelLocalList,
+        requesterCancelWithSupplierIndList,
         requesterFilledLocallyList,
         requesterLocalCannotSupplyList,
         requesterManualCheckInList,
         requesterManualCloseList,
+        requesterNewPatronRequestIndList,
         requesterNoStatusChangeList,
         requesterPatronReturnedList,
         requesterPatronReturnedShippedList,
         requesterReceivedList,
         requesterRejectConditionsList,
         requesterShippedReturnList,
+        requesterSendToNextLocationList,
+        requesterValidateIndList,
 
         // Responder lists
         responderAddConditionalList,
         responderAnswerConditionalList,
         responderAnswerYesList,
         responderCancelList,
+        responderCancelRequestReceivedIndList,
         responderCannotSupplyList,
         responderCheckInAndShipList,
         responderCheckInToReshareList,
+        responderCheckedIntoReshareIndList,
         responderCloseManualList,
         responderItemReturnedList,
         responderManualCheckOutList,
         responderMarkConditionsAgreedList,
         responderMarkShippedList,
+        responderNewPatronRequestIndList,
         responderNoStatusChangeList,
         responderPrintPullSlipList,
 

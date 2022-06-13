@@ -3,11 +3,13 @@ package org.olf.rs.statemodel.events;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StatusStage;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -59,17 +61,19 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
             log.debug('Auto cancel is on');
 
             // System has auto-respond cancel on
-            if (request.state?.code == Status.RESPONDER_ITEM_SHIPPED) {
+            if (request.state?.stage == StatusStage.ACTIVE) {
                 // Revert the state to it's original before the cancel request was received - previousState
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus('Responder', request.previousStates[Status.RESPONDER_CANCEL_REQUEST_RECEIVED]);
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
-                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no'])
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SHIPPED;
+                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no']);
             } else {
                 // Just respond YES
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCELLED);
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_CANCELLED;
                 eventResultDetails.auditMessage =  'AutoResponder:Cancel is ON - responding YES to cancel request';
+                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'yes']);
             }
-            reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'yes']);
         } else {
             // Set needs attention=true
             eventResultDetails.auditMessage = 'Cancellation Request Recieved';

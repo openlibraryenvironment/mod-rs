@@ -89,7 +89,7 @@ public class ActionService {
         }
 
         // Now lookup what we will set the status to
-        Status newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS);
+        Status newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
         String newStatusId = newStatus.id;
 
         // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record

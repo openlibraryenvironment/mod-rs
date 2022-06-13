@@ -10,6 +10,7 @@ import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StatusService;
 import org.olf.rs.statemodel.events.EventISO18626IncomingRequesterService;
 import org.olf.rs.statemodel.events.EventISO18626IncomingResponderService;
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
@@ -41,6 +42,7 @@ public class ReshareApplicationEventHandlerService {
     EventISO18626IncomingResponderService eventISO18626IncomingResponderService;
     EventMessageRequestIndService eventMessageRequestIndService;
     HostLMSLocationService hostLMSLocationService;
+    StatusService statusService;
 
   	/** Holds map of the event to the bean that will do the processing for this event */
   	private static Map serviceEvents = [ : ];
@@ -124,8 +126,27 @@ public class ReshareApplicationEventHandlerService {
 
 								// Do we want to save the request and create an audit entry
 								if (resultDetails.saveData == true) {
+                                    Status newStatus = statusService.lookupStatus(request, eventData.event, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, false);
+                                    String newStatusId = newStatus.id;
+
+                                    // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
+                                    if (!resultDetails.newStatus.id.equals(newStatusId)) {
+                                        String message = 'Hard coded status (' + resultDetails.newStatus.code +
+                                                         ') is not the same as the calculated status (' + newStatus.code +
+                                                          ') for event ' + eventData.event +
+                                                          ' with result ' + resultDetails.result.toString() +
+                                                          ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
+                                        log.error(message);
+                                        auditEntry(
+                                            request,
+                                            currentState,
+                                            currentState,
+                                            message,
+                                            null);
+                                    }
+
 									// Set the status of the request
-									request.state = resultDetails.newStatus;
+									request.state = newStatus;
 
 									// Adding an audit entry so we can see what states we are going to for the event
 									// Do not commit this uncommented, here to aid seeing what transition changes we allow
