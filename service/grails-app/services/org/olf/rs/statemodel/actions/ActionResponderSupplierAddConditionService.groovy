@@ -14,18 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierAddConditionService extends ActionResponderConditionService {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_PENDING_CONDITIONAL_ANSWER
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

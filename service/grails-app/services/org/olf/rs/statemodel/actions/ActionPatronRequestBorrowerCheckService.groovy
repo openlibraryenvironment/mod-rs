@@ -15,19 +15,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestBorrowerCheckService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_INVALID_PATRON,
-        Status.PATRON_REQUEST_VALIDATED
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_BORROWER_CHECK);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Action that performs the returned item action for the requester
@@ -17,27 +16,11 @@ import org.olf.rs.statemodel.Status;
 public class ActionPatronRequestPatronReturnedItemAndShippedReturnService extends AbstractAction {
     ActionPatronRequestPatronReturnedItemService actionPatronRequestPatronReturnedItemService;
     ActionPatronRequestShippedReturnService actionPatronRequestShippedReturnService
-
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER
-    ];
-
     HostLMSService hostLMSService;
 
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

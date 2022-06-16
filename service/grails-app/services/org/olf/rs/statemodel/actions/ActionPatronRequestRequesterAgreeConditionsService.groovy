@@ -16,18 +16,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestRequesterAgreeConditionsService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

@@ -17,26 +17,11 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public class ActionPatronRequestPatronReturnedItemService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING
-    ];
-
     HostLMSService hostLMSService;
 
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

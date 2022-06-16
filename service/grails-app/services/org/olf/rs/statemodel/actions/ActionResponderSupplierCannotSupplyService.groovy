@@ -14,24 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_UNFILLED
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

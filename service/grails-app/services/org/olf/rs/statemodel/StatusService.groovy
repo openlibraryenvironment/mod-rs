@@ -20,8 +20,175 @@ public class StatusService {
     /** The vslue of the ref data value record for if we need to save the status*/
     private String saveValue = null;
 
-    /** The vslue of the ref data value record for if we need to restore the status */
+    /** The value of the ref data value record for if we need to restore the status */
     private String restoreValue = null;
+
+    /**
+     * Returns a list of transitions for the given model and action
+     * @param model The model that we want the tansitions for
+     * @param action The action that we want the transitions for
+     * @return All the transitions for this model and action combination
+     */
+    public List<Transition> possibleActionTransitionsForModel(StateModel model, ActionEvent action) {
+        List<Transition> transitions = new ArrayList<Transition>();
+
+        // If we had a valid action and model that is a good start
+        if ((action != null) && (model != null)) {
+            // Loop through all the available actions for the supplied model and action
+            AvailableAction.findAllByActionEventAndModel(action, model).each { availableAction ->
+                // Lets find the result list we are dealing with
+                ActionEventResultList resultList = availableAction.resultList;
+
+                // If we do not have a resultList fall back to the one on the action event record
+                if (resultList == null) {
+                    resultList = action.resultList;
+                }
+
+                // If we still do not have one or there are no results, just add a transition record that stays at the same state
+                if ((resultList == null) || !resultList.results) {
+                    transitions.add(new Transition (
+                        fromStatus : availableAction.fromState,
+                        actionEvent : action,
+                        qualifier : null,
+                        toStatus : availableAction.fromState
+                    ));
+                } else {
+                    // // We have a result list, so we need to process them all
+                    resultList.results.each { result ->
+                        // Is this result valid for this from status
+                        if ((result.fromStatus == null) || result.fromStatus.id.equals(availableAction.fromState.id)) {
+                            // if we are restoring we need to be a lot cleverer
+                            if (isRestoreRequired(result.saveRestoreState)) {
+                                // ensure the saveValue is populated
+                                if (saveValue == null) {
+                                    // Appears not t be doing anything, but is actually populating saveValue, will always return false
+                                    isSaveRequired(result.saveRestoreState);
+                                }
+
+                                // Find all the states that we can potentially return to
+                                findAllStatesThatSaveOnStatus(result.status).forEach() { status ->
+                                    // Create a transition for them
+                                    transitions.add(new Transition (
+                                        fromStatus : result.status,
+                                        actionEvent : action,
+                                        qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
+                                        toStatus : ((result.overrideSaveStatus == null) ? status : result.overrideSaveStatus)
+                                    ));
+                                }
+                            } else {
+                                // We have a valid transition
+                                transitions.add(new Transition (
+                                    fromStatus : availableAction.fromState,
+                                    actionEvent : action,
+                                    qualifier : result.qualifier,
+                                    toStatus : ((result.status == null) ? availableAction.fromState : result.status)
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // We can now return the transitions
+        return(transitions);
+    }
+
+    public List<Transition> possibleEventTransitionsForModel(StateModel model, List<ActionEvent> events) {
+        List<Transition> transitions = new ArrayList<Transition>();
+
+        // Can't continue if we do not have a model or events
+        if ((events != null) && (model != null)) {
+            // Process the events
+            events.each() { event ->
+                // Must have a resultList
+                if (event.resultList != null) {
+                    // First we need to find the status that triggers this event
+                    Status status = Status.lookupStatusEvent(model, event);
+
+                    // Did we find one for this model
+                    if (status != null) {
+                        // Now we can process the result records
+                        event.resultList.results.each() { result ->
+                            // Only interested where the status has changed
+                            if ((result.status != null) && !result.status.id.equals(status.id)) {
+                            // if we are restoring we need to be a lot cleverer
+                                if (isRestoreRequired(result.saveRestoreState)) {
+                                    // ensure the saveValue is populated
+                                    if (saveValue == null) {
+                                        // Appears not t be doing anything, but is actually populating saveValue, will always return false
+                                        isSaveRequired(result.saveRestoreState);
+                                    }
+
+                                    // Find all the states that we can potentially return to
+                                    findAllStatesThatSaveOnStatus(result.status).forEach() { toStatus ->
+                                        // Create a transition for them
+                                        transitions.add(new Transition (
+                                            fromStatus : status,
+                                            actionEvent : event,
+                                            qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
+                                            toStatus : ((result.overrideSaveStatus == null) ? toStatus : result.overrideSaveStatus)
+                                        ));
+                                    }
+                                } else {
+                                    // Should we take into account save / restore, does this happen during an event ...
+                                    transitions.add(new Transition (
+                                        fromStatus : status,
+                                        actionEvent : event,
+                                        qualifier : result.qualifier,
+                                        toStatus : result.status
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // We can now return the transitions
+        return(transitions);
+    }
+
+    /**
+     * Performs a reverse lookup to find which status could be saved when we change to a specific state
+     * @param status The status that we change to when the state is changed
+     * @return The list of status that could have taken us to this state
+     */
+    private List<Status> findAllStatesThatSaveOnStatus(Status status) {
+        List<Status>savedStatus = new ArrayList<Status>();
+
+        // We need to work our way backwards here, starting from the result, we then go through all the lists,
+        // up through the available actions and the ActionEvents and back through the AvailableActions
+        // and of course not forgetting the events, so bit of a journey here to find what we are looking for
+        // So first of all look for all the result lists that save the current status for this status
+        List<ActionEventResultList> resultLists = ActionEventResultList.getResultsListForSaveStatus(status, saveValue);
+
+        // Now we lookup the AvailableActions that have this result list set on it
+        if (resultLists) {
+            resultLists.each(){ resultList ->
+                AvailableAction.findAllByResultList(resultList).each() { availableAction ->
+                    // Add it to our list
+                    savedStatus.add(availableAction.fromState);
+                }
+
+                // Now go via the ActionEvent
+                ActionEvent.findAllByResultList(resultList).each() { actionEvent ->
+                    // Now look up AvailableAction where the resultList is null for this action event
+                    AvailableAction.findAllByActionEventAndResultListIsNull(actionEvent).each() { availableAction ->
+                        // Add the from status to our list
+                        savedStatus.add(availableAction.fromState);
+                    }
+                }
+            }
+
+            // TODO: how do we deal with events ... With any luck events do not trigger a save ...
+            // We will deal with that when events are added to the diagram
+        }
+
+        // Return a unique list
+        return(savedStatus.unique(){ stat -> stat.id });
+    }
 
     /**
      * Looks to find a result record from the parameters that have been passed in

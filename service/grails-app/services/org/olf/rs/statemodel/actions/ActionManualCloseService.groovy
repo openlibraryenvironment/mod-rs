@@ -21,12 +21,6 @@ public abstract class ActionManualCloseService extends AbstractAction {
     }
 
     @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
-    }
-
-    @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         if ((parameters?.terminalState != null) && (parameters.terminalState ==~ /[A-Z_]+/)) {
             Status closeStatus = Status.lookup(request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER, parameters.terminalState);

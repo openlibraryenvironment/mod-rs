@@ -10,6 +10,9 @@ import grails.gorm.MultiTenant;
 
 class ActionEvent implements MultiTenant<ActionEvent> {
 
+    // Query to find all the events that have a result list that changes the state
+    private static final String EVENTS_CHANGE_STATUS_QUERY = 'from ActionEvent ae where isAction = false and exists (from ae.resultList.results r where r.status is not null)';
+
     /** The id of the record */
     String id;
 
@@ -71,5 +74,9 @@ class ActionEvent implements MultiTenant<ActionEvent> {
             actionEvent = findByCode(code);
         }
         return(actionEvent);
+    }
+
+    public static List<ActionEvent> getEventsThatChangeStatus() {
+        return(findAll(EVENTS_CHANGE_STATUS_QUERY));
     }
 }

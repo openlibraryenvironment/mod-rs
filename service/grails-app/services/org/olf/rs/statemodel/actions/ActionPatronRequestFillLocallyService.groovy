@@ -14,24 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestFillLocallyService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_FILLED_LOCALLY
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_FILL_LOCALLY);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

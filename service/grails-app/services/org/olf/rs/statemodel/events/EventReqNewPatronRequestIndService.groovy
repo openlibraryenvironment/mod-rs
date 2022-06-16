@@ -28,16 +28,6 @@ import groovy.sql.Sql;
  */
 public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-        Status.PATRON_REQUEST_IDLE
-    ];
-
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_ERROR,
-        Status.PATRON_REQUEST_INVALID_PATRON,
-        Status.PATRON_REQUEST_VALIDATED
-    ];
-
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
     ReshareActionService reshareActionService;
@@ -51,27 +41,6 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        return(false);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return((model == StateModel.MODEL_REQUESTER));
     }
 
     // Notify us of a new requester patron request in the database

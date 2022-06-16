@@ -12,23 +12,9 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  */
 public class ActionPatronRequestISO18626NotificationService extends ActionISO18626RequesterService {
 
-    private static final String[] TO_STATES = [
-    ];
-
     @Override
     String name() {
         return(EventISO18626IncomingAbstractService.MESSAGE_REASON_NOTIFICATION);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

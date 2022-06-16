@@ -12,12 +12,6 @@ import org.olf.rs.statemodel.Events;
  */
 public class EventStatusReqEndOfRotaIndService extends EventTriggerNoticesService {
 
-    private static final String[] FROM_STATES = [
-    ];
-
-    private static final String[] TO_STATES = [
-    ];
-
     @Override
     String name() {
         return(Events.EVENT_STATUS_REQ_END_OF_ROTA_INDICATION);
@@ -26,16 +20,6 @@ public class EventStatusReqEndOfRotaIndService extends EventTriggerNoticesServic
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
     }
 
     @Override

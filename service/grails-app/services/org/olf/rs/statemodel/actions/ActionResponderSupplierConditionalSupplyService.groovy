@@ -15,19 +15,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierConditionalSupplyService extends ActionResponderConditionService {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
-        Status.RESPONDER_PENDING_CONDITIONAL_ANSWER
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

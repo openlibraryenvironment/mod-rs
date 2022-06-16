@@ -16,13 +16,6 @@ import org.olf.rs.statemodel.Status;
  */
 public class EventStatusResCheckedInToReshareIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-    ];
-
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_AWAIT_SHIP
-    ];
-
     ReshareActionService reshareActionService;
 
     @Override
@@ -33,22 +26,6 @@ public class EventStatusResCheckedInToReshareIndService extends AbstractEvent {
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_RESPONDER);
     }
 
     @Override

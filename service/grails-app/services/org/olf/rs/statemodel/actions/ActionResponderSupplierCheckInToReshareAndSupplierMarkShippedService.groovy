@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Action that occurs when the responder checks the item into reshare from the LMS
@@ -15,26 +14,16 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierCheckInToReshareAndSupplierMarkShippedService extends ActionResponderService {
 
-    ActionResponderSupplierCheckInToReshareService actionResponderSupplierCheckInToReshareService;
-    ActionResponderSupplierMarkShippedService actionResponderSupplierMarkShippedService;
-
     private static final String REASON_SPOOFED = 'spoofed';
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_ITEM_SHIPPED,
-    ];
-
+    ActionResponderSupplierCheckInToReshareService actionResponderSupplierCheckInToReshareService;
+    ActionResponderSupplierMarkShippedService actionResponderSupplierMarkShippedService;
     HostLMSService hostLMSService;
     DirectoryEntryService directoryEntryService;
 
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

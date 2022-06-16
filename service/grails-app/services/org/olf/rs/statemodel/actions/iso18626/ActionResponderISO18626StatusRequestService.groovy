@@ -11,22 +11,9 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  */
 public class ActionResponderISO18626StatusRequestService extends ActionISO18626ResponderService {
 
-    private static final String[] TO_STATES = [
-    ];
-
     @Override
     String name() {
         return(EventISO18626IncomingAbstractService.ACTION_STATUS_REQUEST);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        return(true);
     }
 
     @Override

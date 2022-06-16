@@ -14,18 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierPrintPullSlipService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_AWAIT_PICKING
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

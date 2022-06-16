@@ -14,24 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierManualCheckoutService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_AWAIT_SHIP
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_MANUAL_CHECKOUT);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

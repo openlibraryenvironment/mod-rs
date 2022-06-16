@@ -47,8 +47,6 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
   public static final String RESPONDER_CANCELLED                  = "RES_CANCELLED";
   public static final String RESPONDER_COMPLETE                   = "RES_COMPLETE";
-  public static final String RESPONDER_ERROR                      = "RES_ERROR";
-  public static final String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
   public static final String RESPONDER_IDLE                       = "RES_IDLE";
   public static final String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
   public static final String RESPONDER_ITEM_SHIPPED               = "RES_ITEM_SHIPPED";
@@ -58,10 +56,12 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_PENDING_CONDITIONAL_ANSWER = "RES_PENDING_CONDITIONAL_ANSWER";
   public static final String RESPONDER_UNFILLED                   = "RES_UNFILLED";
 
-  // These 2 are no longer used but have left here in case they are to be used in the future,
+  // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database
   public static final String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
   public static final String RESPONDER_CHECKED_IN_TO_RESHARE      = "RES_CHECKED_IN_TO_RESHARE";
+  public static final String RESPONDER_ERROR                      = "RES_ERROR";
+  public static final String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
 
   String id
   StateModel owner
@@ -201,5 +201,22 @@ class Status implements MultiTenant<Status> {
           result = allCriteria.list();
       }
       return(result);
+  }
+
+  static public Status lookupStatusEvent(StateModel model, ActionEvent event) {
+      Status eventStatus = null;
+
+      if (event.code.startsWith(Events.STATUS_EVENT_PREFIX)) {
+          // That is good it starts with the right prefix, so remove it
+          String code = event.code.substring(Events.STATUS_EVENT_PREFIX.length());
+          if (code.endsWith(Events.STATUS_EVENT_POSTFIX)) {
+              // Event better it has the right postfix, so we need to move it
+              code = code.substring(0, code.length() - Events.STATUS_EVENT_POSTFIX.length());
+
+              // Now we can lookup the code and ensure it is for the right model
+              eventStatus = findByOwnerAndCode(model, code);
+          }
+      }
+      return(eventStatus);
   }
 }

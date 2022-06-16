@@ -13,24 +13,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierMarkShippedService extends ActionResponderService {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_ITEM_SHIPPED
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

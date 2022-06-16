@@ -13,17 +13,9 @@ import org.olf.rs.statemodel.Actions;
  */
 public abstract class ActionMessageService extends AbstractAction {
 
-    private static final  String[] TO_STATES = [
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_MESSAGE);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

@@ -14,24 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestRequesterManualCheckInService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_CHECKED_IN
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

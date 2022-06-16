@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.ActionService
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.StateModel;
 
 /**
  * Contains the base methods and definitions required to interpret the 18626 protocol
@@ -55,21 +54,6 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
 
     // The service used to run the actions
     ActionService actionService;
-
-    @Override
-    String[] toStates(String model) {
-        return([]);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return([]);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        return(isRequester() && (model == StateModel.MODEL_REQUESTER));
-    }
 
     @Override
     EventFetchRequestMethod fetchRequestMethod() {

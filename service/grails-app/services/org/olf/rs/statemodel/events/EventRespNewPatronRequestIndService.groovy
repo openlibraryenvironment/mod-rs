@@ -21,15 +21,6 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public class EventRespNewPatronRequestIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-        Status.RESPONDER_IDLE
-    ];
-
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
-        Status.RESPONDER_UNFILLED
-    ];
-
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
     ReshareActionService reshareActionService;
@@ -43,27 +34,6 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        return(false);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_RESPONDER);
     }
 
     // Notify us of a new responder patron request in the database
