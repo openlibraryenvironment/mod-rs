@@ -9,6 +9,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 
     /** Query which returns all the states than an action may come from */
     private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
+    private static final String POSSIBLE_ACTIONS_FOR_MODEL_QUERY = 'select distinct aa.actionEvent from AvailableAction as aa where aa.model = :model and aa.actionEvent.code not in :excludeActions and aa.triggerType != :excludeActionType';
 
     public static String TRIGGER_TYPE_MANUAL   = "M"; // Available to users
     public static String TRIGGER_TYPE_PROTOCOL = "P"; // Can occur due to a protocol message
@@ -87,6 +88,11 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 	public static String[] getFromStates(String stateModel, String action, String triggerType = TRIGGER_TYPE_MANUAL) {
 		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));
 	}
+
+    public static ActionEvent[] getUniqueActionsForModel(StateModel model, List<String> excludeActions, Boolean includeProtocolActions) {
+        String notIncludeActionType = includeProtocolActions ? "dummy" : TRIGGER_TYPE_PROTOCOL;
+        return(executeQuery(POSSIBLE_ACTIONS_FOR_MODEL_QUERY, [model: model, excludeActions: excludeActions, excludeActionType: notIncludeActionType]));
+    }
 
     public String toString() {
         return "AvailableAction(${id}) ${actionCode} ${triggerType} ${actionType} ${actionBody?.take(40)}".toString()

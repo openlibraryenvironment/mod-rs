@@ -16,17 +16,9 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public abstract class ActionMessagesAllSeenService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_MESSAGES_ALL_SEEN);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

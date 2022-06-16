@@ -4,7 +4,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Performs an answer will supply action for the responder
@@ -13,18 +12,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderRespondYesService extends ActionResponderService {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_NEW_AWAIT_PULL_SLIP
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_RESPOND_YES);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

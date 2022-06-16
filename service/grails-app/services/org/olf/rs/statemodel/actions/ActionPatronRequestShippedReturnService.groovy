@@ -14,18 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestShippedReturnService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_SHIPPED_RETURN);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

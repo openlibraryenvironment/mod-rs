@@ -25,18 +25,6 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public abstract class EventSendToNextLenderService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-        Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED,
-        Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
-        Status.PATRON_REQUEST_UNFILLED
-    ];
-
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_LOCAL_REVIEW,
-        Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
-        Status.PATRON_REQUEST_END_OF_ROTA
-    ];
-
     HostLMSService hostLMSService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
@@ -44,27 +32,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        return(false);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_REQUESTER);
     }
 
     // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER

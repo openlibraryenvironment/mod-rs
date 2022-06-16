@@ -20,12 +20,6 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-    ];
-
-    private static final String[] TO_STATES = [
-    ];
-
     ReshareActionService reshareActionService;
 
     @Override
@@ -36,22 +30,6 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_RESPONDER);
     }
 
     @Override

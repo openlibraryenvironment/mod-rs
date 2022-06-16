@@ -24,20 +24,11 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 
     private static final String REASON_SPOOFED = 'spoofed';
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_CHECKED_IN
-    ];
-
     HostLMSService hostLMSService;
 
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_REQUESTER_RECEIVED);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

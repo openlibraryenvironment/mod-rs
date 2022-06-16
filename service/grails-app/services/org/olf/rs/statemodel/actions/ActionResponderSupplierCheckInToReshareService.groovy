@@ -27,23 +27,12 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
     private static final String REASON_SPOOFED = 'spoofed';
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_AWAIT_PICKING,
-        Status.RESPONDER_AWAIT_SHIP,
-        '?'
-    ];
-
     HostLMSService hostLMSService;
     DirectoryEntryService directoryEntryService;
 
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

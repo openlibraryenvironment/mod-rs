@@ -25,7 +25,7 @@ docker ps| wc -l
 # Run migration and load reference and sample data (change the port to 8080 for mod-directory)
 	curl -XPOST -H "Content-Type: application/json" -H "X-OKAPI-TENANT: diku" "http://localhost:8081/_/tenant" -d "{\"parameters\":[{\"key\": \"loadReference\", \"value\": true}, {\"key\": \"loadSample\", \"value\": true}]}"
 
-# Few logs in realtime for east / west or north / south
+# View logs in realtime for east / west or north / south
 install kubectl from https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/ which essentially tells you to use the command
 
 	curl -LO "https://dl.k8s.io/release/v1.22.0/bin/windows/amd64/kubectl.exe"
@@ -40,3 +40,8 @@ The pod name that begins with mod-rs-latest is East / West the other pod is Nort
 So as an example to list the latest logs for East / West run the following
 
 	kubectl logs --kubeconfig ./kubectl.cfg -f mod-rs-latest-76d7cb8cf-n9hsl
+
+# Inspect database for east / west or north / south
+Login via ssh to id-bastion.folio-dev.indexdata.com see Ian for access
+run ./connect.sh
+you are now in psql, use schema reshare_east_mod_rs, reshare_west_mod_rs , etc ...

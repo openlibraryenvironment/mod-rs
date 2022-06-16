@@ -17,24 +17,9 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
  */
 public class ActionPatronRequestCancelLocalService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_CANCELLED
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_CANCEL_LOCAL);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

@@ -20,16 +20,6 @@ import org.olf.rs.statemodel.Status;
  */
 public class EventStatusReqValidatedIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-        Status.PATRON_REQUEST_VALIDATED
-    ];
-
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_SOURCING_ITEM,
-        Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED,
-        Status.PATRON_REQUEST_END_OF_ROTA
-    ];
-
     RequestRouterService requestRouterService;
 
     @Override
@@ -40,27 +30,6 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        return(false);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_REQUESTER);
     }
 
     // This takes a request with the state of VALIDATED and changes the state to REQ_SOURCING_ITEM,

@@ -68,6 +68,8 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     // Responder event lists
     static public final String RESPONDER_EVENT_NEW_PATRON_REQUEST = 'responderNewPatronRequestIndList';
 
+    // Query to find all the result lists that save the status before setting the status
+    private static final String SAVE_RESULT_LISTS_QUERY = 'from ActionEventResultList aerl where exists (from aerl.results r where r.saveRestoreState.value = :saveRestoreStateValue and r.status = :status)';
 
     /** The id of the list */
     String id;
@@ -177,6 +179,10 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
             actionEventResultList = findByCode(code);
         }
         return(actionEventResultList);
+    }
+
+    public static List<ActionEventResultList> getResultsListForSaveStatus(Status status, String saveRestoreValue) {
+        return(findAll(SAVE_RESULT_LISTS_QUERY, [saveRestoreStateValue: saveRestoreValue, status: status]).unique(){ resultList -> resultList.id });
     }
 }
 

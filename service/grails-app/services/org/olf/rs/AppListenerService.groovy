@@ -64,7 +64,7 @@ public class AppListenerService implements ApplicationListener {
           topic,
           null,             // key
           [
-            event:'STATUS_'+pr.state.code+'_ind',
+            event:Events.STATUS_EVENT_PREFIX + pr.state.code + Events.STATUS_EVENT_POSTFIX,
             tenant: tenant,
             oid:'org.olf.rs.PatronRequest:'+pr.id,
             payload:[

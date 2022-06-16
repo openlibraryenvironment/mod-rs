@@ -41,24 +41,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
     }
 
     @Override
-    String[] toStates(String model) {
-        // We are dealing with the whole model so just return null as no sensible interpretation can be made of what we return
-        return([Status.RESPONDER_IDLE]);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        // This is the start of the request from the responders perspective, so there is no state to come from
-        return([]);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // It is an event for the responder model
-        return(model == StateModel.MODEL_RESPONDER);
-    }
-
-    @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         // In our scenario the request will be null, as we do everything ourselves, so never reference that parameter
         // We use the responseResult field for returning data back to the caller

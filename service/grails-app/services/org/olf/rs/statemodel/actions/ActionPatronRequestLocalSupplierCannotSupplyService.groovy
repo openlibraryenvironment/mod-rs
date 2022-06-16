@@ -15,24 +15,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestLocalSupplierCannotSupplyService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_UNFILLED
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
-    }
-
-    @Override
-    Boolean canLeadToSameState() {
-        // We do not return the same state, so we need to override and return false
-        return(false);
     }
 
     @Override

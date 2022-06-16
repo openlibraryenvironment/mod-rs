@@ -17,21 +17,12 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAction {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_COMPLETE
-    ];
-
     HostLMSService hostLMSService;
     DirectoryEntryService directoryEntryService;
 
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

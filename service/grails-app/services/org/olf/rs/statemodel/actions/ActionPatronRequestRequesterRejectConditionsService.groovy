@@ -13,18 +13,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionPatronRequestRequesterRejectConditionsService extends ActionPatronRequestCancelService {
 
-    private static final String[] TO_STATES = [
-        Status.PATRON_REQUEST_CANCEL_PENDING
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

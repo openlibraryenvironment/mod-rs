@@ -14,23 +14,9 @@ import org.olf.rs.statemodel.Status;
  */
 public class ActionResponderSupplierRespondToCancelService extends ActionResponderService {
 
-    private static final String[] TO_STATES = [
-        Status.RESPONDER_AWAIT_PICKING,
-        Status.RESPONDER_AWAIT_SHIP,
-        Status.RESPONDER_CHECKED_IN_TO_RESHARE,
-        Status.RESPONDER_IDLE,
-        Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
-        Status.RESPONDER_PENDING_CONDITIONAL_ANSWER
-    ];
-
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL);
-    }
-
-    @Override
-    String[] toStates() {
-        return(TO_STATES);
     }
 
     @Override

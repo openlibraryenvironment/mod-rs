@@ -17,14 +17,6 @@ import org.olf.rs.statemodel.StatusStage;
  */
 public class EventStatusReqCancelledWithSupplierIndService extends AbstractEvent {
 
-    private static final String[] FROM_STATES = [
-        Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER
-    ];
-
-    private static final String[] TO_STATES = [
-        StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED
-    ];
-
     @Override
     String name() {
         return(Events.EVENT_STATUS_REQ_CANCELLED_WITH_SUPPLIER_INDICATION);
@@ -33,22 +25,6 @@ public class EventStatusReqCancelledWithSupplierIndService extends AbstractEvent
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
-    }
-
-    @Override
-    String[] toStates(String model) {
-        return(TO_STATES);
-    }
-
-    @Override
-    String[] fromStates(String model) {
-        return(FROM_STATES);
-    }
-
-    @Override
-    boolean supportsModel(String model) {
-        // This event
-        return(model == StateModel.MODEL_REQUESTER);
     }
 
     @Override
