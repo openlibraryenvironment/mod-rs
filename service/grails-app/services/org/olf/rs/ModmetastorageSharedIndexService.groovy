@@ -8,6 +8,8 @@ import static groovyx.net.http.HttpBuilder.configure
 
 public class ModmetastorageSharedIndexService implements SharedIndexActions {
 
+  final String LENDABLE = 'Will lend';
+
  /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
@@ -62,7 +64,9 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
     return result;
   }
 
-  private Object fetchCluster(String id) {
+  // This method can't be private at the moment or it'll break the test that stubs it
+  // Providing a method signature didn't seem to help https://issues.apache.org/jira/browse/GROOVY-7368
+  Object fetchCluster(String id) {
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
     AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
@@ -187,12 +191,13 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
     cluster?.GetRecord?.record?.metadata?.record?.datafield?.findAll { it.'@tag' == cfg.tag && it.'@ind1' == cfg.ind1 && it.'@ind2' == cfg.ind2 }.each { field ->
       String localId = field?.subfield.find { it.'@code' == cfg.localIdSub }.text();
       String sym = field?.subfield.find { it.'@code' == cfg.symbolSub }.text();
-      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text();
+      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text() ?: LENDABLE;
 
       if (sym && localId) {
-        // Do we already have an entry in the result for the given symbol? If not, Add it
-        if (result.find { it.symbol == sym } == null) {
-          log.debug("adding holding for ${sym} - ${localId} with policy ${pol}");
+        // Do we already have an entry in the result for the given symbol?
+        def existing = result.find { it.symbol == sym };
+        if ( existing == null) {
+          log.debug("Adding holding for ${sym} - ${localId} with policy ${pol}");
           result.add([
                   symbol            : sym,
                   illPolicy         : pol,
@@ -200,6 +205,10 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
                   copyIdentifier    : null])
         } else {
           log.debug("Located existing entry in result for ${sym} - not adding another");
+          if (existing?.illPolicy != LENDABLE && pol == LENDABLE) {
+            log.debug("Updating existing entry for ${sym} - found lendable copy");
+            existing.illPolicy = LENDABLE;
+          }
         }
       } else {
         log.error("Unexpected data back from shared index, symbol or localId missing");
