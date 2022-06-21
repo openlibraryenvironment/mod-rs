@@ -1,5 +1,8 @@
+# To run integration tests
+	gradlew.bat clean build -x test -x integrationTest
+
 # View count the number of dockers running
-docker ps| wc -l
+	docker ps| wc -l
 
 # View okapi logs
 	docker logs -f okapi
