@@ -182,7 +182,7 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
     def cfg = [
       'tag': '999',
       'ind1': '1',
-      'ind2': '0',
+      'ind2': '1',
       'localIdSub': 'i',
       'symbolSub': 's',
       'policySub': 'p',

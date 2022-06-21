@@ -91,21 +91,21 @@ class ModmetastorageSharedIndexServiceSpec extends Specification implements Serv
   </datafield>
 
   
-  <datafield tag="999" ind1="1" ind2="0">
+  <datafield tag="999" ind1="1" ind2="1">
     <subfield code="i">123456</subfield>
     <subfield code="s">SYM-BOL</subfield>
     <subfield code="p">Will not lend</subfield>
   </datafield>
-  <datafield tag="999" ind1="1" ind2="0">
+  <datafield tag="999" ind1="1" ind2="1">
     <subfield code="i">987654</subfield>
     <subfield code="s">SYM-BOL</subfield>
     <subfield code="p">Will lend</subfield>
   </datafield>
-  <datafield tag="999" ind1="1" ind2="0">
+  <datafield tag="999" ind1="1" ind2="1">
     <subfield code="i">987654</subfield>
     <subfield code="s">OTH-ER</subfield>
   </datafield>
-  <datafield tag="999" ind1="1" ind2="0">
+  <datafield tag="999" ind1="1" ind2="1">
     <subfield code="i">123456</subfield>
     <subfield code="s">THI-RD</subfield>
     <subfield code="p">Will not lend</subfield>
