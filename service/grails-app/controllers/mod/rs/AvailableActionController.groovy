@@ -2,6 +2,7 @@ package mod.rs;
 
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionService;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.GraphVizService;
 import org.olf.rs.statemodel.StateModel;
@@ -83,7 +84,12 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		// Remove messagesAllSeen, messageSeen and message as they occur for all states
 		// We also only want to keep those for the state model we are interested in
 		String nameStartsWith = "action" + params.stateModel.capitalize();
-		List<String> ignoredActions = ["messagesAllSeen", "messageSeen", "message"];
+		List<String> ignoredActions = [
+            Actions.ACTION_MESSAGES_ALL_SEEN,
+            Actions.ACTION_MESSAGE_SEEN,
+            Actions.ACTION_MESSAGE,
+            Actions.ACTION_INCOMING_ISO18626
+        ];
 		if (params.excludeActions) {
 			// They have specified some additional actions that should be ignored
 			ignoredActions.addAll(params.excludeActions.split(","));
