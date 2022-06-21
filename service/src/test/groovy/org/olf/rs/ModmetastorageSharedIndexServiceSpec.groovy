@@ -146,12 +146,12 @@ class ModmetastorageSharedIndexServiceSpec extends Specification implements Serv
 </OAI-PMH>
 ''';
 
-  def 'test '() {
+  def 'Test cluster parsing'() {
     setup:
     def parsedSample = new XmlSlurper().parseText(sampleData);
     service.metaClass.fetchCluster = { String id -> parsedSample };
 
-    when: 'We parse a date'
+    when: 'We extract holdings'
     def result = service.sharedIndexHoldings('123');
 
     then:
