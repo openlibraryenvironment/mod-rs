@@ -19,9 +19,9 @@ class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<
 
     where:
       datestr|format|expected_time
-      '2021-09-30' | "yyyy-MM-dd" | 1632956400000
-      '30/9/2021' | "dd/MM/yyyy" | 1632956400000
-      '9/9/2021' | "dd/MM/yyyy" | 1631142000000
+      '2021-09-30' | "yyyy-MM-dd" | 1632960000000
+      '30/9/2021' | "dd/MM/yyyy" | 1632960000000
+      '9/9/2021' | "dd/MM/yyyy" | 1631145600000
       '2021-09-30T00:00:00Z' | "" | 1632960000000
       '2021-09-30T00:00:00Z' | " " | 1632960000000
       '2021-09-30T00:00:00Z' | null | 1632960000000
