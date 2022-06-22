@@ -486,7 +486,9 @@ public class ReshareActionService {
         if (dateFormatToUse.length() < 12) {
             // Failed miserably to just convert a date without time elements using LocalDate, ZonedDateTime or LocalDateTime
             // So have fallen back on the SimpleDateFormat
-            date = new SimpleDateFormat(dateFormatToUse).parse(dateString);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormatToUse);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"))
+            date = simpleDateFormat.parse(dateString);
         } else {
             // See https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
             // for the appropriate patterns
