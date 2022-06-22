@@ -1,6 +1,7 @@
 package org.olf.rs.referenceData;
 
 import org.olf.rs.ReferenceDataService;
+import org.olf.rs.ReshareActionService;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -37,11 +38,12 @@ public class SettingsData {
     public static final String SETTING_Z3950_SERVER_ADDRESS = 'z3950_server_address';
 
     // Settings for the localNCIP section
-    public static final String SETTING_NCIP_APP_PROFILE    = 'ncip_app_profile';
-    public static final String SETTING_NCIP_FROM_AGENCY    = 'ncip_from_agency';
-    public static final String SETTING_NCIP_SERVER_ADDRESS = 'ncip_server_address';
-    public static final String SETTING_NCIP_TO_AGENCY      = 'ncip_to_agency';
-    public static final String SETTING_NCIP_USE_DUE_DATE   = 'ncip_use_due_date';
+    public static final String SETTING_NCIP_APP_PROFILE     = 'ncip_app_profile';
+    public static final String SETTING_NCIP_FROM_AGENCY     = 'ncip_from_agency';
+    public static final String SETTING_NCIP_SERVER_ADDRESS  = 'ncip_server_address';
+    public static final String SETTING_NCIP_TO_AGENCY       = 'ncip_to_agency';
+    public static final String SETTING_NCIP_USE_DUE_DATE    = 'ncip_use_due_date';
+    public static final String SETTING_NCIP_DUE_DATE_FORMAT = 'ncip_due_date_format';
 
     // Settings for the wmsSettings section
     public static final String SETTING_WMS_API_KEY                = 'wms_api_key';
@@ -154,6 +156,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_TO_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_APP_PROFILE, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, 'EZBORROW');
             ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
+            ensureAppSetting(SETTING_NCIP_DUE_DATE_FORMAT, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, ReshareActionService.DEFAULT_DATE_FORMAT);
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);

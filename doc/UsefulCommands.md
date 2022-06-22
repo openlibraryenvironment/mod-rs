@@ -1,5 +1,5 @@
 # To run integration tests
-	gradlew.bat clean build -x test -x integrationTest
+	gradlew.bat clean build test
 
 # View count the number of dockers running
 	docker ps| wc -l
