@@ -4,7 +4,9 @@ import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest;
 import org.olf.rs.RequestVolume;
+import org.olf.rs.SettingsService;
 import org.olf.rs.lms.HostLMSActions;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
@@ -29,6 +31,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
     HostLMSService hostLMSService;
     DirectoryEntryService directoryEntryService;
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -134,7 +137,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
                                 // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
                                 try {
-                                    Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate)
+                                    Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate, settingsService.getSettingValue(SettingsData.SETTING_NCIP_DUE_DATE_FORMAT));
                                     if (!request.parsedDueDateFromLMS || parsedDate.before(request.parsedDueDateFromLMS)) {
                                         parsedDate = tempParsedDate;
                                         stringDate = checkoutResult?.dueDate;

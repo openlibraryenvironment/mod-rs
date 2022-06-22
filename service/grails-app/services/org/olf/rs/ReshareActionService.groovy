@@ -1,5 +1,6 @@
 package org.olf.rs;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -23,6 +24,8 @@ import groovy.time.Duration;
  * the pull slip as printed etc.
  */
 public class ReshareActionService {
+
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd[ ]['T']HH:mm[:ss][.SSS][z][XXX][Z]";
 
     private static final String MESSAGE_NOTIFICATION = 'Notification';
 
@@ -465,17 +468,36 @@ public class ReshareActionService {
         //outboundMessage.save(flush:true, failOnError:true);
     }
 
-    protected Date parseDateString(String dateString) {
+    protected Date parseDateString(String dateString, String dateFormat = DEFAULT_DATE_FORMAT) {
+        Date date;
+
         if (dateString == null) {
             throw new Exception('Attempted to parse null as date')
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd[ ]['T']HH:mm[:ss][.SSS][z][XXX][Z]");
-        Date date;
-        try {
-            date = Date.from(ZonedDateTime.parse(dateString, formatter).toInstant());
-        } catch (Exception e) {
-            log.debug("Failed to parse ${dateString} as ZonedDateTime, falling back to LocalDateTime");
-            date = Date.from(LocalDateTime.parse(dateString, formatter).toInstant(ZoneOffset.UTC));
+
+        // Ensure we have a date format
+        String dateFormatToUse = dateFormat;
+        if (!dateFormatToUse?.trim()) {
+            // It is null or is all whitespace, so use the default format
+            dateFormatToUse = DEFAULT_DATE_FORMAT;
+        }
+
+        // If the format is less than 12 characters we assume it is just a date and has no time
+        if (dateFormatToUse.length() < 12) {
+            // Failed miserably to just convert a date without time elements using LocalDate, ZonedDateTime or LocalDateTime
+            // So have fallen back on the SimpleDateFormat
+            date = new SimpleDateFormat(dateFormatToUse).parse(dateString);
+        } else {
+            // See https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
+            // for the appropriate patterns
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatToUse);
+
+            try {
+                date = Date.from(ZonedDateTime.parse(dateString, formatter).toInstant());
+            } catch (Exception e) {
+                log.debug("Failed to parse ${dateString} as ZonedDateTime, falling back to LocalDateTime");
+                date = Date.from(LocalDateTime.parse(dateString, formatter).toInstant(ZoneOffset.UTC));
+            }
         }
         return date
     }
