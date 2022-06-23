@@ -19,6 +19,13 @@ class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<
 
     where:
       datestr|format|expected_time
+      '2022-10-13T03:59Z' | null | 1665633540000 // Alma
+      '2022-10-12T18:00:00Z' | null | 1665597600000 // Aleph
+      '2022-12-06T23:59Z' | null | 1670371140000 // Koha
+      '2022-10-12T09:00Z' | null | 1665565200000 // Sierra
+      '2022-10-12T23:59:00.000-04:00' | null | 1665633540000 // Symphony
+      '2022-10-20T18:59:00Z' | null | 1666292340000 // Voyager
+      '2022-10-27T03:59Z' | null | 1666843140000 // WMS
       '2021-09-30' | "yyyy-MM-dd" | 1632960000000
       '30/9/2021' | "dd/MM/yyyy" | 1632960000000
       '9/9/2021' | "dd/MM/yyyy" | 1631145600000
