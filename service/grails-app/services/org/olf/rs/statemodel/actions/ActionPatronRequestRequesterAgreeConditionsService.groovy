@@ -34,7 +34,7 @@ public class ActionPatronRequestRequesterAgreeConditionsService extends Abstract
             }
 
             // Inform the responder
-            reshareActionService.sendRequestingAgencyMessage(request, 'Notification', parameters);
+            reshareActionService.sendRequestingAgencyMessage(request, 'Notification', parameters, actionResultDetails);
 
             PatronRequestLoanCondition[] conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(request, request.resolvedSupplier);
             conditions.each { condition ->

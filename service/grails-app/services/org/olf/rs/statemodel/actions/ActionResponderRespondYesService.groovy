@@ -22,7 +22,7 @@ public class ActionResponderRespondYesService extends ActionResponderService {
         // Check the pickup location and route
         if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
             // Status is set to Status.RESPONDER_NEW_AWAIT_PULL_SLIP in validatePickupLocationAndRoute
-            reshareActionService.sendResponse(request, 'ExpectToSupply', parameters);
+            reshareActionService.sendResponse(request, 'ExpectToSupply', parameters, actionResultDetails);
         }
 
         return(actionResultDetails);

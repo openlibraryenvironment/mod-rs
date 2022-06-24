@@ -31,4 +31,37 @@ databaseChangeLog = {
         // Need a unique index on the 2 fields
         addUniqueConstraint(columnNames: "action_event_result_list_results_id, action_event_result_id", tableName: "action_event_result_list_action_event_result")
     }
+
+    changeSet(author: "Chas", id: "1656061591765-01") {
+        // Added the additional fields required for the undo functionality
+        addColumn(tableName: "action_event") {
+            column(name: "ae_undo_status", type: "varchar(20)")
+        }
+
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_last_audit_no", type: "int4")
+        }
+
+        addColumn(tableName: "patron_request_audit") {
+            column(name: "pra_action_event", type: "varchar(36)")
+        }
+
+        addForeignKeyConstraint(baseColumnNames: "pra_action_event", baseTableName: "patron_request_audit", constraintName: "FKmme295lu9ylkj66ckku8o6snl", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "ae_id", referencedTableName: "action_event", validate: "true")
+
+        addColumn(tableName: "patron_request_audit") {
+            column(name: "pra_audit_no", type: "int4")
+        }
+
+        addColumn(tableName: "patron_request_audit") {
+            column(name: "pra_message_sequence_no", type: "int4")
+        }
+
+        addColumn(tableName: "patron_request_audit") {
+            column(name: "pra_rota_position", type: "int8")
+        }
+
+        addColumn(tableName: "patron_request_audit") {
+            column(name: "pra_undo_performed", type: "boolean")
+        }
+    }
 }

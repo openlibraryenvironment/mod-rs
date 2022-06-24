@@ -28,11 +28,15 @@ class ActionEvent implements MultiTenant<ActionEvent> {
     /** The default set of results to use for this action / event */
     ActionEventResultList resultList;
 
+    /** can this action / event be undone */
+    UndoStatus undoStatus;
+
     static constraints = {
                code (nullable: false, blank:false, unique: true)
         description (nullable: false, blank:false)
            isAction (nullable: false)
          resultList (nullable: true)
+         undoStatus (nullable: true)
     }
 
     static mapping = {
@@ -42,9 +46,16 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         description column: 'ae_description'
            isAction column: 'ae_is_action'
          resultList column: 'ae_result_list'
+         undoStatus column: 'ae_undo_status', length: 20
     }
 
-    public static ActionEvent ensure(String code, String description, boolean isAction, String resultListCode) {
+    public static ActionEvent ensure(
+        String code,
+        String description,
+        boolean isAction,
+        String resultListCode,
+        UndoStatus undoStatus = UndoStatus.NO
+    ) {
         // Lookup to see if the code exists
         ActionEvent actionEvent = findByCode(code);
 
@@ -60,6 +71,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         actionEvent.description = description;
         actionEvent.isAction = isAction;
         actionEvent.resultList = ActionEventResultList.lookup(resultListCode);
+        actionEvent.undoStatus = undoStatus;
 
         // and save it
         actionEvent.save(flush:true, failOnError:true);

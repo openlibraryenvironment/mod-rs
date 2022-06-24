@@ -76,7 +76,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
                 log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                reshareActionService.sendResponse(request,  'ExpectToSupply', [:])
+                reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
             } else {
                 unfilled = true;
                 eventResultDetails.auditMessage = 'AutoResponder Failed to route to location ' + location;
@@ -92,7 +92,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         // If it was unfilled then send a response
         if (unfilled == true) {
             log.debug("Send unfilled(No copy) response to ${request.requestingInstitutionSymbol}");
-            reshareActionService.sendResponse(request,  'Unfilled', ['reason':'No copy']);
+            reshareActionService.sendResponse(request,  'Unfilled', ['reason':'No copy'], eventResultDetails);
             eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED);
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED;
         }

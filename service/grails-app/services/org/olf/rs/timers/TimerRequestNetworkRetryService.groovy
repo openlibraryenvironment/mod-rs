@@ -20,10 +20,10 @@ public class TimerRequestNetworkRetryService extends AbstractTimerRequestNetwork
         // Now lets us attempt to resend
         if (request.isRequester) {
             // We do not care about the result as it is all handled in the call, action and message params can be null
-            reshareActionService.sendRequestingAgencyMessage(request, null, null, retryEventData);
+            reshareActionService.sendRequestingAgencyMessage(request, null, null, null, retryEventData);
         } else {
             // We do not care about the result as it is all handled in the call, action, status and message params can be null
-            reshareActionService.sendSupplyingAgencyMessage(request, null, null, null, retryEventData);
+            reshareActionService.sendSupplyingAgencyMessage(request, null, null, null, null, retryEventData);
         }
     }
 }

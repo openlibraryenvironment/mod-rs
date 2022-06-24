@@ -24,8 +24,8 @@ public class ActionResponderSupplierConditionalSupplyService extends ActionRespo
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Check the pickup location and route
         if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
-            reshareActionService.sendResponse(request, 'ExpectToSupply', parameters);
-            sendSupplierConditionalWarning(request, parameters);
+            reshareActionService.sendResponse(request, 'ExpectToSupply', parameters, actionResultDetails);
+            sendSupplierConditionalWarning(request, parameters, actionResultDetails);
 
             if (parameters.isNull('holdingState') || parameters.holdingState == 'no') {
                 // The supplying agency wants to continue with the request

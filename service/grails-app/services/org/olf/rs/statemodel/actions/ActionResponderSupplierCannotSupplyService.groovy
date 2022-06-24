@@ -22,7 +22,7 @@ public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Just send the message of unfilled
-        reshareActionService.sendResponse(request, 'Unfilled', parameters);
+        reshareActionService.sendResponse(request, 'Unfilled', parameters, actionResultDetails);
 
         // Now set the new status and audit message
         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED);

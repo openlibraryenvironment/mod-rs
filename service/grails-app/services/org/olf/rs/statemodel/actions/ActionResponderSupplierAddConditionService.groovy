@@ -33,11 +33,11 @@ public class ActionResponderSupplierAddConditionService extends ActionResponderC
         if (conditionParams.isNull('loanCondition')) {
             log.warn('addCondition not handed any conditions');
         } else {
-            reshareActionService.sendMessage(request, conditionParams);
+            reshareActionService.sendMessage(request, conditionParams, actionResultDetails);
         }
 
         // Send over the supplier conditional warning
-        sendSupplierConditionalWarning(request, parameters);
+        sendSupplierConditionalWarning(request, parameters, actionResultDetails);
 
         // Do we need to hold the request
         if (parameters.isNull('holdingState') || parameters.holdingState == 'no') {

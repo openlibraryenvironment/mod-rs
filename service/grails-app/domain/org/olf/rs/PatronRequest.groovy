@@ -218,6 +218,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** So we can try and cater for timeout issues, we append a sequence number to the note */
   Integer lastSequenceSent;
 
+  /** The last number assigned to an audit record for this request */
+  Integer lastAuditNo;
+
   /** This is the last sequence number we received */
   Integer lastSequenceReceived;
 
@@ -347,6 +350,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     numberOfSendAttempts (nullable: true)
     lastSequenceSent (nullable: true)
     lastSequenceReceived (nullable: true)
+
+    lastAuditNo (nullable: true)
   }
 
   static mapping = {
@@ -454,6 +459,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastSequenceSent column: 'pr_last_sequence_sent'
     lastSequenceReceived column: 'pr_last_sequence_received'
 
+    lastAuditNo column: 'pr_last_audit_no'
+
     audit(sort:'dateCreated', order:'desc')
 
     requestIdentifiers cascade: 'all-delete-orphan'
@@ -526,6 +533,20 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
           lastSequenceSent++;
       }
       return(lastSequenceSent);
+  }
+
+  public int incrementLastAuditNo() {
+      // Increase the last audit number on the request
+      if (lastAuditNo == null) {
+          // First time we have created an audit record
+          lastAuditNo = 1;
+      } else {
+          // Previously created an audit record, so just increment
+          lastAuditNo++;
+      }
+
+      // Return the audit number that can now be used
+      return(lastAuditNo);
   }
 
   private String truncateAndLog(String fieldName, String field, int truncateLength = 255) {

@@ -44,13 +44,13 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus('Responder', request.previousStates[Status.RESPONDER_CANCEL_REQUEST_RECEIVED]);
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SHIPPED;
-                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no']);
+                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no'], eventResultDetails);
             } else {
                 // Just respond YES
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCELLED);
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_CANCELLED;
                 eventResultDetails.auditMessage =  'AutoResponder:Cancel is ON - responding YES to cancel request';
-                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'yes']);
+                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'yes'], eventResultDetails);
             }
         } else {
             // Set needs attention=true

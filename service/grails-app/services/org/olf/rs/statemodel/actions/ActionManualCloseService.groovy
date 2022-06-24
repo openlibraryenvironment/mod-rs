@@ -27,7 +27,7 @@ public abstract class ActionManualCloseService extends AbstractAction {
 
             // Have we been supplied a valid close status
             if (closeStatus && closeStatus.terminal) {
-                reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER} has manually closed this request."]);
+                reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER} has manually closed this request."], actionResultDetails);
                 actionResultDetails.auditMessage = 'Manually closed';
                 actionResultDetails.qualifier = parameters.terminalState;
                 actionResultDetails.newStatus = closeStatus;

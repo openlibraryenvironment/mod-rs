@@ -22,7 +22,7 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Send the response to the requester
-        reshareActionService.sendSupplierCancelResponse(request, parameters);
+        reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
 
         // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
         if (parameters?.cancelResponse == 'no') {
