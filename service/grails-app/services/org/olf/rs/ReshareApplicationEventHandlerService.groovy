@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
+import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
@@ -111,6 +112,9 @@ public class ReshareApplicationEventHandlerService {
 							if (request == null) {
 								log.error("Within event \"" + eventData.event + "\", failed to obtain request with id: \"" + requestId + "\" using method Event " + eventBean.fetchRequestMethod().toString());
 							} else {
+                                // Lookup the ActionEvent record
+                                ActionEvent actionEvent = ActionEvent.lookup(eventData.event);
+
 								// Create ourselves a new result details
 								EventResultDetails resultDetails = new EventResultDetails();
 								Status currentState = request.state;
@@ -158,7 +162,10 @@ public class ReshareApplicationEventHandlerService {
 										currentState,
 										request.state,
 										resultDetails.auditMessage,
-										resultDetails.auditData);
+										resultDetails.auditData,
+                                        actionEvent,
+                                        resultDetails.messageSequenceNo
+                                    );
 
 									// Finally Save the request
 									request.save(flush:true, failOnError:true);
@@ -263,26 +270,48 @@ public class ReshareApplicationEventHandlerService {
 //    auditEntry(pr, old_state, new_state, message, null);
 //  }
 
-  public void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
+    /**
+     * Adds an audit record for the given request
+     * @param request The request we want to add an audit event to
+     * @param from The status we are moving from
+     * @param to The status we are moving to
+     * @param message A message for generating this audit record
+     * @param data Any data that is applicable for this audit record
+     * @param actionEvent The action or event that generated this audit record
+     * @param messageSequenceNo If a a message was sent to the other side of the transaction this is thesequence number it was sent with
+     */
+    public void auditEntry(
+        PatronRequest request,
+        Status from,
+        Status to,
+        String message,
+        Map data,
+        ActionEvent actionEvent  = null,
+        Integer messageSequenceNo = null
+    ) {
 
-    String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
-    LocalDateTime ts = LocalDateTime.now();
-    log.debug("add audit entry at ${ts}, from ${from} to ${to}, message ${message}");
+        String json_data = ( data != null ) ? JsonOutput.toJson(data).toString() : null;
+        LocalDateTime ts = LocalDateTime.now();
+        log.debug("add audit entry at ${ts}, from ${from} to ${to}, message ${message}");
 
-    try {
-      pr.addToAudit( new PatronRequestAudit(
-        patronRequest: pr,
-        dateCreated:ts,
-        fromStatus:from,
-        toStatus:to,
-        duration:null,
-        message: message,
-        auditData: json_data
-      ))
-    } catch(Exception e) {
-      log.error("Problem saving audit entry", e)
+        try {
+            request.addToAudit( new PatronRequestAudit(
+                patronRequest: request,
+                dateCreated:ts,
+                fromStatus:from,
+                toStatus:to,
+                duration:null,
+                message: message,
+                auditData: json_data,
+                auditNo: request.incrementLastAuditNo(),
+                rotaPosition: request.rotaPosition,
+                actionEvent: actionEvent,
+                messageSequenceNo: messageSequenceNo
+            ));
+        } catch(Exception e) {
+            log.error("Problem saving audit entry", e);
+        }
     }
-  }
 
   /**
    * The auto responder has determined that a local copy is available. update the state of the request and

@@ -103,7 +103,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
 
                 request.needsAttention = false;
                 ncipResult = true;
-                reshareActionService.sendRequestingAgencyMessage(request, 'Received', parameters);
+                reshareActionService.sendRequestingAgencyMessage(request, 'Received', parameters, actionResultDetails);
             } else {
                 actionResultDetails.auditMessage = 'Host LMS integration: AcceptItem call failed for some items.';
                 request.needsAttention = true;

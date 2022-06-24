@@ -69,6 +69,9 @@ public class ActionService {
      * @return An ActionResultDetails that contains the result of performing the action
      */
     ActionResultDetails performAction(String action, PatronRequest request, Object parameters) {
+        // Lookup the ActionEvent record
+        ActionEvent actionEvent = ActionEvent.lookup(action);
+
         ActionResultDetails resultDetails = new ActionResultDetails();
         Status currentState = request.state;
 
@@ -121,7 +124,10 @@ public class ActionService {
             currentState,
             request.state,
             resultDetails.auditMessage,
-            resultDetails.auditData);
+            resultDetails.auditData,
+            actionEvent,
+            resultDetails.messageSequenceNo
+        );
 
         // Finally Save the request
         request.save(flush:true, failOnError:true);

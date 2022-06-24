@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.patronstore.PatronStoreActions;
 import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.statemodel.ActionEvent;
+import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Status;
 
 import groovy.json.JsonBuilder;
@@ -157,7 +159,7 @@ public class ReshareActionService {
      *  is changed to an explicit Map and the test for a note property is done via the map interface and not
      *  the special isNull method injected by the controller object (Which then breaks this method if called from another service).
      */
-    public boolean sendMessage(PatronRequest pr, Map actionParams) {
+    public boolean sendMessage(PatronRequest pr, Map actionParams, EventResultDetails eventResultDetails) {
         log.debug("actionMessage(${pr})");
         boolean result = false;
     // Sending a message does not change the state of a request
@@ -166,10 +168,10 @@ public class ReshareActionService {
         if (actionParams.get('note') != null) {
             // This is for sending a REQUESTING AGENCY message to the SUPPLYING AGENCY
             if (pr.isRequester == true) {
-                result = sendRequestingAgencyMessage(pr, MESSAGE_NOTIFICATION, actionParams)
+                result = sendRequestingAgencyMessage(pr, MESSAGE_NOTIFICATION, actionParams, eventResultDetails)
             } else {
                 // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
-                result = sendSupplyingAgencyMessage(pr, MESSAGE_NOTIFICATION, null, actionParams)
+                result = sendSupplyingAgencyMessage(pr, MESSAGE_NOTIFICATION, null, actionParams, eventResultDetails)
             }
 
             if (result == false) {
@@ -180,7 +182,7 @@ public class ReshareActionService {
         return result;
     }
 
-    public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams) {
+    public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams, EventResultDetails eventResultDetails) {
         /* This method will send a cancellation response iso18626 message */
 
         log.debug("sendSupplierCancelResponse(${pr})");
@@ -203,7 +205,7 @@ public class ReshareActionService {
 
             // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
             if (pr.isRequester == false) {
-                result = sendSupplyingAgencyMessage(pr, 'CancelResponse', status, actionParams);
+                result = sendSupplyingAgencyMessage(pr, 'CancelResponse', status, actionParams, eventResultDetails);
             } else {
                 log.warn('The requesting agency should not be able to call sendSupplierConditionalWarning.');
             }
@@ -214,7 +216,13 @@ public class ReshareActionService {
         return result;
     }
 
-    public boolean sendRequestingAgencyMessage(PatronRequest pr, String action, Map messageParams, Map retryEventData = null) {
+    public boolean sendRequestingAgencyMessage(
+        PatronRequest pr,
+        String action,
+        Map messageParams,
+        EventResultDetails eventResultDetails,
+        Map retryEventData = null
+    ) {
         boolean result = false;
 
         Long rotaPosition = pr.rotaPosition;
@@ -234,6 +242,9 @@ public class ReshareActionService {
             if (eventData == null) {
                 String note = messageParams?.note
                 eventData = protocolMessageBuildingService.buildRequestingAgencyMessage(pr, symbols.senderSymbol, symbols.receivingSymbol, action, note);
+                if (eventResultDetails != null) {
+                    eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+                }
             }
 
             // Now send the message
@@ -368,15 +379,17 @@ public class ReshareActionService {
     public void sendResponse(
         PatronRequest pr,
         String status,
-        Map responseParams
+        Map responseParams,
+        EventResultDetails eventResultDetails
     ) {
-        sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams);
+        sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams, eventResultDetails);
     }
 
     // Unused ??
     public void sendStatusChange(
         PatronRequest pr,
         String status,
+        EventResultDetails eventResultDetails,
         String note = null
     ) {
         Map params = [:]
@@ -384,7 +397,7 @@ public class ReshareActionService {
             params = [note: note]
         }
 
-        sendSupplyingAgencyMessage(pr, 'StatusChange', status, params);
+        sendSupplyingAgencyMessage(pr, 'StatusChange', status, params, eventResultDetails);
     }
 
     // see
@@ -398,6 +411,7 @@ public class ReshareActionService {
         String reasonForMessage,
         String status,
         Map messageParams,
+        EventResultDetails eventResultDetails,
         Map retryEventData = null
     ) {
 
@@ -413,6 +427,7 @@ public class ReshareActionService {
             // If it is not a retry we need to generate the message
             if (supplyingMessageRequest == null) {
                 supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
+                eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
             }
 
             // Now send the message
@@ -563,7 +578,16 @@ public class ReshareActionService {
         return result;
     }
 
-    private void auditEntry(PatronRequest pr, Status from, Status to, String message, Map data) {
-        reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data);
+    private void auditEntry(
+        PatronRequest pr,
+        Status from,
+        Status to,
+        String message,
+        Map data,
+        ActionEvent actionEvent  = null,
+        Integer messageSequenceNo = null
+    ) {
+        // Just call the one in the event handler service
+        reshareApplicationEventHandlerService.auditEntry(pr, from, to, message, data, actionEvent, messageSequenceNo);
     }
 }

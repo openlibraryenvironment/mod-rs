@@ -21,7 +21,7 @@ public class ActionResponderSupplierMarkShippedService extends ActionResponderSe
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Send the message that it is on its way
-        reshareActionService.sendResponse(request, 'Loaned', parameters);
+        reshareActionService.sendResponse(request, 'Loaned', parameters, actionResultDetails);
         actionResultDetails.auditMessage = 'Shipped';
         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_ITEM_SHIPPED);
 

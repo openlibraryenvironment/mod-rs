@@ -24,4 +24,7 @@ public class EventResultDetails {
 
     /** The qualifier for looking up the result record for setting the new status */
     String qualifier;
+
+    /** If a message was sent to the other side of the transaction, this is the sequence number of the message sent */
+    Integer messageSequenceNo;
 }

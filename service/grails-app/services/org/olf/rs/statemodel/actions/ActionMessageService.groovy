@@ -26,7 +26,7 @@ public abstract class ActionMessageService extends AbstractAction {
             actionResultDetails.auditMessage = 'No note supplied to send';
         } else {
             // Send the message
-            actionResultDetails.responseResult.status = reshareActionService.sendMessage(request, parameters);
+            actionResultDetails.responseResult.status = reshareActionService.sendMessage(request, parameters, actionResultDetails);
             actionResultDetails.auditMessage = 'Message sent: ' + parameters.note;
         }
         return(actionResultDetails);

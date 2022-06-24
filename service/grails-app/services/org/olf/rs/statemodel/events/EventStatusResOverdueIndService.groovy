@@ -33,7 +33,7 @@ public class EventStatusResOverdueIndService extends AbstractEvent {
             log.debug("pr ${request.id} is requester, not sending protocol message");
         } else {
             log.debug("Sending protocol message with overdue status change from PatronRequest ${request.id}");
-            reshareActionService.sendStatusChange(request, 'Overdue', 'Request is Overdue');
+            reshareActionService.sendStatusChange(request, 'Overdue', eventResultDetails, 'Request is Overdue');
         }
 
         return(eventResultDetails);

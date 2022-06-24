@@ -51,7 +51,7 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
             actionResultDetails.responseResult.status = false;
         } else {
             log.debug('supplierCheckOutOfReshare::transition and send status change');
-            reshareActionService.sendStatusChange(request, 'LoanCompleted', parameters?.note);
+            reshareActionService.sendStatusChange(request, 'LoanCompleted', actionResultDetails, parameters?.note);
             actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_COMPLETE);
             actionResultDetails.responseResult.status = true;
         }

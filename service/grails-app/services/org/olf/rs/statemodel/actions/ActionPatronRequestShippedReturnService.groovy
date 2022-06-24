@@ -24,7 +24,7 @@ public class ActionPatronRequestShippedReturnService extends AbstractAction {
         // Decrement the active borrowing counter - we are returning the item
         statisticsService.decrementCounter('/activeBorrowing');
 
-        reshareActionService.sendRequestingAgencyMessage(request, 'ShippedReturn', parameters);
+        reshareActionService.sendRequestingAgencyMessage(request, 'ShippedReturn', parameters, actionResultDetails);
 
         actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER);
         actionResultDetails.responseResult.status = true;
