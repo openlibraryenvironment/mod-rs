@@ -30,7 +30,7 @@ class HostLMSPatronProfile implements MultiTenant<HostLMSPatronProfile> {
                              code column : 'hlpp_code'
                              name column : 'hlpp_name'
                 canCreateRequests column : 'hlpp_can_create_requests'
-                           hidden column : 'hlpp_hidden', defaulValue: false
+                           hidden column : 'hlpp_hidden', defaultValue: false
                       dateCreated column : 'hlpp_date_created'
                       lastUpdated column : 'hlpp_last_updated'
   }

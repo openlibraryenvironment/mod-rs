@@ -43,7 +43,7 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
                       dateCreated column : 'hlsl_date_created'
                       lastUpdated column : 'hlsl_last_updated'
                  supplyPreference column : 'hlsl_supply_preference'
-                           hidden column : 'hlsl_hidden', defaulValue: false
+                           hidden column : 'hlsl_hidden', defaultValue: false
   }
 
   public String toString() {

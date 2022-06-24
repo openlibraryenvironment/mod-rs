@@ -100,7 +100,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
                       lastUpdated column : 'hll_last_updated'
                  supplyPreference column : 'hll_supply_preference'
       correspondingDirectoryEntry column : 'hll_corresponding_de'
-                           hidden column : 'hll_hidden', defaulValue: false
+                           hidden column : 'hll_hidden', defaultValue: false
   }
 
   public String toString() {
