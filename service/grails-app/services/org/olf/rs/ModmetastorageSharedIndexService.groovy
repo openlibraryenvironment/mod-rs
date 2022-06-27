@@ -8,7 +8,8 @@ import static groovyx.net.http.HttpBuilder.configure
 
 public class ModmetastorageSharedIndexService implements SharedIndexActions {
 
-  final String LENDABLE = 'Will lend';
+  final String LENDABLE_SI = 'LOANABLE';
+  final String LENDABLE_RS = 'Will lend';
 
  /**
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
@@ -183,7 +184,7 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
       'tag': '999',
       'ind1': '1',
       'ind2': '1',
-      'localIdSub': 'i',
+      'localIdSub': 'l',
       'symbolSub': 's',
       'policySub': 'p',
     ];
@@ -191,7 +192,8 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
     cluster?.GetRecord?.record?.metadata?.record?.datafield?.findAll { it.'@tag' == cfg.tag && it.'@ind1' == cfg.ind1 && it.'@ind2' == cfg.ind2 }.each { field ->
       String localId = field?.subfield.find { it.'@code' == cfg.localIdSub }.text();
       String sym = field?.subfield.find { it.'@code' == cfg.symbolSub }.text();
-      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text() ?: LENDABLE;
+      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text() ?: LENDABLE_RS;
+      if (pol == LENDABLE_SI) pol = LENDABLE_RS;
 
       if (sym && localId) {
         // Do we already have an entry in the result for the given symbol?
@@ -205,9 +207,9 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
                   copyIdentifier    : null])
         } else {
           log.debug("Located existing entry in result for ${sym} - not adding another");
-          if (existing?.illPolicy != LENDABLE && pol == LENDABLE) {
+          if (existing?.illPolicy != LENDABLE_RS && pol == LENDABLE_RS) {
             log.debug("Updating existing entry for ${sym} - found lendable copy");
-            existing.illPolicy = LENDABLE;
+            existing.illPolicy = LENDABLE_RS;
           }
         }
       } else {

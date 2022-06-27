@@ -92,23 +92,23 @@ class ModmetastorageSharedIndexServiceSpec extends Specification implements Serv
 
   
   <datafield tag="999" ind1="1" ind2="1">
-    <subfield code="i">123456</subfield>
+    <subfield code="l">123456</subfield>
     <subfield code="s">SYM-BOL</subfield>
-    <subfield code="p">Will not lend</subfield>
+    <subfield code="p">UNLOANABLE</subfield>
   </datafield>
   <datafield tag="999" ind1="1" ind2="1">
-    <subfield code="i">987654</subfield>
+    <subfield code="l">987654</subfield>
     <subfield code="s">SYM-BOL</subfield>
-    <subfield code="p">Will lend</subfield>
+    <subfield code="p">LOANABLE</subfield>
   </datafield>
   <datafield tag="999" ind1="1" ind2="1">
-    <subfield code="i">987654</subfield>
+    <subfield code="l">987654</subfield>
     <subfield code="s">OTH-ER</subfield>
   </datafield>
   <datafield tag="999" ind1="1" ind2="1">
-    <subfield code="i">123456</subfield>
+    <subfield code="l">123456</subfield>
     <subfield code="s">THI-RD</subfield>
-    <subfield code="p">Will not lend</subfield>
+    <subfield code="p">UNLOANABLE</subfield>
   </datafield>
  
  
@@ -156,8 +156,9 @@ class ModmetastorageSharedIndexServiceSpec extends Specification implements Serv
 
     then:
     log.info("parsed as ${result}");
-    result.find { it.symbol == 'SYM-BOL' }.illPolicy == service.LENDABLE;
-    result.find { it.symbol == 'OTH-ER' }.illPolicy == service.LENDABLE;
-    result.find { it.symbol == 'THI-RD' }.illPolicy == 'Will not lend';
+    result.find { it.symbol == 'SYM-BOL' }.illPolicy == service.LENDABLE_RS;
+    result.find { it.symbol == 'OTH-ER' }.illPolicy == service.LENDABLE_RS;
+    result.find { it.symbol == 'THI-RD' }.illPolicy == 'UNLOANABLE';
+    result.find { it.symbol == 'THI-RD' }.instanceIdentifier == '123456';
   }
 }
