@@ -5,6 +5,9 @@ package org.olf.rs.statemodel;
  */
 public enum UndoStatus {
 
+    /** If the to and from status are the same then treat it as SKIP, otherwise treat it as a NO */
+    DECIDE,
+
 	/** The undo action should not be available */
 	NO,
 

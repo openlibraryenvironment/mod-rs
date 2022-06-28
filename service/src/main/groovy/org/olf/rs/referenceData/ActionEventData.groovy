@@ -42,7 +42,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, ActionEventResultList.REQUESTER_CANCEL_LOCAL);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, ActionEventResultList.REQUESTER_FILLED_LOCALLY);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, 'An ISO-18626 Cancel Response has been received', true, ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, null);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, null, UndoStatus.DECIDE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_RENEW_RESPONSE, 'An ISO-18626 Renew Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, 'An ISO-18626 Request Response has been received', true, null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, 'An ISO-18626 Status Change has been received', true, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
