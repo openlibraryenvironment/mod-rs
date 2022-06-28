@@ -166,6 +166,7 @@ try {
                                   ).save(flush:true, failOnError: true);             
 
   def folio_si_rdv = RefdataValue.lookupOrCreate('SharedIndexAdapter', 'FOLIO');
+  RefdataValue.lookupOrCreate('SharedIndexAdapter', 'mod-meta-storage', 'modmetastorage');
 
   AppSetting shared_index_integration = AppSetting.findByKey('shared_index_integration') ?: new AppSetting(
                                   section:'sharedIndex',
