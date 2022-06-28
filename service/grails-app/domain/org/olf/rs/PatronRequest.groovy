@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -15,6 +14,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
 import com.k_int.web.toolkit.tags.Tag;
 
 import grails.gorm.MultiTenant;
+import grails.util.Holders;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -22,8 +22,6 @@ import grails.gorm.MultiTenant;
  */
 
 class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
-
-  private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate and aa.triggerType = :triggerType'
 
   // internal ID of the patron request
   String id
@@ -507,15 +505,6 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       return((networkStatus == null) || (networkStatus == NetworkStatus.Idle) || (networkStatus == NetworkStatus.Sent));
   }
 
-  def getValidActions() {
-      // We only have valid actions if network activity is idle
-      if (isNetworkActivityIdle()) {
-          return(AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate:this.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]));
-      } else {
-          return([]);
-      }
-  }
-
   public Map getDescriptiveMetadata() {
     return [
       'title': this.title,
@@ -547,6 +536,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
       // Return the audit number that can now be used
       return(lastAuditNo);
+  }
+
+  List getValidActions() {
+      // This has moved into the actionService, I do not know how to redirect the json to the actionService so doing it here
+      return(Holders.grailsApplication.mainContext.getBean('actionService').getValidActions(this));
   }
 
   private String truncateAndLog(String fieldName, String field, int truncateLength = 255) {

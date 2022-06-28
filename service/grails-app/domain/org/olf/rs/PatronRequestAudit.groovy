@@ -45,7 +45,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
     Long rotaPosition;
 
     /** Whether we have performed an undo operation on this action / event */
-    Boolean undoPerormed;
+    Boolean undoPerformed;
 
     /** The sequence the message was sent with, if it was sent to the other side of the transaction */
     Integer messageSequenceNo;
@@ -64,7 +64,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
         auditNo           (nullable : true)
         actionEvent       (nullable : true)
         rotaPosition      (nullable : true)
-        undoPerormed      (nullable : true)
+        undoPerformed     (nullable : true)
         messageSequenceNo (nullable : true)
     }
 
@@ -84,7 +84,7 @@ class PatronRequestAudit implements MultiTenant<PatronRequestAudit> {
         auditNo           column : 'pra_audit_no'
         actionEvent       column : 'pra_action_event'
         rotaPosition      column : 'pra_rota_position'
-        undoPerormed      column : 'pra_undo_performed'
+        undoPerformed     column : 'pra_undo_performed'
         messageSequenceNo column : 'pra_message_sequence_no'
     }
 

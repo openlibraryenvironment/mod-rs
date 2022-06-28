@@ -49,4 +49,7 @@ public class Actions {
 	static public final String ACTION_MESSAGE           = "message";
 	static public final String ACTION_MESSAGES_ALL_SEEN = "messagesAllSeen";
 	static public final String ACTION_MESSAGE_SEEN      = "messageSeen";
+
+    // A special action for both sides that allows us to undo am action if the action allows us to
+    static public final String ACTION_UNDO = "undo";
 }

@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 
 import grails.util.Holders;
@@ -9,6 +10,10 @@ import grails.util.Holders;
  * Checks the incoming action to ensure it is valid and dispatches it to the appropriate service
  */
 public class ActionService {
+
+    private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate and aa.triggerType = :triggerType'
+
+    private static final Integer ZERO = Integer.valueOf(0);
 
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     StatusService statusService;
@@ -25,12 +30,18 @@ public class ActionService {
 
         // Can only continue if we have been supplied the values
         if (action && status) {
-            // Get hold of the state model id
-            StateModel stateModel = StateModel.getStateModel(isRequester);
-            if (stateModel) {
-                // It is a valid state model
-                // Now is this a valid action for this state
-                isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
+            // If it is the undo action we need to perform a slightly different test
+            if (Actions.ACTION_UNDO.equals(action)) {
+                // We do not have the request at this stage, so we assume it is valid
+                isValid = true;
+            } else {
+                // Get hold of the state model id
+                StateModel stateModel = StateModel.getStateModel(isRequester);
+                if (stateModel) {
+                    // It is a valid state model
+                    // Now is this a valid action for this state
+                    isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
+                }
             }
         }
         return(isValid);
@@ -92,23 +103,30 @@ public class ActionService {
         }
 
         // Now lookup what we will set the status to
-        Status newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
-        String newStatusId = newStatus.id;
+        Status newStatus;
+        // if the action is undo, then we take it from the newStatus field
+        if (Actions.ACTION_UNDO.equals(action)) {
+            newStatus = resultDetails.newStatus;
+        } else {
+            // Normal scenario of an action being performed
+            newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
+            String newStatusId = newStatus.id;
 
-        // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
-        if (!resultDetails.newStatus.id.equals(newStatusId)) {
-            String message = 'Hard coded status (' + resultDetails.newStatus.code +
-                             ') is not the same as the calculated status (' + newStatus.code +
-                              ') for action ' + action +
-                              ' with result ' + resultDetails.result.toString() +
-                              ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
-            log.error(message);
-            reshareApplicationEventHandlerService.auditEntry(
-                request,
-                currentState,
-                currentState,
-                message,
-                null);
+            // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
+            if (!resultDetails.newStatus.id.equals(newStatusId)) {
+                String message = 'Hard coded status (' + resultDetails.newStatus.code +
+                                 ') is not the same as the calculated status (' + newStatus.code +
+                                  ') for action ' + action +
+                                  ' with result ' + resultDetails.result.toString() +
+                                  ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
+                log.error(message);
+                reshareApplicationEventHandlerService.auditEntry(
+                    request,
+                    currentState,
+                    currentState,
+                    message,
+                    null);
+            }
         }
 
         // Set the status of the request
@@ -134,5 +152,84 @@ public class ActionService {
 
         // Return the result to the caller
         return(resultDetails);
+    }
+
+    /**
+     * Determines if the undo action is valid for the request
+     * @param request The request we want to know if we can undo the last action
+     * @return true if we can undo the action, false if not
+     */
+    boolean isUndoValid(PatronRequest request) {
+        return(buildUndoAudits(request) != null);
+    }
+
+    /**
+     * Builds up the list of audit records that require undoing
+     * @param request The request we want to know if we can undo the last action
+     * @return The list of audit records or null if undo is not valid
+     */
+    List<PatronRequestAudit> buildUndoAudits(PatronRequest request) {
+        List<PatronRequestAudit> undoAudits = new ArrayList<PatronRequestAudit>();
+
+        // Can't do anything if no audits
+        if (request.audit != null) {
+            // To determine this we need to run down the audit records in reverse order until we hit an action, that has
+            // 1. If the undoPerformed property is set to true then skip this audit record
+            // 2. If the actionEvent is set against the audit record then its undo status is not set to NO
+            request.audit.sort(true, {audit -> -(audit.auditNo == null ? ZERO : audit.auditNo)}).find { audit ->
+                // Only interested where an undo has not already been performed
+                if (!audit.undoPerformed) {
+                    // We must have an auditEvent
+                    if (audit.actionEvent != null) {
+                        // Now check to see if we can perform an undo
+                        if (audit.actionEvent.undoStatus == UndoStatus.NO) {
+                             // Bail out here as we can't perform the undo
+                            undoAudits = null;
+                            return(true);
+                        } else {
+                            // If it is an action and the undo status is YES then we can perform an undo
+                            if (audit.actionEvent.undoStatus == UndoStatus.YES) {
+                                // Add to the list of audits that need undoing
+                                undoAudits.add(audit);
+                            }
+
+                            // If this represents an action rgen we need to look no further
+                            if (audit.actionEvent.isAction) {
+                                // We no need to look at anymore audit records
+                                return(true);
+                            }
+                        }
+                    }
+                }
+
+                // We are good to perform an undo on this record so move onto the next one
+                return(false);
+            }
+        }
+
+        return(((undoAudits == null) || (undoAudits.size() == 0)) ? null : undoAudits);
+    }
+
+    /**
+     * Returns the valid list of actions for a request
+     * @param request The request we want the actions for
+     * @return The list of valid actions
+     */
+    public List getValidActions(PatronRequest request) {
+        List actions;
+
+        // We only have valid actions if network activity is idle
+        if (request.isNetworkActivityIdle()) {
+            actions = AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate: request.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]);
+            if (isUndoValid(request)) {
+                // Add the undo action to the list of valid actions
+                actions.add(Actions.ACTION_UNDO);
+            }
+        } else {
+            actions = [];
+        }
+
+        // Return the valid list of actions
+        return(actions);
     }
 }

@@ -3,6 +3,7 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit
 import org.olf.rs.RequestVolume;
 import org.olf.rs.SettingsService;
 import org.olf.rs.lms.HostLMSActions;
@@ -29,6 +30,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
     private static final String REASON_SPOOFED = 'spoofed';
 
+    ActionResponderSupplierCheckOutOfReshareService actionResponderSupplierCheckOutOfReshareService;
     HostLMSService hostLMSService;
     DirectoryEntryService directoryEntryService;
     SettingsService settingsService;
@@ -224,6 +226,23 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
             }
         }
 
+        return(actionResultDetails);
+    }
+
+    @Override
+    ActionResultDetails undo(PatronRequest request, PatronRequestAudit audit, ActionResultDetails actionResultDetails) {
+
+        // Call the checkout of reshare action
+        actionResultDetails = actionResponderSupplierCheckOutOfReshareService.performAction(request, [ undo : true ], actionResultDetails);
+
+        // If we were successful, remove the volumes from the request
+        if (actionResultDetails.result == ActionResult.SUCCESS) {
+            request.volumes.collect().each { volume ->
+                request.removeFromVolumes(volume);
+            }
+        }
+
+        // Let the caller know the result
         return(actionResultDetails);
     }
 }

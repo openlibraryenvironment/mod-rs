@@ -4,6 +4,7 @@ import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.Events;
+import org.olf.rs.statemodel.UndoStatus;
 
 import groovy.util.logging.Slf4j
 
@@ -25,7 +26,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, ActionEventResultList.RESPONDER_ANWSER_YES);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, 'The responder has added a loan condition', true, ActionEventResultList.RESPONDER_ADD_CONDITIONAL);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, 'The responder is saying they cannot supply the item(s)', true, ActionEventResultList.RESPONDER_CANNOT_SUPPLY);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, 'The item(s) has been checked out of the responders LMS to Reshare', true, ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, 'The item(s) has been checked out of the responders LMS to Reshare', true, ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE, UndoStatus.YES);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, 'The item(s) have been checked into reshare from the responders LMS and shipped to the requester', true, ActionEventResultList.RESPONDER_CHECK_IN_AND_SHIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, 'The item(s) has been checked backed into the responders LMS from Reshare', true, ActionEventResultList.RESPONDER_ITEM_RETURNED);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, 'The responder is specifying conditions before they supply the item(s)', true, ActionEventResultList.RESPONDER_ANWSER_CONDITIONAL);
@@ -59,9 +60,10 @@ public class ActionEventData {
         // Both Requester and Responder actions
         ActionEvent.ensure(Actions.ACTION_INCOMING_ISO18626, 'An incoming ISO 18626 message', true, null);
         ActionEvent.ensure(Actions.ACTION_MANUAL_CLOSE, 'Close the request', true, null);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, null);
-        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, null);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Makr a specific message as being seen', true, null);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Mark a specific message as being seen', true, null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_UNDO, 'Attempts to undo the last action performed', true, null, UndoStatus.SKIP);
 
         // All the various events
         ActionEvent.ensure(Events.EVENT_MESSAGE_REQUEST_INDICATION, 'Fill in description for this event', false, null);
