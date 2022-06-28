@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit
 import org.olf.rs.ReshareApplicationEventHandlerService;
 
 /**
@@ -21,6 +22,19 @@ public abstract class AbstractEvent {
      * @return The eventResultDetails
      */
     abstract EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails);
+
+    /**
+     * If an event is capable of being undone, then this method will be overridden to perform the undo
+     * @param request The request the action is being performed against
+     * @param audit The audit record that holds the details of what was performed in the first place
+     * @param eventResultDetails The result of performing the event
+     * @return The eventResultDetails
+     */
+    EventResultDetails undo(PatronRequest request, PatronRequestAudit audit, EventResultDetails eventResultDetails) {
+        eventResultDetails.result = ActionResult.ERROR;
+        eventResultDetails.auditMessage = 'Not Implemented';
+        return(eventResultDetails);
+    }
 
     /**
      * The name of the event

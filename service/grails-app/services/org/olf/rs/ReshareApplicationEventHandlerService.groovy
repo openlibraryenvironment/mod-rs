@@ -48,39 +48,57 @@ public class ReshareApplicationEventHandlerService {
   	/** Holds map of the event to the bean that will do the processing for this event */
   	private static Map serviceEvents = [ : ];
 
+      /**
+       * Obtains the event processor for the supplied event name
+       * @param eventName The name of the event that you want the processor for
+       * @return The event processor for the supplied name
+       */
+      public AbstractEvent getEventProcessor(String eventName) {
+          AbstractEvent eventprocessor = eventNoImplementationService;
+
+          // Cannot locate one if we have been supplied null for the name
+          if (eventName != null) {
+              // If we do not already have the event processor, then we need to locate it
+              if (serviceEvents[eventName] == null) {
+                  // Determine the bean name, if we had a separate event table we could store it as a transient against that
+                  // We split the event name on the underscores then capitalize each word and then join it back together, prefixing it with "event" and postfixing it with "Service"
+                  String[] eventNameWords = eventName.toLowerCase().split("_");
+                  String eventNameNormalised = "";
+                  eventNameWords.each{ word ->
+                      eventNameNormalised += word.capitalize();
+                  }
+
+                  String beanName = "event" + eventNameNormalised + "Service";
+
+                  // Now setup the link to the service action that actually does the work
+                  try {
+                      serviceEvents[eventName] = Holders.grailsApplication.mainContext.getBean(beanName);
+                  } catch (Exception e) {
+                      log.error("Unable to locate event bean: " + beanName);
+                  }
+              }
+
+              // Ensure we have an event processor, default to eventNoImplementationService if it is not found
+              eventprocessor = serviceEvents[eventName];
+              if (eventprocessor == null) {
+                  log.error("Unable to find the bean for event: " + eventName);
+
+                  // We shall use the NoImplementation bean for this event instead
+                  eventprocessor = eventNoImplementationService;
+                  serviceEvents[eventName] = eventprocessor;
+              }
+          }
+
+          // return the processor to the caller
+          return(eventprocessor);
+      }
+
   	@Subscriber('PREventIndication')
 	public handleApplicationEvent(Map eventData) {
 		log.debug("ReshareApplicationEventHandlerService::handleApplicationEvent(${eventData})");
 		if (eventData?.event) {
-			// Get hold of the bean and store it in our map, if we previously havn't been through here
-			if (serviceEvents[eventData.event] == null) {
-				// Determine the bean name, if we had a separate event table we could store it as a transient against that
-				// We split the event name on the underscores then capitalize each word and then join it back together, prefixing it with "event" and postfixing it with "Service"
-				String[] eventNameWords = eventData.event.toLowerCase().split("_");
-				String eventNameNormalised = "";
-				eventNameWords.each{ word ->
-					eventNameNormalised += word.capitalize();
-				}
-
-				String beanName = "event" + eventNameNormalised + "Service";
-
-				// Now setup the link to the service action that actually does the work
-				try {
-					serviceEvents[eventData.event] = Holders.grailsApplication.mainContext.getBean(beanName);
-				} catch (Exception e) {
-					log.error("Unable to locate event bean: " + beanName);
-				}
-			}
-
-			// Did we find the bean
-			AbstractEvent eventBean = serviceEvents[eventData.event];
-			if (eventBean == null) {
-				log.error("Unable to find the bean for event: " + eventData.event);
-
-				// We shall use the NoImplementation bean for this event instead
-				eventBean = eventNoImplementationService;
-				serviceEvents[eventData.event] = eventBean;
-			}
+			// Obtain the event processor
+			AbstractEvent eventBean = getEventProcessor(eventData.event);
 
 			try {
 				// Ensure we are talking to the right tenant database

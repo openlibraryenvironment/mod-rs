@@ -99,7 +99,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 			PatronRequest patron_request = PatronRequest.get(params.patronRequestId)
 
 			if (  patron_request != null ) {
-				result.actions=patron_request.getValidActions();
+				result.actions = actionService.getValidActions(patron_request);
 			} else {
 				result.actions=[];
 				result.message="Unable to locate request for ID ${params.patronRequestId}";
