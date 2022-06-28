@@ -182,8 +182,10 @@ public class ActionService {
                     // We must have an auditEvent
                     if (audit.actionEvent != null) {
                         // Now check to see if we can perform an undo
-                        if (audit.actionEvent.undoStatus == UndoStatus.NO) {
-                             // Bail out here as we can't perform the undo
+                        if ((audit.actionEvent.undoStatus == UndoStatus.NO) ||
+                            ((audit.actionEvent.undoStatus == UndoStatus.DECIDE) &&
+                             !audit.fromStatus.id.equals(audit.toStatus.id))) {
+                            // Bail out here as we can't perform the undo
                             undoAudits = null;
                             return(true);
                         } else {
@@ -191,18 +193,18 @@ public class ActionService {
                             if (audit.actionEvent.undoStatus == UndoStatus.YES) {
                                 // Add to the list of audits that need undoing
                                 undoAudits.add(audit);
-                            }
 
-                            // If this represents an action rgen we need to look no further
-                            if (audit.actionEvent.isAction) {
-                                // We no need to look at anymore audit records
-                                return(true);
+                                // If this represents an action we need to look no further
+                                if (audit.actionEvent.isAction) {
+                                    // We no need to look at anymore audit records
+                                    return(true);
+                                }
                             }
                         }
                     }
                 }
 
-                // We are good to perform an undo on this record so move onto the next one
+                // We are good to perform an undo or we are skipping this record so inspect the next one
                 return(false);
             }
         }
