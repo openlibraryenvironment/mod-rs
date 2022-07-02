@@ -15,6 +15,7 @@ import grails.plugins.rest.client.RestResponse
 import spock.lang.Shared
 import grails.gorm.multitenancy.Tenants
 import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.NamingAuthority
 import com.k_int.web.toolkit.testing.HttpSpec
 import grails.databinding.SimpleMapDataBindingSource
 import grails.web.databinding.GrailsWebDataBinder
@@ -103,7 +104,7 @@ class RSLifecycleSpec extends HttpSpec {
     httpClientConfig = {
       client.clientCustomizer { HttpURLConnection conn ->
         conn.connectTimeout = 5000
-        conn.readTimeout = 20000
+        conn.readTimeout = 25000
       }
     }
 
@@ -180,7 +181,6 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
-      'diku' | 'diku'
   }
 
   void "test presence of HOST LMS adapters"(String name, boolean should_be_found) {
@@ -211,7 +211,6 @@ class RSLifecycleSpec extends HttpSpec {
       'wibble'  | false
   }
 
-  // Set up a new tenant called RSTestTenantA
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
 
@@ -226,6 +225,9 @@ class RSLifecycleSpec extends HttpSpec {
       // post to tenant endpoint
       // doPost(url,jsondata,params,closure)
       def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
+
+      // Give the various jobs time to finish their work.
+      Thread.sleep(5000)
     log.debug("Got response for new tenant: ${resp}");
     then:"The response is correct"
       resp != null;
@@ -235,28 +237,60 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstOne'
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
-      'diku' | 'diku'
   }
 
 
   void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
     when:"Load the default directory (test url is ${baseUrl})"
+    boolean result = true
 
     Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+      log.info("Filling out dummy directory entries for tenant ${tenant_id}");
+
       dirents.each { entry ->
+
+        /*
+        entry.symbols.each { sym ->
+
+          String symbol_string = sym.authority instanceof String ? sym.authority : sym.authority.symbol;
+
+          NamingAuthority na = NamingAuthority.findBySymbol(symbol_string)
+
+          if ( na != null ) {
+            log.debug("[${tenant_id}] replace symbol string ${symbol_string} with a reference to the object (${na.id},${na.symbol}) to prevent duplicate creation");
+            sym.authority = [ id: na.id, symbol: na.symbol ]
+          }
+          else {
+            sym.authority = symbol_string;
+          }
+        }
+        */
+
         log.debug("Sync directory entry ${entry} - Detected runtime port is ${serverPort}")
         def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
         DirectoryEntry de = new DirectoryEntry()
         grailsWebDataBinder.bind(de, source)
 
         // log.debug("Before save, ${de}, services:${de.services}");
-        de.save(flush:true, failOnError:true)
-        // log.debug("Result of bind: ${de} ${de.id}");
+        try {
+          de.save(flush:true, failOnError:true)
+          log.debug("Result of bind: ${de} ${de.id}");
+        }
+        catch ( Exception e ) {
+          log.error("problem bootstrapping directory data",e);
+          result = false;
+        }
+
+        if ( de.errors ) {
+          de.errors?.allErrors?.each { err ->
+            log.error(err?.toString())
+          }
+        }
       }
     }
 
     then:"Test directory entries are present"
-    1==1
+      assert result == true
 
     where:
     tenant_id | dirents
@@ -454,7 +488,7 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | _
   }
 
-  // For diku tenant should return the sample data loaded
+  // For RSInstThree tenant should return the sample data loaded
   void "test API for retrieving shelving locations for #tenant_id"() {
  
     when:"We post to the shelvingLocations endpoint for tenant"
@@ -469,7 +503,7 @@ class RSLifecycleSpec extends HttpSpec {
 
     where:
       tenant_id | _
-      'diku' | _
+      'RSInstThree' | _
   }
 
   void "test API for creating shelving locations for #tenant_id"() {
@@ -509,7 +543,7 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | _
   }
 
-  // For diku tenant should return the sample data loaded
+  // For RSInstThree tenant should return the sample data loaded
   void "test API for retrieving patron profiles for #tenant_id"() {
 
     when:"We GET to the hostLMSPatronProfiles endpoint for tenant"
@@ -524,7 +558,7 @@ class RSLifecycleSpec extends HttpSpec {
 
     where:
       tenant_id | _
-      'RSInstOne' | _
+      'RSInstThree' | _
   }
 
 
