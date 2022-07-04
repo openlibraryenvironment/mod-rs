@@ -19,7 +19,18 @@ import grails.gorm.multitenancy.Tenants;
  */
 public class AppListenerService implements ApplicationListener {
 
+  def grailsApplication
   EventPublicationService eventPublicationService
+  private String moduleVersion = null
+
+  private String getModuleInterfaceVersion() {
+    String result = null;
+    if ( this.moduleVersion == null ) {
+      String[] parsed_version_components = grailsApplication.config?.info?.app?.version.split('\\.')
+      this.moduleVersion = parsed_version_components[0]+'.'+parsed_version_components[1]
+    }
+    return this.moduleVersion
+  }
 
   /**
    * It's not really enough to do this afterInsert - we actually want this event to fire after the transaction
@@ -41,6 +52,7 @@ public class AppListenerService implements ApplicationListener {
           [
             event:eventName,
             tenant: tenant,
+            modRsVersion: getModuleInterfaceVersion(),
             oid:'org.olf.rs.PatronRequest:'+pr.id,
             payload:[
               id: pr.id,
@@ -66,6 +78,7 @@ public class AppListenerService implements ApplicationListener {
           [
             event:Events.STATUS_EVENT_PREFIX + pr.state.code + Events.STATUS_EVENT_POSTFIX,
             tenant: tenant,
+            modRsVersion: getModuleInterfaceVersion(),
             oid:'org.olf.rs.PatronRequest:'+pr.id,
             payload:[
               id: pr.id,
