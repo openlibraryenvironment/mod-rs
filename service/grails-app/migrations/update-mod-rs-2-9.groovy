@@ -64,4 +64,48 @@ databaseChangeLog = {
             column(name: "pra_undo_performed", type: "boolean")
         }
     }
+
+    changeSet(author: "Chas (generated)", id: "1657099942347-1") {
+        createTable(tableName: "report") {
+            column(name: "r_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "reportPK")
+            }
+
+            column(name: "r_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_date_created", type: "TIMESTAMP WITHOUT TIME ZONE") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_last_updated", type: "TIMESTAMP WITHOUT TIME ZONE") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_name", type: "VARCHAR(64)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_description", type: "VARCHAR(2000)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_domain", type: "VARCHAR(64)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_filename", type: "VARCHAR(512)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_is_single_record", type: "BOOLEAN") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "r_report_definition", type: "TEXT") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }

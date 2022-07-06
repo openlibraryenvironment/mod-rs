@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TestPullSlip" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b4f2714a-3193-4a8e-83ee-36ebf13d67c1">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Folio Vagrant"/>
+	<parameter name="id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["7afa600b-5f61-4c9e-9084-f5f5c90431f9"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="timeZone" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["Europe/London"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["M/d/yy"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="timeFormat" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["h:mm a"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["M/d/yy h:mm a"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="schema" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["diku_mod_rs"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select pr_patron_identifier,
+            pr_volume ,
+            pr_hrid,
+            pr_author,
+            pr_title,
+            pr_patron_note,
+            pr_local_call_number,
+            pr_pick_shelving_location,
+            pr_date_created AT TIME ZONE $P{timeZone} "dateCreated",
+            de_req.de_slug "requesterName",
+            de_sup.de_slug "supplierName",
+            de_req.de_email_address "requesterEMail",
+            hll.hll_name "pickLocation"
+ from $P!{schema}.patron_request pr
+           LEFT JOIN $P!{schema}.symbol sym_req ON pr.pr_resolved_req_inst_symbol_fk = sym_req.sym_id
+		   LEFT JOIN $P!{schema}.directory_entry de_req on sym_req.sym_owner_fk = de_req.de_id
+           LEFT JOIN $P!{schema}.symbol sym_sup ON pr.pr_resolved_sup_inst_symbol_fk = sym_sup.sym_id
+		   LEFT JOIN $P!{schema}.directory_entry de_sup on sym_sup.sym_owner_fk = de_sup.de_id
+		   LEFT JOIN $P!{schema}.host_lms_location hll on pr.pr_pick_location_fk = hll.hll_id
+  where pr_id = $P{id}]]>
+	</queryString>
+	<field name="pr_patron_identifier" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_patron_identifier"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_patron_identifier"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_volume" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_volume"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_volume"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_hrid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_hrid"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_hrid"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_author" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_author"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_author"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_title" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_title"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_title"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_patron_note" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pr_patron_note"/>
+		<property name="com.jaspersoft.studio.field.label" value="pr_patron_note"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="patron_request"/>
+	</field>
+	<field name="pr_local_call_number" class="java.lang.String"/>
+	<field name="pr_pick_shelving_location" class="java.lang.String"/>
+	<field name="requesterName" class="java.lang.String"/>
+	<field name="supplierName" class="java.lang.String"/>
+	<field name="requesterEMail" class="java.lang.String"/>
+	<field name="pickLocation" class="java.lang.String"/>
+	<field name="dateCreated" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="730" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<rectangle>
+				<reportElement x="10" y="50" width="290" height="163" uuid="2962c99e-ea86-4a47-ab04-1374563e3b3f"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="25" y="63" width="265" height="15" uuid="b8e200b1-c3e8-4b8b-952b-cd6f35c0fe22">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<text><![CDATA[B O R R O W E R  &  M O R E]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="25" y="103" width="265" height="20" uuid="09761958-637d-4bac-af44-90a101a1ae68">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement markup="styled">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pr_patron_identifier}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="25" y="193" width="41" height="17" uuid="ee53f4a7-3a41-4368-bba0-50ce5eda7d59">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<text><![CDATA[Request]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="193" width="100" height="16" uuid="15ecdb60-01f6-4e08-8c27-dc29f6eb0258"/>
+				<textFieldExpression><![CDATA[$F{pr_hrid}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="10" y="213" width="290" height="250" uuid="8de71198-fa6e-40e7-b51e-b0366e69d011"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="25" y="223" width="265" height="15" uuid="c1583cb9-05bc-477c-8cd3-390052000959">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<text><![CDATA[T H I S  L O A N]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="25" y="255" width="265" height="18" uuid="f5789be3-fb8b-4b4f-9187-e781f002f1c1">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pr_title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="30" y="283" width="20" height="20" uuid="b3f15442-ffe1-415e-a6ff-f3074f50a574"/>
+				<text><![CDATA[By:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="283" width="240" height="20" uuid="9096912a-8f67-4ec5-bb42-898e5a5290ac"/>
+				<textFieldExpression><![CDATA[$F{pr_author}.concat( " Volume: " ).concat($F{pr_volume})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="25" y="313" width="265" height="20" uuid="2ec1fa5f-97d3-47c4-9837-0a76736fde76">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[This item may be recalled]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="25" y="353" width="265" height="30" uuid="60a189ba-f9a6-41fb-be8f-27c0ebf0e366">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<text><![CDATA[If this happens, we'll send an email with a new due date.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="25" y="393" width="265" height="20" uuid="4cf98a49-0cc3-4ea8-a2df-c870333a81d4">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Questions about your loan?]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="10" y="463" width="290" height="247" uuid="15bed55a-6311-4161-95fb-8cd4424338f5"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="25" y="473" width="265" height="15" uuid="a3115a2b-d842-4ae4-8b4c-39e64f8db6ce"/>
+				<text><![CDATA[D E T A I L S  F O R  S T A F F]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="25" y="493" width="265" height="20" uuid="e0043f80-5b19-4804-a3de-29ef1f8af7f1">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Patron note]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="25" y="523" width="265" height="20" uuid="87077494-798f-44a1-b93c-787888b9aeb8">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{pr_patron_note}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="25" y="421" width="40" height="22" uuid="5071d034-8401-49a3-8d9c-2689f907c870">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<text><![CDATA[Contact]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="70" y="423" width="220" height="20" uuid="ddcfe603-c4ff-4bf5-9c7f-e4d2f25c89c2"/>
+				<textFieldExpression><![CDATA[$F{requesterName}.concat( " or" )]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="25" y="444" width="265" height="19" uuid="b976c666-fc9d-4115-a125-8deaadcf7fa6">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{requesterEMail}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="157" y="640" width="133" height="20" uuid="2d8d035c-d692-49fa-a2c2-d93cfb5f5a9c">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{requesterName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement key="" x="25" y="640" width="132" height="20" uuid="97d6e130-852f-404d-b62d-67bb3222aafc">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{supplierName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="25" y="680" width="132" height="20" uuid="73e0bf5d-fe5c-40fe-b679-c0237327ee5e">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat($P{dateTimeFormat}).format(new Date($F{dateCreated}.getTime()))
+]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="25" y="600" width="265" height="20" uuid="47bc3aea-b63b-4c39-a181-b5b350280845">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{pickLocation}.concat( " - " ).concat($F{pr_pick_shelving_location})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="10" y="551" width="290" height="1" uuid="c9544589-587f-4994-a994-a5653362840b">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="10" y="590" width="290" height="1" uuid="4bf17d59-5624-47c6-a2f2-d27b434a15ca">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="25" y="560" width="265" height="20" uuid="af6f88d1-dbaa-4fb9-bea6-b20a337ceac0">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{pr_local_call_number}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="10" y="630" width="290" height="1" uuid="ce008e45-93f7-44cb-9e1c-c1f2f7c73100">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="10" y="670" width="290" height="1" uuid="ba53bce8-9f1a-4393-8970-a5fee71628fc">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="157" y="640" width="1" height="60" uuid="1c69bcf2-f58a-4bdd-820c-3c4c6f68595c"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<componentElement>
+				<reportElement x="25" y="140" width="100" height="30" uuid="959add1e-d78c-4004-98f6-8d05c58f5bd8">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA[$F{pr_hrid}]]></jr:codeExpression>
+				</jr:Code39>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>
