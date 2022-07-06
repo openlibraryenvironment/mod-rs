@@ -118,4 +118,24 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		response.status = 200;
 		response.setContentType("text/plain");
 	}
+
+    /**
+     * Tests the jasper reports functionality by outputing the report to D:/Temp/TestPullSlip.pdf
+     * Example call: curl --http1.1 -sSLf -H "accept: image/png" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport/c2bc1883-5d10-4fb3-ad84-5120f743ffca
+     * @return The png file that is the graph
+     */
+    org.olf.rs.reporting.JasperReportService jasperReportService;
+
+    def testReport() {
+        String schema = "diku_mod_rs";
+        org.olf.rs.reports.Report report = org.olf.rs.reports.Report.lookupPredefinedId(org.olf.rs.referenceData.ReportData.ID_PATRON_REQUEST_PULL_SLIP_1);
+        OutputStream outputStream = new FileOutputStream(new File("D:/Temp/TestPullSlip.pdf"));
+        try {
+            jasperReportService.executeReport(report.id, schema, outputStream, params.requestId);
+        } catch (Exception e) {
+            log.error("Exception thrown generating report", e);
+        } finally {
+            outputStream.close();
+        }
+    }
 }
