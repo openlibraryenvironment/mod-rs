@@ -1,5 +1,6 @@
 package mod.rs;
 
+import org.olf.rs.EmailService
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.Actions;
@@ -121,15 +122,17 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 
     /**
      * Tests the jasper reports functionality by outputing the report to D:/Temp/TestPullSlip.pdf
-     * Example call: curl --http1.1 -sSLf -H "accept: image/png" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport/c2bc1883-5d10-4fb3-ad84-5120f743ffca
+     * Example call: curl --http1.1 -sSLf -H "accept: application/json" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport/c2bc1883-5d10-4fb3-ad84-5120f743ffca
      * @return The png file that is the graph
      */
     org.olf.rs.reporting.JasperReportService jasperReportService;
+    EmailService emailService
 
     def testReport() {
         String schema = "diku_mod_rs";
+        String outputFilename = 'D:/Temp/TestPullSlip.pdf';
         org.olf.rs.reports.Report report = org.olf.rs.reports.Report.lookupPredefinedId(org.olf.rs.referenceData.ReportData.ID_PATRON_REQUEST_PULL_SLIP_1);
-        OutputStream outputStream = new FileOutputStream(new File("D:/Temp/TestPullSlip.pdf"));
+        OutputStream outputStream = new FileOutputStream(new File(outputFilename));
         try {
             jasperReportService.executeReport(report.id, schema, outputStream, params.requestId);
         } catch (Exception e) {
@@ -137,5 +140,30 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
         } finally {
             outputStream.close();
         }
+
+        // In order to test this ensure you have configured mod-email
+        // also need to go through okapi, rather than local otherwise it will not find mod-email
+        File file = new File(outputFilename);
+        byte[] binaryContent = file.bytes;
+        String encoded = binaryContent.encodeBase64().toString();
+        Map emailParamaters = [
+            notificationId: '1',
+            to: 'chaswoodfield@gmail.com',
+            header: 'Has the pull slip attached',
+            body: 'Will it get through',
+            outputFormat: 'text/plain',
+            attachments: [
+                [
+                    contentType: 'application/pdf',
+                    name: 'Pull Slip',
+                    description: 'This is a Pull Slip',
+                    data: encoded,
+                    disposition: 'base64'
+                ]
+            ]
+        ];
+
+        Map emailResult = emailService.sendEmail(emailParamaters);
+        int chas = 1;
     }
 }
