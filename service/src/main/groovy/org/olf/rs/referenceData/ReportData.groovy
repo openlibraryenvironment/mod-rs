@@ -11,7 +11,7 @@ public class ReportData {
 
     private static final String DOMAIN_PATRON_REQUEST = 'PatronRequest';
 
-    private static final String ID_PATRON_REQUEST_PULL_SLIP_1 = DOMAIN_PATRON_REQUEST + '.PullSlip.1';
+    public static final String ID_PATRON_REQUEST_PULL_SLIP_1 = DOMAIN_PATRON_REQUEST + '.PullSlip.1';
 
 	public void load() {
 		log.info("Adding report data to the database");
