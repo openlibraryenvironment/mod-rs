@@ -108,4 +108,17 @@ databaseChangeLog = {
             }
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20220624-1745-003") {
+        createTable(tableName: "host_lms_item_loan_policy") {
+            column(name: "hlilp_id", type: "VARCHAR(36)") { constraints(nullable: "false") }
+            column(name: "hlilp_version", type: "BIGINT")
+            column(name: "hlilp_code", type: "VARCHAR(255)") { constraints(nullable: "false") }
+            column(name: "hlilp_name", type: "VARCHAR(255)")
+            column(name: "hlilp_hidden", type: "BOOLEAN") { constraints(nullable: "false") }
+            column(name: "hlilp_lendable", type: "BOOLEAN") { constraints(nullable: "false") }
+            column(name: "hlilp_date_created", type: "timestamp")
+            column(name: "hlilp_last_updated", type: "timestamp")
+        }
+    }
 }

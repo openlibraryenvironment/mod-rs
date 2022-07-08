@@ -30,6 +30,7 @@ class UrlMappings {
     "/rs/timers" (resources: 'timer' )
     "/rs/hostLMSLocations" (resources: 'hostLMSLocation' )
     "/rs/hostLMSPatronProfiles" (resources: 'hostLMSPatronProfile' )
+    "/rs/hostLMSItemLoanPolicies" (resources: 'hostLMSItemLoanPolicy' )
     "/rs/shelvingLocations" (resources: 'shelvingLocations' )
     "/rs/shelvingLocationSites" (resources: 'shelvingLocationSite')
     "/rs/sharedIndexQuery" (controller: 'sharedIndexQuery', action: 'query', parseRequest: false)

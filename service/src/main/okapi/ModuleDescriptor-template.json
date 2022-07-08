@@ -245,6 +245,16 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/hostLMSItemLoanPolicies*",
+          "permissionsRequired": [ "rs.hostlmsitemloanpolicies.read" ]
+        },
+        {
+          "methods": [ "PUT", "POST", "DELETE" ],
+          "pathPattern": "/rs/hostLMSItemLoanPolicies*",
+          "permissionsRequired": [ "rs.hostlmsitemloanpolicies.write" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/shelvingLocation*",
           "permissionsRequired": [ "rs.shelvingLocations.read" ]
         },
@@ -782,6 +792,21 @@
       "visible": false,
       "subPermissions" : [
         "rs.hostlmspatronprofiles.read"
+      ]
+    },
+    {
+      "permissionName": "rs.hostlmsitemloanpolicies.read",
+      "displayName": "Read item loan policies",
+      "description": "Read item loan policies",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.hostlmsitemloanpolicies.write",
+      "displayName": "Write item loan policies",
+      "description": "Write item loan policies",
+      "visible": false,
+      "subPermissions" : [
+        "rs.hostlmsitemloanpolicies.read"
       ]
     },
     {

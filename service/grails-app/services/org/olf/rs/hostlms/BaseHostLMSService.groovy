@@ -2,7 +2,8 @@ package org.olf.rs.hostlms;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.olf.okapi.modules.directory.Symbol;
+import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.HostLMSItemLoanPolicy;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.HostLMSLocationService;
 import org.olf.rs.HostLMSShelvingLocation;
@@ -130,6 +131,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    */
   private ItemLocation pickBestSupplyLocationFrom(List<ItemLocation> options) {
     ItemLocation result = null;
+    String POLICY_QRY = 'select ilp from HostLMSItemLoanPolicy as ilp where ilp.code=:ilp';
     String SHELVING_LOC_QRY = 'select sl from HostLMSShelvingLocation as sl where sl.code=:sl';
     String SLS_QRY = 'select sls from ShelvingLocationSite as sls where sls.location = :loc and sls.shelvingLocation=:sl';
 
@@ -142,8 +144,29 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       // See if we can find a HostLMSLocation for the given item - create one if not
       HostLMSLocation loc = hostLMSLocationService.EnsureActive(o.location, o.location);
 
+      HostLMSItemLoanPolicy ilp = null;
       HostLMSShelvingLocation sl = null;
       ShelvingLocationSite sls = null;
+
+      // create/find HostLMSItemLoanPolicy
+      if ( o?.itemLoanPolicy?.trim() ) {
+        List<HostLMSItemLoanPolicy> ilps = HostLMSItemLoanPolicy.executeQuery(POLICY_QRY, [ilp: o.itemLoanPolicy.trim()]);
+        switch ( ilps.size() ) {
+          case 0:
+            ilp = new HostLMSItemLoanPolicy( code: o.itemLoanPolicy, name: o.itemLoanPolicy ).save(flush:true, failOnError:true);
+            break;
+          case 1:
+            ilp = ilps.get(0);
+            if (ilp.hidden) {
+              ilp.hidden = false;
+              ilp.save(flush : true, failOnError : true);
+            }
+            break;
+          default:
+            throw new RuntimeException("Multiple loan policies for ${o.itemLoanPolicy}");
+            break;
+        }
+      }
 
       // create a HostLMSShelvingLocation in respect of shelvingLocation
       if ( o?.shelvingLocation != null ) {
@@ -187,7 +210,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
       }
 
-      o.preference = loc?.supplyPreference ?: 0;
+      // Item Loan Policy overrides location preference when item is not lendable
+      o.preference = ilp.lendable ? (loc?.supplyPreference ?: 0) : -1;
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
@@ -728,15 +752,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("BaseHostLMSService holdings record:: ${hld}");
-      boolean available = hld.circulations?.circulation?.any { circ -> circ?.availableNow?.@value == '1' };
-      if (available) {
-        log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
-        ItemLocation il = new ItemLocation(
-                                  reason: reason,
-                                  location: hld.localLocation,
-                                  shelvingLocation:hld.shelvingLocation,
-                                  callNumber:hld.callNumber )
-        availability_summary[hld.localLocation] = il;
+      hld.circulations?.circulation?.any { circ ->
+        if (circ?.availableNow?.@value == '1') {
+          log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
+          ItemLocation il = new ItemLocation(
+                  reason: reason,
+                  location: hld.localLocation,
+                  shelvingLocation: hld.shelvingLocation,
+                  itemLoanPolicy: circ?.availableThru,
+                  callNumber: hld.callNumber)
+          availability_summary[hld.localLocation] = il;
+        }
       }
     }
 
