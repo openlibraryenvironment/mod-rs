@@ -22,7 +22,7 @@ class UrlMappings {
     "/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
     "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
     "/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
-    "/rs/availableAction/testReport/$requestId" (controller: "availableAction", action: "testReport")
+    "/rs/availableAction/testReport" (controller: "availableAction", action: "testReport")
 
     '/rs/noticePolicies' (resources: 'noticePolicy')
 

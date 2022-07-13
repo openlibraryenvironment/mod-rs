@@ -28,7 +28,7 @@ public class JasperReportService {
     // The parameter names passed into the reports
     public static final String PARAMETER_DATE_FORMAT      = "dateFormat";
     public static final String PARAMETER_DATE_TIME_FORMAT = "dateTimeFormat";
-    public static final String PARAMETER_ID               = "id";
+    public static final String PARAMETER_IDS              = "ids";
     public static final String PARAMETER_SCHEMA           = "schema";
     public static final String PARAMETER_TIME_FORMAT      = "timeFormat";
     public static final String PARAMETER_TIME_ZONE        = "timeZone";
@@ -52,13 +52,15 @@ public class JasperReportService {
      * @param reportId The id of the report that is to be run
      * @param schema The database schema that the report will be run against
      * @param outputStream Where the report should be output to
-     * @param idForReport If the report requires an id, this is the id it will be supplied
+     * @param idsForReport The ids to pass into the report
      */
-    public void executeReport(String reportId, String schema, OutputStream outputStream, String idForReport = null) {
+    public void executeReport(String reportId, String schema, OutputStream outputStream, List idsForReport = null) {
+        // If you are having issues with fonts, take a look at
+        // https://community.jaspersoft.com/wiki/custom-font-font-extension
         Connection connection = dataSource.getConnection();
         try{
             Map<String, Object> parameters = new HashMap<String, Object>();
-            parameters.put(PARAMETER_ID, idForReport);
+            parameters.put(PARAMETER_IDS, idsForReport);
             parameters.put(PARAMETER_SCHEMA, schema);
             AddDateTimeParameters(schema, parameters);
 
