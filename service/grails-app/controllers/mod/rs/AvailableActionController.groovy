@@ -122,7 +122,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 
     /**
      * Tests the jasper reports functionality by outputing the report to D:/Temp/TestPullSlip.pdf
-     * Example call: curl --http1.1 -sSLf -H "accept: application/json" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport/c2bc1883-5d10-4fb3-ad84-5120f743ffca
+     * Example call: curl --http1.1 -sSLf -H "accept: application/json" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport?id=c2bc1883-5d10-4fb3-ad84-5120f743ffca&id=7a42ed5a-9608-4bef-9ba2-3cc79a377d47
      * @return The png file that is the graph
      */
     org.olf.rs.reporting.JasperReportService jasperReportService;
@@ -130,11 +130,21 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 
     def testReport() {
         String schema = "diku_mod_rs";
+        List ids;
+        if (params.id == null) {
+            ids = new ArrayList();
+        } else if (params.id instanceof String) {
+            ids = new ArrayList();
+            ids.add(params.id);
+        } else {
+            // it must be an array
+            ids = params.id;
+        }
         String outputFilename = 'D:/Temp/TestPullSlip.pdf';
         org.olf.rs.reports.Report report = org.olf.rs.reports.Report.lookupPredefinedId(org.olf.rs.referenceData.ReportData.ID_PATRON_REQUEST_PULL_SLIP_1);
         OutputStream outputStream = new FileOutputStream(new File(outputFilename));
         try {
-            jasperReportService.executeReport(report.id, schema, outputStream, params.requestId);
+            jasperReportService.executeReport(report.id, schema, outputStream, ids);
         } catch (Exception e) {
             log.error("Exception thrown generating report", e);
         } finally {

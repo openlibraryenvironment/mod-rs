@@ -6,6 +6,7 @@
 
 # View okapi logs
 	docker logs -f okapi
+	docker logs -f magical_newton (for email service)
 
 # Install npm-groovy-lint from here
 	https://github.com/nvuillam/npm-groovy-lint#Autofixable-rules

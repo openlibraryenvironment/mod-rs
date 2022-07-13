@@ -196,6 +196,7 @@ dependencies {
   
   // For jasper reports
   compile 'net.sf.jasperreports:jasperreports:6.19.1'
+  compile 'net.sf.jasperreports:jasperreports-fonts:6.19.1'
   compile 'net.sf.barcode4j:barcode4j:2.1'
   compile 'org.apache.xmlgraphics:batik-bridge:1.14'
 }
