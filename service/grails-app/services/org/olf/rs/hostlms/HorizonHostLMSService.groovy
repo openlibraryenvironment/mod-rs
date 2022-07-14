@@ -48,11 +48,9 @@ public class HorizonHostLMSService extends BaseHostLMSService {
       log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
       if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
         log.debug("Available now");
-        def shelvingLocation = hld?.shelvingLocation?.text();
         def location = hld?.localLocation?.text();
-        if(!shelvingLocation) {
-          shelvingLocation = null; //No blank strings
-        }
+        def shelvingLocation = hld?.shelvingLocation?.text() ?: null;
+        def itemLoanPolicy = hld?.shelvingData?.text()?.trim() ?: null;
         /*
         def locParts = splitLocation(hld.localLocation?.text());
         log.debug("splitLocation returned ${locParts}");
@@ -61,8 +59,8 @@ public class HorizonHostLMSService extends BaseHostLMSService {
           shelvingLocation = locParts[1];
         }
         */
-        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
-        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
+        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, itemLoanPolicy: ${itemLoanPolicy}, callNumber: ${hld.callNumber}");
+        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, itemLoanPolicy: itemLoanPolicy, callNumber: hld.callNumber )
         availability_summary[hld.localLocation] = il;
       }
     }
