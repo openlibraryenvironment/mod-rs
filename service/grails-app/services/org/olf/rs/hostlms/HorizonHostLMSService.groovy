@@ -44,24 +44,16 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("Holding record: ${hld}");
-      log.debug("${hld.circulations?.circulation?.availableNow}");
-      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-        log.debug("Available now");
-        def location = hld?.localLocation?.text();
-        def shelvingLocation = hld?.shelvingLocation?.text() ?: null;
-        def itemLoanPolicy = hld?.shelvingData?.text()?.trim() ?: null;
-        /*
-        def locParts = splitLocation(hld.localLocation?.text());
-        log.debug("splitLocation returned ${locParts}");
-        if(locParts) {
-          location = locParts[0];
-          shelvingLocation = locParts[1];
+      hld.circulations?.circulation?.each { circ ->
+        if (hld?.localLocation && circ?.availableNow?.@value == '1') {
+          ItemLocation il = new ItemLocation(
+                  reason: reason,
+                  location: hld?.localLocation?.text(),
+                  shelvingLocation: hld?.shelvingLocation?.text() ?: null,
+                  itemLoanPolicy: hld?.shelvingData?.text()?.trim() ?: null,
+                  callNumber: hld.callNumber);
+          availability_summary[hld.localLocation] = il;
         }
-        */
-        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, itemLoanPolicy: ${itemLoanPolicy}, callNumber: ${hld.callNumber}");
-        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, itemLoanPolicy: itemLoanPolicy, callNumber: hld.callNumber )
-        availability_summary[hld.localLocation] = il;
       }
     }
 
