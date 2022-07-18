@@ -440,7 +440,7 @@ where $X{IN, pr.pr_id, ids}]]>
 							<jr:codeExpression><![CDATA[$F{itemBarcode}]]></jr:codeExpression>
 						</jr:Code39>
 					</componentElement>
-					<textField>
+					<textField textAdjust="StretchHeight">
 						<reportElement style="FieldSmall" positionType="Float" x="0" y="36" width="275" height="15" uuid="e21a6def-7f96-4efc-acd1-ca62382d2c26">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<property name="com.jaspersoft.studio.unit.x" value="px"/>
