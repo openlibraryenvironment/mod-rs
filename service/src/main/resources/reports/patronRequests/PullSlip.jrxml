@@ -102,265 +102,366 @@ where $X{IN, pr.pr_id, ids}]]>
 	<detail>
 		<band height="834">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<rectangle>
-				<reportElement style="Section" x="10" y="50" width="275" height="163" uuid="2962c99e-ea86-4a47-ab04-1374563e3b3f"/>
-			</rectangle>
-			<staticText>
-				<reportElement style="Header" x="10" y="63" width="275" height="15" uuid="b8e200b1-c3e8-4b8b-952b-cd6f35c0fe22">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<frame>
+				<reportElement x="10" y="63" width="275" height="158" uuid="889543dd-f6c3-49c0-9ca7-90bc8c7cf380">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<text><![CDATA[B O R R O W E R  &amp;  M O R E]]></text>
-			</staticText>
-			<textField>
-				<reportElement style="FieldBigBold" x="10" y="78" width="275" height="36" uuid="09761958-637d-4bac-af44-90a101a1ae68">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<staticText>
+					<reportElement style="Header" positionType="Float" x="0" y="6" width="275" height="15" uuid="b8e200b1-c3e8-4b8b-952b-cd6f35c0fe22">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<text><![CDATA[B O R R O W E R  &amp;  M O R E]]></text>
+				</staticText>
+				<textField>
+					<reportElement style="FieldBigBold" positionType="Float" x="0" y="26" width="275" height="36" uuid="09761958-637d-4bac-af44-90a101a1ae68">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{pr_patron_identifier}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="FieldBold" x="0" y="68" width="275" height="20" uuid="0a085f83-6da3-49b9-a0ff-b925fabfb1aa">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<textElement markup="styled">
+						<font size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{pickupLocation}.concat(" Due")]]></textFieldExpression>
+				</textField>
+				<componentElement>
+					<reportElement positionType="Float" x="10" y="94" width="265" height="30" uuid="959add1e-d78c-4004-98f6-8d05c58f5bd8">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="none">
+						<jr:codeExpression><![CDATA[$F{pr_hrid}]]></jr:codeExpression>
+					</jr:Code39>
+				</componentElement>
+				<textField>
+					<reportElement style="FieldSmall" positionType="Float" x="0" y="132" width="275" height="16" uuid="15ecdb60-01f6-4e08-8c27-dc29f6eb0258">
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<textFieldExpression><![CDATA["Request: ".concat($F{pr_hrid})]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="10" y="221" width="275" height="203" uuid="b3a0d073-8d24-4e3a-b352-4fdb63b8e6a0">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
-				<textFieldExpression><![CDATA[$F{pr_patron_identifier}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="FieldSmall" x="10" y="190" width="275" height="16" uuid="15ecdb60-01f6-4e08-8c27-dc29f6eb0258">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA["Request: ".concat($F{pr_hrid})]]></textFieldExpression>
-			</textField>
-			<rectangle>
-				<reportElement style="Section" x="10" y="213" width="275" height="217" uuid="8de71198-fa6e-40e7-b51e-b0366e69d011">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-			</rectangle>
-			<staticText>
-				<reportElement style="Header" x="10" y="223" width="275" height="15" uuid="c1583cb9-05bc-477c-8cd3-390052000959">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<text><![CDATA[T H I S  L O A N]]></text>
-			</staticText>
-			<textField>
-				<reportElement style="FieldBold" x="10" y="244" width="275" height="18" uuid="f5789be3-fb8b-4b4f-9187-e781f002f1c1">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
-				</reportElement>
-				<textElement>
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{pr_title}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="10" y="268" width="275" height="20" uuid="9096912a-8f67-4ec5-bb42-898e5a5290ac">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
-				</reportElement>
-				<textElement markup="none"/>
-				<textFieldExpression><![CDATA["By: ".concat($F{author}).concat(" Volume: ").concat($F{volume})]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement style="FieldBold" x="10" y="293" width="275" height="20" uuid="2ec1fa5f-97d3-47c4-9837-0a76736fde76">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<text><![CDATA[This item may be recalled]]></text>
-			</staticText>
-			<staticText>
-				<reportElement style="Field" x="10" y="313" width="275" height="30" uuid="60a189ba-f9a6-41fb-be8f-27c0ebf0e366">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<text><![CDATA[If this happens, we'll send an email with a new due date.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement style="FieldBold" x="10" y="349" width="275" height="20" uuid="4cf98a49-0cc3-4ea8-a2df-c870333a81d4">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<text><![CDATA[Questions about your loan?]]></text>
-			</staticText>
-			<rectangle>
-				<reportElement style="Section" x="10" y="430" width="275" height="370" uuid="15bed55a-6311-4161-95fb-8cd4424338f5">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-				</reportElement>
-			</rectangle>
-			<staticText>
-				<reportElement style="Header" x="10" y="440" width="275" height="15" uuid="a3115a2b-d842-4ae4-8b4c-39e64f8db6ce">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<text><![CDATA[D E T A I L S  F O R  S T A F F]]></text>
-			</staticText>
-			<staticText>
-				<reportElement style="FieldBold" x="10" y="461" width="275" height="20" uuid="e0043f80-5b19-4804-a3de-29ef1f8af7f1">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
-				</reportElement>
-				<text><![CDATA[Patron note]]></text>
-			</staticText>
-			<textField textAdjust="StretchHeight">
-				<reportElement style="Field" x="10" y="487" width="275" height="71" uuid="87077494-798f-44a1-b93c-787888b9aeb8">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{pr_patron_note}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="10" y="375" width="275" height="20" uuid="ddcfe603-c4ff-4bf5-9c7f-e4d2f25c89c2">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA["Contact: ".concat($F{requesterName}).concat( " or" )]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="10" y="401" width="275" height="19" uuid="b976c666-fc9d-4115-a125-8deaadcf7fa6">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{requesterEMail}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="148" y="636" width="137" height="20" uuid="2d8d035c-d692-49fa-a2c2-d93cfb5f5a9c">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{requesterName}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement key="" style="Field" x="10" y="636" width="137" height="20" uuid="97d6e130-852f-404d-b62d-67bb3222aafc">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{supplierName}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="10" y="668" width="137" height="20" uuid="73e0bf5d-fe5c-40fe-b679-c0237327ee5e">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat($P{dateTimeFormat}).format(new Date($F{dateCreated}.getTime()))]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Field" x="10" y="603" width="275" height="20" uuid="47bc3aea-b63b-4c39-a181-b5b350280845">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{pickLocation}.concat( " - " ).concat($F{pr_pick_shelving_location})]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement x="10" y="564" width="275" height="1" uuid="c9544589-587f-4994-a994-a5653362840b">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement x="10" y="596" width="275" height="1" uuid="4bf17d59-5624-47c6-a2f2-d27b434a15ca">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
-			<textField>
-				<reportElement style="FieldBold" x="10" y="570" width="275" height="20" uuid="af6f88d1-dbaa-4fb9-bea6-b20a337ceac0">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{pr_local_call_number}]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement x="10" y="629" width="275" height="1" uuid="ce008e45-93f7-44cb-9e1c-c1f2f7c73100">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement x="10" y="662" width="275" height="1" uuid="ba53bce8-9f1a-4393-8970-a5fee71628fc">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement x="147" y="629" width="1" height="65" uuid="1c69bcf2-f58a-4bdd-820c-3c4c6f68595c">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.25" lineStyle="Solid"/>
-				</graphicElement>
-			</line>
-			<componentElement>
-				<reportElement x="20" y="150" width="265" height="30" uuid="959add1e-d78c-4004-98f6-8d05c58f5bd8">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="none">
-					<jr:codeExpression><![CDATA[$F{pr_hrid}]]></jr:codeExpression>
-				</jr:Code39>
-			</componentElement>
-			<textField>
-				<reportElement style="FieldBold" x="10" y="120" width="275" height="20" uuid="0a085f83-6da3-49b9-a0ff-b925fabfb1aa">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<staticText>
+					<reportElement style="Header" positionType="Float" x="0" y="6" width="275" height="15" uuid="c1583cb9-05bc-477c-8cd3-390052000959">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<text><![CDATA[T H I S  L O A N]]></text>
+				</staticText>
+				<textField>
+					<reportElement style="FieldBold" positionType="Float" x="0" y="26" width="275" height="18" uuid="f5789be3-fb8b-4b4f-9187-e781f002f1c1">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
+					</reportElement>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{pr_title}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Field" x="0" y="50" width="275" height="20" isRemoveLineWhenBlank="true" uuid="9096912a-8f67-4ec5-bb42-898e5a5290ac">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
+					</reportElement>
+					<textElement markup="none"/>
+					<textFieldExpression><![CDATA["By: ".concat($F{author}).concat(" Volume: ").concat($F{volume})]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="FieldBold" positionType="Float" x="0" y="70" width="275" height="20" uuid="2ec1fa5f-97d3-47c4-9837-0a76736fde76">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<text><![CDATA[This item may be recalled]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Field" positionType="Float" x="0" y="96" width="275" height="30" uuid="60a189ba-f9a6-41fb-be8f-27c0ebf0e366">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<text><![CDATA[If this happens, we'll send an email with a new due date.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="FieldBold" positionType="Float" x="0" y="132" width="275" height="20" uuid="4cf98a49-0cc3-4ea8-a2df-c870333a81d4">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<text><![CDATA[Questions about your loan?]]></text>
+				</staticText>
+				<textField>
+					<reportElement style="Field" positionType="Float" x="0" y="158" width="275" height="20" uuid="ddcfe603-c4ff-4bf5-9c7f-e4d2f25c89c2">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<textFieldExpression><![CDATA["Contact: ".concat($F{requesterName}).concat( " or" )]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Field" positionType="Float" x="0" y="184" width="275" height="19" uuid="b976c666-fc9d-4115-a125-8deaadcf7fa6">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{requesterEMail}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="10" y="424" width="275" height="50" uuid="a70ed7c4-723f-4a04-9e3a-8df372682e2d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
-				<textElement markup="styled">
-					<font size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{pickupLocation}.concat(" Due")]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement x="10" y="694" width="275" height="1" uuid="f8e72aaf-bfb4-425b-9806-88cefe6c49f9">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<staticText>
+					<reportElement style="Header" positionType="Float" x="0" y="6" width="275" height="15" uuid="a3115a2b-d842-4ae4-8b4c-39e64f8db6ce">
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<text><![CDATA[D E T A I L S  F O R  S T A F F]]></text>
+				</staticText>
+				<frame>
+					<reportElement positionType="Float" x="0" y="27" width="275" height="36" isRemoveLineWhenBlank="true" uuid="6d1fffbd-7c02-4589-a0a3-e0bfc818f94a">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<printWhenExpression><![CDATA[$F{pr_patron_note} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="FieldBold" positionType="Float" x="0" y="0" width="275" height="15" uuid="e0043f80-5b19-4804-a3de-29ef1f8af7f1">
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<text><![CDATA[Patron note]]></text>
+					</staticText>
+					<textField textAdjust="StretchHeight">
+						<reportElement style="Field" positionType="Float" x="0" y="21" width="275" height="15" uuid="87077494-798f-44a1-b93c-787888b9aeb8">
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<textFieldExpression><![CDATA[$F{pr_patron_note}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="66" width="275" height="21" isRemoveLineWhenBlank="true" uuid="81784814-22e0-4a4e-857a-80033d9f3297">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<printWhenExpression><![CDATA[$F{pr_local_call_number} != null]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<pen lineWidth="1.0" lineStyle="Dotted"/>
+						<topPen lineStyle="Dotted"/>
+						<bottomPen lineStyle="Dotted"/>
+					</box>
+					<textField>
+						<reportElement style="FieldBold" positionType="Float" x="0" y="3" width="275" height="15" isRemoveLineWhenBlank="true" uuid="af6f88d1-dbaa-4fb9-bea6-b20a337ceac0">
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
+						</reportElement>
+						<textFieldExpression><![CDATA[$F{pr_local_call_number}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="87" width="275" height="21" isRemoveLineWhenBlank="true" uuid="f3f0a2cc-faeb-4b9f-8db6-6b8a80a4c61a">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<printWhenExpression><![CDATA[$F{pickLocation} != null]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<pen lineWidth="1.0" lineStyle="Dotted"/>
+						<topPen lineWidth="1.0" lineStyle="Dotted"/>
+						<bottomPen lineWidth="1.0" lineStyle="Dotted"/>
+					</box>
+					<textField>
+						<reportElement style="Field" positionType="Float" x="0" y="3" width="275" height="15" isRemoveLineWhenBlank="true" uuid="47bc3aea-b63b-4c39-a181-b5b350280845">
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
+						</reportElement>
+						<textFieldExpression><![CDATA[$F{pickLocation}.concat( " - " ).concat($F{pr_pick_shelving_location})]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="108" width="275" height="21" isRemoveLineWhenBlank="true" uuid="1ac12c3b-d0c7-43ff-a2f9-3a1139cb8891">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="1.0" lineStyle="Dotted"/>
+						<bottomPen lineWidth="1.0" lineStyle="Dotted"/>
+					</box>
+					<frame>
+						<reportElement x="0" y="0" width="137" height="21" uuid="abfcd5c3-50a1-40f8-bd36-e596d353d88d">
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<box>
+							<rightPen lineWidth="1.0" lineStyle="Dotted"/>
+						</box>
+						<textField>
+							<reportElement key="" style="Field" positionType="Float" x="0" y="3" width="137" height="15" isRemoveLineWhenBlank="true" uuid="97d6e130-852f-404d-b62d-67bb3222aafc">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
+								<property name="com.jaspersoft.studio.unit.y" value="px"/>
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							</reportElement>
+							<box>
+								<rightPen lineWidth="0.0"/>
+							</box>
+							<textFieldExpression><![CDATA["From ".concat($F{supplierName})]]></textFieldExpression>
+						</textField>
+					</frame>
+					<frame>
+						<reportElement x="137" y="0" width="137" height="21" uuid="c81c213c-1491-46d0-b279-c09cf8700d2c">
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<box>
+							<leftPen lineWidth="1.0" lineStyle="Dotted"/>
+							<rightPen lineWidth="0.0" lineStyle="Dotted"/>
+						</box>
+						<textField>
+							<reportElement style="Field" positionType="Float" x="0" y="3" width="137" height="15" uuid="2d8d035c-d692-49fa-a2c2-d93cfb5f5a9c">
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<property name="com.jaspersoft.studio.unit.y" value="px"/>
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<printWhenExpression><![CDATA[$F{requesterName} != null]]></printWhenExpression>
+							</reportElement>
+							<box>
+								<leftPen lineWidth="0.0"/>
+							</box>
+							<textFieldExpression><![CDATA["To ".concat($F{requesterName})]]></textFieldExpression>
+						</textField>
+					</frame>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="129" width="275" height="21" uuid="9c82d515-b674-4a1b-be81-1b30db6b3b0f">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="1.0" lineStyle="Dotted"/>
+						<bottomPen lineWidth="1.0" lineStyle="Dotted"/>
+					</box>
+					<frame>
+						<reportElement x="0" y="0" width="137" height="21" uuid="0be41940-57c7-4fc5-8baa-2def824caffa">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<box>
+							<rightPen lineWidth="1.0" lineStyle="Dotted"/>
+						</box>
+						<textField>
+							<reportElement style="Field" positionType="Float" x="0" y="3" width="137" height="15" uuid="73e0bf5d-fe5c-40fe-b679-c0237327ee5e">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
+								<property name="com.jaspersoft.studio.unit.y" value="px"/>
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							</reportElement>
+							<textFieldExpression><![CDATA[new SimpleDateFormat($P{dateTimeFormat}).format(new Date($F{dateCreated}.getTime()))]]></textFieldExpression>
+						</textField>
+					</frame>
+				</frame>
+				<frame>
+					<reportElement style="Header" positionType="Float" x="0" y="153" width="275" height="51" isRemoveLineWhenBlank="true" uuid="ba3b555f-ac1c-4376-b6f5-b7a2a855e3f2">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<printWhenExpression><![CDATA[($F{itemBarcode} != null) && ($F{itemBarcode}.length() > 0)]]></printWhenExpression>
+					</reportElement>
+					<textField>
+						<reportElement style="Field" positionType="Float" x="0" y="0" width="275" height="15" uuid="cc6a5d9e-b5df-4e1e-8ddb-ab40b6ddc4f0">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<printWhenExpression><![CDATA[($F{itemBarcode} != null) && $F{itemBarcode}.startsWith("[multivol:")]]></printWhenExpression>
+						</reportElement>
+						<textFieldExpression><![CDATA["Multiple item request"]]></textFieldExpression>
+					</textField>
+					<componentElement>
+						<reportElement positionType="Float" x="10" y="0" width="265" height="30" uuid="38f52190-71cc-4afc-91c2-67eb35a6afcc">
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<printWhenExpression><![CDATA[($F{itemBarcode} != null) && !$F{itemBarcode}.startsWith("[multivol:")]]></printWhenExpression>
+						</reportElement>
+						<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" evaluationTime="Page" textPosition="none">
+							<jr:codeExpression><![CDATA[$F{itemBarcode}]]></jr:codeExpression>
+						</jr:Code39>
+					</componentElement>
+					<textField>
+						<reportElement style="FieldSmall" positionType="Float" x="0" y="36" width="275" height="15" uuid="e21a6def-7f96-4efc-acd1-ca62382d2c26">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							<property name="com.jaspersoft.studio.unit.y" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						</reportElement>
+						<textFieldExpression><![CDATA[$F{supplierName}.concat(" item ").concat($F{itemBarcode})]]></textFieldExpression>
+					</textField>
+				</frame>
+				<staticText>
+					<reportElement positionType="Float" x="0" y="204" width="275" height="6" uuid="a4ed1bb9-c132-462f-aaf2-935a3a9bd662">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<text><![CDATA[Static Text]]></text>
+				</staticText>
+			</frame>
 			<ellipse>
-				<reportElement style="FieldSmall" x="180" y="367" width="100" height="100" backcolor="#FFFFFF" uuid="a5d25b44-e7f7-46fe-b8cc-a8c7dd847c72">
+				<reportElement style="FieldSmall" positionType="Float" x="180" y="367" width="100" height="100" backcolor="#FFFFFF" uuid="a5d25b44-e7f7-46fe-b8cc-a8c7dd847c72">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -370,7 +471,17 @@ where $X{IN, pr.pr_id, ids}]]>
 				</graphicElement>
 			</ellipse>
 			<staticText>
-				<reportElement style="FieldSmall" x="190" y="422" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
+				<reportElement style="FieldSmall" positionType="Float" x="190" y="392" width="82" height="30" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Do not remove this slip.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="FieldSmall" positionType="Float" x="190" y="422" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -381,55 +492,6 @@ where $X{IN, pr.pr_id, ids}]]>
 				</textElement>
 				<text><![CDATA[Thank you!]]></text>
 			</staticText>
-			<staticText>
-				<reportElement style="FieldSmall" x="190" y="392" width="82" height="30" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Do not remove this slip.]]></text>
-			</staticText>
-			<componentElement>
-				<reportElement x="20" y="700" width="265" height="30" uuid="38f52190-71cc-4afc-91c2-67eb35a6afcc">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[($F{itemBarcode} != null) && !$F{itemBarcode}.startsWith("[multivol:")]]></printWhenExpression>
-				</reportElement>
-				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" evaluationTime="Page" textPosition="none">
-					<jr:codeExpression><![CDATA[$F{itemBarcode}]]></jr:codeExpression>
-				</jr:Code39>
-			</componentElement>
-			<textField>
-				<reportElement style="FieldSmall" x="10" y="736" width="275" height="48" uuid="e21a6def-7f96-4efc-acd1-ca62382d2c26">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[$F{supplierName}.concat(" item ").concat($F{itemBarcode})]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement x="10" y="790" width="275" height="1" uuid="b51abbab-4bdb-4481-884f-e5836ae8ef7f">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="#000000"/>
-				</graphicElement>
-			</line>
-			<textField>
-				<reportElement style="Field" x="10" y="700" width="275" height="16" uuid="cc6a5d9e-b5df-4e1e-8ddb-ab40b6ddc4f0">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<printWhenExpression><![CDATA[($F{itemBarcode} != null) && $F{itemBarcode}.startsWith("[multivol:")]]></printWhenExpression>
-				</reportElement>
-				<textFieldExpression><![CDATA["Multiple item request"]]></textFieldExpression>
-			</textField>
 		</band>
 	</detail>
 </jasperReport>
