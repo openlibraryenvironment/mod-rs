@@ -44,26 +44,16 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("Holding record: ${hld}");
-      log.debug("${hld.circulations?.circulation?.availableNow}");
-      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-        log.debug("Available now");
-        def shelvingLocation = hld?.shelvingLocation?.text();
-        def location = hld?.localLocation?.text();
-        if(!shelvingLocation) {
-          shelvingLocation = null; //No blank strings
+      hld.circulations?.circulation?.each { circ ->
+        if (hld?.localLocation && circ?.availableNow?.@value == '1') {
+          ItemLocation il = new ItemLocation(
+                  reason: reason,
+                  location: hld?.localLocation?.text(),
+                  shelvingLocation: hld?.shelvingLocation?.text() ?: null,
+                  itemLoanPolicy: hld?.shelvingData?.text()?.trim() ?: null,
+                  callNumber: hld.callNumber);
+          availability_summary[hld.localLocation] = il;
         }
-        /*
-        def locParts = splitLocation(hld.localLocation?.text());
-        log.debug("splitLocation returned ${locParts}");
-        if(locParts) {
-          location = locParts[0];
-          shelvingLocation = locParts[1];
-        }
-        */
-        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
-        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
-        availability_summary[hld.localLocation] = il;
       }
     }
 

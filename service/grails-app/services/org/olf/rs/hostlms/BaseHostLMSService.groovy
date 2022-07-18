@@ -149,8 +149,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       ShelvingLocationSite sls = null;
 
       // create/find HostLMSItemLoanPolicy
-      if ( o?.itemLoanPolicy?.trim() ) {
-        List<HostLMSItemLoanPolicy> ilps = HostLMSItemLoanPolicy.executeQuery(POLICY_QRY, [ilp: o.itemLoanPolicy.trim()]);
+      if ( o?.itemLoanPolicy ) {
+        List<HostLMSItemLoanPolicy> ilps = HostLMSItemLoanPolicy.executeQuery(POLICY_QRY, [ilp: o.itemLoanPolicy]);
         switch ( ilps.size() ) {
           case 0:
             ilp = new HostLMSItemLoanPolicy( code: o.itemLoanPolicy, name: o.itemLoanPolicy ).save(flush:true, failOnError:true);
@@ -752,14 +752,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("BaseHostLMSService holdings record:: ${hld}");
-      hld.circulations?.circulation?.any { circ ->
-        if (circ?.availableNow?.@value == '1') {
+      hld.circulations?.circulation?.each { circ ->
+        if (hld?.localLocation && circ?.availableNow?.@value == '1') {
           log.debug("BASE extractAvailableItemsFromOpacRecord Available now");
           ItemLocation il = new ItemLocation(
                   reason: reason,
                   location: hld.localLocation,
-                  shelvingLocation: hld.shelvingLocation,
-                  itemLoanPolicy: circ?.availableThru,
+                  shelvingLocation: hld?.shelvingLocation,
+                  itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
                   callNumber: hld.callNumber)
           availability_summary[hld.localLocation] = il;
         }
