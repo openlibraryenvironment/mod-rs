@@ -347,6 +347,7 @@ public class ReshareApplicationEventHandlerService {
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc
       pr.pickShelvingLocation = location.shelvingLocation
+      pr.selectedItemBarcode = location?.itemId
 
       result = true;
     }

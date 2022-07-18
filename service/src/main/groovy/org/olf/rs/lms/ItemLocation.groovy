@@ -7,10 +7,11 @@ public class ItemLocation {
   public String shelvingLocation
   public String itemLoanPolicy
   public String callNumber
+  public String itemId
   public Long preference
   public Long shelvingPreference
 
   public String toString() {
-    return "ItemLocation(${location} (${preference}),${shelvingLocation} (${shelvingPreference}), ${itemLoanPolicy}, ${callNumber}, ${reason})".toString()
+    return "ItemLocation(${location} (${preference}),${shelvingLocation} (${shelvingPreference}), ${itemLoanPolicy}, ${callNumber}, ${itemId}, ${reason})".toString()
   }
 }

@@ -760,6 +760,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                   location: hld.localLocation,
                   shelvingLocation: hld?.shelvingLocation,
                   itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
+                  itemId: circ?.itemId?.text()?.trim() ?: null,
                   callNumber: hld.callNumber)
           availability_summary[hld.localLocation] = il;
         }
