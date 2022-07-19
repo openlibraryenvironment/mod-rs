@@ -159,7 +159,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
             }
             else {
               log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
-              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber:tag_data['c'] )
+              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber: tag_data['c'], itemLoanPolicy: tag_data?.d )
             }
           }
           else {
