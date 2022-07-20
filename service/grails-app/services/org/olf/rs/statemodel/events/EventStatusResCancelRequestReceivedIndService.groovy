@@ -39,7 +39,7 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
             log.debug('Auto cancel is on');
 
             // System has auto-respond cancel on
-            if (request.state?.stage == StatusStage.ACTIVE) {
+            if (request.state?.stage == StatusStage.ACTIVE_SHIPPED) {
                 // Revert the state to it's original before the cancel request was received - previousState
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus('Responder', request.previousStates[Status.RESPONDER_CANCEL_REQUEST_RECEIVED]);
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
