@@ -159,6 +159,7 @@ dataSource:
   properties:
     initialSize: 5
     maxActive: ${db.maxpoolsize:5}
+    maximumPoolSize: ${db.maxpoolsize:5}
     minIdle: 5
     maxIdle: 10
     maxWait: 10000
