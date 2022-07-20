@@ -174,6 +174,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
             } else {
                 log.warn('Cannot send to next lender - rota is empty');
                 eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
+                eventResultDetails.auditMessage = 'End of rota';
             }
         }
 
