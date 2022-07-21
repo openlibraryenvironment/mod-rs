@@ -121,4 +121,8 @@ databaseChangeLog = {
             column(name: "hlilp_last_updated", type: "timestamp")
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20220721-1600-001") {
+        addPrimaryKey(columnNames: "hlilp_id", constraintName: "host_lms_item_loan_policyPK", tableName: "host_lms_item_loan_policy")
+    }
 }
