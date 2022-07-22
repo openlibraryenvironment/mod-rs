@@ -56,6 +56,9 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('org.olf.rs.EventConsumerService', DEBUG)
   logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
   logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
+  logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
+  logger ('com.zaxxer.hikari.pool.HikariPool', WARN)
+
 
   // Log HTTPBuilderNG traffic
   // logger 'org.apache.http', INFO
