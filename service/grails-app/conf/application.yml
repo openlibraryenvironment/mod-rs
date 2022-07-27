@@ -159,8 +159,8 @@ dataSource:
   properties:
     maximumPoolSize: "${db.maxpoolsize:10}"
     minimumIdle: 3
-    idleTimeout: 180000  # Connections are released from the pool after 3 minutes
-    leakDetectionThreshold: 180000
+    idleTimeout: 240000  # Connections are released from the pool after 4 minutes
+    leakDetectionThreshold: 180000 # 3 mins
     # The following are not HikariCP properties - probably should be removed
     initialSize: 5
     maxActive: ${db.maxpoolsize:5}

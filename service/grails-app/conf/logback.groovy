@@ -57,7 +57,7 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
   logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
-  logger ('com.zaxxer.hikari.pool.HikariPool', WARN)
+  logger ('com.zaxxer.hikari.pool.HikariPool', DEBUG)
 
 
   // Log HTTPBuilderNG traffic
@@ -86,6 +86,7 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger 'org.olf.RSLifecycleSpec', DEBUG
 }
 else {
+  logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
   logger ('com.k_int', INFO)
   logger ('org.olf', INFO)
   logger ('mod.rs', INFO)

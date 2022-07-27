@@ -112,6 +112,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
         long current_systime = System.currentTimeMillis();
 
+        log.debug("Checking timers");
         Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
                            [now:current_systime, en: true]);
         if ((timers != null) && (timers.size()> 0)) {
@@ -180,7 +181,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
                 log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
               }
               finally {
-                // log.debug("Completed scheduled task checking");
+                log.debug("Completed scheduled task checking");
               }
             }
         }
@@ -189,7 +190,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
       log.error("Exception running background tasks",e);
     }
     finally {
-      // log.debug("BackgroundTaskService::performReshareTasks exiting");
+      log.debug("BackgroundTaskService::performReshareTasks exiting");
     }
   }
 
