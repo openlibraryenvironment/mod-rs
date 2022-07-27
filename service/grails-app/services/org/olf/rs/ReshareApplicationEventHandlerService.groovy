@@ -74,7 +74,7 @@ public class ReshareApplicationEventHandlerService {
                   try {
                       serviceEvents[eventName] = Holders.grailsApplication.mainContext.getBean(beanName);
                   } catch (Exception e) {
-                      log.error("Unable to locate event bean: " + beanName);
+                      log.info("Unable to locate event bean: " + beanName);
                   }
               }
 
