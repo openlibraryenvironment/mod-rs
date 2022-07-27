@@ -7,7 +7,6 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.timers.AbstractTimer;
@@ -16,7 +15,6 @@ import org.olf.templating.*;
 import com.k_int.okapi.OkapiClient;
 import com.k_int.web.toolkit.settings.AppSetting;
 
-import grails.gorm.multitenancy.Tenants;
 import grails.util.Holders;
 import groovy.json.JsonSlurper;
 
@@ -56,8 +54,8 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
 
-  def performReshareTasks(String tenant) {
-    log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
+  def performReshareTasks() {
+    log.debug("performReshareTasks() as at ${new Date()}");
 
     Runtime runtime = Runtime.getRuntime();
 
@@ -76,17 +74,10 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
     log.info("JVM uptime: " + format.format(jvmUpTime));
 
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
-      patronNoticeService.processQueue(tenant)
+      patronNoticeService.processQueue()
     }
 
     try {
-      Tenants.withId(tenant) {
-        // Warn of any duplicate symbols
-        def duplicate_symbols = Symbol.executeQuery('select distinct s.symbol, s.authority.symbol from Symbol as s group by s.symbol, s.authority.symbol having count(*) > 1')
-        duplicate_symbols.each { ds ->
-          log.warn("WARNING: Duplicate symbols detected. This means the symbol ${ds} appears more than once. This shoud not happen. Incoming requests for this symbol cannot be uniquely matched to an institution");
-        }
-
         // Generate and log patron requests at a pick location we don't know about
         reportMissingPickLocations()
 
@@ -120,12 +111,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
         // log.debug("Checking timers ready for execution");
 
         long current_systime = System.currentTimeMillis();
-
-        // Dump all timers whilst we look into timer execution
-        Timer.list().each { ti ->
-          def remaining_min = ((ti.nextExecution?:0)-current_systime)/60000
-          log.debug("Declared timer: ${ti.id}, ${ti.nextExecution}, ${ti.enabled}, ${ti.rrule}, ${ti.taskConfig} remaining=${remaining_min}min");
-        }
 
         Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
                            [now:current_systime, en: true]);
@@ -199,8 +184,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
               }
             }
         }
-
-      }
     }
     catch ( Exception e ) {
       log.error("Exception running background tasks",e);
