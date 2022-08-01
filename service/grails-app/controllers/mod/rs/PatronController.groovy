@@ -28,18 +28,19 @@ class PatronController extends OkapiTenantAwareController<Patron>  {
      */
     def canCreateRequest() {
         Map result = [ : ];
-
-        // We do need to be supplied a patronId
-        if (params?.patronIdentifier == null) {
+        Patron.withTransaction { status ->
+          // We do need to be supplied a patronId
+          if (params?.patronIdentifier == null) {
             response.status = 400;
             result.message = 'No patron identifier supplied to perform the check';
-        } else {
+          } else {
             // Lookup the patron
             result = reshareActionService.lookupPatron([ patronIdentifier : params.patronIdentifier ]);
 
             // Remove the patron details and callSuccess as they should not be passed back
             result.remove('callSuccess');
             result.remove('patronDetails');
+          }
         }
         render result as JSON;
     }
