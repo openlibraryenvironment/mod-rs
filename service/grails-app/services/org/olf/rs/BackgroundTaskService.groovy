@@ -127,7 +127,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
-        // log.debug("Checking timers ready for execution");
+        log.debug("Checking timers ready for execution");
 
         long current_systime = System.currentTimeMillis();
 
@@ -199,7 +199,7 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
                 log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
               }
               finally {
-                // log.debug("Completed scheduled task checking");
+                log.debug("Completed scheduled task checking");
               }
             }
         }

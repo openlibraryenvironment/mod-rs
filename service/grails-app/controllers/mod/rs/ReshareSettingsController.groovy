@@ -7,6 +7,9 @@ import com.k_int.okapi.OkapiTenantAwareController;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
+import org.olf.rs.PatronRequest
+import groovy.transform.CompileStatic
+
 
 /**
  * This controller is hit by a timer from OKAPI every 2 minutes/
@@ -17,6 +20,7 @@ import grails.gorm.multitenancy.CurrentTenant;
  *
  */
 @CurrentTenant
+@CompileStatic
 class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolMapping> {
 
     BackgroundTaskService backgroundTaskService;
@@ -26,7 +30,7 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
     }
 
   def worker() {
-    def result = [result:'OK'];
+    Map result = [result:'OK'];
     String tenant_header = request.getHeader('X-OKAPI-TENANT')
     log.info("worker call start tenant: ${tenant_header}");
     try {
@@ -41,6 +45,5 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
       log.info("worker call completed tenant: ${tenant_header}");
     }
     render result as JSON
-
   }
 }
