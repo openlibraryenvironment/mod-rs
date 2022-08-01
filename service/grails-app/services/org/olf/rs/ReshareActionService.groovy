@@ -31,6 +31,7 @@ public class ReshareActionService {
     ProtocolMessageService protocolMessageService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     HostLMSService hostLMSService;
+	HostLMSPatronProfileService hostLMSPatronProfileService;
     PatronNoticeService patronNoticeService;
     PatronStoreService patronStoreService;
 
@@ -63,18 +64,7 @@ public class ReshareActionService {
                 // Check the patron profile and record if we have not seen before
                 HostLMSPatronProfile patronProfile = null
                 if (patronDetails.userProfile != null) {
-                    patronProfile = HostLMSPatronProfile.findByCode(patronDetails.userProfile);
-                    if (patronProfile == null) {
-                        patronProfile = new HostLMSPatronProfile(code:patronDetails.userProfile, name:patronDetails.userProfile);
-                        patronProfile.save(flush:true, failOnError:true);
-
-                        // Trigger a notice to be sent if it has been configured
-                        patronNoticeService.triggerNotices(patronProfile);
-                    } else if (patronProfile.hidden == true) {
-                        // Unhide it as it is active again
-                        patronProfile.hidden = false;
-                        patronProfile.save(flush:true, failOnError:true);
-                    }
+                    patronProfile = hostLMSPatronProfileService.ensureActive(patronDetails.userProfile, patronDetails.userProfile);
                 }
 
                 // Is it a valid patron or are we overriding the fact it is valid
