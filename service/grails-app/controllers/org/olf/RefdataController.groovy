@@ -7,6 +7,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue
 import com.k_int.web.toolkit.utils.DomainUtils
 import grails.gorm.multitenancy.CurrentTenant
 import groovy.util.logging.Slf4j
+import grails.gorm.transactions.Transactional
 
 @Slf4j
 @CurrentTenant
@@ -16,6 +17,7 @@ class RefdataController extends OkapiTenantAwareController<RefdataCategory> {
     super(RefdataCategory)
   }
   
+  @Transactional(readOnly=true)
   def lookup (String domain, String property) {
     def c = DomainUtils.resolveDomainClass(domain)?.javaClass
     def cat = c ? GrailsDomainRefdataHelpers.getCategoryString(c, property) : null
