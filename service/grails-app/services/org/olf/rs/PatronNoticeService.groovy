@@ -59,7 +59,7 @@ public class PatronNoticeService {
     public void processQueue() {
         log.debug("Processing patron notice queue")
         try {
-            NoticeEvent.withSession { sess ->
+            NoticeEvent.withNewSession { sess ->
                 Transaction tx = sess.beginTransaction();
                 // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
                 Query query = sess.createQuery('from NoticeEvent where sent=false');
