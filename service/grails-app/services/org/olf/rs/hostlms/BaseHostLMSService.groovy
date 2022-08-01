@@ -7,6 +7,7 @@ import org.olf.rs.HostLMSItemLoanPolicy;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.HostLMSLocationService;
 import org.olf.rs.HostLMSShelvingLocation;
+import org.olf.rs.HostLMSShelvingLocationService;
 import org.olf.rs.PatronNoticeService;
 import org.olf.rs.PatronRequest
 import org.olf.rs.ShelvingLocationSite;
@@ -30,6 +31,7 @@ import groovyx.net.http.HttpBuilder
 public abstract class BaseHostLMSService implements HostLMSActions {
 
   HostLMSLocationService hostLMSLocationService;
+  HostLMSShelvingLocationService hostLMSShelvingLocationService;
   PatronNoticeService patronNoticeService;
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
@@ -173,8 +175,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [sl: o.shelvingLocation]);
         switch ( shelving_loc_list.size() ) {
           case 0:
-            sl = new HostLMSShelvingLocation( code: o.shelvingLocation, name: o.shelvingLocation, supplyPreference: new Long(0)).save(flush:true, failOnError:true);
-            patronNoticeService.triggerNotices(sl);
+            sl = hostLMSShelvingLocationService.create(o.shelvingLocation, o.shelvingLocation);
             break;
 
           case 1:
