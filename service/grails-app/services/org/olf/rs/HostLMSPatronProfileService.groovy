@@ -18,6 +18,7 @@ public class HostLMSPatronProfileService {
     * @return The record that represents this code and name
     */
   public HostLMSPatronProfile ensureActive(String code, String name) {
+    log.debug("HostLMSPatronProfileService::ensureActive(${code},${name})");
 
     // N.B. You can't really return an object which was materialised in one transactional context to a session
     // living in a different transactional context.
@@ -30,12 +31,17 @@ public class HostLMSPatronProfileService {
         patronProfile = HostLMSPatronProfile.findByCode(code);
 
         if (patronProfile == null) {
+          log.debug("Create new patron profile");
           patronProfile = new HostLMSPatronProfile(code: code, name: name);
+          log.debug("Save");
           patronProfile.save(flush:true, failOnError:true);
           // Trigger a notice to be sent if it has been configured
+          log.debug("Trigger notices");
           patronNoticeService.triggerNotices(patronProfile);
+          log.debug("Done");
         } else if (patronProfile.hidden == true) {
           // Unhide it as it is active again
+          log.debug("Unhiding patron");
           patronProfile.hidden = false;
           patronProfile.save(flush:true, failOnError:true);
         }
@@ -43,6 +49,10 @@ public class HostLMSPatronProfileService {
     } catch(Exception e) {
       log.error('Exception thrown while creating / updating HostLMSPatronProfile: ' + code, e);
     }
+    finally {
+      log.debug("HostLMSPatronProfileService::ensureActive returning");
+    }
+
     return(patronProfile);
   }
 }

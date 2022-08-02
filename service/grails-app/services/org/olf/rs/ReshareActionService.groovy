@@ -50,6 +50,7 @@ public class ReshareActionService {
      */
     public Map lookupPatron(Map actionParams) {
         // The result object
+        log.debug("lookupPatron(${actionParams}");
         Map result = [callSuccess: false, patronValid: false ];
         Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(actionParams.patronIdentifier);
         if (patronDetails != null) {
@@ -64,10 +65,12 @@ public class ReshareActionService {
                 // Check the patron profile and record if we have not seen before
                 HostLMSPatronProfile patronProfile = null
                 if (patronDetails.userProfile != null) {
+                    log.debug("lookupPatron calling hostLMSPatronProfileService.ensureActive");
                     patronProfile = hostLMSPatronProfileService.ensureActive(patronDetails.userProfile, patronDetails.userProfile);
                 }
 
                 // Is it a valid patron or are we overriding the fact it is valid
+                log.debug("Check is patronValid");
                 if (isValidPatron(patronDetails, patronProfile) || actionParams.override) {
                     result.patronValid = true;
                 }
@@ -84,6 +87,7 @@ public class ReshareActionService {
 
         // Let the caller know the patron details
         result.patronDetails = patronDetails;
+        log.debug("lookupPatron returning");
         return(result);
     }
 
