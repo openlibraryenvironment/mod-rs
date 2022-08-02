@@ -81,10 +81,10 @@ public class PatronNoticeService {
             NoticeEvent.withTransaction { status ->
 
               // Retrieve the specific notice event under consideration
-              NoticeEvent ne = NoticeEvent.lock(ev_id);
+              NoticeEvent ev = NoticeEvent.lock(ev_id);
 
               // Double check that nobody else sent this under our feet given the security of our lock
-              if ( ( ne != null ) && ( ne.sent == false ) ) {
+              if ( ( ev != null ) && ( ev.sent == false ) ) {
   
                 Map values = null;
                 if (ev.jsonData == null) {
@@ -118,7 +118,7 @@ public class PatronNoticeService {
                 }
 
                 // We no longer need this event, just delete it
-                ne.delete()
+                ev.delete()
                 // "sent" in this case is more like processed -- not all events necessarily result in notices
                 // ev.sent = true;
                 // ev.save(flush:true, failOnError:true);
