@@ -35,7 +35,10 @@ class PatronController extends OkapiTenantAwareController<Patron>  {
             result.message = 'No patron identifier supplied to perform the check';
         } else {
             // Lookup the patron
-            result = reshareActionService.lookupPatron([ patronIdentifier : params.patronIdentifier ]);
+            
+            Patron.withTransaction { status ->
+              result = reshareActionService.lookupPatron([ patronIdentifier : params.patronIdentifier ]);
+            }
 
             // Remove the patron details and callSuccess as they should not be passed back
             result.remove('callSuccess');
