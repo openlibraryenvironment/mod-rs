@@ -11,7 +11,6 @@ import org.olf.templating.TemplatingService;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
-import grails.gorm.multitenancy.Tenants;
 import groovy.json.JsonBuilder;
 
 /**
@@ -39,6 +38,7 @@ public class PatronNoticeService {
     }
 
     public void triggerNotices(HostLMSPatronProfile hostLMSPatronProfile) {
+        log.debug("triggerNotices(${hostLMSPatronProfile})");
         // We need to find the email address for the institution
 
         Map values = [
@@ -48,71 +48,89 @@ public class PatronNoticeService {
             ]
         ];
 
+        log.debug("Fetch refdata");
+        RefdataValue npp = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE);
+
+        log.debug("call final trigger notices");
         // There is only one type of notice that can be sent for patron profiles, so it is hard coded here
-        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE), null);
+        triggerNotices(new JsonBuilder(values).toString(), npp, null);
     }
 
     public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr = null) {
+        log.debug("triggerNotices(jsonData, trigger, pr)");
         NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger)
         ne.save(flush:true, failOnError:true)
+        log.debug("done");
     }
 
-    public void processQueue(String tenant) {
-        log.debug("Processing patron notice queue for tenant ${tenant}")
+    // The caller needs to ensure we are running in a transactional context
+    public void processQueue() {
+        log.debug("Processing patron notice queue")
         try {
-            Tenants.withId(tenant) {
-                NoticeEvent.withSession { sess ->
-                    Transaction tx = sess.beginTransaction();
-                    // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
-                    Query query = sess.createQuery('from NoticeEvent where sent=false');
-                    query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-                    query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
-                    query.list().each { ev ->
-                        Map values = null;
-                        if (ev.jsonData == null) {
-                            // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
-                            values = requestValues(ev.patronRequest);
-                        } else {
-                            // The new way of doing it
-                            values = new groovy.json.JsonSlurper().parseText(ev.jsonData);
-                        }
+          // Optimistically grab the list of candidate IDs that we MAY send
+          // Query query = sess.createQuery('select ne.id from NoticeEvent as ne where ne.sent=false');
+          def pending_notices = NoticeEvent.executeQuery('select ne.id from NoticeEvent as ne where ne.sent=false')
 
-                        // If we do not have an email address then do not attempt to send it
-                        if (values.email != null) {
-                            // TODO: incorporate this into the above query
-                            NoticePolicyNotice[] notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.id == ev.trigger.id };
-                            notices.each { notice ->
-                                log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
-                                try {
-                                    Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
-                                    Map emailParams = [
-                                        notificationId: notice.id,
-                                        to: values.email,
-                                        header: tmplResult.result.header,
-                                        body: tmplResult.result.body,
-                                        outputFormat: 'text/html'
-                                    ];
-                                    emailService.sendEmail(emailParams);
-                                } catch (Exception e) {
-                                    log.error("Problem sending notice for ${tenant}", e);
-                                }
-                            }
-                        }
+          // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
+          // query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+          // query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
+          pending_notices.each { ev_id ->
+                
+            // Within the context of the current transaction begin a subtransaction - this will auto commit
+            // at the end of this block as a sub-transaction
+            NoticeEvent.withTransaction { status ->
 
-                        // "sent" in this case is more like processed -- not all events necessarily result in notices
-                        ev.sent = true;
-                        ev.save();
-                    }
+              // Retrieve the specific notice event under consideration
+              NoticeEvent ev = NoticeEvent.lock(ev_id);
 
-                    // Now we have processed the notices commit the transaction
-                    tx.commit();
+              // Double check that nobody else sent this under our feet given the security of our lock
+              if ( ( ev != null ) && ( ev.sent == false ) ) {
+  
+                Map values = null;
+                if (ev.jsonData == null) {
+                    // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
+                    values = requestValues(ev.patronRequest);
+                } else {
+                    // The new way of doing it
+                    values = new groovy.json.JsonSlurper().parseText(ev.jsonData);
                 }
-                NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
+  
+                // If we do not have an email address then do not attempt to send it
+                if (values.email != null) {
+                    // TODO: incorporate this into the above query
+                    NoticePolicyNotice[] notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.id == ev.trigger.id };
+                    notices.each { notice ->
+                        log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
+                        try {
+                            Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
+                            Map emailParams = [
+                                notificationId: notice.id,
+                                to: values.email,
+                                header: tmplResult.result.header,
+                                body: tmplResult.result.body,
+                                outputFormat: 'text/html'
+                            ];
+                            emailService.sendEmail(emailParams);
+                        } catch (Exception e) {
+                            log.error("Problem sending notice", e);
+                        }
+                    }
+                }
+
+                // We no longer need this event, just delete it
+                ev.delete()
+                // "sent" in this case is more like processed -- not all events necessarily result in notices
+                // ev.sent = true;
+                // ev.save(flush:true, failOnError:true);
+              }
             }
+          }
+          // We just delete the event when we are done with it
+          // NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
         } catch (Exception e) {
-            log.error("Problem processing notice triggers for ${tenant}", e);
+            log.error("Problem processing notice triggers", e);
         } finally {
-            log.debug("Completed processing of patron notice triggers for ${tenant}");
+            log.debug("Completed processing of patron notice triggers");
         }
     }
 
@@ -148,21 +166,30 @@ public class PatronNoticeService {
      * @return The administrators email address or null if it does not find one
      */
     private String getAdminEmail() {
+        log.debug("getAdminEmail()");
         String institutionEmail = null;
 
         // We need to look the institution directory entry, so find all the managed entries
         RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
+
+        log.debug("Get all managed....");
         DirectoryEntry[] allManaged = DirectoryEntry.findAllByStatus(refdataManaged);
+
         if (allManaged != null) {
             // Good start we have at least 1 managed, so loop through them to find an institution entry
+            log.debug("Get refdata");
             RefdataValue refdataInstitution = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_TYPE, DIRECTORY_ENTRY_TYPE_INSTITUTION, DIRECTORY_ENTRY_TYPE_INSTITUTION);
             allManaged.each { directoryEntry ->
                 // Only interested in the first institution we find
                 DirectoryEntry currentEntry = directoryEntry;
                 while ((currentEntry != null) && (institutionEmail == null)) {
-                    if ((currentEntry.type != null) && (refdataInstitution.id == currentEntry.type.id)) {
+                    log.debug("Evaluate ${currentEntry} / ${currentEntry.type} / ${refdataInstitution.id}");
+                    if ( ( currentEntry.type != null ) && 
+                         ( refdataInstitution.id == currentEntry.type.id ) &&
+                         ( currentEntry.emailAddress != null ) ) {
                         // We have found the institution
                         institutionEmail = currentEntry.emailAddress;
+                        
                     } else {
                         // Take a look at the parent
                         currentEntry = currentEntry.parent;
@@ -170,6 +197,7 @@ public class PatronNoticeService {
                 }
             }
         }
+        log.debug("getAdminEmail() returning institutionEmail");
 
         // Return the email address of the institution to the caller
         return(institutionEmail);
