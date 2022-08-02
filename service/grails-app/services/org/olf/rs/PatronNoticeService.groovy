@@ -61,12 +61,18 @@ public class PatronNoticeService {
         log.debug("Processing patron notice queue")
         try {
           // Optimistically grab the list of candidate IDs that we MAY send
-          Query query = sess.createQuery('select ne.id from NoticeEvent as ne where ne.sent=false');
+          // Query query = sess.createQuery('select ne.id from NoticeEvent as ne where ne.sent=false');
+          def query = NoticeEvent.createCriteria()
+
+          def pending_notices = query.list {
+            eq('sent',Boolean.FALSE)
+            maxResults(100)
+          }
 
           // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
           // query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
           // query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
-          query.list().each { ev_id ->
+          pending_notices.each { ev_id ->
                 
             // Within the context of the current transaction begin a subtransaction - this will auto commit
             // at the end of this block as a sub-transaction
