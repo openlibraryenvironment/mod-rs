@@ -254,9 +254,14 @@ and pr.state.code=:await_pull_slip
 
   private void checkPullSlips(Map timer_cfg) {
     log.debug("checkPullSlips(${timer_cfg})");
-    checkPullSlipsFor(timer_cfg.locations,
-                      timer_cfg.confirmNoPendingRequests?:true,
-                      timer_cfg.emailAddresses);
+    if ( timer_cfg ) {
+      checkPullSlipsFor(timer_cfg.locations,
+                        timer_cfg.confirmNoPendingRequests?:true,
+                        timer_cfg.emailAddresses);
+    }
+    else {
+      log.error("checkPullSlips called with NULL timer_cfg");
+    }
   }
 
   private void checkPullSlipsFor(ArrayList loccodes,
@@ -269,6 +274,11 @@ and pr.state.code=:await_pull_slip
 
     try {
       AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
+
+      if ( pull_slip_template_setting == null ) {
+        log.error("NO pull_slip_template_setting found, unable to print any pull slips");
+        return;
+      }
       TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value)
 
       if (tc != null) {
