@@ -42,13 +42,13 @@ public class BackgroundTaskService {
 Select pr
 from PatronRequest as pr
 where ( pr.pickLocation.id in ( :loccodes ) )
-and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+and pr.state.code=:await_pull_slip
 '''
 
   private static String PULL_SLIP_SUMMARY = '''
     Select count(pr.id), pr.pickLocation.code
     from PatronRequest as pr
-    where pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+    where pr.state.code=:await_pull_slip
     group by pr.pickLocation.code
 '''
 
@@ -274,15 +274,15 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
       TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value)
 
       if (tc != null) {
-        def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
+        log.debug("Fetch pull slip summary - ${Status.RESPONDER_NEW_AWAIT_PULL_SLIP}");
+        def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY, [await_pull_slip:Status.RESPONDER_NEW_AWAIT_PULL_SLIP]);
         log.debug("pull slip summary: ${pull_slip_overall_summary}");
 
         List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
-
         if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
           log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
 
-          List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
+          List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes, await_pull_slip:Status.RESPONDER_NEW_AWAIT_PULL_SLIP]);
 
           if ( pending_ps_printing != null ) {
 
