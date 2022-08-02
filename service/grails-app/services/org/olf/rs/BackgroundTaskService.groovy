@@ -55,14 +55,13 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
 
-  def performReshareTasks() {
+  public void logSystemInfo() {
     log.debug("performReshareTasks() as at ${new Date()}");
 
     Runtime runtime = Runtime.getRuntime();
 
     NumberFormat format = NumberFormat.getInstance();
 
-    StringBuilder sb = new StringBuilder();
     long maxMemory = runtime.maxMemory();
     long allocatedMemory = runtime.totalMemory();
     long freeMemory = runtime.freeMemory();
@@ -77,29 +76,10 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
       patronNoticeService.processQueue()
     }
+  }
 
+  public void processOverdues() {
     try {
-        // Generate and log patron requests at a pick location we don't know about
-        reportMissingPickLocations()
-
-        // Find all patron requesrs where the current state has a System action attached that can be executed.
-        PatronRequest.executeQuery('select pr.id, aa from PatronRequest as pr, AvailableAction as aa where pr.state = aa.fromState and aa.triggerType=:system',[system:'S']).each {  pr ->
-          AvailableAction aa = (AvailableAction) pr[1]
-          log.debug("Apply system action ${pr[1]} to patron request ${pr[0]}");
-          switch ( aa.actionType ) {
-            case 'S':
-              log.debug("service action");
-              break;
-            case 'C':
-              log.debug("closure action");
-              break;
-            default:
-              log.debug("No action type for action ${aa}");
-              break;
-          }
-
-        }
-
         //Find any supplier-side PatronRequests that have become overdue
         log.debug("Checking for overdue PatronRequests");
         Date currentDate = new Date();
@@ -124,7 +104,17 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
             patronRequest.save(flush:true, failOnError:true);
           }
         }
+    }
+    catch ( Exception e ) {
+      log.error("Problem processing overdues",e);
+    }
+    finally {
+      log.info("Overdue processing complete");
+    }
+  }
 
+  public void processTimers() {
+    try {
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
         log.debug("Checking timers ready for execution");
@@ -134,8 +124,8 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
         Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
                            [now:current_systime, en: true]);
         if ((timers != null) && (timers.size()> 0)) {
-            timers.each { timer ->
-              try {
+          timers.each { timer ->
+            try {
                 log.debug("** Timer task ${timer.id} firing....");
 
                 TimeZone tz;
@@ -194,21 +184,21 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
                 log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
                 timer.nextExecution = nextInstance.getTimestamp();
                 timer.save(flush:true, failOnError:true)
-              }
-              catch ( Exception e ) {
-                log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
-              }
-              finally {
-                log.debug("Completed scheduled task checking");
-              }
-            }
+          }
+          catch ( Exception e ) {
+            log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
+          }
+          finally {
+            log.debug("Completed scheduled task checking");
+          }
         }
+      }
     }
     catch ( Exception e ) {
       log.error("Exception running background tasks",e);
     }
     finally {
-      // log.debug("BackgroundTaskService::performReshareTasks exiting");
+      log.debug("BackgroundTaskService::performReshareTasks exiting");
     }
   }
 

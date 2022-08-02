@@ -59,7 +59,6 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
   logger ('com.zaxxer.hikari.pool.HikariPool', WARN)
 
-
   // Log HTTPBuilderNG traffic
   // logger 'org.apache.http', INFO
   // logger 'org.apache.http.headers', TRACE
@@ -89,6 +88,8 @@ else {
   logger ('com.k_int', INFO)
   logger ('org.olf', INFO)
   logger ('mod.rs', INFO)
+  logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
+  logger ('com.zaxxer.hikari.pool.HikariPool', WARN)
 }
 
 root(WARN, ['STDOUT'])

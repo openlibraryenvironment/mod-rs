@@ -25,6 +25,8 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
 
     BackgroundTaskService backgroundTaskService;
 
+    private static int worker_count = 0;
+
     ReshareSettingsController() {
         super(TenantSymbolMapping);
     }
@@ -32,17 +34,24 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
   def worker() {
     Map result = [result:'OK'];
     String tenant_header = request.getHeader('X-OKAPI-TENANT')
-    log.info("worker call start tenant: ${tenant_header}");
+    log.info("worker call start tenant: ${tenant_header} ${worker_count++}");
+
+    backgroundTaskService.logSystemInfo();
+
     try {
-      PatronRequest.withTransaction {
-        backgroundTaskService.performReshareTasks();
+      PatronRequest.withTransaction { status ->
+        backgroundTaskService.processOverdues();
+      }
+
+      PatronRequest.withTransaction { status ->
+        backgroundTaskService.processTimers();
       }
     }
     catch ( Exception e ) {
       log.error("Problem in background task service",e);
     }
     finally {
-      log.info("worker call completed tenant: ${tenant_header}");
+      log.info("worker call completed tenant: ${tenant_header} ${worker_count--}");
     }
     render result as JSON
   }

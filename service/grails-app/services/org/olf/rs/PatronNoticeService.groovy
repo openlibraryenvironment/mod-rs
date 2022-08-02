@@ -56,56 +56,69 @@ public class PatronNoticeService {
         ne.save(flush:true, failOnError:true)
     }
 
+    // The caller needs to ensure we are running in a transactional context
     public void processQueue() {
         log.debug("Processing patron notice queue")
         try {
-            NoticeEvent.withNewSession { sess ->
-                Transaction tx = sess.beginTransaction();
-                // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
-                Query query = sess.createQuery('from NoticeEvent where sent=false');
-                query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-                query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
-                query.list().each { ev ->
-                    Map values = null;
-                    if (ev.jsonData == null) {
-                        // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
-                        values = requestValues(ev.patronRequest);
-                    } else {
-                        // The new way of doing it
-                        values = new groovy.json.JsonSlurper().parseText(ev.jsonData);
-                    }
+          // Optimistically grab the list of candidate IDs that we MAY send
+          Query query = sess.createQuery('select ne.id from NoticeEvent as ne where sent=false');
 
-                    // If we do not have an email address then do not attempt to send it
-                    if (values.email != null) {
-                        // TODO: incorporate this into the above query
-                        NoticePolicyNotice[] notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.id == ev.trigger.id };
-                        notices.each { notice ->
-                            log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
-                            try {
-                                Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
-                                Map emailParams = [
-                                    notificationId: notice.id,
-                                    to: values.email,
-                                    header: tmplResult.result.header,
-                                    body: tmplResult.result.body,
-                                    outputFormat: 'text/html'
-                                ];
-                                emailService.sendEmail(emailParams);
-                            } catch (Exception e) {
-                                log.error("Problem sending notice", e);
-                            }
+          // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
+          // query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+          // query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
+          query.list().each { ev_id ->
+                
+            // Within the context of the current transaction begin a subtransaction - this will auto commit
+            // at the end of this block as a sub-transaction
+            NoticeEvent.withTransaction { status ->
+
+              // Retrieve the specific notice event under consideration
+              NoticeEvent ne = NoticeEvent.lock(ev_id);
+
+              // Double check that nobody else sent this under our feet given the security of our lock
+              if ( ( ne != null ) && ( ne.sent == false ) ) {
+  
+                Map values = null;
+                if (ev.jsonData == null) {
+                    // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
+                    values = requestValues(ev.patronRequest);
+                } else {
+                    // The new way of doing it
+                    values = new groovy.json.JsonSlurper().parseText(ev.jsonData);
+                }
+  
+                // If we do not have an email address then do not attempt to send it
+                if (values.email != null) {
+                    // TODO: incorporate this into the above query
+                    NoticePolicyNotice[] notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.id == ev.trigger.id };
+                    notices.each { notice ->
+                        log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
+                        try {
+                            Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
+                            Map emailParams = [
+                                notificationId: notice.id,
+                                to: values.email,
+                                header: tmplResult.result.header,
+                                body: tmplResult.result.body,
+                                outputFormat: 'text/html'
+                            ];
+                            emailService.sendEmail(emailParams);
+                        } catch (Exception e) {
+                            log.error("Problem sending notice", e);
                         }
                     }
-
-                    // "sent" in this case is more like processed -- not all events necessarily result in notices
-                    ev.sent = true;
-                    ev.save();
                 }
 
-                // Now we have processed the notices commit the transaction
-                tx.commit();
+                // We no longer need this event, just delete it
+                ne.delete()
+                // "sent" in this case is more like processed -- not all events necessarily result in notices
+                // ev.sent = true;
+                // ev.save(flush:true, failOnError:true);
+              }
             }
-            NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
+          }
+          // We just delete the event when we are done with it
+          // NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
         } catch (Exception e) {
             log.error("Problem processing notice triggers", e);
         } finally {
