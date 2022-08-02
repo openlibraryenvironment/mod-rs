@@ -185,7 +185,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
-      o.shelvingPreference = sls.supplyPreference != null ? sls.supplyPreference : (sl.supplyPreference ?: 0);
+      o.shelvingPreference = sls?.supplyPreference != null ? sls.supplyPreference : (sl.supplyPreference ?: 0);
     }
 
     List<ItemLocation> sorted_options = options.findAll { it.preference >= 0 && it.shelvingPreference >= 0 }.sort {
