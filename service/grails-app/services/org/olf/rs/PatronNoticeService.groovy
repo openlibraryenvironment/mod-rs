@@ -38,6 +38,7 @@ public class PatronNoticeService {
     }
 
     public void triggerNotices(HostLMSPatronProfile hostLMSPatronProfile) {
+        log.debug("triggerNotices(${hostLMSPatronProfile})");
         // We need to find the email address for the institution
 
         Map values = [
@@ -47,13 +48,19 @@ public class PatronNoticeService {
             ]
         ];
 
+        log.debug("Fetch refdata");
+        RefdataValue npp = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE);
+
+        log.debug("call final trigger notices");
         // There is only one type of notice that can be sent for patron profiles, so it is hard coded here
-        triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_PATRON_PROFILE), null);
+        triggerNotices(new JsonBuilder(values).toString(), npp, null);
     }
 
     public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr = null) {
+        log.debug("triggerNotices(jsonData, trigger, pr)");
         NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger)
         ne.save(flush:true, failOnError:true)
+        log.debug("done");
     }
 
     // The caller needs to ensure we are running in a transactional context
