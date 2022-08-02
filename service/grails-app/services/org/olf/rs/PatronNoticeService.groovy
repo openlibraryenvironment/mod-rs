@@ -69,12 +69,7 @@ public class PatronNoticeService {
         try {
           // Optimistically grab the list of candidate IDs that we MAY send
           // Query query = sess.createQuery('select ne.id from NoticeEvent as ne where ne.sent=false');
-          def query = NoticeEvent.createCriteria()
-
-          def pending_notices = query.list {
-            eq('sent',Boolean.FALSE)
-            maxResults(100)
-          }
+          def pending_notices = NoticeEvent.executeQuery('select ne.id from NoticeEvent as ne where ne.sent=false')
 
           // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
           // query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
