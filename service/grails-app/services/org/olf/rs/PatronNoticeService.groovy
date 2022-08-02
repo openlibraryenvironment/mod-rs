@@ -171,21 +171,30 @@ public class PatronNoticeService {
      * @return The administrators email address or null if it does not find one
      */
     private String getAdminEmail() {
+        log.debug("getAdminEmail()");
         String institutionEmail = null;
 
         // We need to look the institution directory entry, so find all the managed entries
         RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
+
+        log.debug("Get all managed....");
         DirectoryEntry[] allManaged = DirectoryEntry.findAllByStatus(refdataManaged);
+
         if (allManaged != null) {
             // Good start we have at least 1 managed, so loop through them to find an institution entry
+            log.debug("Get refdata");
             RefdataValue refdataInstitution = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_TYPE, DIRECTORY_ENTRY_TYPE_INSTITUTION, DIRECTORY_ENTRY_TYPE_INSTITUTION);
             allManaged.each { directoryEntry ->
                 // Only interested in the first institution we find
                 DirectoryEntry currentEntry = directoryEntry;
                 while ((currentEntry != null) && (institutionEmail == null)) {
-                    if ((currentEntry.type != null) && (refdataInstitution.id == currentEntry.type.id)) {
+                    log.debug("Evaluate ${currentEntry} / ${currentEntry.type} / ${refdataInstitution.id}");
+                    if ( ( currentEntry.type != null ) && 
+                         ( refdataInstitution.id == currentEntry.type.id ) &&
+                         ( currentEntry.emailAddress != null ) ) {
                         // We have found the institution
                         institutionEmail = currentEntry.emailAddress;
+                        
                     } else {
                         // Take a look at the parent
                         currentEntry = currentEntry.parent;
@@ -193,6 +202,7 @@ public class PatronNoticeService {
                 }
             }
         }
+        log.debug("getAdminEmail() returning institutionEmail");
 
         // Return the email address of the institution to the caller
         return(institutionEmail);
