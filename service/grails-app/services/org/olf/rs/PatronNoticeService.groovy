@@ -103,14 +103,17 @@ public class PatronNoticeService {
                         log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
                         try {
                             Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
-                            Map emailParams = [
-                                notificationId: notice.id,
-                                to: values.email,
-                                header: tmplResult.result.header,
-                                body: tmplResult.result.body,
-                                outputFormat: 'text/html'
-                            ];
-                            emailService.sendEmail(emailParams);
+							// If we have no body then do not send an email
+							if (body: tmplResult.result.body && tmplResult.result.body.trim()) {
+								Map emailParams = [
+                                    notificationId: notice.id,
+                                    to: values.email,
+                                    header: tmplResult.result.header,
+                                    body: tmplResult.result.body,
+                                    outputFormat: 'text/html'
+                                ];
+                                emailService.sendEmail(emailParams);
+							}
                         } catch (Exception e) {
                             log.error("Problem sending notice", e);
                         }
