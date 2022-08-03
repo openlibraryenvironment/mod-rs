@@ -7,7 +7,6 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.statemodel.AvailableAction;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
@@ -17,7 +16,6 @@ import org.olf.templating.*;
 import com.k_int.okapi.OkapiClient;
 import com.k_int.web.toolkit.settings.AppSetting;
 
-import grails.gorm.multitenancy.Tenants;
 import grails.util.Holders;
 import groovy.json.JsonSlurper;
 
@@ -38,7 +36,6 @@ public class BackgroundTaskService {
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   OkapiSettingsService okapiSettingsService
 
-
   private static config_test_count = 0;
   private static String PULL_SLIP_QUERY='''
 Select pr
@@ -57,8 +54,31 @@ and pr.state.code=:await_pull_slip
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
 
-  def performReshareTasks(String tenant) {
-    log.debug("performReshareTasks(${tenant}) as at ${new Date()}");
+  public void logSystemInfo() {
+    log.debug("performReshareTasks() as at ${new Date()}");
+
+    Runtime runtime = Runtime.getRuntime();
+
+    NumberFormat format = NumberFormat.getInstance();
+
+    long maxMemory = runtime.maxMemory();
+    long allocatedMemory = runtime.totalMemory();
+    long freeMemory = runtime.freeMemory();
+    long jvmUpTime = ManagementFactory.getRuntimeMXBean().getUptime();
+
+    log.info("free memory: " + format.format(freeMemory / 1024));
+    log.info("allocated memory: " + format.format(allocatedMemory / 1024));
+    log.info("max memory: " + format.format(maxMemory / 1024));
+    log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
+    log.info("JVM uptime: " + format.format(jvmUpTime));
+
+    if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
+      patronNoticeService.processQueue()
+    }
+  }
+  
+  def performReshareTasks() {
+    log.debug("performReshareTasks() as at ${new Date()}");
 
     Runtime runtime = Runtime.getRuntime();
 
@@ -77,17 +97,10 @@ and pr.state.code=:await_pull_slip
     log.info("JVM uptime: " + format.format(jvmUpTime));
 
     if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
-      patronNoticeService.processQueue(tenant)
+      patronNoticeService.processQueue()
     }
 
     try {
-      Tenants.withId(tenant) {
-        // Warn of any duplicate symbols
-        def duplicate_symbols = Symbol.executeQuery('select distinct s.symbol, s.authority.symbol from Symbol as s group by s.symbol, s.authority.symbol having count(*) > 1')
-        duplicate_symbols.each { ds ->
-          log.warn("WARNING: Duplicate symbols detected. This means the symbol ${ds} appears more than once. This shoud not happen. Incoming requests for this symbol cannot be uniquely matched to an institution");
-        }
-
         // Generate and log patron requests at a pick location we don't know about
         reportMissingPickLocations()
 
@@ -200,8 +213,6 @@ and pr.state.code=:await_pull_slip
               }
             }
         }
-
-      }
     }
     catch ( Exception e ) {
       log.error("Exception running background tasks",e);
