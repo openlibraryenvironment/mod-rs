@@ -1,6 +1,7 @@
 package mod.rs
 
 import org.olf.rs.BackgroundTaskService;
+import org.olf.rs.PatronRequest;
 import org.olf.rs.shared.TenantSymbolMapping;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -26,6 +27,7 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
   }
 
   def worker() {
+
     def result = [result:'OK'];
     String tenant_header = request.getHeader('X-OKAPI-TENANT')
     log.info("worker call start tenant: ${tenant_header}");

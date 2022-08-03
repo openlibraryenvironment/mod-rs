@@ -81,7 +81,7 @@ public class ReshareApplicationEventHandlerService {
               // Ensure we have an event processor, default to eventNoImplementationService if it is not found
               eventprocessor = serviceEvents[eventName];
               if (eventprocessor == null) {
-                  log.error("Unable to find the bean for event: " + eventName);
+                  log.info("Unable to find the bean for event: " + eventName);
 
                   // We shall use the NoImplementation bean for this event instead
                   eventprocessor = eventNoImplementationService;
@@ -342,7 +342,7 @@ public class ReshareApplicationEventHandlerService {
     // Only proceed if there is location
     if ( location && location.location ) {
       // We've been given a specific location, make sure we have a record for that location
-      HostLMSLocation loc = hostLMSLocationService.EnsureActive(location.location, location.location);
+      HostLMSLocation loc = hostLMSLocationService.ensureActive(location.location, location.location);
 
       pr.localCallNumber = location.callNumber
       pr.pickLocation = loc

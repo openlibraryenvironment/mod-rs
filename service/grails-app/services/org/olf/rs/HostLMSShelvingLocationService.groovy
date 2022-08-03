@@ -1,7 +1,5 @@
 package org.olf.rs;
 
-import org.hibernate.Transaction;
-
 /**
  * Perform any services required by the HostLMSShelvingLocation domain
  *
@@ -17,22 +15,34 @@ public class HostLMSShelvingLocationService {
      * @param supplyPreference The supply preference defaults to 0
      * @return The record that represents this code and name
      */
-    public HostLMSShelvingLocation create(String code, String name, long supplyPreference = 0) {
+    public HostLMSShelvingLocation ensureExists(String code, String name, long supplyPreference = 0) {
+        log.debug('Entering HostLMSShelvingLocationService::ensureExists(' + code + ', ' + name + ', ' + supplyPreference.toString()+ ');');
         HostLMSShelvingLocation loc;
 
         // We will need to create a separate transaction
         HostLMSShelvingLocation.withNewSession { session ->
             try {
                 // Start a new transaction
-                Transaction transaction = session.beginTransaction();
+                HostLMSShelvingLocation.withNewTransaction {
 
-                loc = new HostLMSShelvingLocation( code: code, name: name, supplyPreference: supplyPreference);
-                loc.save(flush:true, failOnError:true);
-                patronNoticeService.triggerNotices(loc);
+                    loc = HostLMSShelvingLocation.findByCodeOrName(code, name);
+                    if (loc == null) {
+                        // Dosn't exist so we need to create it
+                        loc = new HostLMSShelvingLocation( code: code, name: name, supplyPreference: supplyPreference);
+                        loc.save(flush:true, failOnError:true);
+                        patronNoticeService.triggerNotices(loc);
+                    }
+                }
             } catch (Exception e) {
                 log.error("Exception thrown while creating HostLMSShelvingLocation: " + code, e);
             }
         }
+
+        // As the session no longer exists we need to attach it to the current session
+        if (loc != null) {
+            loc.attach();
+        }
+        log.debug('Exiting HostLMSShelvingLocationService::ensureActive');
         return(loc);
     }
 }
