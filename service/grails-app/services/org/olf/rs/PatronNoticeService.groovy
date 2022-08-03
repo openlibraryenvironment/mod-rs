@@ -104,7 +104,7 @@ public class PatronNoticeService {
                         try {
                             Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
 							// If we have no body then do not send an email
-							if (body: tmplResult.result.body && tmplResult.result.body.trim()) {
+							if (tmplResult.result.body && tmplResult.result.body.trim()) {
 								Map emailParams = [
                                     notificationId: notice.id,
                                     to: values.email,
