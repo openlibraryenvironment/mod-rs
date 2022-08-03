@@ -3,7 +3,6 @@ package org.olf.rs
 import javax.persistence.LockModeType;
 
 import org.hibernate.LockOptions;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.referenceData.RefdataValueData;
@@ -79,7 +78,7 @@ public class PatronNoticeService {
         triggerNotices(new JsonBuilder(values).toString(), RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION), null);
     }
 
-    public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr = null) {
+    public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr) {
         NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger)
         ne.save(flush:true, failOnError:true)
     }
@@ -88,7 +87,6 @@ public class PatronNoticeService {
         log.debug("Processing patron notice queue")
         try {
             NoticeEvent.withSession { sess ->
-                Transaction tx = sess.beginTransaction();
                 // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
                 Query query = sess.createQuery('from NoticeEvent where sent=false');
                 query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
@@ -129,9 +127,6 @@ public class PatronNoticeService {
                     ev.sent = true;
                     ev.save();
                 }
-
-                // Now we have processed the notices commit the transaction
-                tx.commit();
             }
             NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
         } catch (Exception e) {

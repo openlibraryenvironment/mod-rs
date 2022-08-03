@@ -144,7 +144,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     // Values < 0 are considered "DO NOT USE" - E.G. bindery
     options.each { o ->
       // See if we can find a HostLMSLocation for the given item - create one if not
-      HostLMSLocation loc = hostLMSLocationService.EnsureActive(o.location, o.location);
+      HostLMSLocation loc = hostLMSLocationService.ensureActive(o.location, o.location);
 
       HostLMSItemLoanPolicy ilp = null;
       HostLMSShelvingLocation sl = null;
@@ -175,7 +175,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [sl: o.shelvingLocation]);
         switch ( shelving_loc_list.size() ) {
           case 0:
-            sl = hostLMSShelvingLocationService.create(o.shelvingLocation, o.shelvingLocation);
+            sl = hostLMSShelvingLocationService.ensureExists(o.shelvingLocation, o.shelvingLocation);
             break;
 
           case 1:
