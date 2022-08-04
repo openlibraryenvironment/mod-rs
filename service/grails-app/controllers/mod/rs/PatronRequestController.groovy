@@ -1,7 +1,9 @@
 package mod.rs;
 
+import org.olf.rs.OpenUrlService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.Result;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.ActionService;
@@ -17,6 +19,7 @@ import groovy.util.logging.Slf4j;
 class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
 
 	ActionService actionService;
+    OpenUrlService openUrlService;
 	ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
 
 	PatronRequestController() {
@@ -111,4 +114,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
 		render result as JSON
 	}
+
+    def openURL() {
+        // Maps an OpenURL onto a request, originally taken from here https://github.com/openlibraryenvironment/listener-openurl/blob/master/src/ReshareRequest.js
+        Result result = openUrlService.mapToRequest(params) ;
+        response.status = 200;
+
+        render result as JSON
+    }
 }
