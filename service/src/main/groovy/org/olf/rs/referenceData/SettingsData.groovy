@@ -36,6 +36,7 @@ public class SettingsData {
 
     // Settings for the z3950 section
     public static final String SETTING_Z3950_SERVER_ADDRESS = 'z3950_server_address';
+    public static final String SETTING_Z3950_PROXY_ADDRESS = 'z3950_proxy_address';
 
     // Settings for the localNCIP section
     public static final String SETTING_NCIP_APP_PROFILE     = 'ncip_app_profile';
@@ -150,6 +151,7 @@ public class SettingsData {
             ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
 
             ensureAppSetting(SETTING_NCIP_SERVER_ADDRESS, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_NCIP_FROM_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
