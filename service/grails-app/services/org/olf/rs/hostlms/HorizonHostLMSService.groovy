@@ -74,42 +74,23 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
     List<ItemLocation> result = [];
 
-    String z3950_proxy = 'http://reshare-mp.folio-dev.indexdata.com:9000';
-    String z3950_server = getZ3950Server();
+    def prefix_query_string = "@attr 1=100 ${pr.supplierUniqueRecordId}";
+    def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
+    log.debug("Got Z3950 response: ${z_response}");
 
-    if ( z3950_server != null ) {
-      // log.debug("Sending system id query ${z3950_proxy}?x-target=http://temple-psb.alma.exlibrisgroup.com:1921/01TULI_INST&x-pquery=@attr 1=12 ${pr.supplierUniqueRecordId}");
-      log.debug("Sending system id query ${z3950_proxy}?x-target=${z3950_server}&x-pquery=@attr 1=100 ${pr.supplierUniqueRecordId}");
-
-      def z_response = HttpBuilder.configure {
-        request.uri = z3950_proxy
-      }.get {
-          request.uri.path = '/'
-          // request.uri.query = ['x-target': 'http://aleph.library.nyu.edu:9992/TNSEZB',
-          request.uri.query = ['x-target': z3950_server,
-                               'x-pquery': '@attr 1=100 '+pr.supplierUniqueRecordId,
-                               'maximumRecords':'1' ]
-
-          if ( getHoldingsQueryRecsyn() ) {
-            request.uri.query['recordSchema'] = getHoldingsQueryRecsyn();
-          }
-
-          log.debug("Querying z server with URL ${request.uri?.toURI().toString()}")
-      }
-
-      log.debug("Got Z3950 response: ${z_response}");
-
-      if ( z_response?.numberOfRecords == 1 ) {
-        // Got exactly 1 record
-        Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
-        if ( availability_summary.size() > 0 ) {
-          availability_summary.values().each { v ->
-            result.add(v);
-          }
+    if ( z_response?.numberOfRecords == 1 ) {
+      // Got exactly 1 record
+      Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=100 ${pr.supplierUniqueRecordId}")
+      if ( availability_summary?.size() > 0 ) {
+        availability_summary.values().each { v ->
+          result.add(v);
         }
-
-        log.debug("At end, availability summary: ${availability_summary}");
       }
+      else {
+        log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
+      }
+
+      log.debug("At end, availability summary: ${availability_summary}");
     }
 
     return result;
