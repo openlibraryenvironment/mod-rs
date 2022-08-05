@@ -52,7 +52,9 @@ public class HostLMSLocationService {
 
         // As the session no longer exists we need to attach it to the current session
         if (loc != null) {
-            loc.attach();
+            // Sometimes, the id already exists in the cache as a different object, so you get the exception DuplicateKeyException
+            // So rather than attach, we will do a lookup
+            loc = HostLMSLocation.get(loc.id);
         }
         log.debug('Exiting HostLMSLocationService::ensureActive');
         return(loc);

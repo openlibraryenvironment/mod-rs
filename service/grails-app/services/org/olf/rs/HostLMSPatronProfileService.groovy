@@ -43,7 +43,9 @@ public class HostLMSPatronProfileService {
 
         // As the session no longer exists we need to attach it to the current session
         if (patronProfile != null) {
-            patronProfile.attach();
+            // Sometimes, the id already exists in the cache as a different object, so you get the exception DuplicateKeyException
+            // So rather than attach, we will do a lookup
+            patronProfile = HostLMSPatronProfile.get(patronProfile.id);
         }
         log.debug('Exiting HostLMSPatronProfileService::ensureActive');
         return(patronProfile);
