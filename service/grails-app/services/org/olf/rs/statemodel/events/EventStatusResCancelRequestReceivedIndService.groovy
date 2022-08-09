@@ -54,7 +54,7 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
             }
         } else {
             // Set needs attention=true
-            eventResultDetails.auditMessage = 'Cancellation Request Recieved';
+            eventResultDetails.auditMessage = 'Cancellation Request Received';
             request.needsAttention = true;
         }
 

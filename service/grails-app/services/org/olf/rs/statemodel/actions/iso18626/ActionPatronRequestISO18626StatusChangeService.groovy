@@ -28,7 +28,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
             // Only continue if successful
             if (actionResultDetails.result == ActionResult.SUCCESS) {
                 // Add an audit entry
-                actionResultDetails.auditMessage = 'Status Change message recieved';
+                actionResultDetails.auditMessage = 'Status Change message received';
             }
         }
 

@@ -25,7 +25,7 @@ public class ActionPatronRequestISO18626RequestResponseService extends ActionISO
         // Only continue if successful
         if (actionResultDetails.result == ActionResult.SUCCESS) {
             // Add an audit entry
-            actionResultDetails.auditMessage = 'Request Response message recieved';
+            actionResultDetails.auditMessage = 'Request Response message received';
         }
 
         // Now return the results to the caller

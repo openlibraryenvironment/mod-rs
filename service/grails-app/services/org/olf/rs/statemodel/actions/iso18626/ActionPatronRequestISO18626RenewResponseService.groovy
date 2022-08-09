@@ -25,7 +25,7 @@ public class ActionPatronRequestISO18626RenewResponseService extends ActionISO18
         // Only continue if successful
         if (actionResultDetails.result == ActionResult.SUCCESS) {
             // Add an audit entry
-            actionResultDetails.auditMessage = 'Renew Response message recieved';
+            actionResultDetails.auditMessage = 'Renew Response message received';
         }
 
         // Now return the results to the caller
