@@ -424,6 +424,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterNewPatronRequestIndOKhostLMSCallFailed = [
+        code: 'requesterNewPatronRequestIndOKhostLMSCallFailed',
+        description: 'Failed to talk to the host LMS to validate the patron',
+        status: Status.PATRON_REQUEST_INVALID_PATRON,
+        qualifier: ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED,
+        result: true,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterValidateIndIndOK = [
         code: 'requesterValidateIndIndOK',
         description: 'Event triggered by a status change to Validate',
@@ -1078,7 +1088,8 @@ public class ActionEventResultData {
         results: [
             requesterNewPatronRequestIndOK,
             requesterNewPatronRequestIndOKnoInstitutionSymbol,
-            requesterNewPatronRequestIndOKinvalidPatron
+            requesterNewPatronRequestIndOKinvalidPatron,
+            requesterNewPatronRequestIndOKhostLMSCallFailed
         ]
     ];
 
