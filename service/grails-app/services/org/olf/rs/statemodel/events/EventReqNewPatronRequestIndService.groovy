@@ -110,6 +110,8 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                 } else {
                     // unexpected error in Host LMS call
                     request.needsAttention = true;
+                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
                     eventResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + lookupPatron?.problems;
                 }
             } else {
