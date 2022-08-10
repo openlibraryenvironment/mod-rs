@@ -214,7 +214,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       }
 
       // Item Loan Policy overrides location preference when item is not lendable
-      o.preference = ilp.lendable ? (loc?.supplyPreference ?: 0) : -1;
+      o.preference = ilp?.lendable ? (loc?.supplyPreference ?: 0) : -1;
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
