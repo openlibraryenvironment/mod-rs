@@ -77,7 +77,7 @@ class HostLMSLocation implements MultiTenant<HostLMSLocation> {
   DirectoryEntry correspondingDirectoryEntry
 
   static constraints = {
-    code (nullable: false)
+    code (nullable: false, unique: true)
     name (nullable: true)
     icalRrule (nullable: true)
     lastCompleted (nullable: true)
