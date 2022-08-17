@@ -23,7 +23,6 @@ import org.olf.rs.lms.ItemLocation;
 import com.k_int.web.toolkit.settings.AppSetting
 
 import grails.gorm.multitenancy.Tenants.CurrentTenant
-import groovyx.net.http.HttpBuilder
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -175,27 +174,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       // create a HostLMSShelvingLocation in respect of shelvingLocation
       if ( o?.shelvingLocation != null ) {
-        List<HostLMSShelvingLocation> shelving_loc_list = HostLMSShelvingLocation.executeQuery(SHELVING_LOC_QRY, [sl: o.shelvingLocation]);
-        switch ( shelving_loc_list.size() ) {
-          case 0:
-            sl = hostLMSShelvingLocationService.ensureExists(o.shelvingLocation, o.shelvingLocation);
-            break;
-
-          case 1:
-            sl = shelving_loc_list.get(0);
-
-            // Is it hidden ?
-            if (sl.hidden == true) {
-                // we need to unhide it as it is active again
-                sl.hidden = false;
-                sl.save(flush : true, failOnError : true);
-            }
-            break;
-
-          default:
-            throw new RuntimeException("Multiple shelving locations match ${o.location}.${o.shelvingLocation}");
-            break;
-        }
+        sl = hostLMSShelvingLocationService.ensureExists(o.shelvingLocation, o.shelvingLocation);
       }
 
       // Create an instance of shelving location site to record the association

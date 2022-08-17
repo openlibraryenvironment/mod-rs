@@ -7,7 +7,9 @@ package org.olf.rs;
 public class HostLMSLocationService extends GenericCodeNameService<HostLMSLocation> {
 
     public HostLMSLocationService() {
-        super(HostLMSLocation);
+        super(HostLMSLocation, { instance ->
+            return((instance.hidden != null) && (instance.hidden == true));
+        });
     }
 
     /**
