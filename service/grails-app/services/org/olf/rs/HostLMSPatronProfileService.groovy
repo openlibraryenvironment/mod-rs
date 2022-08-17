@@ -7,7 +7,9 @@ package org.olf.rs;
 public class HostLMSPatronProfileService extends GenericCodeNameService<HostLMSPatronProfile> {
 
     public HostLMSPatronProfileService() {
-        super(HostLMSPatronProfile);
+        super(HostLMSPatronProfile, { instance ->
+            return((instance.hidden != null) && (instance.hidden == true));
+        });
     }
 
     /**

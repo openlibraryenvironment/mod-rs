@@ -12,8 +12,12 @@ public class GenericCodeNameService<TDomainClass> {
     /** The class object for the domain we are dealing with */
     Class domainClass;
 
-    GenericCodeNameService(Class domainClass) {
+    /** Closure to say if the instance requires updating or not */
+    Closure checkForUpdate;
+
+    GenericCodeNameService(Class domainClass, Closure checkForUpdate = null) {
         this.domainClass = domainClass;
+        this.checkForUpdate = checkForUpdate;
     }
 
     /**
@@ -26,46 +30,58 @@ public class GenericCodeNameService<TDomainClass> {
      */
     public TDomainClass ensureExists(String code, String name, Closure additionalFieldsUpdate = null) {
         log.debug('Entering GenericCodeNameService::ensureExists(' + code + ', ' + name + ');');
-        TDomainClass instance;
 
-        // We will need to create a separate transaction
-        domainClass.withNewSession { session ->
-            try {
-                // Start a new transaction
-                domainClass.withNewTransaction {
+        // We first look it up in the current session
+        TDomainClass instance = domainClass.findByCode(code);
 
-                    instance = domainClass.findByCode(code);
-                    if (instance == null) {
-                        // Dosn't exist so we need to create it
-                        instance = domainClass.newInstance();
-                        instance.code = code;
-                        instance.name = name;
+        // Did we find an instance with this code
+        boolean exists = (instance != null);
 
-                        // Are there any additional fields that want setting
-                        if (additionalFieldsUpdate != null) {
-                            additionalFieldsUpdate(instance, true);
-                        }
-                        instance.save(flush:true, failOnError:true);
-                        patronNoticeService.triggerNotices(instance);
-                    } else {
-                        // Do we have any additional fields that want updating
-                        if (additionalFieldsUpdate != null) {
+        // If it dosn't exists or requires updating, do this in a separate transaction
+        if (!exists || ((checkForUpdate != null) && checkForUpdate(instance) && (additionalFieldsUpdate != null))) {
+            // We will need to create a separate transaction
+            domainClass.withNewSession { session ->
+                try {
+                    // Start a new transaction
+                    domainClass.withNewTransaction {
+
+                        // We need to do slightly different functionality for new and update
+                        if (exists) {
+                            // Lookup the instance in this session
+                            instance = domainClass.findByCode(code);
+
+                            // There must be some fields that need updating
                             additionalFieldsUpdate(instance, false);
                             instance.save(flush:true, failOnError:true);
+                        } else {
+                            // Dosn't exist so we need to create it
+                            instance = domainClass.newInstance();
+                            instance.code = code;
+                            instance.name = name;
+
+                            // Are there any additional fields that want setting
+                            if (additionalFieldsUpdate != null) {
+                                additionalFieldsUpdate(instance, true);
+                            }
+                            instance.save(flush:true, failOnError:true);
+
+                            // Send the notice
+                            patronNoticeService.triggerNotices(instance);
                         }
                     }
+                } catch (Exception e) {
+                    log.error("Exception thrown while creating / update within GenericCodeNameService::ensureExists: " + code, e);
                 }
-            } catch (Exception e) {
-                log.error("Exception thrown while creating / update within GenericCodeNameService::ensureExists: " + code, e);
+            }
+
+            // As the session no longer exists we need to attach it to the current session
+            if (instance != null) {
+                // Sometimes, the id already exists in the cache as a different object, so you get the exception DuplicateKeyException
+                // So rather than attach, we will do a lookup
+                instance = domainClass.get(instance.id);
             }
         }
 
-        // As the session no longer exists we need to attach it to the current session
-        if (instance != null) {
-            // Sometimes, the id already exists in the cache as a different object, so you get the exception DuplicateKeyException
-            // So rather than attach, we will do a lookup
-            instance = domainClass.get(instance.id);
-        }
         log.debug('Exiting GenericCodeNameService::ensureExists');
         return(instance);
     }
