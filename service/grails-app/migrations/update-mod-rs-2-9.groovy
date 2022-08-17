@@ -125,4 +125,19 @@ databaseChangeLog = {
     changeSet(author: "jskomorowski", id: "20220721-1600-001") {
         addPrimaryKey(columnNames: "hlilp_id", constraintName: "host_lms_item_loan_policyPK", tableName: "host_lms_item_loan_policy")
     }
+    changeSet(author: "Chas (generated)", id: "1660725210217-1") {
+        addUniqueConstraint(columnNames: "hlilp_code", constraintName: "UC_HOST_LMS_ITEM_LOAN_POLICYHLILP_CODE_COL", tableName: "host_lms_item_loan_policy")
+    }
+
+    changeSet(author: "Chas (generated)", id: "1660725210217-2") {
+        addUniqueConstraint(columnNames: "hll_code", constraintName: "UC_HOST_LMS_LOCATIONHLL_CODE_COL", tableName: "host_lms_location")
+    }
+
+    changeSet(author: "Chas (generated)", id: "1660725210217-3") {
+        addUniqueConstraint(columnNames: "hlpp_code", constraintName: "UC_HOST_LMS_PATRON_PROFILEHLPP_CODE_COL", tableName: "host_lms_patron_profile")
+    }
+
+    changeSet(author: "Chas (generated)", id: "1660725210217-4") {
+        addUniqueConstraint(columnNames: "hlsl_code", constraintName: "UC_HOST_LMS_SHELVING_LOCHLSL_CODE_COL", tableName: "host_lms_shelving_loc")
+    }
 }

@@ -18,7 +18,7 @@ class HostLMSShelvingLocation implements MultiTenant<HostLMSShelvingLocation> {
   Boolean hidden;
 
   static constraints = {
-    code (nullable: false)
+    code (nullable: false, unique: true)
     name (nullable: true)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)

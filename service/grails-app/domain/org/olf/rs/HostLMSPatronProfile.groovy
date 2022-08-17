@@ -15,7 +15,7 @@ class HostLMSPatronProfile implements MultiTenant<HostLMSPatronProfile> {
   Boolean hidden;
 
   static constraints = {
-    code (nullable: false)
+    code (nullable: false, unique: true)
     name (nullable: true)
     canCreateRequests (nullable: true)
     hidden (nullable: true)

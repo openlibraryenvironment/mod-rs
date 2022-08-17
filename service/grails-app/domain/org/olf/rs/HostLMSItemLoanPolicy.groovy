@@ -15,7 +15,7 @@ class HostLMSItemLoanPolicy implements MultiTenant<HostLMSItemLoanPolicy> {
   boolean hidden = Boolean.FALSE;
 
   static constraints = {
-    code (nullable: false)
+    code (nullable: false, unique: true)
     name (nullable: true)
     lendable (nullable: false)
     hidden (nullable: false)
