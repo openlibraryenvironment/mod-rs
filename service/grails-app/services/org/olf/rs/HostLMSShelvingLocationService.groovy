@@ -21,7 +21,9 @@ public class HostLMSShelvingLocationService extends GenericCodeNameService<HostL
         log.debug('Entering HostLMSShelvingLocationService::ensureExists(' + code + ', ' + name + ', ' + supplyPreference.toString()+ ');');
 
         HostLMSShelvingLocation loc = ensureExists(code, name, { instance, newRecord ->
-            instance.supplyPreference = supplyPreference;
+            if (newRecord) {
+                instance.supplyPreference = supplyPreference;
+            }
         });
 
         log.debug('Exiting HostLMSShelvingLocationService::ensureActive');

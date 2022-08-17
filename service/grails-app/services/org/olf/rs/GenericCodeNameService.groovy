@@ -34,7 +34,7 @@ public class GenericCodeNameService<TDomainClass> {
                 // Start a new transaction
                 domainClass.withNewTransaction {
 
-                    instance = domainClass.findByCodeOrName(code, name);
+                    instance = domainClass.findByCode(code);
                     if (instance == null) {
                         // Dosn't exist so we need to create it
                         instance = domainClass.newInstance();
