@@ -125,6 +125,7 @@ databaseChangeLog = {
     changeSet(author: "jskomorowski", id: "20220721-1600-001") {
         addPrimaryKey(columnNames: "hlilp_id", constraintName: "host_lms_item_loan_policyPK", tableName: "host_lms_item_loan_policy")
     }
+
     changeSet(author: "Chas (generated)", id: "1660725210217-1") {
         addUniqueConstraint(columnNames: "hlilp_code", constraintName: "UC_HOST_LMS_ITEM_LOAN_POLICYHLILP_CODE_COL", tableName: "host_lms_item_loan_policy")
     }
@@ -139,5 +140,50 @@ databaseChangeLog = {
 
     changeSet(author: "Chas (generated)", id: "1660725210217-4") {
         addUniqueConstraint(columnNames: "hlsl_code", constraintName: "UC_HOST_LMS_SHELVING_LOCHLSL_CODE_COL", tableName: "host_lms_shelving_loc")
+    }
+
+    changeSet(author: "cwoodfield", id: "20220817120000-001") {
+        // We are now referencing hms shelving location directly raather than just being a string
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_pick_shelving_location_fk", type: "varchar(36)")
+        }
+
+        // Not forgetting the foreign key constraint
+        addForeignKeyConstraint(baseColumnNames: "pr_pick_shelving_location_fk", baseTableName: "patron_request", constraintName: "FK88fl9elfm1j1qqed3x25vqru4", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "hlsl_id", referencedTableName: "host_lms_shelving_loc", validate: "true")
+
+        // We need to ensure that all the references to shelving location exist
+        grailsChange {
+            change {
+                // Iterate through each of the shelving locations
+                sql.eachRow("""SELECT distinct pr_pick_shelving_location
+                               FROM ${database.defaultSchemaName}.patron_request
+                               WHERE pr_pick_shelving_location is not null""".toString(), { uniqueShelvingLocation ->
+
+                    // Look to see if we can find this shelving location
+                    def row = sql.firstRow("""SELECT hlsl_id
+                                              FROM ${database.defaultSchemaName}.host_lms_shelving_loc
+                                              WHERE hlsl_name = '${uniqueShelvingLocation.pr_pick_shelving_location}'""".toString());
+                    def shelvingLocId;
+                    if (row == null) {
+                        // We need to generate a new record
+                        def dateTime = new Date();
+                        shelvingLocId = UUID.randomUUID().toString();
+                        sql.execute("""INSERT into ${database.defaultSchemaName}.host_lms_shelving_loc (hlsl_id, hlsl_version, hlsl_code, hlsl_name, hlsl_date_created, hlsl_last_updated)
+                                       VALUES ('${shelvingLocId}', 0, '${uniqueShelvingLocation.pr_pick_shelving_location}', '${uniqueShelvingLocation.pr_pick_shelving_location}', '${dateTime}', '${dateTime}')""".toString());
+                    } else {
+                        // It already existed
+                        shelvingLocId = row.hlsl_id;
+                    }
+
+                    // Now update all the requests, that reference this shelving location
+                    sql.execute("""update ${database.defaultSchemaName}.patron_request
+                                   set pr_pick_shelving_location_fk = '${shelvingLocId}'
+                                   where  pr_pick_shelving_location = '${uniqueShelvingLocation.pr_pick_shelving_location}'""".toString());
+                });
+            }
+        }
+
+        // Now we have no duplicates, we can add the unique index
+        addUniqueConstraint(columnNames: "sym_authority_fk, sym_symbol", tableName: "symbol")
     }
 }

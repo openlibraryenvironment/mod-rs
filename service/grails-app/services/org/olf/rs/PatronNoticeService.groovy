@@ -159,7 +159,7 @@ public class PatronNoticeService {
                 title: pr.title,
                 materialType: pr?.publicationType?.label ?: '',
                 location: pr?.pickLocation?.name,
-                shelvingLocation: pr?.pickShelvingLocation
+                shelvingLocation: pr?.pickShelvingLocation?.name
             ]
         ];
         return(values);
