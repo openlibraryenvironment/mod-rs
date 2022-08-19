@@ -183,4 +183,24 @@ databaseChangeLog = {
             }
         }
     }
+
+    changeSet(author: "cwoodfield", id: "20220819120000-001") {
+        // The serviceType field hasn't been populated on the requester, so we are retrospectively doing it
+        grailsChange {
+            change {
+                // get hold of the ref data row for loan
+                def loanRow = sql.firstRow("""SELECT rdv_id
+                                              FROM ${database.defaultSchemaName}.refdata_value
+                                              where rdv_owner = (SELECT rdc_id
+                                                                 FROM ${database.defaultSchemaName}.refdata_category
+                                                                 where rdc_description = 'request.serviceType') and
+                                                    rdv_value = 'loan'""".toString());
+
+                // Now update all the requests, that have a null service type
+                sql.execute("""update ${database.defaultSchemaName}.patron_request
+                               set pr_service_type_fk = '${loanRow.rdv_id}'
+                                   where pr_service_type_fk is null""".toString());
+            }
+        }
+    }
 }
