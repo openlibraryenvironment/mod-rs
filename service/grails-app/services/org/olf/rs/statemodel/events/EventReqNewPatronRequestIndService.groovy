@@ -7,6 +7,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SharedIndexService
 import org.olf.rs.statemodel.AbstractEvent;
@@ -54,6 +55,11 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             // Generate a human readabe ID to use
             request.hrid = generateHrid()
             log.debug("set request.hrid to ${request.hrid}");
+
+            // if we do not have a service type set it to loan
+            if (request.serviceType == null) {
+                request.serviceType = ProtocolReferenceDataValue.lookupServiceType(ProtocolReferenceDataValue.SERVICE_TYPE_LOAN);
+            }
 
             // If we were supplied a pickup location, attempt to resolve it here
             DirectoryEntry pickupLoc;
