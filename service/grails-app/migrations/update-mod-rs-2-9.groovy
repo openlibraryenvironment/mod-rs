@@ -182,8 +182,5 @@ databaseChangeLog = {
                 });
             }
         }
-
-        // Now we have no duplicates, we can add the unique index
-        addUniqueConstraint(columnNames: "sym_authority_fk, sym_symbol", tableName: "symbol")
     }
 }
