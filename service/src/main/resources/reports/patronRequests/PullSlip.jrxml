@@ -39,7 +39,7 @@
             pr_title,
             pr_patron_note,
             pr_local_call_number,
-            pr_pick_shelving_location,
+            hlsl.hlsl_name "pick_shelving_location",
             pr_pref_service_point "pickupLocation",
             pr_date_created AT TIME ZONE $P{timeZone} "dateCreated",
             pr_selected_item_barcode "itemBarcode",
@@ -54,6 +54,7 @@
            LEFT JOIN $P!{schema}.symbol sym_sup ON pr.pr_resolved_sup_inst_symbol_fk = sym_sup.sym_id
 		   LEFT JOIN $P!{schema}.directory_entry de_sup on sym_sup.sym_owner_fk = de_sup.de_id
 		   LEFT JOIN $P!{schema}.host_lms_location hll on pr.pr_pick_location_fk = hll.hll_id
+		   LEFT JOIN $P!{schema}.host_lms_shelving_loc hlsl on pr.pr_pick_shelving_location_fk = hlsl.hlsl_id
 where $X{IN, pr.pr_id, ids}]]>
 	</queryString>
 	<field name="pr_patron_identifier" class="java.lang.String">
@@ -93,7 +94,7 @@ where $X{IN, pr.pr_id, ids}]]>
 	<field name="requesterEMail" class="java.lang.String"/>
 	<field name="pickupLocation" class="java.lang.String"/>
 	<field name="dateCreated" class="java.sql.Timestamp"/>
-	<field name="pr_pick_shelving_location" class="java.lang.String"/>
+	<field name="pick_shelving_location" class="java.lang.String"/>
 	<field name="itemBarcode" class="java.lang.String"/>
 	<field name="isRequester" class="java.lang.Boolean"/>
 	<background>
@@ -328,7 +329,7 @@ where $X{IN, pr.pr_id, ids}]]>
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<printWhenExpression><![CDATA[$F{isRequester} == false]]></printWhenExpression>
 						</reportElement>
-						<textFieldExpression><![CDATA[$F{pickLocation}.concat( " - " ).concat($F{pr_pick_shelving_location})]]></textFieldExpression>
+						<textFieldExpression><![CDATA[$F{pickLocation}.concat( " - " ).concat($F{pick_shelving_location})]]></textFieldExpression>
 					</textField>
 				</frame>
 				<frame>
