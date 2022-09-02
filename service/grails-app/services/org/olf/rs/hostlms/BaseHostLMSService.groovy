@@ -341,6 +341,117 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result
   }
 
+
+  private Map ncip2Lookup(String keyValue, Boolean useUserId = true) {
+    Map result = [ status: 'FAIL' ];
+    String key = null;
+    if(userUserId) {
+      key = "user_id";
+    } else {
+      key = "username";
+    }
+
+    log.debug("ncip2Lookup(keyValue:${keyValue}, useUserId:${useUserId})");
+
+    if( (keyValue != null) && (keyValue.length() > 0)) {
+      try {
+        Map ncipValues = getNCIPLookupValues();
+        log.debug("Requesting patron from ${ncipValues.ncip_server_address}");
+        LookupUser lookupUser = null;
+        if(useUserId) {
+          lookupUser = new LookupUser().setUserId(keyValue);
+        } else {
+          lookupUser = new LookupUser().setUserName(keyValue);
+        }
+        lookupUser = lookupUser
+          .includeUserAddressInformation()
+          .includeUserPrivilege()
+          .includeNameInformation()
+          .setToAgency(ncipValues.ncip_to_agency)
+          .setFromAgency(ncipValues.ncip_from_agency)
+          .setRegistryId(ncipValues.registry_id)
+          .setApplicationProfileType(ncipValues.ncip_app_profile);
+
+        log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
+        JSONObject response = ncip_client.send(lookupUser);
+        log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
+
+        processLookupUserResponse(result, response);
+      
+      } catch(Exception e) {
+        result.problems = "Unexpected problem in NCIP Call: ${e.message}";
+        result.result = false;
+      }
+    } else {
+      log.warn("Not calling NCIP lookup - No id value passed in");
+      result.problems='No id supplied'
+      result.result=false
+    }
+
+    return result;
+  }
+
+
+  private Map ncip2LookupById(String user_id) {
+    return ncip2Lookup(user_id, true);
+  }
+
+  private Map ncip2LookupByUsername(String username) {
+    return ncip2Lookup(username, false);
+  }
+
+  private Map getNCIPLookupValues() {
+    map values = [];
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
+    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency');
+    AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency');
+    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile');
+    AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id');
+    values['ncip_server_address'] = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue;
+    values['ncip_from_agency'] = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue;
+    values['ncip_to_agency'] = ncip_to_agency_setting?.value ?: ncip_from_agency;
+    values['ncip_app_profile'] = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue;
+    values['registry_id'] = wms_registry_id?.value;
+
+    if( (values.ncip_server_address == null) ||
+          (values.ncip_from_agency == null) ||
+          (values.ncip_app_profile == null) ) {
+      throw new RuntimeException("ncip_server_address, ncip_from_agency and ncip_app_profile must be defined");
+    }
+
+    return values;
+  }
+
+  // {"firstName":"Stacey",
+  //  "lastName":"Conrad",
+  //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
+  //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
+  //  "userId":"M00069192"}
+  private void processLookupUserResponse(Map result, JSONObject response) {
+    if ( ( response ) && ( ! response.has('problems') ) ) {
+      JSONArray priv = response.getJSONArray('privileges')
+      // Return a status of BLOCKED if the user is blocked, else OK for now
+      result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+      result.userProfile=(priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
+      result.result=true
+      result.userid=response.opt('userId') ?: response.opt('userid')
+      result.givenName=response.opt('firstName')
+      result.surname=response.opt('lastName')
+      if ( response.has('electronicAddresses') ) {
+        JSONArray ea = response.getJSONArray('electronicAddresses')
+        // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
+        result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
+        result.tel=(ea.find { it.key=='tel' })?.value
+      }
+    }
+    else {
+      result.problems=response.get('problems')
+      result.result=false
+    }   
+  }
+
+
+
   /**
    * @param patron_id - the patron to look up
    * @return A map with the following keys {
@@ -353,85 +464,21 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    * }
    */
   private Map ncip2LookupPatron(String patron_id) {
-    Map result = [ status:'FAIL' ];
-    log.debug("ncip2LookupPatron(${patron_id})");
-
-    try {
-
-      if ( ( patron_id != null ) && ( patron_id.length() > 0 ) ) {
-        AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-        AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-        AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
-        AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
-        AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-
-        String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-        String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-        String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
-        String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
-        // Will only be used by the client for WMS LMSs
-        String registry_id = wms_registry_id?.value
-
-        if ( ( ncip_server_address != null ) &&
-             ( ncip_from_agency != null ) &&
-             ( ncip_app_profile != null ) ) {
-
-          log.debug("Request patron from ${ncip_server_address}");
-          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
-          LookupUser lookupUser = new LookupUser()
-                      .setUserId(patron_id)
-                      .includeUserAddressInformation()
-                      .includeUserPrivilege()
-                      .includeNameInformation()
-                      .setToAgency(ncip_to_agency)
-                      .setFromAgency(ncip_from_agency)
-                      .setRegistryId(registry_id)
-                      .setApplicationProfileType(ncip_app_profile);
-
-          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
-          JSONObject response = ncip_client.send(lookupUser);
-          log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
-
-
-          // {"firstName":"Stacey",
-          //  "lastName":"Conrad",
-          //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
-          //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
-          //  "userId":"M00069192"}
-          if ( ( response ) && ( ! response.has('problems') ) ) {
-            JSONArray priv = response.getJSONArray('privileges')
-            // Return a status of BLOCKED if the user is blocked, else OK for now
-            result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
-            result.userProfile=(priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
-            result.result=true
-            result.userid=response.opt('userId') ?: response.opt('userid')
-            result.givenName=response.opt('firstName')
-            result.surname=response.opt('lastName')
-            if ( response.has('electronicAddresses') ) {
-              JSONArray ea = response.getJSONArray('electronicAddresses')
-              // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
-              result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
-              result.tel=(ea.find { it.key=='tel' })?.value
-            }
-          }
-          else {
-            result.problems=response.get('problems')
-            result.result=false
-          }
-        }
-      }
-      else {
-        log.warn("Not calling NCIP lookup - No patron ID passed in");
-        result.problems='No patron id supplied'
-        result.result=false
+    Map user_id_result = null;
+    Map username_result = null;
+    user_id_result = ncip2LookupById(patron_id);
+    if(user_id_result.result == false) {
+      /* 
+      If the user_id lookup failed, try a lookup with the patron_id
+      assigned to the username value instead, and return that result if
+      and only if it is successful
+      */
+      username_result = ncip2LookupByUsername(patron_id);
+      if(username_result.result != false) {
+        return username_result;
       }
     }
-    catch ( Exception e ) {
-      result.problems = "Unexpected problem in NCIP Call ${e.message}";
-      result.result=false
-    }
-
-    return result;
+    return user_id_result;
   }
 
   def makeNCIPLookupUserRequest(String agency, String application_profile, String user_id) {
