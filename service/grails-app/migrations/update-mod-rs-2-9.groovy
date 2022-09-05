@@ -196,10 +196,13 @@ databaseChangeLog = {
                                                                  where rdc_description = 'request.serviceType') and
                                                     rdv_value = 'loan'""".toString());
 
-                // Now update all the requests, that have a null service type
-                sql.execute("""update ${database.defaultSchemaName}.patron_request
-                               set pr_service_type_fk = '${loanRow.rdv_id}'
-                                   where pr_service_type_fk is null""".toString());
+                // Need to check for null for if this is a new tenant, then the predefined data will not exist
+                if (loanRow != null) {
+                    // Now update all the requests, that have a null service type
+                    sql.execute("""update ${database.defaultSchemaName}.patron_request
+                                   set pr_service_type_fk = '${loanRow.rdv_id}'
+                                       where pr_service_type_fk is null""".toString());
+                }
             }
         }
     }
