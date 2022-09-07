@@ -43,6 +43,7 @@ public class ReshareApplicationEventHandlerService {
     EventISO18626IncomingResponderService eventISO18626IncomingResponderService;
     EventMessageRequestIndService eventMessageRequestIndService;
     HostLMSLocationService hostLMSLocationService;
+	HostLMSShelvingLocationService hostLMSShelvingLocationService;
     StatusService statusService;
 
   	/** Holds map of the event to the bean that will do the processing for this event */
@@ -344,10 +345,10 @@ public class ReshareApplicationEventHandlerService {
       // We've been given a specific location, make sure we have a record for that location
       HostLMSLocation loc = hostLMSLocationService.ensureActive(location.location, location.location);
 
-      pr.localCallNumber = location.callNumber
-      pr.pickLocation = loc
-      pr.pickShelvingLocation = location.shelvingLocation
-      pr.selectedItemBarcode = location?.itemId
+      pr.localCallNumber = location.callNumber;
+      pr.pickLocation = loc;
+      pr.pickShelvingLocation = hostLMSShelvingLocationService.ensureExists(location.shelvingLocation, location.shelvingLocation);
+      pr.selectedItemBarcode = location?.itemId;
 
       result = true;
     }
