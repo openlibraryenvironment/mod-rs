@@ -165,7 +165,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   // For a RESPONDER/SUPPLIER/LENDER - which local LMS location will the item be picked from, the shelving location and the call number
   HostLMSLocation pickLocation;
-  String pickShelvingLocation;
+  HostLMSShelvingLocation pickShelvingLocation;
 
 
   /* We want to be able to get in and out of 'cancellation' states from a number of states in the state model,
@@ -424,7 +424,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     neededBy column : 'pr_needed_by'
 
     pickLocation column: 'pr_pick_location_fk'
-    pickShelvingLocation column: 'pr_pick_shelving_location'
+    pickShelvingLocation column: 'pr_pick_shelving_location_fk'
     localCallNumber column : 'pr_local_call_number'
 
     hrid column : 'pr_hrid'
