@@ -345,7 +345,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   private Map ncip2Lookup(String keyValue, Boolean useUserId = true) {
     Map result = [ status: 'FAIL' ];
     String key = null;
-    if(userUserId) {
+    if(useUserId) {
       key = "user_id";
     } else {
       key = "username";
