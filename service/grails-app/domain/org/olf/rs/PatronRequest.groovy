@@ -315,7 +315,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     peerRequestIdentifier (nullable: true)
 
     pickLocation(nullable: true)
-    pickShelvingLocation column: 'pr_pick_shelving_location_fk'
+    pickShelvingLocation(nullable: true, blank:false)
     localCallNumber (nullable: true, blank:false)
     hrid (nullable: true, blank:false)
 
@@ -424,7 +424,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     neededBy column : 'pr_needed_by'
 
     pickLocation column: 'pr_pick_location_fk'
-    pickShelvingLocation column: 'pr_pick_shelving_location'
+    pickShelvingLocation column: 'pr_pick_shelving_location_fk'
     localCallNumber column : 'pr_local_call_number'
 
     hrid column : 'pr_hrid'
