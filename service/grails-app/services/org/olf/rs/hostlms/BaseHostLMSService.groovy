@@ -61,6 +61,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   public abstract CirculationClient getCirculationClient(String address);
 
+   //Method to inquire whether this LMS adapter speaks NCIP v2. Defaults to false, override if true
+  public boolean isNCIP2() {
+    return false;
+  }
+
 
   /**
    *
@@ -357,6 +362,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       try {
         Map ncipValues = getNCIPLookupValues();
         CirculationClient ncip_client = getCirculationClient(ncipValues.ncip_server_address);
+        if(!useUserId && !isNCIP2() ) {
+          log.debug("Cannot look up by username for NCIP1 currently, skipping");
+          result.result = false;
+          result.problems = "Username lookup unsupported";
+          return result;
+        }
         log.debug("Requesting patron from ${ncipValues.ncip_server_address}");
         LookupUser lookupUser = null;
         if(useUserId) {
@@ -469,6 +480,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     Map username_result = null;
     user_id_result = ncip2LookupById(patron_id);
     if(user_id_result.result == false) {
+      log.debug("No result from userId patron lookup, attempting username");
       /* 
       If the user_id lookup failed, try a lookup with the patron_id
       assigned to the username value instead, and return that result if
