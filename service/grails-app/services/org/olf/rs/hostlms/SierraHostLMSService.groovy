@@ -36,6 +36,11 @@ public class SierraHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
+  @Override
+  public boolean isNCIP2() {
+    return true;
+  }
+
   /**
    * III Sierra doesn't provide an availableNow flag in it's holdings record - instead the XML looks as followS:
    * <holdings>
