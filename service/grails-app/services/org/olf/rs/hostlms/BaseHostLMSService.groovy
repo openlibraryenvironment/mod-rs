@@ -401,7 +401,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   private Map getNCIPLookupValues() {
-    Map values = [];
+    Map values = [:];
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
     AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency');
     AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency');
