@@ -31,6 +31,11 @@ public class WmsHostLMSService extends BaseHostLMSService {
       ]).circulationClient;
   }
 
+  @Override
+  public boolean isNCIP2() {
+    return true;
+  }
+
   List getLookupStrategies() {
     [
       [

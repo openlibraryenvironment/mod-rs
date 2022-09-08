@@ -35,4 +35,9 @@ public class DefaultHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 
+  @Override
+  public boolean isNCIP2() {
+    return true;
+  }
+
 }

@@ -36,6 +36,11 @@ public class KohaHostLMSService extends BaseHostLMSService {
     return new NCIPClientWrapper(address, [protocol: "NCIP2", useNamespace: false]).circulationClient;
   }
 
+  @Override
+  public boolean isNCIP2() {
+    return true;
+  }
+
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
