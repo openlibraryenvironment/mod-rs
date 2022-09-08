@@ -299,7 +299,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     log.debug("Got Z3950 response: ${z_response}");
 
-    if ( (z_response?.numberOfRecords?.text() as int) > 0 ) {
+    if ( ((z_response?.numberOfRecords?.text() ?: -1) as int) > 0 ) {
       Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
       if ( availability_summary?.size() > 0 ) {
         availability_summary.values().each { v ->

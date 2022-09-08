@@ -41,7 +41,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
   @Override
   protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract holdings from Koha marcxml record ${z_response}");
-    if ( (z_response?.numberOfRecords?.text() as int) != 1 ) {
+    if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from Koha Z39.50 server, unable to extract available items. Record: ${z_response}");
       return null;
     }
