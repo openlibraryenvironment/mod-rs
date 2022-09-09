@@ -65,6 +65,15 @@ class UrlMappings {
     '/rs/iso18626'(controller:'iso18626', action:'index')
     "/rs/status/$symbol"(controller:'iso18626', action:'status')
 
+    // Swagger document
+    // This one returns what the plugin generates
+//    "/rs/swagger/api"(controller: "swagger", action: "api")
+    // But as it returns controllers we do not want to expose in this way, we then manipulate it to remove them
+    "/rs/swagger/api"(controller: "swaggerUI", action: "api")
+
+    // The swagger plugin dosn't supply the UI, so
+    "/rs/swaggerUI"(controller: "swaggerUI", action: "index")
+
     "500"(view: '/error')
     "404"(view: '/notFound')
 

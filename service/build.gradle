@@ -199,6 +199,10 @@ dependencies {
   compile 'net.sf.jasperreports:jasperreports-fonts:6.19.1'
   compile 'net.sf.barcode4j:barcode4j:2.1'
   compile 'org.apache.xmlgraphics:batik-bridge:1.14'
+  
+  // For swagger - was trying to use t
+  compile 'org.grails.plugins:swagger-grails:0.4.0'
+  compile 'io.swagger.core.v3:swagger-models:2.2.2'
 }
 
 bootRun {
