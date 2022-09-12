@@ -198,15 +198,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
       }
 
-      // Item Loan Policy overrides location preference when item is not lendable
-      o.preference = ilp?.lendable ? (loc?.supplyPreference ?: 0) : -1;
+      // Item Loan Policy (if present) overrides location preference when item is not lendable
+      o.preference = (!ilp || ilp?.lendable) ? (loc?.supplyPreference ?: 0) : -1;
       log.debug("Setting preference for ${o} to ${o.preference} given HostLMSItemLoanPolicy ${ilp} and HostLMSLocation ${loc}");
-
-      //If the ilp is null and the loc.supplyPreference is also null, assign preference to 0
-      if(ilp == null && loc?.supplyPreference == null) {
-        o.preference = 0;
-        log.debug("Setting preference to 0 since ilp and loc.supplyPreference are both null");
-      }
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
