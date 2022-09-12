@@ -187,7 +187,7 @@ dataSource:
 events:
   consumer:
     zk:
-      connect: 'localhost:2181'
+      connect: '${zookeeper_host:localhost}:${zookeeper_port:2181}'
     bootstrap:
       servers: 'localhost:29092'
     key:
