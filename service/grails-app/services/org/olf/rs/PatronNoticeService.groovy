@@ -184,7 +184,9 @@ public class PatronNoticeService {
                 // Only interested in the first institution we find
                 DirectoryEntry currentEntry = directoryEntry;
                 while ((currentEntry != null) && (institutionEmail == null)) {
-                    if ((currentEntry.type != null) && (refdataInstitution.id == currentEntry.type.id)) {
+                    if ((currentEntry.type != null) &&
+                        (refdataInstitution.id == currentEntry.type.id) &&
+                        (currentEntry.emailAddress != null)) {
                         // We have found the institution
                         institutionEmail = currentEntry.emailAddress;
                     } else {
