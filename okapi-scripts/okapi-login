@@ -17,7 +17,7 @@ elif [ -f $HOME/.okapirc ]; then
 fi
 
 # Parse command line options.
-while getopts hupt: OPT; do
+while getopts "h:u:p:t:" OPT; do
   case "$OPT" in
     h)
       echo $USAGE
