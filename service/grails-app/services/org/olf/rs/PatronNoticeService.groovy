@@ -127,7 +127,7 @@ public class PatronNoticeService {
 
                     // "sent" in this case is more like processed -- not all events necessarily result in notices
                     ev.sent = true;
-                    ev.save();
+                    ev.save(flush:true, failOnError:true);
                 }
             }
             NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
