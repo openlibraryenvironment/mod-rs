@@ -10,7 +10,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 /**
@@ -72,15 +71,15 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
 
                                 // Pull back any data we need from the shared index in order to sort the list of candidates
                                 request.addToRota(new PatronRequestRota(
-                                patronRequest : request,
-                                rotaPosition : ctr++,
-                                directoryId : rankedSupplier .supplier_symbol,
-                                instanceIdentifier : rankedSupplier .instance_identifier,
-                                copyIdentifier : rankedSupplier .copy_identifier,
-                                state : reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE),
-                                loadBalancingScore : rankedSupplier .rank,
-                                loadBalancingReason : rankedSupplier .rankReason
-                            ));
+                                    patronRequest : request,
+                                    rotaPosition : ctr++,
+                                    directoryId : rankedSupplier .supplier_symbol,
+                                    instanceIdentifier : rankedSupplier .instance_identifier,
+                                    copyIdentifier : rankedSupplier .copy_identifier,
+                                    loadBalancingScore : rankedSupplier .rank,
+                                    loadBalancingReason : rankedSupplier .rankReason
+                                )
+                            );
                         } else {
                                 log.warn('ILL Policy was not Will lend');
                                 operationData.candidates.add([symbol:rankedSupplier .supplier_symbol, message:"Skipping - illPolicy is \"${rankedSupplier .ill_policy}\""]);
