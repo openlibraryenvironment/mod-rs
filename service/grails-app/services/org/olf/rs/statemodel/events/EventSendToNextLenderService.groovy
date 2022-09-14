@@ -13,7 +13,6 @@ import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -93,8 +92,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                                 eventResultDetails.auditMessage = 'Sent to local review';
                                 return(eventResultDetails);  //Nothing more to do here
                             } else {
-                                prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_NOT_SUPPLIED);
-                                prr.save(flush: true, failOnError: true);
                                 log.debug('Cannot fill locally, skipping');
                                 continue;
                             }
@@ -134,17 +131,13 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                             lookAtNextResponder = false;
 
                             // Probably need a lender_is_valid check here
-                            if (reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest)) {
-                                // We have managed to send a message
-                                prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
-                            } else {
+                            if (!reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest)) {
+                                // Failed to send to lender
                                 messageTried = true;
-                                prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER);
                                 prr.note = "Result of send : ${request.networkStatus.toString()}";
                             }
                         } else {
                             log.warn("Lender at position ${request.rotaPosition} invalid, skipping");
-                            prr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER);
                             prr.note = "Send not attempted: Unable to resolve symbol for : ${nextResponder}";
                         }
 

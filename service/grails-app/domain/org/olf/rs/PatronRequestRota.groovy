@@ -1,8 +1,8 @@
 package org.olf.rs
 
-import grails.gorm.MultiTenant;
-import org.olf.rs.statemodel.Status;
 import org.olf.okapi.modules.directory.Symbol
+
+import grails.gorm.MultiTenant;
 
 class PatronRequestRota implements MultiTenant<PatronRequestRota> {
 
@@ -12,14 +12,14 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   // These 2 dates are maintained by the framework for us
   Date dateCreated
   Date lastUpdated
-  
+
   /** The request this audit record belongs to */
   static belongsTo = [patronRequest : PatronRequest]
 
   /** The position in the rota */
   Long rotaPosition;
 
-  /** The directory entry that represents this rota entry */ 
+  /** The directory entry that represents this rota entry */
   String directoryId;
 
   /** The system identifier for the found item */
@@ -38,7 +38,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
   Date availableFrom;
 
   /** The status the protocol thinks we are at with this messsage,
-   *  the meaning we vary from protocol to protocol, but it is assumed it will map onto an enum 
+   *  the meaning we vary from protocol to protocol, but it is assumed it will map onto an enum
    */
   Long protocolStatus;
 
@@ -51,11 +51,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    * For the load balance to explain it's reasons
    */
   String loadBalancingReason
-
-  /**
-   * a workflow state for this rota entry
-   */
-  Status state
 
   Symbol peerSymbol
 
@@ -76,7 +71,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           (nullable : false) // unique['patronRequest'] if you wanted to - but I don't know why you would.
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
-    state                  (nullable : true)
     peerSymbol             (nullable : true)
     instanceIdentifier     (nullable : true)
     copyIdentifier         (nullable : true)
@@ -99,7 +93,6 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           column : "prr_rota_position"
     shelfmark              column : "prr_shelfmark"
     systemIdentifier       column : "prr_system_identifier"
-    state                  column : "prr_state_fk"
     peerSymbol             column : "prr_peer_symbol_fk"
     instanceIdentifier     column : "prr_instance_identifier"
     copyIdentifier         column : "prr_copy_identifier"
