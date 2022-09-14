@@ -4,8 +4,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.refdata.RefdataCategory;
 import com.k_int.web.toolkit.refdata.RefdataValue;
@@ -24,7 +22,6 @@ public class ActionPatronRequestCancelLocalService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED);
         actionResultDetails.auditMessage = 'Local request cancelled';
         if (parameters.reason) {
             RefdataCategory cat = RefdataCategory.findByDesc('cancellationReasons');

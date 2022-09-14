@@ -4,8 +4,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * This action is performed when the requester ships the item back to the supplier
@@ -26,7 +24,6 @@ public class ActionPatronRequestShippedReturnService extends AbstractAction {
 
         reshareActionService.sendRequestingAgencyMessage(request, 'ShippedReturn', parameters, actionResultDetails);
 
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER);
         actionResultDetails.responseResult.status = true;
 
         return(actionResultDetails);

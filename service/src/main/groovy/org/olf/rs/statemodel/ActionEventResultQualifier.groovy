@@ -26,6 +26,7 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_LOCATED               = 'located';
     static public final String QUALIFIER_NO                    = 'no';
     static public final String QUALIFIER_NO_INSTITUTION_SYMBOL = 'noInstitutionSymbol';
+    static public final String QUALIFIER_NO_SUPPLIER           = 'noSupplier';
     static public final String QUALIFIER_SHIP_ITEM             = 'shipItem';
     static public final String QUALIFIER_SHIPPED               = 'shipped';
     static public final String QUALIFIER_SOURCING              = 'sourcing';

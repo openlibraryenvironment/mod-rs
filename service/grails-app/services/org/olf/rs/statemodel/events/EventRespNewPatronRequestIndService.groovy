@@ -10,7 +10,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -72,7 +71,6 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         if (location != null) {
             // set localCallNumber to whatever we managed to look up
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
                 log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
@@ -93,7 +91,6 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         if (unfilled == true) {
             log.debug("Send unfilled(No copy) response to ${request.requestingInstitutionSymbol}");
             reshareActionService.sendResponse(request,  'Unfilled', ['reason':'No copy'], eventResultDetails);
-            eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED);
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED;
         }
     }

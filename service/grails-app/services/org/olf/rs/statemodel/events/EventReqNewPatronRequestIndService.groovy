@@ -15,7 +15,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -95,18 +94,14 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                     if (s != null && patronValid) {
                         log.debug("Got request ${request}");
                         log.debug(' -> Request is currently ' + Status.PATRON_REQUEST_IDLE + ' - transition to ' + Status.PATRON_REQUEST_VALIDATED);
-                        eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED);
-                    // patronNoticeService.triggerNotices(request, RefdataValue.lookupOrCreate('noticeTriggers', 'New request'));
                     } else if (s == null) {
                         // An unknown requesting institution symbol is a bigger deal than an invalid patron
                         request.needsAttention = true;
                         log.warn("Unkown requesting institution symbol : ${request.requestingInstitutionSymbol}");
-                        eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_ERROR);
                         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
                         eventResultDetails.auditMessage = 'Unknown Requesting Institution Symbol: ' + request.requestingInstitutionSymbol;
                     } else {
                         // If we're here then the requesting institution symbol was fine but the patron is invalid
-                        eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
                         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
                         String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
                         String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
@@ -116,12 +111,10 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                 } else {
                     // unexpected error in Host LMS call
                     request.needsAttention = true;
-                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
                     eventResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + lookupPatron?.problems;
                 }
             } else {
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_ERROR);
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
                 request.needsAttention = true;
                 eventResultDetails.auditMessage = 'No Requesting Institution Symbol';

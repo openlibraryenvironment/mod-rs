@@ -29,7 +29,6 @@ public class ActionPatronRequestLocalSupplierCannotSupplyService extends Abstrac
             prr.save(flush:true, failOnError: true);
         }
 
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNFILLED);
         actionResultDetails.auditMessage = 'Request locally flagged as unable to supply';
 
         return(actionResultDetails);

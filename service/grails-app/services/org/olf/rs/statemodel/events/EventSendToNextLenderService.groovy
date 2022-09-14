@@ -89,7 +89,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                             }
 
                             if (doLocalReview) {
-                                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW);
                                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW;
                                 eventResultDetails.auditMessage = 'Sent to local review';
                                 return(eventResultDetails);  //Nothing more to do here
@@ -159,7 +158,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                 // Did we send a request?
                 if (request.networkStatus == NetworkStatus.Sent) {
                     log.debug('sendToNextLender sent to next lender.....');
-                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
                     eventResultDetails.auditMessage = 'Sent to next lender';
                 } else if (messageTried) {
                     // We will not set the state yet, just the audit message
@@ -167,13 +165,11 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                 } else {
                     // END OF ROTA
                     log.warn('sendToNextLender reached the end of the lending string.....');
-                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                     eventResultDetails.auditMessage = 'End of rota';
                 }
             } else {
                 log.warn('Cannot send to next lender - rota is empty');
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                 eventResultDetails.auditMessage = 'End of rota';
             }
