@@ -4,8 +4,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Performed when the responder has said he cannot supply
@@ -24,8 +22,7 @@ public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
         // Just send the message of unfilled
         reshareActionService.sendResponse(request, 'Unfilled', parameters, actionResultDetails);
 
-        // Now set the new status and audit message
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_UNFILLED);
+        // Now set the  audit message
         actionResultDetails.auditMessage = 'Request manually flagged unable to supply';
 
         return(actionResultDetails);

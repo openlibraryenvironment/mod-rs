@@ -12,7 +12,6 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.custprops.CustomProperty;
@@ -178,7 +177,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                             }
 
                             request.overdue = false;
-                            actionResultDetails.newStatus = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP);
 
                             // Log message differs from "fill request" to "add additional items"
                             actionResultDetails.auditMessage = (request.state.code == Status.RESPONDER_AWAIT_PICKING) ?
@@ -186,13 +184,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                                                              'Additional items successfully checked in to ReShare';
                             result = true;
                         } else {
-                            // If status is in RES_AWAIT_SHIP, send back to RES_AWAIT_PICKING til all checked in
-                            if (request.state.code == Status.RESPONDER_AWAIT_SHIP) {
-                                actionResultDetails.newStatus = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING);
-                                actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare, returning to RES_AWAIT_PICKING. Review configuration and try again or deconfigure host LMS integration in settings.';
-                            } else {
-                                actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.';
-                            }
+                            actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.';
                             request.needsAttention = true;
                         }
                     } else {
@@ -201,10 +193,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     }
                 } else {
                     // If we have deleted all failing requests, we can move to next state
-                    if (request.state.code != Status.RESPONDER_AWAIT_SHIP) {
-                        actionResultDetails.newStatus = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP);
-                        actionResultDetails.auditMessage = 'Fill request completed.';
-                    }
+                    actionResultDetails.auditMessage = 'Fill request completed.';
 
                     // Result is successful
                     result = true

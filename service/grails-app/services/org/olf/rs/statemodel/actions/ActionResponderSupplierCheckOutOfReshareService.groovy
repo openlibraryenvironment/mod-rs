@@ -7,8 +7,6 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Requester has returned the item so we therefore need to check it out of reshare
@@ -54,7 +52,6 @@ public class ActionResponderSupplierCheckOutOfReshareService extends AbstractAct
             if (!parameters?.undo) {
                 // We are not performing an undo of the checkInToReshare action
                 reshareActionService.sendStatusChange(request, 'LoanCompleted', actionResultDetails, parameters?.note);
-                actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_COMPLETE);
             }
             actionResultDetails.responseResult.status = true;
         }

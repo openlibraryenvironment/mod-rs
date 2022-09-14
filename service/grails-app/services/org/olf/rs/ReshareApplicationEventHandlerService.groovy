@@ -139,7 +139,6 @@ public class ReshareApplicationEventHandlerService {
 								Status currentState = request.state;
 
 								// Default a few fields
-								resultDetails.newStatus = currentState;
 								resultDetails.result = ActionResult.SUCCESS;
 								resultDetails.auditMessage = "Executing event: " + eventData.event;
 								resultDetails.auditData = eventData;
@@ -149,27 +148,8 @@ public class ReshareApplicationEventHandlerService {
 
 								// Do we want to save the request and create an audit entry
 								if (resultDetails.saveData == true) {
-                                    Status newStatus = statusService.lookupStatus(request, eventData.event, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, false);
-                                    String newStatusId = newStatus.id;
-
-                                    // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
-                                    if (!resultDetails.newStatus.id.equals(newStatusId)) {
-                                        String message = 'Hard coded status (' + resultDetails.newStatus.code +
-                                                         ') is not the same as the calculated status (' + newStatus.code +
-                                                          ') for event ' + eventData.event +
-                                                          ' with result ' + resultDetails.result.toString() +
-                                                          ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
-                                        log.error(message);
-                                        auditEntry(
-                                            request,
-                                            currentState,
-                                            currentState,
-                                            message,
-                                            null);
-                                    }
-
 									// Set the status of the request
-									request.state = newStatus;
+									request.state = statusService.lookupStatus(request, eventData.event, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, false);
 
 									// Adding an audit entry so we can see what states we are going to for the event
 									// Do not commit this uncommented, here to aid seeing what transition changes we allow

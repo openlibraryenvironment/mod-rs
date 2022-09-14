@@ -3,8 +3,6 @@ package org.olf.rs.statemodel.actions;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Requester has agreed to the conditions, which is being manually marked by the responder
@@ -24,7 +22,6 @@ public class ActionResponderSupplierMarkConditionsAgreedService extends ActionRe
         reshareApplicationEventHandlerService.markAllLoanConditionsAccepted(request)
 
         actionResultDetails.auditMessage = 'Conditions manually marked as agreed';
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, request.previousStates[Status.RESPONDER_PENDING_CONDITIONAL_ANSWER]);
         return(actionResultDetails);
     }
 }
