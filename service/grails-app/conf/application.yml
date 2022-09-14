@@ -150,39 +150,17 @@ dataSource:
   pooled: true
   jmxExport: false
   dbCreate: none
-  username: "${db.username:folio_admin}"
-  password: "${db.password:folio_admin}"
+  username: "folio"
+  password: "Mq7V1aardwKDfWDmnvvN9CAv"
   driverClassName: org.postgresql.Driver
   dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
-  url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}?ApplicationName=mod-rs"
+  url: "jdbc:postgresql://folio-eks-1-palci-upgrade-1.cpvupbknx9nm.us-east-1.rds.amazonaws.com:5432/palci_prod?ApplicationName=mod-rs-hikari"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
-  properties:
-    maximumPoolSize: "${db.maxpoolsize:10}"
-    minimumIdle: 4
-    idleTimeout: 180000  # Connections are released from the pool after 3 minutes
-    leakDetectionThreshold: 180000
-    # Non hikari
-    initialSize: 5
-    maxActive: ${db.maxpoolsize:5}
-    minIdle: 5
-    maxIdle: 10
-    maxWait: 10000
-    maxAge: 600000
-    timeBetweenEvictionRunsMillis: 5000
-    minEvictableIdleTimeMillis: 60000
-    validationQuery: SELECT 1
-    validationInterval: 30000
-    testOnBorrow: true
-    testWhileIdle: true
-    testOnReturn: false
-    removeAbandoned: true
-    removeAbandonedTimeout: 60
-    abandonWhenPercentageFull: 50
-    jdbcInterceptors: ConnectionState
-    defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
-    dbProperties:
-      ApplicationName: mod-rs
-
+  hikariMinimumIdle: 20
+  hikariMaximumPoolSize: 30
+  hikariIdleTimeout: 600000
+  hikariConnectionTimeout: 30000
+  hikariMaxLifetime: 1800000
 
 events:
   consumer:
@@ -219,34 +197,34 @@ events:
 # values at the root when that particular profile is active.
 ##
 environments:
-  test:
-    dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-test"
-      properties:
-        initialSize: 7
-        minIdle: 2
-        maxIdle: 10
-        maxActive: 10
-        validationQuery: SELECT 1
-        testOnBorrow: true
-        testWhileIdle: true
-        testOnReturn: false
-        defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+  #test:
+  #  dataSource:
+  #    url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-test"
+  #    properties:
+  #      initialSize: 7
+  #      minIdle: 2
+  #      maxIdle: 10
+  #      maxActive: 10
+  #      validationQuery: SELECT 1
+  #      testOnBorrow: true
+  #      testWhileIdle: true
+  #      testOnReturn: false
+  #      defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
-  development:
-    dataSource:
-      url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-dev"
-      # logSql: true
-      # formatSql: true
-    # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
-    # OKAPI supplies information about how to reach it to the modules. These options are used for self reg and other calls
-    # when the request did not come through OKAPI.
-    okapi: 
-      service:
-        host: localhost
-        port: 9130
-        register: false
-        deploy: false
+  #development:
+  #  dataSource:
+  #    url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-dev"
+  #    # logSql: true
+  #    # formatSql: true
+  #  # This is only used when the there is no request from okapi coming to the module or a none-okapi request.
+  #  # OKAPI supplies information about how to reach it to the modules. These options are used for self reg and other calls
+  #  # when the request did not come through OKAPI.
+  #  okapi: 
+  #    service:
+  #      host: localhost
+  #      port: 9130
+  #      register: false
+  #      deploy: false
 
     gorm:
       tenantId: public # Used by SystemPropertyTenantResolver
