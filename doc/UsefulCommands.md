@@ -49,4 +49,3 @@ you are now in psql, use schema reshare_east_mod_rs, reshare_west_mod_rs , etc .
 
 # Generating State Model Graph
 	curl --http1.1 -sSLf -H "accept: image/png" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/createGraph/PatronRequest?height=4000\&excludeActions=manualClose
-
