@@ -157,14 +157,15 @@ dataSource:
   url: "jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:okapi_modules}?ApplicationName=mod-rs"
   schemaHandler: com.k_int.okapi.OkapiSchemaHandler
   properties:
+    # See https://github.com/brettwooldridge/HikariCP for the possible hikari settings
     maximumPoolSize: "${db.maxpoolsize:10}"
-    minimumIdle: 3
-    idleTimeout: 240000  # Connections are released from the pool after 4 minutes
+    minimumIdle: ${db.minimumIdle:5}
+    idleTimeout: ${db.idleTimeout:240000}   # Connections are released from the pool after 4 minutes
+    maxLifetime: ${db.maxLifetime:1800000}  # Default 30 minutes
+    connectionTimeout: ${db.connectionTimeout:30000} # Default 30 seconds
     leakDetectionThreshold: 180000 # 3 mins
     # The following are not HikariCP properties - probably should be removed
     initialSize: 5
-    maxActive: ${db.maxpoolsize:5}
-    minIdle: 5
     maxIdle: 10
     maxWait: 10000
     maxAge: 600000
