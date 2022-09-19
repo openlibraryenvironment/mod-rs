@@ -36,30 +36,6 @@ public class HorizonHostLMSService extends BaseHostLMSService {
     return availability_summary;
   }
 
-  @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
-
-    log.debug("extractAvailableItemsFromOpacRecord (HorizonHostLMSService)");
-    Map<String,ItemLocation> availability_summary = [:]
-
-    opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("Holding record: ${hld}");
-      hld.circulations?.circulation?.each { circ ->
-        if (hld?.localLocation && circ?.availableNow?.@value == '1') {
-          ItemLocation il = new ItemLocation(
-                  reason: reason,
-                  location: hld?.localLocation?.text(),
-                  shelvingLocation: hld?.shelvingLocation?.text() ?: null,
-                  itemLoanPolicy: hld?.shelvingData?.text()?.trim() ?: null,
-                  callNumber: hld.callNumber);
-          availability_summary[hld.localLocation] = il;
-        }
-      }
-    }
-
-    return availability_summary;
-  }
-
   public static List<String> splitLocation(String loc) {
     def pattern = /(.+)\s+-\s+(.+)/;
     def matcher = loc =~ pattern;
