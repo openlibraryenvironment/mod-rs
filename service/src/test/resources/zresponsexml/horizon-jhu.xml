@@ -130,4 +130,4 @@
   </circulations>
  </holding>
 </holdings>
-</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=7 1551100177</zs:query><zs:maximumRecords>3</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>http://hip.library.jhu.edu:210/Ipac2</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=100 920189 </zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>http://hip.library.jhu.edu:210/Ipac2</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>
