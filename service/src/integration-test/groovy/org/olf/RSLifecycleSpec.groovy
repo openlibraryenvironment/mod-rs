@@ -567,27 +567,31 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstThree' | _
   }
 
-  void "test determineBestLocation for BaseHostLMSService"() {
-    when:"We mock z39 and run determineBestLocation inherited from BaseHostLMSService"
-      z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File('src/test/resources/zresponsexml/alma-princeton.xml').text) };
+  void "test determineBestLocation for LMS adapters"() {
+    when:"We mock z39 and run determineBestLocation"
+      z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
-        def actions = hostLMSService.getHostLMSActionsFor('alma');
+        def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
         result['viaId'] = actions.determineBestLocation(pr);
         pr = new PatronRequest(isbn: '123');
         result['viaPrefix'] = actions.determineBestLocation(pr);
-        result['location'] = HostLMSLocation.findByCode('Firestone Library');
-        result['shelvingLocation'] = HostLMSShelvingLocation.findByCode('stacks: Firestone Library');
+        result['location'] = HostLMSLocation.findByCode(location);
+        result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
       }
 
-    then:"Confirm location and shelving location were created"
-      result['location'] != null;
-      result['shelvingLocation'] != null;
+    then:"Confirm location and shelving location were created and properly returned"
+      result?.viaId?.location == location;
+      result?.viaPrefix?.location == location;
+      result?.location?.code == location;
+      result?.shelvingLocation?.code == shelvingLocation;
 
     where:
-      tenant_id | _
-      'RSInstThree' | _
+      tenant_id | lms | zResponseFile | location | shelvingLocation | _
+      'RSInstThree' | 'alma' | 'alma-princeton.xml' | 'Firestone Library' | 'stacks: Firestone Library' | _
+      'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
+      'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
   }
 
 }
