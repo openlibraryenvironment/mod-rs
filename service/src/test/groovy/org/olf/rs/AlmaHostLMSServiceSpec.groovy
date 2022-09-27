@@ -15,7 +15,7 @@ class AlmaHostLMSServiceSpec extends Specification implements ServiceUnitTest<Al
         def result = service.extractAvailableItemsFrom(parsedSample);
 
         then:
-        def resultJson = JsonOutput.toJson(result.values().first());
+        def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
         resultJson == '{"itemId":"31735056082393","shelvingLocation":"stacks","callNumber":"HC79.E5 K685 2007","reason":null,"shelvingPreference":null,"preference":null,"location":"ULS - Thomas Blvd","itemLoanPolicy":null}';
     }

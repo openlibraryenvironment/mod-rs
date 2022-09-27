@@ -40,9 +40,9 @@ public class MillenniumHostLMSService extends BaseHostLMSService {
    * Copied from Sierra
    */
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = []
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("${hld}");
@@ -53,7 +53,7 @@ public class MillenniumHostLMSService extends BaseHostLMSService {
                                             location: hld.localLocation?.toString(),
                                             shelvingLocation:hld.localLocation?.toString(),
                                             callNumber:hld.callNumber?.toString() )
-        availability_summary[hld.localLocation?.toString()] = il;
+        availability_summary << il;
       }
     }
 

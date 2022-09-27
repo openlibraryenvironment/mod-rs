@@ -44,14 +44,14 @@ public class KohaHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract holdings from Koha marcxml record ${z_response}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from Koha Z39.50 server, unable to extract available items. Record: ${z_response}");
       return null;
     }
 
-    Map<String, ItemLocation> availability_summary = null;
+    List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
       availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
     }
@@ -67,7 +67,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -88,7 +88,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
     //             <subfield code="f">2</subfield>
     //           </datafield>
     log.debug("KohaHostLMSService extracting available items from record ${record}");
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = []
     record.datafield.each { df ->
       if ( df.'@tag' == "952" ) {
         Map<String,String> tag_data = [:]
@@ -104,7 +104,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
           if ( tag_data['7'] != null ) {
             if ( tag_data['7'] == '0' ) {
               log.debug("Assuming ${tag_data['7']}");
-              availability_summary[tag_data['b']] = new ItemLocation( location: tag_data['b'], shelvingLocation: tag_data['c'], callNumber:tag_data['o'] )
+              availability_summary << new ItemLocation( location: tag_data['b'], shelvingLocation: tag_data['c'], callNumber:tag_data['o'] )
             } else {
               log.debug("Subfield '7' is not zero (${tag_data['7']})");
             }

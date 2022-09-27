@@ -15,23 +15,22 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
   @Override
   //We need to also eliminate any holdings of type "Internet"
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
-    Map<String, ItemLocation> availability_summary = null;
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    List<ItemLocation> availability_summary = [];
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 &&
        it?.recordData?.opacRecord?.holdings?.holding?.localLocation.text() != "Internet" };
       if (withHoldings.size() < 1) {
-        log.warn("BaseHostLMSService failed to find an OPAC record with holdings");
-        return null;
+        log.warn("HorizonHostLMSService failed to find an OPAC record with holdings");
       } else if (withHoldings.size() > 1) {
-        log.warn("BaseHostLMSService found multiple OPAC records with holdings");
-        return null;
+        log.warn("HorizonHostLMSService found multiple OPAC records with holdings");
+      } else {
+        log.debug("[HorizonHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
+        availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
       }
-      log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
-      availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
     }
     else {
-      log.warn("BaseHostLMSService expected the response to contain an OPAC record, but none was found");
+      log.warn("HorizonHostLMSService expected the response to contain an OPAC record, but none was found");
     }
     return availability_summary;
   }
@@ -56,11 +55,9 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
     if ( z_response?.numberOfRecords == 1 ) {
       // Got exactly 1 record
-      Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=100 ${pr.supplierUniqueRecordId}")
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=100 ${pr.supplierUniqueRecordId}")
       if ( availability_summary?.size() > 0 ) {
-        availability_summary.values().each { v ->
-          result.add(v);
-        }
+        result = availability_summary;
       }
       else {
         log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");

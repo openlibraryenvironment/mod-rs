@@ -46,10 +46,10 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     provided. In the event of not finding a shelving location in the localLocation field, we'll
     check for a shelvingLocation field just in case it exists
   */
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
     log.debug("extractAvailableItemsFromOpacRecord (VoyagerHostLMSService)");
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = [];
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("${hld}");
@@ -70,7 +70,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
         }
         log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
         ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
-        availability_summary[hld.localLocation] = il;
+        availability_summary << il;
       }
     }
 
