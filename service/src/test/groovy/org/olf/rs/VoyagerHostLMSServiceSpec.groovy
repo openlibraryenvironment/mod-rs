@@ -16,7 +16,7 @@ class VoyagerHostLMSServiceSpec extends Specification implements ServiceUnitTest
         then:
         def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
-        resultJson == '{"itemId":null,"shelvingLocation":null,"callNumber":"PS3561 O646 W5 1979 (LC)","reason":null,"shelvingPreference":null,"preference":null,"location":"Library Shelving Facility (LSF)","itemLoanPolicy":null}';
+        resultJson == '{"itemId":"211398","shelvingLocation":null,"callNumber":"PS3561 O646 W5 1979 (LC)","reason":null,"shelvingPreference":null,"preference":null,"location":"Library Shelving Facility (LSF)","itemLoanPolicy":null}';
     }
 }
 

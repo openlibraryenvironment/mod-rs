@@ -48,29 +48,30 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   */
   public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
-    log.debug("extractAvailableItemsFromOpacRecord (VoyagerHostLMSService)");
     List<ItemLocation> availability_summary = [];
 
     opacRecord?.holdings?.holding?.each { hld ->
-      log.debug("${hld}");
-      log.debug("${hld.circulations?.circulation?.availableNow}");
-      log.debug("${hld.circulations?.circulation?.availableNow?.@value}");
-      if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-        log.debug("Available now");
-        def shelvingLocation = hld.shelvingLocation?.text();
-        def location = hld.localLocation?.text();
-        if(!shelvingLocation) {
-          shelvingLocation = null; //No blank strings
+      log.debug("VoyagerHostLMSService holdings record :: ${hld}");
+      def location = hld.localLocation?.text()?.trim();
+      def shelvingLocation = hld.shelvingLocation?.text()?.trim() ?: null;
+      def locParts = splitLocation(location);
+      log.debug("splitLocation returned ${locParts}");
+      if (locParts) {
+        location = locParts[0];
+        shelvingLocation = locParts[1];
+      }
+
+      hld.circulations?.circulation?.each { circ ->
+        if (location && circ?.availableNow?.@value == '1') {
+          log.debug("Available now");
+          ItemLocation il = new ItemLocation(
+            reason: reason,
+            location: location,
+            shelvingLocation: shelvingLocation,
+            itemId: circ?.itemId?.text()?.trim() ?: null,
+            callNumber: hld?.callNumber?.text()?.trim() ?: null)
+          availability_summary << il;
         }
-        def locParts = splitLocation(hld.localLocation?.text());
-        log.debug("splitLocation returned ${locParts}");
-        if(locParts) {
-          location = locParts[0];
-          shelvingLocation = locParts[1];
-        }
-        log.debug("Creating new ItemLocation with fields location: ${location}, shelvingLocation: ${shelvingLocation}, callNumber: ${hld.callNumber}");
-        ItemLocation il = new ItemLocation( reason: reason, location: location, shelvingLocation: shelvingLocation, callNumber:hld.callNumber )
-        availability_summary << il;
       }
     }
 
