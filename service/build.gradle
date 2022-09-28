@@ -176,8 +176,8 @@ dependencies {
   compile 'com.opencsv:opencsv:4.6'
   compile 'commons-io:commons-io:2.7'
   
-  compile 'com.k_int.grails:web-toolkit-ce:6.3.0-rc.4'
-  compile 'com.k_int.okapi:grails-okapi:5.0.0-beta.3'
+  compile 'com.k_int.grails:web-toolkit-ce:6.4.1'
+  compile 'com.k_int.okapi:grails-okapi:5.0.1'
 
   // Custom non profile deps.
   compile 'org.apache.kafka:kafka-clients:2.8.1'
