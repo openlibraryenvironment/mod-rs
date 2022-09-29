@@ -50,6 +50,7 @@ class ProtocolMessageService {
                 id = id.substring(0, separatorPosition);
             }
         }
+        return(id);
     }
 
     /**
