@@ -21,6 +21,7 @@ class SierraHostLMSServiceSpec extends Specification implements ServiceUnitTest<
         zResponseFile | validResult
         'sierra-laroche.xml' | '[{"itemId":null,"shelvingLocation":"Circulation","callNumber":"813.54 P648my 2003 ","reason":null,"shelvingPreference":null,"preference":null,"location":"Circulation","itemLoanPolicy":null}]'
         'sierra-laroche-unavail.xml' | '[]'
+        'sierra-widener-check-shelves.xml' | '[{"itemId":null,"shelvingLocation":"M CIRCULATING","callNumber":"TX809.M17 R59 1996 ","reason":null,"shelvingPreference":null,"preference":null,"location":"M CIRCULATING","itemLoanPolicy":null}]'
     }
 }
 
