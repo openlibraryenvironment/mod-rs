@@ -1,0 +1,18 @@
+# This file config can be specified in:  'service/gradle.properties'  org.gradle.jvmargs=
+# suffix 'application-' should not added when specifing this config
+
+##
+# This config file connects to the postgres install mapped by the vagrant file in the project root.
+# Use the flag '-Dgrails.env=vagrant-db' when running
+##
+
+---
+okapi: 
+  service:
+    host: localhost
+    port: 30100
+---
+server:
+    host: localhost
+    port: 8081
+ 
