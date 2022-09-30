@@ -9,6 +9,7 @@ import org.olf.rs.referenceData.NamingAuthority;
 import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.referenceData.ReportData;
 import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.referenceData.StateModelData;
 import org.olf.rs.referenceData.StatusData;
 import org.olf.rs.referenceData.TemplateData;
 import org.olf.rs.referenceData.TimerData;
@@ -57,6 +58,9 @@ public class HousekeepingService {
         // The predefined reports
         ReportData.loadAll();
 
+        // Ensure we have a basic state model record
+//        StateModelData.loadAll(false);
+
 		// Add the Settings
 		SettingsData.loadAll();
 
@@ -71,6 +75,9 @@ public class HousekeepingService {
 
         // The ActionEvent data, must be loaded after ActionEventResultData
         ActionEventData.loadAll();
+
+        // Available actions is dependent on the state model so need to load this first
+        StateModelData.loadAll();
 
 		// Load the Available actions, must be loaded after ActionEventResultData and ActionEventData
 		AvailableActionData.loadAll();

@@ -5,8 +5,8 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StatusService;
 
 /**
  * This action is performed when the user actions the request with Manual Close
@@ -14,6 +14,8 @@ import org.olf.rs.statemodel.Status;
  *
  */
 public abstract class ActionManualCloseService extends AbstractAction {
+
+    StatusService statusService;
 
     @Override
     String name() {
@@ -25,11 +27,11 @@ public abstract class ActionManualCloseService extends AbstractAction {
         if ((parameters?.terminalState != null) && (parameters.terminalState ==~ /[A-Z_]+/)) {
 
             // Need to validate the terminal state is legitimate, this way is no longer valid
-            Status closeStatus = Status.lookup(request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER, parameters.terminalState);
+            Status closeStatus = Status.lookup(parameters.terminalState);
 
             // Have we been supplied a valid close status
             if (closeStatus && closeStatus.terminal) {
-                reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER} has manually closed this request."], actionResultDetails);
+                reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? 'requester' : 'reponder'} has manually closed this request."], actionResultDetails);
                 actionResultDetails.auditMessage = 'Manually closed';
                 actionResultDetails.qualifier = parameters.terminalState;
             } else {

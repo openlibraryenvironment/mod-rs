@@ -1,16 +1,16 @@
 package mod.rs
 
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.json.JsonSlurper
-import groovy.util.logging.Slf4j
-import grails.converters.JSON
 import org.olf.rs.Counter
 import org.olf.rs.PatronRequest;
+
+import grails.converters.JSON
+import grails.gorm.multitenancy.CurrentTenant
+import groovy.util.logging.Slf4j
 
 @Slf4j
 @CurrentTenant
 class StatisticsController {
-  
+
   long totalBorrowing=10
   long totalLending=5
 
@@ -27,10 +27,10 @@ class StatisticsController {
 
   private Map generateRequestsByState() {
     Map result = [:]
-    PatronRequest.executeQuery('select pr.state.owner.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.state.owner.shortcode, pr.state.code').each { sl ->
+    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel, pr.state.code').each { sl ->
       result[sl[0]+':'+sl[1]] = sl[2]
     }
     return result;
   }
-  
+
 }

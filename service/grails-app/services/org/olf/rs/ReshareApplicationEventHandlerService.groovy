@@ -19,7 +19,6 @@ import org.olf.rs.statemodel.events.EventNoImplementationService;
 
 import grails.events.annotation.Subscriber;
 import grails.gorm.multitenancy.Tenants;
-import grails.util.Holders
 import groovy.json.JsonOutput;
 import groovy.util.logging.Slf4j
 
@@ -46,48 +45,18 @@ public class ReshareApplicationEventHandlerService {
     HostLMSShelvingLocationService hostLMSShelvingLocationService;
     StatusService statusService;
 
-  	/** Holds map of the event to the bean that will do the processing for this event */
-  	private static Map serviceEvents = [ : ];
-
       /**
        * Obtains the event processor for the supplied event name
        * @param eventName The name of the event that you want the processor for
        * @return The event processor for the supplied name
        */
       public AbstractEvent getEventProcessor(String eventName) {
-          AbstractEvent eventprocessor = eventNoImplementationService;
-
-          // Cannot locate one if we have been supplied null for the name
-          if (eventName != null) {
-              // If we do not already have the event processor, then we need to locate it
-              if (serviceEvents[eventName] == null) {
-                  // Determine the bean name, if we had a separate event table we could store it as a transient against that
-                  // We split the event name on the underscores then capitalize each word and then join it back together, prefixing it with "event" and postfixing it with "Service"
-                  String[] eventNameWords = eventName.toLowerCase().split("_");
-                  String eventNameNormalised = "";
-                  eventNameWords.each{ word ->
-                      eventNameNormalised += word.capitalize();
-                  }
-
-                  String beanName = "event" + eventNameNormalised + "Service";
-
-                  // Now setup the link to the service action that actually does the work
-                  try {
-                      serviceEvents[eventName] = Holders.grailsApplication.mainContext.getBean(beanName);
-                  } catch (Exception e) {
-                      log.info("Unable to locate event bean: " + beanName);
-                  }
-              }
-
-              // Ensure we have an event processor, default to eventNoImplementationService if it is not found
-              eventprocessor = serviceEvents[eventName];
-              if (eventprocessor == null) {
-                  log.info("Unable to find the bean for event: " + eventName);
-
-                  // We shall use the NoImplementation bean for this event instead
-                  eventprocessor = eventNoImplementationService;
-                  serviceEvents[eventName] = eventprocessor;
-              }
+          AbstractEvent eventprocessor = null;
+          def service = ActionEvent.lookupService(eventName, eventNoImplementationService);
+          if (service instanceof AbstractEvent) {
+              eventprocessor = (AbstractEvent)service;
+          } else {
+              log.error("Service for event is not of type AbstractEvent");
           }
 
           // return the processor to the caller
@@ -98,12 +67,12 @@ public class ReshareApplicationEventHandlerService {
 	public handleApplicationEvent(Map eventData) {
 		log.debug("ReshareApplicationEventHandlerService::handleApplicationEvent(${eventData})");
 		if (eventData?.event) {
-			// Obtain the event processor
-			AbstractEvent eventBean = getEventProcessor(eventData.event);
-
 			try {
 				// Ensure we are talking to the right tenant database
 				Tenants.withId(eventData.tenant) {
+                    // Obtain the event processor
+                    AbstractEvent eventBean = getEventProcessor(eventData.event);
+
 					// If the event handler is doing its own transaction handler, then we just call it, we do not expect it to return us anything
 					if (eventBean.fetchRequestMethod() == EventFetchRequestMethod.HANDLED_BY_EVENT_HANDLER) {
 						// This typically happens when the method is called directly as a response is required directly
@@ -261,14 +230,6 @@ public class ReshareApplicationEventHandlerService {
     return result;
   }
 
-// what calls this, as I don't think it gets called
-//  private void error(PatronRequest pr, String message) {
-//    Status old_state = pr.state;
-//    Status new_state = pr.isRequester ? lookupStatus('PatronRequest', 'REQ_ERROR') : lookupStatus('Responder', 'RES_ERROR');
-//    pr.state = new_state;
-//    auditEntry(pr, old_state, new_state, message, null);
-//  }
-
     /**
      * Adds an audit record for the given request
      * @param request The request we want to add an audit event to
@@ -336,15 +297,6 @@ public class ReshareApplicationEventHandlerService {
       log.debug("unable to reoute request as local responding location absent");
     }
 
-    return result;
-  }
-
-  public Status lookupStatus(String model, String code) {
-    Status result = null;
-    List<Status> qr = Status.executeQuery('select s from Status as s where s.owner.shortcode=:model and s.code=:code',[model:model, code:code]);
-    if ( qr.size() == 1 ) {
-      result = qr.get(0);
-    }
     return result;
   }
 

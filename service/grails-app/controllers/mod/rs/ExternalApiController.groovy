@@ -1,17 +1,14 @@
 package mod.rs
 
-import org.olf.okapi.modules.directory.DirectoryEntry
-
-import grails.core.GrailsApplication
-import grails.plugins.*
-import grails.converters.JSON
-import org.olf.rs.BackgroundTaskService;
-import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.ConfirmationMessageService
-import groovy.util.logging.Slf4j
 import org.olf.rs.Counter
-import grails.gorm.multitenancy.CurrentTenant
 import org.olf.rs.PatronRequest
+import org.olf.rs.ReshareApplicationEventHandlerService
+
+import grails.converters.JSON
+import grails.core.GrailsApplication
+import grails.gorm.multitenancy.CurrentTenant
+import groovy.util.logging.Slf4j
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
@@ -31,7 +28,7 @@ class ExternalApiController {
   def statistics() {
 
     Map result=[:]
-   
+
     try {
       result = [
         asAt:new Date(),
@@ -50,7 +47,7 @@ class ExternalApiController {
 
   private Map generateRequestsByState() {
     Map result = [:]
-    PatronRequest.executeQuery('select pr.state.owner.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.state.owner.shortcode, pr.state.code').each { sl ->
+    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel, pr.state.code').each { sl ->
       result[sl[0]+':'+sl[1]] = sl[2]
     }
     return result;
@@ -77,7 +74,7 @@ class ExternalApiController {
         String recipient;
 
         if ( iso18626_msg.request != null ) {
-  
+
           def mr = iso18626_msg.request;
           log.debug("Process inbound request message. supplying agency id is ${mr?.header?.supplyingAgencyId}");
 
@@ -87,35 +84,35 @@ class ExternalApiController {
 
           def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
           log.debug("result of req_request ${req_result}");
-  
+
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-  
+
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
           // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
-  
+
           def msam = iso18626_msg.supplyingAgencyMessage;
           log.debug("Process inbound supplyingAgencyMessage message. requestingAgencyId is ${msam?.header?.requestingAgencyId}");
-  
+
           // Look in request.header.requestingAgencyId for the intended recipient
           recipient = getSymbolFor(msam.header.requestingAgencyId)
           log.debug("incoming supplying agency message for ${recipient}");
-  
+
           def req_result = reshareApplicationEventHandlerService.handleSupplyingAgencyMessage(msam);
           log.debug("result of req_request ${req_result}");
-  
+
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-  
+
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
           // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
-  
+
           def mram = iso18626_msg.requestingAgencyMessage;
           log.debug("Process inbound requestingAgencyMessage message. SupplyingAgencyId is ${mram?.header?.supplyingAgencyId}");
 
@@ -125,11 +122,11 @@ class ExternalApiController {
 
           def req_result = reshareApplicationEventHandlerService.handleRequestingAgencyMessage(mram);
           log.debug("result of req_request ${req_result}");
-  
+
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
-  
+
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
           // render( contentType:"text/xml" ) { confirmationMessage }
         }

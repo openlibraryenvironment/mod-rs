@@ -1,3 +1,8 @@
+configurations.all {
+  // Check for updates every build
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 repositories {
             mavenCentral()
 }
@@ -158,7 +163,7 @@ dependencies {
   compile 'com.opencsv:opencsv:4.6'
   compile 'commons-io:commons-io:2.7'
 
-  compile 'com.k_int.grails:web-toolkit-ce:6.1.0'
+  compile 'com.k_int.grails:web-toolkit-ce:6.4.0'
   compile 'com.k_int.okapi:grails-okapi:4.1.2'
 
   // Custom non profile deps.

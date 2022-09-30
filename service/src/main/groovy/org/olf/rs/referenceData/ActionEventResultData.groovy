@@ -1429,11 +1429,11 @@ public class ActionEventResultData {
                         result.code,
                         result.description,
                         result.result,
-                        Status.lookup(resultList.model, result.status),
+                        Status.lookup(result.status),
                         result.qualifier,
                         saveRestoreState,
-                        Status.lookup(resultList.model, result.overrideSaveStatus),
-                        Status.lookup(resultList.model, result.fromStatus),
+                        Status.lookup(result.overrideSaveStatus),
+                        Status.lookup(result.fromStatus),
                         result.nextActionEvent
                     )
                 );

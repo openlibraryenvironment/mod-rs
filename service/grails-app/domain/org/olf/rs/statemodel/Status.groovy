@@ -1,9 +1,8 @@
 package org.olf.rs.statemodel
 
-import com.k_int.web.toolkit.tags.Tag
+import com.k_int.web.toolkit.tags.Tag;
 
-import grails.gorm.DetachedCriteria
-import grails.gorm.MultiTenant
+import grails.gorm.MultiTenant;
 
 /**
  * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
@@ -64,7 +63,6 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_HOLD_PLACED                = "RES_HOLD_PLACED";
 
   String id
-  StateModel owner
   String code
   String presSeq
   // Used when retrieving termination status for closing the request manually, if it is not true, it will not be returned
@@ -82,11 +80,9 @@ class Status implements MultiTenant<Status> {
         tags: Tag
   ]
 
-
   static constraints = {
-               owner (nullable: false)
-               code (nullable: false, blank:false)
-            presSeq (nullable: true, blank:false)
+               code (nullable: false, blank: false, unique: true)
+            presSeq (nullable: true, blank: false)
             visible (nullable: true)
      needsAttention (nullable: true)
            terminal (nullable: false)
@@ -96,7 +92,6 @@ class Status implements MultiTenant<Status> {
   static mapping = {
                      id column : 'st_id', generator: 'uuid2', length:36
                 version column : 'st_version'
-                  owner column : 'st_owner'
                    code column : 'st_code'
                 presSeq column : 'st_presentation_sequence'
                 visible column : 'st_visible'
@@ -108,11 +103,10 @@ class Status implements MultiTenant<Status> {
 
   // Assert is a helper method that helps us ensure refdata is up to date - create any missing entries, update any ones
   // where the tags have changed and return the located value
-  public static Status ensure(String model, String code, StatusStage stage, presSeq=null, visible=null, needsAttention=null, terminal=false, tags=null) {
-      StateModel sm = StateModel.findByShortcode(model) ?: new StateModel(shortcode: model).save(flush:true, failOnError:true)
-      Status s = Status.findByOwnerAndCode(sm, code)
+  public static Status ensure(String code, StatusStage stage, presSeq=null, visible=null, needsAttention=null, terminal=false, tags=null) {
+      Status s = Status.findByCode(code)
       if ( s == null ) {
-          s = new Status(owner:sm, code:code, tags: tags);
+          s = new Status(code:code, tags: tags);
       } else {
           // We already know about this status code - just check if we need to install any new tags
           if ( tags != null ) {
@@ -142,68 +136,30 @@ class Status implements MultiTenant<Status> {
       return s;
   }
 
-  public static Status lookup(String model, String code) {
+  public static Status lookup(String code) {
     Status result = null;
     if (code != null) {
-        StateModel sm = StateModel.findByShortcode(model);
-        if (sm) {
-            result = Status.findByOwnerAndCode(sm, code);
-        }
+        result = Status.findByCode(code);
     }
     return result;
   }
 
-  public static List<String> getTerminalStates(String stateModelCode) {
-    List<String> result = new ArrayList<String>();
-    StateModel stateModel = StateModel.findByShortcode(stateModelCode);
-    if ( stateModel ) {
-      Status[] states = Status.findAllByOwnerAndTerminal(stateModel, true);
-	  if (states) {
-		  states.each {  state ->
-			  result.add(state.code);
-		  }
-	  }
-    }
-    return(result);
-  }
+// Dosn't appear to be used
+//  public static List<String> getTerminalStates(String stateModelCode) {
+//    List<String> result = new ArrayList<String>();
+//    StateModel stateModel = StateModel.findByShortcode(stateModelCode);
+//    if ( stateModel ) {
+//      Status[] states = Status.findAllByOwnerAndTerminal(stateModel, true);
+//	  if (states) {
+//		  states.each {  state ->
+//			  result.add(state.code);
+//		  }
+//	  }
+//    }
+//    return(result);
+//  }
 
-  public static List<Status> getActiveStates(String modelCode) {
-      List<Status> result = new ArrayList<Status>();
-      StateModel stateModel = StateModel.findByShortcode(modelCode);
-      if (stateModel) {
-          DetachedCriteria<Status> activeCriteria = where {
-              owner.id == stateModel.id && ((stage == StatusStage.ACTIVE) || (stage == StatusStage.ACTIVE_SHIPPED))
-          }
-          result = activeCriteria.list();
-      }
-      return(result);
-  }
-
-  public static List<Status> getNonTerminalStates(String modelCode) {
-      List<Status> result = new ArrayList<Status>();
-      StateModel stateModel = StateModel.findByShortcode(modelCode);
-      if (stateModel) {
-          DetachedCriteria<Status> nonTerminalCriteria = where {
-              owner.id == stateModel.id && (terminal == null || terminal == false)
-          }
-          result = nonTerminalCriteria.list();
-      }
-      return(result);
-  }
-
-  public static List<Status> getAllStates(String modelCode) {
-      List<Status> result = new ArrayList<Status>();
-      StateModel stateModel = StateModel.findByShortcode(modelCode);
-      if (stateModel) {
-          DetachedCriteria<Status> allCriteria = where {
-              owner.id == stateModel.id
-          }
-          result = allCriteria.list();
-      }
-      return(result);
-  }
-
-  static public Status lookupStatusEvent(StateModel model, ActionEvent event) {
+  static public Status lookupStatusEvent(ActionEvent event) {
       Status eventStatus = null;
 
       if (event.code.startsWith(Events.STATUS_EVENT_PREFIX)) {
@@ -214,7 +170,7 @@ class Status implements MultiTenant<Status> {
               code = code.substring(0, code.length() - Events.STATUS_EVENT_POSTFIX.length());
 
               // Now we can lookup the code and ensure it is for the right model
-              eventStatus = findByOwnerAndCode(model, code);
+              eventStatus = findByCode(code);
           }
       }
       return(eventStatus);
