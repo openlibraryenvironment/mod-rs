@@ -1,4 +1,4 @@
-package org.olf.rs
+package org.olf.rs.hostlms
 
 import grails.testing.services.ServiceUnitTest
 import groovy.json.JsonOutput

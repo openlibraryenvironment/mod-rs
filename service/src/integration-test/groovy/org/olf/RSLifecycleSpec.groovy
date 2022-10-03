@@ -590,6 +590,7 @@ class RSLifecycleSpec extends HttpSpec {
     where:
       tenant_id | lms | zResponseFile | location | shelvingLocation | _
       'RSInstThree' | 'alma' | 'alma-princeton.xml' | 'Firestone Library' | 'stacks: Firestone Library' | _
+      'RSInstThree' | 'alma' | 'alma-princeton-notfound.xml' | null | null | _
       'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
       'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
   }
