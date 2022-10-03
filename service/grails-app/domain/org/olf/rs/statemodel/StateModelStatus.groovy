@@ -19,20 +19,22 @@ class StateModelStatus implements MultiTenant<StateModelStatus> {
     Status state;
 
     /** Can this state trigger stale request functionality for a request */
-    Boolean canTriggerStaleRequest;
+    boolean canTriggerStaleRequest;
 
     /** Can this state trigger overdue functionality for a request */
-    Boolean canTriggerOverdueRequest;
+    boolean canTriggerOverdueRequest;
 
     /** Is this state considered a terminal state */
-    Boolean isTerminal;
+    boolean isTerminal;
+
+    static belongsTo = [ stateModel: StateModel ];
 
     static constraints = {
                       stateModel (nullable: false)
                            state (nullable: false)
-          canTriggerStaleRequest (nullable: true)
-        canTriggerOverdueRequest (nullable: true)
-                      isTerminal (nullable: true)
+          canTriggerStaleRequest (nullable: false)
+        canTriggerOverdueRequest (nullable: false)
+                      isTerminal (nullable: false)
     }
 
     static mapping = {
@@ -43,18 +45,5 @@ class StateModelStatus implements MultiTenant<StateModelStatus> {
           canTriggerStaleRequest column : 'sms_can_trigger_stale_request'
         canTriggerOverdueRequest column : 'sms_can_trigger_overdue_request'
                       isTerminal column : 'sms_is_terminal'
-    }
-
-    public void ensure(
-        Boolean canTriggerStaleRequest,
-        Boolean canTriggerOverdueRequest,
-        Boolean isTerminal
-    ) {
-        this.canTriggerStaleRequest = canTriggerStaleRequest;
-        this.canTriggerOverdueRequest = canTriggerOverdueRequest;
-        this.isTerminal = isTerminal;
-
-        // Save the record
-//        save(flush: false, failOnError: true);
     }
 }
