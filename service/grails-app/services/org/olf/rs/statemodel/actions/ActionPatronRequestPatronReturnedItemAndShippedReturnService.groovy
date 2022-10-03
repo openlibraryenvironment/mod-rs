@@ -33,13 +33,9 @@ public class ActionPatronRequestPatronReturnedItemAndShippedReturnService extend
 
         // mark returned by patron
         if (actionPatronRequestPatronReturnedItemService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-            // Copy in the new status in case the second action fails
-            actionResultDetails.newStatus = resultDetails.newStatus;
-
             // Now we can mark it as being return shipped
             if (actionPatronRequestShippedReturnService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-                // Its a success, so copy in the new status and response result
-                actionResultDetails.newStatus = resultDetails.newStatus;
+                // Its a success, so set the response result
                 actionResultDetails.responseResult = resultDetails.responseResult;
             } else {
                 // Set the qualifier as the item has been returned by the patron

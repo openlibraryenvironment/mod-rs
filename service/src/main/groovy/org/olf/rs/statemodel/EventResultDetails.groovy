@@ -7,8 +7,8 @@ public class EventResultDetails {
 	/** The result of performing the event */
 	ActionResult result;
 
-	/** The status the request should move to on completion of the event */
-	Status newStatus;
+	/** If set this means the status is specifically being over ridden in the code (eg. undo) */
+	Status overrideStatus;
 
 	/** The message that will be set in the audit record */
 	String auditMessage;

@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>00730cam a2200277 a 4500</leader>
+  <controlfield tag="001">35626799</controlfield>
+  <controlfield tag="003">OCoLC</controlfield>
+  <controlfield tag="005">19971010104057.0</controlfield>
+  <controlfield tag="008">960910s1996    nyua          001 0 eng d</controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">96067512</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0670869961</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">181108</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">CNb</subfield>
+    <subfield code="c">DLC</subfield>
+  </datafield>
+  <datafield tag="041" ind1="1" ind2=" ">
+    <subfield code="a">eng</subfield>
+    <subfield code="h">ger</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">lccopycat</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">UWCC</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="4">
+    <subfield code="a">TX809.M17</subfield>
+    <subfield code="b">R59 1996</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Rizzi, Silvio.</subfield>
+  </datafield>
+  <datafield tag="240" ind1="1" ind2="0">
+    <subfield code="a">Grosse Buch der Teigwaren.</subfield>
+    <subfield code="l">English.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="4">
+    <subfield code="a">The pasta bible /</subfield>
+    <subfield code="c">Silvio Rizzi &amp; Tan Lee Leng.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Penguin Studio,</subfield>
+    <subfield code="c">c1996.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">240 p. :</subfield>
+    <subfield code="b">col. ill. ;</subfield>
+    <subfield code="c">31 cm.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Includes indexes.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Cooking (Pasta)</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Pasta products.</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Leng, Tan Lee.</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <localLocation>M CIRCULATING</localLocation>
+  <callNumber>TX809.M17 R59 1996 </callNumber>
+  <publicNote>CHECK SHELVES</publicNote>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=12 .b11325331</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>libcat.widener.edu:210/innopac</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

@@ -138,7 +138,7 @@ public class ActionEventResultData {
         result: true,
         status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
         qualifier: null,
-        saveRestoreState: null,
+        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
         nextActionEvent: null
     ];
 
@@ -210,6 +210,16 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_CANCEL_PENDING,
         qualifier: null,
         saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterCancelOKNoSupplier = [
+        code: 'requesterCancelOKNoSupplier',
+        description: 'Requester has said they want to cancel the request, but there is no supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_CANCELLED,
+        qualifier: ActionEventResultQualifier.QUALIFIER_NO_SUPPLIER,
+        saveRestoreState: null,
         nextActionEvent: null
     ];
 
@@ -1018,7 +1028,8 @@ public class ActionEventResultData {
         description: 'Requester has requested that the request be cancelled',
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterCancelOK
+            requesterCancelOK,
+            requesterCancelOKNoSupplier
         ]
     ];
 

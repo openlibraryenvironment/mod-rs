@@ -4,11 +4,8 @@ import java.util.regex.Matcher;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
-import org.olf.rs.PatronRequestRota;
 import org.olf.rs.RequestVolume;
-import org.olf.rs.statemodel.ActionEventResult;
 import org.olf.rs.statemodel.ActionResultDetails;
-import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StatusService;
 
 /**
@@ -140,33 +137,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         if (statusInfo.status) {
             // Set the qualifier on the result
             actionResultDetails.qualifier = statusInfo.status;
-
-            // Lookup what we should set the status to
-            ActionEventResult actionEventResult = statusService.findResult(request.state, Actions.ACTION_INCOMING_ISO18626, true, statusInfo.status, true);
-
-            // Did we find a result
-            if (actionEventResult != null) {
-                // Is the status set on it
-                if (actionEventResult.status != null) {
-                    // It is so we will change to this state
-                    actionResultDetails.newStatus = actionEventResult.status;
-                } else {
-                    String error = 'actionEventResult status is null, so not setting for qualifier' + statusInfo.status;
-                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, error, null);
-                    log.error(error);
-                }
-            } else {
-                String error = 'No actionEventResult found for status: ' + request.state.code + ', action: ' + Actions.ACTION_INCOMING_ISO18626 + ', qualifier: ' + statusInfo.status;
-                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, error, null);
-                log.error("No actionEventResult found for status: " + request.state.code + ", action: " + Actions.ACTION_INCOMING_ISO18626 + ", qualifier: " + statusInfo.status);
-            }
-
-            // Get the rota entry for the current peer
-            PatronRequestRota prr = request.rota.find({ rotaEntry -> rotaEntry.rotaPosition == request.rotaPosition });
-            if (prr != null) {
-                // Why are we holding the state at the rota level ?
-                prr.state = actionResultDetails.newStatus;
-            }
         }
     }
 }

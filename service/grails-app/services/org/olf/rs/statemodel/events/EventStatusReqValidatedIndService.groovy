@@ -10,7 +10,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
 /**
@@ -38,13 +37,11 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         // We only deal with requester requests that are in the state validated
         if ((request.isRequester == true) && (request.state?.code == Status.PATRON_REQUEST_VALIDATED)) {
-            eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SOURCING_ITEM);
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SOURCING;
             eventResultDetails.auditMessage = 'Sourcing potential items';
 
             if (request.rota?.size() != 0) {
                 log.debug(' -> Request is currently ' + Status.PATRON_REQUEST_SOURCING_ITEM + ' - transition to ' + Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
                 eventResultDetails.qualifier = null;
                 eventResultDetails.auditMessage = 'Request supplied with Lending String';
             } else {
@@ -74,15 +71,15 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
 
                                 // Pull back any data we need from the shared index in order to sort the list of candidates
                                 request.addToRota(new PatronRequestRota(
-                                patronRequest : request,
-                                rotaPosition : ctr++,
-                                directoryId : rankedSupplier .supplier_symbol,
-                                instanceIdentifier : rankedSupplier .instance_identifier,
-                                copyIdentifier : rankedSupplier .copy_identifier,
-                                state : reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE),
-                                loadBalancingScore : rankedSupplier .rank,
-                                loadBalancingReason : rankedSupplier .rankReason
-                            ));
+                                    patronRequest : request,
+                                    rotaPosition : ctr++,
+                                    directoryId : rankedSupplier .supplier_symbol,
+                                    instanceIdentifier : rankedSupplier .instance_identifier,
+                                    copyIdentifier : rankedSupplier .copy_identifier,
+                                    loadBalancingScore : rankedSupplier .rank,
+                                    loadBalancingReason : rankedSupplier .rankReason
+                                )
+                            );
                         } else {
                                 log.warn('ILL Policy was not Will lend');
                                 operationData.candidates.add([symbol:rankedSupplier .supplier_symbol, message:"Skipping - illPolicy is \"${rankedSupplier .ill_policy}\""]);
@@ -93,13 +90,11 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
                     }
 
                     // Procesing
-                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
                     eventResultDetails.qualifier = null;
                     eventResultDetails.auditMessage = 'Ratio-Ranked lending string calculated by ' + selectedRouter.getRouterInfo()?.description;
                 } else {
                     // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
                     log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
-                    eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA);
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                     eventResultDetails.auditMessage =  'Unable to locate lenders';
                 }

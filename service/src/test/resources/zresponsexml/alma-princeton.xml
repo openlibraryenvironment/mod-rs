@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01613cam a2200409 a 4500</leader>
+  <controlfield tag="001">9911694303506421</controlfield>
+  <controlfield tag="005">20200803131217.0</controlfield>
+  <controlfield tag="008">970826s1997    nyu           000 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">   97016318  </subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0375700374 (alk. paper)</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(CStRLIN)NJPG97-B48613</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">CCS0707TS</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">1169430</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(NjP)1169430-princetondb</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)ocm36783841</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">NhD</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">n-us---</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">HG2481</subfield>
+    <subfield code="b">.C42 1997</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">332.1/0973</subfield>
+    <subfield code="2">21</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Chernow, Ron.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/n88268242</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="4">
+    <subfield code="a">The death of the banker :</subfield>
+    <subfield code="b">the decline and fall of the great financial dynasties and the triumph of the small investor /</subfield>
+    <subfield code="c">by Ron Chernow.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">1st ed.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Vintage Books,</subfield>
+    <subfield code="c">1997.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xiv, 130 p. ;</subfield>
+    <subfield code="c">21 cm.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">"A Vintage original."</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Banks and banking</subfield>
+    <subfield code="z">United States</subfield>
+    <subfield code="x">History</subfield>
+    <subfield code="y">20th century.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Trust companies</subfield>
+    <subfield code="z">United States</subfield>
+    <subfield code="x">History</subfield>
+    <subfield code="y">20th century.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Finance, Personal</subfield>
+    <subfield code="z">United States.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/subjects/sh2008103760</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Bankers</subfield>
+    <subfield code="z">United States.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/subjects/sh85011596</subfield>
+  </datafield>
+  <datafield tag="600" ind1="1" ind2="0">
+    <subfield code="a">Morgan, J. Pierpont</subfield>
+    <subfield code="q">(John Pierpont),</subfield>
+    <subfield code="d">1837-1913.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/n85073820</subfield>
+  </datafield>
+  <datafield tag="600" ind1="3" ind2="0">
+    <subfield code="a">Warburg family.</subfield>
+  </datafield>
+  <datafield tag="911" ind1=" " ind2=" ">
+    <subfield code="a">19970904</subfield>
+  </datafield>
+  <datafield tag="912" ind1=" " ind2=" ">
+    <subfield code="a">19970826000000.0</subfield>
+  </datafield>
+  <datafield tag="998" ind1=" " ind2=" ">
+    <subfield code="a">08/26/97</subfield>
+    <subfield code="s">9110</subfield>
+    <subfield code="n">NjP</subfield>
+    <subfield code="w">NHDG97B13260</subfield>
+    <subfield code="d">08/26/97</subfield>
+    <subfield code="c">DWS</subfield>
+    <subfield code="b">DWS</subfield>
+    <subfield code="i">970826</subfield>
+    <subfield code="l">NJPG</subfield>
+  </datafield>
+  <datafield tag="014" ind1="1" ind2=" ">
+    <subfield code="a">CCS0707TS001</subfield>
+  </datafield>
+  <datafield tag="014" ind1="0" ind2=" ">
+    <subfield code="9">001338522</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2="0">
+    <subfield code="b">firestone</subfield>
+    <subfield code="c">stacks</subfield>
+    <subfield code="t">1</subfield>
+    <subfield code="h">HG2481</subfield>
+    <subfield code="i">.C42 1997</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <encodingLevel>z</encodingLevel>
+  <receiptAcqStatus>2</receiptAcqStatus>
+  <generalRetention>0</generalRetention>
+  <completeness>1</completeness>
+  <dateOfReport>000000</dateOfReport>
+  <localLocation>Firestone Library</localLocation>
+  <shelvingLocation>stacks: Firestone Library</shelvingLocation>
+  <callNumber>HG2481 .C42 1997</callNumber>
+  <copyNumber>1</copyNumber>
+  <volumes>
+   <volume>
+    <enumeration>       </enumeration>
+    <chronology>     </chronology>
+   </volume>
+  </volumes>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <availableThru>Gen</availableThru>
+    <itemId>32101034358281</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=12 9911694303506421</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>http://princeton.alma.exlibrisgroup.com:1921/01PRI_INST</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

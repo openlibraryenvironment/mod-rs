@@ -37,8 +37,6 @@ public class ActionResponderSupplierCheckInToReshareAndSupplierMarkShippedServic
         String returnAuditMessage;
 
         if (actionResponderSupplierCheckInToReshareService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-            // Copy in the new status in case the second action fails
-            actionResultDetails.newStatus = resultDetails.newStatus;
 
             // Store auditMessage from check in call in case of success
             if (resultDetails.auditMessage) {
@@ -50,8 +48,7 @@ public class ActionResponderSupplierCheckInToReshareAndSupplierMarkShippedServic
 
             // Now we can mark it as being shipped
             if (actionResponderSupplierMarkShippedService.performAction(request, parameters, resultDetails).result == ActionResult.SUCCESS) {
-                // Its a success, so copy in the new status and response result
-                actionResultDetails.newStatus = resultDetails.newStatus;
+                // Its a success, so copy in the response result
                 actionResultDetails.responseResult = resultDetails.responseResult;
 
                 // Store auditMessage from check in call in case of success

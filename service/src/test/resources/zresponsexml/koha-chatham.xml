@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01995cam a2200469 i 4500</leader>
+  <datafield tag="050" ind1=" " ind2=" ">
+    <subfield code="a">B105.P535 T444 2016</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="c">100087</subfield>
+    <subfield code="d">100087</subfield>
+    <subfield code="x">0</subfield>
+  </datafield>
+  <controlfield tag="001">ocn936082941</controlfield>
+  <controlfield tag="003">OCoLC</controlfield>
+  <controlfield tag="005">20220927044433.0</controlfield>
+  <controlfield tag="008">151223s2016    mdua     b    001 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2015039112</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9781498510592</subfield>
+    <subfield code="q">(cloth :</subfield>
+    <subfield code="q">alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1498510590</subfield>
+    <subfield code="q">(cloth :</subfield>
+    <subfield code="q">alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="z">9781498510608</subfield>
+    <subfield code="q">(electronic)</subfield>
+  </datafield>
+  <datafield tag="029" ind1="1" ind2=" ">
+    <subfield code="a">CHVBK</subfield>
+    <subfield code="b">358734983</subfield>
+  </datafield>
+  <datafield tag="029" ind1="1" ind2=" ">
+    <subfield code="a">CHBIS</subfield>
+    <subfield code="b">010584034</subfield>
+  </datafield>
+  <datafield tag="029" ind1="1" ind2=" ">
+    <subfield code="a">AU@</subfield>
+    <subfield code="b">000056917888</subfield>
+  </datafield>
+  <datafield tag="029" ind1="1" ind2=" ">
+    <subfield code="a">ZWZ</subfield>
+    <subfield code="b">196683572</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)936082941</subfield>
+    <subfield code="z">(OCoLC)922727493</subfield>
+    <subfield code="z">(OCoLC)922913779</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">BDX</subfield>
+    <subfield code="d">OCLCF</subfield>
+    <subfield code="d">NKM</subfield>
+    <subfield code="d">CHVBK</subfield>
+    <subfield code="d">ZWZ</subfield>
+    <subfield code="d">OL$</subfield>
+    <subfield code="d">AGL</subfield>
+    <subfield code="d">WAU</subfield>
+    <subfield code="d">HHC</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">pcc</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">HHCC</subfield>
+  </datafield>
+  <datafield tag="070" ind1="0" ind2=" ">
+    <subfield code="a">B105.P535</subfield>
+    <subfield code="b">G74 2016</subfield>
+  </datafield>
+  <datafield tag="092" ind1=" " ind2=" ">
+    <subfield code="a">580.1 G733v</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="4">
+    <subfield code="a">The green thread :</subfield>
+    <subfield code="b">dialogues with the vegetal world /</subfield>
+    <subfield code="c">edited by Patr&#xED;cia Vieira, Monica Gagliano, and John Ryan.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Lanham :</subfield>
+    <subfield code="b">Lexington Books,</subfield>
+    <subfield code="c">[2016]</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xxvii, 298 pages :</subfield>
+    <subfield code="b">illustrations ;</subfield>
+    <subfield code="c">24 cm.</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">Ecocritical theory and practice</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references and index.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Plants (Philosophy)</subfield>
+    <subfield code="9">216073</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Plants (Philosophy)</subfield>
+    <subfield code="2">fast</subfield>
+    <subfield code="9">216073</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Pflanzen</subfield>
+    <subfield code="2">gnd</subfield>
+    <subfield code="9">216074</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Philosophie</subfield>
+    <subfield code="2">gnd</subfield>
+    <subfield code="9">65794</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Plantes</subfield>
+    <subfield code="x">Philosophie.</subfield>
+    <subfield code="2">ram</subfield>
+    <subfield code="9">216075</subfield>
+  </datafield>
+  <datafield tag="690" ind1=" " ind2="0">
+    <subfield code="9">213072</subfield>
+    <subfield code="a">Environment (new 17-18)</subfield>
+  </datafield>
+  <datafield tag="690" ind1=" " ind2="0">
+    <subfield code="9">213010</subfield>
+    <subfield code="a">Philosophy, Religion (new 17-18)</subfield>
+  </datafield>
+  <datafield tag="690" ind1=" " ind2="0">
+    <subfield code="9">213326</subfield>
+    <subfield code="a">Science (new 17-18)</subfield>
+  </datafield>
+  <datafield tag="690" ind1=" " ind2="0">
+    <subfield code="9">213069</subfield>
+    <subfield code="a">Writing and Literary Studies (new 17-18)</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Ecocritical theory and practice.</subfield>
+    <subfield code="9">216076</subfield>
+  </datafield>
+  <datafield tag="942" ind1=" " ind2=" ">
+    <subfield code="2">ddc</subfield>
+    <subfield code="c">BOOK</subfield>
+    <subfield code="0">3</subfield>
+  </datafield>
+  <datafield tag="952" ind1=" " ind2=" ">
+    <subfield code="0">0</subfield>
+    <subfield code="1">0</subfield>
+    <subfield code="2">ddc</subfield>
+    <subfield code="4">0</subfield>
+    <subfield code="6">580_100000000000000_G733V</subfield>
+    <subfield code="7">0</subfield>
+    <subfield code="8">CIRC</subfield>
+    <subfield code="9">120635</subfield>
+    <subfield code="a">CHATHAM</subfield>
+    <subfield code="b">CHATHAM</subfield>
+    <subfield code="c">CIRC2</subfield>
+    <subfield code="d">2018-05-30</subfield>
+    <subfield code="e">JC	1/23/2018	Requested by Anissa Wardi for English Dept. but might also cross over to FSS</subfield>
+    <subfield code="g">95.00</subfield>
+    <subfield code="l">3</subfield>
+    <subfield code="m">1</subfield>
+    <subfield code="o">580.1 G733v</subfield>
+    <subfield code="p">31437000069572</subfield>
+    <subfield code="q">2023-03-12</subfield>
+    <subfield code="r">2022-09-25</subfield>
+    <subfield code="s">2022-09-25</subfield>
+    <subfield code="v">125.00</subfield>
+    <subfield code="w">2018-05-30</subfield>
+    <subfield code="y">BOOK</subfield>
+    <subfield code="k">Checked Out</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=12 100087</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordSchema>marcxml</zs:recordSchema><zs:extraRequestData><zs:target>chatham.bywatersolutions.com:9899/biblios</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

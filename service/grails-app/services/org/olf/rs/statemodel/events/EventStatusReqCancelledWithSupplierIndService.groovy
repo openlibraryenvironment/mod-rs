@@ -6,7 +6,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusStage;
 
@@ -33,13 +32,11 @@ public class EventStatusReqCancelledWithSupplierIndService extends AbstractEvent
         if (request.state?.stage == StatusStage.COMPLETED) {
             if (request.requestToContinue == true) {
                 eventResultDetails.auditMessage = 'Request to continue, sending to next lender';
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_UNFILLED);
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_CONTINUE;
                 log.debug(eventResultDetails.auditMessage);
             } else {
                 log.debug('Cancelling request')
                 eventResultDetails.auditMessage = 'Request cancelled';
-                eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED);
             }
         } else {
             log.warn('Request not in the correct state of ' + Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER + " (${request?.state?.code}).");

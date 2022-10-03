@@ -54,8 +54,9 @@ public abstract class ActionUndoService extends AbstractAction {
                         undoResultDetails = eventProcessor.undo(request, audit, undoResultDetails);
                     }
 
-                    // Set the newStatus to being the status the audit record originally came from
-                    actionResultDetails.newStatus = audit.fromStatus;
+                    // Set the override status to being the status the audit record originally came from
+                    // Check this one as to what happens, may need to do something different
+                    actionResultDetails.overrideStatus = audit.fromStatus;
                     actionResultDetails.result = undoResultDetails.result;
 
                     // If it was not successful, then we beed to try and pass back as much information as possible

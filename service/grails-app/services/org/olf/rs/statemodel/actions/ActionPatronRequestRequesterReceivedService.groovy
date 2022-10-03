@@ -8,8 +8,6 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
@@ -96,8 +94,6 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
             }
 
             if (volumesWithoutTemporaryItem.size() == 0) {
-                // Mark item as awaiting circ
-                actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN);
                 // Let the user know if the success came from a real call or a spoofed one
                 actionResultDetails.auditMessage = 'Host LMS integration: AcceptItem call succeeded for all items.';
 

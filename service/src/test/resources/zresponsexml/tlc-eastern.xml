@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01647cam a2200445 i 4500</leader>
+  <controlfield tag="001">ocm32429215 </controlfield>
+  <controlfield tag="003">OCoLC</controlfield>
+  <controlfield tag="005">20200809095012.0</controlfield>
+  <controlfield tag="008">950417s1996||||nyuaf         001 0aeng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">   95017607 </subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0679439161</subfield>
+  </datafield>
+  <datafield tag="039" ind1=" " ind2=" ">
+    <subfield code="a">43596</subfield>
+    <subfield code="c">TLC</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">EBS</subfield>
+    <subfield code="d">TLC</subfield>
+    <subfield code="e">rda</subfield>
+  </datafield>
+  <datafield tag="041" ind1="1" ind2=" ">
+    <subfield code="a">eng</subfield>
+    <subfield code="h">fre</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">e-fr---</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">EBSD</subfield>
+    <subfield code="c">[125211]</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">PQ2683.I32</subfield>
+    <subfield code="b">Z52313 1996</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">813/.54</subfield>
+    <subfield code="a">B</subfield>
+    <subfield code="2">20</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Wiesel, Elie,</subfield>
+    <subfield code="d">1928-</subfield>
+    <subfield code="e">author.</subfield>
+    <subfield code="0">(local)tlcaut143259339624800</subfield>
+  </datafield>
+  <datafield tag="240" ind1="0" ind2="0">
+    <subfield code="a">Tous les fleuves vont a&#x300; la mer.</subfield>
+    <subfield code="l">English.</subfield>
+    <subfield code="0">(local)tlcaut144947476446512</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">All rivers run to the sea :</subfield>
+    <subfield code="b">memoirs /</subfield>
+    <subfield code="c">Elie Wiesel.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">First American edition</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Knopf,</subfield>
+    <subfield code="c">1996.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="2">
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Random House</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">432 pages, [8] pages of plates :</subfield>
+    <subfield code="b">illustrations ;</subfield>
+    <subfield code="c">25 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="380" ind1=" " ind2=" ">
+    <subfield code="a">Book</subfield>
+    <subfield code="2">tlcgt</subfield>
+  </datafield>
+  <datafield tag="380" ind1=" " ind2=" ">
+    <subfield code="a">Biography</subfield>
+    <subfield code="2">marcgt</subfield>
+  </datafield>
+  <datafield tag="385" ind1=" " ind2=" ">
+    <subfield code="a">General</subfield>
+    <subfield code="2">tlctarget</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Includes index.</subfield>
+  </datafield>
+  <datafield tag="600" ind1="1" ind2="0">
+    <subfield code="a">Wiesel, Elie,</subfield>
+    <subfield code="d">1928-</subfield>
+    <subfield code="v">Biography.</subfield>
+    <subfield code="0">(local)tlcaut142660724447680</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Jewish authors</subfield>
+    <subfield code="v">Biography.</subfield>
+    <subfield code="0">(DLC)sh2008122294</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Holocaust, Jewish (1939-1945)</subfield>
+    <subfield code="v">Personal narratives.</subfield>
+    <subfield code="0">(DLC)sh 85061518 </subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Holocaust survivors</subfield>
+    <subfield code="v">Biography.</subfield>
+    <subfield code="0">(DLC)sh2008105720</subfield>
+  </datafield>
+  <datafield tag="655" ind1=" " ind2="7">
+    <subfield code="a">Biographies.</subfield>
+    <subfield code="2">tlcgt</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">125211  wcb  30.00</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="a">WSTACKBOOK</subfield>
+    <subfield code="c">PQ2683.I32 Z52313 1996</subfield>
+    <subfield code="g">30094000460060</subfield>
+    <subfield code="o">125211</subfield>
+  </datafield>
+  <datafield tag="982" ind1=" " ind2=" ">
+    <subfield code="1">y</subfield>
+    <subfield code="a">WSTACKBOOK</subfield>
+    <subfield code="b">Warner Library</subfield>
+    <subfield code="c">WARNER STACKS</subfield>
+    <subfield code="i">30094000460060</subfield>
+    <subfield code="m">PQ2683.I32 Z52313 1996</subfield>
+    <subfield code="s">A</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=7 "0679439161"</zs:query><zs:maximumRecords>3</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordSchema>marcxml</zs:recordSchema><zs:extraRequestData><zs:target>http://eastern.tlcdelivers.com:5666/LSPacZ</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

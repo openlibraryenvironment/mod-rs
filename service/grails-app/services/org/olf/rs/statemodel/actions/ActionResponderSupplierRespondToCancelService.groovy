@@ -4,8 +4,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Responder is replying to a cancel request from the requester
@@ -26,13 +24,11 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
 
         // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
         if (parameters?.cancelResponse == 'no') {
-            // We set the new status, to the saved status
-            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, request.previousStates[request.state.code]);
+            // Set the audit message and qualifier
             actionResultDetails.auditMessage = 'Cancellation denied';
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
             actionResultDetails.auditMessage = 'Cancellation accepted';
-            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCELLED);
         }
 
         return(actionResultDetails);

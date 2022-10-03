@@ -24,11 +24,16 @@ import org.grails.orm.hibernate.HibernateDatastore
 import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+
 import org.olf.rs.EmailService
 import org.olf.rs.HostLMSService
+import org.olf.rs.HostLMSLocation
+import org.olf.rs.HostLMSShelvingLocation
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.PatronRequest
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.routing.RankedSupplier
+import org.olf.rs.Z3950Service
 
 @Slf4j
 @Integration
@@ -95,6 +100,7 @@ class RSLifecycleSpec extends HttpSpec {
   EmailService emailService
   HostLMSService hostLMSService
   StaticRouterService staticRouterService
+  Z3950Service z3950Service
 
   @Value('${local.server.port}')
   Integer serverPort
@@ -561,5 +567,32 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstThree' | _
   }
 
+  void "test determineBestLocation for LMS adapters"() {
+    when:"We mock z39 and run determineBestLocation"
+      z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
+      def result = [:];
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        def actions = hostLMSService.getHostLMSActionsFor(lms);
+        def pr = new PatronRequest(supplierUniqueRecordId: '123');
+        result['viaId'] = actions.determineBestLocation(pr);
+        pr = new PatronRequest(isbn: '123');
+        result['viaPrefix'] = actions.determineBestLocation(pr);
+        result['location'] = HostLMSLocation.findByCode(location);
+        result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
+      }
+
+    then:"Confirm location and shelving location were created and properly returned"
+      result?.viaId?.location == location;
+      result?.viaPrefix?.location == location;
+      result?.location?.code == location;
+      result?.shelvingLocation?.code == shelvingLocation;
+
+    where:
+      tenant_id | lms | zResponseFile | location | shelvingLocation | _
+      'RSInstThree' | 'alma' | 'alma-princeton.xml' | 'Firestone Library' | 'stacks: Firestone Library' | _
+      'RSInstThree' | 'alma' | 'alma-princeton-notfound.xml' | null | null | _
+      'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
+      'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
+  }
 
 }

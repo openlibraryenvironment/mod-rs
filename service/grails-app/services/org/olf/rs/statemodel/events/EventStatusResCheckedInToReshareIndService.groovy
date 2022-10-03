@@ -6,8 +6,6 @@ import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * This event is triggered when the item is checked in to reshare
@@ -20,7 +18,7 @@ public class EventStatusResCheckedInToReshareIndService extends AbstractEvent {
 
     @Override
     String name() {
-        return(Events.EVENT_STATUS_RES_CANCEL_REQUEST_RECEIVED_INDICATION);
+        return(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION);
     }
 
     @Override
@@ -35,7 +33,6 @@ public class EventStatusResCheckedInToReshareIndService extends AbstractEvent {
          * await shipping, so for now we leave the 2 states in place and just automatically transition  between them
          * this method exists largely as a place to put functions and workflows that diverge from that model
          */
-        eventResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP);
         eventResultDetails.auditMessage = 'Request awaits shipping';
 
         return(eventResultDetails);

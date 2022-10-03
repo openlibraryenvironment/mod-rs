@@ -6,8 +6,6 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * This action performs the agreeing of conditions by the requester
@@ -43,7 +41,6 @@ public class ActionPatronRequestRequesterAgreeConditionsService extends Abstract
             }
 
             actionResultDetails.auditMessage = 'Agreed to loan conditions';
-            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
         } else {
             actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
             actionResultDetails.auditMessage = 'Only the responder can accept the conditions';

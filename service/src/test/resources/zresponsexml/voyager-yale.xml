@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>00722cam a2200253 i 4500</leader>
+  <controlfield tag="001">206735</controlfield>
+  <controlfield tag="005">20210104103053.0</controlfield>
+  <controlfield tag="008">810106c1979    enk           00010 eng d</controlfield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)ocn687936660</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(CStRLIN)CTYG5376864-B</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="9">AAW7957YL</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">206735</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">CtY</subfield>
+    <subfield code="c">CtY</subfield>
+  </datafield>
+  <datafield tag="079" ind1=" " ind2=" ">
+    <subfield code="a">ocm05376864</subfield>
+  </datafield>
+  <datafield tag="090" ind1=" " ind2=" ">
+    <subfield code="a">PS3521.O63</subfield>
+    <subfield code="b">W5 1979</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Kopit, Arthur,</subfield>
+    <subfield code="d">1937-</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">Wings :</subfield>
+    <subfield code="b">a new play /</subfield>
+    <subfield code="c">by Arthur Kopit.</subfield>
+  </datafield>
+  <datafield tag="260" ind1="0" ind2=" ">
+    <subfield code="a">London :</subfield>
+    <subfield code="b">Eyre Methuen,</subfield>
+    <subfield code="c">1979, c1978.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xvii, 78 p. ;</subfield>
+    <subfield code="c">22 cm.</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">A Methuen modern play</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Cerebrovascular disease</subfield>
+    <subfield code="x">Patients</subfield>
+    <subfield code="x">Rehabilitation</subfield>
+    <subfield code="v">Drama.</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Methuen modern plays.</subfield>
+  </datafield>
+  <datafield tag="928" ind1=" " ind2=" ">
+    <subfield code="a">AC031297</subfield>
+  </datafield>
+  <datafield tag="948" ind1=" " ind2=" ">
+    <subfield code="a">OCLC</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <typeOfRecord>x</typeOfRecord>
+  <encodingLevel>z</encodingLevel>
+  <receiptAcqStatus>2</receiptAcqStatus>
+  <generalRetention>0</generalRetention>
+  <completeness>1</completeness>
+  <dateOfReport>000000</dateOfReport>
+  <nucCode>lsfdra</nucCode>
+  <localLocation>Library Shelving Facility (LSF)</localLocation>
+  <callNumber>PS3561 O646 W5 1979 (LC)</callNumber>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <itemId>211398</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=12 206735</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>z3950-tst.library.yale.edu:7090/voyager</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

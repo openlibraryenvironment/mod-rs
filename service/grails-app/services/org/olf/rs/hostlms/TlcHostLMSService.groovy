@@ -37,14 +37,14 @@ public class TlcHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract available items from TLC marcxml record ${z_response}, reason ${reason}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from TLC Z39.50 server, unable to extract available items. Record: ${z_response}");
       return null;
     }
 
-    Map<String, ItemLocation> availability_summary = null;
+    List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
       availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
     }
@@ -61,7 +61,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
 
   
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     //<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
     //  <zs:numberOfRecords>1359</zs:numberOfRecords>
     //  <zs:records>
@@ -87,7 +87,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
     //          <subfield code="s">A</subfield>
     //        </datafield>
     log.debug("extractAvailableItemsFromMARCXMLRecord (TlcHostLMSService)");
-    Map<String, ItemLocation> availability_summary = [:];
+    List<ItemLocation> availability_summary = [];
     record.datafield.each { df ->
       if( df.'@tag' == "982") {
         Map<String,String> tag_data = [:];
@@ -103,7 +103,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
             def location = tag_data['b'];
             def shelvingLocation = tag_data['c'];
             ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation );
-            availability_summary[location] = il;
+            availability_summary << il;
           }
         } catch(Exception e) {
           log.debug("Unable to parse holdings (982): ${e.message}");

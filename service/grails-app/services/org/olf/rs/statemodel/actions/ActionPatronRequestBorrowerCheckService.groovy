@@ -5,8 +5,6 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 /**
  * This action checks whether the borrower is valid or not
@@ -26,7 +24,7 @@ public class ActionPatronRequestBorrowerCheckService extends AbstractAction {
         Map borrowerCheck = reshareActionService.lookupPatron(request, parameters);
         actionResultDetails.responseResult.status = borrowerCheck?.callSuccess && borrowerCheck?.patronValid
         if (actionResultDetails.responseResult.status) {
-            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED);
+            // Call succeeded and the patron is valid, nothing to do
         } else if (!borrowerCheck?.callSuccess) {
             // The Host LMS check call has failed, stay in current state
             request.needsAttention = true;
@@ -35,7 +33,6 @@ public class ActionPatronRequestBorrowerCheckService extends AbstractAction {
         } else {
             // The call succeeded but patron is invalid
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
-            actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON);
             String errors = (borrowerCheck?.problems == null) ? '' : (' (Errors: ' + borrowerCheck.problems + ')');
             String status = borrowerCheck?.status == null ? '' : (' (Patron state = ' + borrowerCheck.status + ')');
             actionResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}";

@@ -5,8 +5,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -27,7 +25,6 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Just set the status
-        actionResultDetails.newStatus = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING);
         actionResultDetails.responseResult.status = true;
 
         AppSetting checkInOnReturn = AppSetting.findByKey('check_in_on_return');

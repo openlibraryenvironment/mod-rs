@@ -236,8 +236,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
-    Map<String, ItemLocation> availability_summary = null;
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 };
       if (withHoldings.size() < 1) {
@@ -272,11 +272,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     if ( z_response?.numberOfRecords == 1 ) {
       // Got exactly 1 record
-      Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
       if ( availability_summary?.size() > 0 ) {
-        availability_summary.values().each { v ->
-          result.add(v);
-        }
+        result = availability_summary;
       }
       else {
         log.debug("CQL lookup(${prefix_query_string}) returned ${z_response?.numberOfRecords} matches. Unable to determine availability");
@@ -299,11 +297,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( ((z_response?.numberOfRecords?.text() ?: -1) as int) > 0 ) {
-      Map<String,ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
       if ( availability_summary?.size() > 0 ) {
-        availability_summary.values().each { v ->
-          result.add(v)
-        }
+        result = availability_summary;
       }
 
       log.debug("At end, availability summary: ${availability_summary}, result=${result}");
@@ -753,9 +749,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   /**
    * Override this method if the server returns opac records but does something dumb like cram availability status into a public note
    */
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = [];
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("BaseHostLMSService holdings record:: ${hld}");
@@ -770,7 +766,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                   itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
                   itemId: circ?.itemId?.text()?.trim() ?: null,
                   callNumber: hld?.callNumber?.text()?.trim() ?: null)
-          availability_summary[loc] = il;
+          availability_summary << il;
         }
       }
     }
@@ -781,7 +777,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -801,7 +797,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     //             <subfield code="d">BOOK</subfield>
     //             <subfield code="f">2</subfield>
     //           </datafield>
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = [];
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {
         Map<String,String> tag_data = [:]
@@ -818,7 +814,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             }
             else {
               log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
-              availability_summary[tag_data['a']] = new ItemLocation(
+              availability_summary << new ItemLocation(
                                                             location: tag_data['a'],
                                                             shelvingLocation: tag_data['b'],
                                                             callNumber:tag_data['c'],

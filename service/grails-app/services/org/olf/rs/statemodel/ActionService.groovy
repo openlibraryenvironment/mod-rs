@@ -87,7 +87,6 @@ public class ActionService {
         Status currentState = request.state;
 
         // Default a few fields
-        resultDetails.newStatus = currentState;
         resultDetails.result = ActionResult.SUCCESS;
         resultDetails.auditMessage = 'Executing action: ' + action;
         resultDetails.auditData = parameters;
@@ -104,29 +103,14 @@ public class ActionService {
 
         // Now lookup what we will set the status to
         Status newStatus;
-        // if the action is undo, then we take it from the newStatus field
-        if (Actions.ACTION_UNDO.equals(action)) {
-            newStatus = resultDetails.newStatus;
-        } else {
+
+        // if we have an override status then we shall use that and not calculate the status, this is primarily for the undo action where we look at the audit trail to see what we need to set the status to
+        if (resultDetails.overrideStatus == null) {
             // Normal scenario of an action being performed
             newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
-            String newStatusId = newStatus.id;
-
-            // if the new status is not the same as the hard coded state then we are either missing a qualifier or an actionEventResult record
-            if (!resultDetails.newStatus.id.equals(newStatusId)) {
-                String message = 'Hard coded status (' + resultDetails.newStatus.code +
-                                 ') is not the same as the calculated status (' + newStatus.code +
-                                  ') for action ' + action +
-                                  ' with result ' + resultDetails.result.toString() +
-                                  ' and qualifier ' + ((resultDetails.qualifier == null) ? 'null' : resultDetails.qualifier);
-                log.error(message);
-                reshareApplicationEventHandlerService.auditEntry(
-                    request,
-                    currentState,
-                    currentState,
-                    message,
-                    null);
-            }
+        } else {
+            // The status has been overridden in the code
+            newStatus = resultDetails.overrideStatus;
         }
 
         // Set the status of the request

@@ -59,11 +59,9 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
 
     if ( z_response?.numberOfRecords == 1 ) {
       // Got exactly 1 record
-      Map<String, ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=1016 ${search_id}")
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=1016 ${search_id}")
       if ( availability_summary.size() > 0 ) {
-        availability_summary.values().each { v ->
-          result.add(v);
-        }
+        result = availability_summary;
       }
 
       log.debug("At end, availability summary: ${availability_summary}");
@@ -75,14 +73,14 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected Map<String, ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
     log.debug("Extract holdings from Symphony marcxml record ${z_response}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from Symphony Z39.50 server, unable to extract available items. Record: ${z_response}");
       return null;
     }
 
-    Map<String, ItemLocation> availability_summary = null;
+    List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
       availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
     }
@@ -91,7 +89,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -112,7 +110,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     //             <subfield code="f">2</subfield>
     //           </datafield>
     log.debug("extractAvailableItemsFromMARCXMLRecord (SymphonyHostLMSService)");
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = [];
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {
         Map<String,String> tag_data = [:]
@@ -129,7 +127,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
             }
             else {
               log.debug("Assuming ${tag_data['b']} implies available - update extractAvailableItemsFromMARCXMLRecord if not the case");
-              availability_summary[tag_data['a']] = new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber: tag_data['c'], itemLoanPolicy: tag_data?.d )
+              availability_summary << new ItemLocation( location: tag_data['a'], shelvingLocation: tag_data['b'], callNumber: tag_data['c'], itemLoanPolicy: tag_data?.d )
             }
           }
           else {

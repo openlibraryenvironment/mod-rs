@@ -31,6 +31,8 @@ import org.olf.rs.circ.client.CirculationClient;
  */
 public class SierraHostLMSService extends BaseHostLMSService {
 
+  List<String> NOTES_CONSIDERED_AVAILABLE = ['AVAILABLE', 'CHECK SHELVES'];
+
   public CirculationClient getCirculationClient(String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
@@ -54,20 +56,21 @@ public class SierraHostLMSService extends BaseHostLMSService {
    * We are taking publicNote==AVAILABLE as an indication of an available copy
    */
   @Override
-  public Map<String, ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
-    Map<String,ItemLocation> availability_summary = [:]
+    List<ItemLocation> availability_summary = []
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("Process sierra OPAC holdings record:: ${hld}");
-      if ( hld.publicNote?.toString() == 'AVAILABLE' ) {
+      def note = hld?.publicNote?.toString();
+      if ( note && NOTES_CONSIDERED_AVAILABLE.contains(note) ) {
         log.debug("SIERRA OPAC Record: Item Available now");
         ItemLocation il = new ItemLocation( 
                                             reason: reason,
                                             location: hld.localLocation?.toString(), 
                                             shelvingLocation:hld.localLocation?.toString(), 
-                                            callNumber:hld.callNumber?.toString() )
-        availability_summary[hld.localLocation?.toString()] = il;
+                                            callNumber:hld?.callNumber?.toString() )
+        availability_summary << il;
       }
     }
 

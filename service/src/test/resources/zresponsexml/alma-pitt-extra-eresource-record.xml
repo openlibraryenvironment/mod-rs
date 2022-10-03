@@ -1,0 +1,366 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>2</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01941pam a22004694a 4500</leader>
+  <controlfield tag="001">9950935833406236</controlfield>
+  <controlfield tag="005">20180619141932.0</controlfield>
+  <controlfield tag="008">070531s2007    enk      b    001 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2007022227</subfield>
+  </datafield>
+  <datafield tag="015" ind1=" " ind2=" ">
+    <subfield code="a">GBA747812</subfield>
+    <subfield code="2">bnb</subfield>
+  </datafield>
+  <datafield tag="016" ind1="7" ind2=" ">
+    <subfield code="a">013773183</subfield>
+    <subfield code="2">Uk</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9781842778715 (pb : alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1842778714 (pb : alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9781842778708 (hb : alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1842778706 (hb : alk. paper)</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)ocn137331474</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">5093583</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(ppiu)5093583-pittdb</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(pittdb)5093583-pittdb</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">YDX</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">UKM</subfield>
+    <subfield code="d">BAKER</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">OrLoB-B</subfield>
+    <subfield code="d">UtOrBLW</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">PITT</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">HC79.E5</subfield>
+    <subfield code="b">K685 2007</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">333.7</subfield>
+    <subfield code="2">22</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Kovel, Joel,</subfield>
+    <subfield code="d">1936-2018.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="4">
+    <subfield code="a">The enemy of nature :</subfield>
+    <subfield code="b">the end of capitalism or the end of the world? /</subfield>
+    <subfield code="c">Joel Kovel.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">2nd ed.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">London ;</subfield>
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Zed Books ;</subfield>
+    <subfield code="a">Halifax :</subfield>
+    <subfield code="b">Fernwood Pub. ;</subfield>
+    <subfield code="a">New York, NY :</subfield>
+    <subfield code="b">Distributed in the USA exclusively by Palgrave Macmillan,</subfield>
+    <subfield code="c">2007.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xvi, 329 p. ;</subfield>
+    <subfield code="c">21 cm.</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references (p. 310-320) and index.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="g">1.</subfield>
+    <subfield code="t">Introduction -- </subfield>
+    <subfield code="g">Part I.</subfield>
+    <subfield code="t">culprit -- </subfield>
+    <subfield code="g">2.</subfield>
+    <subfield code="t">ecological crisis -- </subfield>
+    <subfield code="g">3.</subfield>
+    <subfield code="t">Capital -- </subfield>
+    <subfield code="g">4.</subfield>
+    <subfield code="t">Capitalism -- </subfield>
+    <subfield code="g">Part II.</subfield>
+    <subfield code="t">domination of nature -- </subfield>
+    <subfield code="g">5.</subfield>
+    <subfield code="t">On ecologies -- </subfield>
+    <subfield code="g">6.</subfield>
+    <subfield code="t">Capital and the domination of nature -- </subfield>
+    <subfield code="g">Part III.</subfield>
+    <subfield code="t">Paths to ecosocialism -- </subfield>
+    <subfield code="g">7.</subfield>
+    <subfield code="t">Introduction -- </subfield>
+    <subfield code="g">8.</subfield>
+    <subfield code="t">critique of actually existing ecopolitics -- </subfield>
+    <subfield code="g">9.</subfield>
+    <subfield code="t">Prefiguration -- </subfield>
+    <subfield code="g">10.</subfield>
+    <subfield code="t">Ecosocialism.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Environmental economics.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Capitalism</subfield>
+    <subfield code="x">Environmental aspects.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Marxian economics.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Environmental policy.</subfield>
+  </datafield>
+  <datafield tag="906" ind1=" " ind2=" ">
+    <subfield code="a">ULS</subfield>
+  </datafield>
+  <datafield tag="945" ind1=" " ind2=" ">
+    <subfield code="a">PromptCat</subfield>
+    <subfield code="b">Firm</subfield>
+    <subfield code="c">PITT</subfield>
+  </datafield>
+  <datafield tag="946" ind1=" " ind2=" ">
+    <subfield code="a">econ</subfield>
+    <subfield code="b">BookA</subfield>
+    <subfield code="c">31735056082393</subfield>
+  </datafield>
+  <datafield tag="947" ind1=" " ind2=" ">
+    <subfield code="a">20.46</subfield>
+    <subfield code="b">272898</subfield>
+  </datafield>
+  <datafield tag="994" ind1=" " ind2=" ">
+    <subfield code="a">92</subfield>
+    <subfield code="b">PIT</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2=" ">
+    <subfield code="b">THOM</subfield>
+    <subfield code="c">stor</subfield>
+    <subfield code="h">HC79.E5</subfield>
+    <subfield code="i">K685 2007</subfield>
+  </datafield>
+  <datafield tag="952" ind1=" " ind2=" ">
+    <subfield code="a">econ</subfield>
+  </datafield>
+  <datafield tag="561" ind1=" " ind2=" ">
+    <subfield code="a">HILL.stks</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <encodingLevel>4</encodingLevel>
+  <receiptAcqStatus>0</receiptAcqStatus>
+  <generalRetention>8</generalRetention>
+  <completeness>1</completeness>
+  <dateOfReport>000000</dateOfReport>
+  <localLocation>ULS - Thomas Blvd</localLocation>
+  <shelvingLocation>stacks</shelvingLocation>
+  <callNumber>HC79.E5 K685 2007</callNumber>
+  <volumes>
+   <volume>
+    <enumeration>       </enumeration>
+    <chronology>     </chronology>
+   </volume>
+  </volumes>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <itemId>31735056082393</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02969nam a2200613Ia 4500</leader>
+  <controlfield tag="001">9998553535306236</controlfield>
+  <controlfield tag="005">20210210004238.0</controlfield>
+  <controlfield tag="006">m     o  d |      </controlfield>
+  <controlfield tag="007">cr#-n---------</controlfield>
+  <controlfield tag="008">070531s2007    enk     ob    001 0 eng c</controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="z">  2007022227</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1-350-25100-3</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1-84813-659-5</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1-84277-080-2</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1-281-25871-7</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9786611258719</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">1-84813-047-3</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(CKB)1000000000415517</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(EBL)339195</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)476155780</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(SSID)ssj0000082453</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PQKBManifestationID)11119870</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PQKBTitleCode)TC0000082453</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PQKBWorkID)10155626</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PQKB)10173662</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(MiAaPQ)EBC339195</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(MiAaPQ)EBC4509705</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(EXLCZ)991000000000415517</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">MiAaPQ</subfield>
+    <subfield code="c">MiAaPQ</subfield>
+    <subfield code="d">MiAaPQ</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield tag="050" ind1=" " ind2="4">
+    <subfield code="a">HC79.E5</subfield>
+    <subfield code="b">K685 2007</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">333.7</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Kovel, Joel,</subfield>
+    <subfield code="d">1936-</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="4">
+    <subfield code="a">The enemy of nature</subfield>
+    <subfield code="h">[electronic resource] :</subfield>
+    <subfield code="b">the end of capitalism or the end of the world? /</subfield>
+    <subfield code="c">Joel Kovel.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">2nd ed.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">London ;</subfield>
+    <subfield code="a">New York :</subfield>
+    <subfield code="b">Zed Books ;</subfield>
+    <subfield code="a">Halifax :</subfield>
+    <subfield code="b">Fernwood Pub. ;</subfield>
+    <subfield code="a">New York, NY :</subfield>
+    <subfield code="b">Distributed in the USA exclusively by Palgrave Macmillan,</subfield>
+    <subfield code="c">2007.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">1 online resource (347 p.)</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">computer</subfield>
+    <subfield code="b">c</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">online resource</subfield>
+    <subfield code="b">cr</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Description based upon print version of record.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Contents; Preface to the second edition; Preface to the first edition; 1 - Introduction; Part I - The culprit; 2 - The ecological crisis; 3 - Capital; 4 - Capitalism; Part II - The domination of nature; 5 - On ecologies; 6 - Capital and the domination of nature; Part III - Paths to ecosocialism; 7 - Introduction; 8 - A critique of actually existing ecopolitics; 9 - Prefiguration; 10 - Ecosocialism; Afterword; Notes; Bibliography; Index;</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">We live in and from nature, but the way we have evolved of doing this is about to destroy us. Capitalism and its by-products - imperialism, war, neoliberal globalization, racism, poverty and the destruction of community - are all playing a part in the destruction of our ecosystem. Only now are we beginning to realise the depth of the crisis and the kind of transformation which will have to occur to ensure our survival. This second, thoroughly updated, edition of The Enemy of Nature speaks to this new environmental awareness.</subfield>
+  </datafield>
+  <datafield tag="546" ind1=" " ind2=" ">
+    <subfield code="a">English</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references (p. 310-320) and index.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Environmental economics.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Capitalism</subfield>
+    <subfield code="x">Environmental aspects.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Marxian economics.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Environmental policy.</subfield>
+  </datafield>
+  <datafield tag="653" ind1=" " ind2="0">
+    <subfield code="a">marxistisk &#xA9;&#x131;konomi</subfield>
+    <subfield code="a">globalisering</subfield>
+    <subfield code="a">geopolitikk</subfield>
+    <subfield code="a">naturressurser</subfield>
+    <subfield code="a">milj&#xA9;&#x131;</subfield>
+    <subfield code="a">milj&#xA9;&#x131;politikk</subfield>
+    <subfield code="a">milj&#xA9;&#x131;&#xA9;&#x131;konomi</subfield>
+  </datafield>
+  <datafield tag="655" ind1=" " ind2="4">
+    <subfield code="a">Electronic books.</subfield>
+  </datafield>
+  <datafield tag="776" ind1=" " ind2=" ">
+    <subfield code="z">1-84277-871-4</subfield>
+  </datafield>
+  <datafield tag="776" ind1=" " ind2=" ">
+    <subfield code="z">1-84277-870-6</subfield>
+  </datafield>
+  <datafield tag="906" ind1=" " ind2=" ">
+    <subfield code="a">BOOK</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>2</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=7 "1842778706"</zs:query><zs:maximumRecords>3</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>http://pitt.alma.exlibrisgroup.com:1921/01PITT_INST</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>
