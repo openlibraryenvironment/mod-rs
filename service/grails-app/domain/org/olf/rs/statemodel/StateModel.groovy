@@ -127,9 +127,6 @@ where s in (select sms.state
                     // Just update the additional fields, but we need to do it to the already saved record
                     states.find { realState ->
                         if (realState.state.code.equals(state.state.code)) {
-//                            realState.canTriggerStaleRequest = foundState.canTriggerStaleRequest;
-//                            realState.canTriggerOverdueRequest = foundState.canTriggerOverdueRequest;
-//                            realState.isTerminal = foundState.isTerminal;
                             updateState(realState, foundState.canTriggerStaleRequest, foundState.canTriggerOverdueRequest, foundState.isTerminal);
                             return(true);
                         }
