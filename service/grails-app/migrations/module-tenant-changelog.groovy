@@ -8,4 +8,9 @@ databaseChangeLog = {
   include file: 'update-mod-rs-2-7.groovy'
   include file: 'update-mod-rs-2-8.groovy'
   include file: 'update-mod-rs-2-9.groovy'
+  
+  // Toolkit features opted into.
+  include file: 'wtk/additional_CustomPropertyDefinitions.feat.groovy'
+  include file: 'wtk/multi-value-custprops.feat.groovy'
+  include file: 'wtk/hidden-appsetting.feat.groovy'
 }
