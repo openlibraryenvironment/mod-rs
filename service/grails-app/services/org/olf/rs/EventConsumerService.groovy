@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.errors.WakeupException
 import org.olf.okapi.modules.directory.DirectoryEntry
 
 import com.k_int.okapi.OkapiTenantResolver
@@ -46,8 +47,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   GrailsApplication grailsApplication
 
   private KafkaConsumer consumer = null
-  private boolean running = true
-//  private boolean tenant_list_updated = false
+  
+  private static volatile boolean running = true  
+  private static volatile boolean topic_list_updated = true
+  
   private final Set<String> topic_list = ConcurrentHashMap.newKeySet()
 
   private String version = 'development'
@@ -56,7 +59,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   public void init() {
     log.debug("Configuring event consumer service")
     
-    version = grailsApplication.metadata.applicationVersion
+    version = grailsApplication.metadata.applicationVersion ?: version
     final Properties props = new Properties()
     try {
       final String consumerConfigPrefix = 'events.consumer.'
@@ -79,7 +82,6 @@ public class EventConsumerService implements EventPublisher, DataBinder {
      * suggests this hook when using streams... We need to do something similar
      * Runtime.getRuntime().addShutdownHook(new Thread(streams::close))
      */
-
     Promise p = WithPromises.task {
       consumePatronRequestEvents()
     }
@@ -98,25 +100,27 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   
   private Set<String> getTopicsForTenantSchema ( final String tenantSchema ) {
     final String tenantName = OkapiTenantResolver.schemaNameToTenantId(tenantSchema)
-    TOPIC_SUFFIXES.collect { "${tenantName}${it}" } as Set
+    TOPIC_SUFFIXES.collect { "${tenantName}${it}" as String } as Set
   }
   
   @Subscriber('okapi:tenant_datasource_added')
   public void addTenantSubscriptions( final String tenantSchema ) {
     topic_list.addAll( getTopicsForTenantSchema( tenantSchema ) )
-    adjustSubscriptions()
+    topic_list_updated = true
   }
   
   @Subscriber('okapi:tenant_datasource_removed')
   public void removeTenantSubscriptions( final String tenantSchema ) {
     topic_list.removeAll( getTopicsForTenantSchema( tenantSchema ) )
-    adjustSubscriptions()
+    topic_list_updated = true
   }
   
-  protected KafkaConsumer adjustSubscriptions() {    
-    consumer.subscribe(topic_list)
-    log.info("this instance of mod-rs (${version}) is now listening out for topics : ${topic_list}")
-    consumer
+  protected void adjustSubscriptions() {
+    if (topic_list_updated) {
+      consumer.subscribe(topic_list)
+      log.info("this instance of mod-rs (${version}) is now listening out for topics : ${topic_list}")
+      topic_list_updated = false
+    }
   }
 
   private Map<String,?> parseMapFromRecord ( ConsumerRecord record ) {
@@ -134,40 +138,58 @@ public class EventConsumerService implements EventPublisher, DataBinder {
       final Duration pollTimeout = Duration.ofSeconds(1)
       
       while ( running ) {
-        Iterable<ConsumerRecord> consumerRecords = (consumer.subscription().empty ? [] : consumer.poll( pollTimeout )) as Iterable
-        consumerRecords.each { ConsumerRecord record ->
-          try {
-            log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}")
-
-            
-            switch ( record.topic() ) {
+        
+        if (!consumer.subscription().empty) {
+        
+          final Iterable<ConsumerRecord> consumerRecords = consumer.poll( pollTimeout )
+          
+          // Read each topic entry.
+          consumerRecords.each { final ConsumerRecord record ->
+            try {
+              log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}")
+  
               
-              case { String topic -> topic.endsWith(TOPIC_PATRON_REQUESTS_SUFFIX) }: 
-                final Map<String,?> data = parseMapFromRecord(record)
-                if ( data.event != null ) {
-                  notify('PREventIndication', data)
-                }
-                else {
-                  log.debug("No event specified in payoad: ${record.value()}")
-                }
-                break
+              switch ( record.topic() ) {
                 
-              case { String topic -> topic.endsWith(TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX) }:
-                notify('DirectoryUpdate', parseMapFromRecord(record))
-                break
-                
-              default:
-                log.debug("Not handling event for topic ${record.topic()}")
+                case { String topic -> topic.endsWith(TOPIC_PATRON_REQUESTS_SUFFIX) }: 
+                  final Map<String,?> data = parseMapFromRecord(record)
+                  if ( data.event != null ) {
+                    notify('PREventIndication', data)
+                  }
+                  else {
+                    log.debug("No event specified in payoad: ${record.value()}")
+                  }
+                  break
+                  
+                case { String topic -> topic.endsWith(TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX) }:
+                  notify('DirectoryUpdate', parseMapFromRecord(record))
+                  break
+                  
+                default:
+                  log.debug("Not handling event for topic ${record.topic()}")
+              }
+            }
+            catch(Exception e) {
+              log.error("problem processing event notification",e)
+            }
+            finally {
+              log.debug("Completed processing of rs entry event")
             }
           }
-          catch(Exception e) {
-            log.error("problem processing event notification",e)
-          }
-          finally {
-            log.debug("Completed processing of rs entry event")
-          }
+          consumer.commitAsync()
         }
-        consumer.commitAsync()
+          
+        // Check for updated topic list
+        adjustSubscriptions()
+      }
+    }
+    catch ( WakeupException we ) {
+      // Kafka client equivalent of Interrupt for poll operation.
+      // We should log the fact it was aborted as info and not an error.
+      if (!running) {
+        log.info ( 'Aborted current polling because of shutdown' )
+      } else {
+        log.error ( 'Poll operation was unexpectedly aborted' )
       }
     }
     catch ( Exception e ) {
