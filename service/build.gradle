@@ -1,10 +1,14 @@
-repositories {
-            mavenCentral()
+
+/** / // Disables caching of artefacts ensuring latest snapshots are used.
+configurations.all {
+ // Check for updates every build
+ resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
+/**/
 
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
   }
   dependencies {
@@ -86,9 +90,9 @@ eclipse {
 }
 
 repositories {
-  maven { url "http://maven.k-int.com/content/repositories/public" }
-  jcenter()
-  mavenLocal()
+//  mavenLocal()
+  mavenCentral()
+  maven { url "https://maven.k-int.com/content/repositories/public" }
   maven { url 'https://repo.grails.org/grails/core' }
   maven { url 'http://maven.indexdata.com/' }
   maven { url "https://repository.folio.org/repository/maven-folio" }
@@ -137,9 +141,6 @@ dependencies {
   // runtime "com.h2database:h2"
   runtime "javax.xml.bind:jaxb-api:2.3.1"
 
-  // non-graphql dependency
-  compile 'org.olf.reshare.dm.directory:dm-directory:2.0.1'
-
   profile "org.grails.profiles:rest-api"
 
 
@@ -178,6 +179,14 @@ dependencies {
   
   compile 'com.k_int.grails:web-toolkit-ce:6.4.1'
   compile 'com.k_int.okapi:grails-okapi:5.0.1'
+  
+  
+  // Data-model dependency
+//  compile 'org.olf.reshare.dm.directory:dm-directory:2.0.1'
+  
+  compile ('org.olf.reshare.dm.directory:dm-directory:2.0.1') {       // Required by Grails Okapi
+    exclude group: 'com.k_int.grails', module: 'web-toolkit-ce'
+  }
 
   // Custom non profile deps.
   compile 'org.apache.kafka:kafka-clients:2.8.1'
