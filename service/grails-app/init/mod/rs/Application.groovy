@@ -1,28 +1,22 @@
 package mod.rs
 
-import grails.boot.GrailsApp;
-import grails.boot.config.GrailsAutoConfiguration;
-import groovy.util.logging.Slf4j;
-
-import org.grails.datastore.gorm.validation.constraints.registry.ConstraintRegistry;
 import org.grails.datastore.mapping.model.MappingContext;
-import org.grails.datastore.mapping.model.PersistentEntity;
-import org.grails.datastore.gorm.validation.constraints.registry.DefaultValidatorRegistry;
 import org.grails.datastore.mapping.validation.ValidatorRegistry
-
 import org.springframework.boot.web.embedded.undertow.UndertowBuilderCustomizer
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.EnableScheduling
 
+import grails.boot.GrailsApp;
+import grails.boot.config.GrailsAutoConfiguration;
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j;
 import io.undertow.Undertow.Builder
-import io.undertow.UndertowOptions
 
 
-
+@EnableScheduling
 @CompileStatic
-@Slf4j 
+@Slf4j
 class Application extends GrailsAutoConfiguration {
 
   static void main(String[] args) {
