@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel
 
+import org.apache.commons.lang3.builder.HashCodeBuilder
+
 import grails.gorm.MultiTenant;
 
 /**
@@ -8,9 +10,7 @@ import grails.gorm.MultiTenant;
  * @author Chas
  *
  */
-class StateModelStatus implements MultiTenant<StateModelStatus> {
-
-    String id;
+class StateModelStatus implements Serializable, MultiTenant<StateModelStatus> {
 
     /** The state model this state is associated with */
     StateModel stateModel;
@@ -38,12 +38,29 @@ class StateModelStatus implements MultiTenant<StateModelStatus> {
     }
 
     static mapping = {
-                              id column : 'sms_id', generator: 'uuid2', length:36
+                              id composite : [ 'stateModel', 'state' ]
                          version column : 'sms_version'
                       stateModel column : 'sms_state_model'
                            state column : 'sms_state'
           canTriggerStaleRequest column : 'sms_can_trigger_stale_request'
         canTriggerOverdueRequest column : 'sms_can_trigger_overdue_request'
                       isTerminal column : 'sms_is_terminal'
+    }
+
+    public boolean equals(other) {
+        // If the object is not of the correct type then it can't be equal
+        if (!(other instanceof StateModelStatus)) {
+            return(false);
+        }
+
+        // So if the state and state model are the same
+        return((other.stateModel.id == stateModel.id) && (other.state.id == state.id));
+    }
+
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+        builder.append(stateModel.id);
+        builder.append(state.id);
+        return(builder.toHashCode());
     }
 }

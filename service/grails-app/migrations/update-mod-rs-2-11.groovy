@@ -75,9 +75,13 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "sm_overdue_status", baseTableName: "state_model", constraintName: "FKnhr0p3t18clni7rjkx0gu81wm", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
     }
 
-    changeSet(author: "Chas (generated)", id: "1664551605716-13") {
+    changeSet(author: "Chas (generated)", id: "1664874996380-1") {
         createTable(tableName: "state_model_status") {
-            column(name: "sms_id", type: "VARCHAR(36)") {
+            column(name: "sms_state_model", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "state_model_statusPK")
+            }
+
+            column(name: "sms_state", type: "VARCHAR(36)") {
                 constraints(nullable: "false", primaryKey: "true", primaryKeyName: "state_model_statusPK")
             }
 
@@ -94,14 +98,6 @@ databaseChangeLog = {
             }
 
             column(name: "sms_is_terminal", type: "BOOLEAN") {
-                constraints(nullable: "false")
-            }
-
-            column(name: "sms_state", type: "VARCHAR(36)") {
-                constraints(nullable: "false")
-            }
-
-            column(name: "sms_state_model", type: "VARCHAR(36)") {
                 constraints(nullable: "false")
             }
         }
