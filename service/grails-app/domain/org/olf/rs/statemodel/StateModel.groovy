@@ -111,7 +111,7 @@ where s in (select sms.state
         List workingStates = ((suppliedStates == null) ? [ ] : suppliedStates.collect());
 
         // Go through removing the items that no longer need to be there
-        if (states.size() > 0) {
+        if ((states != null) && (states.size() > 0)) {
             // Process all the current records
             states.collect().each { state ->
                 // now look to see if it is in the working list
