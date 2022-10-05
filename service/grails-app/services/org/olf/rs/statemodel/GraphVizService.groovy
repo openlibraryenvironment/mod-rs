@@ -10,9 +10,9 @@ import static guru.nidi.graphviz.model.Link.to;
 import groovy.util.logging.Slf4j
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Font;
+import guru.nidi.graphviz.attribute.GraphAttr.SplineMode;
 import guru.nidi.graphviz.attribute.Rank;
 import guru.nidi.graphviz.attribute.Shape;
-import guru.nidi.graphviz.attribute.GraphAttr.SplineMode;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
@@ -103,7 +103,7 @@ public class GraphVizService {
 
     private List<String> getCompletedStates(StateModel model) {
         List<String> completedStates = new ArrayList<String>();
-        Status.findAllByOwnerAndStage(model, StatusStage.COMPLETED).each { status ->
+        StateModel.getCompletedStates(model.shortcode).each { status ->
             completedStates.add(status.code);
         }
         return(completedStates);

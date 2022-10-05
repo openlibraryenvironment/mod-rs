@@ -171,11 +171,19 @@ where s in (select sms.state
     }
 
     public static List<Status> getActiveStates(String modelCode) {
+        return(getStatesByStage(modelCode, [ StatusStage.ACTIVE, StatusStage.ACTIVE_SHIPPED ]));
+    }
+
+    public static List<Status> getCompletedStates(String modelCode) {
+        return(getStatesByStage(modelCode, [ StatusStage.COMPLETED ]));
+    }
+
+    public static List<Status> getStatesByStage(String modelCode, List<StatusStage> stages) {
         List<Status> result = null;
 
         if (modelCode != null) {
             // Just lookup the statuses that have the appropriate stage for this model
-            result = Status.findAll(STATES_FOR_STAGES_QUERY, [ stateModelCode : modelCode, stages : [ StatusStage.ACTIVE, StatusStage.ACTIVE_SHIPPED ]]);
+            result = Status.findAll(STATES_FOR_STAGES_QUERY, [ stateModelCode : modelCode, stages : stages ]);
         }
 
         // Return an empty array instead of null
