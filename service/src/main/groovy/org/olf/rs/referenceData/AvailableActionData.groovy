@@ -95,6 +95,7 @@ public class AvailableActionData {
 
         // RES_OVERDUE OR "Overdue"
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_ISO18626_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_SHIPPED_RETURN_ISO18626);
 
         // REQ_REQUEST_SENT_TO_SUPPLIER OR "Request sent"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
