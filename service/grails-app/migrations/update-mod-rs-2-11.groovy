@@ -46,15 +46,6 @@ databaseChangeLog = {
         }
     }
 
-
-    changeSet(author: "Chas (generated)", id: "1664201829503-1") {
-        // New column to say what action is being performed when a request is considered stale
-        addColumn(tableName: "state_model") {
-            column(name: "sm_stale_action", type: "varchar(36)")
-        }
-        addForeignKeyConstraint(baseColumnNames: "sm_stale_action", baseTableName: "state_model", constraintName: "FKrs32cws730v084r29fyw1awx3", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "ae_id", referencedTableName: "action_event", validate: "true")
-    }
-
     changeSet(author: "Chas (generated)", id: "1664288044250-1") {
         addColumn(tableName: "action_event") {
             column(name: "ae_service_class", type: "varchar(64)")
@@ -62,7 +53,7 @@ databaseChangeLog = {
     }
 
     changeSet(author: "Chas (generated)", id: "1664358925815-1") {
-        // If a request is determined to be overdue then this is the action to be performed
+        // If a request is determined to be stale then this is the action to be performed
         addColumn(tableName: "state_model") {
             column(name: "sm_stale_action", type: "varchar(36)")
         }
