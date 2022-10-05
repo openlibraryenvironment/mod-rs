@@ -75,10 +75,13 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "sm_overdue_status", baseTableName: "state_model", constraintName: "FKnhr0p3t18clni7rjkx0gu81wm", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
     }
 
-    changeSet(author: "Chas (generated)", id: "1664533125580-13") {
-        // The states available to a model
+    changeSet(author: "Chas (generated)", id: "1664874996380-1") {
         createTable(tableName: "state_model_status") {
-            column(name: "sms_id", type: "VARCHAR(36)") {
+            column(name: "sms_state_model", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "state_model_statusPK")
+            }
+
+            column(name: "sms_state", type: "VARCHAR(36)") {
                 constraints(nullable: "false", primaryKey: "true", primaryKeyName: "state_model_statusPK")
             }
 
@@ -86,22 +89,20 @@ databaseChangeLog = {
                 constraints(nullable: "false")
             }
 
-            column(name: "sms_can_trigger_overdue_request", type: "BOOLEAN")
-
-            column(name: "sms_can_trigger_stale_request", type: "BOOLEAN")
-
-            column(name: "sms_is_terminal", type: "BOOLEAN")
-
-            column(name: "sms_state", type: "VARCHAR(36)") {
+            column(name: "sms_can_trigger_overdue_request", type: "BOOLEAN") {
                 constraints(nullable: "false")
             }
 
-            column(name: "sms_state_model", type: "VARCHAR(36)") {
+            column(name: "sms_can_trigger_stale_request", type: "BOOLEAN") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "sms_is_terminal", type: "BOOLEAN") {
                 constraints(nullable: "false")
             }
         }
 
-        // Add the foreign keys
+        // Add the foreign key constraints
         addForeignKeyConstraint(baseColumnNames: "sms_state_model", baseTableName: "state_model_status", constraintName: "FK25422f62cugfnficmn7xoeram", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "sm_id", referencedTableName: "state_model", validate: "true")
         addForeignKeyConstraint(baseColumnNames: "sms_state", baseTableName: "state_model_status", constraintName: "FKmkj0x77yy0pixpdwqjc8p71gj", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
     }

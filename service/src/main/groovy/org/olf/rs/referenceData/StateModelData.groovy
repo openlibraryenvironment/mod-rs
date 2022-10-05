@@ -14,7 +14,6 @@ public class StateModelData {
 
     // The states available to the default requester state model
     static private final List requesterStates = [
-/*
         [ status : Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING ],
         [ status : Status.PATRON_REQUEST_BORROWER_RETURNED ],
         [ status : Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED ],
@@ -43,28 +42,23 @@ public class StateModelData {
         [ status : Status.PATRON_REQUEST_UNFILLED ],
         [ status : Status.PATRON_REQUEST_VALIDATED ],
         [ status : Status.PATRON_REQUEST_WILL_SUPPLY ]
-*/
     ];
 
     // The states available to the default responder state model
     static private final List responderStates = [
-/*
         [ status : Status.RESPONDER_AWAIT_PICKING ],
         [ status : Status.RESPONDER_AWAITING_RETURN_SHIPPING ],
         [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
         [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
         [ status : Status.RESPONDER_COMPLETE, isTerminal : true ],
         [ status : Status.RESPONDER_IDLE, canTriggerStaleRequest : true ],
-*/
         [ status : Status.RESPONDER_ITEM_RETURNED ],
-        [ status : Status.RESPONDER_ITEM_SHIPPED, canTriggerOverdueRequest : true ]
-/*
+        [ status : Status.RESPONDER_ITEM_SHIPPED, canTriggerOverdueRequest : true ],
         [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true ],
         [ status : Status.RESPONDER_NOT_SUPPLIED, isTerminal : true ],
         [ status : Status.RESPONDER_OVERDUE ],
         [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
         [ status : Status.RESPONDER_UNFILLED, isTerminal : true ]
-*/
     ];
 
 	public void load() {

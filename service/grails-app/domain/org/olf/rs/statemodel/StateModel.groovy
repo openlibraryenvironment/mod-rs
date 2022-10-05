@@ -29,8 +29,7 @@ where s in (select sms.state
             from StateModel as sm
                 inner join sm.states as sms
             where sm.shortcode = :stateModelCode and
-                  (sms.isTerminal = false or
-                   sms.isTerminal is null))
+                  sms.isTerminal = false)
 """;
 
     /** The query to find all states for a state model */
@@ -126,8 +125,13 @@ where s in (select sms.state
                     workingStates.remove(indexToRemove);
 
                     // Just update the additional fields, but we need to do it to the already saved record
-                    StateModelStatus savedState = this.states.find { realState -> realState.state.code.equals(state.state.code) };
-                    savedState.ensure(foundState.canTriggerStaleRequest, foundState.canTriggerOverdueRequest, foundState.isTerminal);
+                    states.find { realState ->
+                        if (realState.state.code.equals(state.state.code)) {
+                            updateState(realState, foundState.canTriggerStaleRequest, foundState.canTriggerOverdueRequest, foundState.isTerminal);
+                            return(true);
+                        }
+                        return(false);
+                    };
                 }
             }
         }
@@ -140,12 +144,26 @@ where s in (select sms.state
             state.state = Status.lookup(workingState.status);
             if (state.state != null) {
                 // We have a status, now set the additional fields
-                state.ensure(workingState.canTriggerStaleRequest, workingState.canTriggerOverdueRequest, workingState.isTerminal);
+                updateState(state, workingState.canTriggerStaleRequest, workingState.canTriggerOverdueRequest, workingState.isTerminal);
 
                 // Now add the state as its not already there
                 addToStates(state);
             }
         }
+    }
+
+    private void updateState(
+        StateModelStatus state,
+        Boolean canTriggerStaleRequest,
+        Boolean canTriggerOverdueRequest,
+        Boolean isTerminal
+    ) {
+        // DOT NOT move this method to the StateModelStatus domain as it will not work for updates and I have no idea why it dosn't spent far to long trying to make it work
+        // Update the fields on the state record
+        state.canTriggerStaleRequest = canTriggerStaleRequest == null ? Boolean.FALSE : canTriggerStaleRequest;
+        state.canTriggerOverdueRequest = canTriggerOverdueRequest == null ? Boolean.FALSE : canTriggerOverdueRequest;
+        state.isTerminal = isTerminal == null ? Boolean.FALSE : isTerminal;
+        // We do not need to perform a save here as it is implicitlt done by the parent
     }
 
     static public StateModel lookup(String code) {

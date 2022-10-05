@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel
 
+import org.apache.commons.lang3.builder.HashCodeBuilder
+
 import grails.gorm.MultiTenant;
 
 /**
@@ -8,9 +10,7 @@ import grails.gorm.MultiTenant;
  * @author Chas
  *
  */
-class StateModelStatus implements MultiTenant<StateModelStatus> {
-
-    String id;
+class StateModelStatus implements Serializable, MultiTenant<StateModelStatus> {
 
     /** The state model this state is associated with */
     StateModel stateModel;
@@ -19,24 +19,26 @@ class StateModelStatus implements MultiTenant<StateModelStatus> {
     Status state;
 
     /** Can this state trigger stale request functionality for a request */
-    Boolean canTriggerStaleRequest;
+    boolean canTriggerStaleRequest;
 
     /** Can this state trigger overdue functionality for a request */
-    Boolean canTriggerOverdueRequest;
+    boolean canTriggerOverdueRequest;
 
     /** Is this state considered a terminal state */
-    Boolean isTerminal;
+    boolean isTerminal;
+
+    static belongsTo = [ stateModel: StateModel ];
 
     static constraints = {
                       stateModel (nullable: false)
                            state (nullable: false)
-          canTriggerStaleRequest (nullable: true)
-        canTriggerOverdueRequest (nullable: true)
-                      isTerminal (nullable: true)
+          canTriggerStaleRequest (nullable: false)
+        canTriggerOverdueRequest (nullable: false)
+                      isTerminal (nullable: false)
     }
 
     static mapping = {
-                              id column : 'sms_id', generator: 'uuid2', length:36
+                              id composite : [ 'stateModel', 'state' ]
                          version column : 'sms_version'
                       stateModel column : 'sms_state_model'
                            state column : 'sms_state'
@@ -45,16 +47,20 @@ class StateModelStatus implements MultiTenant<StateModelStatus> {
                       isTerminal column : 'sms_is_terminal'
     }
 
-    public void ensure(
-        Boolean canTriggerStaleRequest,
-        Boolean canTriggerOverdueRequest,
-        Boolean isTerminal
-    ) {
-        this.canTriggerStaleRequest = canTriggerStaleRequest;
-        this.canTriggerOverdueRequest = canTriggerOverdueRequest;
-        this.isTerminal = isTerminal;
+    public boolean equals(other) {
+        // If the object is not of the correct type then it can't be equal
+        if (!(other instanceof StateModelStatus)) {
+            return(false);
+        }
 
-        // Save the record
-//        save(flush: false, failOnError: true);
+        // So if the state and state model are the same
+        return((other.stateModel.id == stateModel.id) && (other.state.id == state.id));
+    }
+
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+        builder.append(stateModel.id);
+        builder.append(state.id);
+        return(builder.toHashCode());
     }
 }

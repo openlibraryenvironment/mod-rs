@@ -84,6 +84,7 @@ if ( ( Environment.isDevelopmentMode() ) ||
   //logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
   //logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
   logger 'org.olf.RSLifecycleSpec', DEBUG
+  logger 'services.k_int.core', TRACE
 }
 else {
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)

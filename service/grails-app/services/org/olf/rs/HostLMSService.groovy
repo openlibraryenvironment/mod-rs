@@ -1,17 +1,10 @@
 package org.olf.rs;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
-import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.HostLMSActions;
-import grails.core.GrailsApplication
+
+import com.k_int.web.toolkit.settings.AppSetting;
+
+import grails.core.GrailsApplication;
 
 /**
  * Return the right HostLMSActions for the tenant config
@@ -43,18 +36,18 @@ public class HostLMSService {
     return result;
   }
 
-  /* 
+  /*
    *  Utility function to handle checking in volumes for a request
    */
   public Map checkInRequestVolumes(PatronRequest request) {
-    
+
     boolean result = false;
     def resultMap = [:];
     resultMap.checkInList = [];
     resultMap.hostLMS = false;
     resultMap.errors = [];
     resultMap.complete = [:];
-    /* 
+    /*
     Since we don't throw errors for checking in already-checked-in items there's no
     reason not to just try and check in all of the volumes
     */
@@ -70,12 +63,12 @@ public class HostLMSService {
         checkInMap.result = check_in_result;
         checkInMap.volume = vol;
         String message;
-        if(check_in_result?.result == true) {          
-          if(check_in_result?.already_checked_in == true) {	
+        if(check_in_result?.result == true) {
+          if(check_in_result?.already_checked_in == true) {
             message = "NCIP CheckinItem call succeeded for item: ${vol.temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem not performed because the item was already checked in.'}"
           } else {
             message = "NCIP CheckinItem call succeeded for item: ${vol.temporaryItemBarcode}. ${check_in_result.reason=='spoofed' ? '(No host LMS integration configured for check in item call)' : 'Host LMS integration: CheckinItem call succeeded.'}"
-          }          
+          }
           checkInMap.success = true;
           reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
           def newVolStatus = check_in_result.reason=='spoofed' ? vol.lookupStatus('lms_check_in_(no_integration)') : vol.lookupStatus('completed')
@@ -114,7 +107,7 @@ public class HostLMSService {
     volumesNotCheckedIn = request.volumes.findAll { rv -> rv.status.value == 'awaiting_lms_check_in'; }
 
     if(volumesNotCheckedIn.size() == 0) {
-      statisticsService.decrementCounter('/activeLoans');
+      statisticsService.decrementCounter(Counter.COUNTER_ACTIVE_LOANS);
       request.needsAttention = false;
       request.activeLoan = false;
 
@@ -142,7 +135,7 @@ public class HostLMSService {
     }
     resultMap.result = result;
     return resultMap;
-    
+
   }
 
 }

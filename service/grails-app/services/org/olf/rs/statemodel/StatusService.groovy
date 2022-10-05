@@ -108,6 +108,9 @@ public class StatusService {
 
         // Can't continue if we do not have a model or events
         if ((events != null) && (model != null)) {
+            // Obtain the list of valid status for the model
+            List<Status> validStatus = StateModel.getAllStates(model.shortcode);
+
             // Process the events
             events.each() { event ->
                 // Must have a resultList
@@ -116,38 +119,40 @@ public class StatusService {
                     Status status = Status.lookupStatusEvent(event);
 
                     // Did we find a status
-                    // TODO: Check that the status is used by this model
                     if (status != null) {
-                        // Now we can process the result records
-                        event.resultList.results.each() { result ->
-                            // Only interested where the status has changed
-                            if ((result.status != null) && !result.status.id.equals(status.id)) {
-                            // if we are restoring we need to be a lot cleverer
-                                if (isRestoreRequired(result.saveRestoreState)) {
-                                    // ensure the saveValue is populated
-                                    if (saveValue == null) {
-                                        // Appears not t be doing anything, but is actually populating saveValue, will always return false
-                                        isSaveRequired(result.saveRestoreState);
-                                    }
+                        // Is it a state that belongs to the state model
+                        if (validStatus.find { modelState -> return(modelState.id.equals(status.id)) } != null) {
+                            // Now we can process the result records
+                            event.resultList.results.each() { result ->
+                                // Only interested where the status has changed
+                                if ((result.status != null) && !result.status.id.equals(status.id)) {
+                                // if we are restoring we need to be a lot cleverer
+                                    if (isRestoreRequired(result.saveRestoreState)) {
+                                        // ensure the saveValue is populated
+                                        if (saveValue == null) {
+                                            // Appears not t be doing anything, but is actually populating saveValue, will always return false
+                                            isSaveRequired(result.saveRestoreState);
+                                        }
 
-                                    // Find all the states that we can potentially return to
-                                    findAllStatesThatSaveOnStatus(result.status).forEach() { toStatus ->
-                                        // Create a transition for them
+                                        // Find all the states that we can potentially return to
+                                        findAllStatesThatSaveOnStatus(result.status).forEach() { toStatus ->
+                                            // Create a transition for them
+                                            transitions.add(new Transition (
+                                                fromStatus : status,
+                                                actionEvent : event,
+                                                qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
+                                                toStatus : ((result.overrideSaveStatus == null) ? toStatus : result.overrideSaveStatus)
+                                            ));
+                                        }
+                                    } else {
+                                        // Should we take into account save / restore, does this happen during an event ...
                                         transitions.add(new Transition (
                                             fromStatus : status,
                                             actionEvent : event,
-                                            qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
-                                            toStatus : ((result.overrideSaveStatus == null) ? toStatus : result.overrideSaveStatus)
+                                            qualifier : result.qualifier,
+                                            toStatus : result.status
                                         ));
                                     }
-                                } else {
-                                    // Should we take into account save / restore, does this happen during an event ...
-                                    transitions.add(new Transition (
-                                        fromStatus : status,
-                                        actionEvent : event,
-                                        qualifier : result.qualifier,
-                                        toStatus : result.status
-                                    ));
                                 }
                             }
                         }

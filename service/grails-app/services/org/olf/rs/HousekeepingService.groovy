@@ -58,9 +58,6 @@ public class HousekeepingService {
         // The predefined reports
         ReportData.loadAll();
 
-        // Ensure we have a basic state model record
-//        StateModelData.loadAll(false);
-
 		// Add the Settings
 		SettingsData.loadAll();
 
