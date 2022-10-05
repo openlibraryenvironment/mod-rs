@@ -7,12 +7,9 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
 import org.olf.rs.timers.AbstractTimer;
 import org.olf.templating.*;
 
-import com.k_int.okapi.OkapiClient;
 import com.k_int.web.toolkit.settings.AppSetting;
 
 import grails.util.Holders;
@@ -25,16 +22,11 @@ import groovy.json.JsonSlurper;
 public class BackgroundTaskService {
 
   def grailsApplication
-  def reshareActionService
-  def groovyPageRenderer
   def templatingService
 
-  OkapiClient okapiClient
   EmailService emailService
   PatronNoticeService patronNoticeService
-  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   OkapiSettingsService okapiSettingsService
-
 
   private static config_test_count = 0;
   private static String PULL_SLIP_QUERY='''
@@ -80,31 +72,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
     try {
         // Generate and log patron requests at a pick location we don't know about
         reportMissingPickLocations()
-
-        //Find any supplier-side PatronRequests that have become overdue
-        log.debug("Checking for overdue PatronRequests");
-        Date currentDate = new Date();
-        def criteria = PatronRequest.createCriteria();
-        def results = criteria.list {
-          lt("parsedDueDateRS", currentDate) //current date is later than due date
-          state {
-            eq("code",Status.RESPONDER_ITEM_SHIPPED) //only marked items as overdue once shipped
-          }
-          ne("isRequester", true) //request is not request-side (we want supply-side)
-        }
-        results.each { patronRequest ->
-          log.debug("Found PatronRequest ${patronRequest.id} with state ${patronRequest.state?.code}");
-          def previousState = patronRequest.state;
-          def overdueState = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_OVERDUE);
-          if(overdueState == null) {
-            log.error("Unable to lookup state with reshareApplicationEventHandlerService.lookupStatus('Responder', 'RES_OVERDUE')");
-          } else {
-            patronRequest.state = overdueState;
-            reshareApplicationEventHandlerService.auditEntry(patronRequest, previousState, overdueState, "Request is Overdue", null);
-            log.debug("PatronRequest ${patronRequest.id} is overdue -- currently ${currentDate} and due on ${patronRequest.parsedDueDateRS}");
-            patronRequest.save(flush:true, failOnError:true);
-          }
-        }
 
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0

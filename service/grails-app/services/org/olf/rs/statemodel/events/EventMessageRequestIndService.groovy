@@ -12,8 +12,7 @@ import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StateModel;
-import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StatusService;
 
 import groovy.util.logging.Slf4j
 
@@ -28,6 +27,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
+    StatusService statusService;
 
     @Override
     String name() {
@@ -165,8 +165,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-            pr.state = reshareApplicationEventHandlerService.lookupStatus(StateModel.MODEL_RESPONDER, Status.RESPONDER_IDLE);
             pr.isRequester = false;
+            pr.stateModel = statusService.getStateModel(pr.isRequester);
+            pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
 
             log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");

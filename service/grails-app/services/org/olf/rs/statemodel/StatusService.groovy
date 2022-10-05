@@ -3,7 +3,9 @@ package org.olf.rs.statemodel;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.SettingsService;
 import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.rs.referenceData.SettingsData;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
 
@@ -16,6 +18,7 @@ public class StatusService {
 
     ReferenceDataService referenceDataService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+    SettingsService settingsService;
 
     /** The vslue of the ref data value record for if we need to save the status*/
     private String saveValue = null;
@@ -94,50 +97,62 @@ public class StatusService {
         return(transitions);
     }
 
+    /**
+     * Retrieves all the possible transitions for the supplied events for the given state model
+     * @param model The state model that we want the transitions for
+     * @param events The events that the transitions are required for
+     * @return The transitions that are appropriate for the supplied state model and events
+     */
     public List<Transition> possibleEventTransitionsForModel(StateModel model, List<ActionEvent> events) {
         List<Transition> transitions = new ArrayList<Transition>();
 
         // Can't continue if we do not have a model or events
         if ((events != null) && (model != null)) {
+            // Obtain the list of valid status for the model
+            List<Status> validStatus = StateModel.getAllStates(model.shortcode);
+
             // Process the events
             events.each() { event ->
                 // Must have a resultList
                 if (event.resultList != null) {
                     // First we need to find the status that triggers this event
-                    Status status = Status.lookupStatusEvent(model, event);
+                    Status status = Status.lookupStatusEvent(event);
 
-                    // Did we find one for this model
+                    // Did we find a status
                     if (status != null) {
-                        // Now we can process the result records
-                        event.resultList.results.each() { result ->
-                            // Only interested where the status has changed
-                            if ((result.status != null) && !result.status.id.equals(status.id)) {
-                            // if we are restoring we need to be a lot cleverer
-                                if (isRestoreRequired(result.saveRestoreState)) {
-                                    // ensure the saveValue is populated
-                                    if (saveValue == null) {
-                                        // Appears not t be doing anything, but is actually populating saveValue, will always return false
-                                        isSaveRequired(result.saveRestoreState);
-                                    }
+                        // Is it a state that belongs to the state model
+                        if (validStatus.find { modelState -> return(modelState.id.equals(status.id)) } != null) {
+                            // Now we can process the result records
+                            event.resultList.results.each() { result ->
+                                // Only interested where the status has changed
+                                if ((result.status != null) && !result.status.id.equals(status.id)) {
+                                // if we are restoring we need to be a lot cleverer
+                                    if (isRestoreRequired(result.saveRestoreState)) {
+                                        // ensure the saveValue is populated
+                                        if (saveValue == null) {
+                                            // Appears not t be doing anything, but is actually populating saveValue, will always return false
+                                            isSaveRequired(result.saveRestoreState);
+                                        }
 
-                                    // Find all the states that we can potentially return to
-                                    findAllStatesThatSaveOnStatus(result.status).forEach() { toStatus ->
-                                        // Create a transition for them
+                                        // Find all the states that we can potentially return to
+                                        findAllStatesThatSaveOnStatus(result.status).forEach() { toStatus ->
+                                            // Create a transition for them
+                                            transitions.add(new Transition (
+                                                fromStatus : status,
+                                                actionEvent : event,
+                                                qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
+                                                toStatus : ((result.overrideSaveStatus == null) ? toStatus : result.overrideSaveStatus)
+                                            ));
+                                        }
+                                    } else {
+                                        // Should we take into account save / restore, does this happen during an event ...
                                         transitions.add(new Transition (
                                             fromStatus : status,
                                             actionEvent : event,
-                                            qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
-                                            toStatus : ((result.overrideSaveStatus == null) ? toStatus : result.overrideSaveStatus)
+                                            qualifier : result.qualifier,
+                                            toStatus : result.status
                                         ));
                                     }
-                                } else {
-                                    // Should we take into account save / restore, does this happen during an event ...
-                                    transitions.add(new Transition (
-                                        fromStatus : status,
-                                        actionEvent : event,
-                                        qualifier : result.qualifier,
-                                        toStatus : result.status
-                                    ));
                                 }
                             }
                         }
@@ -192,6 +207,7 @@ public class StatusService {
 
     /**
      * Looks to find a result record from the parameters that have been passed in
+     * @param model The state model that the result has to be associated with
      * @param fromStatus The status we want to transition from
      * @param actionCode The action code that has been performed
      * @param successful Was the execution of the action successful
@@ -199,7 +215,7 @@ public class StatusService {
      * @param availableActionMustExist If trye it means an AvailableAction record must exist
      * @return An ActionEventResult that informs us what to do on completion of the ActionEvent
      */
-    public ActionEventResult findResult(Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
+    public ActionEventResult findResult(StateModel model, Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
         // We return null if we could not find a status
         ActionEventResult actionEventResult = null;
 
@@ -211,7 +227,7 @@ public class StatusService {
                 boolean carryOn = true;
                 if (availableActionMustExist) {
                     // Get hold of the AvailableAction
-                    AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, fromStatus.owner);
+                    AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, model);
                     if (availableAction != null) {
                         // Now do we have a resultList on the availableAction
                         if (availableAction.resultList != null) {
@@ -219,7 +235,7 @@ public class StatusService {
                         }
                     } else {
                         carryOn = false;
-                        log.error('Looking up the to status, but unable to find an AvailableAction for Model: ' + fromStatus.owner.shortcode +
+                        log.error('Looking up the to status, but unable to find an AvailableAction for Model: ' + model.shortcode +
                                      ', fromStatus: ' + fromStatus.code +
                                      ', action: ' + actionCode);
                     }
@@ -269,7 +285,8 @@ public class StatusService {
         Status newStatus = request.state;
 
         // Now lets see if we can find the ActionEventResult record
-        ActionEventResult actionEventResult = findResult(request.state, action, successful, qualifier, availableActionMustExist);
+        StateModel stateModel = (request.stateModel == null) ? getStateModel(request.isRequester) : request.stateModel;
+        ActionEventResult actionEventResult = findResult(stateModel, request.state, action, successful, qualifier, availableActionMustExist);
 
         // Did we find a result
         if (actionEventResult != null) {
@@ -282,7 +299,7 @@ public class StatusService {
                     String newStatusCode = request.previousStates.get(statusCode);
                     if (newStatusCode != null) {
                         // That is good we have a saved status
-                        newStatus = reshareApplicationEventHandlerService.lookupStatus(request.state.owner.shortcode, newStatusCode);
+                        newStatus = Status.lookup(newStatusCode);
 
                         // We also clear the saved value
                         request.previousStates[statusCode] = null;
@@ -321,6 +338,11 @@ public class StatusService {
         return(newStatus);
     }
 
+    /**
+     * Checks the supplied RefdataValue to see if we are restoring the status from a previous saved value
+     * @param saveRestoreValue The reference value that needs to be checked to see if it means restore the previous saved value
+     * @return true if we need to restore a previously saved value otherwise false
+     */
     private boolean isRestoreRequired(RefdataValue saveRestoreValue) {
         boolean result  = false;
 
@@ -346,6 +368,11 @@ public class StatusService {
         return(result);
     }
 
+    /**
+     * Checks the supplied RefdataValue to see if we need to save the current status before it is set with the new status
+     * @param saveRestoreValue The reference value that needs to be checked to see if it means save the current value
+     * @return true if we need to save the current status before we overwrite it otherwise false
+     */
     private boolean isSaveRequired(RefdataValue saveRestoreValue) {
         boolean result  = false;
 
@@ -369,5 +396,27 @@ public class StatusService {
 
         // Return the result to the caller
         return(result);
+    }
+
+    /**
+     * Returns the state model currently in use (this will need to be extended to take into account the institution once we have determined where the institution is coming from)
+     * @param isRequester Are we playing the role of requester
+     * @return The state model that is being used
+     */
+    public StateModel getStateModel(boolean isRequester) {
+        // Generate the settings key
+        String settingsKey = isRequester ? SettingsData.SETTING_STATE_MODEL_REQUESTER : SettingsData.SETTING_STATE_MODEL_RESPONDER;
+        String stateModelCode = settingsService.getSettingValue(settingsKey);
+
+        // Lookup the state model
+        StateModel stateModel = StateModel.lookup(stateModelCode);
+        if (stateModel == null) {
+            // Log the fact that we cannot find the state model and return a default
+            log.error("unable to find state model with code " + stateModelCode + " in StatusService.getStateModel(" + boolean.toString() + ")");
+            stateModel = StateModel.lookup(isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER);
+        }
+
+        // Return the found state model
+        return(stateModel);
     }
 }

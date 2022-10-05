@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
-import org.olf.rs.HostLMSService
+import org.olf.rs.Counter;
+import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.lms.HostLMSActions;
@@ -34,7 +35,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
         boolean ncipResult = false;
 
         // Increment the active borrowing counter
-        statisticsService.incrementCounter('/activeBorrowing');
+        statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_BORROWING);
 
         // Check the item in to the local LMS
         HostLMSActions hostLMS = hostLMSService.getHostLMSActions();

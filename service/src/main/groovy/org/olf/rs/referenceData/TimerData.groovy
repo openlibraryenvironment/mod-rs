@@ -33,6 +33,14 @@ public class TimerData {
             "FREQ=MINUTELY;INTERVAL=10",
             "RequestNetworkTimeout"
         );
+
+        // Timer to check for overdue requests
+        Timer.ensure(
+            "CheckForOverdueSupplierRequests",
+            "Check for any requests that have not been returned to the supplier by the requester",
+            "FREQ=DAILY",
+            "CheckForOverdueSupplierRequests"
+        );
 	}
 
 	public static void loadAll() {

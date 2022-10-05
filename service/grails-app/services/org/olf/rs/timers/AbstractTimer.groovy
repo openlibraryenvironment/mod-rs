@@ -9,6 +9,9 @@ package org.olf.rs.timers;
  */
 public abstract class AbstractTimer {
 
+    /** The timezone we work with, used by some of the timers */
+    public static final String TIME_ZONE_UTC = 'UTC';
+
 	/**
 	 * Method that performs the required task of the timer
 	 * @param config The config as configured against the timer

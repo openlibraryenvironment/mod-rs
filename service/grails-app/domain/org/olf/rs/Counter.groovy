@@ -8,11 +8,14 @@ import grails.gorm.MultiTenant;
  */
 class Counter implements MultiTenant<Counter> {
 
+    static public final String COUNTER_ACTIVE_BORROWING = '/activeBorrowing';
+    static public final String COUNTER_ACTIVE_LOANS     = '/activeLoans';
+
   String id
   String context
   String description
   Long value
-  
+
   static constraints = {
         context (nullable : false, blank: false, unique: true)
     description (nullable : true,  blank: false)

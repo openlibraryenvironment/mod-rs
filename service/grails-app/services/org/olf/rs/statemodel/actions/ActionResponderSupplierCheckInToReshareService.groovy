@@ -1,7 +1,8 @@
 package org.olf.rs.statemodel.actions;
 
+import org.olf.rs.Counter;
 import org.olf.rs.DirectoryEntryService;
-import org.olf.rs.HostLMSService
+import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestAudit
 import org.olf.rs.RequestVolume;
@@ -162,7 +163,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                         }
 
                         if (volumesNotCheckedIn.size() == 0) {
-                            statisticsService.incrementCounter('/activeLoans');
+                            statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
                             request.activeLoan = true;
                             request.needsAttention = false;
                             AppSetting useLMSDueDate = AppSetting.findByKey('ncip_use_due_date');

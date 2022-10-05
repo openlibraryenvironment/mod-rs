@@ -132,7 +132,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Is the this the requester or suppliers view of the request */
   Boolean isRequester;
 
-  // Status
+  /** The state model this request is following */
+  StateModel stateModel;
+
+  /** The current status of the request */
   Status state
 
   /** The number of retries that have occurred, */
@@ -254,6 +257,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronIdentifier (nullable: true)
     patronReference (nullable: true)
     serviceType (nullable: true)
+    stateModel (nullable: true, bindable: false)
     state (nullable: true, bindable: false)
     isRequester (nullable: true, bindable: true)
     numberOfRetries (nullable: true, bindable: false)
@@ -361,6 +365,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     patronIdentifier column : 'pr_patron_identifier'
     patronReference column : 'pr_patron_reference'
     serviceType column : 'pr_service_type_fk'
+    stateModel column : 'pr_state_model_fk'
     state column : 'pr_state_fk'
     isRequester column : "pr_is_requester"
     numberOfRetries column : 'pr_number_of_retries'
@@ -465,16 +470,17 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   /**
-   * If this is a requester request we are inserting then set the pending action to be VALIDATE
+   * The beforeInsert method is triggered prior to an insert
    */
   def beforeInsert() {
-    if ( this.state == null ) {
-      if ( this.isRequester ) {
-        this.state = Status.lookup(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE);
-      }
-      else {
-        this.state = Status.lookup(StateModel.MODEL_RESPONDER, Status.RESPONDER_IDLE);
-      }
+    // If the state model is null then set it
+    if (this.stateModel == null) {
+        this.stateModel = Holders.grailsApplication.mainContext.getBean('statusService').getStateModel(this.isRequester);
+    }
+
+    // If the state is null, then we need to set it to the initial state for the model in play
+    if (this.state == null) {
+      this.state = stateModel.initialState;
     }
   }
 

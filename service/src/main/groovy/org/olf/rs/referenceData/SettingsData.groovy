@@ -2,6 +2,7 @@ package org.olf.rs.referenceData;
 
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.statemodel.StateModel;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -31,6 +32,7 @@ public class SettingsData {
     private static final String SECTION_ROUTING              = 'Routing';
     private static final String SECTION_SHARED_INDEX         = 'sharedIndex';
     private static final String SECTION_STATE_ACTION_CONFIG  = 'state_action_config';
+    private static final String SECTION_STATE_MODEL          = 'state_model';
     private static final String SECTION_WMS                  = 'wmsSettings';
     private static final String SECTION_Z3950                = 'z3950';
 
@@ -111,6 +113,12 @@ public class SettingsData {
     public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
     public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
+    // State model configuration settings
+    public static final String SETTING_STATE_MODEL_REQUESTER     = 'state_model_requester';
+    public static final String SETTING_STATE_MODEL_REQUESTER_CDL = 'state_model_requester_cdl';
+    public static final String SETTING_STATE_MODEL_RESPONDER     = 'state_model_responder';
+    public static final String SETTING_STATE_MODEL_RESPONDER_CDL = 'state_model_responder_cdl';
+
     public static void loadAll() {
         (new SettingsData()).load();
     }
@@ -125,7 +133,7 @@ public class SettingsData {
      * @param value the the value that it is given to start off with (default: null)
      * @return the AppSetting that exists or has been created
      */
-    public AppSetting ensureAppSetting(String key, String section, String settingType, String vocabulary = null, String defaultValue = null, String value = null) {
+    public AppSetting ensureAppSetting(String key, String section, String settingType, String vocabulary = null, String defaultValue = null, String value = null, boolean hidden = null) {
         AppSetting result = AppSetting.findByKey(key);
         if (result == null) {
             result = new AppSetting(
@@ -134,7 +142,8 @@ public class SettingsData {
                 vocab: vocabulary,
                 key: key,
                 defValue: defaultValue,
-                value: value
+                value: value,
+                hidden: hidden
             );
             result.save(flush:true, failOnError:true);
         }
@@ -215,6 +224,12 @@ public class SettingsData {
             ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '0');
             ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');
             ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
+
+            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
+
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
         }

@@ -63,7 +63,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
-            Status s = Status.findByOwnerAndCode(sm, state);
+            Status s = Status.lookup(state);
             if (s) {
                 result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action);
                 if (result == null) {
