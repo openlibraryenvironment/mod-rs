@@ -45,7 +45,6 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_LOCAL.capitalize(), ActionEventResultList.REQUESTER_CANCEL_LOCAL);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_FILL_LOCALLY.capitalize(), ActionEventResultList.REQUESTER_FILLED_LOCALLY);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, 'An ISO-18626 Cancel Response has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE.capitalize(), ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_ISO18626_NOTIFICATION.capitalize(), null, UndoStatus.DECIDE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_RENEW_RESPONSE, 'An ISO-18626 Renew Response has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_ISO18626_RENEW_RESPONSE.capitalize(), null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, 'An ISO-18626 Request Response has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE.capitalize(), null);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, 'An ISO-18626 Status Change has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE.capitalize(), ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
@@ -62,10 +61,11 @@ public class ActionEventData {
 
         // Both Requester and Responder actions
         ActionEvent.ensure(Actions.ACTION_INCOMING_ISO18626, 'An incoming ISO 18626 message', true, Actions.ACTION_INCOMING_ISO18626.capitalize(), null);
-        ActionEvent.ensure(Actions.ACTION_MANUAL_CLOSE, 'Close the request', true, Actions.ACTION_MANUAL_CLOSE.capitalize(), null);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, Actions.ACTION_MESSAGE.capitalize(), null, UndoStatus.SKIP);
-        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, Actions.ACTION_MESSAGES_ALL_SEEN.capitalize(), null, UndoStatus.SKIP);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Mark a specific message as being seen', true, Actions.ACTION_MESSAGE_SEEN.capitalize(), null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize(), null, UndoStatus.DECIDE, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize());
+        ActionEvent.ensure(Actions.ACTION_MANUAL_CLOSE, 'Close the request', true, 'ManualClose', null);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, 'Message', null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, 'MessagesAllSeen', null, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Mark a specific message as being seen', true, 'MessageSeen', null, UndoStatus.SKIP);
         ActionEvent.ensure(Actions.ACTION_UNDO, 'Attempts to undo the last action performed', true, Actions.ACTION_UNDO.capitalize(), null, UndoStatus.SKIP);
 
         // All the various events

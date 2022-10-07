@@ -2,9 +2,16 @@ package org.olf.rs.statemodel;
 
 public class Actions {
 
+    // Both Requester and Responder actions
+    static public final String ACTION_INCOMING_ISO18626     = 'ISO18626';
+    static public final String ACTION_ISO18626_NOTIFICATION = "ISO18626Notification";
+    static public final String ACTION_MANUAL_CLOSE          = "manualClose";
+    static public final String ACTION_MESSAGE               = "message";
+    static public final String ACTION_MESSAGES_ALL_SEEN     = "messagesAllSeen";
+    static public final String ACTION_MESSAGE_SEEN          = "messageSeen";
+
 	// Responder actions
     static public final String ACTION_RESPONDER_ISO18626_CANCEL                              = "ISO18626Cancel";
-    static public final String ACTION_RESPONDER_ISO18626_NOTIFICATION                        = "ISO18626Notification";
     static public final String ACTION_RESPONDER_ISO18626_RECEIVED                            = "ISO18626Received";
     static public final String ACTION_RESPONDER_ISO18626_SHIPPED_RETURN                      = "ISO18626ShippedReturn";
     static public final String ACTION_RESPONDER_ISO18626_STATUS_REQUEST                      = "ISO18626StatusRequest";
@@ -28,7 +35,6 @@ public class Actions {
 	static public final String ACTION_REQUESTER_CANCEL_LOCAL                 	 = "cancelLocal";
 	static public final String ACTION_REQUESTER_FILL_LOCALLY                 	 = "fillLocally";
     static public final String ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE         = "ISO18626CancelResponse";
-    static public final String ACTION_REQUESTER_ISO18626_NOTIFICATION            = "ISO18626Notification";
     static public final String ACTION_REQUESTER_ISO18626_RENEW_RESPONSE          = "ISO18626RenewResponse";
     static public final String ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE        = "ISO18626RequestResponse";
     static public final String ACTION_REQUESTER_ISO18626_STATUS_CHANGE           = "ISO18626StatusChange";
@@ -42,13 +48,6 @@ public class Actions {
 	static public final String ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS  	 = "requesterRejectConditions";
 	static public final String ACTION_REQUESTER_SHIPPED_RETURN               	 = "shippedReturn";
 	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn"
-
-	// Both Requester and Responder actions
-    static public final String ACTION_INCOMING_ISO18626 = 'ISO18626';
-	static public final String ACTION_MANUAL_CLOSE      = "manualClose";
-	static public final String ACTION_MESSAGE           = "message";
-	static public final String ACTION_MESSAGES_ALL_SEEN = "messagesAllSeen";
-	static public final String ACTION_MESSAGE_SEEN      = "messageSeen";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";

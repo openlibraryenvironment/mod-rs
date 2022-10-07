@@ -13,7 +13,7 @@ import org.olf.rs.statemodel.StatusService;
  * @author Chas
  *
  */
-public abstract class ActionManualCloseService extends AbstractAction {
+public class ActionManualCloseService extends AbstractAction {
 
     StatusService statusService;
 

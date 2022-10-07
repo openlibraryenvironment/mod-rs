@@ -97,4 +97,10 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "sms_state_model", baseTableName: "state_model_status", constraintName: "FK25422f62cugfnficmn7xoeram", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "sm_id", referencedTableName: "state_model", validate: "true")
         addForeignKeyConstraint(baseColumnNames: "sms_state", baseTableName: "state_model_status", constraintName: "FKmkj0x77yy0pixpdwqjc8p71gj", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1665136023956-1") {
+        addColumn(tableName: "action_event") {
+            column(name: "ae_responder_service_class", type: "varchar(64)")
+        }
+    }
 }
