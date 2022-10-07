@@ -14,7 +14,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
  * @author Chas
  *
  */
-public abstract class ActionMessagesAllSeenService extends AbstractAction {
+public class ActionMessagesAllSeenService extends AbstractAction {
 
     @Override
     String name() {

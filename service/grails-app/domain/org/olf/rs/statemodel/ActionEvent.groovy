@@ -39,51 +39,39 @@ class ActionEvent implements MultiTenant<ActionEvent> {
     /** The name of the service (excluding the ptrfix of Action / Event and the postfix of service) that executes this action / event */
     String serviceClass;
 
+    /** If the action can be both requester and responder and we need to differentiate, then this is the class for the responder */
+    String responderServiceClass;
+
     static constraints = {
-                code (nullable: false, blank: false, unique: true)
-         description (nullable: false, blank: false)
-            isAction (nullable: false)
-          resultList (nullable: true)
-          undoStatus (nullable: true)
-        serviceClass (nullable: true, blank: false)
+                         code (nullable: false, blank: false, unique: true)
+                  description (nullable: false, blank: false)
+                     isAction (nullable: false)
+                   resultList (nullable: true)
+                   undoStatus (nullable: true)
+                 serviceClass (nullable: true, blank: false)
+        responderServiceClass (nullable: true, blank: false)
     }
 
     static mapping = {
-                  id column: 'ae_id', generator: 'uuid2', length: 36
-             version column: 'ae_version'
-                code column: 'ae_code', length: 64
-         description column: 'ae_description'
-            isAction column: 'ae_is_action'
-          resultList column: 'ae_result_list'
-          undoStatus column: 'ae_undo_status', length: 20
-        serviceClass column: 'ae_service_class', length: 64
+                           id column: 'ae_id', generator: 'uuid2', length: 36
+                      version column: 'ae_version'
+                         code column: 'ae_code', length: 64
+                  description column: 'ae_description'
+                     isAction column: 'ae_is_action'
+                   resultList column: 'ae_result_list'
+                   undoStatus column: 'ae_undo_status', length: 20
+                 serviceClass column: 'ae_service_class', length: 64
+        responderServiceClass column: 'ae_responder_service_class', length: 64
     }
 
-    public AbstractAction getServiceAction(String actionCode, boolean isRequester) {
-        // Get gold of the state model
-        StateModel stateModel = statusService.getStateModel(isRequester);
-
-        // Determine the bean name, if we had a separate action table we could store it as a transient against that
-        String beanName = "action" + stateModel.shortcode.capitalize() + actionCode.capitalize() + "Service";
-
-        // Get hold of the bean and store it in our map, if we previously havn't been through here
-        if (serviceActions[beanName] == null) {
-            // Now setup the link to the service action that actually does the work
-            try {
-                serviceActions[beanName] = Holders.grailsApplication.mainContext.getBean(beanName);
-            } catch (Exception e) {
-                log.error("Unable to locate action bean: " + beanName);
-            }
-        }
-        return(serviceActions[beanName]);
-    }
     public static ActionEvent ensure(
         String code,
         String description,
         boolean isAction,
         String serviceClass,
         String resultListCode,
-        UndoStatus undoStatus = UndoStatus.NO
+        UndoStatus undoStatus = UndoStatus.NO,
+        String responderServiceClass = null
     ) {
         // Lookup to see if the code exists
         ActionEvent actionEvent = findByCode(code);
@@ -102,6 +90,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         actionEvent.resultList = ActionEventResultList.lookup(resultListCode);
         actionEvent.serviceClass = serviceClass;
         actionEvent.undoStatus = undoStatus;
+        actionEvent.responderServiceClass = responderServiceClass;
 
         // and save it
         actionEvent.save(flush:true, failOnError:true);
@@ -122,20 +111,35 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         return(findAll(EVENTS_CHANGE_STATUS_QUERY));
     }
 
-    public static def lookupService(String actionEventCode, def defaultService = null) {
+    public static def lookupService(String actionEventCode, boolean isRequester, def defaultService = null) {
         // Have we previously looked it up
-        def result = services[actionEventCode];
+        String key = actionEventCode + '~' + isRequester.toString();
+        def result = services[key];
         if (result == null) {
             // No we have not
             ActionEvent actionEvent = lookup(actionEventCode);
 
+            // Determine the service name
+            String serviceClass = null;
+
             // Did we find a record
-            if ((actionEvent == null) || (actionEvent.serviceClass == null)) {
+            if (actionEvent != null) {
+                if ((actionEvent.responderServiceClass != null) && !isRequester) {
+                    // This action is used for both requester and responder and we have a different service for the responder
+                    serviceClass = actionEvent.responderServiceClass;
+                } else {
+                    // Simple scenario
+                    serviceClass = actionEvent.serviceClass;
+                }
+            }
+
+            // Did we find a service class
+            if (serviceClass == null) {
                 // We did not or the service class was not set, so return the default service
                 result = defaultService;
             } else {
                 // Determine the bean name, if we had a separate action table we could store it as a transient against that
-                String beanName = (actionEvent.isAction ? "action" : "event") + actionEvent.serviceClass + "Service";
+                String beanName = (actionEvent.isAction ? "action" : "event") + serviceClass + "Service";
 
                 // Now setup the link to the service that actually does the work
                 try {
@@ -152,7 +156,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
                 }
 
                 // Update the services map
-                services[actionEventCode] = result;
+                services[key] = result;
             }
         }
         return(result);

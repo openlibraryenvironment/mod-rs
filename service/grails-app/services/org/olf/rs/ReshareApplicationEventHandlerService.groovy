@@ -52,7 +52,10 @@ public class ReshareApplicationEventHandlerService {
        */
       public AbstractEvent getEventProcessor(String eventName) {
           AbstractEvent eventprocessor = null;
-          def service = ActionEvent.lookupService(eventName, eventNoImplementationService);
+
+          // For events, we have no way of knowing before hand whether they are for a requester or responder
+          // So the service class will need to tak it into account
+          def service = ActionEvent.lookupService(eventName, true, eventNoImplementationService);
           if (service instanceof AbstractEvent) {
               eventprocessor = (AbstractEvent)service;
           } else {
@@ -70,7 +73,8 @@ public class ReshareApplicationEventHandlerService {
 			try {
 				// Ensure we are talking to the right tenant database
 				Tenants.withId(eventData.tenant) {
-                    // Obtain the event processor
+                    // Obtain the event processor, we do not know at this point whether we are dealing with a requester or responder event
+                    // So the event service class needs to deal with whether they are a requester or responder
                     AbstractEvent eventBean = getEventProcessor(eventData.event);
 
 					// If the event handler is doing its own transaction handler, then we just call it, we do not expect it to return us anything

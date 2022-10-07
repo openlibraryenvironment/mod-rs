@@ -50,7 +50,7 @@ public class ActionService {
      */
     public AbstractAction getServiceAction(String actionCode, boolean isRequester) {
         AbstractAction actionProcessor = null;
-        def service = ActionEvent.lookupService(actionCode);
+        def service = ActionEvent.lookupService(actionCode, isRequester);
         if ((service != null) && (service instanceof AbstractAction)) {
             actionProcessor = (AbstractAction)service;
         } else {

@@ -13,7 +13,6 @@ import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -36,136 +35,131 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     // This takes a request with the state of REQ_SUPPLIER_IDENTIFIED and changes the state to REQUEST_SENT_TO_SUPPLIER
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
-        // We must have found the request, and it as to be in a state of supplier identifier or unfilled
-        if ((request.state?.code == Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED) ||
-            (request.state?.code == Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER) ||
-            (request.state?.code == Status.PATRON_REQUEST_UNFILLED)) {
-            log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
+        log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
-            // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
-            request.networkStatus = NetworkStatus.Idle;
+        // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
+        request.networkStatus = NetworkStatus.Idle;
 
-            if (request.rota.size() > 0) {
-                boolean messageTried  = false;
-                boolean lookAtNextResponder = true;
+        if (request.rota.size() > 0) {
+            boolean messageTried  = false;
+            boolean lookAtNextResponder = true;
 
-                // There may be problems with entries in the lending string, so we loop through the rota
-                // until we reach the end, or we find a potential lender we can talk to. The request must
-                // also explicitly state a requestingInstitutionSymbol
-                while (lookAtNextResponder &&
-                       (request.rota.size() > 0) &&
-                       ((request.rotaPosition ?: -1) < request.rota.size()) &&
-                       (request.requestingInstitutionSymbol != null)) {
-                    // We have rota entries left, work out the next one
-                    request.rotaPosition = (request.rotaPosition != null ? request.rotaPosition + 1 : 0);
+            // There may be problems with entries in the lending string, so we loop through the rota
+            // until we reach the end, or we find a potential lender we can talk to. The request must
+            // also explicitly state a requestingInstitutionSymbol
+            while (lookAtNextResponder &&
+                   (request.rota.size() > 0) &&
+                   ((request.rotaPosition ?: -1) < request.rota.size()) &&
+                   (request.requestingInstitutionSymbol != null)) {
+                // We have rota entries left, work out the next one
+                request.rotaPosition = (request.rotaPosition != null ? request.rotaPosition + 1 : 0);
 
-                    // get the responder
-                    PatronRequestRota prr = request.rota.find({ rotaEntry -> rotaEntry.rotaPosition == request.rotaPosition });
-                    if (prr != null) {
-                        String nextResponder = prr.directoryId
+                // get the responder
+                PatronRequestRota prr = request.rota.find({ rotaEntry -> rotaEntry.rotaPosition == request.rotaPosition });
+                if (prr != null) {
+                    String nextResponder = prr.directoryId
 
-                        log.debug("Attempt to resolve symbol \"${nextResponder}\"");
-                        Symbol s = (nextResponder != null) ? reshareApplicationEventHandlerService.resolveCombinedSymbol(nextResponder) : null;
-                        log.debug("Resolved nextResponder to ${s} with status ${s?.owner?.status?.value}");
-                        String ownerStatus = s.owner?.status?.value;
+                    log.debug("Attempt to resolve symbol \"${nextResponder}\"");
+                    Symbol s = (nextResponder != null) ? reshareApplicationEventHandlerService.resolveCombinedSymbol(nextResponder) : null;
+                    log.debug("Resolved nextResponder to ${s} with status ${s?.owner?.status?.value}");
+                    String ownerStatus = s.owner?.status?.value;
 
-                        if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
-                            log.debug('Responder is local') //, going to review state");
-                            boolean doLocalReview  = true;
-                            //Check to see if we're going to try to automatically check for local
-                            //copies
-                            String localAutoRespond = AppSetting.findByKey('auto_responder_local')?.value;
-                            if (localAutoRespond?.toLowerCase()?.startsWith('on')) {
-                                boolean hasLocalCopy = checkForLocalCopy(request);
-                                if (hasLocalCopy) {
-                                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder located a local copy - requires review', null);
-                                } else {
-                                    doLocalReview  = false;
-                                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder did not locate a local copy - sent to next lender', null);
-                                }
+                    if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
+                        log.debug('Responder is local') //, going to review state");
+                        boolean doLocalReview  = true;
+                        //Check to see if we're going to try to automatically check for local
+                        //copies
+                        String localAutoRespond = AppSetting.findByKey('auto_responder_local')?.value;
+                        if (localAutoRespond?.toLowerCase()?.startsWith('on')) {
+                            boolean hasLocalCopy = checkForLocalCopy(request);
+                            if (hasLocalCopy) {
+                                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder located a local copy - requires review', null);
                             } else {
-                                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder off - requires manual checking', null);
-                            }
-
-                            if (doLocalReview) {
-                                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW;
-                                eventResultDetails.auditMessage = 'Sent to local review';
-                                return(eventResultDetails);  //Nothing more to do here
-                            } else {
-                                log.debug('Cannot fill locally, skipping');
-                                continue;
-                            }
-                        }
-
-                        // Fill out the directory entry reference if it's not currently set, and try to send.
-                        if ((nextResponder != null) &&
-                            (s != null) &&
-                            (prr.peerSymbol == null)) {
-                            // Determine the message we will be sending, the id includes the rota position, so needs to be dtermined after the rota position has been calculated
-                            Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
-                            log.debug("Built request message request: ${requestMessageRequest }");
-
-                            if (s != null) {
-                                request.resolvedSupplier = s;
-                                log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");
-                                prr.lock();
-                                log.debug("LOCKING: PatronRequestRota[${prr.id}] - OBTAINED");
-                                prr.peerSymbol = s;
-                                prr.save(flush:true, failOnError:true);
-
-                                requestMessageRequest.header.supplyingAgencyId = [
-                                    agencyIdType : s.authority?.symbol,
-                                    agencyIdValue : s.symbol,
-                                ];
-                            } else {
-                                log.warn("Cannot understand or resolve symbol ${nextResponder}");
-                            }
-
-                            if ((prr.instanceIdentifier != null) && (prr.instanceIdentifier.length() > 0)) {
-                                // update requestMessageRequest.supplierUniqueRecordId to the system number specified in the rota
-                                requestMessageRequest.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
-                            }
-                            requestMessageRequest.bibliographicInfo.supplyingInstitutionSymbol = nextResponder;
-
-                            // No longer need to look at next responder
-                            lookAtNextResponder = false;
-
-                            // Probably need a lender_is_valid check here
-                            if (!reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest)) {
-                                // Failed to send to lender
-                                messageTried = true;
-                                prr.note = "Result of send : ${request.networkStatus.toString()}";
+                                doLocalReview  = false;
+                                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder did not locate a local copy - sent to next lender', null);
                             }
                         } else {
-                            log.warn("Lender at position ${request.rotaPosition} invalid, skipping");
-                            prr.note = "Send not attempted: Unable to resolve symbol for : ${nextResponder}";
+                            reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder off - requires manual checking', null);
                         }
 
-                        prr.save(flush:true, failOnError:true);
-                    } else {
-                        log.error("Unable to find rota entry at position ${request.rotaPosition} (Size=${request.rota.size()}) ${( request.rotaPosition ?: -1 < request.rota.size() )}. Try next");
+                        if (doLocalReview) {
+                            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW;
+                            eventResultDetails.auditMessage = 'Sent to local review';
+                            return(eventResultDetails);  //Nothing more to do here
+                        } else {
+                            log.debug('Cannot fill locally, skipping');
+                            continue;
+                        }
                     }
-                }
 
-                // ToDo - there are three possible states here,not two - Send, End of Rota, Error
-                // Did we send a request?
-                if (request.networkStatus == NetworkStatus.Sent) {
-                    log.debug('sendToNextLender sent to next lender.....');
-                    eventResultDetails.auditMessage = 'Sent to next lender';
-                } else if (messageTried) {
-                    // We will not set the state yet, just the audit message
-                    eventResultDetails.auditMessage = 'Problem sending to supplier, will reattempt';
+                    // Fill out the directory entry reference if it's not currently set, and try to send.
+                    if ((nextResponder != null) &&
+                        (s != null) &&
+                        (prr.peerSymbol == null)) {
+                        // Determine the message we will be sending, the id includes the rota position, so needs to be dtermined after the rota position has been calculated
+                        Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
+                        log.debug("Built request message request: ${requestMessageRequest }");
+
+                        if (s != null) {
+                            request.resolvedSupplier = s;
+                            log.debug("LOCKING: PatronRequestRota[${prr.id}] - REQUEST");
+                            prr.lock();
+                            log.debug("LOCKING: PatronRequestRota[${prr.id}] - OBTAINED");
+                            prr.peerSymbol = s;
+                            prr.save(flush:true, failOnError:true);
+
+                            requestMessageRequest.header.supplyingAgencyId = [
+                                agencyIdType : s.authority?.symbol,
+                                agencyIdValue : s.symbol,
+                            ];
+                        } else {
+                            log.warn("Cannot understand or resolve symbol ${nextResponder}");
+                        }
+
+                        if ((prr.instanceIdentifier != null) && (prr.instanceIdentifier.length() > 0)) {
+                            // update requestMessageRequest.supplierUniqueRecordId to the system number specified in the rota
+                            requestMessageRequest.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
+                        }
+                        requestMessageRequest.bibliographicInfo.supplyingInstitutionSymbol = nextResponder;
+
+                        // No longer need to look at next responder
+                        lookAtNextResponder = false;
+
+                        // Probably need a lender_is_valid check here
+                        if (!reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol, nextResponder, requestMessageRequest)) {
+                            // Failed to send to lender
+                            messageTried = true;
+                            prr.note = "Result of send : ${request.networkStatus.toString()}";
+                        }
+                    } else {
+                        log.warn("Lender at position ${request.rotaPosition} invalid, skipping");
+                        prr.note = "Send not attempted: Unable to resolve symbol for : ${nextResponder}";
+                    }
+
+                    prr.save(flush:true, failOnError:true);
                 } else {
-                    // END OF ROTA
-                    log.warn('sendToNextLender reached the end of the lending string.....');
-                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
-                    eventResultDetails.auditMessage = 'End of rota';
+                    log.error("Unable to find rota entry at position ${request.rotaPosition} (Size=${request.rota.size()}) ${( request.rotaPosition ?: -1 < request.rota.size() )}. Try next");
                 }
+            }
+
+            // ToDo - there are three possible states here,not two - Send, End of Rota, Error
+            // Did we send a request?
+            if (request.networkStatus == NetworkStatus.Sent) {
+                log.debug('sendToNextLender sent to next lender.....');
+                eventResultDetails.auditMessage = 'Sent to next lender';
+            } else if (messageTried) {
+                // We will not set the state yet, just the audit message
+                eventResultDetails.auditMessage = 'Problem sending to supplier, will reattempt';
             } else {
-                log.warn('Cannot send to next lender - rota is empty');
+                // END OF ROTA
+                log.warn('sendToNextLender reached the end of the lending string.....');
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                 eventResultDetails.auditMessage = 'End of rota';
             }
+        } else {
+            log.warn('Cannot send to next lender - rota is empty');
+            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
+            eventResultDetails.auditMessage = 'End of rota';
         }
 
         return(eventResultDetails);

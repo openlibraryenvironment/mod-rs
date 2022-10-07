@@ -11,7 +11,7 @@ import org.olf.rs.statemodel.Actions;
  * @author Chas
  *
  */
-public abstract class ActionMessageService extends AbstractAction {
+public class ActionMessageService extends AbstractAction {
 
     @Override
     String name() {
