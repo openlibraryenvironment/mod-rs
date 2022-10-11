@@ -75,35 +75,49 @@ class Status implements MultiTenant<Status> {
   // The stage of the request that this status applies to
   StatusStage stage;
 
+  /** The sequence to display the status for the close manual drop down */
+  Integer terminalSequence;
+
+
   static hasMany = [
         // Allow us to tag a state for use in analytical reporting - for example CURRENT_LOAN or CURRENT_BORROW
         tags: Tag
   ]
 
   static constraints = {
-               code (nullable: false, blank: false, unique: true)
-            presSeq (nullable: true, blank: false)
-            visible (nullable: true)
-     needsAttention (nullable: true)
-           terminal (nullable: false)
-              stage (nullable: true)
+                 code (nullable: false, blank: false, unique: true)
+              presSeq (nullable: true, blank: false)
+              visible (nullable: true)
+       needsAttention (nullable: true)
+             terminal (nullable: false)
+                stage (nullable: true)
+     terminalSequence (nullable: true)
   }
 
-  static mapping = {
-                     id column : 'st_id', generator: 'uuid2', length:36
-                version column : 'st_version'
-                   code column : 'st_code'
-                presSeq column : 'st_presentation_sequence'
-                visible column : 'st_visible'
-         needsAttention column : 'st_needs_attention'
-               terminal column : 'st_terminal'
-                  stage column : 'st_stage'
-                   tags cascade: 'save-update'
-  }
+    static mapping = {
+                       id column : 'st_id', generator: 'uuid2', length:36
+                  version column : 'st_version'
+                     code column : 'st_code'
+                  presSeq column : 'st_presentation_sequence'
+                  visible column : 'st_visible'
+           needsAttention column : 'st_needs_attention'
+                 terminal column : 'st_terminal'
+                    stage column : 'st_stage'
+         terminalSequence column : 'st_terminal_sequence'
+                     tags cascade: 'save-update'
+    }
 
-  // Assert is a helper method that helps us ensure refdata is up to date - create any missing entries, update any ones
-  // where the tags have changed and return the located value
-  public static Status ensure(String code, StatusStage stage, presSeq=null, visible=null, needsAttention=null, terminal=false, tags=null) {
+    // Assert is a helper method that helps us ensure refdata is up to date - create any missing entries, update any ones
+    // where the tags have changed and return the located value
+    public static Status ensure(
+        String code,
+        StatusStage stage,
+        String presSeq = null,
+        Boolean visible = null,
+        Boolean needsAttention = null,
+        Boolean terminal = false,
+        Integer terminalSequence = null,
+        List<String> tags=null) {
       Status s = Status.findByCode(code)
       if ( s == null ) {
           s = new Status(code:code, tags: tags);
@@ -122,12 +136,13 @@ class Status implements MultiTenant<Status> {
           }
       }
 
-      // Just update the ther fields in case they have changed
+      // Just update the the fields in case they have changed
       s.presSeq = presSeq;
       s.visible = visible;
       s.needsAttention = needsAttention;
       s.terminal = terminal;
       s.stage = stage;
+      s.terminalSequence = terminalSequence;
 
       // Save the status
 	  s.save(flush:true, failOnError:true);

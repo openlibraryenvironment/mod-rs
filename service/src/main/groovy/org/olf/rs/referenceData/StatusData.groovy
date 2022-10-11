@@ -31,7 +31,7 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, StatusStage.ACTIVE_SHIPPED, '0045', true);
         Status.ensure(Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, StatusStage.ACTIVE_SHIPPED, '0046', true);
         Status.ensure(Status.PATRON_REQUEST_BORROWER_RETURNED, StatusStage.ACTIVE_SHIPPED, '0050', true);
-        Status.ensure(Status.PATRON_REQUEST_REQUEST_COMPLETE, StatusStage.COMPLETED, '0055', true, null, true);
+        Status.ensure(Status.PATRON_REQUEST_REQUEST_COMPLETE, StatusStage.COMPLETED, '0055', true, null, true, 1);
         Status.ensure(Status.PATRON_REQUEST_PENDING, StatusStage.ACTIVE, '0060', true);
         Status.ensure(Status.PATRON_REQUEST_WILL_SUPPLY, StatusStage.ACTIVE, '0065', true);
         Status.ensure(Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, StatusStage.ACTIVE, '0070', true);
@@ -39,14 +39,14 @@ public class StatusData {
 
         // Add in the ability to tag states with meaningful semantics for reporting
         // model, code, presSeq, visible, needsAttention, terminal, tags
-        Status.ensure(Status.PATRON_REQUEST_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, [ 'ACTIVE_BORROW' ]);
+        Status.ensure(Status.PATRON_REQUEST_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ 'ACTIVE_BORROW' ]);
         Status.ensure(Status.PATRON_REQUEST_CHECKED_IN, StatusStage.ACTIVE_SHIPPED, '0077', true);
         Status.ensure(Status.PATRON_REQUEST_LOCAL_REVIEW, StatusStage.LOCAL, '0079', true);
-        Status.ensure(Status.PATRON_REQUEST_FILLED_LOCALLY, StatusStage.COMPLETED, '0081', true, null, true);
+        Status.ensure(Status.PATRON_REQUEST_FILLED_LOCALLY, StatusStage.COMPLETED, '0081', true, null, true, 2);
         // This one doesn't appear to be in use
         // Status.lookupOrCreate('REQ_AWAIT_RETURN_SHIPPING', StatusStage.ACTIVE_SHIPPED, '0078', true);
-        Status.ensure(Status.PATRON_REQUEST_END_OF_ROTA, StatusStage.COMPLETED, '0080', true, null, true);
-        Status.ensure(Status.PATRON_REQUEST_CANCELLED, StatusStage.COMPLETED, '9998', true, null, true);
+        Status.ensure(Status.PATRON_REQUEST_END_OF_ROTA, StatusStage.COMPLETED, '0080', true, null, true, 3);
+        Status.ensure(Status.PATRON_REQUEST_CANCELLED, StatusStage.COMPLETED, '9998', true, null, true, 4);
         Status.ensure(Status.PATRON_REQUEST_ERROR, StatusStage.ACTIVE, '9999', true, true);
 
         // Responder / Lender State Model
@@ -56,13 +56,13 @@ public class StatusData {
         Status.ensure(Status.RESPONDER_AWAIT_PICKING, StatusStage.ACTIVE, '0015', true);
         Status.ensure(Status.RESPONDER_AWAIT_SHIP, StatusStage.ACTIVE, '0021', true);
         Status.ensure(Status.RESPONDER_HOLD_PLACED, StatusStage.ACTIVE, '0025', true);
-        Status.ensure(Status.RESPONDER_UNFILLED, StatusStage.COMPLETED, '0030', true, null, true);
+        Status.ensure(Status.RESPONDER_UNFILLED, StatusStage.COMPLETED, '0030', true, null, true, 2);
         Status.ensure(Status.RESPONDER_NOT_SUPPLIED, StatusStage.COMPLETED, '0035', false, null, true);
-        Status.ensure(Status.RESPONDER_ITEM_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0040', true, null, false, [ 'ACTIVE_LOAN' ] );
+        Status.ensure(Status.RESPONDER_ITEM_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0040', true, null, false, null, [ 'ACTIVE_LOAN' ] );
         Status.ensure(Status.RESPONDER_ITEM_RETURNED, StatusStage.ACTIVE_SHIPPED, '0040', true);
-        Status.ensure(Status.RESPONDER_COMPLETE, StatusStage.COMPLETED, '0040', true, null, true);
+        Status.ensure(Status.RESPONDER_COMPLETE, StatusStage.COMPLETED, '0040', true, null, true, 1);
         Status.ensure(Status.RESPONDER_CANCEL_REQUEST_RECEIVED, StatusStage.ACTIVE, '9998', true, true);
-        Status.ensure(Status.RESPONDER_CANCELLED, StatusStage.COMPLETED, '9999', true, null, true);
+        Status.ensure(Status.RESPONDER_CANCELLED, StatusStage.COMPLETED, '9999', true, null, true, 3);
         Status.ensure(Status.RESPONDER_ERROR, StatusStage.ACTIVE, '9999', true, true);
         Status.ensure(Status.RESPONDER_OVERDUE, StatusStage.ACTIVE_SHIPPED, '9997', true);
 	}
