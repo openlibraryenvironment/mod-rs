@@ -32,6 +32,18 @@ where s in (select sms.state
                   sms.isTerminal = false)
 """;
 
+    /** The query to find the terminal states for a state model */
+    private static final String VISIBLE_TERMINAL_STATES_QUERY = """
+from Status as s
+where s in (select sms.state
+            from StateModel as sm
+                inner join sm.states as sms
+            where sm.shortcode = :stateModelCode and
+                  sms.isTerminal = true and
+                  sms.state.visible = true)
+order by s.terminalSequence
+""";
+
     /** The query to find all states for a state model */
     private static final String ALL_STATES_QUERY = """
 from Status as s
@@ -179,42 +191,33 @@ where s in (select sms.state
     }
 
     public static List<Status> getStatesByStage(String modelCode, List<StatusStage> stages) {
-        List<Status> result = null;
-
-        if (modelCode != null) {
-            // Just lookup the statuses that have the appropriate stage for this model
-            result = Status.findAll(STATES_FOR_STAGES_QUERY, [ stateModelCode : modelCode, stages : stages ]);
-        }
-
-        // Return an empty array instead of null
-        if (result == null) {
-            result = new ArrayList<Status>();
-        }
-        return(result);
+        return(queryStates(modelCode, STATES_FOR_STAGES_QUERY, stages));
     }
 
     public static List<Status> getNonTerminalStates(String modelCode) {
-        List<Status> result = null;
-
-        if (modelCode != null) {
-            // Just lookup the statuses that have the appropriate stage for this model
-            result = Status.findAll(NON_TERMINAL_STATES_QUERY, [ stateModelCode : modelCode ]);
-        }
-
-        // Return an empty array instead of null
-        if (result == null) {
-            result = new ArrayList<Status>();
-        }
-
-        return(result);
+        return(queryStates(modelCode, NON_TERMINAL_STATES_QUERY));
     }
 
     public static List<Status> getAllStates(String modelCode) {
+        return(queryStates(modelCode, ALL_STATES_QUERY));
+    }
+
+    public static List<Status> getVisibleTerminalStates(String modelCode) {
+        return(queryStates(modelCode, VISIBLE_TERMINAL_STATES_QUERY));
+    }
+
+    private static List<Status> queryStates(String modelCode, String query, List<StatusStage> stages = null) {
         List<Status> result = null;
 
         if (modelCode != null) {
-            // Just lookup the statuses that have the appropriate stage for this model
-            result = Status.findAll(ALL_STATES_QUERY, [ stateModelCode : modelCode ]);
+            // Build up the parameter map, don't add stages if it is null, as that means the query is not expecting it
+            Map parameters =  [ stateModelCode : modelCode ];
+            if (stages != null) {
+                parameters.put('stages', stages);
+            }
+
+            // Find all the states that match this query for the state model
+            result = Status.findAll(query, parameters);
         }
 
         // Return an empty array instead of null

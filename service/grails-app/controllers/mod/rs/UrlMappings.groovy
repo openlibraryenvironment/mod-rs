@@ -15,6 +15,7 @@ class UrlMappings {
     "/rs/patronrequests" (resources:'patronRequest') {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
+      '/manualCloseStates'  (controller: 'patronRequest', action: 'manualCloseStates')
     }
 
     "/rs/patronrequests/openURL" (controller: "patronRequest", action: "openURL")

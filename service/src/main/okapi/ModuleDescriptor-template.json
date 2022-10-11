@@ -37,6 +37,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.post" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/{id}/*",
+          "permissionsRequired": [ "rs.patronrequests.item.get" ]
+        }, 
+        {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
           "permissionsRequired": [ "rs.patronrequests.item.put" ]

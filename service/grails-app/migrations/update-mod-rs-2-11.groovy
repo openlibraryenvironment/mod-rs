@@ -103,4 +103,10 @@ databaseChangeLog = {
             column(name: "ae_responder_service_class", type: "varchar(64)")
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1665402489495-1") {
+        addColumn(tableName: "status") {
+            column(name: "st_terminal_sequence", type: "int4")
+        }
+    }
 }
