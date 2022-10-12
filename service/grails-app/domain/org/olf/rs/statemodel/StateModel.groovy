@@ -183,7 +183,7 @@ where s in (select sms.state
     }
 
     public static List<Status> getActiveStates(String modelCode) {
-        return(getStatesByStage(modelCode, [ StatusStage.ACTIVE, StatusStage.ACTIVE_SHIPPED ]));
+        return(getStatesByStage(modelCode, [ StatusStage.ACTIVE, StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER, StatusStage.ACTIVE_SHIPPED ]));
     }
 
     public static List<Status> getCompletedStates(String modelCode) {

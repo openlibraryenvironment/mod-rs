@@ -10,7 +10,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.Status;
 
 /**
  * Event triggered when the request requires validation
@@ -39,7 +38,6 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
         eventResultDetails.auditMessage = 'Sourcing potential items';
 
         if (request.rota?.size() != 0) {
-            log.debug(' -> Request is currently ' + Status.PATRON_REQUEST_SOURCING_ITEM + ' - transition to ' + Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED);
             eventResultDetails.qualifier = null;
             eventResultDetails.auditMessage = 'Request supplied with Lending String';
         } else {
