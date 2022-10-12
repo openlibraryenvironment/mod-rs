@@ -15,7 +15,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -93,7 +92,6 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                     // If s != null and patronValid == true then the request has passed validation
                     if (s != null && patronValid) {
                         log.debug("Got request ${request}");
-                        log.debug(' -> Request is currently ' + Status.PATRON_REQUEST_IDLE + ' - transition to ' + Status.PATRON_REQUEST_VALIDATED);
                     } else if (s == null) {
                         // An unknown requesting institution symbol is a bigger deal than an invalid patron
                         request.needsAttention = true;
@@ -153,7 +151,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                 log.debug("No request.bibliographicRecordId : ${request.bibliographicRecordId}");
             }
         } else {
-            log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${request?.isRequester}");
+            log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
         }
 
         return(eventResultDetails);

@@ -14,6 +14,9 @@ public enum StatusStage {
 	/** It is active with a supplier */
 	ACTIVE,
 
+    /** Waiting for an answer to a conditional */
+    ACTIVE_PENDING_CONDITIONAL_ANSWER,
+
     /** It is active with a supplier who has shipped it */
     ACTIVE_SHIPPED,
 

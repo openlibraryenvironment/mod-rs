@@ -51,7 +51,7 @@ public class StatusData {
 
         // Responder / Lender State Model
         Status responderIdle = Status.ensure(Status.RESPONDER_IDLE, StatusStage.ACTIVE, '0005', true);
-        Status.ensure(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, StatusStage.ACTIVE, '0006', true);
+        Status.ensure(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER, '0006', true);
         Status.ensure(Status.RESPONDER_NEW_AWAIT_PULL_SLIP, StatusStage.ACTIVE, '0010', true);
         Status.ensure(Status.RESPONDER_AWAIT_PICKING, StatusStage.ACTIVE, '0015', true);
         Status.ensure(Status.RESPONDER_AWAIT_SHIP, StatusStage.ACTIVE, '0021', true);

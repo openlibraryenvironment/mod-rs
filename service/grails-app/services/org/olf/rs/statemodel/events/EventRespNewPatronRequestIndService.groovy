@@ -10,7 +10,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.Status;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -52,7 +51,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                 log.error("Problem in auto respond: ${e.getMessage()}", e);
             }
         } else {
-            log.warn("Unable to locate request for ID ${eventData.payload.id} OR state != ${Status.PATRON_REQUEST_IDLE} (${request?.state?.code}) isRequester=${request?.isRequester}");
+            log.warn("Unable to locate request for ID ${eventData.payload.id}} isRequester=${request?.isRequester}");
         }
 
         return(eventResultDetails);

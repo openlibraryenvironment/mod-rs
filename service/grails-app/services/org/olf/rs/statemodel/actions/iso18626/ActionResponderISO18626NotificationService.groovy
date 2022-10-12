@@ -4,7 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
-import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.StatusStage;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
 /**
@@ -33,7 +33,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
             if ((messageData.note != null) &&
                 (messageData.note.startsWith('#ReShareLoanConditionAgreeResponse#'))) {
                 // First check we're in the state where we need to change states, otherwise we just ignore this and treat as a regular message, albeit with warning
-                if (request.state.code == Status.RESPONDER_PENDING_CONDITIONAL_ANSWER) {
+                if (request.state.stage == StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER) {
                     // We need to change the state to the saved state
                     actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_CONDITIONS_AGREED;
                     actionResultDetails.auditMessage = 'Requester agreed to loan conditions, moving request forward';

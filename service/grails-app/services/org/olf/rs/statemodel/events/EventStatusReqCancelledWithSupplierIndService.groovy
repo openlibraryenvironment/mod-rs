@@ -6,7 +6,6 @@ import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusStage;
 
 /**
@@ -39,7 +38,7 @@ public class EventStatusReqCancelledWithSupplierIndService extends AbstractEvent
                 eventResultDetails.auditMessage = 'Request cancelled';
             }
         } else {
-            log.warn('Request not in the correct state of ' + Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER + " (${request?.state?.code}).");
+            log.warn('Request not in the correct state ' + " (${request?.state?.code}).");
         }
         return(eventResultDetails);
     }
