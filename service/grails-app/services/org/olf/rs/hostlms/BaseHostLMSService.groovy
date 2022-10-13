@@ -42,7 +42,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       [
         name:'Local_identifier_By_Z3950',
         precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
-        strategy: { pr, service -> return service.z3950ItemsByIdentifier(pr) }
+        strategy: { pr, service -> return service.z3950ItemsByIdentifier(pr) },
+        // We don't want to try other strategies if the precondition passes and available copies are not found
+        final: true
       ],
       [
         name:'ISBN_identifier_By_Z3950',
@@ -117,6 +119,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("Completed strategy ${next_strategy.name}, location = ${location}");
         }
 
+        if (next_strategy?.final) {
+          return location;
+        }
       }
       else {
         log.debug("Strategy did not pass precondition");
