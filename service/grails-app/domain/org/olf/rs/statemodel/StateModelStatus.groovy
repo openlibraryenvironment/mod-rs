@@ -27,6 +27,9 @@ class StateModelStatus implements Serializable, MultiTenant<StateModelStatus> {
     /** Is this state considered a terminal state */
     boolean isTerminal;
 
+    /** Does this state trigger pull slip emails */
+    boolean triggerPullSlipEmail;
+
     static belongsTo = [ stateModel: StateModel ];
 
     static constraints = {
@@ -35,6 +38,7 @@ class StateModelStatus implements Serializable, MultiTenant<StateModelStatus> {
           canTriggerStaleRequest (nullable: false)
         canTriggerOverdueRequest (nullable: false)
                       isTerminal (nullable: false)
+            triggerPullSlipEmail (nullable: false)
     }
 
     static mapping = {
@@ -45,6 +49,7 @@ class StateModelStatus implements Serializable, MultiTenant<StateModelStatus> {
           canTriggerStaleRequest column : 'sms_can_trigger_stale_request'
         canTriggerOverdueRequest column : 'sms_can_trigger_overdue_request'
                       isTerminal column : 'sms_is_terminal'
+            triggerPullSlipEmail column : 'sms_trigger_pull_slip_email', defaultValue : "false"
     }
 
     public boolean equals(other) {
