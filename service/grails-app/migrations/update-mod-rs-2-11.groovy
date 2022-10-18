@@ -109,4 +109,12 @@ databaseChangeLog = {
             column(name: "st_terminal_sequence", type: "int4")
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1665736736915-1") {
+        addColumn(tableName: "state_model_status") {
+            column(defaultValueBoolean: "false", name: "sms_trigger_pull_slip_email", type: "boolean") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }

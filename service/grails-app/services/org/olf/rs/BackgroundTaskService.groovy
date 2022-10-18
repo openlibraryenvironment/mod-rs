@@ -8,9 +8,6 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.rs.timers.AbstractTimer;
-import org.olf.templating.*;
-
-import com.k_int.web.toolkit.settings.AppSetting;
 
 import grails.util.Holders;
 import groovy.json.JsonSlurper;
@@ -22,26 +19,9 @@ import groovy.json.JsonSlurper;
 public class BackgroundTaskService {
 
   def grailsApplication
-  def templatingService
 
-  EmailService emailService
   PatronNoticeService patronNoticeService
   OkapiSettingsService okapiSettingsService
-
-  private static config_test_count = 0;
-  private static String PULL_SLIP_QUERY='''
-Select pr
-from PatronRequest as pr
-where ( pr.pickLocation.id in ( :loccodes ) )
-and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
-'''
-
-  private static String PULL_SLIP_SUMMARY = '''
-    Select count(pr.id), pr.pickLocation.code
-    from PatronRequest as pr
-    where pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
-    group by pr.pickLocation.code
-'''
 
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
@@ -70,9 +50,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
     }
 
     try {
-        // Generate and log patron requests at a pick location we don't know about
-        reportMissingPickLocations()
-
         // Process any timers for sending pull slip notification emails
         // Refactor - lastExcecution now contains the next scheduled execution or 0
         // log.debug("Checking timers ready for execution");
@@ -101,7 +78,6 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
 
     			// The date we start processing tis in the local time zone
                 timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
-
 
                 if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
                   // First time we have seen this timer - we don't know when it is next due - so work that out
@@ -164,129 +140,41 @@ and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
   	private runTimer(Timer t) {
 		try {
 			if (t.taskCode != null) {
-				switch ( t.taskCode ) {
-					case 'PrintPullSlips':
-				  		log.debug("Fire pull slip timer task. Config is ${t.taskConfig} enabled=${t.enabled}")
-						JsonSlurper jsonSlurper = new JsonSlurper()
-						Map task_config = jsonSlurper.parseText(t.taskConfig)
-						checkPullSlips(task_config)
-						break;
+				// Get hold of the bean and store it in our map, if we previously havn't been through here
+				if (serviceTimers[t.taskCode] == null) {
+					// We capitalize the task code and then prefix it with "timer" and postfix with "Service"
+					String beanName = "timer" + t.taskCode.capitalize() + "Service";
 
-					default:
-						// Get hold of the bean and store it in our map, if we previously havn't been through here
-						if (serviceTimers[t.taskCode] == null) {
-							// We capitalize the task code and then prefix it with "timer" and postfix with "Service"
-							String beanName = "timer" + t.taskCode.capitalize() + "Service";
+					// Now setup the link to the service action that actually does the work
+					try {
+						serviceTimers[t.taskCode] = Holders.grailsApplication.mainContext.getBean(beanName);
+					} catch (Exception e) {
+						log.error("Unable to locate timer bean: " + beanName);
+					}
+				}
 
-							// Now setup the link to the service action that actually does the work
-							try {
-								serviceTimers[t.taskCode] = Holders.grailsApplication.mainContext.getBean(beanName);
-							} catch (Exception e) {
-								log.error("Unable to locate timer bean: " + beanName);
-							}
-						}
-
-						// Did we find the bean
-						AbstractTimer timerBean = serviceTimers[t.taskCode];
-						if (timerBean == null) {
-							log.debug("Unhandled timer task code ${t.taskCode}");
-						} else {
-							// juat call the performTask method, with the timers config
-							timerBean.performTask(t.taskConfig);
-						}
-						break;
+				// Did we find the bean
+				AbstractTimer timerBean = serviceTimers[t.taskCode];
+				if (timerBean == null) {
+					log.debug("Unhandled timer task code ${t.taskCode}");
+				} else {
+                    // Start a new session and transaction for each timer, so that everything is not in the same transaction
+                    // As the transactions in the different timers should not be related in any form
+                    Timer.withNewSession { session ->
+                        try {
+                            // Start a new transaction
+                            Timer.withNewTransaction {
+    							// just call the performTask method, with the timers config
+    							timerBean.performTask(t.taskConfig);
+                            }
+                        } catch(Exception e) {
+                            log.error("Exception thrown by timer " + t.code, e);
+                        }
+                    }
 				}
 			}
 		} catch ( Exception e ) {
 			log.error("ERROR running timer",e)
 		}
   	}
-
-  private void checkPullSlips(Map timer_cfg) {
-    log.debug("checkPullSlips(${timer_cfg})");
-    checkPullSlipsFor(timer_cfg.locations,
-                      timer_cfg.confirmNoPendingRequests?:true,
-                      timer_cfg.emailAddresses);
-  }
-
-  private void checkPullSlipsFor(ArrayList loccodes,
-                                 boolean confirm_no_pending_slips,
-                                 ArrayList emailAddresses) {
-
-    // See /configurations/entries?query=code==FOLIO_HOST
-    // See /configurations/entries?query=code==localeSettings
-    log.debug("checkPullSlipsFor(${loccodes},${confirm_no_pending_slips},${emailAddresses})");
-
-    try {
-      AppSetting pull_slip_template_setting = AppSetting.findByKey('pull_slip_template_id')
-      TemplateContainer tc = TemplateContainer.read(pull_slip_template_setting?.value)
-
-      if (tc != null) {
-        def pull_slip_overall_summary = PatronRequest.executeQuery(PULL_SLIP_SUMMARY);
-        log.debug("pull slip summary: ${pull_slip_overall_summary}");
-
-        List<HostLMSLocation> pslocs = HostLMSLocation.executeQuery('select h from HostLMSLocation as h where h.id in ( :loccodes )',[loccodes:loccodes])
-
-        if ( ( pslocs.size() > 0 ) && ( emailAddresses != null ) ) {
-          log.debug("Resolved locations ${pslocs} - send to ${emailAddresses}");
-
-          List<PatronRequest> pending_ps_printing = PatronRequest.executeQuery(PULL_SLIP_QUERY,[loccodes:loccodes]);
-
-          if ( pending_ps_printing != null ) {
-
-            if ( ( pending_ps_printing.size() > 0 ) || confirm_no_pending_slips ) {
-              log.debug("${pending_ps_printing.size()} pending pull slip printing for locations ${pslocs}");
-
-              String locationsText = pslocs.inject('', { String output, HostLMSLocation loc ->
-                output + (output != '' ? ', ' : '') + (loc.name ?: loc.code)
-              })
-
-              String locFilters = loccodes.collect{"location.${it}"}.join('%2C')
-
-              // 'from':'admin@reshare.org',
-              def tmplResult = templatingService.performTemplate(
-                tc,
-                [
-                  locations: locationsText,
-                  pendingRequests: pending_ps_printing,
-                  numRequests:pending_ps_printing.size(),
-                  summary: pull_slip_overall_summary,
-                  reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}%2Cstate.RES_NEW_AWAIT_PULL_SLIP&sort=-dateCreated"
-                ],
-                "en"
-              );
-
-              emailAddresses.each { to ->
-                Map email_params = [
-                  notificationId: '1',
-                  to: to,
-                  header: tmplResult.result.header,
-                  body: tmplResult.result.body,
-                  outputFormat: "text/html"
-                ]
-
-                Map email_result = emailService.sendEmail(email_params);
-              }
-            }
-          }
-          else {
-            log.debug("No pending pull slips for ${loccodes}");
-          }
-        }
-        else {
-          log.warn("Problem resolving locations or email addresses");
-        }
-      } else {
-        log.error("Cannot find a pull slip template")
-      }
-    }
-    catch ( Exception e ) {
-      e.printStackTrace();
-    }
-  }
-
-  private void reportMissingPickLocations() {
-    log.debug("reportMissingPickLocations()");
-    // ToDo: Implement a function that lists all pr.pickShelvingLocation values that do not have a corresponding directoryEntry.hostLMSCode and email an admin
-  }
 }

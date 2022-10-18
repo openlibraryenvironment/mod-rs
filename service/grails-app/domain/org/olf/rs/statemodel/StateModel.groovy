@@ -139,7 +139,7 @@ where s in (select sms.state
                     // Just update the additional fields, but we need to do it to the already saved record
                     states.find { realState ->
                         if (realState.state.code.equals(state.state.code)) {
-                            updateState(realState, foundState.canTriggerStaleRequest, foundState.canTriggerOverdueRequest, foundState.isTerminal);
+                            updateState(realState, foundState.canTriggerStaleRequest, foundState.canTriggerOverdueRequest, foundState.isTerminal, foundState.triggerPullSlipEmail);
                             return(true);
                         }
                         return(false);
@@ -156,7 +156,7 @@ where s in (select sms.state
             state.state = Status.lookup(workingState.status);
             if (state.state != null) {
                 // We have a status, now set the additional fields
-                updateState(state, workingState.canTriggerStaleRequest, workingState.canTriggerOverdueRequest, workingState.isTerminal);
+                updateState(state, workingState.canTriggerStaleRequest, workingState.canTriggerOverdueRequest, workingState.isTerminal, workingState.triggerPullSlipEmail);
 
                 // Now add the state as its not already there
                 addToStates(state);
@@ -168,13 +168,15 @@ where s in (select sms.state
         StateModelStatus state,
         Boolean canTriggerStaleRequest,
         Boolean canTriggerOverdueRequest,
-        Boolean isTerminal
+        Boolean isTerminal,
+        Boolean triggerPullSlipEmail
     ) {
-        // DOT NOT move this method to the StateModelStatus domain as it will not work for updates and I have no idea why it dosn't spent far to long trying to make it work
+        // DO NOT move this method to the StateModelStatus domain as it will not work for updates and I have no idea why it dosn't spent far to long trying to make it work
         // Update the fields on the state record
-        state.canTriggerStaleRequest = canTriggerStaleRequest == null ? Boolean.FALSE : canTriggerStaleRequest;
-        state.canTriggerOverdueRequest = canTriggerOverdueRequest == null ? Boolean.FALSE : canTriggerOverdueRequest;
-        state.isTerminal = isTerminal == null ? Boolean.FALSE : isTerminal;
+        state.canTriggerStaleRequest = canTriggerStaleRequest == null ? false : canTriggerStaleRequest;
+        state.canTriggerOverdueRequest = canTriggerOverdueRequest == null ? false : canTriggerOverdueRequest;
+        state.isTerminal = isTerminal == null ? false : isTerminal;
+        state.triggerPullSlipEmail = (triggerPullSlipEmail == null) ? false : triggerPullSlipEmail;
         // We do not need to perform a save here as it is implicitlt done by the parent
     }
 

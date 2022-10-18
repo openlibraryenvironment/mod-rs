@@ -54,7 +54,7 @@ public class StateModelData {
         [ status : Status.RESPONDER_IDLE, canTriggerStaleRequest : true ],
         [ status : Status.RESPONDER_ITEM_RETURNED ],
         [ status : Status.RESPONDER_ITEM_SHIPPED, canTriggerOverdueRequest : true ],
-        [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true ],
+        [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
         [ status : Status.RESPONDER_NOT_SUPPLIED, isTerminal : true ],
         [ status : Status.RESPONDER_OVERDUE ],
         [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
