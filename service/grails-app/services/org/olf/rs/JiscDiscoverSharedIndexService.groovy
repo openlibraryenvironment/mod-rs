@@ -16,9 +16,11 @@ import org.olf.rs.SharedIndexActions;
  * The interface between mod-rs and the shared index is defined by this service.
  *
  */
-public class FolioSharedIndexService implements SharedIndexActions {
+public class JiscDiscoverSharedIndexService implements SharedIndexActions {
 
  /**
+   * See: https://discover.libraryhub.jisc.ac.uk/sru-api?operation=searchRetrieve&version=1.1&query=rec.id%3d%2231751908%22&maximumRecords=1
+   *
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
    * @param description A Map of properies that describe the item. Currently understood properties:
