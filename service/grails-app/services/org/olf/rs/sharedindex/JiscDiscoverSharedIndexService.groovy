@@ -11,12 +11,17 @@ import groovy.json.JsonOutput;
 import groovyx.net.http.FromServer;
 import org.olf.rs.SharedIndexActions;
 
+import org.olf.rs.sharedindex.jiscdiscover.JiscDiscoverApiConnection;
+
 
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
  */
 public class JiscDiscoverSharedIndexService implements SharedIndexActions {
+
+  @Autowired
+  JiscDiscoverApiConnection jiscDiscoverApiConnection
 
  /**
    * See: https://discover.libraryhub.jisc.ac.uk/sru-api?operation=searchRetrieve&version=1.1&query=rec.id%3d%2231751908%22&maximumRecords=1
@@ -93,44 +98,18 @@ public class JiscDiscoverSharedIndexService implements SharedIndexActions {
 
     List<String> result = [];
 
-    AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
-    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
-    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
-    AppSetting shared_index_tenant_setting = AppSetting.findByKey('shared_index_tenant');
-    
-    String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
-    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
-    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
-    String shared_index_tenant =  shared_index_tenant_setting?.value ?: shared_index_tenant_setting?.defValue ?: 'diku'
+    // Left here as a signpost in case we want to externalise the base URL of the jisc discover service
+    // AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
+    // String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
 
-    if ( ( shared_index_base_url != null ) &&
-         ( shared_index_user != null ) &&
-         ( shared_index_pass != null ) && 
-         ( id != null ) &&
+    if ( ( id != null ) &&
          ( id.length() > 0 ) ) {
-      log.debug("Attempt to retrieve shared index record ${id} from ${shared_index_base_url} ${shared_index_user}/${shared_index_pass}");
-      String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
-      if ( token ) {
-        def r1 = configure {
-           request.headers['X-Okapi-Tenant'] = shared_index_tenant;
-           request.headers['X-Okapi-Token'] = token
-          request.uri = shared_index_base_url+'/inventory/instances/'+(id.trim());
-        }.get() {
-          response.success { FromServer fs, Object body ->
-            log.debug("Success response from shared index");
-            result = [JsonOutput.toJson(body)];
-          }
-          response.failure { FromServer fs ->
-            log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to GET ${id}");
-          }
-        }
-      }
-      else {
-        log.warn("Unable to login to remote shared index");
-      }
+      log.debug("Attempt to retrieve shared index record ${id} from Jisc LHD");
+
+      // 
     }
     else {
-      log.debug("Unable to contact shared index - no url/user/pass");
+      log.debug("No record ID provided - cannot lookup SI record at Jisc LHD");
     }
 
     return result;

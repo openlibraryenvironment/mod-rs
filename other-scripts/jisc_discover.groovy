@@ -28,6 +28,7 @@ r.records.record.recordData.mods.extension.modsCollection.mods.each { mc ->
     println("  UkMac location code: ${ukmac_code}");
 
     loc.holdingSimple.copyInformation.each { ci ->
+      // Have seen (Not Borrowable) in subLocation as an indication of policy
       println("    subloc: ${ci.subLocation}")
       println("    shelf: ${ci.shelfLocator}")
     }
