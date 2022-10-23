@@ -6,38 +6,23 @@ import org.apache.http.client.config.RequestConfig
 import groovyx.net.http.HttpBuilder
 import groovyx.net.http.FromServer
 import static groovyx.net.http.ApacheHttpBuilder.configure
+import groovy.util.slurpersupport.GPathResult;
 
 /**
+ * HttpBuilderNG returns groovy.util.slurpersupport.GPathResult from parsed XML response records
  */
 public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection {
 
-  public Object getSru(Map description) {
+  public GPathResult getSru(Map description) {
 
-    // https://discover.libraryhub.jisc.ac.uk/sru-api?operation=searchRetrieve&version=1.1&query=rec.id%3d%2231751908%22&maximumRecords=1
-    HttpBuilder jiscDiscover = configure {
-      request.uri = 'https://discover.libraryhub.jisc.ac.uk'
+    GPathResult result = null;
+
+    if ( description?.systemInstanceIdentifier == '2231751908' ) {
+      InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
+      result = new XmlSlurper().parse(is)
     }
 
-    jiscDiscover.get {
-      request.uri.path='/sru-api'
-      request.accept='application/json'
-      request.contentType='application/json'
-      request.uri.query=[
-        'operation':'searchRetrieve',
-        'version':'1.1',
-        'query':'rec.id=2231751908',
-        'maximumRecords':1
-      ]
-
-      response.success { FromServer fs, Object body ->
-        println("pull modules OK");
-      }
-      response.failure { FromServer fs, Object body ->
-        println("Problem ${body} ${fs} ${fs.getStatusCode()}");
-      }
-
-    }
-
+    return result;
   }
 
 }

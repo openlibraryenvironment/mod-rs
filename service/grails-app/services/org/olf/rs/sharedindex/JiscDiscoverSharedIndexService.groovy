@@ -10,6 +10,7 @@ import static groovyx.net.http.HttpBuilder.configure
 import groovy.json.JsonOutput;
 import groovyx.net.http.FromServer;
 import org.olf.rs.SharedIndexActions;
+import org.olf.rs.AvailabilityStatement;
 
 import org.olf.rs.sharedindex.jiscdiscover.JiscDiscoverApiConnection;
 
