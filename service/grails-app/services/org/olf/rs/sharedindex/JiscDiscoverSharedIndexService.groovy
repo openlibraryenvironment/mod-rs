@@ -1,4 +1,4 @@
-package org.olf.rs;
+package org.olf.rs.sharedindex;
 
 import grails.gorm.multitenancy.Tenants
 import java.util.concurrent.ThreadLocalRandom;
