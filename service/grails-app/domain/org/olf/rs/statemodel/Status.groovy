@@ -78,7 +78,6 @@ class Status implements MultiTenant<Status> {
   /** The sequence to display the status for the close manual drop down */
   Integer terminalSequence;
 
-
   static hasMany = [
         // Allow us to tag a state for use in analytical reporting - for example CURRENT_LOAN or CURRENT_BORROW
         tags: Tag
