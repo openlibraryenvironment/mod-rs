@@ -76,12 +76,12 @@ public class BackgroundTaskService {
                   tz = TimeZone.getTimeZone('UTC');
                 }
 
-    			// The date we start processing tis in the local time zone
+    			// The date we start processing this in the local time zone
                 timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
 
                 if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
                   // First time we have seen this timer - we don't know when it is next due - so work that out
-                  // as tho we just run the timer.
+                  // as though we just run the timer.
                 }
                 else {
                   runTimer(timer)
