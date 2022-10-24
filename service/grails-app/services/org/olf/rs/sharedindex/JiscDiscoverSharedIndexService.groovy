@@ -41,25 +41,54 @@ public class JiscDiscoverSharedIndexService implements SharedIndexActions {
 
     // Use the shared index to try and obtain a list of locations
     try {
-      log.debug("Try graphql")
       if ( description?.systemInstanceIdentifier != null ) {
         log.debug("Query shared index for holdings of system instance identifier: ${description?.systemInstanceIdentifier}");
 
-        /*
-        sharedIndexHoldings(description?.systemInstanceIdentifier).each { shared_index_availability ->
-          log.debug("add shared index availability: ${shared_index_availability}");
+        def sru_response = jiscDiscoverApiConnection.getSru(description);
 
-          // We need to look through the identifiers to see if there is an identifiier where identifierTypeObject.name == shared_index_availability.symbol
-          // If so, that identifier is the instanceIdentifier in the shared index for this item - I know - it makes my brain hurt too
-          
+        if ( sru_response?.numberOfRecords?.toString() == '1' ) {
+          sru_response.records.record.recordData.mods.extension.modsCollection.mods.each { mr ->
 
-          result.add(new AvailabilityStatement(
-                                               symbol:shared_index_availability.symbol, 
-                                               instanceIdentifier:shared_index_availability.instanceIdentifier, 
-                                               copyIdentifier:shared_index_availability.copyIdentifier,
-                                               illPolicy:shared_index_availability.illPolicy));
+
+            mr.recordInfo.recordIdentifier.each { loc_specific_record_id ->
+              log.debug("    rec [${loc_specific_record_id.'@source'}] : ${loc_specific_record_id.text()}");
+            }
+
+            int lendable_copies = 0;
+            int total_copies = 0;
+
+            List<String> shelf_locations = []
+            mr.location.each { loc ->
+              String ukmac_code = loc.physicalLocation.find { it.'@authority'=='UkMaC' }
+              log.debug("  UkMac location code: ${ukmac_code}");
+
+              if ( ukmac_code ) {
+
+                loc.holdingSimple.copyInformation.each { ci ->
+                  // Have seen (Not Borrowable) in subLocation as an indication of policy
+                  log.debug("    subloc: ${ci.subLocation}")
+                  log.debug("    shelf: ${ci.shelfLocator}")
+                  shelf_locations.add(ci.shelfLocator)
+                  lendable_copies++;
+                  total_copies++;
+                }
+
+                if ( lendable_copies > 0 ) {
+                  log.debug("Add ${ukmac_code} to availability / ${shelf_locations.join(', ')}");
+                  AvailabilityStatement avls = new AvailabilityStatement()
+                  avls.symbol = ukmac_code
+                  avls.instanceIdentifier = null;
+                  avls.copyIdentifier = null;
+                  avls.illPolicy = null;
+                  avls.totalCopies = new Long(total_copies);
+                  avls.availableCopies = new Long(lendable_copies)
+                  result.add(avls);
+                }
+              }
+            }
+
+          }
         }
-        */
       }
       else {
         log.warn("No shared index identifier for record. Cannot use shared index");

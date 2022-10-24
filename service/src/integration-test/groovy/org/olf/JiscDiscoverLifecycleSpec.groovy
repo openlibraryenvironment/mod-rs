@@ -148,13 +148,15 @@ class JiscDiscoverLifecycleSpec extends HttpSpec {
 
   void "Test Library Hub Discover Lookup"() {
     when: "we try to look up an item by id"
-      def lookup_result = null;
+      List lookup_result = null;
       Tenants.withId('RSInstFour_mod_rs'.toLowerCase()) {
-        lookup_result = jiscDiscoverSharedIndexService.findAppropriateCopies([systemInstanceIdentifier:'123'])
+        // In a test profile, this will invoke the mock provider and give back static data - check that works first
+        lookup_result = jiscDiscoverSharedIndexService.findAppropriateCopies([systemInstanceIdentifier:'2231751908'])
       }
 
 
-    then: "service returns an appropriate record"
-      lookup_result != null
+    then: "service returns an appropriate record"  
+      log.debug("Lookup result: ${lookup_result}");
+      lookup_result.size() == 11
   }
 }
