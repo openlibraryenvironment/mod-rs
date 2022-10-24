@@ -1,0 +1,1048 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zs:searchRetrieveResponse xmlns:zs="http://www.loc.gov/zing/srw/"><zs:version>1.1</zs:version><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordPacking>xml</zs:recordPacking><zs:recordData><mods xmlns="http://www.loc.gov/mods/v3" xmlns:h="http://copac.ac.uk/schemas/holdings/v1" xmlns:xlink="http://www.w3.org/1999/xlink" version="3.7">
+	<recordInfo>
+		<recordIdentifier source="UkMaC">31751908</recordIdentifier>
+		<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+	</recordInfo>
+	<typeOfResource>text</typeOfResource>
+	<originInfo>
+		<issuance>single unit</issuance>
+	</originInfo>
+	<originInfo>
+		<dateIssued encoding="marc">1994</dateIssued>
+		<place>
+			<placeTerm authority="marccountry" type="code">enk</placeTerm>
+		</place>
+	</originInfo>
+	<identifier type="isbn">047194839X</identifier>
+	<identifier type="isbn">9780471948391</identifier>
+	<identifier type="isbn">0471276871</identifier>
+	<identifier type="isbn">9780471276876</identifier>
+	<classification authority="lcc">HD30.25 .B44 1994</classification>
+	<classification authority="ddc" edition="21">658.4</classification>
+	<name type="personal">
+		<namePart>Beer, Stafford.</namePart>
+		<role>
+			<roleTerm type="text">creator</roleTerm>
+		</role>
+	</name>
+	<titleInfo>
+		<title>Brain of the firm</title>
+	</titleInfo>
+	<note type="statement of responsibility">Stafford Beer.</note>
+	<originInfo>
+		<edition>2nd ed.</edition>
+	</originInfo>
+	<originInfo eventType="publisher">
+		<place>
+			<placeTerm type="text">Chichester, England ; New York</placeTerm>
+		</place>
+		<publisher>John Wiley &amp; Sons</publisher>
+		<dateIssued>1994</dateIssued>
+	</originInfo>
+	<physicalDescription>
+		<extent>xiii, 417 pages : illustrations ; 23 cm.</extent>
+	</physicalDescription>
+	<relatedItem type="series">
+		<titleInfo>
+			<title>The managerial cybernetics of organization.</title>
+		</titleInfo>
+	</relatedItem>
+	<relatedItem type="series">
+		<titleInfo>
+			<title>Managerial cybernetics of organization</title>
+		</titleInfo>
+	</relatedItem>
+	<relatedItem type="series">
+		<titleInfo>
+			<title>The Stafford Beer classic library</title>
+		</titleInfo>
+	</relatedItem>
+	<note type="general">"Companion volume to The heart of Enterprise."</note>
+	<note type="general">"Paperback edition 1994"--Title page verso.</note>
+	<note type="bibliography">Includes bibliographical references (pages 405-410) and index.</note>
+	<tableOfContents displayLabel="Contents">Pt. 1. Conceptual Components -- Ch. 1. Let's Think Again -- Ch. 2. Concepts and Terms -- Ch. 3. Dimensions of the Problem -- Ch. 4. Organization of Unthinkable Systems -- Ch. 5. Hierarchies of Control -- Pt. 2. Form of the Model -- Ch. 6. Anatomy of Management -- Ch. 7. Control Physiology -- Ch. 8. Autonomy -- Ch. 9. Autonomic Management -- Ch. 10. Biggest Switch -- Pt. 3. Use of the Model -- Ch. 11. Corporate Structure and its Quantification -- Ch. 12. Autonomics -- Systems One, Two, Three -- Ch. 13. Environments of Decision -- System Four -- Ch. 14. Multinode -- System Five -- Ch. 15. Higher Management -- Pt. 4. Course of History -- Ch. 16. Flying Start -- Ch. 17. Into its Stride -- Ch. 18. October Watershed -- Ch. 19. End of the Beginning -- Ch. 20. Prospectus. Note to Part Four -- References explicit to these five chapters -- Pt. 5. Appendix.</tableOfContents>
+	<abstract displayLabel="Review">"This is the second edition of a book which has already become a management standard both in universities and on the bookshelves of managers and their advisers. Brain of the Firm develops an account of the firm based upon insights derived from the study of the human nervous system, and is a basic text from the author's theory of viable systems. Despite the neurophysiology, the book is written for managers to understand. The companion volume to this book is The Heart of Enterprise, which is intended to support and complement this text."--Jacket.</abstract>
+	<subject>
+		<name type="personal">
+			<namePart>Beer, Stafford.</namePart>
+		</name>
+	</subject>
+	<subject authority="lcsh">
+		<topic>Management</topic>
+		<topic>Mathematical models.</topic>
+	</subject>
+	<subject authority="lcsh">
+		<topic>Cybernetics.</topic>
+	</subject>
+	<subject authority="mesh">
+		<topic>Cybernetics</topic>
+	</subject>
+	<subject authority="rvm">
+		<topic>Gestion</topic>
+		<topic>Modèles mathématiques.</topic>
+	</subject>
+	<subject authority="rvm">
+		<topic>Cybernétique.</topic>
+	</subject>
+	<subject authority="aat">
+		<topic>cybernetics.</topic>
+	</subject>
+	<subject authority="fast">
+		<topic>Cybernetics.</topic>
+	</subject>
+	<subject authority="fast">
+		<topic>Management</topic>
+		<topic>Mathematical models.</topic>
+	</subject>
+	<subject authority="nli">
+		<topic>Cybernetics.</topic>
+	</subject>
+	<subject authority="nli">
+		<topic>Industrial management.</topic>
+	</subject>
+	<subject authority="nli">
+		<topic>Organizational effectiveness.</topic>
+	</subject>
+	<subject authority="nli">
+		<topic>Neurophysiology.</topic>
+	</subject>
+	<subject>
+		<topic>Organisations</topic>
+		<topic>Management.</topic>
+	</subject>
+	<subject>
+		<topic>Management.</topic>
+	</subject>
+	<subject>
+		<topic>ORGANISATION</topic>
+	</subject>
+	<subject>
+		<topic>MANAGEMENT</topic>
+	</subject>
+	<subject>
+		<topic>SYSTEMS</topic>
+	</subject>
+	<subject>
+		<topic>ANALYSIS</topic>
+	</subject>
+	<subject>
+		<topic>cybernetics</topic>
+	</subject>
+	<titleInfo type="alternative">
+		<title>The managerial cybernetics of organization.</title>
+	</titleInfo>
+	<relatedItem type="series">
+		<name type="personal">
+			<namePart>Beer, Stafford.</namePart>
+		</name>
+		<titleInfo>
+			<title>Stafford Beer classic library.</title>
+		</titleInfo>
+	</relatedItem>
+	<relatedItem type="series">
+		<titleInfo type="uniform">
+			<title>Managerial cybernetics of organization.</title>
+		</titleInfo>
+	</relatedItem>
+	<extension>
+		<modsCollection>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">31751908</recordIdentifier>
+					<recordIdentifier source="WlAbUW">99815083402418</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1981</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">enk</placeTerm>
+					</place>
+				</originInfo>
+				<identifier type="isbn">0471276871</identifier>
+				<classification authority="ddc" edition="19">658.4</classification>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer.</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>c1981</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>xiii,417p : ill ; 24cm.</extent>
+				</physicalDescription>
+				<note type="general">Previous ed., London , Allen Lane, 1972.</note>
+				<note type="general">At head of title: The managerial cybernetics of organization.</note>
+				<note type="bibliography">Bibliography, p405-410. - Includes index.</note>
+				<subject authority="lcsh">
+					<topic>Management.</topic>
+				</subject>
+				<subject authority="lcsh">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<titleInfo type="alternative">
+					<title>The managerial cybernetics of organization.</title>
+				</titleInfo>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<genre>Illustrated</genre>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>Aberystwyth University Library</physicalLocation>
+					<physicalLocation authority="UkMaC">abr</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>External Store</subLocation>
+							<shelfLocator>STORE HD38.B4 (R13.167)</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">137537092</recordIdentifier>
+					<recordIdentifier source="UkCU">991005467479703606</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<recordInfo>
+					<descriptionStandard>aacr</descriptionStandard>
+				</recordInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1994</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">enk</placeTerm>
+					</place>
+				</originInfo>
+				<identifier displayLabel="National Bibliography Number" type="bnb">GB9507963</identifier>
+				<identifier type="isbn">047194839X</identifier>
+				<identifier type="isbn">0471276871</identifier>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer.</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>1994, c1981</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>xiii,417p ; 23cm.</extent>
+				</physicalDescription>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The Stafford Beer classic library</title>
+					</titleInfo>
+				</relatedItem>
+				<note type="general">Companion volume to The heart of enterprise.</note>
+				<subject authority="lcsh">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<subject authority="lcsh">
+					<topic>Management.</topic>
+				</subject>
+				<titleInfo type="alternative">
+					<title>The heart of enterprise.</title>
+				</titleInfo>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Cambridge Libraries</physicalLocation>
+					<physicalLocation authority="UkMaC">cam</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>University Library: Order in West Room (Not borrowable)</subLocation>
+							<shelfLocator>1995.8.2787</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>Judge Business School Information Centre: Main Library</subLocation>
+							<shelfLocator>HD38.B43 1994</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">123317650</recordIdentifier>
+					<recordIdentifier source="WlCaUW">991030993402420</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1981</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">xxk</placeTerm>
+					</place>
+				</originInfo>
+				<identifier type="isbn">0471276871</identifier>
+				<classification authority="ddc" edition="19">658.4</classification>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer.</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>c1981</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>xiii,417p : ill ; 24cm.</extent>
+				</physicalDescription>
+				<note type="general">Previous ed., London , Allen Lane, 1972.</note>
+				<note type="general">At head of title: The managerial cybernetics of organization.</note>
+				<note type="bibliography">Bibliography, p405-410. - Includes index.</note>
+				<subject authority="lcsh">
+					<topic>Management.</topic>
+				</subject>
+				<subject authority="lcsh">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<titleInfo type="alternative">
+					<title>The managerial cybernetics of organization.</title>
+				</titleInfo>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<genre>Illustrated</genre>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>Cardiff University Libraries</physicalLocation>
+					<physicalLocation authority="UkMaC">cdf</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Talybont Research Reserve: Ask at desk</subLocation>
+							<shelfLocator> 658.4   B </shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>Contact the Arts and Social Sciences Library </subLocation>
+							<shelfLocator>HD38.B3</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+				<extension>
+					<cpc:local xmlns:cpc="http://copac.ac.uk/schemas/mods-copac/v1">
+						<note type="local"/>
+					</cpc:local>
+				</extension>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">89626418</recordIdentifier>
+					<recordIdentifier source="UkCraT">a294548</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1994</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">xxk</placeTerm>
+					</place>
+				</originInfo>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer.</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>1994</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>416 p. ; 24 cm.</extent>
+				</physicalDescription>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>Cranfield University Libraries</physicalLocation>
+					<physicalLocation authority="UkMaC">cra</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Kings Norton Library</subLocation>
+							<shelfLocator>65.012.7 BEE (STANDARD)</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">155079157</recordIdentifier>
+					<recordIdentifier source="UkHlHU">.b14491163</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<recordInfo>
+					<descriptionStandard>aacr</descriptionStandard>
+				</recordInfo>
+				<originInfo/>
+				<identifier type="isbn">0471276871</identifier>
+				<recordInfo>
+					<recordContentSource authority="marcorg">UkHlHU</recordContentSource>
+				</recordInfo>
+				<classification authority="lcc">HD 58.7 B4</classification>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm.</title>
+				</titleInfo>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>1981</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>417p.</extent>
+				</physicalDescription>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The managerial cybernetics of organization.</title>
+					</titleInfo>
+				</relatedItem>
+				<subject authority="lcsh">
+					<topic>Management.</topic>
+				</subject>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+					<form authority="marccategory">text</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Hull</physicalLocation>
+					<physicalLocation authority="UkMaC">hll</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>BJL 5th Floor</subLocation>
+							<shelfLocator>HD 58.7 B4</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">166115994</recordIdentifier>
+					<recordIdentifier source="UkLiJM">990001946890303826</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1981</dateIssued>
+				</originInfo>
+				<identifier type="isbn">0471276871</identifier>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<publisher>Wiley</publisher>
+					<dateIssued>1981</dateIssued>
+				</originInfo>
+				<subject>
+					<name type="personal">
+						<namePart>Beer, Stafford.</namePart>
+					</name>
+				</subject>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>Liverpool John Moores University</physicalLocation>
+					<physicalLocation authority="UkMaC">ljmu</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Avril Robarts Library, Main Collection</subLocation>
+							<shelfLocator>658.403 BEE</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">166216360</recordIdentifier>
+					<recordIdentifier source="UkLiJM">990005194310303826</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1981</dateIssued>
+				</originInfo>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">by Stafford Beer</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<publisher>John Wiley</publisher>
+					<dateIssued>1981</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>Liverpool John Moores University</physicalLocation>
+					<physicalLocation authority="UkMaC">ljmu</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Aldham Robarts Library, Stafford Beer Collection (24 hrs notice required)</subLocation>
+							<shelfLocator>SB.A.049</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">93117282</recordIdentifier>
+					<recordIdentifier source="UkMaJRU">9922925534401631</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<recordInfo>
+					<descriptionStandard>aacr</descriptionStandard>
+				</recordInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1994</dateIssued>
+				</originInfo>
+				<identifier type="isbn">047194839X</identifier>
+				<identifier type="isbn">9780471948391</identifier>
+				<recordInfo>
+					<recordContentSource authority="marcorg">IDPM RETRO</recordContentSource>
+				</recordInfo>
+				<name type="personal">
+					<namePart>Beer, S.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the Firm.</title>
+				</titleInfo>
+				<originInfo>
+					<edition>2nd edition.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>John Wiley &amp; Sons</publisher>
+					<dateIssued>1994</dateIssued>
+				</originInfo>
+				<subject>
+					<topic>ORGANISATION</topic>
+				</subject>
+				<subject>
+					<topic>MANAGEMENT</topic>
+				</subject>
+				<subject>
+					<topic>SYSTEMS</topic>
+				</subject>
+				<subject>
+					<topic>ANALYSIS</topic>
+				</subject>
+				<subject>
+					<topic>cybernetics</topic>
+				</subject>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Manchester Library</physicalLocation>
+					<physicalLocation authority="UkMaC">man</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Contact the Main Library</subLocation>
+							<shelfLocator>  311.4 </shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">35679351</recordIdentifier>
+					<recordIdentifier source="UkOxU">011643062</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<recordInfo>
+					<descriptionStandard>aacr</descriptionStandard>
+				</recordInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1994</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">enk</placeTerm>
+					</place>
+				</originInfo>
+				<identifier displayLabel="National Bibliography Number" type="bnb">GB 95-7963</identifier>
+				<identifier type="isbn">0471276871 (hbk)</identifier>
+				<identifier type="isbn">047194839X</identifier>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer</note>
+				<originInfo>
+					<edition>2nd ed</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>Wiley</publisher>
+					<dateIssued>1994</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>xiii, 417 p ; 23 cm</extent>
+				</physicalDescription>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>Managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The Stafford Beer classic library</title>
+					</titleInfo>
+				</relatedItem>
+				<note type="general">Companion volume to The heart of enterprise</note>
+				<note type="general">Originally published in hardback by John Wiley &amp; Sons Ltd in 1981</note>
+				<subject authority="lcsh">
+					<topic>Cybernetics</topic>
+				</subject>
+				<subject authority="lcsh">
+					<topic>Management</topic>
+				</subject>
+				<titleInfo type="alternative">
+					<title>Heart of enterprise</title>
+				</titleInfo>
+				<relatedItem type="series">
+					<titleInfo type="uniform">
+						<title>Managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<relatedItem type="series">
+					<name type="personal">
+						<namePart>Beer, Stafford.</namePart>
+					</name>
+					<titleInfo>
+						<title>Stafford Beer classic library</title>
+					</titleInfo>
+				</relatedItem>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Oxford Libraries</physicalLocation>
+					<physicalLocation authority="UkMaC">oxf</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Radcliffe Science Library</subLocation>
+							<shelfLocator>95.E05375 (Box B000000494886)</shelfLocator>
+						</copyInformation>
+						<copyInformation>
+							<subLocation>Sainsbury Library: Annexe</subLocation>
+							<shelfLocator>HD38 BEE 1994</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">474919999</recordIdentifier>
+					<recordIdentifier source="UK-SoUHL">ocm31937798</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<recordInfo>
+					<descriptionStandard>aacr</descriptionStandard>
+				</recordInfo>
+				<originInfo>
+					<dateIssued encoding="marc">1994</dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">enk</placeTerm>
+					</place>
+				</originInfo>
+				<recordInfo>
+					<recordContentSource authority="marcorg">UKM</recordContentSource>
+					<languageOfCataloging>
+						<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					</languageOfCataloging>
+				</recordInfo>
+				<identifier displayLabel="National Bibliography Number" type="bnb">GB9507963</identifier>
+				<identifier type="isbn">047194839X</identifier>
+				<identifier type="isbn">9780471948391</identifier>
+				<identifier type="isbn">0471276871</identifier>
+				<identifier type="isbn">9780471276876</identifier>
+				<classification authority="lcc">HD30.25 .B44 1994</classification>
+				<classification authority="ddc" edition="21">658.4</classification>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm</title>
+				</titleInfo>
+				<note type="statement of responsibility">Stafford Beer.</note>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester, England ; New York</placeTerm>
+					</place>
+					<publisher>John Wiley &amp; Sons</publisher>
+					<dateIssued>1994</dateIssued>
+				</originInfo>
+				<physicalDescription>
+					<extent>xiii, 417 pages : illustrations ; 23 cm.</extent>
+				</physicalDescription>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>Managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The Stafford Beer classic library</title>
+					</titleInfo>
+				</relatedItem>
+				<note type="general">"Companion volume to The heart of Enterprise."</note>
+				<note type="general">"Paperback edition 1994"--Title page verso.</note>
+				<note type="bibliography">Includes bibliographical references (pages 405-410) and index.</note>
+				<abstract displayLabel="Review">"This is the second edition of a book which has already become a management standard both in universities and on the bookshelves of managers and their advisers. Brain of the Firm develops an account of the firm based upon insights derived from the study of the human nervous system, and is a basic text from the author's theory of viable systems. Despite the neurophysiology, the book is written for managers to understand. The companion volume to this book is The Heart of Enterprise, which is intended to support and complement this text."--Jacket.</abstract>
+				<tableOfContents displayLabel="Contents">Pt. 1. Conceptual Components -- Ch. 1. Let's Think Again -- Ch. 2. Concepts and Terms -- Ch. 3. Dimensions of the Problem -- Ch. 4. Organization of Unthinkable Systems -- Ch. 5. Hierarchies of Control -- Pt. 2. Form of the Model -- Ch. 6. Anatomy of Management -- Ch. 7. Control Physiology -- Ch. 8. Autonomy -- Ch. 9. Autonomic Management -- Ch. 10. Biggest Switch -- Pt. 3. Use of the Model -- Ch. 11. Corporate Structure and its Quantification -- Ch. 12. Autonomics -- Systems One, Two, Three -- Ch. 13. Environments of Decision -- System Four -- Ch. 14. Multinode -- System Five -- Ch. 15. Higher Management -- Pt. 4. Course of History -- Ch. 16. Flying Start -- Ch. 17. Into its Stride -- Ch. 18. October Watershed -- Ch. 19. End of the Beginning -- Ch. 20. Prospectus. Note to Part Four -- References explicit to these five chapters -- Pt. 5. Appendix.</tableOfContents>
+				<subject authority="lcsh">
+					<topic>Management</topic>
+					<topic>Mathematical models.</topic>
+				</subject>
+				<subject authority="lcsh">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<subject authority="mesh">
+					<topic>Cybernetics</topic>
+				</subject>
+				<subject authority="rvm">
+					<topic>Gestion</topic>
+					<topic>Modèles mathématiques.</topic>
+				</subject>
+				<subject authority="rvm">
+					<topic>Cybernétique.</topic>
+				</subject>
+				<subject authority="aat">
+					<topic>cybernetics.</topic>
+				</subject>
+				<subject authority="fast">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<subject authority="fast">
+					<topic>Management</topic>
+					<topic>Mathematical models.</topic>
+				</subject>
+				<subject authority="nli">
+					<topic>Cybernetics.</topic>
+				</subject>
+				<subject authority="nli">
+					<topic>Industrial management.</topic>
+				</subject>
+				<subject authority="nli">
+					<topic>Organizational effectiveness.</topic>
+				</subject>
+				<subject authority="nli">
+					<topic>Neurophysiology.</topic>
+				</subject>
+				<subject>
+					<topic>Management.</topic>
+				</subject>
+				<relatedItem type="series">
+					<titleInfo type="uniform">
+						<title>Managerial cybernetics of organization.</title>
+					</titleInfo>
+				</relatedItem>
+				<relatedItem type="series">
+					<name type="personal">
+						<namePart>Beer, Stafford.</namePart>
+					</name>
+					<titleInfo>
+						<title>Stafford Beer classic library.</title>
+					</titleInfo>
+				</relatedItem>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+					<form authority="rdamedia" type="media">unmediated</form>
+					<form authority="rdacarrier" type="carrier">volume</form>
+				</physicalDescription>
+				<genre>Bibliography</genre>
+				<genre>Illustrated</genre>
+				<genre authority="rdacontent">text</genre>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Southampton Library</physicalLocation>
+					<physicalLocation authority="UkMaC">sth</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Hartley Library: Main Collection (Standard Loan)</subLocation>
+							<shelfLocator>HD38 BEE</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+			</mods>
+			<mods version="3.7">
+				<recordInfo>
+					<recordIdentifier source="UkMaC">55745232</recordIdentifier>
+					<recordIdentifier source="WlCmTSD">9911117402421</recordIdentifier>
+					<recordCreationDate encoding="iso8601">20221023</recordCreationDate>
+				</recordInfo>
+				<typeOfResource>text</typeOfResource>
+				<originInfo>
+					<issuance>single unit</issuance>
+				</originInfo>
+				<originInfo>
+					<dateIssued encoding="marc">    </dateIssued>
+					<place>
+						<placeTerm authority="marccountry" type="code">enk</placeTerm>
+					</place>
+				</originInfo>
+				<identifier type="isbn">047194839X</identifier>
+				<classification authority="ddc">658.4032</classification>
+				<name type="personal">
+					<namePart>Beer, Stafford.</namePart>
+					<role>
+						<roleTerm type="text">creator</roleTerm>
+					</role>
+				</name>
+				<titleInfo>
+					<title>Brain of the firm.</title>
+				</titleInfo>
+				<originInfo>
+					<edition>2nd ed.</edition>
+				</originInfo>
+				<originInfo eventType="publisher">
+					<place>
+						<placeTerm type="text">Chichester</placeTerm>
+					</place>
+					<publisher>John Wiley and Sons</publisher>
+					<dateIssued>1981</dateIssued>
+				</originInfo>
+				<relatedItem type="series">
+					<titleInfo>
+						<title>The managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<subject>
+					<topic>Cybernetics.</topic>
+				</subject>
+				<subject>
+					<topic>Organisations</topic>
+					<topic>Management.</topic>
+				</subject>
+				<relatedItem type="series">
+					<titleInfo type="uniform">
+						<title>The managerial cybernetics of organization</title>
+					</titleInfo>
+				</relatedItem>
+				<physicalDescription>
+					<form authority="marcform">print</form>
+				</physicalDescription>
+				<language>
+					<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+					<languageTerm type="text">English</languageTerm>
+				</language>
+				<location>
+					<physicalLocation>University of Wales Trinity Saint David</physicalLocation>
+					<physicalLocation authority="UkMaC">tsd</physicalLocation>
+					<holdingSimple>
+						<copyInformation>
+							<subLocation>Carmarthen Campus Library: Main Collection</subLocation>
+							<shelfLocator>658.4032 BEE</shelfLocator>
+						</copyInformation>
+					</holdingSimple>
+				</location>
+				<extension>
+					<cpc:local xmlns:cpc="http://copac.ac.uk/schemas/mods-copac/v1">
+						<note type="local"/>
+					</cpc:local>
+				</extension>
+			</mods>
+		</modsCollection>
+	</extension>
+	<physicalDescription>
+		<form authority="marcform">print</form>
+		<form authority="marccategory">text</form>
+		<form authority="rdamedia" type="media">unmediated</form>
+		<form authority="rdacarrier" type="carrier">volume</form>
+	</physicalDescription>
+	<genre>Bibliography</genre>
+	<genre>Illustrated</genre>
+	<genre authority="rdacontent">text</genre>
+	<language>
+		<languageTerm authority="iso639-2b" type="code">eng</languageTerm>
+		<languageTerm type="text">English</languageTerm>
+	</language>
+</mods></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>1.1</zs:version><zs:query>rec.id="31751908"</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordPacking>xml</zs:recordPacking></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

@@ -108,6 +108,7 @@ public class RefdataValueData {
     // Shared index adapter
     public static final String SHARED_INDEX_ADAPTER_FOLIO = 'FOLIO';
     public static final String SHARED_INDEX_ADAPTER_METASTORAGE = 'modmetastorage';
+    public static final String SHARED_INDEX_ADAPTER_JISC_LHD = 'jiscDiscover';
 
     // Yes / No
     public static final String YES_NO_NO  = 'No';
@@ -195,6 +196,8 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, 'mod-meta-storage', SHARED_INDEX_ADAPTER_METASTORAGE);
+            RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_JISC_LHD);
+
 
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_MANUAL);
