@@ -132,9 +132,16 @@ public class JiscDiscoverSharedIndexService implements SharedIndexActions {
     // AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
     // String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
 
-    if ( ( id != null ) &&
-         ( id.length() > 0 ) ) {
+    if ( ( id != null ) && ( id.length() > 0 ) ) {
       log.debug("Attempt to retrieve shared index record ${id} from Jisc LHD");
+
+      def sru_response = jiscDiscoverApiConnection.getSru(description);
+
+      if ( sru_response?.numberOfRecords?.toString() == '1' ) {
+        sru_response.records.record.each { r ->
+          result.add(groovy.xml.XmlUtil.serialize(sru_response.records))
+        }
+      }
 
       // 
     }
