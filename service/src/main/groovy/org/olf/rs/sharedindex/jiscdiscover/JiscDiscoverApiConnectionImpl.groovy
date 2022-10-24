@@ -26,7 +26,7 @@ public class JiscDiscoverApiConnectionImpl implements JiscDiscoverApiConnection 
       request.uri.query=[
         'operation':'searchRetrieve',
         'version':'1.1',
-        'query':'rec.id=31751908',
+        'query':"rec.id=${description.systemInstanceIdentifier}".toString(),
         'maximumRecords':1
       ]
 
