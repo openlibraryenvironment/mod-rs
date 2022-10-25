@@ -364,8 +364,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastUpdated column : 'pr_last_updated'
     patronIdentifier column : 'pr_patron_identifier'
     patronReference column : 'pr_patron_reference'
-    serviceType column : 'pr_service_type_fk'
-    stateModel column : 'pr_state_model_fk'
+    serviceType column : 'pr_service_type_fk', fetch: 'join'
+    stateModel column : 'pr_state_model_fk', fetch: 'join'
     state column : 'pr_state_fk'
     isRequester column : "pr_is_requester"
     numberOfRetries column : 'pr_number_of_retries'
@@ -373,7 +373,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     preErrorStatus column : 'pr_pre_error_status_fk'
     awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
     rotaPosition column : 'pr_rota_position'
-    publicationType column : 'pr_pub_type_fk'
+    publicationType column : 'pr_pub_type_fk', fetch: 'join'
 
     title column : 'pr_title'
     author column : 'pr_author'
@@ -408,10 +408,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     selectedItemBarcode column: 'pr_selected_item_barcode'
 
     requestingInstitutionSymbol column : 'pr_req_inst_symbol'
-    resolvedRequester column : 'pr_resolved_req_inst_symbol_fk'
+    resolvedRequester column : 'pr_resolved_req_inst_symbol_fk', fetch: 'join'
 
     supplyingInstitutionSymbol column : 'pr_sup_inst_symbol'
-    resolvedSupplier column : 'pr_resolved_sup_inst_symbol_fk'
+    resolvedSupplier column : 'pr_resolved_sup_inst_symbol_fk', fetch: 'join'
 
     peerRequestIdentifier column : 'pr_peer_request_identifier'
 
@@ -427,8 +427,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     bibRecord column: 'pr_bib_record'
     neededBy column : 'pr_needed_by'
 
-    pickLocation column: 'pr_pick_location_fk'
-    pickShelvingLocation column: 'pr_pick_shelving_location_fk'
+    pickLocation column: 'pr_pick_location_fk', fetch: 'join'
+    pickShelvingLocation column: 'pr_pick_shelving_location_fk', fetch: 'join'
     localCallNumber column : 'pr_local_call_number'
 
     hrid column : 'pr_hrid'
@@ -438,13 +438,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocation column : 'pr_pref_service_point'
     pickupLocationCode column : 'pr_pref_service_point_code'
     pickupLocationSlug column : 'pr_pickup_location_slug'
-    resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
+    resolvedPickupLocation column : 'pr_resolved_pickup_location_fk', fetch: 'join'
     resolvedPatron column : 'pr_resolved_patron_fk'
     requestToContinue column: 'pr_request_to_continue'
     previousStates column: 'pr_previous_states'
     activeLoan column: 'pr_active_loan'
     needsAttention column: 'pr_needs_attention'
-    cancellationReason column: 'pr_cancellation_reason_fk'
+    cancellationReason column: 'pr_cancellation_reason_fk', fetch: 'join'
 
     dueDateFromLMS column: 'pr_due_date_from_lms'
     parsedDueDateFromLMS column: 'pr_parsed_due_date_lms'
@@ -453,7 +453,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     overdue column: 'pr_overdue'
 
-    networkStatus column: 'pr_network_status', length:32
+    networkStatus column: 'pr_network_status', length:32, fetch: 'join'
     lastSendAttempt column: 'pr_last_send_attempt'
     nextSendAttempt column: 'pr_next_send_attempt'
     lastProtocolData column: 'pr_last_protocol_data', length:20000
