@@ -6,28 +6,25 @@ import org.apache.http.client.config.RequestConfig
 import groovyx.net.http.HttpBuilder
 import groovyx.net.http.FromServer
 import static groovyx.net.http.ApacheHttpBuilder.configure
-import groovy.util.slurpersupport.GPathResult;
 
 
 /**
  */
 public class JiscDiscoverApiConnectionImpl implements JiscDiscoverApiConnection {
 
-  public GPathResult getSru(Map description) {
+  public Object getSru(Map description) {
 
     // https://discover.libraryhub.jisc.ac.uk/sru-api?operation=searchRetrieve&version=1.1&query=rec.id%3d%2231751908%22&maximumRecords=1
     HttpBuilder jiscDiscover = configure {
       request.uri = 'https://discover.libraryhub.jisc.ac.uk'
     }
 
-    GPathResult result = (GPathResult) jiscDiscover.get {
-      request.uri.path='/sru-api'
+    Object result = jiscDiscover.get {
+      request.uri.path='/search' // ?id=3568439&rn=1&format=json
       request.accept='text/xml'
       request.uri.query=[
-        'operation':'searchRetrieve',
-        'version':'1.1',
-        'query':"rec.id=${description.systemInstanceIdentifier}".toString(),
-        'maximumRecords':1
+        'id':description.systemInstanceIdentifier,
+        'format':'json'
       ]
 
       response.success { FromServer fs, Object body ->

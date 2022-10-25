@@ -67,12 +67,18 @@ public class BackgroundTaskService {
                 TimeZone tz;
                 try {
                   JsonSlurper jsonSlurper = new JsonSlurper();
-                  def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
-                  log.debug("Got system locale settings : ${tenant_locale}");
-                  tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                  def tz_setting = okapiSettingsService.getSetting('localeSettings');
+                  if ( tz_setting != null ) {
+                    def tenant_locale = jsonSlurper.parseText(tz_setting.value);
+                    log.debug("Got system locale settings : ${tenant_locale}");
+                    tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                  }
+                  else {
+                    tz = TimeZone.getTimeZone('UTC');
+                  }
                 }
                 catch ( Exception e ) {
-                  log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
+                  log.debug("Failure getting locale to determine timezone, processing timer in UTC");
                   tz = TimeZone.getTimeZone('UTC');
                 }
 
