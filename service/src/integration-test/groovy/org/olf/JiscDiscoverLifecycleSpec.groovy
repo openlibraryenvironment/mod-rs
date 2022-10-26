@@ -151,12 +151,12 @@ class JiscDiscoverLifecycleSpec extends HttpSpec {
       List lookup_result = null;
       Tenants.withId('RSInstFour_mod_rs'.toLowerCase()) {
         // In a test profile, this will invoke the mock provider and give back static data - check that works first
-        lookup_result = jiscDiscoverSharedIndexService.findAppropriateCopies([systemInstanceIdentifier:'3568439'])
+        lookup_result = jiscDiscoverSharedIndexService.findAppropriateCopies([systemInstanceIdentifier:'2231751908'])
       }
 
     then: "service returns an appropriate record"  
       log.debug("Lookup result: ${lookup_result}");
-      lookup_result.size() == 33
+      lookup_result.size() == 11
   }
 
   void "Test record attachment"() {
@@ -164,7 +164,7 @@ class JiscDiscoverLifecycleSpec extends HttpSpec {
       List lookup_result = null;
       Tenants.withId('RSInstFour_mod_rs'.toLowerCase()) {
         // In a test profile, this will invoke the mock provider and give back static data - check that works first
-        lookup_result = jiscDiscoverSharedIndexService.fetchSharedIndexRecords([systemInstanceIdentifier:'3568439'])
+        lookup_result = jiscDiscoverSharedIndexService.fetchSharedIndexRecords([systemInstanceIdentifier:'2231751908'])
       }
 
     then: "service returns an appropriate record"  

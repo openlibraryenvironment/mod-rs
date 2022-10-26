@@ -23,12 +23,10 @@ public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection 
 
     Object result = null;
 
-    if ( description?.systemInstanceIdentifier == '3568439' ) {
+    if ( description?.systemInstanceIdentifier == '2231751908' ) {
 
-      // Switching over to RESTFUL/JSON API
-      // InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
-
-      InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
+      InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
+      // InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
       result = new JsonSlurper().parse(is)
 
       println("Returning ${result}");
