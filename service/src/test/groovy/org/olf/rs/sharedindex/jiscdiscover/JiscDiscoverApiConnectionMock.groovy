@@ -25,7 +25,11 @@ public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection 
 
     if ( description?.systemInstanceIdentifier == '2231751908' ) {
 
+
       InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
+      result = new XmlSlurper().parse(is)
+
+      // Json variant - not using this one
       // InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
       // result = new JsonSlurper().parse(is)
 
