@@ -14,7 +14,7 @@ import org.olf.rs.statemodel.EventResultDetails;
  * @author Chas
  *
  */
-public abstract class ActionUndoService extends AbstractAction {
+public class ActionUndoService extends AbstractAction {
 
     ActionService actionService;
 
