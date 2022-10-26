@@ -12,34 +12,38 @@ class Timer implements MultiTenant<Timer> {
 
   // A simple code this timer is known by
   String code;
-    
+
   // When to execute, see https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html
   String rrule;
-  
+
   // When this job was last executed (Note: used to be the time it was to be next executed)
   Long lastExecution;
 
-  // When this job will be next executed  
+  // When this job will be next executed
   Long nextExecution;
 
-  // The task to be executed, if the task is not explicitly known it will look for a service with a name prefixed with timer and postfixed with Service and uppercase the first letter  
+  // The task to be executed, if the task is not explicitly known it will look for a service with a name prefixed with timer and postfixed with Service and uppercase the first letter
   String taskCode;
 
-  // Any configuration that is specific to this task that needs to be passed to the proessor   
+  // Any configuration that is specific to this task that needs to be passed to the proessor
   String taskConfig;
-  
+
   // Is this timer enabled or not
   Boolean enabled;
-  
+
+  // Do we execute this timer at the start of the day
+  boolean executeAtDayStart;
+
   static constraints = {
-             code (nullable : true, blank:false)
-      description (nullable : true, blank: false)
-            rrule (nullable : true, blank: false)
-    lastExecution (nullable : true)
-    nextExecution (nullable : true)
-         taskCode (nullable : false, blank: false)
-       taskConfig (nullable : true, blank: false)
-          enabled (nullable : true)
+                 code (nullable : true, blank:false)
+          description (nullable : true, blank: false)
+                rrule (nullable : true, blank: false)
+        lastExecution (nullable : true)
+        nextExecution (nullable : true)
+             taskCode (nullable : false, blank: false)
+           taskConfig (nullable : true, blank: false)
+              enabled (nullable : true)
+    executeAtDayStart (nullable : false)
   }
 
   static mapping = {
@@ -53,31 +57,37 @@ class Timer implements MultiTenant<Timer> {
     taskCode               column : 'tr_task_code'
     taskConfig             column : 'tr_task_config', type: 'text'
     enabled                column : 'tr_enabled'
+    executeAtDayStart      column : 'tr_execute_at_day_start', defaultValue : "false"
   }
 
-  	
-  	public static Timer ensure(String code, String description, String rrule, String taskCode, String config = null, boolean enabled = true) {
+
+  	public static Timer ensure(
+        String code,
+        String description,
+        String rrule,
+        String taskCode,
+        String config = null,
+        boolean enabled = true,
+        boolean executeAtDayStart = false
+    ) {
 		Timer timer = Timer.findByCode(code);
 		if (timer == null) {
 			timer = new Timer(
-				code: code,
-				description: description,
-				rrule: rrule,
-				taskCode: taskCode,
-				taskConfig: config,
-				enabled: enabled
+				code: code
 			);
-		} else {
-			// Update the various properties of the timer, that influences what it does
-			timer.description = description;
-			timer.rrule = rrule;
-			timer.taskCode = taskCode;
-			timer.taskConfig = config;
 		}
-		
+
+        // Update the various properties of the timer
+        timer.description = description;
+        timer.rrule = rrule;
+        timer.taskCode = taskCode;
+        timer.taskConfig = config;
+        timer.enabled = enabled;
+        timer.executeAtDayStart = executeAtDayStart;
+
 		// Save the timer
 		timer.save(flush:true, failOnError:true);
-		
+
 		// Caller may want to do something with it
 		return(timer);
 	}

@@ -15,7 +15,10 @@ public class TimerData {
             "CheckForStaleSupplierRequests",
             "Check supplier requests have not become stale",
             "FREQ=DAILY",
-            "CheckForStaleSupplierRequests"
+            "CheckForStaleSupplierRequests",
+            null,
+            true,
+            true
         );
 
         // Timer to check for requests we need to retry
@@ -39,7 +42,10 @@ public class TimerData {
             "CheckForOverdueSupplierRequests",
             "Check for any requests that have not been returned to the supplier by the requester",
             "FREQ=DAILY",
-            "CheckForOverdueSupplierRequests"
+            "CheckForOverdueSupplierRequests",
+            null,
+            true,
+            true
         );
 	}
 

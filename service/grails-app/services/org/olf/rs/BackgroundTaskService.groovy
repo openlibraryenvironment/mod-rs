@@ -4,7 +4,6 @@ import java.lang.management.ManagementFactory;
 import java.text.NumberFormat;
 
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.rs.timers.AbstractTimer;
@@ -96,11 +95,8 @@ public class BackgroundTaskService {
                 // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
 
                 DateTime start = new DateTime(tz, current_systime);
-    			// If the frequency, is daily, monthly or yearly then we need to clear the time part
-    			if (rule_to_parse.contains(Freq.DAILY.toString()) ||
-    				rule_to_parse.contains(Freq.MONTHLY.toString()) ||
-    				rule_to_parse.contains(Freq.WEEKLY.toString()) ||
-    				rule_to_parse.contains(Freq.YEARLY.toString())) {
+    			// If we are to be executed at the beginning of the day, then clear the time element
+    			if (timer.executeAtDayStart) {
     				// Set it to the start of the day, otherwise we will have jobs happening during the day
     				start = start.startOfDay();
     			}
