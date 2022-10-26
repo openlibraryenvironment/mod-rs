@@ -1,0 +1,698 @@
+{
+ "hits": 1,
+ "next-page": "WzEwMC4wLDEuMCw1NTk4Mjk2XQ==",
+ "records": [
+  {
+   "bibliographic_data": {
+    "author": [
+     "Beer, Stafford."
+    ],
+    "isbn": [
+     "0713902191",
+     "9780713902198"
+    ],
+    "physical_description": [
+     "319 pages illustrations 23 cm"
+    ],
+    "publication_details": [
+     "[London] Allen Lane the Penguin Press [1972]"
+    ],
+    "subject": [
+     "Cybernetics.",
+     "Industrial management.",
+     "Cybernetics",
+     "Cybernétique.",
+     "Gestion d'entreprise.",
+     "cybernetics.",
+     "Cybernetics.",
+     "Industrial management.",
+     "Management",
+     "Kybernetik"
+    ],
+    "title": [
+     "Brain of the firm: the managerial cybernetics of organization."
+    ]
+   },
+   "holdings": [
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "nbr",
+        "name": "Northumbria University Library"
+       },
+       "latitude": 54.9785995483398,
+       "location_id": "nbr:main",
+       "longitude": -1.60875999927521
+      }
+     ],
+     "item_id": 3568439,
+     "local_id": "991000506649703181",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "nlw",
+        "name": "National Library of Wales / Llyfrgell Genedlaethol Cymru"
+       },
+       "latitude": 52.4142990112305,
+       "location_id": "nlw:main",
+       "longitude": -4.06845998764038
+      }
+     ],
+     "item_id": 8818789,
+     "local_id": "99284033602419",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "yrk",
+        "name": "University of York Libraries"
+       },
+       "latitude": 53.9488983154297,
+       "location_id": "yrk:main",
+       "longitude": -1.05188000202179
+      }
+     ],
+     "item_id": 11617498,
+     "local_id": "9958332311701381",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "edi",
+        "name": "University of Edinburgh Libraries"
+       },
+       "latitude": 55.942798614502,
+       "location_id": "edi:Main",
+       "longitude": -3.18933010101318
+      }
+     ],
+     "item_id": 21188493,
+     "local_id": "992624523502466",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "edi",
+        "name": "University of Edinburgh Libraries"
+       },
+       "latitude": 55.942798614502,
+       "location_id": "edi:Main",
+       "longitude": -3.18933010101318
+      }
+     ],
+     "item_id": 21557649,
+     "local_id": "9918467473502466",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "tcd",
+        "name": "Trinity College Dublin Library"
+       },
+       "latitude": 53.3436012268066,
+       "location_id": "tcd:tcl",
+       "longitude": -6.25604009628296
+      },
+      {
+       "institution": {
+        "institution_id": "tcd",
+        "name": "Trinity College Dublin Library"
+       },
+       "latitude": 53.3436012268066,
+       "location_id": "tcd:tcl",
+       "longitude": -6.25604009628296
+      }
+     ],
+     "item_id": 23695692,
+     "local_id": ".b105145968",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "lse",
+        "name": "LSE Library"
+       },
+       "latitude": 51.5147018432617,
+       "location_id": "lse:lse",
+       "longitude": -0.115696996450424
+      }
+     ],
+     "item_id": 29438202,
+     "local_id": "997818310302021",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "oxf",
+        "name": "University of Oxford Libraries"
+       },
+       "latitude": 51.7541007995605,
+       "location_id": "oxf:BODBL",
+       "longitude": -1.25436997413635
+      }
+     ],
+     "item_id": 34299992,
+     "local_id": "010151706",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "liv",
+        "name": "University of Liverpool Library"
+       },
+       "latitude": 53.4026985168457,
+       "location_id": "liv:sj",
+       "longitude": -2.96382999420166
+      }
+     ],
+     "item_id": 50054625,
+     "local_id": ".b11232225",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "qub",
+        "name": "Queen's University Belfast"
+       },
+       "latitude": 54.5838012695312,
+       "location_id": "qub:qm",
+       "longitude": -5.93261003494263
+      }
+     ],
+     "item_id": 56552371,
+     "local_id": ".b1075250x",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "bli",
+        "name": "British Library"
+       },
+       "latitude": 51.5289001464844,
+       "location_id": "bli:stpancras",
+       "longitude": -0.127482995390892
+      },
+      {
+       "institution": {
+        "institution_id": "bli",
+        "name": "British Library"
+       },
+       "latitude": 51.5289001464844,
+       "location_id": "bli:stpancras",
+       "longitude": -0.127482995390892
+      }
+     ],
+     "item_id": 58255989,
+     "local_id": "000250107",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "bli",
+        "name": "British Library"
+       },
+       "latitude": 53.9198989868164,
+       "location_id": "bli:bspa",
+       "longitude": -1.32114994525909
+      }
+     ],
+     "item_id": 66964831,
+     "local_id": "010324298",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "bru",
+        "name": "Brunel University London Library"
+       },
+       "latitude": 51.5326995849609,
+       "location_id": "bru:main",
+       "longitude": -0.473967999219894
+      }
+     ],
+     "item_id": 89696284,
+     "local_id": "97285",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "man",
+        "name": "University of Manchester Library"
+       },
+       "latitude": 53.467700958252,
+       "location_id": "man:EDL",
+       "longitude": -2.23724007606506
+      }
+     ],
+     "item_id": 92425229,
+     "local_id": "99368244401631",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "she",
+        "name": "University of Sheffield Library"
+       },
+       "latitude": 53.3825988769531,
+       "location_id": "she:LIB_WBL",
+       "longitude": -1.48784995079041
+      }
+     ],
+     "item_id": 107036377,
+     "local_id": "9976683550001441",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "lei",
+        "name": "University of Leicester Library"
+       },
+       "latitude": 52.6204986572266,
+       "location_id": "lei:DWL",
+       "longitude": -1.12455999851227
+      }
+     ],
+     "item_id": 111361852,
+     "local_id": "991003129329702746",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "ucl",
+        "name": "UCL Library Services"
+       },
+       "latitude": 51.5243988037109,
+       "location_id": "ucl:MAIN",
+       "longitude": -0.134442999958992
+      }
+     ],
+     "item_id": 116264412,
+     "local_id": "990001379700204761",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "hud",
+        "name": "University of Huddersfield Library"
+       },
+       "latitude": 53.6436996459961,
+       "location_id": "hud:main",
+       "longitude": -1.77873003482819
+      }
+     ],
+     "item_id": 121030864,
+     "local_id": "991001275999704221",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "war",
+        "name": "University of Warwick Library"
+       },
+       "latitude": 52.3815002441406,
+       "location_id": "war:cc",
+       "longitude": -1.56173002719879
+      }
+     ],
+     "item_id": 133327837,
+     "local_id": ".b11473447",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "cam",
+        "name": "University of Cambridge Libraries"
+       },
+       "latitude": 52.2051010131836,
+       "location_id": "cam:UL",
+       "longitude": 0.107722997665405
+      },
+      {
+       "institution": {
+        "institution_id": "cam",
+        "name": "University of Cambridge Libraries"
+       },
+       "latitude": 52.2051010131836,
+       "location_id": "cam:UL",
+       "longitude": 0.107722997665405
+      }
+     ],
+     "item_id": 138957522,
+     "local_id": "991005467489703606",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "bri",
+        "name": "University of Bristol Libraries"
+       },
+       "latitude": 51.459400177002,
+       "location_id": "bri:BUBA",
+       "longitude": -2.60146999359131
+      }
+     ],
+     "item_id": 145185238,
+     "local_id": "ocm00415702",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "ext",
+        "name": "University of Exeter Library"
+       },
+       "latitude": 50.7355003356934,
+       "location_id": "ext:main",
+       "longitude": -3.53328990936279
+      }
+     ],
+     "item_id": 151406555,
+     "local_id": ".b16805537",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "scd",
+        "name": "University of Strathclyde Library"
+       },
+       "latitude": 55.8638000488281,
+       "location_id": "scd:main",
+       "longitude": -4.24063014984131
+      }
+     ],
+     "item_id": 159291901,
+     "local_id": "991745713402996",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "ljmu",
+        "name": "Liverpool John Moores University"
+       },
+       "latitude": 53.4029006958008,
+       "location_id": "ljmu:ALD",
+       "longitude": -2.9718599319458
+      }
+     ],
+     "item_id": 166227075,
+     "local_id": "990004240580303826",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "sur",
+        "name": "University of Surrey"
+       },
+       "latitude": 51.2425994873047,
+       "location_id": "sur:main",
+       "longitude": -0.58950001001358
+      }
+     ],
+     "item_id": 166804491,
+     "local_id": "9958036702346",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "esx",
+        "name": "University of Essex"
+       },
+       "latitude": 51.8765983581543,
+       "location_id": "esx:main",
+       "longitude": 0.945025026798248
+      }
+     ],
+     "item_id": 174050545,
+     "local_id": ".b1032835x",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "nls",
+        "name": "National Library of Scotland"
+       },
+       "latitude": 55.948600769043,
+       "location_id": "nls:NLS",
+       "longitude": -3.19186997413635
+      }
+     ],
+     "item_id": 206983209,
+     "local_id": "9913386953804341",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "lee",
+        "name": "University of Leeds Library"
+       },
+       "latitude": 53.8078994750977,
+       "location_id": "lee:brotherton",
+       "longitude": -1.552649974823
+      }
+     ],
+     "item_id": 340728489,
+     "local_id": "991011267809705181",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "uea",
+        "name": "University of East Anglia Library"
+       },
+       "latitude": 52.6206016540527,
+       "location_id": "uea:main",
+       "longitude": 1.24068999290466
+      }
+     ],
+     "item_id": 391083285,
+     "local_id": "ocm00415702",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "lnl",
+        "name": "The London Library"
+       },
+       "latitude": 51.5074005126953,
+       "location_id": "lnl:main",
+       "longitude": -0.136691004037857
+      }
+     ],
+     "item_id": 406263676,
+     "local_id": "990002646500206436",
+     "physical_format": [
+      "print"
+     ]
+    }
+   ],
+   "uri": "https://discover.libraryhub.jisc.ac.uk/search?id=3568439&rn=1"
+  }
+ ]
+}

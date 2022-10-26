@@ -1,0 +1,101 @@
+{
+ "hits": 1,
+ "next-page": "WzEwMC4wLDEuMCw2MTM3ODA3XQ==",
+ "records": [
+  {
+   "bibliographic_data": {
+    "author": [
+     "Beer, Stafford.",
+     "Beer, Stafford. Brain of the firm."
+    ],
+    "edition": [
+     "New ed."
+    ],
+    "isbn": [
+     "0471948373",
+     "0471275999"
+    ],
+    "physical_description": [
+     "xiv, 582p."
+    ],
+    "publication_details": [
+     "Chichester : Wiley, 1979."
+    ],
+    "subject": [
+     "Cybernetics.",
+     "Feasibility studies.",
+     "Business enterprises."
+    ],
+    "title": [
+     "The heart of enterprise / Stafford Beer."
+    ]
+   },
+   "holdings": [
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "nlw",
+        "name": "National Library of Wales / Llyfrgell Genedlaethol Cymru"
+       },
+       "latitude": 52.4142990112305,
+       "location_id": "nlw:main",
+       "longitude": -4.06845998764038
+      }
+     ],
+     "item_id": 6172245,
+     "local_id": "99426209902419",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "lbk",
+        "name": "Leeds Beckett University Library"
+       },
+       "latitude": 53.80419921875,
+       "location_id": "lbk:silver",
+       "longitude": -1.54872000217438
+      }
+     ],
+     "item_id": 158365627,
+     "local_id": "u84387",
+     "physical_format": [
+      "print"
+     ]
+    },
+    {
+     "document_type": [
+      "book"
+     ],
+     "held_at": [
+      {
+       "institution": {
+        "institution_id": "usu",
+        "name": "University of Sunderland"
+       },
+       "latitude": 54.9122848510742,
+       "location_id": "usu:stpeters",
+       "longitude": -1.37355804443359
+      }
+     ],
+     "item_id": 470382418,
+     "local_id": "991000039279707451",
+     "physical_format": [
+      "print"
+     ]
+    }
+   ],
+   "uri": "https://discover.libraryhub.jisc.ac.uk/search?id=6172245&rn=1"
+  }
+ ]
+}

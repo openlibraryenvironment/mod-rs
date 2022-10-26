@@ -18,6 +18,7 @@ import org.olf.rs.sharedindex.jiscdiscover.JiscDiscoverApiConnection;
 /**
  * The interface between mod-rs and the shared index is defined by this service.
  *
+ * See also : https://discover.libraryhub.jisc.ac.uk/search?id=6172245&rn=1&format=json - restful API seems to carry more data.
  */
 public class JiscDiscoverSharedIndexService implements SharedIndexActions {
 
