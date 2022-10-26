@@ -30,6 +30,8 @@ public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection 
 
       InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
       result = new JsonSlurper().parse(is)
+
+      println("Returning ${result}");
     }
     else {
       log.debug("No matching mock systemInstanceIdentifier - return null");

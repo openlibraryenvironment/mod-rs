@@ -45,50 +45,47 @@ public class JiscDiscoverSharedIndexService implements SharedIndexActions {
       if ( description?.systemInstanceIdentifier != null ) {
         log.debug("Query shared index for holdings of system instance identifier: ${description?.systemInstanceIdentifier}");
 
-        def sru_response = jiscDiscoverApiConnection.getSru(description);
+        def jc_json_response = jiscDiscoverApiConnection.getSru(description);
 
-        if ( sru_response?.numberOfRecords?.toString() == '1' ) {
-          sru_response.records.record.recordData.mods.extension.modsCollection.mods.each { mr ->
-
-
-            mr.recordInfo.recordIdentifier.each { loc_specific_record_id ->
-              log.debug("    rec [${loc_specific_record_id.'@source'}] : ${loc_specific_record_id.text()}");
-            }
+        if ( jc_json_response?.hits == 1 ) {
+          jc_json_response.records.each { mr ->
+            // mr.recordInfo.recordIdentifier.each { loc_specific_record_id ->
+            //   log.debug("    rec [${loc_specific_record_id.'@source'}] : ${loc_specific_record_id.text()}");
+            // }
 
             int lendable_copies = 0;
             int total_copies = 0;
 
             List<String> shelf_locations = []
-            mr.location.each { loc ->
-              String ukmac_code = loc.physicalLocation.find { it.'@authority'=='UkMaC' }
-              log.debug("  UkMac location code: ${ukmac_code}");
-
-              if ( ukmac_code ) {
-
-                loc.holdingSimple.copyInformation.each { ci ->
-                  // Have seen (Not Borrowable) in subLocation as an indication of policy
-                  log.debug("    subloc: ${ci.subLocation}")
-                  log.debug("    shelf: ${ci.shelfLocator}")
-                  shelf_locations.add(ci.shelfLocator)
+            mr.holdings.each { holding ->
+              holding.held_at.each { holding_location ->
+                String ukmac_code = holding_location.institution.institution_id
+                log.debug("  UkMac location code: ${ukmac_code}");
+                if ( ukmac_code ) {
+                  // shelf_locations.add(ci.shelfLocator)
                   lendable_copies++;
                   total_copies++;
-                }
 
-                if ( lendable_copies > 0 ) {
-                  log.debug("Add ${ukmac_code} to availability / ${shelf_locations.join(', ')}");
-                  AvailabilityStatement avls = new AvailabilityStatement()
-                  avls.symbol = ukmac_code
-                  avls.instanceIdentifier = null;
-                  avls.copyIdentifier = null;
-                  avls.illPolicy = null;
-                  avls.totalCopies = new Long(total_copies);
-                  avls.availableCopies = new Long(lendable_copies)
-                  result.add(avls);
+                  if ( lendable_copies > 0 ) {
+                    log.debug("Add ${ukmac_code}");
+                    AvailabilityStatement avls = new AvailabilityStatement()
+                    avls.symbol = ukmac_code
+                    avls.instanceIdentifier = holding_location.item_id;
+                    // Location of item is in holding_location.location_id
+                    avls.copyIdentifier = holding_location.item_id;
+                    avls.illPolicy = null;
+                    avls.totalCopies = new Long(total_copies);
+                    avls.availableCopies = new Long(lendable_copies)
+                    result.add(avls);
+                  }
                 }
               }
             }
 
           }
+        }
+        else {
+          log.warn("Expected 1 hit from JHD but got ${jc_json_response?.hits}");
         }
       }
       else {
@@ -136,11 +133,11 @@ public class JiscDiscoverSharedIndexService implements SharedIndexActions {
     if ( ( id != null ) && ( id.length() > 0 ) ) {
       log.debug("Attempt to retrieve shared index record ${id} from Jisc LHD");
 
-      def sru_response = jiscDiscoverApiConnection.getSru(description);
+      def jc_json_response = jiscDiscoverApiConnection.getSru(description);
 
-      if ( sru_response?.numberOfRecords?.toString() == '1' ) {
-        sru_response.records.record.each { r ->
-          result.add(groovy.xml.XmlUtil.serialize(sru_response.records))
+      if ( jc_json_response?.hits == 1 ) {
+        jc_json_response.records.each { r ->
+          result.add(groovy.json.JsonOutput.toJson(r))
         }
       }
 

@@ -156,7 +156,7 @@ class JiscDiscoverLifecycleSpec extends HttpSpec {
 
     then: "service returns an appropriate record"  
       log.debug("Lookup result: ${lookup_result}");
-      lookup_result.size() == 11
+      lookup_result.size() == 33
   }
 
   void "Test record attachment"() {
