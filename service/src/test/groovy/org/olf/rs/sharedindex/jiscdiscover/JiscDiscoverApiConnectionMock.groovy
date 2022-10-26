@@ -27,7 +27,7 @@ public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection 
 
       InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
       // InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
-      result = new JsonSlurper().parse(is)
+      // result = new JsonSlurper().parse(is)
 
       println("Returning ${result}");
     }
