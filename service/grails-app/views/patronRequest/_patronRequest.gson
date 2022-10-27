@@ -58,9 +58,10 @@ final def toExclude = fullRecord ? [
 
 json g.render(patronRequest, [expand: toExpand,
                               excludes: toExclude]) {
-
+  // Required for the Update tab
+  validActions patronRequest.getValidActions()
+  
   if (fullRecord) {
-    validActions patronRequest.getValidActions()
 
     volumes g.render(patronRequest.volumes?.sort {a,b ->
       a.name <=> b.name ?: a.itemId <=> b.itemId
