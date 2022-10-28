@@ -41,13 +41,13 @@ public class BackgroundTaskService {
 Select pr
 from PatronRequest as pr
 where ( pr.pickLocation.id in ( :loccodes ) )
-and pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+and pr.state.code=Status.RES_NEW_AWAIT_PULL_SLIP
 '''
 
   private static String PULL_SLIP_SUMMARY = '''
     Select count(pr.id), pr.pickLocation.code
     from PatronRequest as pr
-    where pr.state.code=Status.RESPONDER_NEW_AWAIT_PULL_SLIP
+    where pr.state.code=Status.RES_NEW_AWAIT_PULL_SLIP
     group by pr.pickLocation.code
 '''
 
