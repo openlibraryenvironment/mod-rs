@@ -9,6 +9,12 @@ else
   OKAPI_HOST=${WSL_HOST}
 fi
 export OKAPI_HOST
+#export OKAPI_PORT="8081"
 export OKAPI_PORT="9130"
 export OKAPI_PROTOCOL="http"
 export OKAPI_URL="${OKAPI_PROTOCOL}://${OKAPI_HOST}:${OKAPI_PORT}"
+
+# Set the tenant, username and password
+export TENANT="diku"
+export UN="diku_admin"
+export PW="admin"

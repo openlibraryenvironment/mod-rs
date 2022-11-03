@@ -4,16 +4,20 @@
 SCRIPT_DIRECTORY=`dirname "$0"`
 #echo Script directory: ${SCRIPT_DIRECTORY}
 
-# setOkapiUrl sets the variable OKAPI_URL
-. ${SCRIPT_DIRECTORY}/setOkapiUrl
+# If we are using the rancher desktop then there will be a .okapirc file
+if [ -f $HOME/.okapirc ]; then
+	# Everything is set in .okapirc
+    . $HOME/.okapirc
+else
+	# setOkapiUrl sets the variable OKAPI_URL
+	. ${SCRIPT_DIRECTORY}/setOkapiUrl
+fi
+
 #echo OKAPI URL: ${OKAPI_URL}
 
 # Get hold of an auth token
 AUTH_TOKEN=`${SCRIPT_DIRECTORY}/okapi-login`
 #echo Auth Token: $AUTH_TOKEN
-
-# Which tenant are we dealing with
-TENANT="diku"
 
 # Read in the patronRequest
 PATRON_REQUEST=`cat patronRequest.json`
