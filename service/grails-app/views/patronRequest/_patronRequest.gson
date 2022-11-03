@@ -53,21 +53,20 @@ final def toExclude = fullRecord ? [
   'rota',
   'stateModel',
   'tags',
-  'volumes'
+  'volumes' // Resolved explicitly
 ]
 
 json g.render(patronRequest, [expand: toExpand,
                               excludes: toExclude]) {
   // Required for the Update tab
   validActions patronRequest.getValidActions()
-  
-  if (fullRecord) {
 
-    volumes g.render(patronRequest.volumes?.sort {a,b ->
-      a.name <=> b.name ?: a.itemId <=> b.itemId
-    }) ?: []
-  }
+  // Required for list display  
+  volumes g.render(patronRequest.volumes?.sort {a,b ->
+    a.name <=> b.name ?: a.itemId <=> b.itemId
+  }) ?: []
 
+  // Required for supplier list display  
   if ( patronRequest.pickLocation ) {
     pickLocation g.render( patronRequest.pickLocation, [excludes: ['correspondingDirectoryEntry']] ) {
       correspondingDirectoryEntry {
@@ -83,4 +82,3 @@ json g.render(patronRequest, [expand: toExpand,
     }
   }
 }
-
