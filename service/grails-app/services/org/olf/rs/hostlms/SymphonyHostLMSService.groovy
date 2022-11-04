@@ -51,8 +51,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
 
     List<ItemLocation> result = [];
 
-    String id_prefix = "^C";
-    String search_id = id_prefix + pr.supplierUniqueRecordId;
+    String search_id = pr.supplierUniqueRecordId;
     String prefix_query_string = "@attr 1=1016 ${search_id}";
     def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
     log.debug("Got Z3950 response: ${z_response}");

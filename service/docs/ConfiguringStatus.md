@@ -8,34 +8,52 @@ We will talk about it in terms of grails domains, so below is a brief diagram of
 
 ###	StateModel
 Defines the model you are working and has the states, a request can be at, the actions a request can perform and the events that will be triggered associated with this model.
-| Property  | Description |
-| --------- | ----------- |
-| id        | The id of the model |
-| shortcode | The code for this model|
-| name      | A descriptive name for this model |
+| Property      | Description |
+| ------------- | ----------- |
+| id            | The id of the model |
+| shortcode     | The code for this model|
+| name          | A descriptive name for this model |
+| initialState  | The initial state of a request using this state model |
+| staleAction   | The action to perform when a request is considered stale |
+| overdueStatus | The status we set the request to when the request is considered overdue |
+| states        | The states that are associated with this state model |
 
 ### Status
 Defines the various states that a request can be at.
 | Property       | Description |
-| -------------- | ----------- |
-| id             | The id of the model |
-| owner          | The state model this status belongs to |
-| code           | The code for this status |
-| presSeq        | ??? |
-| visible        | When being displayed on screen is this status visible or not |
-| needsAttention | When the request is set to this status should the request be marked as needing attention |
-| terminal       | Is this status a terminal state (ie. no more actions can be performed) |
-| stage          | The stage of the request this status applies to (Preparing, Local, Active, Completed) |
+| ---------------- | ----------- |
+| id               | The id of the model |
+| code             | The code for this status |
+| presSeq          | ??? |
+| visible          | When being displayed on screen is this status visible or not |
+| needsAttention   | When the request is set to this status should the request be marked as needing attention |
+| terminal         | Is this status a terminal state (ie. no more actions can be performed) |
+| stage            | The stage of the request this status applies to (eg. Preparing, Local, Active, Completed) |
+| terminalSequence | The order to show the status in the close manual drop down |
+
+### StateModelStatus
+Associates a state with a state model, allowing you to specify specific settings for that state model against that state
+| Property    | Description |
+| ----------- | ----------- |
+| stateModel | The state model the state is associated with |
+| state      | The state associated with this the specified model |
+| canTriggerStaleRequest | Can this state trigger a stale request scenario |
+| canTriggerOverdueRequest | Can this request trigger an overdue request scenario |
+| isTerminal               | Does this state mean the request has come to the end of its life with the current location on the rota |
+| triggerPullSlipEmail     | Does this state trigger a pull slip email to be sent if one has been configured |
 
 ### ActionEvent
 Defines the actions and events that can be performed against a request.
-| Property    | Description |
-| ----------- | ----------- |
-| id          | The id of the ActionEvent |
-| code        | The code assigned to this action / event |
-| description | A description of what this ActionEvent represents |
-| isAction    | Does this record represent an action ? |
-| resultList  | The list of results that are used to calculate the new status after performing this action |
+| Property              | Description |
+| --------------------- | ----------- |
+| id                    | The id of the ActionEvent |
+| code                  | The code assigned to this action / event |
+| description           | A description of what this ActionEvent represents |
+| isAction              | Does this record represent an action ? |
+| resultList            | The list of results that are used to calculate the new status after performing this action |
+| undoStatus            | What do we do if an undo is requested |
+| serviceClass          | The class that performs the action / event |
+| responderServiceClass | If the request is for a responder and the action / event needs to have different behaviour than if the request was for a requester this class is called instead of the one specified by serviceClass |
 
 ### AvailableAction
 Defines the actions that are available when the request is in a particular state.
@@ -47,8 +65,8 @@ Defines the actions that are available when the request is in a particular state
 | actionCode  | The action code that can be performed when the request is in this state |
 | actionEvent | The actionEvent that can be performed when the request is in this state (supercedes actionCode) |
 | triggerType | When is this ActionEvent available ([S]ystem, [M]anual or [P]rotocol) |
-| actionType  | Redundant |
-| actionBody  | Redundant |
+| actionType  | Redundant, should probably be removed |
+| actionBody  | Redundant, should probably be removed |
 | resultList  | The list of results that are used to calculate the new status after performing this action, if a potential result is not found here, it will then look at the ActionEventResultList on the actionEvent record |
 
 ### ActionEventResultList
@@ -67,7 +85,7 @@ Defines what status to transition to if the criteria is met and whether the curr
 | ------------------ | ----------- |
 | id                 | The id of the AvailableAction |
 | code               | A code we have given this result record |
-| descriotion        | The purpose of this result record |
+| description        | The purpose of this result record |
 | result             | Was the processing of the action / event successful or not |
 | qualifier          | When there are many outcomes from an action / event then a qualifier will be returned to allow use to set the status correctly |
 | status             | The status the request should change to or if the saveRestoreState is set this is the status we use to retrieve the status that the reuest should be set to |
@@ -77,7 +95,7 @@ Defines what status to transition to if the criteria is met and whether the curr
 | nextActionEvent    | Not implemented yet, intention is to trigger a follow on action or event |
 
 ## Method of finding the result
-Once the action or event has completed we use the method **lookupStatus** on the service **StatusService** to determine the bew status for a request.
+Once the action or event has completed we use the method **lookupStatus** on the service **StatusService** to determine the new status for a request.
 The method takes the following parameters
 | Parameter | Description |
 | --------- | ----------- |

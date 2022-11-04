@@ -22,6 +22,7 @@ public class FolioSharedIndexService implements SharedIndexActions {
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
    * @param description A Map of properies that describe the item. Currently understood properties:
+   *                         systemInstanceIdentifier - Instance identifier for the title we want copies of
    *                         title - the title of the item
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
