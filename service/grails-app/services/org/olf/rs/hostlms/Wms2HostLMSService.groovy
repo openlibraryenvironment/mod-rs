@@ -44,7 +44,7 @@ public class Wms2HostLMSService extends BaseHostLMSService {
         strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3") }
       ],
       [
-        name:'Adapter_By_Identifier',
+        name:'Adapter_By_ISBN_Identifier',
         precondition: { pr -> return ( pr.isbn != null ) },
         strategy: { pr, service -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3") }
       ],
@@ -88,13 +88,13 @@ public class Wms2HostLMSService extends BaseHostLMSService {
     log.debug("Got Z3950 response: ${z_response}")
 
     if ( z_response?.numberOfRecords?.size() > 0) {
-      Map availability_summary = [:]
+      List<ItemLocation> availability_summary = [];
       result = z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.findResults { hld ->
         if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
           log.debug("Holding available now");
           ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-          availability_summary[hld.localLocation] = il;
-          return il;
+          availability_summary << il;
+          if( availability_summary?.size() > 0) { result = availability_summary; }
         } else {
           log.debug("Holding unavailable");
           return null;
