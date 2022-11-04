@@ -68,7 +68,10 @@ where s in (select sms.state
 
     static hasMany = [
         // The states that are applicable for this model and their specific settings
-        states : StateModelStatus
+        states : StateModelStatus,
+
+        // The available actions that are applicable to this state model
+        availableActions : AvailableAction
     ];
 
     static constraints = {
@@ -80,14 +83,15 @@ where s in (select sms.state
     }
 
     static mapping = {
-                   id column: 'sm_id', generator: 'uuid2', length:36
-              version column: 'sm_version'
-            shortcode column: 'sm_shortcode'
-                 name column: 'sm_name'
-         initialState column: 'sm_initial_state'
-          staleAction column: 'sm_stale_action'
-        overdueStatus column: 'sm_overdue_status'
-               states cascade: 'all-delete-orphan'
+                      id column: 'sm_id', generator: 'uuid2', length:36
+                 version column: 'sm_version'
+               shortcode column: 'sm_shortcode'
+                    name column: 'sm_name'
+            initialState column: 'sm_initial_state'
+             staleAction column: 'sm_stale_action'
+           overdueStatus column: 'sm_overdue_status'
+                  states cascade: 'all-delete-orphan'
+        availableActions cascade: 'all-delete-orphan'
     }
 
     static public StateModel ensure(
