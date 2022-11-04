@@ -61,6 +61,11 @@
           "pathPattern": "/rs/patronrequests/{id}",
           "permissionsRequired": [ "rs.patronrequests.item.delete" ]
         },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/openURL",
+          "permissionsRequired": [ ]
+        },
         
         {
           "methods": [ "GET" ],
@@ -81,6 +86,11 @@
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/refdata*",
           "permissionsRequired": [ "rs.refdata.delete" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/stateModel/export*",
+          "permissionsRequired": [ "rs.stateModel.export" ]
         },
         {
           "methods": [ "GET" ],
@@ -596,6 +606,13 @@
     },
 
     {
+      "permissionName": "rs.stateModel.export",
+      "displayName": "State model export",
+      "description": "Exports state models",
+      "visible": false
+    },
+
+    {
       "permissionName": "rs.status.get",
       "displayName": "status get",
       "description": "get states",
@@ -845,6 +862,7 @@
         "rs.refdata.write",
         "rs.settings.write",
         "rs.statistics.write",
+        "rs.stateModel.export",
         "rs.status.get",
         "rs.iso18626.write",
         "rs.externalapi.write",
