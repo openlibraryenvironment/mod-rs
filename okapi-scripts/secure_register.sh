@@ -35,7 +35,7 @@ if [ ! -d "$DESCRIPTORDIR" ]; then
 fi
 
 # DEP_DESC=`cat ${DESCRIPTORDIR}/DeploymentDescriptor.json | jq -c ".url=\"$2\""`
-DEP_DESC=`cat ${DESCRIPTORDIR}/DeploymentDescriptor.json | jq -c ".url=\"http://192.168.5.2:8081/\""`
+DEP_DESC=`cat ${DESCRIPTORDIR}/DeploymentDescriptor.json | jq -c ".url=\"http://${DEVELOPMENT_MACHINE}:${DEVELOPMENT_MACHINE_RESHARE_PORT}/\""`
 SVC_ID=`echo $DEP_DESC | jq -rc '.srvcId'`
 INS_ID=`echo $DEP_DESC | jq -rc '.instId'`
 
