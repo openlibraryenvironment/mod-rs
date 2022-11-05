@@ -125,4 +125,28 @@ databaseChangeLog = {
             }
         }
     }
+
+  changeSet(author: "Ian (manual)", id: "20221105-1651-001") {
+
+    createTable(tableName: "resource_sharing_context") {
+
+      column(name: "rsc_id", type: "VARCHAR(36)") {
+        constraints(nullable: "false", primaryKey: "true", primaryKeyName: "resource_sharing_contextPK")
+      }
+
+      column(name: "rsc_version", type: "BIGINT") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rsc_context", type: "VARCHAR(128)") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rsc_shared_index_type", type: "VARCHAR(128)") {
+        constraints(nullable: "false")
+      }
+
+      column(name: "rsc_protocol", type: "VARCHAR(128)")
+    }
+  }
 }
