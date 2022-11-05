@@ -4,13 +4,13 @@ import java.lang.management.ManagementFactory;
 import java.text.NumberFormat;
 
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.rs.timers.AbstractTimer;
 
 import grails.util.Holders;
 import groovy.json.JsonSlurper;
+import services.k_int.core.FolioLockService;
 
 /**
  * This handles the background tasks, these are triggered by the folio 2 minute timer
@@ -18,130 +18,129 @@ import groovy.json.JsonSlurper;
  */
 public class BackgroundTaskService {
 
-  def grailsApplication
+  def grailsApplication;
 
-  PatronNoticeService patronNoticeService
-  OkapiSettingsService okapiSettingsService
+  FolioLockService folioLockService;
+  OkapiSettingsService okapiSettingsService;
+  PatronNoticeService patronNoticeService;
 
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
 
-  def performReshareTasks() {
-    log.debug("performReshareTasks() as at ${new Date()}");
+    def performReshareTasks() {
+        log.debug("performReshareTasks() as at ${new Date()}");
 
-    Runtime runtime = Runtime.getRuntime();
+        Runtime runtime = Runtime.getRuntime();
 
-    NumberFormat format = NumberFormat.getInstance();
+        NumberFormat format = NumberFormat.getInstance();
 
-    StringBuilder sb = new StringBuilder();
-    long maxMemory = runtime.maxMemory();
-    long allocatedMemory = runtime.totalMemory();
-    long freeMemory = runtime.freeMemory();
-    long jvmUpTime = ManagementFactory.getRuntimeMXBean().getUptime();
+        StringBuilder sb = new StringBuilder();
+        long maxMemory = runtime.maxMemory();
+        long allocatedMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+        long jvmUpTime = ManagementFactory.getRuntimeMXBean().getUptime();
 
-    log.info("free memory: " + format.format(freeMemory / 1024));
-    log.info("allocated memory: " + format.format(allocatedMemory / 1024));
-    log.info("max memory: " + format.format(maxMemory / 1024));
-    log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
-    log.info("JVM uptime: " + format.format(jvmUpTime));
+        log.info("free memory: " + format.format(freeMemory / 1024));
+        log.info("allocated memory: " + format.format(allocatedMemory / 1024));
+        log.info("max memory: " + format.format(maxMemory / 1024));
+        log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
+        log.info("JVM uptime: " + format.format(jvmUpTime));
 
-    if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
-      patronNoticeService.processQueue()
-    }
-
-    try {
-        // Process any timers for sending pull slip notification emails
-        // Refactor - lastExcecution now contains the next scheduled execution or 0
-        // log.debug("Checking timers ready for execution");
-
-        long current_systime = System.currentTimeMillis();
-
-        log.debug("Checking timers");
-        Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
-                           [now:current_systime, en: true]);
-        if ((timers != null) && (timers.size()> 0)) {
-            timers.each { timer ->
-              try {
-                log.debug("** Timer task ${timer.id} firing....");
-
-                TimeZone tz;
-                try {
-                  JsonSlurper jsonSlurper = new JsonSlurper();
-                  def tz_setting = okapiSettingsService.getSetting('localeSettings');
-                  if ( tz_setting != null ) {
-                    def tenant_locale = jsonSlurper.parseText(tz_setting.value);
-                    log.debug("Got system locale settings : ${tenant_locale}");
-                    tz = TimeZone.getTimeZone(tenant_locale?.timezone);
-                  }
-                  else {
-                    tz = TimeZone.getTimeZone('UTC');
-                  }
-                }
-                catch ( Exception e ) {
-                  log.debug("Failure getting locale to determine timezone, processing timer in UTC");
-                  tz = TimeZone.getTimeZone('UTC');
-                }
-
-    			// The date we start processing this in the local time zone
-                timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
-
-                if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
-                  // First time we have seen this timer - we don't know when it is next due - so work that out
-                  // as though we just run the timer.
-                }
-                else {
-                  runTimer(timer)
-                };
-
-                String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
-
-                // Calculate the next due date
-                RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
-                // DateTime start = DateTime.now()
-                // DateTime start = new DateTime(current_systime)
-                // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
-
-                DateTime start = new DateTime(tz, current_systime);
-    			// If the frequency, is daily, monthly or yearly then we need to clear the time part
-    			if (rule_to_parse.contains(Freq.DAILY.toString()) ||
-    				rule_to_parse.contains(Freq.MONTHLY.toString()) ||
-    				rule_to_parse.contains(Freq.WEEKLY.toString()) ||
-    				rule_to_parse.contains(Freq.YEARLY.toString())) {
-    				// Set it to the start of the day, otherwise we will have jobs happening during the day
-    				start = start.startOfDay();
-    			}
-
-    			// Now work out what the next execution time will be
-                RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
-                def nextInstance = null;
-
-                // Cycle forward to the next occurrence after this moment
-                int loopcount = 0;
-                while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) &&
-                        ( loopcount++ < 10 ) ) {
-                  nextInstance = rrule_iterator.nextDateTime();
-                }
-                log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
-                log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
-                timer.nextExecution = nextInstance.getTimestamp();
-                timer.save(flush:true, failOnError:true)
-              }
-              catch ( Exception e ) {
-                log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
-              }
-              finally {
-                log.debug("Completed scheduled task checking");
-              }
-            }
+        // We do not want to do any processing if we are already performing the background processing
+        // We have a distributed lock for when there are multiple mod-rs processes running
+        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip('mod-rs:BackgroundTaskService:performReshareTasks', 0) {
+            doBackgroundTasks();
+        }) {
+            // Failed to obtain the lock
+            log.info("Skiping background tasks as unable to obtain lock");
         }
     }
-    catch ( Exception e ) {
-      log.error("Exception running background tasks",e);
+
+    private void doBackgroundTasks() {
+        // Start off with the patron notices, could we move this into a timer ...
+        if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
+            patronNoticeService.processQueue()
+        }
+
+        // Now we move onto the timers
+        try {
+            // Process any timers for sending pull slip notification emails
+            // Refactor - lastExcecution now contains the next scheduled execution or 0
+            // log.debug("Checking timers ready for execution");
+
+            long current_systime = System.currentTimeMillis();
+
+            log.debug("Checking timers");
+            Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
+                               [now:current_systime, en: true]);
+            if ((timers != null) && (timers.size()> 0)) {
+                timers.each { timer ->
+                    try {
+                        log.debug("** Timer task ${timer.id} firing....");
+
+                        TimeZone tz;
+                        try {
+                            JsonSlurper jsonSlurper = new JsonSlurper();
+                            def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+                            log.debug("Got system locale settings : ${tenant_locale}");
+                            tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                        } catch ( Exception e ) {
+                            log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
+                            tz = TimeZone.getTimeZone('UTC');
+                        }
+
+                        // The date we start processing this in the local time zone
+                        timer.lastExecution = new DateTime(tz, System.currentTimeMillis()).getTimestamp();
+
+                        if ( ( timer.nextExecution == 0 ) || ( timer.nextExecution == null ) ) {
+                            // First time we have seen this timer - we don't know when it is next due - so work that out
+                            // as though we just run the timer.
+                        } else {
+                            runTimer(timer)
+                        };
+
+                        String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
+
+                        // Calculate the next due date
+                        RecurrenceRule rule = new RecurrenceRule(rule_to_parse);
+                        // DateTime start = DateTime.now()
+                        // DateTime start = new DateTime(current_systime)
+                        // DateTime start = new DateTime(TimeZone.getTimeZone("UTC"), current_systime)
+
+                        DateTime start = new DateTime(tz, current_systime);
+                        // If we are to be executed at the beginning of the day, then clear the time element
+                        if (timer.executeAtDayStart) {
+                            // Set it to the start of the day, otherwise we will have jobs happening during the day
+                            start = start.startOfDay();
+                        }
+
+                        // Now work out what the next execution time will be
+                        RecurrenceRuleIterator rrule_iterator = rule.iterator(start);
+                        def nextInstance = null;
+
+                        // Cycle forward to the next occurrence after this moment
+                        int loopcount = 0;
+                        while ( ( ( nextInstance == null ) || ( nextInstance.getTimestamp() < current_systime ) ) &&
+                                ( loopcount++ < 10 ) ) {
+                            nextInstance = rrule_iterator.nextDateTime();
+                        }
+                        log.debug("Calculated next event for ${timer.id}/${timer.taskCode}/${timer.rrule} as ${nextInstance} (remaining=${nextInstance.getTimestamp()-System.currentTimeMillis()})");
+                        log.debug(" -> selected as timestamp ${nextInstance.getTimestamp()}");
+                        timer.nextExecution = nextInstance.getTimestamp();
+                        timer.save(flush:true, failOnError:true)
+                    } catch ( Exception e ) {
+                        log.error("Unexpected error processing timer tasks ${e.message} - rule is \"${timer.rrule}\"");
+                    } finally {
+                        log.debug("Completed scheduled task checking");
+                    }
+                }
+            }
+        } catch ( Exception e ) {
+            log.error("Exception running background tasks",e);
+        } finally {
+            log.debug("BackgroundTaskService::performReshareTasks exiting");
+        }
     }
-    finally {
-      log.debug("BackgroundTaskService::performReshareTasks exiting");
-    }
-  }
 
   	private runTimer(Timer t) {
 		try {

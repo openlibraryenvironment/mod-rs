@@ -2,31 +2,71 @@ import groovy.transform.*
 import org.olf.rs.PatronRequest;
 
 @Field PatronRequest patronRequest
-json g.render(patronRequest, [expand: ['state',
-                                       'serviceType',
-                                       'publicationType',
-                                       'pickLocation',
-                                       'pickShelvingLocation',
-                                       'rota',
-                                       'tags',
-                                       'audit',
-                                       'notifications',
-                                       'cancellationReason',
-                                       'conditions',
-                                       'resolvedRequester',
-                                       'resolvedPatron',
-                                       'resolvedSupplier',
-                                       'resolvedPickupLocation',
-                                       'requestIdentifiers'
-                                       ],
-                              excludes: ['volumes', 'pickLocation']]) {
+final boolean fullRecord = params.get('_view', (actionName == 'index' ? 'brief' : 'full')) == 'full'
 
+final def toExpand = fullRecord ? [
+  // Full expanded set...
+  'state',
+  'serviceType',
+  'publicationType',
+  'pickLocation',
+  'pickShelvingLocation',
+  'rota',
+  'tags',
+  'audit',
+  'notifications',
+  'cancellationReason',
+  'conditions',
+  'resolvedRequester',
+  'resolvedPatron',
+  'resolvedSupplier',
+  'resolvedPickupLocation',
+  'requestIdentifiers'
+] : [
+  // brief record view..
+  'pickShelvingLocation',
+  'resolvedSupplier',
+  'serviceType',
+  'state'
+]
+
+final def toExclude = fullRecord ? [
+  // Full excluded set...
+  'pickLocation', // Resolved explicitly
+  'volumes' // Resolved explicitly
+] : [
+  // brief record excludes ...
+  'audit',
+  'cancellationReason',
+  'conditions',
+  'customProperties',
+  'networkStatus',
+  'notifications',
+  'pickLocation', // Resolved explicitly
+  'preErrorStatus',
+  'previousStates',
+  'publicationType',
+  'requestIdentifiers',
+  'resolvedPatron',
+  'resolvedPickupLocation',
+  'resolvedRequester',
+  'rota',
+  'stateModel',
+  'tags',
+  'volumes' // Resolved explicitly
+]
+
+json g.render(patronRequest, [expand: toExpand,
+                              excludes: toExclude]) {
+  // Required for the Update tab
   validActions patronRequest.getValidActions()
 
+  // Required for list display  
   volumes g.render(patronRequest.volumes?.sort {a,b ->
     a.name <=> b.name ?: a.itemId <=> b.itemId
   }) ?: []
 
+  // Required for supplier list display  
   if ( patronRequest.pickLocation ) {
     pickLocation g.render( patronRequest.pickLocation, [excludes: ['correspondingDirectoryEntry']] ) {
       correspondingDirectoryEntry {
@@ -42,4 +82,3 @@ json g.render(patronRequest, [expand: ['state',
     }
   }
 }
-

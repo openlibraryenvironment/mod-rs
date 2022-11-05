@@ -31,6 +31,9 @@ public class GenericCodeNameService<TDomainClass> {
     public TDomainClass ensureExists(String code, String name, Closure additionalFieldsUpdate = null) {
         log.debug('Entering GenericCodeNameService::ensureExists(' + code + ', ' + name + ');');
 
+        // We cannot create/look up a record with a null code
+        if (code == null) return null;
+
         // We first look it up in the current session
         TDomainClass instance = domainClass.findByCode(code);
 

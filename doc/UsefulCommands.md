@@ -22,6 +22,7 @@
 
 # To generate db changes
 	gradlew.bat -Dgrails.env=vagrant-db :dbmGormDiff -Pargs="--defaultSchema=diku_mod_rs" > dbChanges.txt
+	gradlew.bat -Dgrails.env=rancher-desktop :dbmGormDiff -Pargs="--defaultSchema=test1_mod_rs" > dbChanges.txt
 
 # Run migration and load reference and sample data (change the port to 8080 for mod-directory)
 	curl -XPOST -H "Content-Type: application/json" -H "X-OKAPI-TENANT: diku" "http://localhost:8081/_/tenant" -d "{\"parameters\":[{\"key\": \"loadReference\", \"value\": true}, {\"key\": \"loadSample\", \"value\": true}]}"

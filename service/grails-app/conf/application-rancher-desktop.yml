@@ -5,7 +5,36 @@
 # This config file connects to the postgres install mapped by the vagrant file in the project root.
 # Use the flag '-Dgrails.env=vagrant-db' when running
 ##
-
+---
+dataSource:
+  dbCreate: none
+  url: "jdbc:postgresql://${db.host:127.0.0.1}:${db.port:30101}/${db.database:okapi_modules}?ApplicationName=mod-rs-rancher-desktop"
+  username: okapi_1
+  password: okapi_1
+  driverClassName: org.postgresql.Driver
+  dialect: com.k_int.hibernate.dialects.postgres.KIPostgres94Dialect
+  schemaHandler: com.k_int.okapi.OkapiSchemaHandler
+  logSql: false
+  properties:
+      jmxEnabled: false
+      initialSize: 5
+      maxActive: 50
+      minIdle: 5
+      maxIdle: 25
+      maxWait: 10000
+      maxAge: 600000
+      timeBetweenEvictionRunsMillis: 5000
+      minEvictableIdleTimeMillis: 60000
+      validationQuery: SELECT 1
+      validationInterval: 30000
+      testOnBorrow: true
+      testWhileIdle: true
+      testOnReturn: false
+      removeAbandoned: true
+      removeAbandonedTimeout: 60
+      abandonWhenPercentageFull: 50
+      jdbcInterceptors: ConnectionState
+      defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 ---
 okapi: 
   service:
@@ -13,6 +42,20 @@ okapi:
     port: 30100
 ---
 server:
-    host: localhost
+    host: 0.0.0.0
     port: 8081
- 
+---
+events:
+  consumer:
+    zk:
+      connect: '${zookeeper_host:localhost}:${zookeeper_port:30104}'
+    bootstrap:
+      servers: 'localhost:30103'
+
+# see https://kafka.apache.org/28/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
+# Setting linger to 1 will cause a 1ms delay in sending to batch up groups of messages.
+  publisher:
+    zk:
+      connect: 'localhost:30104'
+    bootstrap:
+      servers: 'localhost:30103'

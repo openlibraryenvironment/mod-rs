@@ -117,4 +117,12 @@ databaseChangeLog = {
             }
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1666622872063-1") {
+        addColumn(tableName: "timer") {
+            column(defaultValueBoolean: "false", name: "tr_execute_at_day_start", type: "boolean") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }
