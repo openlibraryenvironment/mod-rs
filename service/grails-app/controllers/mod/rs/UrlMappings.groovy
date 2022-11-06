@@ -68,6 +68,8 @@ class UrlMappings {
     '/rs/iso18626'(controller:'iso18626', action:'index')
     "/rs/status/$symbol"(controller:'iso18626', action:'status')
 
+    "/rs/contexts"(resources:'resourceSharingContext')
+
     // Swagger document
     // This one returns what the plugin generates
 //    "/rs/swagger/api"(controller: "swagger", action: "api")

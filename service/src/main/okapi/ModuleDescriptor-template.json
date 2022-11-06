@@ -293,31 +293,16 @@
           "pathPattern": "/rs/noticePolicies*",
           "permissionsRequired": ["rs.noticePolicies"]
         },
-        {
-          "methods": [ "GET" ],
-          "pathPattern": "/rs/template*",
-          "permissionsRequired": ["rs.template.collection.get"]
-        },
-        {
-          "methods": [ "GET" ],
-          "pathPattern": "/rs/template/{id}*",
-          "permissionsRequired": ["rs.template.item.get"]
-        },
-        {
-          "methods": ["POST" ],
-          "pathPattern": "/rs/template*",
-          "permissionsRequired": ["rs.template.item.post"]
-        },
-        {
-          "methods": [ "PUT" ],
-          "pathPattern": "/rs/template/{id}*",
-          "permissionsRequired": ["rs.template.item.put"]
-        },
-        {
-          "methods": [ "DELETE" ],
-          "pathPattern": "/rs/template/{id}*",
-          "permissionsRequired": ["rs.template.item.delete"]
-        }
+        { "methods": [ "GET" ],    "pathPattern": "/rs/template*",       "permissionsRequired": ["rs.template.collection.get"] },
+        { "methods": [ "GET" ],    "pathPattern": "/rs/template/{id}*",  "permissionsRequired": ["rs.template.item.get"] },
+        { "methods": [ "POST" ],   "pathPattern": "/rs/template*",       "permissionsRequired": ["rs.template.item.post"] },
+        { "methods": [ "PUT" ],    "pathPattern": "/rs/template/{id}*",  "permissionsRequired": ["rs.template.item.put"] },
+        { "methods": [ "DELETE" ], "pathPattern": "/rs/template/{id}*",  "permissionsRequired": ["rs.template.item.delete"] },
+        { "methods": [ "GET" ],    "pathPattern": "/rs/contexts*",       "permissionsRequired": ["rs.context.collection.get"] },
+        { "methods": [ "GET" ],    "pathPattern": "/rs/contexts/{id}*",  "permissionsRequired": ["rs.context.item.get"] },
+        { "methods": [ "POST" ],   "pathPattern": "/rs/contexts*",       "permissionsRequired": ["rs.context.item.post"] },
+        { "methods": [ "PUT" ],    "pathPattern": "/rs/contexts/{id}*",  "permissionsRequired": ["rs.context.item.put"] },
+        { "methods": [ "DELETE" ], "pathPattern": "/rs/contexts/{id}*",  "permissionsRequired": ["rs.context.item.delete"] }
       ]
     },{
       "id" : "_tenant",
