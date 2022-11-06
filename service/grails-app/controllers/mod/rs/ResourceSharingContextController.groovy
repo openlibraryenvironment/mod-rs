@@ -12,7 +12,7 @@ class ResourceSharingContextController extends OkapiTenantAwareController<Resour
   static responseFormats = ['json', 'xml']
   
   ResourceSharingContextController() {
-    super(Timer)
+    super(ResourceSharingContext)
   }
   
 }

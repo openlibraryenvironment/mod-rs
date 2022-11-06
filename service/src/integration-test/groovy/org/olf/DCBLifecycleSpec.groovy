@@ -59,7 +59,7 @@ class DCBLifecycleSpec extends HttpSpec {
         ]
       ]
     ],
-    [ id:'DCB-T-D-0002', name: 'RSInstTwo', slug:'DCB_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'DST2', priority:'a'] ],
+    [ id:'DCB-T-D-0002', name: 'DCBInstTwo', slug:'DCB_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'DST2', priority:'a'] ],
       services:[
         [
           slug:'DCBInstTwo_ISO18626',
@@ -182,8 +182,98 @@ class DCBLifecycleSpec extends HttpSpec {
 
     where:
       tenantid | name
-      'RSInstOne' | 'RSInstOne'
-      'RSInstTwo' | 'RSInstTwo'
-      'RSInstThree' | 'RSInstThree'
+      'DCBInstOne' | 'DCBInstOne'
+      'DCBInstTwo' | 'DCBInstTwo'
+      'DCBInstThree' | 'DCBInstThree'
   }
+
+  void "Set up test tenants "(tenantid, name) {
+    when:"We post a new tenant request to the OKAPI controller"
+
+      log.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
+
+      setHeaders([
+                   'X-Okapi-Tenant': tenantid,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      // post to tenant endpoint
+      // doPost(url,jsondata,params,closure)
+      def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
+
+      // Give the various jobs time to finish their work.
+      Thread.sleep(5000)
+    log.debug("Got response for new tenant: ${resp}");
+    then:"The response is correct"
+      resp != null;
+
+    where:
+      tenantid | name
+      'DCBInstOne'   | 'DCBInstOne'
+      'DCBInstTwo'   | 'DCBInstTwo'
+      'DCBInstThree' | 'DCBInstThree'
+  }
+
+
+  void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
+    when:"Load the default directory (test url is ${baseUrl})"
+    boolean result = true
+
+    Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+      log.info("Filling out dummy directory entries for tenant ${tenant_id}");
+
+      dirents.each { entry ->
+        log.debug("Sync directory entry ${entry} - Detected runtime port is ${serverPort}")
+        def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
+        DirectoryEntry de = new DirectoryEntry()
+        grailsWebDataBinder.bind(de, source)
+
+        // log.debug("Before save, ${de}, services:${de.services}");
+        try {
+          de.save(flush:true, failOnError:true)
+          log.debug("Result of bind: ${de} ${de.id}");
+        }
+        catch ( Exception e ) {
+          log.error("problem bootstrapping directory data",e);
+          result = false;
+        }
+
+        if ( de.errors ) {
+          de.errors?.allErrors?.each { err ->
+            log.error(err?.toString())
+          }
+        }
+      }
+    }
+
+    then:"Test directory entries are present"
+      assert result == true
+
+    where:
+    tenant_id | dirents
+    'DCBInstOne' | DIRECTORY_INFO
+    'DCBInstTwo' | DIRECTORY_INFO
+    'DCBInstThree' | DIRECTORY_INFO
+  }
+
+  void "test API for creating resource sharing contexts #tenant_id"(String tenant_id) {
+    when:"We post to the shelvingLocations endpoint for tenant"
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id
+                 ])
+      def resp = doPost("${baseUrl}rs/contexts".toString(),
+                        [
+                          context:'MOBIUS',
+                          sharedIndexType:'ReshareDCB',
+                          protocol:'ISO18626'
+                        ])
+    then:"Created"
+      resp != null;
+      log.debug("Got create resource sharing context response: ${resp}");
+    where:
+      tenant_id | _
+      'DCBInstOne' | _
+  }
+
 }
