@@ -1,11 +1,5 @@
 package org.olf.rs.sharedindex.jiscdiscover
 
-// N.B. Repackaging in upcoming groovy update
-// import groovy.xml.slurpersupport.GPathResult;
-
-import groovy.util.slurpersupport.GPathResult;
-
-
 /**
  * In order to make the JiscDiscoverSharedIndex service testable we need to be able to mock out
  * the connection to that remote web service. This interface is the contract that
@@ -14,6 +8,6 @@ import groovy.util.slurpersupport.GPathResult;
  */
 public interface JiscDiscoverApiConnection {
   
-  public GPathResult getSru(Map description);
+  public Object getSru(Map description);
   
 }
