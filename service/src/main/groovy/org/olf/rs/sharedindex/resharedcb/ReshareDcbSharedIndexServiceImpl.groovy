@@ -9,10 +9,12 @@ import groovy.util.logging.Slf4j
 public class ReshareDcbSharedIndexServiceImpl implements SharedIndexActions {
 
   public List<AvailabilityStatement> findAppropriateCopies(Map description) {
+    log.debug("ReshareDcbSharedIndexServiceImpl::findAppropriateCopies(${description})");
     return null;
   }
 
   public List<String> fetchSharedIndexRecords(Map description) {
+    log.debug("ReshareDcbSharedIndexServiceImpl::fetchSharedIndexRecords(${description})");
     return null;
   }
 

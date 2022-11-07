@@ -19,7 +19,7 @@ public class ReshareDcbRouterService implements RequestRouter {
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
 
-    log.debug("StaticRouterService::findMoreSuppliers(${description},${already_tried_symbols})");
+    log.debug("ReshareDcbRouterService::findMoreSuppliers(${description},${already_tried_symbols})");
     List<RankedSupplier> result = []
 
     AppSetting static_routing_cfg = AppSetting.findByKey('static_routes')
@@ -71,8 +71,8 @@ public class ReshareDcbRouterService implements RequestRouter {
 
   public Map getRouterInfo() {
     return [
-      'name':'StaticRouterService',
-      'description': 'Static Routing Service'
+      'name':'ReshareDcbRouterService',
+      'description': 'Reshare DCB Routing Service'
     ]
   }
 
