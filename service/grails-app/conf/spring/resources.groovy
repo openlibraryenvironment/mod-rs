@@ -10,10 +10,12 @@ beans = {
     case Environment.TEST:
       emailService(MockEmailServiceImpl)
       jiscDiscoverApiConnection(JiscDiscoverApiConnectionMock)
+      reshareDcbSharedIndexService(ReshareDcbSharedIndexServiceMock)
       break
     default:
       emailService(FolioEmailServiceImpl)
       jiscDiscoverApiConnection(JiscDiscoverApiConnectionImpl)
+      reshareDcbSharedIndexService(ReshareDcbSharedIndexServiceImpl)
       break
   }
 }
