@@ -15,6 +15,7 @@ public class ReshareDcbRouterService implements RequestRouter {
   DirectoryEntryService directoryEntryService
 
   // Grab the right implementation - in test return the Mock, in live return a real service
+  @Autowired
   SharedIndexActions reshareDcbSharedIndexService;
 
 
@@ -23,6 +24,8 @@ public class ReshareDcbRouterService implements RequestRouter {
     log.debug("ReshareDcbRouterService::findMoreSuppliers(${description},${already_tried_symbols})");
     List<RankedSupplier> result = []
 
+
+    log.debug("reshareDcbSharedIndexService : ${reshareDcbSharedIndexService} ${reshareDcbSharedIndexService?.class?.name}");
 
     // Probably we should iterate around the list of resource sharing contexts for the requesting location.... until then
     List<AvailabilityStatement> availability = reshareDcbSharedIndexService.findAppropriateCopies(description);

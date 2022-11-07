@@ -8,10 +8,12 @@ import groovy.util.logging.Slf4j
 public class ReshareDcbSharedIndexServiceMock implements SharedIndexActions {
 
   public List<AvailabilityStatement> findAppropriateCopies(Map description) {
+    log.debug("ReshareDcbSharedIndexServiceMock::findAppropriateCopies(${description})");
     return null;
   }
 
   public List<String> fetchSharedIndexRecords(Map description) {
+    log.debug("ReshareDcbSharedIndexServiceMock::fetchSharedIndexRecords(${description})");
     return null;
   }
 
