@@ -58,6 +58,7 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
   logger ('com.zaxxer.hikari.pool.HikariPool', DEBUG)
+  logger ('org.apache', WARN)
 
 
   // Log HTTPBuilderNG traffic

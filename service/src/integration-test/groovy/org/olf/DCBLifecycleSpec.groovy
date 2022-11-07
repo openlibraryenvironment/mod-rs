@@ -287,4 +287,98 @@ class DCBLifecycleSpec extends HttpSpec {
       'DCBInstOne' | _
   }
 
+  /** Grab the settings for each tenant so we can modify them as needeed and send back,
+   *  then work through the list posting back any changes needed for that particular tenant in this testing setup
+   *  for now, disable all auto responders
+   *  N.B. Unlike RS Lifecycle test, here we are going to rely upon the RSContextPreference value from the directory to force us into
+   *  a different implementation of a shared index. In TEST the ReShareDCBSI will be replaced with a MOCK implementation that returns
+   *  static values which reflect the use case here.
+   */
+  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
+    when:"We fetch the existing settings for ${tenant_id}"
+      println("Post settings here");
+      // RequestRouter = Static
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                ])
+      def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0'])
+      if ( changes_needed != null ) {
+        resp.each { setting ->
+          // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
+          if ( changes_needed.containsKey(setting.key) ) {
+            def new_value = changes_needed[setting.key];
+            // log.debug("Post update to ${setting} ==> ${new_value}");
+            setting.value = new_value;
+            def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
+            log.debug("Result of settings update: ${update_setting_result}");
+          }
+        }
+      }
+
+    then:"Tenant is configured"
+      1==1
+
+    where:
+      tenant_id       | changes_needed
+      'DCBInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off'] 
+      'DCBInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off']
+      'DCBInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off']
+
+  }
+
+  void "Send request "(String tenant_id,
+                       String peer_tenant,
+                       String p_title,
+                       String p_author,
+                       String p_systemInstanceIdentifier,
+                       String p_patron_id,
+                       String p_patron_reference,
+                       String requesting_symbol,
+                       String[] tags) {
+    when:"post new request"
+      log.debug("Create a new request ${tenant_id} ${tags} ${p_title} ${p_patron_id}");
+
+      // Create a request from OCLC:PPPA TO OCLC:AVL
+      def req_json_data = [
+        requestingInstitutionSymbol:requesting_symbol,
+        title: p_title,
+        author: p_author,
+        systemInstanceIdentifier: p_systemInstanceIdentifier,
+        patronReference:p_patron_reference,
+        patronIdentifier:p_patron_id,
+        isRequester:true,
+        tags: tags
+      ]
+
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
+
+      log.debug("CreateReqTest2 -- Response: RESP:${resp} ID:${resp.id}");
+
+      // Stash the ID
+      this.testctx.request_data[p_patron_reference] = resp.id
+
+      // This will fail initially until we have done the necessary work to find shared index config from the directory
+      String peer_request = waitForRequestState(peer_tenant, 10000, p_patron_reference, 'RES_IDLE')
+      log.debug("Created new request for with-rota test case 1. REQUESTER ID is : ${this.testctx.request_data[p_patron_reference]}")
+      log.debug("                                               RESPONDER ID is : ${peer_request}");
+
+
+    then:"Check the return value"
+      assert this.testctx.request_data[p_patron_reference] != null;
+      assert peer_request != null
+
+    where:
+      tenant_id    | peer_tenant  | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference         | requesting_symbol | tags
+      'DCBInstOne' | 'DCBInstTwo' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'DCB-LIFECYCLE-TEST-00002' | 'ISIL:DST1'       | [ 'DCB-TESTCASE-2' ]
+  }
+
 }
