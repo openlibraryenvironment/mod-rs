@@ -35,6 +35,10 @@ import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.Z3950Service
 
+/**
+ * This sequence of tests centre around libraries who are members of a fictional resource sharing consortia called DCBNET.
+ * the institution codes are DST1, DST2 and DST3
+ */
 @Slf4j
 @Integration
 @Stepwise
@@ -54,8 +58,10 @@ class DCBLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstOne']
-          ]
+            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstOne'],
+            'RSContextPreference': [ 'DCBNET' ]
+          ],
+          status: 'managed'
         ]
       ]
     ],
@@ -66,7 +72,8 @@ class DCBLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstTwo']
+            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstTwo'],
+            'RSContextPreference': [ 'DCBNET' ]
           ]
         ]
       ]
@@ -78,7 +85,8 @@ class DCBLifecycleSpec extends HttpSpec {
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
           customProperties:[ 
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstThree']
+            'AdditionalHeaders':['X-Okapi-Tenant:DCBInstThree'],
+            'RSContextPreference': [ 'DCBNET' ]
           ]
         ]
       ]
@@ -257,6 +265,9 @@ class DCBLifecycleSpec extends HttpSpec {
     'DCBInstThree' | DIRECTORY_INFO
   }
 
+  /**
+   * Set up a resource sharing context called DCBNET
+   */ 
   void "test API for creating resource sharing contexts #tenant_id"(String tenant_id) {
     when:"We post to the shelvingLocations endpoint for tenant"
       setHeaders([
@@ -264,7 +275,7 @@ class DCBLifecycleSpec extends HttpSpec {
                  ])
       def resp = doPost("${baseUrl}rs/contexts".toString(),
                         [
-                          context:'MOBIUS',
+                          context:'DCBNET', 
                           sharedIndexType:'ReshareDCB',
                           protocol:'ISO18626'
                         ])
