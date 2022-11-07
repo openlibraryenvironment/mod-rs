@@ -323,9 +323,9 @@ class DCBLifecycleSpec extends HttpSpec {
 
     where:
       tenant_id       | changes_needed
-      'DCBInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off'] 
-      'DCBInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off']
-      'DCBInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off']
+      'DCBInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static'] // Will be replaced with ReshareDcbRouter
+      'DCBInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static']
+      'DCBInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static']
 
   }
 
