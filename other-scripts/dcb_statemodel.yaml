@@ -1,0 +1,63 @@
+
+
+reshare:
+  statemodels:
+    DCB:
+      states:
+        DCB_IDLE:
+          reactions: 
+            - on: 'DCB_IDLE.indication'
+              execute: 
+                type: 'spring'
+                beanName: 'validateDCB'
+            - on: 'validate:valid'
+              toState: 'DCB_VALIDATED'
+            - on: 'validate:invalid'
+              toState: 'DCB_INVALID'
+
+        DCB_INVALID:
+          isTerminal: true
+
+        DCB_VALIDATED:
+          reactions: 
+            - on: 'DCB_VALIDATED.indication'
+              execute:
+                type: 'spring'
+                beanName: 'findLender'
+            - on: 'findLender:available'
+              toState: 'DCB_PEER_FOUND'
+            - on: 'findLender:not_found'
+              toState: 'DCB_END_OF_ROTA'
+
+        DCB_PEER_FOUND:
+          reactions: 
+            - on: 'DCB_PEER_FOUND.indication'
+              execute: 
+                type: 'spring'
+                beanName: 'dcbSendToNextLender'
+            - on: 'peer_request:started'
+              toState: 'DCB_PEER_IN_PROCESS'
+
+        DCB_END_OF_ROTA:
+          isTerminal: true
+
+        DCB_PEER_IN_PROCESS:
+          reactions:
+            - on: 'subTransaction:unfilled'
+              toState: 'DCB_PEER_UNFILLED'
+            - on: 'subTransaction:filled'
+              toState: 'DCB_FILLED'
+
+        DCB_PEER_UNFILLED:
+          reactions: 
+            - on: 'DCB_PEER_UNFILLED.indication'
+              execute:
+                type: 'spring'
+                beanName: 'findLender'
+            - on: 'findLender:available'
+              toState: 'DCB_PEER_FOUND'
+            - on: 'findLender:not_found'
+              toState: 'DCB_END_OF_ROTA'
+
+        DCB_FILLED:
+          isTerminal: true
