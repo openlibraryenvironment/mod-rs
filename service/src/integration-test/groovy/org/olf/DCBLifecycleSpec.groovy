@@ -34,6 +34,7 @@ import org.olf.rs.PatronRequest
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.Z3950Service
+import groovy.json.*;
 
 /**
  * This sequence of tests centre around libraries who are members of a fictional resource sharing consortia called DCBNET.
@@ -329,6 +330,29 @@ class DCBLifecycleSpec extends HttpSpec {
 
   }
 
+  void "Load DCB State Models"(String tenant_id, other) {
+
+    when: "We load the DCB State models"
+      String dcb_state_models_txt = new File("src/test/resources/statemodel/DCBStateModels.json").text
+      Object dcb_state_models_json = new JsonSlurper().parseText(dcb_state_models_txt)
+      setHeaders([
+                   'X-Okapi-Tenant': tenant_id,
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def resp = doPost("${baseUrl}rs/stateModel/import".toString(), dcb_state_models_json)
+
+    then: "Imported OK"
+      log.debug("Import result : ${resp}");
+
+    where:
+      tenant_id       | other
+      'DCBInstOne'    | null
+      'DCBInstTwo'    | null
+      'DCBInstThree'  | null
+  }
+
   void "Send request "(String tenant_id,
                        String peer_tenant,
                        String p_title,
@@ -360,7 +384,6 @@ class DCBLifecycleSpec extends HttpSpec {
                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
                  ])
       def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
-
       log.debug("CreateReqTest2 -- Response: RESP:${resp} ID:${resp.id}");
 
       // Stash the ID

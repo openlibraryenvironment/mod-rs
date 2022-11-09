@@ -28,6 +28,7 @@ class UrlMappings {
     "/rs/availableAction/testReport" (controller: "availableAction", action: "testReport")
 
     "/rs/stateModel/export" (controller: "stateModel", action: "export")
+    "/rs/stateModel/import" (controller: "stateModel", action: "importStateModel")
 
     '/rs/noticePolicies' (resources: 'noticePolicy')
 

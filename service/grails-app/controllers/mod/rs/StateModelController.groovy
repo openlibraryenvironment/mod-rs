@@ -91,4 +91,11 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
     else
       render result as JSON;
   }
+
+  def importStateModel() {
+    Map result = [status:'OK']
+    log.debug("Import state model: ${request.JSON}");
+    render result as JSON;
+  }
+
 }

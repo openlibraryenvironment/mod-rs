@@ -176,4 +176,37 @@ public class StateModelService {
         // Return the result to the caller
         return(result);
     }
+
+  /**
+   * The other exports in this file provide a 1:1 mapping from the normalised domain classes to an output format. This is
+   * pure and correct, but doesn't flow well for humans wanting to read and write state model documents. This method
+   * is an attempt to provide a more user-friendly state-model specification experience to developers which more naturally
+   * fits in with the way users and developers think about/express state models. There may be duplication or denormalisation - this
+   * is considered a price worth paying for keeping all the information in one place.
+   */
+  public Map exportFlow() {
+
+    Map result = [
+      state_models:[:]
+    ]
+
+    StateModel.list().each { sm ->
+      Map state_model = [:]
+
+      // Header data
+      state_model.name = sm.name
+      state_model.initialState = sm.initialState?.code
+      state_model.states = []
+      
+      sm.states.each { state_model_status ->
+        Map state_info = [
+          code: state_model_status?.state?.code
+        ]
+        state_model.states.add( state_info )
+      }
+
+      result.state_models[sm.shortcode] = state_model;
+    }
+    return result;
+  }
 }

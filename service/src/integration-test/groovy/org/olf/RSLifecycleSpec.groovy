@@ -34,6 +34,7 @@ import org.olf.rs.PatronRequest
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.Z3950Service
+import groovy.json.*
 
 @Slf4j
 @Integration
@@ -433,7 +434,9 @@ class RSLifecycleSpec extends HttpSpec {
       def yaml_resp = doGet("${baseUrl}/rs/stateModel/export?format=yaml".toString())
     then:
       println("Got state model response...");
-      new File('./build/state_models.json') << json_resp
+
+      // This is mostly so I have something to crib off when creating new state models
+      new File('./build/state_models.json') << JsonOutput.prettyPrint(JsonOutput.toJson(json_resp))
       new File('./build/state_models.yaml') << yaml_resp
       yaml_resp != null;
   }

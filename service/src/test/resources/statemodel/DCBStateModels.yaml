@@ -1,0 +1,19 @@
+
+
+stateModels:
+  DCBRequester:
+    initialState: DCB_REQ_IDLE
+    states:
+      initialState: DCB_REQ_IDLE
+      events:
+        Req_New_Patron_Request_ind:
+          notes: All new requester role patron requests have this event issued to kick off the process
+          serviceClass: ReqNewPatronRequestInd
+          results:
+            requesterNewPatronRequestIndOKnoInstitutionSymbol:
+            requesterNewPatronRequestIndOK:
+            requesterNewPatronRequestIndOKinvalidPatron:
+            requesterNewPatronRequestIndOKhostLMSCallFailed:
+      actions:
+        CANCEL:
+          notes: Patron cancelled
