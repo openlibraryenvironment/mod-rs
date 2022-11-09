@@ -2,6 +2,20 @@
 
 reshare:
   statemodels:
+    PatronRequest:
+      states:
+        RES_IDLE:
+          actions:
+            requesterCancel:
+              -- Actions.ACTION_REQUESTER_REQUESTER_CANCEL,
+              type: manual
+              -- Actions.ACTION_REQUESTER_BORROWER_CHECK,
+            borrowerCheck:
+              type: manual
+              results:
+                requesterBorrowerCheckOK:
+                  description: The borrower id has been verified
+                  toState: Status.PATRON_REQUEST_VALIDATED,
     DCB:
       states:
         DCB_IDLE:

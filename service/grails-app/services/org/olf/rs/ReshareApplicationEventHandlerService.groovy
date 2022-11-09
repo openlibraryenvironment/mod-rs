@@ -62,6 +62,8 @@ public class ReshareApplicationEventHandlerService {
               log.error("Service for event is not of type AbstractEvent");
           }
 
+          log.debug("getEventProcessor(${eventName}) returning ${eventprocessor?.class?.name}");
+
           // return the processor to the caller
           return(eventprocessor);
       }
