@@ -421,6 +421,23 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstOne' | 'RSInstThree' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
   }
 
+  void "test StateModel.export"() {
+    when:"We request an export of the state models"
+      setHeaders([
+                   'X-Okapi-Tenant': 'RSInstOne',
+                   'X-Okapi-Token': 'dummy',
+                   'X-Okapi-User-Id': 'dummy',
+                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+                 ])
+      def json_resp = doGet("${baseUrl}/rs/stateModel/export?format=json".toString())
+      def yaml_resp = doGet("${baseUrl}/rs/stateModel/export?format=yaml".toString())
+    then:
+      println("Got state model response...");
+      new File('./build/state_models.json') << json_resp
+      new File('./build/state_models.yaml') << yaml_resp
+      yaml_resp != null;
+  }
+
   /**
    * Important note for this test case:: peer_tenant is set to RSInstThree and this works because RSInstOne has a static rota set up
    * so that RSInstThree is the first option for sending a request to. Any changes in the test data will likely break this test. Watch out 
