@@ -47,6 +47,7 @@ public class StateModelData {
     // The states available to the default responder state model
     static private final List responderStates = [
         [ status : Status.RESPONDER_AWAIT_PICKING ],
+        [ status : Status.RESPONDER_AWAIT_SHIP ],
         [ status : Status.RESPONDER_AWAITING_RETURN_SHIPPING ],
         [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
         [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
