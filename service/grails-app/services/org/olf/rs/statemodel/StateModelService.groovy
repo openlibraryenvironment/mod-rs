@@ -186,67 +186,96 @@ public class StateModelService {
     }
 
     /**
+     * Generic domain import routine
+     * @param items The domain items to be imported
+     * @param domainText The text to appear in messages that represents the domain
+     * @param createUpdate The closure that performs the create / update for the domain,
+     *                     it is passed the json that represents a record and the messages list,
+     *                     it returns true if successful or false if an error occurred
+     * @param messages A message list that we will append, default: an empty list
+     * @param itemCodeProperty The property on the item that represents the code for that item, default: code
+     * @return The list of messages that were accumulated
+     */
+    private List importDomain(
+        JSONArray items,
+        String domainText,
+        Closure createUpdate,
+        List messages = null,
+        String itemCodeProperty = null) {
+
+        // If we have not been passed an itemCodeProperty default to "code"
+        String codeProperty = itemCodeProperty ? itemCodeProperty : "code";
+
+        // Do we need to allocate a new messages list or have we been supplied one
+        List localMessages = (messages == null) ? [ ] : messages;
+        int okCount = 0;
+        int errorCount = 0;
+
+        // Have we been supplied any items
+        if (items) {
+            // We have been supplied some so, loop through them
+            items.each { item ->
+                if (item[codeProperty]) {
+                    try {
+                        // Call the closure to attempt to create the item
+                        if (createUpdate(item, localMessages)) {
+                            // We were successful
+                            okCount++;
+                        } else {
+                            // Failed to create / update
+                            localMessages.add("Failed to create / update " + domainText + " with " + codeProperty + ": \"" + item[codeProperty] + "\"");
+                            errorCount++;
+                        }
+                    } catch (Exception e) {
+                        String message = "Exception thrown adding " + domainText + " with " + codeProperty + ": \"" + item[codeProperty] + "\"";
+                        localMessages.add(message + ", Exception: " + e.message);
+                        errorCount++;
+                        log.error(message, e);
+                    }
+                } else {
+                    // No code specified for item
+                    localMessages.add("No " + codeProperty + " specified for " + domainText);
+                    errorCount++;
+                }
+            }
+        } else {
+            // No array of items supplied, so just give a warning message
+            localMessages.add("No array of " + domainText + " supplied");
+        }
+
+        // Give a summary of what we managed to do
+        localMessages.add("Number of " + domainText + " imported: " + okCount.toString() + ", errors: " + errorCount.toString());
+
+        // Return the messages
+        return(localMessages);
+    }
+
+    /**
      * Imports the supplied list of stati
      * @param stati The states to import
      * @return A list of informational / error messages that inform the user of what went on
      */
     public List importStati(JSONArray stati) {
-
-        List messages = [ ];
-        int okCount = 0;
-        int errorCount = 0;
-
-        // Have we been supplied any stati
-        if (stati) {
-            // We have been supplied some so, loop through them
-            stati.each { status ->
-                if (status.code) {
-                    StatusStage stage = convertStatusStage(status.stage);
-                    if (stage) {
-                        try {
-                            // We have been supplied a valid stage so try and save the status
-                            if (Status.ensure(
-                                status.code,
-                                stage,
-                                status.presSeq,
-                                status.visible,
-                                status.needsAttention,
-                                status.terminal,
-                                status.terminalSequence) == null) {
-                                // Failed to create / update
-                                messages.add("Failed to create / update status with code: \"" + status.code + "\"");
-                                errorCount++;
-                            } else {
-                                // Created / Updated without errors
-                                okCount++;
-                            }
-                        } catch (Exception e) {
-                            String message = "Exception thrown adding status with code: \"" + status.code + "\"";
-                            messages.add(message + ", Exception: " + e.message);
-                            errorCount++;
-                            log.error(message, e);
-                        }
-                    } else {
-                        // Invalid stage specified for status
-                        messages.add("An invalid stage was specified for status with code: \"" + status.code + "\"");
-                        errorCount++;
-                    }
-                } else {
-                    // No code specified for status
-                    messages.add("No No code specified for status");
-                    errorCount++;
-                }
+        // The closure ensure the status exists
+        Closure createUpdate = { jsonStatus, statusMessages ->
+            boolean result = false;
+            StatusStage stage = convertStatusStage(jsonStatus.stage);
+            if (stage) {
+                // We have been supplied a valid stage so try and save the status
+                result = (Status.ensure(
+                    jsonStatus.code,
+                    stage,
+                    jsonStatus.presSeq,
+                    jsonStatus.visible,
+                    jsonStatus.needsAttention,
+                    jsonStatus.terminal,
+                    jsonStatus.terminalSequence) != null);
             }
-        } else {
-            // No status supplied, so just give a warning message
-            messages.add("No status supplied");
-        }
+            return(result);
+        };
 
-        // Give a summary of what we managed to do
-        messages.add("Number of states imported: " + okCount.toString() + ", errors: " + errorCount.toString());
-
-        // Return the messages
-        return(messages);
+        // Call the generic import routine to do the work and return the messages
+        return(importDomain(stati,  "status", createUpdate));
     }
 
     /**
@@ -273,59 +302,26 @@ public class StateModelService {
      */
     public List importActionEventResults(JSONArray actionEventResults) {
 
-        List messages = [ ];
-        int okCount = 0;
-        int errorCount = 0;
+        // The closure ensure the action event result exists
+        Closure createUpdate = { jsonActionEventResult, actionEventResultMessages ->
+            // Lookup the restore state
+            RefdataValue saveRestoreState = referenceDataService.lookup(RefdataValueData.VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, jsonActionEventResult.saveRestoreState);
 
-        // Have we been supplied any action / event results
-        if (actionEventResults) {
-            // We have been supplied some so, loop through them
-            actionEventResults.each { actionEventResult ->
-                if (actionEventResult.code) {
-                    try {
-                        // Lookup the restore state
-                        RefdataValue saveRestoreState = referenceDataService.lookup(RefdataValueData.VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, actionEventResult.saveRestoreState);
-
-                        // Now create / update this result
-                        if (ActionEventResult.ensure(
-                            actionEventResult.code,
-                            actionEventResult.description,
-                            actionEventResult.result,
-                            Status.lookup(actionEventResult.status),
-                            actionEventResult.qualifier,
-                            saveRestoreState,
-                            Status.lookup(actionEventResult.overrideSaveStatus),
-                            Status.lookup(actionEventResult.fromStatus),
-                            actionEventResult.nextActionEvent) == null) {
-                            // Failed to create / update
-                            messages.add("Failed to create / update action / event result with code: \"" + actionEventResult.code + "\"");
-                            errorCount++;
-                        } else {
-                            // Created / Updated without errors
-                            okCount++;
-                        }
-                    } catch (Exception e) {
-                        String message = "Exception thrown adding action / event result with code: \"" + actionEventResult.code + "\"";
-                        messages.add(message + ", Exception: " + e.message);
-                        errorCount++;
-                        log.error(message, e);
-                    }
-                } else {
-                    // No code specified for the action /event result
-                    messages.add("No code specified for action /event result");
-                    errorCount++;
-                }
-            }
-        } else {
-            // No action / event result supplied, so just give a message
-            messages.add("No action / event result supplied");
+            // Now create / update this result
+            return(ActionEventResult.ensure(
+                jsonActionEventResult.code,
+                jsonActionEventResult.description,
+                jsonActionEventResult.result,
+                Status.lookup(jsonActionEventResult.status),
+                jsonActionEventResult.qualifier,
+                saveRestoreState,
+                Status.lookup(jsonActionEventResult.overrideSaveStatus),
+                Status.lookup(jsonActionEventResult.fromStatus),
+                jsonActionEventResult.nextActionEvent) != null);
         }
 
-        // Give a summary of what we managed to do
-        messages.add("Number of action / event results imported: " + okCount.toString() + ", errors: " + errorCount.toString());
-
-        // Return the messages
-        return(messages);
+        // Call the generic import routine to do the work and return the messages
+        return(importDomain(actionEventResults,  "action / event result", createUpdate));
     }
 
     /**
@@ -335,68 +331,35 @@ public class StateModelService {
      */
     public List importActionEventResultLists(JSONArray actionEventResultLists) {
 
-        List messages = [ ];
-        int okCount = 0;
-        int errorCount = 0;
+        // The closure ensure the action event result list exists
+        Closure createUpdate = { jsonActionEventResultList, actionEventResultListMessages ->
+            List<ActionEventResult> resultItems = new ArrayList<ActionEventResult>();
 
-        // Have we been supplied any action / event result lists
-        if (actionEventResultLists) {
-            // We have been supplied some so, loop through them
-            actionEventResultLists.each { actionEventResultList ->
-                if (actionEventResultList.code) {
-                    try {
-                        List<ActionEventResult> resultItems = new ArrayList<ActionEventResult>();
-
-                        // Have we been supplied with any action event results
-                        if (actionEventResultList.actionEventResults) {
-                            actionEventResultList.actionEventResults.each { actionEventResult ->
-                                ActionEventResult resultItem = ActionEventResult.lookup(actionEventResult.code);
-                                if (resultItem) {
-                                    // IT exists, so add itto the result list
-                                    resultItems.add(resultItem);
-                                } else {
-                                    messages.add("Unable to find action event result \"" + actionEventResult.code + "\" foe action event result list with code: \"" + actionEventResultList.code + "\"");
-                                }
-                            }
-                        } else {
-                            // Not an error, just an empty list
-                            messages.add("An empty list has been supplied for action / event result list with code: \"" + actionEventResultList.code + "\"");
-                        }
-
-                        // Now create / update this result
-                        if (ActionEventResultList.ensure(
-                            actionEventResultList.code,
-                            actionEventResultList.description,
-                            resultItems) == null) {
-                            // Failed to create / update
-                            messages.add("Failed to create / update action / event result list with code: \"" + actionEventResultList.code + "\"");
-                            errorCount++;
-                        } else {
-                            // Created / Updated without errors
-                            okCount++;
-                        }
-                    } catch (Exception e) {
-                        String message = "Exception thrown adding action / event result list with code: \"" + actionEventResultList.code + "\"";
-                        messages.add(message + ", Exception: " + e.message);
-                        errorCount++;
-                        log.error(message, e);
+            // Have we been supplied with any action event results
+            if (jsonActionEventResultList.actionEventResults) {
+                jsonActionEventResultList.actionEventResults.each { jsonActionEventResult ->
+                    ActionEventResult resultItem = ActionEventResult.lookup(jsonActionEventResult.code);
+                    if (resultItem) {
+                        // IT exists, so add it to the result list
+                        resultItems.add(resultItem);
+                    } else {
+                        messages.add("Unable to find action event result \"" + jsonActionEventResult.code + "\" fof action event result list with code: \"" + jsonActionEventResultList.code + "\"");
                     }
-                } else {
-                    // No code specified for the action /event result list
-                    messages.add("No code specified for action /event result list");
-                    errorCount++;
                 }
+            } else {
+                // Not an error, just an empty list
+                messages.add("An empty list has been supplied for action / event result list with code: \"" + jsonActionEventResultList.code + "\"");
             }
-        } else {
-            // No action / event result list supplied, so just give a message
-            messages.add("No action / event result list supplied");
-        }
 
-        // Give a summary of what we managed to do
-        messages.add("Number of action / event result lists imported: " + okCount.toString() + ", errors: " + errorCount.toString());
+            // Now create / update this result list
+            return(ActionEventResultList.ensure(
+                jsonActionEventResultList.code,
+                jsonActionEventResultList.description,
+                resultItems) != null);
+        };
 
-        // Return the messages
-        return(messages);
+        // Call the generic import routine to do the work and return the messages
+        return(importDomain(actionEventResultLists,  "action / event result list", createUpdate));
     }
 
     /**
@@ -407,55 +370,21 @@ public class StateModelService {
      */
     public List importActionEvents(JSONArray actionEvents, boolean isAction) {
 
-        String actionEventType = isAction ? "action" : "event";
-        List messages = [ ];
-        int okCount = 0;
-        int errorCount = 0;
+        // The closure ensure the action event exists
+        Closure createUpdate = { jsonActionEvent, actionEventMessages ->
+             // Create / update this action / event
+            return(ActionEvent.ensure(
+                jsonActionEvent.code,
+                jsonActionEvent.description,
+                isAction,
+                jsonActionEvent. serviceClass,
+                jsonActionEvent.resultList,
+                convertUndoStatus(jsonActionEvent.undoStatus),
+                jsonActionEvent.responderServiceClass) != null);
+        };
 
-        // Have we been supplied any actions / events
-        if (actionEvents) {
-            // We have been supplied some so, loop through them
-            actionEvents.each { actionEvent ->
-                if (actionEvent.code) {
-                    try {
-                        // Now create / update this action / event
-                        if (ActionEvent.ensure(
-                            actionEvent.code,
-                            actionEvent.description,
-                            isAction,
-                            actionEvent. serviceClass,
-                            actionEvent.resultList,
-                            convertUndoStatus(actionEvent.undoStatus),
-                            actionEvent.responderServiceClass) == null) {
-                            // Failed to create / update
-                            messages.add("Failed to create / update " + actionEventType + " with code: \"" + actionEvent.code + "\"");
-                            errorCount++;
-                        } else {
-                            // Created / Updated without errors
-                            okCount++;
-                        }
-                    } catch (Exception e) {
-                        String message = "Exception thrown adding " + actionEventType + " with code: \"" + actionEvent.code + "\"";
-                        messages.add(message + ", Exception: " + e.message);
-                        errorCount++;
-                        log.error(message, e);
-                    }
-                } else {
-                    // No code specified for the action / event
-                    messages.add("No code specified for " + actionEventType);
-                    errorCount++;
-                }
-            }
-        } else {
-            // No actions supplied, so just give a message
-            messages.add("No " + actionEventType + "s supplied");
-        }
-
-        // Give a summary of what we managed to do
-        messages.add("Number of " + actionEventType + "s imported: " + okCount.toString() + ", errors: " + errorCount.toString());
-
-        // Return the messages
-        return(messages);
+        // Call the generic import routine to do the work and return the messages
+        return(importDomain(actionEvents, isAction ? "action" : "event", createUpdate));
     }
 
     /**
@@ -482,106 +411,68 @@ public class StateModelService {
      */
     public List importStateModels(JSONArray stateModels) {
 
-        List messages = [ ];
-        int okCount = 0;
-        int errorCount = 0;
+        // The closure ensure the state model exists
+        Closure createUpdate = { jsonStateModel, stateModelMessages ->
+            boolean result = false;
+            List states = [ ];
 
-        // Have we been supplied any state models
-        if (stateModels) {
-            // We have been supplied some so, loop through them
-            stateModels.each { jsonStateModel ->
-                if (jsonStateModel.code) {
-                    try {
-                        List states = [ ];
+            // Have any states been specified for this model
+            if (jsonStateModel.stati) {
+                // Loop through all the states, dealing with states specific to this model
+                jsonStateModel.stati.each { jsonStatus ->
+                    Map stateModelStatus = [ : ];
+                    states.add(stateModelStatus);
+                    stateModelStatus.status = jsonStatus.state;
+                    stateModelStatus.canTriggerOverdueRequest = jsonStatus.canTriggerOverdueRequest;
+                    stateModelStatus.canTriggerStaleRequest = jsonStatus.canTriggerStaleRequest;
+                    stateModelStatus.isTerminal = jsonStatus.isTerminal;
+                    stateModelStatus.triggerPullSlipEmail = jsonStatus.triggerPullSlipEmail;
+                }
+            } else {
+                messages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
+            }
 
-                        // Have any states been specified dor this model
-                        if (jsonStateModel.stati) {
-                            // Loop through all the states, dealing with states specific to this model
-                            jsonStateModel.stati.each { status ->
-                                Map stateModelStatus = [ : ];
-                                states.add(stateModelStatus);
-                                stateModelStatus.status = status.state;
-                                stateModelStatus.canTriggerOverdueRequest = status.canTriggerOverdueRequest;
-                                stateModelStatus.canTriggerStaleRequest = status.canTriggerStaleRequest;
-                                stateModelStatus.isTerminal = status.isTerminal;
-                                stateModelStatus.triggerPullSlipEmail = status.triggerPullSlipEmail;
-                            }
-                        } else {
-                            messages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
-                        }
+            // Now create / update this state model
+            StateModel stateModel = StateModel.ensure(
+                jsonStateModel.code,
+                jsonStateModel.name,
+                jsonStateModel.initialState,
+                jsonStateModel.staleAction,
+                jsonStateModel.overdueStatus,
+                states);
 
-                        // Now create / update this state model
-                        StateModel stateModel = StateModel.ensure(
-                            jsonStateModel.code,
-                            jsonStateModel.name = null,
-                            jsonStateModel.initialState,
-                            jsonStateModel.staleAction,
-                            jsonStateModel.overdueStatus,
-                            states);
-                        if (stateModel == null) {
-                            // Failed to create / update
-                            messages.add("Failed to create / update state model with code: \"" + jsonStateModel.code + "\"");
-                            errorCount++;
-                        } else {
-                            // Created / Updated without errors
-                            okCount++;
+            if (stateModel != null) {
+                // Successfully created
+                result = true;
 
-                            // We now need to iterate through the available actions for the states in the model
-                            if (jsonStateModel.stati) {
-                                jsonStateModel.stati.each { status ->
-                                    // We have separate counts for the available actions
-                                    int okCountAvailableAction = 0;
-                                    int errorCountAvailableAction = 0;
+                // We now need to iterate through the available actions for the states in the model
+                if (jsonStateModel.stati) {
+                    jsonStateModel.stati.each { jsonStatus ->
+                        Closure createUpdateAvailableAction = { jsonAvailableAction, availableActionMessages ->
+                            return(AvailableAction.ensure(
+                                stateModel,
+                                jsonStatus.state,
+                                jsonAvailableAction.actionEvent,
+                                jsonAvailableAction.triggerType,
+                                jsonAvailableAction.resultList) != null);
+                        };
 
-                                    if (status.availableActions) {
-                                        // Now iterate through the available actions adding them
-                                        status.availableActions.each { jsonAvailableAction ->
-                                            if (AvailableAction.ensure(
-                                                stateModel,
-                                                status.state,
-                                                jsonAvailableAction.actionEvent,
-                                                jsonAvailableAction.triggerType,
-                                                jsonAvailableAction.resultList) == null) {
-                                                // Failed to create the available action
-                                                errorCountAvailableAction++;
-                                                messages.add("Failed to create available action for state model with code: \"" + jsonStateModel.code + "\" and status with code \"" + status.state + "\" for action / event with code \"" + jsonAvailableAction.actionEvent + "\"");
-                                            } else {
-                                                okCountAvailableAction++;
-                                            }
-                                        }
-
-                                        // Add a message to let them know how many available actions were create
-                                        messages.add("Number of available actions for state model with code: \"" + jsonStateModel.code + "\" and status with code \"" + status.state + "\" that have been imported: " + okCountAvailableAction.toString() + ", errors: " + errorCountAvailableAction.toString());
-                                    } else {
-                                        // If it is terminal then we may not have any available actions
-                                        if (!status.isTerminal) {
-                                            messages.add("No available actions specified for state model with code: \"" + jsonStateModel.code + "\" and status with code \"" + status.state + "\"");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        String message = "Exception thrown adding state model with code: \"" + jsonStateModel.code + "\"";
-                        messages.add(message + ", Exception: " + e.message);
-                        log.error(message, e);
-                        errorCount++;
+                        // Call the generic import routine to do the work
+                        importDomain(
+                            jsonStatus.availableActions,
+                            "available action for state model with code: \"" + jsonStateModel.code + "\" and status with code \"" + jsonStatus.state + "\"",
+                            createUpdateAvailableAction,
+                            stateModelMessages,
+                            "actionEvent");
                     }
-                } else {
-                    // No code specified for the state model
-                    messages.add("No code specified for state model");
-                    errorCount++;
                 }
             }
-        } else {
-            // No state models supplied, so just give a message
-            messages.add("No state models supplied");
-        }
 
-        // Give a summary of what we managed to do
-        messages.add("Number of state models imported: " + okCount.toString() + ", errors: " + errorCount.toString());
+            // Return the result to the caller
+            return(result);
+        };
 
-        // Return the messages
-        return(messages);
+        // Call the generic import routine to do the work and return the messages
+        return(importDomain(stateModels, "state model", createUpdate));
     }
 }
