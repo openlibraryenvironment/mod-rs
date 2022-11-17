@@ -93,6 +93,10 @@ grails:
             accept:
                 header:
                     userAgents: []
+    controllers:
+       upload:
+          maxFileSize: 209715200
+          maxRequestSize: 220200960
     gorm:
         multiTenancy:
             mode: SCHEMA

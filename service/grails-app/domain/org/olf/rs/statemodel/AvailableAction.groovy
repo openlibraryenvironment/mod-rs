@@ -63,6 +63,16 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
+            // Excellent we have found the state model
+            result = ensure(sm, state, action, triggerType, resultListCode);
+        }
+        return(result);
+    }
+
+    public static AvailableAction ensure(StateModel sm, String state, String action, String triggerType, String resultListCode = null) {
+
+        AvailableAction result = null;
+        if (sm) {
             Status s = Status.lookup(state);
             if (s) {
                 result = AvailableAction.findByModelAndFromStateAndActionCode(sm,s,action);

@@ -93,6 +93,11 @@
           "permissionsRequired": [ "rs.stateModel.export" ]
         },
         {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/stateModel/import*",
+          "permissionsRequired": [ "rs.stateModel.import" ]
+        },
+        {
           "methods": [ "GET" ],
           "pathPattern": "/rs/status*",
           "permissionsRequired": [ "rs.status.get" ]
@@ -611,6 +616,12 @@
       "description": "Exports state models",
       "visible": false
     },
+    {
+      "permissionName": "rs.stateModel.import",
+      "displayName": "State model import",
+      "description": "Imports state models",
+      "visible": false
+    },
 
     {
       "permissionName": "rs.status.get",
@@ -863,6 +874,7 @@
         "rs.settings.write",
         "rs.statistics.write",
         "rs.stateModel.export",
+        "rs.stateModel.import",
         "rs.status.get",
         "rs.iso18626.write",
         "rs.externalapi.write",
