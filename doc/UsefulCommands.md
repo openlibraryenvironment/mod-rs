@@ -1,5 +1,13 @@
 # To run integration tests
-	gradlew.bat clean build test
+	# Ensure you do not have mod-directory running as that will conflict with ports being used
+	cd tools\testing
+	docker-compose up
+		# In a separate window
+		cd service
+		gradlew.bat clean build test
+	# When finished
+	Ctrl+c docker-compose
+	docker-compose down -v
 
 # View count the number of dockers running
 	docker ps| wc -l
@@ -25,7 +33,7 @@
 	gradlew.bat -Dgrails.env=rancher-desktop :dbmGormDiff -Pargs="--defaultSchema=test1_mod_rs" > dbChanges.txt
 
 # Run migration and load reference and sample data (change the port to 8080 for mod-directory)
-	curl -XPOST -H "Content-Type: application/json" -H "X-OKAPI-TENANT: diku" "http://localhost:8081/_/tenant" -d "{\"parameters\":[{\"key\": \"loadReference\", \"value\": true}, {\"key\": \"loadSample\", \"value\": true}]}"
+	curl -XPOST -H "Content-Type: application/json" -H "X-OKAPI-TENANT: test1" "http://localhost:8081/_/tenant" -d "{\"parameters\":[{\"key\": \"loadReference\", \"value\": true}, {\"key\": \"loadSample\", \"value\": true}]}"
 
 # View logs in realtime for east / west or north / south
 install kubectl from https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/ which essentially tells you to use the command

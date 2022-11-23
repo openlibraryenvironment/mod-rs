@@ -1,0 +1,7 @@
+{
+    "action": "supplierRespondToCancel",
+    "actionParams": {
+        "cancelResponse": "no",
+        "note": "To late to Cancel"
+    }
+}

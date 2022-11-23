@@ -48,7 +48,7 @@ public class BackgroundTaskService {
 
         // We do not want to do any processing if we are already performing the background processing
         // We have a distributed lock for when there are multiple mod-rs processes running
-        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip('mod-rs:BackgroundTaskService:performReshareTasks', 0) {
+        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip(LockIdentifier.BACKGROUND_TASKS, 0) {
             doBackgroundTasks();
         }) {
             // Failed to obtain the lock

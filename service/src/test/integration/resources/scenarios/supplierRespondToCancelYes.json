@@ -1,0 +1,7 @@
+{
+    "action": "supplierRespondToCancel",
+    "actionParams": {
+        "cancelResponse": "yes",
+        "note": "OK, its not been sent yet"
+    }
+}

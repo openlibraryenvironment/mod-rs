@@ -19,14 +19,15 @@ import com.k_int.okapi.OkapiTenantAdminService
 
 import grails.events.annotation.Subscriber
 import grails.gorm.multitenancy.Tenants
+import services.k_int.core.FolioLockService;
 
 /**
  * This service works at the module level, it's often called without a tenant context.
  */
 public class HousekeepingService {
 
-  // This was DataSource but I think this is actually a HibernateDataSource
-  OkapiTenantAdminService okapiTenantAdminService
+  FolioLockService folioLockService;
+  OkapiTenantAdminService okapiTenantAdminService;
 
   /**
    * This is called by the eventing mechanism - There is no web request context
@@ -47,6 +48,16 @@ public class HousekeepingService {
     log.info("HousekeepingService::setupData(${tenantName},${tenantId})");
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
+        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip(LockIdentifier.SETUP_REFERENCE_DATA, 0) {
+            setupReferenceData();
+        }) {
+            // Failed to obtain the lock
+            log.info("Skiping setting up reference data as unable to obtain lock");
+        }
+    }
+  }
+
+  private void setupReferenceData() {
       Status.withNewTransaction { status ->
 
 		// Load the Custom text properties
@@ -88,7 +99,6 @@ public class HousekeepingService {
         // The predefined templates
         TemplateData.loadAll();
       }
-    }
   }
 
   /**
