@@ -8,10 +8,10 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.EmailService
 import org.olf.rs.EventPublicationService
+import org.olf.rs.GrailsEventIdentifier;
 import org.olf.rs.HostLMSLocation
 import org.olf.rs.HostLMSService
 import org.olf.rs.HostLMSShelvingLocation
-import org.olf.rs.LockIdentifier;
 import org.olf.rs.PatronRequest
 import org.olf.rs.Z3950Service
 import org.olf.rs.lms.HostLMSActions
@@ -23,12 +23,13 @@ import org.springframework.beans.factory.annotation.Value
 import com.k_int.web.toolkit.testing.HttpSpec
 
 import grails.databinding.SimpleMapDataBindingSource
+import grails.events.bus.EventBus
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
-import services.k_int.core.FolioLockService;
 import spock.lang.*
+import spock.util.concurrent.PollingConditions;
 
 @Slf4j
 @Integration
@@ -99,14 +100,30 @@ class RSLifecycleSpec extends HttpSpec {
   HibernateDatastore hibernateDatastore
   DataSource dataSource
   EmailService emailService
-  FolioLockService folioLockService;
   HostLMSService hostLMSService
   StaticRouterService staticRouterService
   Z3950Service z3950Service
 
-  @Value('${local.server.port}')
-  Integer serverPort
+  // Default grails event bus is named targetEvenBus to avoid collision with reactor's event bus.
+  @Autowired
+  EventBus targetEventBus
 
+  @Value('${local.server.port}')
+  Integer serverPort;
+
+  /** Contains the tenants that have the ref data loaded */
+  static final List<String> refDataLoadedTenants = [];
+
+  // This method is declared in the HttpSpec
+  def setupSpecWithSpring() {
+
+      targetEventBus.subscribe(GrailsEventIdentifier.REFERENCE_DATA_LOADED) { final String tenant ->
+          log.debug("Ref data loaded for ${tenant.replace("_mod_rs", "")}");
+          refDataLoadedTenants.add(tenant.replace("_mod_rs", ""));
+      }
+
+      super.setupSpecWithSpring();
+  }
 
   def setupSpec() {
     httpClientConfig = {
@@ -135,8 +152,6 @@ class RSLifecycleSpec extends HttpSpec {
 
   def cleanup() {
   }
-
-
 
   // For the given tenant, block up to timeout ms until the given request is found in the given state
   private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
@@ -185,6 +200,7 @@ class RSLifecycleSpec extends HttpSpec {
       try {
         setHeaders(['X-Okapi-Tenant': tenantid, 'accept': 'application/json; charset=UTF-8'])
         def resp = doDelete("${baseUrl}_/tenant".toString(),null)
+        refDataLoadedTenants.remove(tenantid);
       }
       catch ( Exception e ) {
         // If there is no TestTenantG we'll get an exception here, it's fine
@@ -243,22 +259,25 @@ class RSLifecycleSpec extends HttpSpec {
       // doPost(url,jsondata,params,closure)
       def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
 
-      // Wait a second, to ensure that the lock is first obtained by the thread setting up the reference data
-      sleep(1000);
-
       // Lets record how long it took to get the lock
       long startTime = System.currentTimeMillis();
 
-      // Now if we can obtain the reference data lock, then we know the reference data has been setup, but we still timeout after 30 seconds
-      if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip(LockIdentifier.SETUP_REFERENCE_DATA, 30000) {
-          log.info("Obtained the reference data lock after " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, so it should be safe to assume the reference data has been setup");
-      }) {
-          // Failed to obtain the lock
-          log.info("Failed to obtain the reference data lock after 3o seconds, so it might still be setting up the reference data, may cause problems with setting up the directories");
+      // Wait for the refdata to be loaded.
+      PollingConditions conditions = new PollingConditions(timeout: 30)
+      conditions.eventually {
+        // The tenant id sent through the event handler comes through as lowercase
+        refDataLoadedTenants.contains(tenantid.toLowerCase());
       }
+
+      log.info("Ref data loaded event after " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, so it should be safe to assume the reference data has been setup");
       log.debug("Got response for new tenant: ${resp}");
+      log.debug("refDataLoadedTenants: " + refDataLoadedTenants.toString());
+
     then:"The response is correct"
-      resp != null;
+      assert(resp != null);
+
+      // The tenant id sent through the event handler comes through as lowercase
+      assert(refDataLoadedTenants.contains(tenantid.toLowerCase()));
 
     where:
       tenantid | name
@@ -266,7 +285,6 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
   }
-
 
   void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
     when:"Load the default directory (test url is ${baseUrl})"
