@@ -20,14 +20,12 @@ import com.k_int.okapi.OkapiTenantAdminService
 import grails.events.EventPublisher;
 import grails.events.annotation.Subscriber
 import grails.gorm.multitenancy.Tenants
-import services.k_int.core.FolioLockService;
 
 /**
  * This service works at the module level, it's often called without a tenant context.
  */
 public class HousekeepingService implements EventPublisher {
 
-  FolioLockService folioLockService;
   OkapiTenantAdminService okapiTenantAdminService;
 
   /**
@@ -49,16 +47,11 @@ public class HousekeepingService implements EventPublisher {
     log.info("HousekeepingService::setupData(${tenantName},${tenantId})");
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
-//        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip(LockIdentifier.SETUP_REFERENCE_DATA, 0) {
-            try {
-                setupReferenceData();
-            } catch (Exception e) {
-                log.error("Exception thrown while setting up the reference data", e);
-            }
-//        }) {
-//            // Failed to obtain the lock
-//            log.info("Skiping setting up reference data as unable to obtain lock");
-//        }
+        try {
+            setupReferenceData();
+        } catch (Exception e) {
+            log.error("Exception thrown while setting up the reference data", e);
+        }
     }
 
     // Send an event to say that we have completed loading the reference data
