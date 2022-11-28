@@ -1,0 +1,8 @@
+{
+    "action": "supplierAddCondition",
+    "actionParams": {
+        "holdingState": "yes",
+        "loanCondition": "watchlibraryuseonly",
+        "note": "Watch over what they do, can't have the dog eating it"
+    }
+}

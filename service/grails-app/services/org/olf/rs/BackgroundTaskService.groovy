@@ -10,7 +10,6 @@ import org.olf.rs.timers.AbstractTimer;
 
 import grails.util.Holders;
 import groovy.json.JsonSlurper;
-import services.k_int.core.FolioLockService;
 
 /**
  * This handles the background tasks, these are triggered by the folio 2 minute timer
@@ -20,14 +19,14 @@ public class BackgroundTaskService {
 
   def grailsApplication;
 
-  FolioLockService folioLockService;
+  LockService lockService;
   OkapiSettingsService okapiSettingsService;
   PatronNoticeService patronNoticeService;
 
   // Holds the services that we have discovered that perform tasks for the timers
   private static Map serviceTimers = [ : ];
 
-    def performReshareTasks() {
+    def performReshareTasks(String tenant) {
         log.debug("performReshareTasks() as at ${new Date()}");
 
         Runtime runtime = Runtime.getRuntime();
@@ -48,7 +47,7 @@ public class BackgroundTaskService {
 
         // We do not want to do any processing if we are already performing the background processing
         // We have a distributed lock for when there are multiple mod-rs processes running
-        if (!folioLockService.federatedLockAndDoWithTimeoutOrSkip('mod-rs:BackgroundTaskService:performReshareTasks', 0) {
+        if (!lockService.performWorkIfLockObtained(tenant, LockIdentifier.BACKGROUND_TASKS, 0) {
             doBackgroundTasks();
         }) {
             // Failed to obtain the lock
