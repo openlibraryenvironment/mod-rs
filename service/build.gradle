@@ -202,7 +202,7 @@ dependencies {
   }
 
   // NCIP deps
-  compile 'org.olf.rs:lib-ncip-client:0.20.1'
+  compile 'org.olf.rs:lib-ncip-client:0.20.2'
   compile 'com.github.jknack:handlebars:4.2.0'
   compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
   compile 'org.apache.commons:commons-collections4:4.4'
