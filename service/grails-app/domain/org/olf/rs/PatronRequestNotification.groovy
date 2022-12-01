@@ -1,12 +1,13 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants;
-import grails.gorm.MultiTenant
-import org.olf.okapi.modules.directory.Symbol;
 import java.time.Instant;
 
-class PatronRequestNotification implements MultiTenant<PatronRequest> {
-  
+import org.olf.okapi.modules.directory.Symbol;
+
+import grails.gorm.MultiTenant
+
+class PatronRequestNotification implements MultiTenant<PatronRequestNotification> {
+
   // Internal id of the message
   String id
 
@@ -49,11 +50,11 @@ class PatronRequestNotification implements MultiTenant<PatronRequest> {
     attachedAction( nullable: true)
     actionStatus( nullable: true)
     actionData( nullable: true)
-    timestamp (nullable: true, blank: false)
-    seen (nullable: true, blank: false)
-    isSender (nullable: true, blank: false)
-    messageSender (nullable: true, blank: false)
-    messageReceiver (nullable: true, blank: false)
+    timestamp (nullable: true)
+    seen (nullable: true)
+    isSender (nullable: true)
+    messageSender (nullable: true)
+    messageReceiver (nullable: true)
   }
 
   static mapping = {

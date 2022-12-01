@@ -318,7 +318,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     peerRequestIdentifier (nullable: true)
 
     pickLocation(nullable: true)
-    pickShelvingLocation(nullable: true, blank:false)
+    pickShelvingLocation(nullable: true)
     localCallNumber (nullable: true, blank:false)
     hrid (nullable: true, blank:false)
 
