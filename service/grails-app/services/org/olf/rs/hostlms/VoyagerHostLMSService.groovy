@@ -39,52 +39,29 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  /*
-    Instead of having using a localLocation and a shelvingLocation field, the Voyager result
-    simply stores both in the localLocation field and separates them with a dash. If there is
-    no dash-separated name, assume it is only the location and there is no shelving location
-    provided. In the event of not finding a shelving location in the localLocation field, we'll
-    check for a shelvingLocation field just in case it exists
-  */
   public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
 
     List<ItemLocation> availability_summary = [];
 
     opacRecord?.holdings?.holding?.each { hld ->
       log.debug("VoyagerHostLMSService holdings record :: ${hld}");
-      def location = hld.localLocation?.text()?.trim();
-      def shelvingLocation = hld.shelvingLocation?.text()?.trim() ?: null;
-      def locParts = splitLocation(location);
-      log.debug("splitLocation returned ${locParts}");
-      if (locParts) {
-        location = locParts[0];
-        shelvingLocation = locParts[1];
-      }
-
       hld.circulations?.circulation?.each { circ ->
-        if (location && circ?.availableNow?.@value == '1') {
+        def loc = hld?.localLocation?.text()?.trim();
+        if (loc && circ?.availableNow?.@value == '1') {
           log.debug("Available now");
           ItemLocation il = new ItemLocation(
-            reason: reason,
-            location: location,
-            shelvingLocation: shelvingLocation,
-            itemId: circ?.itemId?.text()?.trim() ?: null,
-            callNumber: hld?.callNumber?.text()?.trim() ?: null)
+                  reason: reason,
+                  location: loc,
+                  shelvingLocation: hld?.shelvingLocation?.text()?.trim() ?: null,
+                  itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
+                  itemId: circ?.itemId?.text()?.trim() ?: null,
+                  callNumber: hld?.callNumber?.text()?.trim() ?: null)
           availability_summary << il;
         }
       }
     }
 
     return availability_summary;
-  }
-
-  public static List<String> splitLocation(String loc) {
-    def pattern = /(.+)\s+-\s+(.+)/;
-    def matcher = loc =~ pattern;
-    if(matcher.find()) {
-      return [ matcher.group(1), matcher.group(2)];
-    }
-    return null;
   }
 
   public Map acceptItem(String item_id,
