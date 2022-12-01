@@ -683,7 +683,7 @@ class RSLifecycleSpec extends HttpSpec {
             peerTenant = requesterTenantId;
         }
 
-        String jsonAction = new File("src/test/integration/resources/scenarios/${actionFile}").text;
+        String jsonAction = new File("src/integration-test/resources/scenarios/${actionFile}").text;
         log.debug("Action json: ${jsonAction}");
         setHeaders([
             'X-Okapi-Tenant': actionTenant,
