@@ -9,7 +9,7 @@ import org.olf.rs.ReshareApplicationEventHandlerService;
  */
 public class ActionService {
 
-    private static final String POSSIBLE_ACTIONS_QUERY='select distinct aa.actionCode from AvailableAction as aa where aa.fromState = :fromstate and aa.triggerType = :triggerType'
+    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionCode from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType = :triggerType';
 
     private static final Integer ZERO = Integer.valueOf(0);
 
@@ -19,25 +19,17 @@ public class ActionService {
     /**
      * Checks whether an action being performed is valid
      */
-    boolean isValid(boolean isRequester, Status status, String action) {
+    boolean isValid(PatronRequest request, String action) {
         // We default to not being valid
         boolean isValid = false;
 
         // Can only continue if we have been supplied the values
-        if (action && status) {
-            // If it is the undo action we need to perform a slightly different test
-            if (Actions.ACTION_UNDO.equals(action)) {
-                // We do not have the request at this stage, so we assume it is valid
-                isValid = true;
-            } else {
-                // Get hold of the state model
-                StateModel stateModel = statusService.getStateModel(isRequester);
-                if (stateModel) {
-                    // It is a valid state model
-                    // Now is this a valid action for this state
-                    isValid = (AvailableAction.countByModelAndFromStateAndActionCode(stateModel, status, action) == 1);
-                }
-            }
+        if (action && request?.state) {
+            // Get hold of the valid actions
+            List validActions = getValidActions(request);
+
+            // Only if the passed in action is in the list of valid actions, is the action being performed valid
+            isValid = validActions.contains(action);
         }
         return(isValid);
     }
@@ -193,16 +185,48 @@ public class ActionService {
 
         // We only have valid actions if network activity is idle
         if (request.isNetworkActivityIdle()) {
-            actions = AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[fromstate: request.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]);
+            // Obtain the valid list of actions
+            actions = lookupAvailableActions(statusService.getStateModel(request), request.state);
+
+            // Remove any duplicates as they might have come from multiple state models
+            actions.unique();
+
+            // Is the undo action action valid
             if (isUndoValid(request)) {
                 // Add the undo action to the list of valid actions
                 actions.add(Actions.ACTION_UNDO);
             }
         } else {
+            // Just return an empty list
             actions = [];
         }
 
         // Return the valid list of actions
+        return(actions);
+    }
+
+    /**
+     * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
+     * @param stateModel The state model that we are looking for the valid actions from
+     * @param fromStatus The status the action has to be valid for
+     * @return The list of actions that is valid for the state model and status combination
+     */
+    private List lookupAvailableActions(StateModel stateModel, Status fromStatus) {
+        List actions;
+
+        // Nice and simple lookup the available actions getting the distinct actions
+        actions = AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[stateModel: stateModel, fromstate: fromStatus, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL])
+
+        // We need to take into account any transitions we may be inheriting
+        if (stateModel.inheritedStateModels) {
+            // We do so go through each of the state models to see if we can find the available action
+            stateModel.inheritedStateModels.each { inheritedStateModel ->
+                // this is where we get recursive ...
+                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, fromStatus);
+            }
+        }
+
+        // Return the result to the caller
         return(actions);
     }
 }

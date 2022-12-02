@@ -67,12 +67,17 @@ where s in (select sms.state
     Status overdueStatus;
 
     static hasMany = [
-        // The states that are applicable for this model and their specific settings
+        /** The states that are applicable for this model and their specific settings */
         states : StateModelStatus,
 
-        // The available actions that are applicable to this state model
+        /** The state models it inherits transitions from */
+        inheritedStateModels : StateModelInheritsFrom,
+
+        /** The available actions that are applicable to this state model */
         availableActions : AvailableAction
     ];
+
+    static mappedBy = [ inheritedStateModels : 'stateModel' ];
 
     static constraints = {
             shortcode (nullable: false, blank: false)
@@ -83,15 +88,16 @@ where s in (select sms.state
     }
 
     static mapping = {
-                      id column: 'sm_id', generator: 'uuid2', length:36
-                 version column: 'sm_version'
-               shortcode column: 'sm_shortcode'
-                    name column: 'sm_name'
-            initialState column: 'sm_initial_state'
-             staleAction column: 'sm_stale_action'
-           overdueStatus column: 'sm_overdue_status'
-                  states cascade: 'all-delete-orphan'
-        availableActions cascade: 'all-delete-orphan'
+                          id column: 'sm_id', generator: 'uuid2', length:36
+                     version column: 'sm_version'
+                   shortcode column: 'sm_shortcode'
+                        name column: 'sm_name'
+                initialState column: 'sm_initial_state'
+                 staleAction column: 'sm_stale_action'
+               overdueStatus column: 'sm_overdue_status'
+                      states cascade: 'all-delete-orphan'
+        inheritedStateModels cascade: 'all-delete-orphan', sort: 'priority' // Guarantees the set is sorted by priority
+            availableActions cascade: 'all-delete-orphan'
     }
 
     static public StateModel ensure(
@@ -100,7 +106,8 @@ where s in (select sms.state
         String initialStateCode = null,
         String staleActionCode = null,
         String overdueStatusCode = null,
-        List states = null
+        List states = null,
+        List inheritedStateModels = null
     ) {
         // Does this state model already exist
         StateModel stateModel = lookup(code);
@@ -110,16 +117,67 @@ where s in (select sms.state
         }
 
         // Now update all the fields in case they have changed
+        stateModel.name = name;
         stateModel.initialState = Status.lookup(initialStateCode);
         stateModel.staleAction = ActionEvent.lookup(staleActionCode);
         stateModel.overdueStatus = Status.lookup(overdueStatusCode);
         stateModel.ensureStates(states);
+        stateModel.ensureInheritedStateModels(inheritedStateModels);
 
         // Save the state model, if any changes have been made
         stateModel.save(flush: true, failOnError: true);
 
         // Return the state model to the caller
         return(stateModel);
+    }
+
+    private void ensureInheritedStateModels(List suppliedInheritedStateModels) {
+        // We create ourselves a working list as we want to modify as we process it
+        List working = ((suppliedInheritedStateModels == null) ? [ ] : suppliedInheritedStateModels.collect());
+
+        // Go through removing the items that no longer need to be there
+        if ((inheritedStateModels != null) && (inheritedStateModels.size() > 0)) {
+            // Process all the current records
+            inheritedStateModels.collect().each { inheritedStateModel ->
+                // now look to see if it is in the working list
+                Map foundInheritedStateModel = working.find { workingInheritFrom -> workingInheritFrom.stateModel.equals(inheritedStateModel.inheritedStateModel.shortcode) };
+                if (foundInheritedStateModel == null) {
+                    // no longer required so remove from the database
+                    // Failed miserably to get removeFrom to work so just deleting the record directly, need to remove it from the set first
+                    inheritedStateModels.remove(inheritedStateModel);
+                    inheritedStateModel.delete();
+                    //removeFromInheritedStateModels(inheritedStateModel);
+                } else {
+                    // Remove it from the working inheritsFrom as it is already in the database
+                    int indexToRemove = working.findIndexOf{ workingInheritFrom -> foundInheritedStateModel.stateModel.equals(workingInheritFrom.stateModel) };
+                    working.remove(indexToRemove);
+
+                    // Just update the additional fields, but we need to do it to the already saved record
+                    inheritedStateModels.find { realInheritFrom ->
+                        if (realInheritFrom.inheritedStateModel.shortcode.equals(inheritedStateModel.inheritedStateModel.shortcode)) {
+                            realInheritFrom.priority = foundInheritedStateModel.priority;
+                            return(true);
+                        }
+                        return(false);
+                    };
+                }
+            }
+        }
+
+        // if There is anything left in working then they need adding to the database
+        working.each{ workingInheritFrom ->
+            // Create a new StateModelState record
+            StateModelInheritsFrom stateModelInheritsFrom = new StateModelInheritsFrom();
+            stateModelInheritsFrom.stateModel = this;
+            stateModelInheritsFrom.inheritedStateModel = lookup(workingInheritFrom.stateModel);
+            if (stateModelInheritsFrom.inheritedStateModel != null) {
+                // We have a state model, now set the additional fields
+                stateModelInheritsFrom.priority = workingInheritFrom.priority;
+
+                // Now add the state as its not already there
+                addToInheritedStateModels(stateModelInheritsFrom);
+            }
+        }
     }
 
     private void ensureStates(List suppliedStates) {
@@ -134,7 +192,10 @@ where s in (select sms.state
                 Map foundState = workingStates.find { workingState -> workingState.status.equals(state.state.code) };
                 if (foundState == null) {
                     // no longer required so remove from the database
-                    removeFromStates(state);
+                    // Failed miserably to get removeFrom to work so just deleting the record directly, need to remove it from the set first
+                    states.remove(state);
+                    state.delete();
+                    //removeFromStates(state);
                 } else {
                     // Remove it from the working states as it is already in the database
                     int indexToRemove = workingStates.findIndexOf{ workingState -> foundState.status.equals(workingState.status) };

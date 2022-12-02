@@ -83,7 +83,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                         // 1. Is a valid action for the current status of the request
                         // 2. Request has no network activity going on
 						if (patron_request.isNetworkActivityIdle() &&
-                            actionService.isValid(patron_request.isRequester, patron_request.state, request.JSON.action)) {
+                            actionService.isValid(patron_request, request.JSON.action)) {
 							// Perform the requested action
 							ActionResultDetails resultDetails = actionService.performAction(request.JSON.action, patron_request, request.JSON.actionParams)
 							response.status = (resultDetails.result == ActionResult.SUCCESS ? 200 : (resultDetails.result == ActionResult.INVALID_PARAMETERS ? 400 : 500));

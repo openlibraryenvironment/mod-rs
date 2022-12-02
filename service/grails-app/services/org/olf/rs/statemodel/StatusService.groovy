@@ -215,7 +215,7 @@ public class StatusService {
      * @param availableActionMustExist If trye it means an AvailableAction record must exist
      * @return An ActionEventResult that informs us what to do on completion of the ActionEvent
      */
-    public ActionEventResult findResult(StateModel model, Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
+    private ActionEventResult findResult(StateModel model, Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
         // We return null if we could not find a status
         ActionEventResult actionEventResult = null;
 
@@ -227,7 +227,7 @@ public class StatusService {
                 boolean carryOn = true;
                 if (availableActionMustExist) {
                     // Get hold of the AvailableAction
-                    AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, model);
+                    AvailableAction availableAction = lookupAvailableAction(model, fromStatus, actionEvent);
                     if (availableAction != null) {
                         // Now do we have a resultList on the availableAction
                         if (availableAction.resultList != null) {
@@ -272,6 +272,38 @@ public class StatusService {
     }
 
     /**
+     * Looks to see if the available action exists for the state model, looking at inherited state models as well if any
+     * @param stateModel The state model we want to lookup
+     * @param fromStatus The status that we are coming from
+     * @param actionEvent The action / event being performed
+     * @return The available action record if one was found, if not null
+     */
+    private AvailableAction lookupAvailableAction(StateModel stateModel, Status fromStatus, ActionEvent actionEvent) {
+        // Nice and simple lookup the available action
+        AvailableAction availableAction = AvailableAction.findByFromStateAndActionEventAndModel(fromStatus, actionEvent, stateModel);
+
+        // Did we find the transition
+        if (availableAction == null) {
+            // We did not, so look to see if we are inheriting it
+            if (stateModel.inheritedStateModels) {
+                // We do so go through each of the state models to see if we can find the available action
+                // The set should already have been sorted by priority
+                stateModel.inheritedStateModels.find { inheritedStateModel ->
+
+                    // this is where we get recursive ...
+                    availableAction = lookupAvailableAction(inheritedStateModel.inheritedStateModel, fromStatus, actionEvent);
+
+                    // return true if we managed to find an available action
+                    return(availableAction != null);
+                }
+            }
+        }
+
+        // Return the result to the caller
+        return(availableAction);
+    }
+
+    /**
      * Looks up the database to see what the new status should be for the request
      * @param request The request that we want to set the status for
      * @param action The action that has been performed
@@ -285,8 +317,7 @@ public class StatusService {
         Status newStatus = request.state;
 
         // Now lets see if we can find the ActionEventResult record
-        StateModel stateModel = (request.stateModel == null) ? getStateModel(request.isRequester) : request.stateModel;
-        ActionEventResult actionEventResult = findResult(stateModel, request.state, action, successful, qualifier, availableActionMustExist);
+        ActionEventResult actionEventResult = findResult(getStateModel(request), request.state, action, successful, qualifier, availableActionMustExist);
 
         // Did we find a result
         if (actionEventResult != null) {
@@ -396,6 +427,15 @@ public class StatusService {
 
         // Return the result to the caller
         return(result);
+    }
+
+    /**
+     * Determines the state model for a patron request
+     * @param request The request we want the syaye model for
+     * @return The state model that is applicable for that request
+     */
+    public StateModel getStateModel(PatronRequest request) {
+        return((request.stateModel == null) ? getStateModel(request.isRequester) : request.stateModel);
     }
 
     /**

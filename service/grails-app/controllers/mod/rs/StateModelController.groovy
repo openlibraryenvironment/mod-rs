@@ -110,12 +110,12 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
             value = "The JSON that contains the state model(s) that needs importing",
             dataType = "string",
             defaultValue = '''{
-    stati = [],
-    actionEventResults = [],
-    actionEventResultLists = [],
-    actions = [],
-    events = [],
-    stateModels = []
+    stati: [],
+    actionEventResults: [],
+    actionEventResultLists: [],
+    actions: [],
+    events: [],
+    stateModels: []
 }''')
     ])
     def ingest() {

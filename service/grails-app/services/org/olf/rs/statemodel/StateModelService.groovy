@@ -28,6 +28,20 @@ public class StateModelService {
         result.staleAction = stateModel.staleAction?.code;
         result.overdueStatus = stateModel.overdueStatus?.code;
 
+        // Have we inherited any state models
+        if (stateModel.inheritedStateModels) {
+            List inheritedStateModels = [ ];
+            result.inheritedStateModels = inheritedStateModels;
+
+            // We do so export the code and priority for each one that is inherited
+            stateModel.inheritedStateModels.each { inheritedStateModel ->
+                Map inheritedStateModelMap = [ : ];
+                inheritedStateModels.add(inheritedStateModelMap);
+                inheritedStateModelMap.code = inheritedStateModel.inheritedStateModel.shortcode;
+                inheritedStateModelMap.priority = inheritedStateModel.priority;
+            }
+        }
+
         // Now lets run through all the states
         List states = [];
         result.stati = states;
@@ -415,6 +429,17 @@ public class StateModelService {
         Closure createUpdate = { jsonStateModel, stateModelMessages ->
             boolean result = false;
             List states = [ ];
+            List inheritedStateModels = [ ];
+
+            // Check for any inherited state models
+            if (jsonStateModel.inheritedStateModels) {
+                jsonStateModel.inheritedStateModels.each { jsonInheritedStateModel ->
+                    Map inheritedStateModel = [ : ];
+                    inheritedStateModels.add(inheritedStateModel);
+                    inheritedStateModel.stateModel = jsonInheritedStateModel.code;
+                    inheritedStateModel.priority = jsonInheritedStateModel.priority;
+                }
+            }
 
             // Have any states been specified for this model
             if (jsonStateModel.stati) {
@@ -429,7 +454,7 @@ public class StateModelService {
                     stateModelStatus.triggerPullSlipEmail = jsonStatus.triggerPullSlipEmail;
                 }
             } else {
-                messages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
+                stateModelMessages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
             }
 
             // Now create / update this state model
@@ -439,7 +464,8 @@ public class StateModelService {
                 jsonStateModel.initialState,
                 jsonStateModel.staleAction,
                 jsonStateModel.overdueStatus,
-                states);
+                states,
+                inheritedStateModels);
 
             if (stateModel != null) {
                 // Successfully created
@@ -472,7 +498,65 @@ public class StateModelService {
             return(result);
         };
 
+        // The messages that have been generated during the import process
+        List messages = [ ];
+
+        // As we can inherit state tables we need to ensure any ones we are inheriting are already in the database before we attempt to import the state table
+        JSONArray pendingStateModels;
+        JSONArray stateModelsToImport;
+        JSONArray stateModelsToCheck = stateModels;
+        int lastStateModelsToCheckSize = -1;
+
+        // Keep loop until we have no more state models to load or we are referenceing a state model that is not going to get loaded
+        while (stateModelsToCheck && (lastStateModelsToCheckSize != stateModelsToCheck.size())) {
+            // Process all the state models putting them in the appropriate list
+            pendingStateModels = new JSONArray();
+            stateModelsToImport = new JSONArray();
+            stateModelsToCheck.each { stateModel ->
+                // Are we inheriting any state models
+                if (stateModel.inheritedStateModels) {
+                    // Check that all the state model we are referencing already exists
+                    if (stateModel.inheritedStateModels.find { inheritedStateModel ->
+                        // We return true if the state model is not in the database
+                        return(StateModel.lookup(inheritedStateModel.code) == null)
+                    } == null) {
+                        // Needs to go back in the to import list as all inherited state models exist
+                        stateModelsToImport.add(stateModel);
+                    } else {
+                        // Needs to go back in the pending list as an inherited state model does not exist
+                        pendingStateModels.add(stateModel);
+                    }
+                } else {
+                    // Can go straight into the import list as there are no inherited state models
+                    stateModelsToImport.add(stateModel);
+                }
+            }
+
+            // All state models have been checked
+            lastStateModelsToCheckSize = stateModelsToCheck.size();
+            stateModelsToCheck = pendingStateModels;
+
+            // Process the ones that we can
+            messages += importDomain(stateModelsToImport, "state model", createUpdate);
+        }
+
+        // if We still have some state models to import then we have some inherited state models that do not exist
+        stateModelsToCheck.each { stateModel ->
+            // Must be inheriting state models for them to be still in the check list
+            if (stateModel.inheritedStateModels) {
+                // Add a message for each inherited state model that does not exist
+                stateModel.inheritedStateModels.each { inheritedStateModel ->
+                    if (StateModel.lookup(inheritedStateModel.code) == null) {
+                        messages.add("State model " + stateModel.code + " has not been loaded as it is inheriting from state model " + inheritedStateModel.code + " which does not exist");
+                    }
+                }
+            } else {
+                // This should not happen, but for some reason it has happens
+                messages.add("State model " + stateModel.code + " has not imported");
+            }
+        }
+
         // Call the generic import routine to do the work and return the messages
-        return(importDomain(stateModels, "state model", createUpdate));
+        return(messages);
     }
 }
