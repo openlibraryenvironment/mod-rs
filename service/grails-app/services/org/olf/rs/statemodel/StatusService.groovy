@@ -20,7 +20,7 @@ public class StatusService {
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     SettingsService settingsService;
 
-    /** The vslue of the ref data value record for if we need to save the status*/
+    /** The value of the ref data value record for if we need to save the status*/
     private String saveValue = null;
 
     /** The value of the ref data value record for if we need to restore the status */
@@ -30,71 +30,136 @@ public class StatusService {
      * Returns a list of transitions for the given model and action
      * @param model The model that we want the tansitions for
      * @param action The action that we want the transitions for
+     * @param traverseHierarchy Do we traverse the inheritance hierarchy or not
      * @return All the transitions for this model and action combination
      */
-    public List<Transition> possibleActionTransitionsForModel(StateModel model, ActionEvent action) {
-        List<Transition> transitions = new ArrayList<Transition>();
+    public List<Transition> possibleActionTransitionsForModel(StateModel model, ActionEvent action, boolean traverseHierarchy = true) {
+        List<Transition> transitions = [ ];
 
         // If we had a valid action and model that is a good start
         if ((action != null) && (model != null)) {
-            // Loop through all the available actions for the supplied model and action
-            AvailableAction.findAllByActionEventAndModel(action, model).each { availableAction ->
-                // Lets find the result list we are dealing with
-                ActionEventResultList resultList = availableAction.resultList;
+            // Get hold of the transitions for this model
+            transitionsForModel(transitions, model, action, traverseHierarchy);
+        }
 
-                // If we do not have a resultList fall back to the one on the action event record
-                if (resultList == null) {
-                    resultList = action.resultList;
-                }
+        // Return the transitions to the caller
+        return(transitions);
+    }
 
-                // If we still do not have one or there are no results, just add a transition record that stays at the same state
-                if ((resultList == null) || !resultList.results) {
-                    transitions.add(new Transition (
-                        fromStatus : availableAction.fromState,
-                        actionEvent : action,
-                        qualifier : null,
-                        toStatus : availableAction.fromState
-                    ));
-                } else {
-                    // // We have a result list, so we need to process them all
-                    resultList.results.each { result ->
-                        // Is this result valid for this from status
-                        if ((result.fromStatus == null) || result.fromStatus.id.equals(availableAction.fromState.id)) {
-                            // if we are restoring we need to be a lot cleverer
-                            if (isRestoreRequired(result.saveRestoreState)) {
-                                // ensure the saveValue is populated
-                                if (saveValue == null) {
-                                    // Appears not t be doing anything, but is actually populating saveValue, will always return false
-                                    isSaveRequired(result.saveRestoreState);
-                                }
+    /**
+     * Adds the list of transitions available to this model to the supplied transition list if it dosn't already exist
+     * @param transitions The list of transitions that needs to be added
+     * @param model The model that we want the tansitions for
+     * @param action The action that we want the transitions for
+     * @param traverseHierarchy Do we traverse the inheritance hierarchy or not
+     */
+    private void transitionsForModel(List<Transition> transitions, StateModel model, ActionEvent action, boolean traverseHierarchy) {
 
-                                // Find all the states that we can potentially return to
-                                findAllStatesThatSaveOnStatus(result.status).forEach() { status ->
-                                    // Create a transition for them
-                                    transitions.add(new Transition (
-                                        fromStatus : result.status,
-                                        actionEvent : action,
-                                        qualifier : ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved" ,
-                                        toStatus : ((result.overrideSaveStatus == null) ? status : result.overrideSaveStatus)
-                                    ));
-                                }
-                            } else {
-                                // We have a valid transition
-                                transitions.add(new Transition (
-                                    fromStatus : availableAction.fromState,
-                                    actionEvent : action,
-                                    qualifier : result.qualifier,
-                                    toStatus : ((result.status == null) ? availableAction.fromState : result.status)
-                                ));
+        // Loop through all the available actions for the supplied model and action
+        AvailableAction.findAllByActionEventAndModel(action, model).each { availableAction ->
+            // Lets find the result list we are dealing with
+            ActionEventResultList resultList = availableAction.resultList;
+
+            // If we do not have a resultList fall back to the one on the action event record
+            if (resultList == null) {
+                resultList = action.resultList;
+            }
+
+            // If we still do not have one or there are no results, just add a transition record that stays at the same state
+            if ((resultList == null) || !resultList.results) {
+                addTransitionIfNotExist(
+                    transitions,
+                    availableAction.fromState,
+                    action,
+                    null,
+                    availableAction.fromState
+                );
+            } else {
+                // // We have a result list, so we need to process them all
+                resultList.results.each { result ->
+                    // Is this result valid for this from status
+                    if ((result.fromStatus == null) || result.fromStatus.id.equals(availableAction.fromState.id)) {
+                        // if we are restoring we need to be a lot cleverer
+                        if (isRestoreRequired(result.saveRestoreState)) {
+                            // ensure the saveValue is populated
+                            if (saveValue == null) {
+                                // Appears not t be doing anything, but is actually populating saveValue, will always return false
+                                isSaveRequired(result.saveRestoreState);
                             }
+
+                            // Find all the states that we can potentially return to
+                            findAllStatesThatSaveOnStatus(result.status).forEach() { status ->
+                                // Create a transition for them
+                                addTransitionIfNotExist(
+                                    transitions,
+                                    result.status,
+                                    action,
+                                    ((result.qualifier == null) ? "" : (result.qualifier  + "-")) + "saved",
+                                    ((result.overrideSaveStatus == null) ? status : result.overrideSaveStatus)
+                                );
+                            }
+                        } else {
+                            // We have a valid transition
+                            addTransitionIfNotExist(
+                                transitions,
+                                availableAction.fromState,
+                                action,
+                                result.qualifier,
+                                ((result.status == null) ? availableAction.fromState : result.status)
+                            );
                         }
                     }
                 }
             }
         }
 
-        // We can now return the transitions
-        return(transitions);
+        // Now do we want to traverse the hierarchy
+        if (traverseHierarchy && model.inheritedStateModels) {
+            // These should already be sorted by priority
+            model.inheritedStateModels.each { inheritedStateModel ->
+                // This is where we ger recursive
+                transitionsForModel(transitions, inheritedStateModel.inheritedStateModel, action, traverseHierarchy);
+            }
+        }
+    }
+
+    /**
+     * Adds a transition to the transitions list if it does not already exist
+     * @param transitions The transitions list that the transition will added to
+     * @param fromStatus The status that we will be moving from
+     * @param actionEvent The action / event that is occurring
+     * @param qualifier The qualifier returned by the processing of the action / event (may be null)
+     * @param toStatus The status that the combination of fromStatus / actionEvent and qualifier it will transition to
+     */
+    private void addTransitionIfNotExist(
+        List<Transition> transitions,
+        Status fromStatus,
+        ActionEvent actionEvent,
+        String qualifier,
+        Status toStatus)
+    {
+        // Must have fromStatus, actionEvent and toStatus, otherwise we do not add it
+        if (fromStatus && actionEvent && toStatus) {
+            // only add it, if it dosn't already exist
+            if (transitions.find { transition ->
+                // For the qualifier we have to take into account null values
+                boolean qualifierMatches =
+                    (qualifier == null ? (transition.qualifier == null ? true : false) :
+                        (transition.qualifier == null ? false : qualifier.equals(transition.qualifier)));
+                return(qualifierMatches &&
+                       fromStatus.id.equals(transition.fromStatus.id) &&
+                       actionEvent.id.equals(transition.actionEvent.id) &&
+                       toStatus.id.equals(transition.toStatus.id));
+            } == null) {
+                // dosn't already exist. so add it
+                transitions.add(new Transition (
+                    fromStatus : fromStatus,
+                    actionEvent : actionEvent,
+                    qualifier : qualifier,
+                    toStatus : toStatus
+                ));
+            }
+        }
     }
 
     /**

@@ -99,9 +99,21 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));
 	}
 
-    public static ActionEvent[] getUniqueActionsForModel(StateModel model, List<String> excludeActions, Boolean includeProtocolActions) {
+    public static List<ActionEvent> getUniqueActionsForModel(StateModel model, List<String> excludeActions, Boolean includeProtocolActions, boolean traverseHierarchy) {
         String notIncludeActionType = includeProtocolActions ? "dummy" : TRIGGER_TYPE_PROTOCOL;
-        return(executeQuery(POSSIBLE_ACTIONS_FOR_MODEL_QUERY, [model: model, excludeActions: excludeActions, excludeActionType: notIncludeActionType]));
+        List<ActionEvent> actionEvents = executeQuery(POSSIBLE_ACTIONS_FOR_MODEL_QUERY, [model: model, excludeActions: excludeActions, excludeActionType: notIncludeActionType]);
+
+        // Now do we need to go up the hierarchy
+        if (traverseHierarchy && model.inheritedStateModels) {
+            // We need to go up the hierarchy
+            model.inheritedStateModels.each { inheritedStateModel ->
+                actionEvents += getUniqueActionsForModel(inheritedStateModel.inheritedStateModel, excludeActions, includeProtocolActions, traverseHierarchy);
+            }
+
+            // Remove any duplicates
+            actionEvents.unique(true, { actionEvent1, actionEvent2 -> actionEvent1.id <=> actionEvent2.id });
+        }
+        return(actionEvents);
     }
 
     public String toString() {

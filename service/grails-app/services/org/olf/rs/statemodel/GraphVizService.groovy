@@ -43,18 +43,25 @@ public class GraphVizService {
      * @param outputStream The stream we need to write the diagram to
      * @param height The height of the image that is generated, not quite sure what the units are though (default is 0)
      */
-    void generateGraph(String stateModelCode, Boolean includeProtocolActions, List<String> excludeActions, OutputStream outputStream, int height = 0) {
+    void generateGraph(
+        String stateModelCode,
+        Boolean includeProtocolActions,
+        List<String> excludeActions,
+        OutputStream outputStream,
+        int height = 0,
+        boolean traverseHierarchy = true)
+    {
         try {
             // Find the list of tecompletedtates
             StateModel model = StateModel.lookup(stateModelCode);
             List<String> completedStates = getCompletedStates(model);
-            ActionEvent[] actions = AvailableAction.getUniqueActionsForModel(model, excludeActions, includeProtocolActions);
+            List<ActionEvent> actions = AvailableAction.getUniqueActionsForModel(model, excludeActions, includeProtocolActions, traverseHierarchy);
 
             // Now build up the list of the links
             // First the actions
             List<LinkTarget> links = [];
             actions.each { action ->
-                Transition[] transitions = statusService.possibleActionTransitionsForModel(model, action);
+                Transition[] transitions = statusService.possibleActionTransitionsForModel(model, action, traverseHierarchy);
                 BuildLinks(links, transitions, Color.PURPLE, Color.BLACK, completedStates);
             };
 
