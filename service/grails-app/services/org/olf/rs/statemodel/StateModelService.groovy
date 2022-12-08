@@ -77,6 +77,7 @@ public class StateModelService {
                         availableActionResult.actionType = availableAction.actionType;
                         availableActionResult.actionBody = availableAction.actionBody;
                         availableActionResult.resultList = availableAction.resultList?.code;
+                        availableActionResult.isAvailableGroovy = availableAction.isAvailableGroovy;
                     }
                 }
             }
@@ -107,6 +108,7 @@ public class StateModelService {
                 actionEventResult.resultList = actionEvent.resultList?.code;
                 actionEventResult.serviceClass = actionEvent.serviceClass;
                 actionEventResult.responderServiceClass = actionEvent.responderServiceClass;
+                actionEventResult.isAvailableGroovy = actionEvent.isAvailableGroovy;
             }
         }
 
@@ -480,7 +482,8 @@ public class StateModelService {
                                 jsonStatus.state,
                                 jsonAvailableAction.actionEvent,
                                 jsonAvailableAction.triggerType,
-                                jsonAvailableAction.resultList) != null);
+                                jsonAvailableAction.resultList,
+                                jsonAvailableAction.isAvailableGroovy) != null);
                         };
 
                         // Call the generic import routine to do the work

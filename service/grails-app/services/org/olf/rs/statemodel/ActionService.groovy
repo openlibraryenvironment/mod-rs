@@ -3,16 +3,18 @@ package org.olf.rs.statemodel;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.dynamic.DynamicGroovyService
 
 /**
  * Checks the incoming action to ensure it is valid and dispatches it to the appropriate service
  */
 public class ActionService {
 
-    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionCode from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType = :triggerType';
+    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType = :triggerType';
 
     private static final Integer ZERO = Integer.valueOf(0);
 
+    DynamicGroovyService dynamicGroovyService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     StatusService statusService;
 
@@ -186,7 +188,7 @@ public class ActionService {
         // We only have valid actions if network activity is idle
         if (request.isNetworkActivityIdle()) {
             // Obtain the valid list of actions
-            actions = lookupAvailableActions(statusService.getStateModel(request), request.state);
+            actions = lookupAvailableActions(statusService.getStateModel(request), request);
 
             // Remove any duplicates as they might have come from multiple state models
             actions.unique();
@@ -208,21 +210,44 @@ public class ActionService {
     /**
      * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
      * @param stateModel The state model that we are looking for the valid actions from
-     * @param fromStatus The status the action has to be valid for
+     * @param request The patron requestwe are making the decision for
      * @return The list of actions that is valid for the state model and status combination
      */
-    private List lookupAvailableActions(StateModel stateModel, Status fromStatus) {
-        List actions;
+    private List lookupAvailableActions(StateModel stateModel, PatronRequest request) {
+        List actions = [ ];
 
-        // Nice and simple lookup the available actions getting the distinct actions
-        actions = AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[stateModel: stateModel, fromstate: fromStatus, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL])
+        // Was nice and simple lookup the available actions getting the distinct actions
+        AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[stateModel: stateModel, fromstate: request.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]).each { availableAction ->
+            // To try and make it more obvious as to what is selected, we extract them into variables here
+            String code = availableAction[0];
+            String actionGroovy = availableAction[1];
+            String availableActionGroovy = availableAction[2];
+
+            // Do we have some groovy to execute on the available action
+            if (availableActionGroovy) {
+                // We do for the available action, if it returns true then we add it to the available actions list
+                if (dynamicGroovyService.executeScript("availableAction:isAvailable:" + code, availableActionGroovy, [ patronRequest : request ])) {
+                    // Script says yes
+                    actions.add(code);
+                }
+            } else if (actionGroovy) {
+                // We do for the action, if it returns true then we add it to the available actions list
+                if (dynamicGroovyService.executeScript("actionEvent:isAvailable:" + code, actionGroovy, [ patronRequest : request ])) {
+                    // Script says yes
+                    actions.add(code);
+                }
+            } else {
+                // We do not have any groovy so just add the action
+                actions.add(code);
+            }
+        }
 
         // We need to take into account any transitions we may be inheriting
         if (stateModel.inheritedStateModels) {
             // We do so go through each of the state models to see if we can find the available action
             stateModel.inheritedStateModels.each { inheritedStateModel ->
                 // this is where we get recursive ...
-                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, fromStatus);
+                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, request);
             }
         }
 
