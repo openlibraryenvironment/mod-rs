@@ -1,5 +1,6 @@
 # To run integration tests
 	# Ensure you do not have mod-directory running as that will conflict with ports being used
+	# If you have modified gradle.properties to set the grails environment, don't forget to remove that
 	cd tools\testing
 	docker-compose up
 		# In a separate window

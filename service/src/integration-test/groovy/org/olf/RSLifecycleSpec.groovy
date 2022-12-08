@@ -14,6 +14,7 @@ import org.olf.rs.HostLMSService
 import org.olf.rs.HostLMSShelvingLocation
 import org.olf.rs.PatronRequest
 import org.olf.rs.Z3950Service
+import org.olf.rs.dynamic.DynamicGroovyService;
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
@@ -95,6 +96,7 @@ class RSLifecycleSpec extends HttpSpec {
   ]
 
   def grailsApplication
+  DynamicGroovyService dynamicGroovyService;
   EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
   HibernateDatastore hibernateDatastore
@@ -776,4 +778,46 @@ class RSLifecycleSpec extends HttpSpec {
             "RSInstOne"       | "RSInstThree"     | 4        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
             "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | null               | null                  | null
     }
+
+    void "test Dynamic Groovy"() {
+        when: "Initialise the groovy source"
+            String scriptSource =
+'''
+    parameter1.equals("Test");
+''';
+            String scriptAsClassSource =
+'''
+    arguments.parameter1.equals("Test");
+''';
+            Map ScriptArguments = ["parameter1": "Test"];
+            Object scriptResult = dynamicGroovyService.executeScript(scriptSource, ScriptArguments);
+            Object scriptResultAsClass = dynamicGroovyService.executeScript("scriptCacheKey", scriptAsClassSource, ScriptArguments);
+            Object scriptResultAsClassCache = dynamicGroovyService.executeScript("scriptCacheKey", scriptAsClassSource, ScriptArguments);
+
+            String classSource = '''
+class DosomethingSimple {
+    public String perform(Map args) {
+        return(args.parameter1 + "-" + args.secondParameter);
+    }
+    public String toString() {
+        return("Goodness gracious me");
+    }
+}
+''';
+
+            Object classResultDefaultMethod = dynamicGroovyService.executeClass("cacheKey", classSource, ["parameter1": "request", "secondParameter": 4]);
+            Object classResultCacheMethod = dynamicGroovyService.executeClass("cacheKey", "As long as its null it will be taken from the cache", null, "toString");
+
+        then:"Confirm confirm we get the expected results from executing dynamic groovy"
+            assert(scriptResult instanceof Boolean);
+            assert (scriptResult == true);
+            assert(scriptResultAsClass instanceof Boolean);
+            assert (scriptResultAsClass == true);
+            assert(scriptResultAsClassCache instanceof Boolean);
+            assert (scriptResultAsClassCache == true);
+            assert(classResultDefaultMethod instanceof String);
+            assert(classResultDefaultMethod == "request-4");
+            assert(classResultCacheMethod instanceof String);
+            assert(classResultCacheMethod == "Goodness gracious me");
+      }
 }
