@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>03094cam a2200457 i 4500</leader>
+  <controlfield tag="001">13022770</controlfield>
+  <controlfield tag="005">20170208130857.0</controlfield>
+  <controlfield tag="008">160415t20162016ilu      b    000 0 eng c</controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2016018232</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9780226323039</subfield>
+    <subfield code="q">(cloth ;</subfield>
+    <subfield code="q">alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">022632303X</subfield>
+    <subfield code="q">(cloth ;</subfield>
+    <subfield code="q">alk. paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="z">9780226323176</subfield>
+    <subfield code="q">(e-book)</subfield>
+  </datafield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">40026553088</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(DLC)  2016018232</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">13022770</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">PUL</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">PUL</subfield>
+    <subfield code="d">DLC</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">BDX</subfield>
+    <subfield code="d">OCLCF</subfield>
+    <subfield code="d">WIM</subfield>
+    <subfield code="d">FM0</subfield>
+    <subfield code="d">CHVBK</subfield>
+    <subfield code="d">VP@</subfield>
+    <subfield code="d">BUR</subfield>
+    <subfield code="d">CGU</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">pcc</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">PN56.C612</subfield>
+    <subfield code="b">G48 2016</subfield>
+  </datafield>
+  <datafield tag="079" ind1=" " ind2=" ">
+    <subfield code="a">ocn944087613</subfield>
+  </datafield>
+  <datafield tag="090" ind1=" " ind2=" ">
+    <subfield code="a">PN56.C612</subfield>
+    <subfield code="b">G48X 2016 (LC)</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Ghosh, Amitav,</subfield>
+    <subfield code="d">1956-</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="4">
+    <subfield code="a">The great derangement :</subfield>
+    <subfield code="b">climate change and the unthinkable /</subfield>
+    <subfield code="c">Amitav Ghosh.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Chicago ;</subfield>
+    <subfield code="a">London :</subfield>
+    <subfield code="b">The University of Chicago Press,</subfield>
+    <subfield code="c">2016.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="4">
+    <subfield code="c">&#xA9;2016</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">196 pages ;</subfield>
+    <subfield code="c">23 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">The Randy L. and Melvin R. Berlin family lectures</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references (pages 165-196).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Stories -- History -- Politics.</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">"Are we deranged? The acclaimed Indian novelist Amitav Ghosh argues that future generations may well think so. How else to explain our imaginative failure in the face of global warming? In his first major book of nonfiction since In an Antique Land, Ghosh examines our inability--at the level of literature, history, and politics--to grasp the scale and violence of climate change. The extreme nature of today's climate events, Ghosh asserts, makes them peculiarly resistant to contemporary modes of thinking and imagining. This is particularly true of serious literary fiction: hundred-year storms and freakish tornadoes simply feel too improbable for the novel; they are automatically consigned to other genres. In the writing of history, too, the climate crisis has sometimes led to gross simplifications; Ghosh shows that the history of the carbon economy is a tangled global story with many contradictory and counterintuitive elements. Ghosh ends by suggesting that politics, much like literature, has become a matter of personal moral reckoning rather than an arena of collective action. But to limit fiction and politics to individual moral adventure comes at a great cost. The climate crisis asks us to imagine other forms of human existence-a task to which fiction, Ghosh argues, is the best suited of all cultural forms. His book serves as a great writer's summons to confront the most urgent task of our time."--Dust jacket.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Climatic changes in literature.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Climatic changes in literature.</subfield>
+    <subfield code="2">fast</subfield>
+    <subfield code="0">(OCoLC)fst01902821</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Literatur.</subfield>
+    <subfield code="0">(DE-588)4035964-5</subfield>
+    <subfield code="2">gnd</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Klimaa&#x308;nderung.</subfield>
+    <subfield code="0">(DE-588)7552364-4</subfield>
+    <subfield code="2">gnd</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Klimaschutz.</subfield>
+    <subfield code="0">(DE-588)7547705-1</subfield>
+    <subfield code="2">gnd</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Randy L. and Melvin R. Berlin family lectures.</subfield>
+  </datafield>
+  <datafield tag="960" ind1=" " ind2=" ">
+    <subfield code="a">39002127190487</subfield>
+    <subfield code="o">1</subfield>
+    <subfield code="s">24.73</subfield>
+    <subfield code="t">ccl</subfield>
+    <subfield code="u">YBBASS151</subfield>
+  </datafield>
+  <datafield tag="961" ind1=" " ind2=" ">
+    <subfield code="c">170105</subfield>
+    <subfield code="f">921160</subfield>
+    <subfield code="m">653130</subfield>
+  </datafield>
+  <datafield tag="987" ind1=" " ind2=" ">
+    <subfield code="c">ON ORDER</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <typeOfRecord>x</typeOfRecord>
+  <encodingLevel>1</encodingLevel>
+  <receiptAcqStatus>0</receiptAcqStatus>
+  <generalRetention>8</generalRetention>
+  <completeness>4</completeness>
+  <dateOfReport>000000</dateOfReport>
+  <nucCode>ccl</nucCode>
+  <localLocation>BASS, Lower Level</localLocation>
+  <callNumber>PN56.C612 G48X 2016 (LC)</callNumber>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <itemId>11529458</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+    <temporaryLocation>BASS, Lower Level, 24-Hour Reserve</temporaryLocation>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=12 13022770</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>z3950-tst.library.yale.edu:7090/voyager</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

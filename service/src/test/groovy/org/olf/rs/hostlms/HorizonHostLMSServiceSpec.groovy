@@ -17,7 +17,7 @@ class HorizonHostLMSServiceSpec extends Specification implements ServiceUnitTest
         then:
         def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
-        resultJson == '{"itemId":null,"shelvingLocation":null,"callNumber":"SH 349 .M34 1992","reason":null,"shelvingPreference":null,"preference":null,"location":"Eisenhower","itemLoanPolicy":"Available"}';
+        resultJson == '{"temporaryShelvingLocation":null,"itemId":null,"temporaryLocation":null,"shelvingLocation":null,"callNumber":"SH 349 .M34 1992","reason":null,"shelvingPreference":null,"preference":null,"location":"Eisenhower","itemLoanPolicy":"Available"}';
     }
 }
 

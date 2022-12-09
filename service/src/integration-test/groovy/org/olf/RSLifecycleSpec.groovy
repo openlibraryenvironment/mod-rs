@@ -1,5 +1,7 @@
 package org.olf
 
+import org.olf.rs.HostLMSLocationService
+
 import java.text.SimpleDateFormat;
 
 import javax.sql.DataSource
@@ -101,6 +103,7 @@ class RSLifecycleSpec extends HttpSpec {
   DataSource dataSource
   EmailService emailService
   HostLMSService hostLMSService
+  HostLMSLocationService hostLMSLocationService
   StaticRouterService staticRouterService
   Z3950Service z3950Service
 
@@ -612,6 +615,10 @@ class RSLifecycleSpec extends HttpSpec {
       z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
+        def nonlending = hostLMSLocationService.ensureActive('BASS, Lower Level, f24-Hour Reserve','');
+        nonlending.setSupplyPreference(-1);
+
         def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
         result['viaId'] = actions.determineBestLocation(pr);
@@ -633,6 +640,7 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstThree' | 'alma' | 'alma-princeton-notfound.xml' | null | null | _
       'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
       'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
+      'RSInstThree' | 'voyager' | 'voyager-temp.xml' | null | null | _
   }
 
     /**
