@@ -459,8 +459,24 @@ public class StateModelService {
                 stateModelMessages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
             }
 
+            // Delete all available actions for this state model first
+            StateModel stateModel = StateModel.lookup(jsonStateModel.code);
+
+            // Did we find one
+            if (stateModel != null) {
+                // We did so delete all the available actions as they may have changed
+                if (stateModel.availableActions) {
+                    // We have at least 1 available action to remove
+                    stateModel.availableActions.collect().each { availableAction ->
+                        // Delete the available action
+                        stateModel.availableActions.remove(availableAction);
+                        availableAction.delete();
+                    }
+                }
+            }
+
             // Now create / update this state model
-            StateModel stateModel = StateModel.ensure(
+            stateModel = StateModel.ensure(
                 jsonStateModel.code,
                 jsonStateModel.name,
                 jsonStateModel.initialState,

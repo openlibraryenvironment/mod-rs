@@ -37,6 +37,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
     String isAvailableGroovy;
 
+    static belongsTo = [ model: StateModel ];
+
     static constraints = {
                     model (nullable: false)
                 fromState (nullable: false)
