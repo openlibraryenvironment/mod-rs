@@ -5,6 +5,8 @@ class ItemLocation {
     String reason
     String location
     String shelvingLocation
+    String temporaryLocation
+    String temporaryShelvingLocation
     String itemLoanPolicy
     String callNumber
     String itemId
