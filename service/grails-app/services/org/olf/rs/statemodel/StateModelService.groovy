@@ -158,7 +158,7 @@ public class StateModelService {
             actionEventResultResult.result = actionEventResult.result;
             actionEventResultResult.qualifier = actionEventResult.qualifier;
             actionEventResultResult.status = actionEventResult.status?.code;
-            actionEventResultResult.saveRestoreState = actionEventResult.saveRestoreState?.value;
+            actionEventResultResult.saveRestoreState = actionEventResult.saveRestoreState?.label;
             actionEventResultResult.overrideSaveStatus = actionEventResult.overrideSaveStatus?.code;
             actionEventResultResult.fromStatus = actionEventResult.fromStatus?.code;
             actionEventResultResult.nextActionEvent = actionEventResult.nextActionEvent?.code;
@@ -396,7 +396,8 @@ public class StateModelService {
                 jsonActionEvent. serviceClass,
                 jsonActionEvent.resultList,
                 convertUndoStatus(jsonActionEvent.undoStatus),
-                jsonActionEvent.responderServiceClass) != null);
+                jsonActionEvent.responderServiceClass,
+                jsonActionEvent.isAvailableGroovy) != null);
         };
 
         // Call the generic import routine to do the work and return the messages

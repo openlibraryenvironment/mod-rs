@@ -1,0 +1,313 @@
+{
+  "stateModels": [
+    {
+      "code": "testResponder",
+      "name": null,
+      "initialState": "RES_IDLE",
+      "staleAction": "supplierCannotSupply",
+      "overdueStatus": "RES_OVERDUE",
+      "inheritedStateModels": [
+        {
+          "code": "Responder",
+          "priority": 1
+        }
+      ],
+      "stati": [
+        {
+          "state": "goneSwimming",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "finishedSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_NEW_AWAIT_PULL_SLIP",
+          "canTriggerStaleRequest": true,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": true,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_CANCELLED",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": true,
+          "triggerPullSlipEmail": false,
+          "availableActions": []
+        },
+        {
+          "state": "RES_ITEM_SHIPPED",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": true,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "doSudoku",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": "arguments.patronRequest.patronIdentifier.equals(\"Unknown\")"
+            },
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_COMPLETE",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": true,
+          "triggerPullSlipEmail": false,
+          "availableActions": []
+        },
+        {
+          "state": "RES_AWAIT_PICKING",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_AWAIT_SHIP",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_IDLE",
+          "canTriggerStaleRequest": true,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_OVERDUE",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "doSudoku",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": "arguments.patronRequest.patronIdentifier.equals(\"Unknown\")"
+            },
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_ITEM_RETURNED",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "doSudoku",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": "arguments.patronRequest.patronIdentifier.equals(\"Unknown\")"
+            },
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_CANCEL_REQUEST_RECEIVED",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        },
+        {
+          "state": "RES_PENDING_CONDITIONAL_ANSWER",
+          "canTriggerStaleRequest": false,
+          "canTriggerOverdueRequest": false,
+          "isTerminal": false,
+          "triggerPullSlipEmail": false,
+          "availableActions": [
+            {
+              "actionEvent": "goSwimming",
+              "triggerType": "M",
+              "actionType": null,
+              "actionBody": null,
+              "resultList": null,
+              "isAvailableGroovy": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "code": "doSudoku",
+      "description": "Take a break and do a sudoku",
+      "undoStatus": "SKIP",
+      "resultList": "responderNoStatusChange",
+      "serviceClass": "GenericDoNothing",
+      "responderServiceClass": null,
+      "isAvailableGroovy": null
+    },
+    {
+      "code": "goSwimming",
+      "description": "Go take a dip in de water",
+      "undoStatus": "SKIP",
+      "resultList": "goneSwimming",
+      "serviceClass": "GenericDoNothing",
+      "responderServiceClass": null,
+      "isAvailableGroovy": "!arguments.patronRequest.patronIdentifier.equals(\"NoSwimming\")"
+    },
+    {
+      "code": "finishedSwimming",
+      "description": "Finished swimming",
+      "undoStatus": "SKIP",
+      "resultList": "finishedSwimming",
+      "serviceClass": "GenericDoNothing",
+      "responderServiceClass": null,
+      "isAvailableGroovy": null
+    }
+  ],
+  "stati": [
+    {
+      "code": "goneSwimming",
+      "presSeq": "0001",
+      "visible": true,
+      "needsAttention": null,
+      "terminal": false,
+      "stage": "ACTIVE",
+      "terminalSequence": null
+    }
+  ],
+  "actionEventResultLists": [
+    {
+      "code": "goneSwimming",
+      "description": "Having a break and gone swimming",
+      "actionEventResults": [
+        {
+          "code": "goneSwimming"
+        }
+      ]
+    },
+    {
+      "code": "finishedSwimming",
+      "description": "Finihed the swim",
+      "actionEventResults": [
+        {
+          "code": "finishedSwimming"
+        }
+      ]
+    }
+  ],
+  "actionEventResults": [
+    {
+      "code": "goneSwimming",
+      "description": "Gone swimming",
+      "result": true,
+      "qualifier": null,
+      "status": "goneSwimming",
+      "saveRestoreState": "Save",
+      "overrideSaveStatus": null,
+      "fromStatus": null,
+      "nextActionEvent": null
+    },
+    {
+      "code": "finishedSwimming",
+      "description": "Finished swimming",
+      "result": true,
+      "qualifier": null,
+      "status": "goneSwimming",
+      "saveRestoreState": "Restore",
+      "overrideSaveStatus": null,
+      "fromStatus": null,
+      "nextActionEvent": null
+    }
+  ]
+}

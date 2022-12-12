@@ -347,6 +347,30 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstThree' | DIRECTORY_INFO
   }
 
+    void changeSettings(String tenant_id, Map changes_needed, boolean hidden = false) {
+        // RequestRouter = Static
+        setHeaders([
+            'X-Okapi-Tenant': tenant_id,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]);
+        def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0', 'filters' : "hidden==${hidden}"]);
+        log.debug("Number of settings found: " + resp.size() + ", hidden: " + hidden + ", results: " + resp.toString());
+        if ( changes_needed != null ) {
+            resp.each { setting ->
+                // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
+                if ( changes_needed.containsKey(setting.key) ) {
+                    def new_value = changes_needed[setting.key];
+                    //log.debug("Post update to ${setting} ==> ${new_value}");
+                    setting.value = new_value;
+                    def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
+                    log.debug("Result of settings update: ${update_setting_result}");
+                }
+            }
+        }
+    }
+
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
    *  for now, disable all auto responders
@@ -355,27 +379,7 @@ class RSLifecycleSpec extends HttpSpec {
    */
   void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
     when:"We fetch the existing settings for ${tenant_id}"
-      println("Post settings here");
-      // RequestRouter = Static
-      setHeaders([
-                   'X-Okapi-Tenant': tenant_id,
-                   'X-Okapi-Token': 'dummy',
-                   'X-Okapi-User-Id': 'dummy',
-                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-                ])
-      def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0'])
-      if ( changes_needed != null ) {
-        resp.each { setting ->
-          // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
-          if ( changes_needed.containsKey(setting.key) ) {
-            def new_value = changes_needed[setting.key];
-            // log.debug("Post update to ${setting} ==> ${new_value}");
-            setting.value = new_value;
-            def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
-            log.debug("Result of settings update: ${update_setting_result}");
-          }
-        }
-      }
+        changeSettings(tenant_id, changes_needed);
 
     then:"Tenant is configured"
       1==1
@@ -641,7 +645,7 @@ class RSLifecycleSpec extends HttpSpec {
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
      * so if the scenario test is moved out we will also need to setup the directories and settings in that spec file as well
      */
-    private void createScenarioRequest(String requesterTenantId, int scenarioNo) {
+    private void createScenarioRequest(String requesterTenantId, int scenarioNo, String patronIdentifier = null) {
         // Create the request based on the scenario
         Map request = [
             patronReference: 'Scenario-' + scenarioNo + '-' + scenarioDateFormatter.format(new Date()),
@@ -649,17 +653,12 @@ class RSLifecycleSpec extends HttpSpec {
             author: 'Author-Scenario-' + scenarioNo,
             requestingInstitutionSymbol: 'ISIL:RST1',
             systemInstanceIdentifier: '123-Scenario-' + scenarioNo,
-            patronIdentifier: '987-Scenario-' + scenarioNo,
+            patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
             isRequester: true
         ];
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 
-        setHeaders([
-            'X-Okapi-Tenant': requesterTenantId,
-            'X-Okapi-Token': 'dummy',
-            'X-Okapi-User-Id': 'dummy',
-            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-        ]);
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         def requestResponse = doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
         log.debug("${request.title} -- Response: Response: ${requestResponse} Id: ${requestResponse.id}");
@@ -687,16 +686,56 @@ class RSLifecycleSpec extends HttpSpec {
 
         String jsonAction = new File("src/integration-test/resources/scenarios/${actionFile}").text;
         log.debug("Action json: ${jsonAction}");
-        setHeaders([
-            'X-Okapi-Tenant': actionTenant,
-            'X-Okapi-Token': 'dummy',
-            'X-Okapi-User-Id': 'dummy',
-            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-        ]);
+        setHeaders([ 'X-Okapi-Tenant': actionTenant ]);
 
         // Execute the action
         def actionResponse = doPost("${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString(), jsonAction);
         return(actionResponse.toString());
+    }
+
+    private String doScenarioAction(
+        String requesterTenantId,
+        String responderTenantId,
+        int scenario,
+        boolean isRequesterAction,
+        String actionFile,
+        String requesterStatus,
+        String responderStatus,
+        String newResponderTenant,
+        String newResponderStatus,
+        String patronIdentifier = null
+    ) {
+        String actionResponse = null;
+
+        try {
+            log.debug("Performing action for scenario " + scenario + " using file " + actionFile + ", expected requester status " + requesterStatus + ", expected responder status " + responderStatus);
+            // Are we creating a fresh request
+            if (responderTenantId == null) {
+                // So we need to create  new request
+                createScenarioRequest(requesterTenantId, scenario, patronIdentifier);
+            } else {
+                // We need to perform an action
+                actionResponse = performScenarioAction(requesterTenantId, responderTenantId, isRequesterAction, actionFile);
+            }
+
+            // Wait for this side of the request to move to the appropriate Action
+            waitForRequestState(isRequesterAction ? requesterTenantId : responderTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? requesterStatus : responderStatus);
+
+            // Wait for the other side to change state if it is not a new request
+            if (actionFile != null) {
+                waitForRequestState(isRequesterAction ? responderTenantId : requesterTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? responderStatus : requesterStatus);
+            }
+
+            // Are we moving onto a new responder
+            if (newResponderTenant != null) {
+                // Wait for the status and get the responder id
+                this.testctx.request_data[SCENARIO_RESPONDER_ID] = waitForRequestState(newResponderTenant, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], newResponderStatus);
+            }
+        } catch(Exception e) {
+            log.error("Exceptione Performing action for scenario " + scenario + " using file " + actionFile + ", expected requester status " + requesterStatus + ", expected responder status " + responderStatus, e);
+            throw(e);
+        }
+        return(actionResponse);
     }
 
     /**
@@ -716,30 +755,18 @@ class RSLifecycleSpec extends HttpSpec {
     ) {
         when:"Progress the request"
 
-            String actionResponse = null;
+            String actionResponse = doScenarioAction(
+                requesterTenantId,
+                responderTenantId,
+                scenario,
+                isRequesterAction,
+                actionFile,
+                requesterStatus,
+                responderStatus,
+                newResponderTenant,
+                newResponderStatus
+            );
 
-            // Are we creating a fresh request
-            if (responderTenantId == null) {
-                // So we need to create  new request
-                createScenarioRequest(requesterTenantId, scenario);
-            } else {
-                // We need to perform an action
-                actionResponse = performScenarioAction(requesterTenantId, responderTenantId, isRequesterAction, actionFile);
-            }
-
-            // Wait for this side of the request to move to the appropriate Action
-            waitForRequestState(isRequesterAction ? requesterTenantId : responderTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? requesterStatus : responderStatus);
-
-            // Wait for the other side to change state if it is not a new request
-            if (actionFile != null) {
-                waitForRequestState(isRequesterAction ? responderTenantId : requesterTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? responderStatus : requesterStatus);
-            }
-
-            // Are we moving onto a new responder
-            if (newResponderTenant != null) {
-                // Wait for the status and get the responder id
-                this.testctx.request_data[SCENARIO_RESPONDER_ID] = waitForRequestState(newResponderTenant, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], newResponderStatus);
-            }
             log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
             log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
 
@@ -819,5 +846,163 @@ class DosomethingSimple {
             assert(classResultDefaultMethod == "request-4");
             assert(classResultCacheMethod instanceof String);
             assert(classResultCacheMethod == "Goodness gracious me");
-      }
+    }
+
+    void "test Import"(String tenantId, String importFile) {
+        when: "Perform the import"
+            String jsonImportFile = new File("src/integration-test/resources/stateModels/${importFile}").text;
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Perform the import
+            def responseJson = doPost("${baseUrl}/rs/stateModel/import".toString(), jsonImportFile);
+
+        then:"Confirm the result json has no errors"
+            if (responseJson instanceof Map) {
+                responseJson.each { arrayElement ->
+                    // The value should be of type ArrayList
+                    if (arrayElement.value instanceof ArrayList) {
+                        arrayElement.value.each { error ->
+                            if (error instanceof String) {
+                                // Ignore lines beginning with "No array of "
+                                if (!error.startsWith("No array of ")) {
+                                    // It should end with ", errors: 0" otherwise we have problems
+                                    assert(error.endsWith(", errors: 0"));
+                                }
+                            } else {
+                                log.debug("List element is not of type String, it has type " + error.getClass());
+                                assert(false);
+                            }
+                        }
+                    } else {
+                        // For some reason we did not get an array list
+                        log.debug("Map element with key " + arrayElement.key + " is not an ArrayList");
+                        assert(false);
+                    }
+                }
+            } else {
+                // We obviously did not get json returned
+                log.debug("Json returned by import is not a Map");
+                assert(false);
+            }
+
+        where:
+            tenantId      | importFile
+            "RSInstThree" | "testResponder.json"
+    }
+
+    void "set_responder_state_model"(String tenantId, String stateModel) {
+        when:"Progress the request"
+            // Ensure we have the correct model for the responder
+            log.debug("Setting responder state model to " + stateModel);
+            changeSettings(tenantId, [ state_model_responder : stateModel ], true);
+
+        then:"If no exception assume it has been set"
+            assert(true);
+
+        where:
+            tenantId      | stateModel
+            "RSInstThree" | "testResponder"
+    }
+
+    /**
+     * This test case is actually being executed multiple times as it works through the scenarios, so it could actually take a long time to run
+     */
+    void "test inherited_scenario"(
+        String requesterTenantId,
+        String responderTenantId,
+        int scenario,
+        boolean isRequesterAction,
+        String actionFile,
+        String requesterStatus,
+        String responderStatus,
+        String newResponderTenant,
+        String newResponderStatus,
+        String patronIdentifier,
+        String expectedActionResponse
+    ) {
+        when:"Progress the request"
+            // Default state model for instance 3 should have been set to testResponder
+
+            String actionResponse = doScenarioAction(
+                requesterTenantId,
+                responderTenantId,
+                scenario,
+                isRequesterAction,
+                actionFile,
+                requesterStatus,
+                responderStatus,
+                newResponderTenant,
+                newResponderStatus,
+                patronIdentifier
+            );
+
+            log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
+            log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
+
+        then:"Check the response value"
+            assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
+            if (expectedActionResponse != null) {
+                assert expectedActionResponse == actionResponse;
+            }
+
+        where:
+            requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | patronIdentifier | expectedActionResponse
+            "RSInstOne"       | null              | 101      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+            "RSInstOne"       | "RSInstThree"     | 10101    | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10102    | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10103    | false             | "goSwimming.json"                   | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | "goneSwimming"                              | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10104    | false             | "finishedSwimming.json"             | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10105    | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10106    | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10107    | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | null             | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 10108    | false             | "goSwimming.json"                   | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | "goneSwimming"                              | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10109    | false             | "finishedSwimming.json"             | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10110    | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10111    | false             | "supplierMarkShipped.json"          | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10112    | false             | "doSudoku.json"                     | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10114    | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10115    | true              | "patronReturnedItem.json"           | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null             | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 10116    | false             | "doSudoku.json"                     | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null             | "{}"
+            "RSInstOne"       | "RSInstThree"     | 10118    | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null             | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 10119    | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null             | "{status=true}"
+    }
+
+    void "check_is_available_groovy"(
+        String requesterTenantId,
+        String responderTenantId
+    ) {
+        when:"Create the request and get valid actions"
+            // For the patron identifier NoSwimming, the action goSwimming should not be available
+            String actionResponse = doScenarioAction(
+                requesterTenantId,
+                null,
+                100001,
+                true,
+                null,
+                Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+                null,
+                responderTenantId,
+                Status.RESPONDER_IDLE,
+                "NoSwimming"
+            );
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+
+            String validActionsUrl = "${baseUrl}/rs/patronrequests/${this.testctx.request_data[SCENARIO_RESPONDER_ID]}/validActions";
+            log.debug("doGet(" + validActionsUrl + "");
+            // Get hold of the valid actions for the responder
+            def validActionsResponse = doGet(validActionsUrl);
+
+            log.debug("Valid responder actions response: ${validActionsResponse.actions.toString()}");
+
+        then:"Check that goSwimmin is not a valid action"
+            assert(!validActionsResponse.actions.contains("goSwimming"));
+
+        where:
+            requesterTenantId | responderTenantId
+            "RSInstOne"       | "RSInstThree"
+    }
 }
