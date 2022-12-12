@@ -309,7 +309,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     String z3950_server = getZ3950Server();
 
-    def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
+    // We need to fetch multiple records here as some sites may have separate records for electronic
+    // and we'll also need a few results to determine if a title search was too broad to be useful eg.
+    // we can't use title if there is more than exactly one record with holdings
+    def z_response = z3950Service.query(prefix_query_string, 3, getHoldingsQueryRecsyn());
 
     log.debug("Got Z3950 response: ${z_response}");
 
