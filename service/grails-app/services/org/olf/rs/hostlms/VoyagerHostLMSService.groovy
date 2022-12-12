@@ -103,6 +103,9 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   }
 
   private String stripDiacritics(String input) {
+    if( input == null ) {
+      return null;
+    }
     input = Normalizer.normalize(input, Normalizer.Form.NFD);
     input = input.replaceAll("[^\\p{ASCII}]", ""); //Remove all non ASCII chars
     return input;
