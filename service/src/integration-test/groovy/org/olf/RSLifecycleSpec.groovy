@@ -616,7 +616,7 @@ class RSLifecycleSpec extends HttpSpec {
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
         // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
-        def nonlending = hostLMSLocationService.ensureActive('BASS, Lower Level, f24-Hour Reserve','');
+        def nonlending = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve','');
         nonlending.setSupplyPreference(-1);
 
         def actions = hostLMSService.getHostLMSActionsFor(lms);
