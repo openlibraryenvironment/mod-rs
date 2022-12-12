@@ -1,21 +1,15 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation
-
 import org.olf.rs.circ.client.NCIPClientWrapper
 import org.olf.rs.circ.client.CirculationClient
+import org.olf.rs.lms.ItemLocation
 
 import com.k_int.web.toolkit.settings.AppSetting
 
 
-/**
- * The interface between mod-rs and any host Library Management Systems
- *
- */
-public class WmsHostLMSService extends BaseHostLMSService {
+public class Wms2HostLMSService extends BaseHostLMSService {
 
+  @Override
   public CirculationClient getCirculationClient(String address) {
     AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
     AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
@@ -24,7 +18,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
-      protocol: "WMS",
+      protocol: "WMS2",
       apiKey: wms_api_key?.value,
       apiSecret: wms_api_secret?.value,
       lookupPatronEndpoint: wms_lookup_patron_endpoint?.value
@@ -36,6 +30,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     return true;
   }
 
+  @Override
   List getLookupStrategies() {
     [
       [
@@ -112,5 +107,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
 
     return result
   }
-  
+
+
+
 }
