@@ -16,7 +16,7 @@ class SymphonyHostLMSServiceSpec extends Specification implements ServiceUnitTes
         then:
         def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
-        resultJson == '{"itemId":null,"shelvingLocation":"STACKS","callNumber":"HV6534 .V55 J36 2017","reason":null,"shelvingPreference":null,"preference":null,"location":"SAL3","itemLoanPolicy":"STKS-MONO"}';
+        resultJson == '{"temporaryShelvingLocation":null,"itemId":null,"temporaryLocation":null,"shelvingLocation":"STACKS","callNumber":"HV6534 .V55 J36 2017","reason":null,"shelvingPreference":null,"preference":null,"location":"SAL3","itemLoanPolicy":"STKS-MONO"}';
     }
 }
 

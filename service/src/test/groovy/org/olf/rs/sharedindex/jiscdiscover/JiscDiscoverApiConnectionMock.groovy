@@ -8,6 +8,7 @@ import groovyx.net.http.FromServer
 import static groovyx.net.http.ApacheHttpBuilder.configure
 import groovy.util.slurpersupport.GPathResult;
 import groovy.util.logging.Slf4j
+import groovy.json.JsonSlurper
 
 /**
  * HttpBuilderNG returns groovy.util.slurpersupport.GPathResult from parsed XML response records
@@ -16,15 +17,23 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class JiscDiscoverApiConnectionMock implements JiscDiscoverApiConnection {
 
-  public GPathResult getSru(Map description) {
+  public Object getSru(Map description) {
 
     log.debug("JiscDiscoverApiConnectionMock::getSru(${description})");
 
-    GPathResult result = null;
+    Object result = null;
 
     if ( description?.systemInstanceIdentifier == '2231751908' ) {
+
+
       InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/jd_rec_id_2231751908.xml");
       result = new XmlSlurper().parse(is)
+
+      // Json variant - not using this one
+      // InputStream is = this.getClass().getResourceAsStream("/sharedindex/jiscdiscover/item_3568439.json")
+      // result = new JsonSlurper().parse(is)
+
+      println("Returning ${result}");
     }
     else {
       log.debug("No matching mock systemInstanceIdentifier - return null");

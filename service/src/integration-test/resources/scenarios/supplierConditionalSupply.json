@@ -1,0 +1,11 @@
+{
+    "action": "supplierConditionalSupply",
+    "actionParams": {
+        "holdingState": "yes",
+        "callnumber": "call number",
+        "pickLocation": "location",
+        "pickShelvingLocation": "shelving location",
+        "loanCondition": "other",
+        "note": "A note to the wise"
+    }
+}

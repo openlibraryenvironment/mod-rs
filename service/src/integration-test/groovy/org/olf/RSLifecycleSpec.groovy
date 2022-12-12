@@ -1,49 +1,53 @@
 package org.olf
 
-import grails.testing.mixin.integration.Integration
-import grails.transaction.*
-import static grails.web.http.HttpHeaders.*
-import static org.springframework.http.HttpStatus.*
-import spock.lang.*
-import geb.spock.*
-import groovy.util.logging.Slf4j
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.k_int.okapi.OkapiHeaders
-import grails.plugins.rest.client.RestBuilder
-import grails.plugins.rest.client.RestResponse
-import spock.lang.Shared
-import grails.gorm.multitenancy.Tenants
-import org.olf.okapi.modules.directory.DirectoryEntry
-import org.olf.okapi.modules.directory.NamingAuthority
-import com.k_int.web.toolkit.testing.HttpSpec
-import grails.databinding.SimpleMapDataBindingSource
-import grails.web.databinding.GrailsWebDataBinder
-import org.olf.rs.EventPublicationService
-import org.grails.orm.hibernate.HibernateDatastore
+import org.olf.rs.HostLMSLocationService
+
+import java.text.SimpleDateFormat;
+
 import javax.sql.DataSource
-import org.springframework.beans.factory.annotation.Autowired
+
+import org.grails.orm.hibernate.HibernateDatastore
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.EmailService
+import org.olf.rs.EventPublicationService
+import org.olf.rs.GrailsEventIdentifier;
+import org.olf.rs.HostLMSLocation
+import org.olf.rs.HostLMSService
+import org.olf.rs.HostLMSShelvingLocation
+import org.olf.rs.PatronRequest
+import org.olf.rs.Z3950Service
+import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.routing.RankedSupplier
+import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.statemodel.Status;
 import org.springframework.beans.factory.annotation.Value
 
-import org.olf.rs.EmailService
-import org.olf.rs.HostLMSService
-import org.olf.rs.HostLMSLocation
-import org.olf.rs.HostLMSShelvingLocation
-import org.olf.rs.lms.HostLMSActions
-import org.olf.rs.PatronRequest
-import org.olf.rs.routing.StaticRouterService
-import org.olf.rs.routing.RankedSupplier
-import org.olf.rs.Z3950Service
+import com.k_int.web.toolkit.testing.HttpSpec
+
+import grails.databinding.SimpleMapDataBindingSource
+import grails.events.bus.EventBus
+import grails.gorm.multitenancy.Tenants
+import grails.testing.mixin.integration.Integration
+import grails.web.databinding.GrailsWebDataBinder
+import groovy.util.logging.Slf4j
+import spock.lang.*
+import spock.util.concurrent.PollingConditions;
 
 @Slf4j
 @Integration
 @Stepwise
 class RSLifecycleSpec extends HttpSpec {
 
+    // The scenario details that are maintained between tests
+    private static final String SCENARIO_PATRON_REFERENCE = "scenario-patronReference";
+    private static final String SCENARIO_REQUESTER_ID = "scenario-requesterId";
+    private static final String SCENARIO_RESPONDER_ID = "scenario-responderId";
+
   private static String LONG_300_CHAR_TITLE = '123456789A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I123456789J123456789k123456789l123456789m123456789n123456789o123456789p123456789q123456789r123456789s123456789t123456789U123456789V123456789W123456789Y123456789Y12345XXXXX'
-  
+  private SimpleDateFormat scenarioDateFormatter = new SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS");
+
   // Warning: You will notice that these directory entries carry and additional customProperty: AdditionalHeaders
-  // When okapi fronts the /rs/externalApi/iso18626 endpoint it does so through a root path like 
+  // When okapi fronts the /rs/externalApi/iso18626 endpoint it does so through a root path like
   // _/invoke/tenant/TENANT_ID/rs/externalApi/iso18626 - it then calls the relevant path with the TENANT_ID as a header
   // Because we want our tests to run without an OKAPI, we need to supply the tenant-id that OKAPI normally would and that
   // is the function of the AdditionalHeaders custom property here
@@ -54,7 +58,7 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstOne_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 
+          customProperties:[
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
             'AdditionalHeaders':['X-Okapi-Tenant:RSInstOne']
           ]
@@ -66,7 +70,7 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstTwo_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 
+          customProperties:[
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
             'AdditionalHeaders':['X-Okapi-Tenant:RSInstTwo']
           ]
@@ -78,7 +82,7 @@ class RSLifecycleSpec extends HttpSpec {
         [
           slug:'RSInstThree_ISO18626',
           service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-          customProperties:[ 
+          customProperties:[
             'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
             'AdditionalHeaders':['X-Okapi-Tenant:RSInstThree']
           ]
@@ -99,12 +103,30 @@ class RSLifecycleSpec extends HttpSpec {
   DataSource dataSource
   EmailService emailService
   HostLMSService hostLMSService
+  HostLMSLocationService hostLMSLocationService
   StaticRouterService staticRouterService
   Z3950Service z3950Service
 
-  @Value('${local.server.port}')
-  Integer serverPort
+  // Default grails event bus is named targetEvenBus to avoid collision with reactor's event bus.
+  @Autowired
+  EventBus targetEventBus
 
+  @Value('${local.server.port}')
+  Integer serverPort;
+
+  /** Contains the tenants that have the ref data loaded */
+  static final List<String> refDataLoadedTenants = [];
+
+  // This method is declared in the HttpSpec
+  def setupSpecWithSpring() {
+
+      targetEventBus.subscribe(GrailsEventIdentifier.REFERENCE_DATA_LOADED) { final String tenant ->
+          log.debug("Ref data loaded for ${tenant.replace("_mod_rs", "")}");
+          refDataLoadedTenants.add(tenant.replace("_mod_rs", ""));
+      }
+
+      super.setupSpecWithSpring();
+  }
 
   def setupSpec() {
     httpClientConfig = {
@@ -134,8 +156,6 @@ class RSLifecycleSpec extends HttpSpec {
   def cleanup() {
   }
 
-
-
   // For the given tenant, block up to timeout ms until the given request is found in the given state
   private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
     long start_time = System.currentTimeMillis();
@@ -147,9 +167,9 @@ class RSLifecycleSpec extends HttpSpec {
 
       setHeaders([ 'X-Okapi-Tenant': tenant ]);
       // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-      def resp = doGet("${baseUrl}rs/patronrequests", 
-                       [ 
-                         'max':'100', 
+      def resp = doGet("${baseUrl}rs/patronrequests",
+                       [
+                         'max':'100',
                          'offset':'0',
                          'match':'patronReference',
                          'term':patron_reference
@@ -169,11 +189,21 @@ class RSLifecycleSpec extends HttpSpec {
     return request_id;
   }
 
+  // For the given tenant fetch the specified request
+  private Map fetchRequest(String tenant, String requestId) {
+
+    setHeaders([ 'X-Okapi-Tenant': tenant ]);
+    // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests/{id}
+    def response = doGet("${baseUrl}rs/patronrequests/${requestId}")
+    return response;
+  }
+
   void "Attempt to delete any old tenants"(tenantid, name) {
     when:"We post a delete request"
       try {
         setHeaders(['X-Okapi-Tenant': tenantid, 'accept': 'application/json; charset=UTF-8'])
         def resp = doDelete("${baseUrl}_/tenant".toString(),null)
+        refDataLoadedTenants.remove(tenantid);
       }
       catch ( Exception e ) {
         // If there is no TestTenantG we'll get an exception here, it's fine
@@ -232,11 +262,25 @@ class RSLifecycleSpec extends HttpSpec {
       // doPost(url,jsondata,params,closure)
       def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
 
-      // Give the various jobs time to finish their work.
-      Thread.sleep(5000)
-    log.debug("Got response for new tenant: ${resp}");
+      // Lets record how long it took to get the lock
+      long startTime = System.currentTimeMillis();
+
+      // Wait for the refdata to be loaded.
+      PollingConditions conditions = new PollingConditions(timeout: 30)
+      conditions.eventually {
+        // The tenant id sent through the event handler comes through as lowercase
+        refDataLoadedTenants.contains(tenantid.toLowerCase());
+      }
+
+      log.info("Ref data loaded event after " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, so it should be safe to assume the reference data has been setup");
+      log.debug("Got response for new tenant: ${resp}");
+      log.debug("refDataLoadedTenants: " + refDataLoadedTenants.toString());
+
     then:"The response is correct"
-      resp != null;
+      assert(resp != null);
+
+      // The tenant id sent through the event handler comes through as lowercase
+      assert(refDataLoadedTenants.contains(tenantid.toLowerCase()));
 
     where:
       tenantid | name
@@ -244,7 +288,6 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstTwo' | 'RSInstTwo'
       'RSInstThree' | 'RSInstThree'
   }
-
 
   void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
     when:"Load the default directory (test url is ${baseUrl})"
@@ -311,7 +354,7 @@ class RSLifecycleSpec extends HttpSpec {
    *  N.B. that the test "Send request using static router" below RELIES upon the static routes assigned to RSInstOne.
    *  changing this data may well break that test.
    */
-  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {  
+  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
     when:"We fetch the existing settings for ${tenant_id}"
       println("Post settings here");
       // RequestRouter = Static
@@ -364,12 +407,12 @@ class RSLifecycleSpec extends HttpSpec {
    * Send a test request from RSInstOne(ISIL:RST1) to RSInstThree(ISIL:RST3)
    * This test bypasses the request routing component by providing a pre-established rota
    */
-  void "Send request with preset rota"(String tenant_id, 
+  void "Send request with preset rota"(String tenant_id,
                                        String peer_tenant,
-                                       String p_title, 
-                                       String p_author, 
-                                       String p_systemInstanceIdentifier, 
-                                       String p_patron_id, 
+                                       String p_title,
+                                       String p_author,
+                                       String p_systemInstanceIdentifier,
+                                       String p_patron_id,
                                        String p_patron_reference,
                                        String requesting_symbol,
                                        String responder_symbol) {
@@ -423,7 +466,7 @@ class RSLifecycleSpec extends HttpSpec {
 
   /**
    * Important note for this test case:: peer_tenant is set to RSInstThree and this works because RSInstOne has a static rota set up
-   * so that RSInstThree is the first option for sending a request to. Any changes in the test data will likely break this test. Watch out 
+   * so that RSInstThree is the first option for sending a request to. Any changes in the test data will likely break this test. Watch out
    */
   void "Send request using static router"(String tenant_id,
                                           String peer_tenant,
@@ -496,7 +539,7 @@ class RSLifecycleSpec extends HttpSpec {
 
   // For RSInstThree tenant should return the sample data loaded
   void "test API for retrieving shelving locations for #tenant_id"() {
- 
+
     when:"We post to the shelvingLocations endpoint for tenant"
       setHeaders([
                    'X-Okapi-Tenant': tenant_id
@@ -572,6 +615,10 @@ class RSLifecycleSpec extends HttpSpec {
       z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
+        def nonlending = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve','');
+        nonlending.setSupplyPreference(-1);
+
         def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
         result['viaId'] = actions.determineBestLocation(pr);
@@ -593,6 +640,148 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstThree' | 'alma' | 'alma-princeton-notfound.xml' | null | null | _
       'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
       'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
+      'RSInstThree' | 'voyager' | 'voyager-temp.xml' | null | null | _
   }
 
+    /**
+     * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
+     * so if the scenario test is moved out we will also need to setup the directories and settings in that spec file as well
+     */
+    private void createScenarioRequest(String requesterTenantId, int scenarioNo) {
+        // Create the request based on the scenario
+        Map request = [
+            patronReference: 'Scenario-' + scenarioNo + '-' + scenarioDateFormatter.format(new Date()),
+            title: 'Testing-Scenario-' + scenarioNo,
+            author: 'Author-Scenario-' + scenarioNo,
+            requestingInstitutionSymbol: 'ISIL:RST1',
+            systemInstanceIdentifier: '123-Scenario-' + scenarioNo,
+            patronIdentifier: '987-Scenario-' + scenarioNo,
+            isRequester: true
+        ];
+        log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
+
+        setHeaders([
+            'X-Okapi-Tenant': requesterTenantId,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]);
+        def requestResponse = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        log.debug("${request.title} -- Response: Response: ${requestResponse} Id: ${requestResponse.id}");
+
+        // Stash the id and patron reference
+        this.testctx.request_data[SCENARIO_REQUESTER_ID] = requestResponse.id;
+        this.testctx.request_data[SCENARIO_PATRON_REFERENCE] = requestResponse.patronReference;
+    }
+
+    private String performScenarioAction(
+        String requesterTenantId,
+        String responderTenantId,
+        boolean isRequesterAction,
+        String actionFile
+    ) {
+        String actionRequestId = this.testctx.request_data[SCENARIO_REQUESTER_ID]
+        String actionTenant = requesterTenantId;
+        String peerTenant = responderTenantId;
+        if (!isRequesterAction) {
+            // It is the responder performing the action
+            actionRequestId = this.testctx.request_data[SCENARIO_RESPONDER_ID];
+            actionTenant = responderTenantId;
+            peerTenant = requesterTenantId;
+        }
+
+        String jsonAction = new File("src/integration-test/resources/scenarios/${actionFile}").text;
+        log.debug("Action json: ${jsonAction}");
+        setHeaders([
+            'X-Okapi-Tenant': actionTenant,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]);
+
+        // Execute the action
+        def actionResponse = doPost("${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString(), jsonAction);
+        return(actionResponse.toString());
+    }
+
+    /**
+     * This test case is actually being executed multiple times as it works through the scenarios, so it could actually take a long time to run
+     */
+    void "test scenarios"(
+        String requesterTenantId,
+        String responderTenantId,
+        int scenario,
+        boolean isRequesterAction,
+        String actionFile,
+        String requesterStatus,
+        String responderStatus,
+        String newResponderTenant,
+        String newResponderStatus,
+        String expectedActionResponse
+    ) {
+        when:"Progress the request"
+
+            String actionResponse = null;
+
+            // Are we creating a fresh request
+            if (responderTenantId == null) {
+                // So we need to create  new request
+                createScenarioRequest(requesterTenantId, scenario);
+            } else {
+                // We need to perform an action
+                actionResponse = performScenarioAction(requesterTenantId, responderTenantId, isRequesterAction, actionFile);
+            }
+
+            // Wait for this side of the request to move to the appropriate Action
+            waitForRequestState(isRequesterAction ? requesterTenantId : responderTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? requesterStatus : responderStatus);
+
+            // Wait for the other side to change state if it is not a new request
+            if (actionFile != null) {
+                waitForRequestState(isRequesterAction ? responderTenantId : requesterTenantId, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], isRequesterAction ? responderStatus : requesterStatus);
+            }
+
+            // Are we moving onto a new responder
+            if (newResponderTenant != null) {
+                // Wait for the status and get the responder id
+                this.testctx.request_data[SCENARIO_RESPONDER_ID] = waitForRequestState(newResponderTenant, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], newResponderStatus);
+            }
+            log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
+            log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
+
+        then:"Check the response value"
+            assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
+            if (expectedActionResponse != null) {
+                assert expectedActionResponse == actionResponse;
+            }
+
+        where:
+            requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | expectedActionResponse
+            "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkShipped.json"          | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "patronReturnedItem.json"           | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | "{status=true}"
+            "RSInstOne"       | null              | 2        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
+            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierCannotSupply.json"         | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | "{}"
+            "RSInstOne"       | null              | 3        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
+            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 3        | true              | "requesterRejectConditions.json"    | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | "RSInstTwo"        | Status.RESPONDER_IDLE | "{}"
+            "RSInstOne"       | null              | 4        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
+            "RSInstOne"       | "RSInstThree"     | 4        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
+            "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | null               | null                  | null
+    }
 }

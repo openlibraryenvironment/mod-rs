@@ -1,12 +1,11 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants;
-import grails.gorm.MultiTenant
 import org.olf.okapi.modules.directory.Symbol;
-import java.time.Instant;
 
-class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
-  
+import grails.gorm.MultiTenant
+
+class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanCondition> {
+
   // Internal id of the message
   String id
 
@@ -16,7 +15,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
   Date dateCreated
   Date lastUpdated
 
-  /* 
+  /*
    * Right now, when a loan condition is rejected, this results in the request being cancelled with the supplier.
    * Hence we can safely assume that false OR null == pending and true == accepted.
    * If this behaviour changes in future we will be able to separate out null == pending and false == rejected
@@ -43,7 +42,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequest> {
     patronRequest (nullable: true)
     code( nullable: true)
     note( nullable: true)
-    relevantSupplier (nullable: true, blank: false)
+    relevantSupplier (nullable: true)
   }
 
   static mapping = {

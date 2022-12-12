@@ -1,20 +1,24 @@
-package org.olf.rs
+package org.olf.rs.sharedindex
 
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.xml.XmlUtil
 import groovyx.net.http.FromServer
+import org.olf.rs.AvailabilityStatement
+import org.olf.rs.SharedIndexActions
 
 import static groovyx.net.http.HttpBuilder.configure
 
-public class ModmetastorageSharedIndexService implements SharedIndexActions {
+public class OaipmhSharedIndexService implements SharedIndexActions {
 
   final String LENDABLE_SI = 'LOANABLE';
   final String LENDABLE_RS = 'Will lend';
 
  /**
+   * A shared index implementation based on the GetRecord OAI-PMH verb as used by the Reservoir SI
+   *
    * findAppropriateCopies - Accept a map of name:value pairs that describe an instance and see if we can locate
    * any appropriate copies in the shared index.
-   * @param description A Map of properies that describe the item. Currently understood properties:
+   * @param description A Map of properties that describe the item. Currently understood properties:
    *                         title - the title of the item
    * @return instance of SharedIndexAvailability which tells us where we can find the item.
    */
@@ -47,7 +51,7 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
       }
     }
     catch ( Exception e ) {
-      log.error("Failure in mod-shared-index lookup", e);
+      log.error("Failure in shared index lookup", e);
     }
 
     // See if we have an app setting for lender of last resort
@@ -69,43 +73,26 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
   // Providing a method signature didn't seem to help https://issues.apache.org/jira/browse/GROOVY-7368
   Object fetchCluster(String id) {
     AppSetting shared_index_base_url_setting = AppSetting.findByKey('shared_index_base_url');
-    AppSetting shared_index_user_setting = AppSetting.findByKey('shared_index_user');
-    AppSetting shared_index_pass_setting = AppSetting.findByKey('shared_index_pass');
-    AppSetting shared_index_tenant_setting = AppSetting.findByKey('shared_index_tenant');
-    
     String shared_index_base_url = shared_index_base_url_setting?.value ?: shared_index_base_url_setting?.defValue;
-    String shared_index_user = shared_index_user_setting?.value ?: shared_index_user_setting?.defValue;
-    String shared_index_pass = shared_index_pass_setting?.value ?: shared_index_pass_setting?.defValue;
-    String shared_index_tenant =  shared_index_tenant_setting?.value ?: shared_index_tenant_setting?.defValue ?: 'diku'
 
     if ( ( shared_index_base_url != null ) &&
-         ( shared_index_user != null ) &&
-         ( shared_index_pass != null ) && 
          ( id != null ) &&
          ( id.length() > 0 ) ) {
-      log.debug("Attempt to retrieve shared index record ${id} from ${shared_index_base_url} ${shared_index_user}/${shared_index_pass}");
-      String token = getOkapiToken(shared_index_base_url, shared_index_user, shared_index_pass, shared_index_tenant);
-      if ( token ) {
-        def r1 = configure {
-          request.headers['X-Okapi-Tenant'] = shared_index_tenant;
-          request.headers['X-Okapi-Token'] = token;
-          request.uri = shared_index_base_url+'/meta-storage/oai?verb=GetRecord&identifier='+(id.trim());
-        }.get() {
-          response.success { FromServer fs, Object body ->
-            log.debug("Success response from shared index");
-            return body;
-          }
-          response.failure { FromServer fs ->
-            log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to GET ${id}");
-          }
+      log.debug("Attempt to retrieve shared index record ${id} from ${shared_index_base_url}");
+      def r1 = configure {
+        request.uri = shared_index_base_url+'?verb=GetRecord&identifier='+(id.trim());
+      }.get() {
+        response.success { FromServer fs, Object body ->
+          log.debug("Success response from shared index");
+          return body;
         }
-      }
-      else {
-        log.warn("Unable to login to remote shared index");
+        response.failure { FromServer fs ->
+          log.debug("Failure response from shared index ${fs.getStatusCode()} when attempting to GET ${id}");
+        }
       }
     }
     else {
-      log.debug("Unable to contact shared index - no url/user/pass");
+      log.debug("Missing SI URL or fetchCluster called without id");
     }
   }
 
@@ -127,48 +114,6 @@ public class ModmetastorageSharedIndexService implements SharedIndexActions {
     }
     return result;
   }
-
-  private String getOkapiToken(String baseUrl, String user, String pass, String tenant) {
-    String result = null;
-    def postBody = [username: user, password: pass]
-    log.debug("getOkapiToken(${baseUrl},${postBody},..,${tenant})");
-    try {
-      def r1 = configure {
-        request.headers['X-Okapi-Tenant'] = tenant
-        request.headers['accept'] = 'application/json'
-        request.contentType = 'application/json'
-        request.uri = baseUrl+'/authn/login'
-        request.body = postBody
-      }.post() {
-        response.success { resp ->
-          if ( resp == null ) {
-            log.error("Response null from http post");
-          }
-          else {
-            log.debug("Try to extract token - ${resp} ${resp?.headers}");
-            def tok_header = resp.headers?.find { h-> h.key == 'x-okapi-token' }
-            if ( tok_header ) {
-              result = tok_header.value;
-            }
-            else {
-              log.warn("Unable to locate okapi token header amongst ${r1?.headers}");
-            }
-          }
-        
-        }
-        response.failure { resp, body ->
-          log.error("RESP ERROR: ${resp.getStatusCode()}, ${resp.getMessage()}, ${body}, ${resp.getHeaders()}")
-        }
-      }
-    }
-    catch ( Exception e ) {
-        log.error("problem trying to obtain auth token for shared index",e);
-      }
-
-    log.debug("Result of okapi login: ${result}");
-    return result;
-  }
-
 
   private List<Map> sharedIndexHoldings(String id) {
     log.debug("sharedIndexHoldings(${id})");

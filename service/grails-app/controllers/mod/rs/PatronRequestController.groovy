@@ -42,10 +42,11 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
      *   }
      */
     @ApiOperation(
-        value = "List the from states that an action can be triggered from",
+        value = "Performs the action the posted action for the given request",
         nickname = "{patronRequestId}/performAction",
         produces = "application/json",
-        httpMethod = "POST"
+        httpMethod = "POST",
+        notes = 'Need to describe the actions here some how'
     )
     @ApiResponses([
         @ApiResponse(code = 200, message = "Success")

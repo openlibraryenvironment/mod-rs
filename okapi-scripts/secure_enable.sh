@@ -17,7 +17,8 @@ else
   exit 0
 fi
 
-echo Enable mod-rs for tenant $1 on URL $2
+TENANT="${1:-test1}"
+echo Enable mod-rs for tenant $TENANT
 
 echo $BASEDIR
 pushd "$BASEDIR/../service"
@@ -42,10 +43,11 @@ SVC_ID=`echo $DEP_DESC | jq -rc '.srvcId'`
 INS_ID=`echo $DEP_DESC | jq -rc '.instId'`
 
 AUTH_TOKEN=`../okapi-scripts/okapi-login -u $ST_UN -p $ST_PW -t supertenant`
+echo $AUTH_TOKEN
 
 ENABLE_DOC=`echo $DEP_DESC | jq -c '[{id: .srvcId, action: "enable"}]'`
 echo "Enable service - enable doc is $ENABLE_DOC"
 
-curl -XPOST -H "X-Okapi-Token: $AUTH_TOKEN" "${OKAPI_URL}/_/proxy/tenants/$1/install?tenantParameters=loadSample%3Dtest,loadReference%3Dother" -d "$ENABLE_DOC"
+curl -XPOST -H "X-Okapi-Token: $AUTH_TOKEN" "${OKAPI_URL}/_/proxy/tenants/$TENANT/install?tenantParameters=loadSample%3Dtest,loadReference%3Dother" -d "$ENABLE_DOC"
 
 echo Done

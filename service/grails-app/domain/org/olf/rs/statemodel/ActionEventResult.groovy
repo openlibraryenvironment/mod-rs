@@ -104,4 +104,12 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         // Return the result to the caller
         return(actionEventResult);
     }
+
+    public static ActionEventResult lookup(String code) {
+        ActionEventResult result = null;
+        if (code != null) {
+            result = ActionEventResult.findByCode(code);
+        }
+        return result;
+  }
 }

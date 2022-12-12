@@ -1,12 +1,12 @@
-package org.olf.rs
+package org.olf.rs.sharedindex
 
 import grails.testing.services.ServiceUnitTest
 import groovy.util.logging.Slf4j
+import org.olf.rs.sharedindex.OaipmhSharedIndexService
 import spock.lang.Specification
-import groovy.util.XmlSlurper
 
 @Slf4j
-class ModmetastorageSharedIndexServiceSpec extends Specification implements ServiceUnitTest<ModmetastorageSharedIndexService> {
+class OaipmhSharedIndexServiceSpec extends Specification implements ServiceUnitTest<OaipmhSharedIndexService> {
   def sampleData = '''<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

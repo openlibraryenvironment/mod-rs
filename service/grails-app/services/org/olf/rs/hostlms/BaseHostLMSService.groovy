@@ -187,6 +187,18 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         sl = hostLMSShelvingLocationService.ensureExists(o.shelvingLocation, o.shelvingLocation);
       }
 
+      // if temporary location is present, use it in lieu of location for determining availability
+      if ( o?.temporaryLocation != null ) {
+        loc = hostLMSLocationService.ensureExists(o.temporaryLocation, o.temporaryLocation);
+        // the shelving location does not apply to the temporary location but a temporaryShelvingLocation may be specified
+        sl = null;
+      }
+
+      // if temporary shelving location is present, use it in lieu of shelving location for determining availability
+      if ( o?.temporaryShelvingLocation != null ) {
+        sl = hostLMSShelvingLocationService.ensureExists(o.temporaryShelvingLocation, o.temporaryShelvingLocation);
+      }
+
       // Create an instance of shelving location site to record the association
       if ( ( sl != null ) && ( loc != null ) ) {
         List<ShelvingLocationSite> slss = ShelvingLocationSite.executeQuery(SLS_QRY,[loc: loc, sl:sl]);

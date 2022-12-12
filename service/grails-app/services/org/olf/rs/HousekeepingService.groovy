@@ -17,16 +17,16 @@ import org.olf.rs.statemodel.Status;
 
 import com.k_int.okapi.OkapiTenantAdminService
 
+import grails.events.EventPublisher;
 import grails.events.annotation.Subscriber
 import grails.gorm.multitenancy.Tenants
 
 /**
  * This service works at the module level, it's often called without a tenant context.
  */
-public class HousekeepingService {
+public class HousekeepingService implements EventPublisher {
 
-  // This was DataSource but I think this is actually a HibernateDataSource
-  OkapiTenantAdminService okapiTenantAdminService
+  OkapiTenantAdminService okapiTenantAdminService;
 
   /**
    * This is called by the eventing mechanism - There is no web request context
@@ -47,6 +47,18 @@ public class HousekeepingService {
     log.info("HousekeepingService::setupData(${tenantName},${tenantId})");
     // Establish a database session in the context of the activated tenant. You can use GORM domain classes inside the closure
     Tenants.withId(tenantId) {
+        try {
+            setupReferenceData();
+        } catch (Exception e) {
+            log.error("Exception thrown while setting up the reference data", e);
+        }
+    }
+
+    // Send an event to say that we have completed loading the reference data
+    notify(GrailsEventIdentifier.REFERENCE_DATA_LOADED, tenantId);
+  }
+
+  private void setupReferenceData() {
       Status.withNewTransaction { status ->
 
 		// Load the Custom text properties
@@ -88,7 +100,6 @@ public class HousekeepingService {
         // The predefined templates
         TemplateData.loadAll();
       }
-    }
   }
 
   /**

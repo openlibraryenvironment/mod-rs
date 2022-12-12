@@ -16,7 +16,7 @@ class KohaHostLMSServiceSpec extends Specification implements ServiceUnitTest<Ko
         then:
         def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
-        resultJson == '{"itemId":null,"shelvingLocation":"CIRC2","callNumber":"580.1 G733v","reason":null,"shelvingPreference":null,"preference":null,"location":"CHATHAM","itemLoanPolicy":null}';
+        resultJson == '{"temporaryShelvingLocation":null,"itemId":null,"temporaryLocation":null,"shelvingLocation":"CIRC2","callNumber":"580.1 G733v","reason":null,"shelvingPreference":null,"preference":null,"location":"CHATHAM","itemLoanPolicy":null}';
     }
 }
 

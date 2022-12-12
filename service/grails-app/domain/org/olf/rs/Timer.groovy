@@ -43,7 +43,6 @@ class Timer implements MultiTenant<Timer> {
              taskCode (nullable : false, blank: false)
            taskConfig (nullable : true, blank: false)
               enabled (nullable : true)
-    executeAtDayStart (nullable : false)
   }
 
   static mapping = {

@@ -1,0 +1,9 @@
+{
+    "action": "supplierCheckInToReshare",
+    "actionParams": {
+        "itemBarcodes": [{
+                "itemId": "123"
+            }
+        ]
+    }
+}
