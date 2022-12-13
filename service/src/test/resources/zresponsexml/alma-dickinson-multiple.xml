@@ -1,0 +1,1070 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>4</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>14730cam a2200661 a 4500</leader>
+  <controlfield tag="001">991002604539705226</controlfield>
+  <controlfield tag="005">20101029010001.0</controlfield>
+  <controlfield tag="008">960502s1997    mau      b    001 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">   96003113</subfield>
+  </datafield>
+  <datafield tag="015" ind1=" " ind2=" ">
+    <subfield code="a">GB97-37021</subfield>
+  </datafield>
+  <datafield tag="019" ind1=" " ind2=" ">
+    <subfield code="a">37465528</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0631199861 (pbk. : acid-free paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9780631199861 (pbk. : acid-free paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0631199853 (acid-free paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9780631199854 (acid-free paper)</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PCarlD)u324577-01dickinson_inst</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(Sirsi) o34710760</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)34710760</subfield>
+    <subfield code="z">(OCoLC)37465528</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">C#P</subfield>
+    <subfield code="d">UKM</subfield>
+    <subfield code="d">BAKER</subfield>
+    <subfield code="d">NLGGC</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">LVB</subfield>
+    <subfield code="d">NLE</subfield>
+    <subfield code="d">ZQM</subfield>
+    <subfield code="d">IBS</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">n-us---</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">DKCC</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">PS508.W7</subfield>
+    <subfield code="b">N56 1997</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">810.809287</subfield>
+    <subfield code="2">21</subfield>
+  </datafield>
+  <datafield tag="084" ind1=" " ind2=" ">
+    <subfield code="a">18.06</subfield>
+    <subfield code="2">bcl</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">Nineteenth-century American women writers :</subfield>
+    <subfield code="b">an anthology /</subfield>
+    <subfield code="c">edited by Karen L. Kilcup.</subfield>
+  </datafield>
+  <datafield tag="246" ind1="3" ind2=" ">
+    <subfield code="a">19th-century American women writers</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Cambridge, Mass. :</subfield>
+    <subfield code="b">Blackwell Publishers,</subfield>
+    <subfield code="c">1997.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">l, 601 pages ;</subfield>
+    <subfield code="c">23 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">Blackwell anthologies</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references and index.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="g">Native American myths.</subfield>
+    <subfield code="t">The woman who fell from the sky (Iroquois) --</subfield>
+    <subfield code="t">The origin of corn (Eastern Cherokee) --</subfield>
+    <subfield code="t">The chief's daughters : an Otoe tale (Otoe) --</subfield>
+    <subfield code="t">The ghost wife (Pawnee) --</subfield>
+    <subfield code="t">Changing woman and white shell woman (Navajo) --</subfield>
+    <subfield code="t">Bluejay and the well-behaved maiden (Nez Perce&#x301;).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="g">Sampler verses.</subfield>
+    <subfield code="t">Adam alone in paradise did grieve --</subfield>
+    <subfield code="t">Glittering stones and golden things --</subfield>
+    <subfield code="t">I cannot perceive this business design'd --</subfield>
+    <subfield code="t">Plain as this canvas was, as plain we find --</subfield>
+    <subfield code="t">Oh may our follies like the falling trees --</subfield>
+    <subfield code="t">Beauties like princes from their very youth --</subfield>
+    <subfield code="t">Mysterious heaven how wondrous are thy ways --</subfield>
+    <subfield code="t">Now while my needle does my hours engage --</subfield>
+    <subfield code="t">Tis true tis long ere I began --</subfield>
+    <subfield code="t">Believe not each aspersing tongue --</subfield>
+    <subfield code="t">Ann thou are fair divinely fair --</subfield>
+    <subfield code="t">I read his awful name, emblazoned high --</subfield>
+    <subfield code="t">How various her employments whom the world --</subfield>
+    <subfield code="t">In all my vast concerns with thee --</subfield>
+    <subfield code="t">Observe the rising lily's snowy grace --</subfield>
+    <subfield code="t">When first my lisping accents came --</subfield>
+    <subfield code="t">Whence did the wondrous mystic art arise.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from A narrative of the life of Mrs. Mary Jemison.</subfield>
+    <subfield code="t">The adoption ceremony; new sisters ;</subfield>
+    <subfield code="t">Marriage and childbirth ;</subfield>
+    <subfield code="t">Women's work among the Seneca; the introduction of ardent spirits /</subfield>
+    <subfield code="r">Mary Jemison (Degiwene's) --</subfield>
+    <subfield code="t">Memoir of Old Elizabeth, a colored woman /</subfield>
+    <subfield code="r">Old Elizabeth --</subfield>
+    <subfield code="t">from The behavior book : a manual for ladies.</subfield>
+    <subfield code="t">Incorrect words /</subfield>
+    <subfield code="r">Eliza Leslie --</subfield>
+    <subfield code="t">from The Atlantic souvenir.</subfield>
+    <subfield code="t">Cacoethes scribendi ;</subfield>
+    <subfield code="t">from Letters from abroad to kindred at home.</subfield>
+    <subfield code="t">An American in London /</subfield>
+    <subfield code="r">Catharine Maria Sedgwick --</subfield>
+    <subfield code="t">from Sketch of Connecticut, forty years since.</subfield>
+    <subfield code="t">Chapter VI Primus and his daughter ;</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">Death of an infant ;</subfield>
+    <subfield code="t">from Zinzendorff, and other poems.</subfield>
+    <subfield code="t">Niagara ;</subfield>
+    <subfield code="t">The western emigrant ;</subfield>
+    <subfield code="t">from Water-drops.</subfield>
+    <subfield code="t">Drinking song ;</subfield>
+    <subfield code="t">from The female poets of America.</subfield>
+    <subfield code="t">Indian names ;</subfield>
+    <subfield code="t">from Letters of life.</subfield>
+    <subfield code="t">Requests for writing /</subfield>
+    <subfield code="r">Lydia Howard Huntley Sigourney --</subfield>
+    <subfield code="t">from the Spiritual autobiography and diary.</subfield>
+    <subfield code="t">My holy leader, a woman ;</subfield>
+    <subfield code="t">A dream of slaughter ;</subfield>
+    <subfield code="t">The dream of the cakes ;</subfield>
+    <subfield code="t">Rebecca Perot and I in a garden ;</subfield>
+    <subfield code="t">Rebecca and me together ;</subfield>
+    <subfield code="t">Rebecca's hair ;</subfield>
+    <subfield code="t">A beautiful vision ;</subfield>
+    <subfield code="t">Two beloved sisters ;</subfield>
+    <subfield code="t">Dream of home and search for Eldress Paulina ;</subfield>
+    <subfield code="t">The beauty of Zion /</subfield>
+    <subfield code="r">Rebecca Cox Jackson.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from the Anti-slavery bugle.</subfield>
+    <subfield code="t">May I say a few words? /</subfield>
+    <subfield code="r">Sojourner Truth --</subfield>
+    <subfield code="t">from Narrative of Sojourner Truth.</subfield>
+    <subfield code="t">Ar'n't I a woman? /</subfield>
+    <subfield code="r">Frances Dana Gage --</subfield>
+    <subfield code="t">from A new home, who'll follow?</subfield>
+    <subfield code="t">Borrowing ;</subfield>
+    <subfield code="t">One class of settlers /</subfield>
+    <subfield code="r">Caroline Kirkland --</subfield>
+    <subfield code="t">from Juvenile miscellany.</subfield>
+    <subfield code="t">Adventure in the woods ;</subfield>
+    <subfield code="t">from The American frugal housewife.</subfield>
+    <subfield code="t">Introductory chapter ;</subfield>
+    <subfield code="t">General maxims for health ;</subfield>
+    <subfield code="t">Education of daughters ;</subfield>
+    <subfield code="t">from Fact and fiction.</subfield>
+    <subfield code="t">Hilda Silfverling /</subfield>
+    <subfield code="r">Lydia Maria Child --</subfield>
+    <subfield code="t">from the Lowell offering.</subfield>
+    <subfield code="t">A new society ;</subfield>
+    <subfield code="t">The white dress; or, Village aristocracy ;</subfield>
+    <subfield code="t">from the Lowell offering.</subfield>
+    <subfield code="t">Aunt Letty; or, the Useful /</subfield>
+    <subfield code="r">Betsey Chamberlain, Lowell Offering writers --</subfield>
+    <subfield code="t">from Unpublished diaries.</subfield>
+    <subfield code="t">European travel /</subfield>
+    <subfield code="r">Lorenza Stevens Berbineau --</subfield>
+    <subfield code="t">from Summer on the lakes, in 1843.</subfield>
+    <subfield code="t">Mackinaw ;</subfield>
+    <subfield code="t">from Woman in the nineteenth-century.</subfield>
+    <subfield code="t">We would have every arbitrary barrier thrown down /</subfield>
+    <subfield code="r">Margaret Fuller --</subfield>
+    <subfield code="t">from Olive branch.</subfield>
+    <subfield code="t">Aunt Hetty on matrimony ;</subfield>
+    <subfield code="t">from True flag.</subfield>
+    <subfield code="t">Soliloquy of a housemaid ;</subfield>
+    <subfield code="t">from Little ferns for Fanny's little friends.</subfield>
+    <subfield code="t">The baby's complaint ;</subfield>
+    <subfield code="t">The boy who liked natural history ;</subfield>
+    <subfield code="t">from True flag.</subfield>
+    <subfield code="t">Hungry husbands ;</subfield>
+    <subfield code="t">from Little ferns for Fanny's little friends.</subfield>
+    <subfield code="t">A peep underground ;</subfield>
+    <subfield code="t">from the New York Ledger.</subfield>
+    <subfield code="t">Awe-ful thoughts ;</subfield>
+    <subfield code="t">from the New York Ledger.</subfield>
+    <subfield code="t">A word on the other side ;</subfield>
+    <subfield code="t">from the New York Ledger.</subfield>
+    <subfield code="t">Fashionable invalidism /</subfield>
+    <subfield code="r">Fanny Fern (Sara Payson Willis Parton).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">The lady's mistake ;</subfield>
+    <subfield code="t">"Won't you die &amp; be a spirit" ;</subfield>
+    <subfield code="t">The wraith of the rose ;</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">The Cocoa-nut tree ;</subfield>
+    <subfield code="t">A flight of fancy ;</subfield>
+    <subfield code="t">The lily's delusion /</subfield>
+    <subfield code="r">Frances Sargent Osgood --</subfield>
+    <subfield code="t">from Sunny memories of foreign lands.</subfield>
+    <subfield code="t">Letter I sea travel ;</subfield>
+    <subfield code="t">from Sam Lawson's Oldtown fireside stories.</subfield>
+    <subfield code="t">Laughin' in meetin' /</subfield>
+    <subfield code="r">Harriet Beecher Stowe --</subfield>
+    <subfield code="t">from Clovernook; or, Recollections of our neighborhood in the West.</subfield>
+    <subfield code="t">My grandfather ;</subfield>
+    <subfield code="t">from Ballads, lyrics, and hymns.</subfield>
+    <subfield code="t">The bridal veil ;</subfield>
+    <subfield code="t">If and if ;</subfield>
+    <subfield code="t">The sea-side cave ;</subfield>
+    <subfield code="t">from The poetical works of Alice and Phoebe Cary.</subfield>
+    <subfield code="t">Three bugs /</subfield>
+    <subfield code="r">Alice Cary --</subfield>
+    <subfield code="t">from Proceedings of the Eleventh Women's Rights Convention.</subfield>
+    <subfield code="t">We are all bound up together ;</subfield>
+    <subfield code="t">from Sketches of southern life.</subfield>
+    <subfield code="t">Aunt Chloe ;</subfield>
+    <subfield code="t">The deliverance ;</subfield>
+    <subfield code="t">Aunt Chloe's politics ;</subfield>
+    <subfield code="t">Learning to read ;</subfield>
+    <subfield code="t">Church building ;</subfield>
+    <subfield code="t">The reunion ;</subfield>
+    <subfield code="t">from the Christian recorder.</subfield>
+    <subfield code="t">Fancy etchings ;</subfield>
+    <subfield code="t">from the New York freeman.</subfield>
+    <subfield code="t">John and Jacob : a dialogue on women's rights ;</subfield>
+    <subfield code="t">from Atlanta offering : poems.</subfield>
+    <subfield code="t">Songs for the people /</subfield>
+    <subfield code="r">Frances E.W. Harper --</subfield>
+    <subfield code="t">from The poetical works of Lucy Larcom.</subfield>
+    <subfield code="t">Weaving ;</subfield>
+    <subfield code="t">The city lights ;</subfield>
+    <subfield code="t">March ;</subfield>
+    <subfield code="t">A little old girl ;</subfield>
+    <subfield code="t">Flowers of the fallow /</subfield>
+    <subfield code="r">Lucy Larcom --</subfield>
+    <subfield code="t">from Somebody's neighbors.</subfield>
+    <subfield code="t">Miss Beulah's bonnet ;</subfield>
+    <subfield code="t">from Huckleberries gathered from New England hills.</subfield>
+    <subfield code="t">How Celia changed her mind ;</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">Blue-beard's closet ;</subfield>
+    <subfield code="t">Fantasia ;</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">Arachne /</subfield>
+    <subfield code="r">Rose Terry Cooke.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">Letter 260 to Thomas Wentworth Higginson, 15 April 1862 ;</subfield>
+    <subfield code="t">I'll tell you how the sun rose ;</subfield>
+    <subfield code="t">The nearest dream recedes unrealized ;</subfield>
+    <subfield code="t">We play at paste ;</subfield>
+    <subfield code="t">Letter 261 to Thomas Wentworth Higginson, 25 April 1862 ;</subfield>
+    <subfield code="t">South winds jostle them ;</subfield>
+    <subfield code="t">Of all the sounds despatched abroad ;</subfield>
+    <subfield code="t">There came a day at summer's full ;</subfield>
+    <subfield code="t">Letter 265 to Thomas Wentworth Higginson, 7 June 1862 ;</subfield>
+    <subfield code="t">Letter 271 to Thomas Wentworth Higginson, August 1862 ;</subfield>
+    <subfield code="t">I cannot dance upon my toes ;</subfield>
+    <subfield code="t">Before I got my eye put out ;</subfield>
+    <subfield code="t">Letter 238 to Susan Gilbert Dickinson, summer 1861.</subfield>
+    <subfield code="t">Safe in their alabaster chambers ;</subfield>
+    <subfield code="t">Letter 258 to Susan Gilbert Dickinson, early 1862.</subfield>
+    <subfield code="t">Your riches taught me poverty! ;</subfield>
+    <subfield code="t">Letter 364 to Susan Gilbert Dickinson, September 1867 ;</subfield>
+    <subfield code="t">Letter 378 to Susan Gilbert Dickinson, autumn 1872.</subfield>
+    <subfield code="t">A narrow fellow in the grass ;</subfield>
+    <subfield code="t">Letter 712 to Gilbert Dickinson, c. 1881.</subfield>
+    <subfield code="t">The bumble bee's religion ;</subfield>
+    <subfield code="t">Letter 868 to Susan Gilbert Dickinson, early October 1883 ;</subfield>
+    <subfield code="t">Letter 871 to Susan Gilbert Dickinson, early October 1883.</subfield>
+    <subfield code="t">Expanse cannot be lost ;</subfield>
+    <subfield code="t">Letter 601a from Helen Hunt Jackson, 12 May 1879 ;</subfield>
+    <subfield code="t">One of the ones that Midas touched ;</subfield>
+    <subfield code="t">Letter 602 to Helen Hunt Jackson, 1879.</subfield>
+    <subfield code="t">A route of evanescence ;</subfield>
+    <subfield code="t">Letter 937 to Helen Hunt Jackson, September 1884 ;</subfield>
+    <subfield code="t">Letter 937a from Helen Hunt Jackson, 5 September 1884 ;</subfield>
+    <subfield code="t">Letter 835 to Mrs. J. Howard Sweetser, summer 1883 ;</subfield>
+    <subfield code="t">Letter 835a to Mrs. J. Howard Sweetser, summer 1883.</subfield>
+    <subfield code="t">Black cake /</subfield>
+    <subfield code="r">Emily Dickinson.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from the Springfield republican.</subfield>
+    <subfield code="t">Miss Emily Dickinson of Amherst /</subfield>
+    <subfield code="r">Susan Gilbert Dickinson --</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">Down to sleep ;</subfield>
+    <subfield code="t">from Sonnets and lyrics.</subfield>
+    <subfield code="t">Poppies on the wheat ;</subfield>
+    <subfield code="t">Crossed threads ;</subfield>
+    <subfield code="t">from Poems.</subfield>
+    <subfield code="t">October /</subfield>
+    <subfield code="r">Helen Hunt Jackson --</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">Blind Tom ;</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">A faded leaf of history /</subfield>
+    <subfield code="r">Rebecca Harding Davis --</subfield>
+    <subfield code="t">from Theophilus and others.</subfield>
+    <subfield code="t">Miss Maloney on the Chinese question ;</subfield>
+    <subfield code="t">Sunday afternoon in a poor-house /</subfield>
+    <subfield code="r">Mary Mapes Dodge --</subfield>
+    <subfield code="t">from the Independent.</subfield>
+    <subfield code="t">Transcendental wild oats /</subfield>
+    <subfield code="r">Louisa May Alcott --</subfield>
+    <subfield code="t">from Who would have thought it?.</subfield>
+    <subfield code="t">The arrival ;</subfield>
+    <subfield code="t">The little black girl ;</subfield>
+    <subfield code="t">The mysterious big boxes ;</subfield>
+    <subfield code="t">from The squatter and the Don.</subfield>
+    <subfield code="t">The Don's view of the treaty of Guadalupe Hidalgo /</subfield>
+    <subfield code="r">Maria Amparo Ruiz de Burton --</subfield>
+    <subfield code="t">from Harper's new monthly magazine.</subfield>
+    <subfield code="t">In the Maguerriwock /</subfield>
+    <subfield code="r">Harriet Prescott Spofford --</subfield>
+    <subfield code="t">from Our young folks.</subfield>
+    <subfield code="t">The sandpiper's nest ;</subfield>
+    <subfield code="t">from Audubon magazine.</subfield>
+    <subfield code="t">Woman's heartlessness ;</subfield>
+    <subfield code="t">from The poems of Celia Thaxter.</subfield>
+    <subfield code="t">Alone ;</subfield>
+    <subfield code="t">Remembrance /</subfield>
+    <subfield code="r">Celia Thaxter --</subfield>
+    <subfield code="t">from Mac-o-cheek press.</subfield>
+    <subfield code="t">The fancy ball ;</subfield>
+    <subfield code="t">from The galaxy.</subfield>
+    <subfield code="t">Giving back the flower ;</subfield>
+    <subfield code="t">from A women's poems.</subfield>
+    <subfield code="t">An after-poem ;</subfield>
+    <subfield code="t">from the Independent.</subfield>
+    <subfield code="t">The black princess ;</subfield>
+    <subfield code="t">from The capital.</subfield>
+    <subfield code="t">The funeral of a doll ;</subfield>
+    <subfield code="t">The grave at Frankfort ;</subfield>
+    <subfield code="t">from The capital.</subfield>
+    <subfield code="t">Faith in fairy-land ;</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">A lesson in a picture ;</subfield>
+    <subfield code="t">from Youth's companion.</subfield>
+    <subfield code="t">Trumpet flowers ;</subfield>
+    <subfield code="t">from Enchanted castle : and other poems.</subfield>
+    <subfield code="t">In the round tower at Cloyne ;</subfield>
+    <subfield code="t">from Child's world ballads and other poems.</subfield>
+    <subfield code="t">Confession ;</subfield>
+    <subfield code="t">from the Bookman.</subfield>
+    <subfield code="t">Inspiration and poem ;</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">A mistake in the bird-market ;</subfield>
+    <subfield code="t">from the Independent.</subfield>
+    <subfield code="t">A new Thanksgiving /</subfield>
+    <subfield code="r">Sarah Morgan Bryan Piatt.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from The Widder Doodle's courtship, and other sketches.</subfield>
+    <subfield code="t">A pleasure exertion /</subfield>
+    <subfield code="r">Marietta Holley ("Josiah Allen's wife") --</subfield>
+    <subfield code="t">from Culture and cooking; or, Art in the kitchen.</subfield>
+    <subfield code="t">Warming over ;</subfield>
+    <subfield code="t">Sauces ;</subfield>
+    <subfield code="t">On some table prejudices /</subfield>
+    <subfield code="r">Catherine Owen (Helen Alice Matthews Nitsch) --</subfield>
+    <subfield code="t">from Lippincott's magazine.</subfield>
+    <subfield code="t">"Miss Grief" /</subfield>
+    <subfield code="r">Constance Fenimore Woolson --</subfield>
+    <subfield code="t">from Men, women, and ghosts.</subfield>
+    <subfield code="t">The tenth of January ;</subfield>
+    <subfield code="t">from Harper's monthly magazine.</subfield>
+    <subfield code="t">The stone woman of Eastern Point /</subfield>
+    <subfield code="r">Elizabeth Stuart Phelps (Ward) --</subfield>
+    <subfield code="t">from Life among the Piutes.</subfield>
+    <subfield code="t">First meeting of Piutes and Whites ;</subfield>
+    <subfield code="t">Domestic and social moralities /</subfield>
+    <subfield code="r">Sarah Winnemucca (Thocmetony) --</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">The fate of a voice ;</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">Pictures of the Far West ;</subfield>
+    <subfield code="t">I Looking for camp ;</subfield>
+    <subfield code="t">II The coming of winter ;</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">Pictures of the Far West ;</subfield>
+    <subfield code="t">III The sheriff's posse /</subfield>
+    <subfield code="r">May Hallock Foote --</subfield>
+    <subfield code="t">from Harper's monthly magazine.</subfield>
+    <subfield code="t">An ex-brigadier /</subfield>
+    <subfield code="r">Sarah Barnwell Elliott --</subfield>
+    <subfield code="t">from The poems of Emma Lazarus.</subfield>
+    <subfield code="t">Echoes ;</subfield>
+    <subfield code="t">The guardian of the red disk ;</subfield>
+    <subfield code="t">The new colossus ;</subfield>
+    <subfield code="t">The new Ezekiel ;</subfield>
+    <subfield code="t">The South /</subfield>
+    <subfield code="r">Emma Lazarus --</subfield>
+    <subfield code="t">from Play-days : a book of stories for children.</subfield>
+    <subfield code="t">Woodchucks ;</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">The town poor ;</subfield>
+    <subfield code="t">from A native of Winby and other tales.</subfield>
+    <subfield code="t">The passing of Sister Barsett /</subfield>
+    <subfield code="r">Sarah Orne Jewett.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from Vogue.</subfield>
+    <subfield code="t">The story of an hour ;</subfield>
+    <subfield code="t">from the New Orleans times democrat.</subfield>
+    <subfield code="t">Lilacs ;</subfield>
+    <subfield code="t">from The complete works of Kate Chopin.</subfield>
+    <subfield code="t">The storm /</subfield>
+    <subfield code="r">Kate Chopin --</subfield>
+    <subfield code="t">from Harper's bazar.</subfield>
+    <subfield code="t">Two friends ;</subfield>
+    <subfield code="t">from Harper's bazar.</subfield>
+    <subfield code="t">Old Woman Magoun /</subfield>
+    <subfield code="r">Mary Wilkins Freeman --</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">The balcony ;</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">The old lady's restoration ;</subfield>
+    <subfield code="t">from Balcony stories.</subfield>
+    <subfield code="t">Anne Marie and Jeanne Marie /</subfield>
+    <subfield code="r">Grace King --</subfield>
+    <subfield code="t">from A branch of May.</subfield>
+    <subfield code="t">August ;</subfield>
+    <subfield code="t">Mid-March ;</subfield>
+    <subfield code="t">from A quiet road.</subfield>
+    <subfield code="t">Telling the bees ;</subfield>
+    <subfield code="t">from Spicewood.</subfield>
+    <subfield code="t">Drought ;</subfield>
+    <subfield code="t">A war memory ;</subfield>
+    <subfield code="t">from Wild cherry.</subfield>
+    <subfield code="t">Emily ;</subfield>
+    <subfield code="t">White flags ;</subfield>
+    <subfield code="t">from Selected poems.</subfield>
+    <subfield code="t">A flower of mullein ;</subfield>
+    <subfield code="t">from White April and other poems.</subfield>
+    <subfield code="t">Crows ;</subfield>
+    <subfield code="t">Nina ;</subfield>
+    <subfield code="t">White April /</subfield>
+    <subfield code="r">Lizette Woodworth Reese --</subfield>
+    <subfield code="t">from Chap-book.</subfield>
+    <subfield code="t">The tale of a self-made cat /</subfield>
+    <subfield code="r">Kate Douglas Wiggin --</subfield>
+    <subfield code="t">from A voice from the South.</subfield>
+    <subfield code="t">The higher education of women /</subfield>
+    <subfield code="r">Anna Julia Cooper --</subfield>
+    <subfield code="t">from Colored American magazine.</subfield>
+    <subfield code="t">Talma Gordon ;</subfield>
+    <subfield code="t">from Colored American magazine.</subfield>
+    <subfield code="t">Bro'r Abr'm Jimson's wedding /</subfield>
+    <subfield code="r">Pauline Elizabeth Hopkins --</subfield>
+    <subfield code="t">from the American Jewess.</subfield>
+    <subfield code="t">The wooing of Rachel Schlipsky /</subfield>
+    <subfield code="r">Laura Jacobson --</subfield>
+    <subfield code="t">The yellow wall-paper (manuscript version) /</subfield>
+    <subfield code="r">Charlotte Perkins (Stetson) Gilman --</subfield>
+    <subfield code="t">from Happy ending : the collected lyrics of Louise Imogen Guiney.</subfield>
+    <subfield code="t">Emily Bronte&#x308; ;</subfield>
+    <subfield code="t">Hylas ;</subfield>
+    <subfield code="t">London ;</subfield>
+    <subfield code="t">Sanctuary ;</subfield>
+    <subfield code="t">Two Irish peasant songs ;</subfield>
+    <subfield code="t">When on the marge of evening /</subfield>
+    <subfield code="r">Louise Imogen Guiney --</subfield>
+    <subfield code="t">from The white wampum.</subfield>
+    <subfield code="t">Erie waters ;</subfield>
+    <subfield code="t">Marshlands ;</subfield>
+    <subfield code="t">Shadow River, Muskoka ;</subfield>
+    <subfield code="t">from Canadian born.</subfield>
+    <subfield code="t">The corn husker ;</subfield>
+    <subfield code="t">Low tide at St. Andrews ;</subfield>
+    <subfield code="t">from Flint and feather.</subfield>
+    <subfield code="t">The Indian corn planter ;</subfield>
+    <subfield code="t">from Mother's magazine.</subfield>
+    <subfield code="t">The tenas klootchman ;</subfield>
+    <subfield code="t">from The moccasin maker.</subfield>
+    <subfield code="t">As it was in the beginning /</subfield>
+    <subfield code="r">E. Pauline Johnson (Tekahionwake).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">from Magnolia leaves.</subfield>
+    <subfield code="t">Alaska ;</subfield>
+    <subfield code="t">The Cherokee ;</subfield>
+    <subfield code="t">The coming woman ;</subfield>
+    <subfield code="t">The Saxon legend of language /</subfield>
+    <subfield code="r">Mary Weston Fordham --</subfield>
+    <subfield code="t">from A red record.</subfield>
+    <subfield code="t">History of some cases of rape /</subfield>
+    <subfield code="r">Ida Baker Wells-Barnett --</subfield>
+    <subfield code="t">from The Nebraska of Kate McPhelim Cleary.</subfield>
+    <subfield code="t">Dust storm ;</subfield>
+    <subfield code="t">Feet of clay /</subfield>
+    <subfield code="r">Kate McPhelim Cleary --</subfield>
+    <subfield code="t">from Mrs. Spring Fragrance.</subfield>
+    <subfield code="t">Mrs. Spring Fragrance ;</subfield>
+    <subfield code="t">"Its wavering image" ;</subfield>
+    <subfield code="t">What about the cat? /</subfield>
+    <subfield code="r">Sui Sin Far (Edith Maud Eaton) --</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">The basket maker ;</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">The walking woman /</subfield>
+    <subfield code="r">Mary Hunter Austin --</subfield>
+    <subfield code="t">from Wynema, a child of the forest.</subfield>
+    <subfield code="t">Some Indian dishes ;</subfield>
+    <subfield code="t">A conservative /</subfield>
+    <subfield code="r">Sophia Alice Callahan --</subfield>
+    <subfield code="t">from The renegade and other stories.</subfield>
+    <subfield code="t">The beast ;</subfield>
+    <subfield code="t">Genendel the pious /</subfield>
+    <subfield code="r">Martha Wolfenstein --</subfield>
+    <subfield code="t">from The goodness of St. Rocque.</subfield>
+    <subfield code="t">A carnival jangle ;</subfield>
+    <subfield code="t">Sister Josepha /</subfield>
+    <subfield code="r">Alice Dunbar-Nelson --</subfield>
+    <subfield code="t">from Harper's monthly magazine.</subfield>
+    <subfield code="t">Two converts ;</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">The loves of Sakura Jiro and the three headed maid /</subfield>
+    <subfield code="r">Onoto Watanna (Winnifred Eaton) --</subfield>
+    <subfield code="t">from Atlantic monthly.</subfield>
+    <subfield code="t">The school days of an Indian girl /</subfield>
+    <subfield code="r">Zitkala-S&#x30C;a (Gertrude Simmons Bonnin) --</subfield>
+    <subfield code="t">from Century magazine.</subfield>
+    <subfield code="t">The birth of the god of war ;</subfield>
+    <subfield code="t">The vine-leaf /</subfield>
+    <subfield code="r">Maria Cristina Mena</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Women</subfield>
+    <subfield code="z">United States</subfield>
+    <subfield code="v">Literary collections.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">American literature</subfield>
+    <subfield code="x">Women authors.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">American literature</subfield>
+    <subfield code="y">19th century.</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Kilcup, Karen L.</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Blackwell anthologies.</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">u324577</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2011.</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2011.</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2011.</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2010</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2010</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">Record replaced by OCLC BRN service FY2010</subfield>
+  </datafield>
+  <datafield tag="994" ind1=" " ind2=" ">
+    <subfield code="a">02</subfield>
+    <subfield code="b">DKC</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="a">PS508 .W7 N56 1997</subfield>
+    <subfield code="w">LC</subfield>
+    <subfield code="c">1</subfield>
+    <subfield code="i">30420200302325</subfield>
+    <subfield code="d">12/17/2011</subfield>
+    <subfield code="e">12/17/2011</subfield>
+    <subfield code="f">7/5/2018</subfield>
+    <subfield code="g">2</subfield>
+    <subfield code="l">STACKS</subfield>
+    <subfield code="m">WAIDNER-SP</subfield>
+    <subfield code="n">4</subfield>
+    <subfield code="p">$22.95</subfield>
+    <subfield code="r">Y</subfield>
+    <subfield code="s">Y</subfield>
+    <subfield code="t">BOOK</subfield>
+    <subfield code="u">2/10/1998</subfield>
+    <subfield code="x">ENG</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2=" ">
+    <subfield code="b">DICKINSON</subfield>
+    <subfield code="c">STACKS</subfield>
+    <subfield code="h">PS508 .W7 N56 1997</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <encodingLevel>3</encodingLevel>
+  <localLocation>Waidner-Spahr Library</localLocation>
+  <shelvingLocation>STACKS</shelvingLocation>
+  <callNumber>PS508 .W7 N56 1997</callNumber>
+  <volumes>
+   <volume>
+    <enumeration>       </enumeration>
+    <chronology>     </chronology>
+   </volume>
+  </volumes>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <availableThru>BOOK</availableThru>
+    <itemId>30420200302325</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01624cam a2200457 a 4500</leader>
+  <controlfield tag="001">991004016649705226</controlfield>
+  <controlfield tag="005">20130214232324.0</controlfield>
+  <controlfield tag="008">120524s2012    mau      b    001 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2011285309</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9780674067158</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0674067150</subfield>
+  </datafield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">40021728412</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PCarlD)u1012061-01dickinson_inst</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(Sirsi) i9780674067158</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)792887523</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="b">99951886069</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">OSU</subfield>
+    <subfield code="d">CDX</subfield>
+    <subfield code="d">YUS</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">pcc</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">a-cc---</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">DKCC</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">DS735</subfield>
+    <subfield code="b">.W695 2012</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">951</subfield>
+    <subfield code="2">23</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Wilkinson, Endymion Porter.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">Chinese history :</subfield>
+    <subfield code="b">a new manual /</subfield>
+    <subfield code="c">Endymion Wilkinson.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">[Revised edition].</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Cambridge, MA :</subfield>
+    <subfield code="b">Harvard University Asia Center,</subfield>
+    <subfield code="c">2012.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xxiii, 1124 pages ;</subfield>
+    <subfield code="c">28 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">Harvard-Yenching Institue monograph series ;</subfield>
+    <subfield code="v">84</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references (pages [903]-988 and indexes.</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="0">
+    <subfield code="a">China</subfield>
+    <subfield code="x">History</subfield>
+    <subfield code="v">Handbooks, manuals, etc.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">Harvard University.</subfield>
+    <subfield code="b">Asia Center.</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Harvard-Yenching Institute monograph series ;</subfield>
+    <subfield code="v">84.</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">u1012061</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">PromptCat FY2013</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="c">1</subfield>
+    <subfield code="i">30420205501863</subfield>
+    <subfield code="k">JUSTIN</subfield>
+    <subfield code="l">STACKS</subfield>
+    <subfield code="t">BOOK</subfield>
+    <subfield code="w">LC</subfield>
+  </datafield>
+  <datafield tag="994" ind1=" " ind2=" ">
+    <subfield code="a">92</subfield>
+    <subfield code="b">DKC</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="a">DS735 .W695 2012</subfield>
+    <subfield code="w">LC</subfield>
+    <subfield code="c">1</subfield>
+    <subfield code="i">30420205501863</subfield>
+    <subfield code="d">10/7/2014</subfield>
+    <subfield code="e">8/26/2014</subfield>
+    <subfield code="f">2/8/2019</subfield>
+    <subfield code="g">1</subfield>
+    <subfield code="l">OVERSIZE</subfield>
+    <subfield code="m">WAIDNER-SP</subfield>
+    <subfield code="n">1</subfield>
+    <subfield code="r">Y</subfield>
+    <subfield code="s">Y</subfield>
+    <subfield code="t">BOOK</subfield>
+    <subfield code="u">2/27/2013</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2=" ">
+    <subfield code="b">DICKINSON</subfield>
+    <subfield code="c">OVERSIZE</subfield>
+    <subfield code="h">DS735 .W695 2012</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <encodingLevel>3</encodingLevel>
+  <localLocation>Waidner-Spahr Library</localLocation>
+  <shelvingLocation>OVERSIZE</shelvingLocation>
+  <callNumber>DS735 .W695 2012</callNumber>
+  <volumes>
+   <volume>
+    <enumeration>       </enumeration>
+    <chronology>     </chronology>
+   </volume>
+  </volumes>
+  <circulations>
+   <circulation>
+    <availableNow value="1"/>
+    <availableThru>BOOK</availableThru>
+    <itemId>30420205501863</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>2</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><opacRecord>
+  <bibliographicRecord>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02771cam a2200577 i 4500</leader>
+  <controlfield tag="001">991004193779705226</controlfield>
+  <controlfield tag="005">20151024112414.0</controlfield>
+  <controlfield tag="008">150211s2015    mau      bf   001 0 eng  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2015005599</subfield>
+  </datafield>
+  <datafield tag="019" ind1=" " ind2=" ">
+    <subfield code="a">907204480</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9780674088467</subfield>
+    <subfield code="q">(paperback)</subfield>
+    <subfield code="q">(alkaline paper)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0674088468</subfield>
+    <subfield code="q">(paperback)</subfield>
+    <subfield code="q">(alkaline paper)</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PCarlD)u1394307-01dickinson_inst</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(Sirsi) i9780674088467</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)903436716</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="b">99964478105</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">OCLCF</subfield>
+    <subfield code="d">BTCTA</subfield>
+    <subfield code="d">YDXCP</subfield>
+    <subfield code="d">OSU</subfield>
+    <subfield code="d">STF</subfield>
+    <subfield code="d">OCLCO</subfield>
+  </datafield>
+  <datafield tag="041" ind1="0" ind2=" ">
+    <subfield code="a">eng</subfield>
+    <subfield code="a">chi</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">pcc</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">a-cc---</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">DKCC</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="2">RDA</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">DS735</subfield>
+    <subfield code="b">.W695 2015</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="0">
+    <subfield code="a">951</subfield>
+    <subfield code="2">23</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Wilkinson, Endymion Porter,</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">Chinese history :</subfield>
+    <subfield code="b">a new manual /</subfield>
+    <subfield code="c">Endymion Wilkinson.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">Fourth edition.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Cambridge, Massachusetts :</subfield>
+    <subfield code="b">Harvard University Asia Center, for the Harvard-Yenching Institute,</subfield>
+    <subfield code="c">2015.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">xxiii, 1135 pages ;</subfield>
+    <subfield code="c">28 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="a">Harvard-Yenching Institute monograph series ;</subfield>
+    <subfield code="v">100</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">"First edition published as Chinese history : a manual, 1998"--Title page verso.</subfield>
+  </datafield>
+  <datafield tag="520" ind1="2" ind2=" ">
+    <subfield code="a">"An indispensable guide to the civilization and history of China. Introduces sources from prehistory to the present and examines the context in which the sources were produced, preserved, and received, the problems of research and interpretation associated with them, and the best, most up-to-date secondary works"--</subfield>
+    <subfield code="c">Provided by publisher.</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references and indexes.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">LANGUAGE -- PEOPLE -- GEOGRAPHY &amp; ENVIRONMENT -- GOVERNING &amp; EDUCATING -- IDEAS, BELIEFS, LITERATURE &amp; FINE ARTS -- AGRICULTURE, FOOD &amp; DRINK -- TECHNOLOGY &amp; SCIENCE -- TRADE TOPICS -- HISTORY -- PRE-QIN -- QIN-WUDAI -- SONG-QING -- EARLY TWENTIETH CENTURY -- BIBLIOGRAPHY.</subfield>
+  </datafield>
+  <datafield tag="546" ind1=" " ind2=" ">
+    <subfield code="a">Written in both English and Chinese.</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="0">
+    <subfield code="a">China</subfield>
+    <subfield code="x">History</subfield>
+    <subfield code="v">Handbooks, manuals, etc.</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="0">
+    <subfield code="a">China</subfield>
+    <subfield code="x">Civilization</subfield>
+    <subfield code="v">Handbooks, manuals, etc.</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="0">
+    <subfield code="a">China</subfield>
+    <subfield code="x">History</subfield>
+    <subfield code="v">Sources.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">Harvard University.</subfield>
+    <subfield code="b">Asia Center.</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Harvard-Yenching Institute monograph series ;</subfield>
+    <subfield code="v">100.</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">u1394307</subfield>
+  </datafield>
+  <datafield tag="910" ind1=" " ind2=" ">
+    <subfield code="a">PromptCat FY2016</subfield>
+  </datafield>
+  <datafield tag="938" ind1=" " ind2=" ">
+    <subfield code="a">Baker and Taylor</subfield>
+    <subfield code="b">BTCP</subfield>
+    <subfield code="n">BK0016859272</subfield>
+  </datafield>
+  <datafield tag="938" ind1=" " ind2=" ">
+    <subfield code="a">YBP Library Services</subfield>
+    <subfield code="b">YANK</subfield>
+    <subfield code="n">12361053</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="c">1</subfield>
+    <subfield code="i">30420205728698</subfield>
+    <subfield code="k">JUSTIN</subfield>
+    <subfield code="l">STACKS</subfield>
+    <subfield code="t">BOOK</subfield>
+    <subfield code="w">LC</subfield>
+  </datafield>
+  <datafield tag="994" ind1=" " ind2=" ">
+    <subfield code="a">92</subfield>
+    <subfield code="b">DKC</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="a">DS735 .W695 2015</subfield>
+    <subfield code="w">LC</subfield>
+    <subfield code="c">1</subfield>
+    <subfield code="i">30420205728698</subfield>
+    <subfield code="d">12/12/2017</subfield>
+    <subfield code="e">9/4/2017</subfield>
+    <subfield code="l">STACKS</subfield>
+    <subfield code="m">WAIDNER-SP</subfield>
+    <subfield code="n">2</subfield>
+    <subfield code="r">Y</subfield>
+    <subfield code="s">Y</subfield>
+    <subfield code="t">BOOK</subfield>
+    <subfield code="u">11/2/2015</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2=" ">
+    <subfield code="b">DICKINSON</subfield>
+    <subfield code="c">STACKS</subfield>
+    <subfield code="h">DS735 .W695 2015</subfield>
+  </datafield>
+</record>
+  </bibliographicRecord>
+<holdings>
+ <holding>
+  <encodingLevel>3</encodingLevel>
+  <localLocation>Waidner-Spahr Library</localLocation>
+  <shelvingLocation>STACKS</shelvingLocation>
+  <callNumber>DS735 .W695 2015</callNumber>
+  <volumes>
+   <volume>
+    <enumeration>       </enumeration>
+    <chronology>     </chronology>
+   </volume>
+  </volumes>
+  <circulations>
+   <circulation>
+    <availableNow value="0"/>
+    <availabilityDate>01/25/2023</availabilityDate>
+    <availableThru>BOOK</availableThru>
+    <itemId>30420205728698</itemId>
+    <renewable value="0"/>
+    <onHold value="0"/>
+   </circulation>
+  </circulations>
+ </holding>
+</holdings>
+</opacRecord></zs:recordData><zs:recordPosition>3</zs:recordPosition></zs:record></zs:records><zs:nextRecordPosition>4</zs:nextRecordPosition><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@attr 1=4 "Chinese history : a new manual"</zs:query><zs:maximumRecords>3</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:extraRequestData><zs:target>dickinson.alma.exlibrisgroup.com:1921/01DICKINSON_INST</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>
