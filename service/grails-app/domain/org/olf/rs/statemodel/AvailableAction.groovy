@@ -34,43 +34,63 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     /** The default set of results to use for this action / event */
     ActionEventResultList resultList;
 
+    /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
+    String isAvailableGroovy;
+
+    static belongsTo = [ model: StateModel ];
+
     static constraints = {
-              model (nullable: false)
-          fromState (nullable: false)
-        actionEvent (nullable: true, unique: ['model', 'fromState']) // Only temporarily nullable, until the data gets added for it
-         actionCode (nullable: false, blank:false) // To be removed once the data has been added
-        triggerType (nullable: true, blank:false)
-         actionType (nullable: true, blank:false)
-         actionBody (nullable: true, blank:false)
-         resultList (nullable: true)
+                    model (nullable: false)
+                fromState (nullable: false)
+              actionEvent (nullable: true, unique: ['model', 'fromState']) // Only temporarily nullable, until the data gets added for it
+               actionCode (nullable: false, blank:false) // To be removed once the data has been added
+              triggerType (nullable: true, blank:false)
+               actionType (nullable: true, blank:false)
+               actionBody (nullable: true, blank:false)
+               resultList (nullable: true)
+        isAvailableGroovy (nullable: true, blank: false)
     }
 
     static mapping = {
-                 id column : 'aa_id', generator: 'uuid2', length:36
-            version column : 'aa_version'
-              model column : 'aa_model'
-          fromState column : 'aa_from_state'
-         actionCode column : 'aa_action_code'  // To be removed once the data has been added
-        actionEvent column : 'aa_action_event'
-        triggerType column : 'aa_trigger_type'
-         actionType column : 'aa_action_type'
-         actionBody column : 'aa_action_body'
-         resultList column : 'aa_result_list'
+                       id column : 'aa_id', generator: 'uuid2', length:36
+                  version column : 'aa_version'
+                    model column : 'aa_model'
+                fromState column : 'aa_from_state'
+               actionCode column : 'aa_action_code'  // To be removed once the data has been added
+              actionEvent column : 'aa_action_event'
+              triggerType column : 'aa_trigger_type'
+               actionType column : 'aa_action_type'
+               actionBody column : 'aa_action_body'
+               resultList column : 'aa_result_list'
+        isAvailableGroovy column : 'aa_is_available_groovy', length: 512
     }
 
-    public static AvailableAction ensure(String model, String state, String action, String triggerType, String resultListCode = null) {
+    public static AvailableAction ensure(
+        String model,
+        String state,
+        String action,
+        String triggerType,
+        String resultListCode = null,
+        String isAvailableGroovy = null
+    ) {
 
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
             // Excellent we have found the state model
-            result = ensure(sm, state, action, triggerType, resultListCode);
+            result = ensure(sm, state, action, triggerType, resultListCode, isAvailableGroovy);
         }
         return(result);
     }
 
-    public static AvailableAction ensure(StateModel sm, String state, String action, String triggerType, String resultListCode = null) {
-
+    public static AvailableAction ensure(
+        StateModel sm,
+        String state,
+        String action,
+        String triggerType,
+        String resultListCode = null,
+        String isAvailableGroovy = null
+    ) {
         AvailableAction result = null;
         if (sm) {
             Status s = Status.lookup(state);
@@ -89,6 +109,7 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                 result.actionEvent = ActionEvent.lookup(action);
                 result.triggerType = triggerType;
                 result.resultList = ActionEventResultList.lookup(resultListCode);
+                result.isAvailableGroovy = isAvailableGroovy;
                 result.save(flush:true, failOnError:true);
             }
         }
@@ -99,9 +120,21 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 		return(executeQuery(POSSIBLE_FROM_STATES_QUERY,[stateModelCode: stateModel, action: action, triggerType: triggerType]));
 	}
 
-    public static ActionEvent[] getUniqueActionsForModel(StateModel model, List<String> excludeActions, Boolean includeProtocolActions) {
+    public static List<ActionEvent> getUniqueActionsForModel(StateModel model, List<String> excludeActions, Boolean includeProtocolActions, boolean traverseHierarchy) {
         String notIncludeActionType = includeProtocolActions ? "dummy" : TRIGGER_TYPE_PROTOCOL;
-        return(executeQuery(POSSIBLE_ACTIONS_FOR_MODEL_QUERY, [model: model, excludeActions: excludeActions, excludeActionType: notIncludeActionType]));
+        List<ActionEvent> actionEvents = executeQuery(POSSIBLE_ACTIONS_FOR_MODEL_QUERY, [model: model, excludeActions: excludeActions, excludeActionType: notIncludeActionType]);
+
+        // Now do we need to go up the hierarchy
+        if (traverseHierarchy && model.inheritedStateModels) {
+            // We need to go up the hierarchy
+            model.inheritedStateModels.each { inheritedStateModel ->
+                actionEvents += getUniqueActionsForModel(inheritedStateModel.inheritedStateModel, excludeActions, includeProtocolActions, traverseHierarchy);
+            }
+
+            // Remove any duplicates
+            actionEvents.unique(true, { actionEvent1, actionEvent2 -> actionEvent1.id <=> actionEvent2.id });
+        }
+        return(actionEvents);
     }
 
     public String toString() {

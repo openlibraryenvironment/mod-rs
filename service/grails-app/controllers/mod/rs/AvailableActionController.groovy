@@ -108,6 +108,14 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
             required = true,
             value = "The action that you want to know which states a request could move onto after the action has been performed",
             dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "traverseHierarchy",
+            paramType = "query",
+            required = true,
+            value = "Do we look at the state models we have inherited about",
+            dataType = "boolean",
+            defaultValue = "true"
         )
     ])
 	def toStates() {
@@ -115,7 +123,11 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		def result = [ : ]
 		if (request.method == 'GET') {
 			if (params.stateModel && params.actionCode) {
-                List<Transition> transitions = statusService.possibleActionTransitionsForModel(StateModel.lookup(params.stateModel), ActionEvent.lookup(params.actionCode));
+                boolean traverseHierarchy = false;
+                if (params.traverseHierarchy) {
+                    traverseHierarchy = params.traverseHierarchy.toBoolean();
+                }
+                List<Transition> transitions = statusService.possibleActionTransitionsForModel(StateModel.lookup(params.stateModel), ActionEvent.lookup(params.actionCode), traverseHierarchy);
                 result.toStates = [ ];
                 transitions.forEach{transition ->
                     Map coreDetails = [ : ];
@@ -180,6 +192,14 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
             value = "The height of the graph",
             dataType = "int",
             defaultValue = "2000"
+        ),
+        @ApiImplicitParam(
+            name = "traverseHierarchy",
+            paramType = "query",
+            required = true,
+            value = "Do we look at the state models we have inherited about",
+            dataType = "boolean",
+            defaultValue = "true"
         )
     ])
 	def createGraph() {
@@ -193,6 +213,12 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
             Actions.ACTION_MESSAGE,
             Actions.ACTION_INCOMING_ISO18626
         ];
+
+        boolean traverseHierarchy = false;
+        if (params.traverseHierarchy) {
+            traverseHierarchy = params.traverseHierarchy.toBoolean();
+        }
+
 		if (params.excludeActions) {
 			// They have specified some additional actions that should be ignored
 			ignoredActions.addAll(params.excludeActions.split(","));
@@ -214,7 +240,7 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
         Boolean includeProtocolActions = !((params.excludeProtocolActions == null) ? false : params.excludeProtocolActions.toBoolean());
 
 		// Tell it to build the graph, it should return the dot file in the output stream
-		graphVizService.generateGraph(params.stateModel, includeProtocolActions, ignoredActions, outputStream, height);
+		graphVizService.generateGraph(params.stateModel, includeProtocolActions, ignoredActions, outputStream, height, traverseHierarchy);
 
 		// Hopefully we have what we want in the output stream
 		outputStream.flush();

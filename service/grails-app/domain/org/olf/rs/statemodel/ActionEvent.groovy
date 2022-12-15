@@ -42,6 +42,9 @@ class ActionEvent implements MultiTenant<ActionEvent> {
     /** If the action can be both requester and responder and we need to differentiate, then this is the class for the responder */
     String responderServiceClass;
 
+    /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
+    String isAvailableGroovy;
+
     static constraints = {
                          code (nullable: false, blank: false, unique: true)
                   description (nullable: false, blank: false)
@@ -50,6 +53,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
                    undoStatus (nullable: true)
                  serviceClass (nullable: true, blank: false)
         responderServiceClass (nullable: true, blank: false)
+            isAvailableGroovy (nullable: true, blank: false)
     }
 
     static mapping = {
@@ -62,6 +66,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
                    undoStatus column: 'ae_undo_status', length: 20
                  serviceClass column: 'ae_service_class', length: 64
         responderServiceClass column: 'ae_responder_service_class', length: 64
+            isAvailableGroovy column: 'ae_is_available_groovy', length: 512
     }
 
     public static ActionEvent ensure(
@@ -71,7 +76,8 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         String serviceClass,
         String resultListCode,
         UndoStatus undoStatus = UndoStatus.NO,
-        String responderServiceClass = null
+        String responderServiceClass = null,
+        String isAvailableGroovy = null
     ) {
         // Lookup to see if the code exists
         ActionEvent actionEvent = findByCode(code);
@@ -91,6 +97,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         actionEvent.serviceClass = serviceClass;
         actionEvent.undoStatus = undoStatus;
         actionEvent.responderServiceClass = responderServiceClass;
+        actionEvent.isAvailableGroovy = isAvailableGroovy;
 
         // and save it
         actionEvent.save(flush:true, failOnError:true);
