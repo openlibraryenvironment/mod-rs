@@ -91,7 +91,6 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "r_file_definition", baseTableName: "report", constraintName: "FK6f40ksfw3i43n5yjkpnk69nvj", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "fd_id", referencedTableName: "file_definition", validate: "true")
 
         // Remove the 2 columns that are no longer used
-        dropColumn(columnName: "r_filename", tableName: "report")
         dropColumn(columnName: "r_report_definition", tableName: "report")
     }
 }
