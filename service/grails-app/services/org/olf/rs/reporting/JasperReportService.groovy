@@ -7,10 +7,12 @@ import java.text.SimpleDateFormat;
 import javax.sql.DataSource;
 
 import org.olf.rs.OkapiSettingsService;
-import org.olf.rs.reports.Report;
+import org.olf.rs.files.FileDefinition;
+import org.olf.rs.files.FileFetchResult;
+import org.olf.rs.files.FileService;
 
 import groovy.json.JsonSlurper;
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Slf4j;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -41,6 +43,7 @@ public class JasperReportService {
     ];
 
     DataSource dataSource;
+    FileService fileService;
     OkapiSettingsService okapiSettingsService;
 
     // Very simple form of caching, potentially use EHCache
@@ -48,13 +51,49 @@ public class JasperReportService {
     private static final Map cachedReports = [ : ];
 
     /**
+     * loads a report from the supplied report path
+     * @param resourcePath The resource path to load the file from
+     * @return A fileFetchResult that contains the input stream of the resource or an error if one occurred
+     */
+    public FileFetchResult loadReportFromResource(String resourcePath) {
+        FileFetchResult result = new FileFetchResult();
+        try {
+            // Obtain the URL to the resource
+            URL resource = this.class.classLoader.getResource(resourcePath);
+            if (resource == null) {
+                result.error = "Unable to find resource: " + resourcePath;
+            } else {
+                // Now actually read the resource into a string
+                result.inputStream = resource.openStream();
+            }
+        } catch (Exception e) {
+            String message = "Exception thrown while loading report definition for " + resourcePath;
+            result.error = message + ", exeption: " + e.getMessage();
+            log.errorEnabled(message, e);
+
+        }
+
+        // Return the result to the caller
+        return(result);
+    }
+
+    /**
      * Generates a report using Jasper Reports
-     * @param reportId The id of the report that is to be run
+     * @param fileDefinition The file definition that defines the report to be run
      * @param schema The database schema that the report will be run against
      * @param outputStream Where the report should be output to
      * @param idsForReport The ids to pass into the report
+     * @param fallbackReportResource If we do not have a report using the file definition, the is where we obtain it from the resources
+     * @return The input stream for the generated report or null if the report failed
      */
-    public void executeReport(String reportId, String schema, OutputStream outputStream, List idsForReport = null) {
+    public InputStream executeReport(
+        FileDefinition fileDefinition,
+        String schema,
+        List idsForReport = null,
+        String fallbackReportResource = null
+    ) {
+        InputStream result = null;
+
         // If you are having issues with fonts, take a look at
         // https://community.jaspersoft.com/wiki/custom-font-font-extension
         Connection connection = dataSource.getConnection();
@@ -65,57 +104,78 @@ public class JasperReportService {
             AddDateTimeParameters(schema, parameters);
 
             // Compile the report
-            JasperReport jasperReport = getReport(reportId);
+            JasperReport jasperReport = getReport(fileDefinition, fallbackReportResource);
 
             // Execute the report
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
 
             // Now output the report
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-
+            result = new ByteArrayInputStream(outputStream.toByteArray());
+            outputStream.close();
         } catch(Exception e) {
             log.error("Exception thrown while generating a report", e);
         } finally {
             // Not forgetting to close the connection
             connection.close();
         }
+
+        // Return the result to the caller
+        return(result);
     }
 
     /**
      * Returns a compiled report for the given id
-     * @param id The id of the report
+     * @param fileDefinition The file definition that defines the report to be run
+     * @param fallbackReportResource If we do not have a report using the file definition, the is where we obtain it from the resources
      * @return The report or null if it does not exist or compile
      */
-    private JasperReport getReport(String id) {
+    private JasperReport getReport(FileDefinition fileDefinition, String fallbackReportResource) {
+        String cacheKey = ((fileDefinition == null) ? fallbackReportResource : fileDefinition.id);
+
         // Lookup the cache to see if it has been previously compiled
-        JasperReport report = cachedReports[id];
+        JasperReport report = cachedReports[cacheKey];
 
         // Did we find it
         if (report == null) {
+            FileFetchResult fetchResult;
+
             // No we did not
             try {
-                // look in the database to get the report
-                Report dbReport = Report.lookup(id);
+                // look to see if we can get hold of the report
+                if (fileDefinition == null) {
+                    // we need to obtain it from the resources
+                    fetchResult = loadReportFromResource(fallbackReportResource);
+                } else {
+                    // It is stored in the database or the file system
+                    fetchResult = fileService.fetch(fileDefinition);
+                }
 
-                if (dbReport == null) {
-                    log.error("Unable to find report: " + id);
+                // Did we find the input stream
+                if (fetchResult.inputStream == null) {
+                    log.error("Unable to find report with file id: " + cacheKey + ", Error: " + fetchResult.error);
                 } else {
                     // Compile the report
-                    InputStream reportInputStream = new ByteArrayInputStream(dbReport.reportDefinition.getBytes());
-                    report = JasperCompileManager.compileReport(reportInputStream);
-                    reportInputStream.close();
+                    report = JasperCompileManager.compileReport(fetchResult.inputStream);
 
                     // Did it compile
                     if (report == null) {
                         // Need to check, not sure if it returns null or throws an exception when the report has an error
-                        log.error("Failed to compile report: " + id);
+                        log.error("Failed to compile report with file if: " + cacheKey);
                     } else {
                         // Add it to the cache
-                        cachedReports[id] = report;
+                        cachedReports[cacheKey] = report;
                     }
                 }
             } catch (Exception e) {
-                log.error("Exception thrown while compiling report " + id, e);
+                log.error("Exception thrown while compiling report with file id" + cacheKey, e);
+            } finally {
+                // If we have an input stream ensure it is closed
+                if (fetchResult?.inputStream != null) {
+                    // We do so lets close it
+                    fetchResult.inputStream.close();
+                }
             }
         }
 

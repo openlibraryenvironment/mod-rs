@@ -7,7 +7,6 @@ import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
 import org.olf.rs.referenceData.RefdataValueData;
-import org.olf.rs.referenceData.ReportData;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.referenceData.StateModelData;
 import org.olf.rs.referenceData.StatusData;
@@ -66,9 +65,6 @@ public class HousekeepingService implements EventPublisher {
 
         // Load the reference data (needs to be done before settings
         RefdataValueData.loadAll();
-
-        // The predefined reports
-        ReportData.loadAll();
 
 		// Add the Settings
 		SettingsData.loadAll();
