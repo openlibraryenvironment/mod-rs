@@ -25,7 +25,12 @@ class UrlMappings {
     "/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
     "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
     "/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
-    "/rs/availableAction/testReport" (controller: "availableAction", action: "testReport")
+
+    "/rs/report/createUpdate" (controller: "report", action: "createUpdate")
+    "/rs/report/execute" (controller: "report", action: "execute")
+
+    "/rs/fileDefinition/testFileUpload" (controller: "fileDefinition", action: "testFileUpload")
+    "/rs/fileDefinition/testFileDownload/$fileId" (controller: "fileDefinition", action: "testFileDownload")
 
     "/rs/stateModel/export" (controller: "stateModel", action: "export")
     "/rs/stateModel/import" (controller: "stateModel", action: "ingest")

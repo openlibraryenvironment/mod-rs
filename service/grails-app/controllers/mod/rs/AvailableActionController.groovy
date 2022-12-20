@@ -1,6 +1,5 @@
 package mod.rs;
 
-import org.olf.rs.EmailService;
 import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.AvailableAction;
@@ -247,79 +246,4 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		response.status = 200;
 		response.setContentType("text/plain");
 	}
-
-    org.olf.rs.reporting.JasperReportService jasperReportService;
-    EmailService emailService
-
-    /**
-     * Tests the jasper reports functionality by running the pullslip report and saving it to D:/Temp/TestPullSlip.pdf
-     * Example call: curl --http1.1 -sSLf -H "accept: application/json" -H "X-Okapi-Tenant: diku" --connect-timeout 10 --max-time 300 -XGET http://localhost:8081/rs/availableAction/testReport?id=c2bc1883-5d10-4fb3-ad84-5120f743ffca&id=7a42ed5a-9608-4bef-9ba2-3cc79a377d47
-     * The report is saved to the file D:/Temp/TestPullSlip.pdf and emailed to chas.
-     */
-    @ApiOperation(
-        value = "Exercises the jasper report service ",
-        nickname = "availableAction/testReport",
-        httpMethod = "GET"
-    )
-    @ApiResponses([
-        @ApiResponse(code = 200, message = "Success")
-    ])
-    @ApiImplicitParams([
-        @ApiImplicitParam(
-            name = "id",
-            paramType = "query",
-            allowMultiple = true,
-            required = true,
-            value = "The id(s) that the picklist is to be printed for",
-            dataType = "string"
-        )
-    ])
-    def testReport() {
-        String schema = "diku_mod_rs";
-        List ids;
-        if (params.id == null) {
-            ids = new ArrayList();
-        } else if (params.id instanceof String) {
-            ids = new ArrayList();
-            ids.add(params.id);
-        } else {
-            // it must be an array
-            ids = params.id;
-        }
-        String outputFilename = 'D:/Temp/TestPullSlip.pdf';
-        org.olf.rs.reports.Report report = org.olf.rs.reports.Report.lookupPredefinedId(org.olf.rs.referenceData.ReportData.ID_PATRON_REQUEST_PULL_SLIP_1);
-        OutputStream outputStream = new FileOutputStream(new File(outputFilename));
-        try {
-            jasperReportService.executeReport(report.id, schema, outputStream, ids);
-        } catch (Exception e) {
-            log.error("Exception thrown generating report", e);
-        } finally {
-            outputStream.close();
-        }
-
-        // In order to test this ensure you have configured mod-email
-        // also need to go through okapi, rather than local otherwise it will not find mod-email
-        File file = new File(outputFilename);
-        byte[] binaryContent = file.bytes;
-        String encoded = binaryContent.encodeBase64().toString();
-        Map emailParamaters = [
-            notificationId: '1',
-            to: 'chaswoodfield@gmail.com',
-            header: 'Has the pull slip attached',
-            body: 'Will it get through',
-            outputFormat: 'text/plain',
-            attachments: [
-                [
-                    contentType: 'application/pdf',
-                    name: 'Pull Slip',
-                    description: 'This is a Pull Slip',
-                    data: encoded,
-                    disposition: 'base64'
-                ]
-            ]
-        ];
-
-        // Send an email with the pull slip in
-        emailService.sendEmail(emailParamaters);
-    }
 }

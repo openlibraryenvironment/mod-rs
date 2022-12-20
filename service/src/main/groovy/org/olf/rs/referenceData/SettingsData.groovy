@@ -4,6 +4,7 @@ import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.statemodel.StateModel;
 
+import com.k_int.web.toolkit.files.FileUploadService;
 import com.k_int.web.toolkit.settings.AppSetting;
 
 import groovy.util.logging.Slf4j;
@@ -23,6 +24,7 @@ public class SettingsData {
 
     private static final String SECTION_AUTO_RESPONDER       = 'autoResponder';
     private static final String SECTION_CHAT                 = 'chat';
+    private static final String SECTION_FILE_STORAGE         = 'fileStorage';
     private static final String SECTION_HOST_LMS_INTEGRATION = 'hostLMSIntegration';
     private static final String SECTION_LOCAL_NCIP           = 'localNCIP';
     private static final String SECTION_NETWORK              = 'network';
@@ -118,6 +120,14 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_REQUESTER_CDL = 'state_model_requester_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER     = 'state_model_responder';
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL = 'state_model_responder_cdl';
+
+    public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
+    public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
+    public static final String SETTING_FILE_STORAGE_S3_ACCESS_KEY    = 'S3AccessKey';
+    public static final String SETTING_FILE_STORAGE_S3_SECRET_KEY    = 'S3SecretKey';
+    public static final String SETTING_FILE_STORAGE_S3_BUCKET_NAME   = 'S3BucketName';
+    public static final String SETTING_FILE_STORAGE_S3_BUCKET_REGION = 'S3BucketRegion';
+    public static final String SETTING_FILE_STORAGE_S3_OBJECT_PREFIX = 'S3ObjectPrefix';
 
     public static void loadAll() {
         (new SettingsData()).load();
@@ -230,6 +240,15 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
+
+            ensureAppSetting(SETTING_FILE_STORAGE_ENGINE, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, FileUploadService.S3_STORAGE_ENGINE);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_ENDPOINT, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_ACCESS_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_SECRET_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_NAME, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_REGION, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_OBJECT_PREFIX, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, 'reshare-');
+
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
         }
