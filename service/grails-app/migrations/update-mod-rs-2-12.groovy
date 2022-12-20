@@ -79,11 +79,7 @@ databaseChangeLog = {
             }
         }
 
-        addColumn(tableName: "report") {
-            column(defaultValue: "report.pdf", name: "r_filename", type: "varchar(64)") {
-                constraints(nullable: "false")
-            }
-        }
+        addDefaultValue(columnDataType: "varchar(64)", columnName: "r_filename", defaultValue: "report.pdf", tableName: "report")
         
         addColumn(tableName: "report") {
             column(name: "r_file_definition", type: "varchar(36)") {
