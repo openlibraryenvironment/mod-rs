@@ -1,13 +1,11 @@
 package org.olf.rs.files
 
-import org.olf.rs.files.FileType
-
 import com.k_int.web.toolkit.files.FileUpload;
 
 import grails.gorm.MultiTenant;
 
 /**
- * Holds the detils for a file that has been uploaded
+ * Holds the details for a file that has been uploaded
  * @author Chas
  *
  */

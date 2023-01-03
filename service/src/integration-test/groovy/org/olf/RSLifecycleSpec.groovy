@@ -1,17 +1,20 @@
 package org.olf
 
-import org.olf.rs.HostLMSLocationService
-
 import java.text.SimpleDateFormat;
 
 import javax.sql.DataSource
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.grails.orm.hibernate.HibernateDatastore
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.EmailService
 import org.olf.rs.EventPublicationService
 import org.olf.rs.GrailsEventIdentifier;
 import org.olf.rs.HostLMSLocation
+import org.olf.rs.HostLMSLocationService
 import org.olf.rs.HostLMSService
 import org.olf.rs.HostLMSShelvingLocation
 import org.olf.rs.PatronRequest
@@ -30,6 +33,7 @@ import grails.events.bus.EventBus
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
+import grails.web.http.HttpHeaders;
 import groovy.util.logging.Slf4j
 import spock.lang.*
 import spock.util.concurrent.PollingConditions;
@@ -350,7 +354,7 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstThree' | DIRECTORY_INFO
   }
 
-    void changeSettings(String tenant_id, Map changes_needed, boolean hidden = false) {
+    List changeSettings(String tenant_id, Map changes_needed, boolean hidden = false) {
         // RequestRouter = Static
         setHeaders([
             'X-Okapi-Tenant': tenant_id,
@@ -371,7 +375,13 @@ class RSLifecycleSpec extends HttpSpec {
                     log.debug("Result of settings update: ${update_setting_result}");
                 }
             }
+
+            // Get hold of the updated settings and return them
+            resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0', 'filters' : "hidden==${hidden}"]);
         }
+
+        // Return the settings
+        return(resp);
     }
 
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
@@ -1013,5 +1023,80 @@ class DosomethingSimple {
         where:
             requesterTenantId | responderTenantId
             "RSInstOne"       | "RSInstThree"
+    }
+
+    void "Configure Tenants for reporting"(String tenant_id, String key, String value) {
+        when:"We fetch the existing settings for ${tenant_id}"
+            List settings = changeSettings(tenant_id, [ (key) : value ]);
+            def newSetting = settings.find { setting -> setting.key.equals(key) };
+            log.debug("set key: " + key + ", to value: " + value);
+            log.debug("Setting: " + settings.toString());
+            log.debug("new setting: " + newSetting.toString());
+
+        then:"Tenant is configured"
+            assert(newSetting != null);
+            assert(newSetting.value.equals(value));
+
+        where:
+            tenant_id     | key             | value
+            'RSInstThree' | "S3SecretKey"   | "RESHARE_AGG_SECRET_KEY"
+            'RSInstThree' | "S3Endpoint"    | "http://127.0.0.1:9010"
+            'RSInstThree' | "S3AccessKey"   | "RESHARE_AGG_ACCESS_KEY"
+            'RSInstThree' | "S3BucketName"  | "reshare-general"
+            'RSInstThree' | "storageEngine" | "S3"
+
+    }
+
+    void "Upload_Download_File"(String tenantId, String fileContents, String fileContentType, String filename) {
+        when:"We upload and then download a file"
+            // Post to the upload end point
+            // Build the http entity
+            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+            multipartEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            multipartEntityBuilder.addBinaryBody("file", fileContents.getBytes(), ContentType.create(fileContentType), filename);
+            multipartEntityBuilder.addTextBody("fileType", "REPORT_DEFINITION");
+            multipartEntityBuilder.addTextBody("description", "A simple test of file upload");
+            HttpEntity httpEntity = multipartEntityBuilder.build();
+            InputStream entityInputStream = httpEntity.getContent();
+            String body = httpEntity.getContent().text;
+            entityInputStream.close();
+
+            // Now set the headers
+            setHeaders([
+                'X-Okapi-Tenant': tenantId,
+                (HttpHeaders.ACCEPT) : 'application/json',
+                (HttpHeaders.CONTENT_TYPE) : httpEntity.getContentType().value,
+                (HttpHeaders.CONTENT_LENGTH) : httpEntity.getContentLength().toString()
+            ]);
+            def uploadResponse = doPost("${baseUrl}/rs/fileDefinition/testFileUpload".toString(), null, null, {
+                // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
+                request.setBody(body);
+            });
+            log.debug("Response from posting attachment: " + uploadResponse.toString());
+
+            // If we successfully uploaded then attempt to download
+            String dowloadedText = null;
+            if (uploadResponse?.id != null) {
+                // Fetch from the download end point
+                setHeaders([
+                    'X-Okapi-Tenant': tenantId,
+                    (HttpHeaders.ACCEPT) : 'application/octet-stream',
+                ]);
+                def downloadResponse = doGet("${baseUrl}rs/fileDefinition/testFileDownload/${uploadResponse.id}");
+                if (downloadResponse instanceof String) {
+                    // That is good we have the response we expected
+                    dowloadedText = downloadResponse;
+                }
+//                log.debug("Download response is of type: " + downloadResponse.getClass().toString());
+//                log.debug("Download response: " + downloadResponse);
+            }
+
+        then:"Tenant is configured"
+            assert(uploadResponse?.id != null);
+            assert(fileContents.equals(dowloadedText));
+
+        where:
+            tenantId      | fileContents                                | fileContentType  | filename
+            'RSInstThree' | "Will this manage to get uploaded properly" | "text/plain"     | "test.txt"
     }
 }

@@ -84,7 +84,8 @@ class FileDefinitionController extends OkapiTenantAwareController<FileDefinition
             result = new FileDefinitionCreateResult();
             result.error = "File type must be supplied";
         }
-        render result as JSON
+        Map jsonResult = [ id : result.fileDefinition?.id, error : result.error ];
+        render jsonResult as JSON
     }
 
     /**
