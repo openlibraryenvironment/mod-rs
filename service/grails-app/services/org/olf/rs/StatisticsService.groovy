@@ -1,14 +1,9 @@
 package org.olf.rs
 
-import org.olf.rs.shared.TenantSymbolMapping
-import grails.gorm.multitenancy.*
-import grails.gorm.transactions.Transactional
-import groovy.sql.Sql
-import org.olf.rs.Counter
-import org.olf.okapi.modules.directory.Symbol;
-// import java.util.concurrent.ThreadLocalRandom;
-import groovy.json.JsonSlurper
 import org.olf.okapi.modules.directory.ServiceAccount
+import org.olf.okapi.modules.directory.Symbol;
+
+import groovy.json.JsonSlurper
 
 
 /**
@@ -72,22 +67,22 @@ public class StatisticsService {
 
     log.debug("StatisticsService::refreshStatsForrefreshStatsFor(${symbol})");
     Map result = null;
-  
+
     if ( symbol != null ) {
       String symbol_str = "${symbol.authority.symbol}:${symbol.symbol}".toString()
       result = stats_cache[symbol_str]
 
       if ( ( result == null ) ||
            ( System.currentTimeMillis() - result.timestamp > MAX_CACHE_AGE ) ) {
-  
+
         // symbol.owner.customProperties.value.each { it ->
         //   log.debug("refreshStatsFor cp ${it}");
         // }
-  
+
         // symbol.owner.services.each { it ->
         //   log.debug("refreshStatsFor service ${it}");
         // }
-  
+
         // symbol.owner.customProperties is a CustomPropertyContainer which means it's value is a list of custom properties
         try {
           def ratio_custprop = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
@@ -116,7 +111,7 @@ public class StatisticsService {
             symbol.owner.services.each {
               log.warn("    -> declared service: ${it.service.businessFunction}/${it.service.businessFunction?.value} != RS_STATS");
             }
-            
+
             // No stats available so return data which will place this symbol at parity
             result = [
               timestamp: System.currentTimeMillis(),
@@ -184,8 +179,10 @@ public class StatisticsService {
     long ratio_borrow = Long.parseLong(parsed_ratio[1])
 
     if ( current_stats ) {
-      long current_loans = current_stats.current.find { it.context=='/activeLoans' } ?.value
-      long current_borrowing = current_stats.current.find { it.context=='/activeBorrowing' } ?.value
+      def activeContext = current_stats.current.find { it.context=='/activeLoans' };
+      long current_loans = ((activeContext == null) ? 0 : activeContext.value);
+      def borrowingContext = current_stats.current.find { it.context=='/activeBorrowing' };
+      long current_borrowing = ((borrowingContext == null) ? 0 : borrowingContext.value);
       result = [
         timestamp: System.currentTimeMillis(),
         lbr_loan:ratio_loan,
