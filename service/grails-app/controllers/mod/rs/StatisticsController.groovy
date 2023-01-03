@@ -1,36 +1,49 @@
 package mod.rs
 
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.json.JsonSlurper
-import groovy.util.logging.Slf4j
-import grails.converters.JSON
-import org.olf.rs.Counter
+import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
+
+import grails.converters.JSON;
+import grails.gorm.multitenancy.CurrentTenant;
+import groovy.util.logging.Slf4j
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Slf4j
 @CurrentTenant
+@Api(value = "/rs/", tags = ["Statistics Controller"], description = "Statistics Api")
 class StatisticsController {
-  
-  long totalBorrowing=10
-  long totalLending=5
 
-  def index() {
+    long totalBorrowing=10
+    long totalLending=5
 
-    def result = [
-      asAt:new Date(),
-      current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
-      requestsByState:generateRequestsByState()
-    ]
+    @ApiOperation(
+        value = "Generates the statistics for this tenant",
+        nickname = "statistics",
+        httpMethod = "GET",
+        produces = "application/json"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    def index() {
 
-    render result as JSON
-  }
+        def result = [
+            asAt:new Date(),
+            current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
+            requestsByState:generateRequestsByState()
+        ];
 
-  private Map generateRequestsByState() {
-    Map result = [:]
-    PatronRequest.executeQuery('select pr.state.owner.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.state.owner.shortcode, pr.state.code').each { sl ->
-      result[sl[0]+':'+sl[1]] = sl[2]
+        render result as JSON
     }
-    return result;
-  }
-  
+
+    private Map generateRequestsByState() {
+        Map result = [:]
+        PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel.shortcode, pr.state.code').each { sl ->
+            result[sl[0]+':'+sl[1]] = sl[2]
+        }
+        return result;
+    }
 }
