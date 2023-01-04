@@ -1111,10 +1111,10 @@ class DosomethingSimple {
             log.debug("Response from statistics: " + statisticsResponse.toString());
 
         then:"Check we have received some statistics"
-            // Should have the current syayus
+            // Should have the current statistics
             assert(statisticsResponse?.current != null);
 
-            // We should also the requests by state
+            // We should also have the requests by state
             assert(statisticsResponse.requestsByState != null);
 
             // We should have the number of requests that are actively borrowing
