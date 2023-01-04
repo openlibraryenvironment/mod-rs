@@ -1091,12 +1091,40 @@ class DosomethingSimple {
 //                log.debug("Download response: " + downloadResponse);
             }
 
-        then:"Tenant is configured"
+        then:"Check file has been uploaded correctly"
             assert(uploadResponse?.id != null);
             assert(fileContents.equals(dowloadedText));
 
         where:
             tenantId      | fileContents                                | fileContentType  | filename
             'RSInstThree' | "Will this manage to get uploaded properly" | "text/plain"     | "test.txt"
+    }
+
+    void "Check_Statistics_returned"(String tenantId, String ignore) {
+        when:"We download the statistics"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Request the statistics
+            def statisticsResponse = doGet("${baseUrl}rs/statistics");
+            log.debug("Response from statistics: " + statisticsResponse.toString());
+
+        then:"Check we have received some statistics"
+            // Should have the current statistics
+            assert(statisticsResponse?.current != null);
+
+            // We should also have the requests by state
+            assert(statisticsResponse.requestsByState != null);
+
+            // We should have the number of requests that are actively borrowing
+            assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeBorrowing") } != null);
+
+            // We should also have the number of requests that are currently on loan
+            assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeLoans") } != null);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
     }
 }
