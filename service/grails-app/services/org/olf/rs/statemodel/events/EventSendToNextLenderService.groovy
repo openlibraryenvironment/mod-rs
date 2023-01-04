@@ -138,7 +138,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
 
                     prr.save(flush:true, failOnError:true);
                 } else {
-                    log.error("Unable to find rota entry at position ${request.rotaPosition} (Size=${request.rota.size()}) ${( request.rotaPosition ?: -1 < request.rota.size() )}. Try next");
+                    // We have come to the end of the rota, this is handled below, it is no longer an error
                 }
             }
 
