@@ -22,21 +22,22 @@ public class SettingsData {
     private static final String SETTING_TYPE_STRING   = 'String';
     private static final String SETTING_TYPE_TEMPLATE = 'Template';
 
-    private static final String SECTION_AUTO_RESPONDER       = 'autoResponder';
-    private static final String SECTION_CHAT                 = 'chat';
-    private static final String SECTION_FILE_STORAGE         = 'fileStorage';
-    private static final String SECTION_HOST_LMS_INTEGRATION = 'hostLMSIntegration';
-    private static final String SECTION_LOCAL_NCIP           = 'localNCIP';
-    private static final String SECTION_NETWORK              = 'network';
-    private static final String SECTION_PATRON_STORE         = 'patronStore';
-    private static final String SECTION_PULLSLIP_TEMPLATE    = 'pullslipTemplateConfig';
-    private static final String SECTION_REQUESTS             = 'requests';
-    private static final String SECTION_ROUTING              = 'Routing';
-    private static final String SECTION_SHARED_INDEX         = 'sharedIndex';
-    private static final String SECTION_STATE_ACTION_CONFIG  = 'state_action_config';
-    private static final String SECTION_STATE_MODEL          = 'state_model';
-    private static final String SECTION_WMS                  = 'wmsSettings';
-    private static final String SECTION_Z3950                = 'z3950';
+    private static final String SECTION_AUTO_RESPONDER         = 'autoResponder';
+    private static final String SECTION_CHAT                   = 'chat';
+    private static final String SECTION_FILE_STORAGE           = 'fileStorage';
+    private static final String SECTION_HOST_LMS_INTEGRATION   = 'hostLMSIntegration';
+    private static final String SECTION_LOCAL_NCIP             = 'localNCIP';
+    private static final String SECTION_NETWORK                = 'network';
+    private static final String SECTION_PATRON_STORE           = 'patronStore';
+    private static final String SECTION_PULLSLIP_CONFIGURATION = 'pullslipConfiguration';
+    private static final String SECTION_PULLSLIP_TEMPLATE      = 'pullslipTemplateConfig';
+    private static final String SECTION_REQUESTS               = 'requests';
+    private static final String SECTION_ROUTING                = 'Routing';
+    private static final String SECTION_SHARED_INDEX           = 'sharedIndex';
+    private static final String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
+    private static final String SECTION_STATE_MODEL            = 'state_model';
+    private static final String SECTION_WMS                    = 'wmsSettings';
+    private static final String SECTION_Z3950                  = 'z3950';
 
     // Settings for the z3950 section
     public static final String SETTING_Z3950_SERVER_ADDRESS = 'z3950_server_address';
@@ -58,6 +59,11 @@ public class SettingsData {
     public static final String SETTING_WMS_CONNECTOR_USERNAME     = 'wms_connector_username';
     public static final String SETTING_WMS_LOOKUP_PATRON_ENDPOINT = 'wms_lookup_patron_endpoint';
     public static final String SETTING_WMS_REGISTRY_ID            = 'wms_registry_id';
+
+    // Settings for the pull slip configuration section
+    public static final String SETTING_PULL_SLIP_LOGO_ID     = 'pull_slip_logo_id';
+    public static final String SETTING_PULL_SLIP_MAX_ITEMS   = 'pull_slip_max_items';
+    public static final String SETTING_PULL_SLIP_REPORT_ID   = 'pull_slip_report_id';
 
     // Settings for the pullslipTemplateConfig section
     public static final String SETTING_PULL_SLIP_TEMPLATE_ID = 'pull_slip_template_id';
@@ -143,7 +149,7 @@ public class SettingsData {
      * @param value the the value that it is given to start off with (default: null)
      * @return the AppSetting that exists or has been created
      */
-    public AppSetting ensureAppSetting(String key, String section, String settingType, String vocabulary = null, String defaultValue = null, String value = null, boolean hidden = null) {
+    public AppSetting ensureAppSetting(String key, String section, String settingType, String vocabulary = null, String defaultValue = null, String value = null, boolean hidden = false) {
         AppSetting result = AppSetting.findByKey(key);
         if (result == null) {
             result = new AppSetting(
@@ -188,6 +194,10 @@ public class SettingsData {
             ensureAppSetting(SETTING_WMS_CONNECTOR_PASSWORD, SECTION_WMS, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_PULL_SLIP_TEMPLATE_ID, SECTION_PULLSLIP_TEMPLATE, SETTING_TYPE_TEMPLATE, RefdataValueData.VOCABULARY_PULL_SLIP_TEMPLATE);
+
+            ensureAppSetting(SETTING_PULL_SLIP_REPORT_ID, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_PULL_SLIP_LOGO_ID, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_PULL_SLIP_MAX_ITEMS, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING, null, "100", null, true);
 
             ensureAppSetting(SETTING_BORROWER_CHECK, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_BORROWER_CHECK_METHOD);
             ensureAppSetting(SETTING_CHECK_OUT_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_OUT_METHOD);
@@ -243,8 +253,8 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_FILE_STORAGE_ENGINE, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, FileUploadService.S3_STORAGE_ENGINE);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_ENDPOINT, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
-            ensureAppSetting(SETTING_FILE_STORAGE_S3_ACCESS_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
-            ensureAppSetting(SETTING_FILE_STORAGE_S3_SECRET_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_ACCESS_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_PASSWORD);
+            ensureAppSetting(SETTING_FILE_STORAGE_S3_SECRET_KEY, SECTION_FILE_STORAGE, SETTING_TYPE_PASSWORD);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_NAME, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_REGION, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_OBJECT_PREFIX, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, 'reshare-');
