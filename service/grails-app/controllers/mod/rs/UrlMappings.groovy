@@ -28,6 +28,7 @@ class UrlMappings {
 
     "/rs/report/createUpdate" (controller: "report", action: "createUpdate")
     "/rs/report/execute" (controller: "report", action: "execute")
+    "/rs/report/generatePicklist" (controller: "report", action: "generatePicklist")
 
     "/rs/fileDefinition/testFileUpload" (controller: "fileDefinition", action: "testFileUpload")
     "/rs/fileDefinition/testFileDownload/$fileId" (controller: "fileDefinition", action: "testFileDownload")

@@ -1,11 +1,13 @@
 package org.olf.rs.reporting;
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileDefinitionCreateResult;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.FileService;
 import org.olf.rs.files.FileType;
 import org.olf.rs.files.ReportCreateUpdateResult;
-import org.springframework.web.multipart.MultipartFile
+import org.olf.rs.referenceData.SettingsData;
+import org.springframework.web.multipart.MultipartFile;
 
 import groovy.util.logging.Slf4j
 
@@ -23,6 +25,17 @@ public class ReportService {
     /** The service that interfaces into jasper reports */
     JasperReportService jasperReportService;
 
+    /** The service that interogates the settings */
+    SettingsService settingsService;
+
+    /**
+     * Generates the specified report
+     * @param tenant The tenant the report is being against, this will be supplied as a parameter to the report
+     * @param reportId The id of the report to be executed
+     * @param identifiers The identifiers to be passed to the report
+     * @param fallbackReportResource If a report id is not valid, then if this parameter is specified we will look in the resources with the supplies path to see if we can find the report there
+     * @return A FileFetchResult object that will either give an error or an InputStream containing the generated report
+     */
     public FileFetchResult generateReport(String tenant, String reportId, List identifiers = null, String fallbackReportResource = null) {
         FileFetchResult result = new FileFetchResult();
 
@@ -102,7 +115,7 @@ public class ReportService {
                     } else {
                         // File has been created, so do we have a report object
                         if (report == null) {
-                            // Now we havn't so we are creating a new record
+                            // No we havn't so we are creating a new record
                             report = new Report();
                         }
 
@@ -130,5 +143,41 @@ public class ReportService {
 
         // Return the result to the caller
         return(result);
+    }
+
+    /**
+     * Retrieves the report id that has been configured that generates the pull slip
+     * @return The report id if one has been configured or null which means use the default
+     */
+    public String getPullSlipReportId() {
+        return(settingsService.getSettingValue(SettingsData.SETTING_PULL_SLIP_REPORT_ID));
+    }
+
+    /**
+     * Retrieves the maximum number of requests that can be contained on 1 pull slip
+     * @return The maximum number of requests that can be printed on a pull slip
+     */
+    public int getMaxRequestsInPullSlip() {
+        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS, 100));
+    }
+
+    /**
+     * Retrieves the logo that is to be used on the pull slip
+     * @return the InputStream for the logo or null if no logo has been specified
+     */
+    public InputStream getPullSlipLogo() {
+        // The inputStream for the logs
+        InputStream logoInputStream = null;
+
+        // Get hold of the id for the logo
+        String logoId = settingsService.getSettingValue(SettingsData.SETTING_PULL_SLIP_LOGO_ID);
+
+        // Do we have an id for the logo
+        if (logoId != null) {
+            logoInputStream = fileService.fetch(logoId).inputStream;
+        }
+
+        // Return the input stream to the caller
+        return(logoInputStream);
     }
 }
