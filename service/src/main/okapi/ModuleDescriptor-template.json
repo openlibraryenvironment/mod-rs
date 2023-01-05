@@ -275,6 +275,21 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/report/execute*",
+          "permissionsRequired": [ "rs.report.execute" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/report/generatePicklist",
+          "permissionsRequired": [ "rs.report.execute" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/report/createUpdate",
+          "permissionsRequired": [ "rs.report.admin" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/shelvingLocation*",
           "permissionsRequired": [ "rs.shelvingLocations.read" ]
         },
@@ -843,6 +858,18 @@
       ]
     },
     {
+      "permissionName": "rs.report.admin",
+      "displayName": "Can administer reports",
+      "description": "Can administer reports",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.report.execute",
+      "displayName": "Can execute reports",
+      "description": "Can execute reports",
+      "visible": false
+    },
+    {
       "permissionName": "rs.shelvingLocations.read",
       "displayName": "Read shelving locations",
       "description": "Read shelving locations",
@@ -884,6 +911,8 @@
         "rs.shipments",
         "rs.noticePolicies",
         "rs.hostlmslocations.write",
+        "rs.report.admin",
+		"rs.report.execute",
         "rs.timers",
         "rs.shelvingLocations"
       ]

@@ -132,7 +132,48 @@ class ReportController extends OkapiTenantAwareController<Report>  {
     }
 
     @ApiOperation(
-        value = "Executes the specied report",
+        value = "Executes the picklist report",
+        nickname = "generatePicklist",
+        httpMethod = "GET",
+        produces = "application/pdf,application/json"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success", response = byte.class)
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "id",
+            paramType = "query",
+            allowMultiple = true,
+            required = true,
+            value = "The id(s) that that will be passed to the picklist",
+            dataType = "string"
+        )
+    ])
+    def generatePicklist() {
+        List ids = null;
+        if (params.id == null) {
+            Map renderResult = [ error: "No request identifies specified for the pickliist report" ];
+            render renderResult as JSON, status: 400, contentType: "application/json";
+        } else {
+            if (params.id instanceof String) {
+                ids = new ArrayList();
+                ids.add(params.id);
+            } else {
+                // it must be an array
+                ids = params.id;
+            }
+
+            // Ensure we do we have more than the maximum number of requests for a pull slip
+            ids = ids.take(reportService.getMaxRequestsInPullSlip());
+
+            // Now generate the report, this does the render
+            generateReport(reportService.getPullSlipReportId(), ids, pullSlipDefaultReport);
+        }
+    }
+
+    @ApiOperation(
+        value = "Executes the specified report",
         nickname = "execute",
         httpMethod = "GET",
         produces = "application/pdf,application/json"
@@ -146,7 +187,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             paramType = "query",
             allowMultiple = false,
             required = false,
-            value = "The id of the report to be run, if left null will use the default pull slip",
+            value = "The id of the report to be run",
             dataType = "string"
         ),
         @ApiImplicitParam(
@@ -154,7 +195,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             paramType = "query",
             allowMultiple = true,
             required = true,
-            value = "The id(s) that the picklist is to be printed for",
+            value = "The id(s) that that will be passed to the report",
             dataType = "string"
         )
     ])
@@ -170,27 +211,9 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             ids = params.id;
         }
 
-        try {
-            // Attempt to execute the report
-            FileFetchResult fetchResult = reportService.generateReport(request.getHeader("X-Okapi-Tenant"), params.reportId, ids, pullSlipDefaultReport);
+        // Now generate the report, this performs the render
+        generateReport(params.reportId, ids);
 
-            // Did we manage to generate the report
-            if (fetchResult.inputStream == null) {
-                // we had an error
-                Map renderResult = [ error: fetchResult.error ];
-                render renderResult as JSON, status: 404, contentType: "application/json";
-            } else {
-                // Present the pdf
-                // This header needs adding so that swagger allows you to download the file
-                response.addHeader("Content-Disposition", ": attachment; filename=" + fetchResult.filename);
-                render file: fetchResult.inputStream, contentType: fetchResult.contentType, status: 200
-            }
-        } catch (Exception e) {
-            String message = "Exception thrown generating report";
-            log.error(message, e);
-            Map renderResult = [ error: (message + ", exception: " + e.getMessage()) ];
-            render renderResult as JSON, status: 404, contentType: "application/json";
-        }
 /* Commented this out for the time being as it will need to be reworked and live somewhere else
         // In order to test this ensure you have configured mod-email
         // also need to go through okapi, rather than local otherwise it will not find mod-email
@@ -217,5 +240,37 @@ class ReportController extends OkapiTenantAwareController<Report>  {
         // Send an email with the pull slip in
         emailService.sendEmail(emailParamaters);
 */
+    }
+
+    /**
+     * Generates the report
+     * @param reportId The report id to generate
+     * @param identifiers The identifiers to pass to the report
+     * @param defaultReport The path to the default report in the resources
+     */
+    private void generateReport(String reportId, List identifiers, String defaultReport = null) {
+
+        // It is assumed that everything has been validated by this point
+        try {
+            // Attempt to execute the report
+            FileFetchResult fetchResult = reportService.generateReport(request.getHeader("X-Okapi-Tenant"), reportId, identifiers, defaultReport);
+
+            // Did we manage to generate the report
+            if (fetchResult.inputStream == null) {
+                // we had an error
+                Map renderResult = [ error: fetchResult.error ];
+                render renderResult as JSON, status: 404, contentType: "application/json";
+            } else {
+                // Present the pdf
+                // Ensure we have the Content-Disposition header in the response
+                response.addHeader("Content-Disposition", ": attachment; filename=" + fetchResult.filename);
+                render file: fetchResult.inputStream, contentType: fetchResult.contentType, status: 200
+            }
+        } catch (Exception e) {
+            String message = "Exception thrown generating report";
+            log.error(message, e);
+            Map renderResult = [ error: (message + ", exception: " + e.getMessage()) ];
+            render renderResult as JSON, status: 404, contentType: "application/json";
+        }
     }
 }
