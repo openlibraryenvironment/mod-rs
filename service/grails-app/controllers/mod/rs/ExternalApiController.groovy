@@ -47,7 +47,7 @@ class ExternalApiController {
 
   private Map generateRequestsByState() {
     Map result = [:]
-    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel, pr.state.code').each { sl ->
+    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel.shortcode, pr.state.code').each { sl ->
       result[sl[0]+':'+sl[1]] = sl[2]
     }
     return result;
