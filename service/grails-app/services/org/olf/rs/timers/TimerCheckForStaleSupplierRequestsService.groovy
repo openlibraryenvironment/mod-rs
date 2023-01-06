@@ -44,7 +44,7 @@ where pr.dateCreated < :staleDate and
 	SettingsService settingsService;
 
 	@Override
-	public void performTask(String config) {
+	public void performTask(String tenant, String config) {
 		if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES)) {
 			// We look to see if a request has been sitting at a supplier for more than X days without the pull slip being printed
 

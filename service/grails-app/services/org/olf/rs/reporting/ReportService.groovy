@@ -19,6 +19,8 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class ReportService {
 
+    static public final String pullSlipDefaultReport = "reports/patronRequests/PullSlip.jrxml";
+
     /** The service that handles files for us */
     FileService fileService;
 
@@ -158,7 +160,16 @@ public class ReportService {
      * @return The maximum number of requests that can be printed on a pull slip
      */
     public int getMaxRequestsInPullSlip() {
-        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS, 100));
+        int maxRequestsInPullSlip = settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS, 100);
+
+        // ensure it cannot be less than 1
+        if (maxRequestsInPullSlip < 1) {
+            // It is so set it to 100
+            maxRequestsInPullSlip = 100;
+        }
+
+        // return the result to the caller
+        return(maxRequestsInPullSlip);
     }
 
     /**

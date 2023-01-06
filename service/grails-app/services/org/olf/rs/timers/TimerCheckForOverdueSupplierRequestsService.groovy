@@ -29,7 +29,7 @@ where pr.parsedDueDateRS < :today and
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
 
 	@Override
-	public void performTask(String config) {
+	public void performTask(String tenant, String config) {
         // Only interested in the date segment and that it is in UTC
         Date today = new Date((new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay().getTimestamp());
 
