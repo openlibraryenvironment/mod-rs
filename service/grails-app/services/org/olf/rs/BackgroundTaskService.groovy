@@ -48,14 +48,14 @@ public class BackgroundTaskService {
         // We do not want to do any processing if we are already performing the background processing
         // We have a distributed lock for when there are multiple mod-rs processes running
         if (!lockService.performWorkIfLockObtained(tenant, LockIdentifier.BACKGROUND_TASKS, 0) {
-            doBackgroundTasks();
+            doBackgroundTasks(tenant);
         }) {
             // Failed to obtain the lock
             log.info("Skiping background tasks as unable to obtain lock");
         }
     }
 
-    private void doBackgroundTasks() {
+    private void doBackgroundTasks(String tenant) {
         // Start off with the patron notices, could we move this into a timer ...
         if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
             patronNoticeService.processQueue()
@@ -95,7 +95,7 @@ public class BackgroundTaskService {
                             // First time we have seen this timer - we don't know when it is next due - so work that out
                             // as though we just run the timer.
                         } else {
-                            runTimer(timer)
+                            runTimer(timer, tenant)
                         };
 
                         String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
@@ -141,7 +141,7 @@ public class BackgroundTaskService {
         }
     }
 
-  	private runTimer(Timer t) {
+  	private runTimer(Timer t, String tenant) {
 		try {
 			if (t.taskCode != null) {
 				// Get hold of the bean and store it in our map, if we previously havn't been through here
@@ -169,7 +169,7 @@ public class BackgroundTaskService {
                             // Start a new transaction
                             Timer.withNewTransaction {
     							// just call the performTask method, with the timers config
-    							timerBean.performTask(t.taskConfig);
+    							timerBean.performTask(tenant, t.taskConfig);
                             }
                         } catch(Exception e) {
                             log.error("Exception thrown by timer " + t.code, e);

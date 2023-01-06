@@ -32,7 +32,7 @@ public abstract class AbstractTimerRequestNetworkService extends AbstractTimer {
     abstract public void performNetworkTask(PatronRequest request, Map retryEventData);
 
     @Override
-    public void performTask(String config) {
+    public void performTask(String tenant, String config) {
         // We do not want multiple threads in here at the same time, which could happen with the timers being triggered by OKAPI
         synchronized(this) {
             // First of all, get hold of all the requests that we are interested in

@@ -1,9 +1,8 @@
 package mod.rs;
 
-import org.olf.rs.EmailService;
-import org.olf.rs.files.FileFetchResult
-import org.olf.rs.files.ReportCreateUpdateResult
-import org.olf.rs.reporting.Report
+import org.olf.rs.files.FileFetchResult;
+import org.olf.rs.files.ReportCreateUpdateResult;
+import org.olf.rs.reporting.Report;
 import org.olf.rs.reporting.ReportService;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -23,13 +22,10 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "/rs/report", tags = ["Report Controller"], description = "Report Api")
 class ReportController extends OkapiTenantAwareController<Report>  {
 
-    static private final String pullSlipDefaultReport = "reports/patronRequests/PullSlip.jrxml";
-
 	ReportController() {
 		super(Report)
 	}
 
-    EmailService emailService
     ReportService reportService;
 
     @ApiOperation(
@@ -168,7 +164,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             ids = ids.take(reportService.getMaxRequestsInPullSlip());
 
             // Now generate the report, this does the render
-            generateReport(reportService.getPullSlipReportId(), ids, pullSlipDefaultReport);
+            generateReport(reportService.getPullSlipReportId(), ids, ReportService.pullSlipDefaultReport);
         }
     }
 
@@ -213,33 +209,6 @@ class ReportController extends OkapiTenantAwareController<Report>  {
 
         // Now generate the report, this performs the render
         generateReport(params.reportId, ids);
-
-/* Commented this out for the time being as it will need to be reworked and live somewhere else
-        // In order to test this ensure you have configured mod-email
-        // also need to go through okapi, rather than local otherwise it will not find mod-email
-        File file = new File(outputFilename);
-        byte[] binaryContent = file.bytes;
-        String encoded = binaryContent.encodeBase64().toString();
-        Map emailParamaters = [
-            notificationId: '1',
-            to: 'chaswoodfield@gmail.com',
-            header: 'Has the pull slip attached',
-            body: 'Will it get through',
-            outputFormat: 'text/plain',
-            attachments: [
-                [
-                    contentType: 'application/pdf',
-                    name: 'Pull Slip',
-                    description: 'This is a Pull Slip',
-                    data: encoded,
-                    disposition: 'base64'
-                ]
-            ]
-        ];
-
-        // Send an email with the pull slip in
-        emailService.sendEmail(emailParamaters);
-*/
     }
 
     /**
