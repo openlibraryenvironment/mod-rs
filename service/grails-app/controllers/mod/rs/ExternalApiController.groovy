@@ -1,14 +1,15 @@
 package mod.rs
 
-import org.olf.rs.ConfirmationMessageService
-import org.olf.rs.Counter
-import org.olf.rs.PatronRequest
-import org.olf.rs.ReshareApplicationEventHandlerService
+import org.olf.rs.ConfirmationMessageService;
+import org.olf.rs.Counter;
+import org.olf.rs.PatronRequest;
+import org.olf.rs.ReshareApplicationEventHandlerService;
+import org.olf.rs.StatisticsService;
 
-import grails.converters.JSON
-import grails.core.GrailsApplication
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.util.logging.Slf4j
+import grails.converters.JSON;
+import grails.core.GrailsApplication;
+import grails.gorm.multitenancy.CurrentTenant;
+import groovy.util.logging.Slf4j;
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
@@ -20,6 +21,7 @@ class ExternalApiController {
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ConfirmationMessageService confirmationMessageService
+  StatisticsService statisticsService;
 
   def index() {
   }
@@ -33,8 +35,8 @@ class ExternalApiController {
       result = [
         asAt:new Date(),
         current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
-        requestsByState: generateRequestsByState(),
-        requestsByTag: generateRequestsByStateTag()
+        requestsByState: statisticsService.generateRequestsByState(),
+        requestsByTag: statisticsService.generateRequestsByStateTag()
       ]
     }
     catch ( Exception e ) {
@@ -44,23 +46,6 @@ class ExternalApiController {
 
     render result as JSON
   }
-
-  private Map generateRequestsByState() {
-    Map result = [:]
-    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel.shortcode, pr.state.code').each { sl ->
-      result[sl[0]+':'+sl[1]] = sl[2]
-    }
-    return result;
-  }
-
-  private Map generateRequestsByStateTag() {
-    Map result = [:]
-    PatronRequest.executeQuery('select tag.value, count(pr.id) from PatronRequest as pr join pr.state.tags as tag group by tag.value').each { sl ->
-      result[sl[0]] = sl[1]
-    }
-    return result;
-  }
-
 
   def iso18626() {
     log.debug("externalApiController::index(${params})");

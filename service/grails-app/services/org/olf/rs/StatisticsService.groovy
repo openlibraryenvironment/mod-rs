@@ -5,7 +5,6 @@ import org.olf.okapi.modules.directory.Symbol;
 
 import groovy.json.JsonSlurper
 
-
 /**
  * This service takes responsibility for assembling/aggregating all the data needed
  * to build a ranked rota entry.
@@ -191,6 +190,22 @@ public class StatisticsService {
         current_borrowing_level:current_borrowing,
         reason:'Statistics collected from stats service'
       ]
+    }
+    return result;
+  }
+
+  public Map generateRequestsByState() {
+    Map result = [:]
+    PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel.shortcode, pr.state.code').each { sl ->
+      result[sl[0]+':'+sl[1]] = sl[2]
+    }
+    return result;
+  }
+
+  public Map generateRequestsByStateTag() {
+    Map result = [:]
+    PatronRequest.executeQuery('select tag.value, count(pr.id) from PatronRequest as pr join pr.state.tags as tag group by tag.value').each { sl ->
+      result[sl[0]] = sl[1]
     }
     return result;
   }

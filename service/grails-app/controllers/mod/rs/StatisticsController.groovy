@@ -1,7 +1,7 @@
 package mod.rs
 
 import org.olf.rs.Counter;
-import org.olf.rs.PatronRequest;
+import org.olf.rs.StatisticsService;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
@@ -16,8 +16,7 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "/rs/", tags = ["Statistics Controller"], description = "Statistics Api")
 class StatisticsController {
 
-    long totalBorrowing=10
-    long totalLending=5
+    StatisticsService statisticsService;
 
     @ApiOperation(
         value = "Generates the statistics for this tenant",
@@ -31,19 +30,11 @@ class StatisticsController {
     def index() {
 
         def result = [
-            asAt:new Date(),
-            current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
-            requestsByState:generateRequestsByState()
+            asAt: new Date(),
+            current: Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
+            requestsByState: statisticsService.generateRequestsByState()
         ];
 
         render result as JSON
-    }
-
-    private Map generateRequestsByState() {
-        Map result = [:]
-        PatronRequest.executeQuery('select pr.stateModel.shortcode, pr.state.code, count(pr.id) from PatronRequest as pr group by pr.stateModel.shortcode, pr.state.code').each { sl ->
-            result[sl[0]+':'+sl[1]] = sl[2]
-        }
-        return result;
     }
 }
