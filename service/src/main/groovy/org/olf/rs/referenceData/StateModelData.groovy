@@ -66,8 +66,8 @@ public class StateModelData {
 		log.info("Adding state model records to the database");
 
         // Now update the state models with the initial state
-        StateModel.ensure(StateModel.MODEL_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, requesterStates);
-        StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, responderStates);
+        StateModel.ensure(StateModel.MODEL_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, requesterStates);
+        StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, responderStates);
 	}
 
 	public static void loadAll() {

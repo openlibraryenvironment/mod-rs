@@ -19,6 +19,53 @@ public class ActionService {
     StatusService statusService;
 
     /**
+     * Executes the supplied action to the given request with the supplied parameters
+     * @param patronRequestId The request the action is to be supplied to
+     * @param action The action that is to be applied
+     * @param parameters The parameters to be used when processing the action
+     * @return A map containing the result of the processing
+     */
+    public Map executeAction(String patronRequestId, String action, Object parameters) {
+        Map result = [ : ];
+
+        // Lock the request
+        PatronRequest patronRequest = PatronRequest.lock(patronRequestId);
+
+        // was the request valid and did we lock it
+        if (patronRequest) {
+            // We did
+            log.debug("Apply action ${action} to ${patronRequest.id}");
+
+            // Needs to fulfil the following criteria to be valid
+            // 1. Is a valid action for the current status of the request
+            // 2. Request has no network activity going on
+            if (patronRequest.isNetworkActivityIdle() &&
+                isValid(patronRequest, action)) {
+                // Perform the requested action
+                ActionResultDetails resultDetails = performAction(action, patronRequest, parameters);
+                result = resultDetails.responseResult;
+                result.actionResult = resultDetails.result;
+            } else {
+                // Not a valid action or the request is busy with a previous action
+                result.actionResult = ActionResult.INVALID_PARAMETERS;
+                result.message = 'A valid action was not supplied, isRequester: ' + patronRequest.isRequester +
+                                 ' Current state: ' + patronRequest.state.code +
+                                 ', network status: ' + patronRequest.networkStatus.toString() +
+                                 ' Action being performed: ' + action;
+                reshareApplicationEventHandlerService.auditEntry(patronRequest, patronRequest.state, patronRequest.state, result.message, null);
+                patronRequest.save(flush:true, failOnError:true);
+            }
+        } else {
+            // Unknown request id or could not obtain the lock
+            result.actionResult = ActionResult.INVALID_PARAMETERS;
+            result.message='Unable to lock request with id: ' + patronRequestId;
+        }
+
+        // Return the result to the caller
+        return(result);
+    }
+
+    /**
      * Checks whether an action being performed is valid
      */
     boolean isValid(PatronRequest request, String action) {

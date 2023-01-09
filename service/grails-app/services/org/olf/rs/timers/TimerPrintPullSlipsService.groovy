@@ -1,13 +1,14 @@
 package org.olf.rs.timers;
 
-import org.olf.rs.EmailService
+import org.olf.rs.EmailService;
 import org.olf.rs.HostLMSLocation;
-import org.olf.rs.OkapiSettingsService
+import org.olf.rs.OkapiSettingsService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.reporting.ReportService;
+import org.olf.rs.statemodel.ActionService;
 import org.olf.templating.TemplateContainer;
 import org.olf.templating.TemplatingService;
 
@@ -21,6 +22,7 @@ import groovy.json.JsonSlurper;
  */
 public class TimerPrintPullSlipsService extends AbstractTimer {
 
+    ActionService actionService;
     ReportService reportService;
     SettingsService settingsService;
 
@@ -232,6 +234,15 @@ where h.id in ( :loccodes )
 
                                     // Reset the start position
                                     startPosition = nextStartPosition;
+                                }
+
+                                // For each patron request we need to mark it as printed
+                                pending_ps_printing.each { PatronRequest request ->
+                                    // If we have an action to mark the request as printed then do so
+                                    if (request.stateModel.pickSlipPrintedAction?.code != null) {
+                                        // We do, so execute the action, we do not care about the result
+                                        actionService.executeAction(request.id, request.stateModel.pickSlipPrintedAction.code, null);
+                                    }
                                 }
                             } else {
                                 // Just send the email with no attachments

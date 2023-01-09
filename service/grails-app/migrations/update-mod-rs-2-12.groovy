@@ -93,4 +93,10 @@ databaseChangeLog = {
         // Remove the 2 columns that are no longer used
         dropColumn(columnName: "r_report_definition", tableName: "report")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1673022987400") {
+        addColumn(tableName: "state_model") {
+            column(name: "sm_pick_slip_printed_action", type: "varchar(36)")
+        }
+    }
 }
