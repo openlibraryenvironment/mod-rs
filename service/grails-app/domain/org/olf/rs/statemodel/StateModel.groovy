@@ -66,6 +66,9 @@ where s in (select sms.state
     /** The status to set the request to when when a request is overdue */
     Status overdueStatus;
 
+    /** Action to perform when we automatically mark the pick list as printed */
+    ActionEvent pickSlipPrintedAction;
+
     static hasMany = [
         /** The states that are applicable for this model and their specific settings */
         states : StateModelStatus,
@@ -80,24 +83,26 @@ where s in (select sms.state
     static mappedBy = [ inheritedStateModels : 'stateModel' ];
 
     static constraints = {
-            shortcode (nullable: false, blank: false)
-                 name (nullable: true, blank: false)
-         initialState (nullable: true)
-          staleAction (nullable: true)
-        overdueStatus (nullable: true)
+                    shortcode (nullable: false, blank: false)
+                         name (nullable: true, blank: false)
+                 initialState (nullable: true)
+                  staleAction (nullable: true)
+                overdueStatus (nullable: true)
+        pickSlipPrintedAction (nullable: true)
     }
 
     static mapping = {
-                          id column: 'sm_id', generator: 'uuid2', length:36
-                     version column: 'sm_version'
-                   shortcode column: 'sm_shortcode'
-                        name column: 'sm_name'
-                initialState column: 'sm_initial_state'
-                 staleAction column: 'sm_stale_action'
-               overdueStatus column: 'sm_overdue_status'
-                      states cascade: 'all-delete-orphan'
-        inheritedStateModels cascade: 'all-delete-orphan', sort: 'priority' // Guarantees the set is sorted by priority
-            availableActions cascade: 'all-delete-orphan'
+                           id column: 'sm_id', generator: 'uuid2', length:36
+                      version column: 'sm_version'
+                    shortcode column: 'sm_shortcode'
+                         name column: 'sm_name'
+                 initialState column: 'sm_initial_state'
+                  staleAction column: 'sm_stale_action'
+                overdueStatus column: 'sm_overdue_status'
+        pickSlipPrintedAction column: 'sm_pick_slip_printed_action'
+                       states cascade: 'all-delete-orphan'
+         inheritedStateModels cascade: 'all-delete-orphan', sort: 'priority' // Guarantees the set is sorted by priority
+             availableActions cascade: 'all-delete-orphan'
     }
 
     static public StateModel ensure(
@@ -106,6 +111,7 @@ where s in (select sms.state
         String initialStateCode = null,
         String staleActionCode = null,
         String overdueStatusCode = null,
+        String pickSlipPrintedAction = null,
         List states = null,
         List inheritedStateModels = null
     ) {
@@ -121,6 +127,7 @@ where s in (select sms.state
         stateModel.initialState = Status.lookup(initialStateCode);
         stateModel.staleAction = ActionEvent.lookup(staleActionCode);
         stateModel.overdueStatus = Status.lookup(overdueStatusCode);
+        stateModel.pickSlipPrintedAction = ActionEvent.lookup(pickSlipPrintedAction);
         stateModel.ensureStates(states);
         stateModel.ensureInheritedStateModels(inheritedStateModels);
 

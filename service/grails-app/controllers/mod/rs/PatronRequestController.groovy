@@ -5,7 +5,6 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.Result;
 import org.olf.rs.statemodel.ActionResult;
-import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.StateModel
 
@@ -74,34 +73,12 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 			log.debug("PatronRequestController::performAction(${request.JSON})...");
 			if ( params.patronRequestId ) {
 				PatronRequest.withTransaction { tstatus ->
-					PatronRequest patron_request = PatronRequest.lock(params.patronRequestId)
+                    // Execute the action
+                    result = actionService.executeAction(params.patronRequestId, request.JSON.action, request.JSON.actionParams);
+                    response.status = (result.actionResult == ActionResult.SUCCESS ? 200 : (result.actionResult == ActionResult.INVALID_PARAMETERS ? 400 : 500));
 
-					if ( patron_request ) {
-						log.debug("Apply action ${request.JSON.action} to ${patron_request}");
-
-                        // Needs to fulfil the following criteria to be valid
-                        // 1. Is a valid action for the current status of the request
-                        // 2. Request has no network activity going on
-						if (patron_request.isNetworkActivityIdle() &&
-                            actionService.isValid(patron_request, request.JSON.action)) {
-							// Perform the requested action
-							ActionResultDetails resultDetails = actionService.performAction(request.JSON.action, patron_request, request.JSON.actionParams)
-							response.status = (resultDetails.result == ActionResult.SUCCESS ? 200 : (resultDetails.result == ActionResult.INVALID_PARAMETERS ? 400 : 500));
-							result = resultDetails.responseResult;
-						} else {
-							response.status = 400;
-							result.message = 'A valid action was not supplied, isRequester: ' + patron_request.isRequester +
-				            	   			 ' Current state: ' + patron_request.state.code +
-                                             ', network status: ' + patron_request.networkStatus.toString() +
-											 ' Action being performed: ' + request.JSON.action;
-						    reshareApplicationEventHandlerService.auditEntry(patron_request, patron_request.state, patron_request.state, result.message, null);
-							patron_request.save(flush:true, failOnError:true);
-						}
-
-					} else {
-						response.status = 400;
-						result.message='Unable to lock request with id: ' + params.patronRequestId;
-					}
+                    // We do not want to pass the internal action result back to the caller, so we need to remove it
+                    result.remove('actionResult');
 				}
 			}
 		}

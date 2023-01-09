@@ -6,6 +6,7 @@
       "initialState": "RES_IDLE",
       "staleAction": "supplierCannotSupply",
       "overdueStatus": "RES_OVERDUE",
+      "pickSlipPrintedAction": "supplierPrintPullSlip",
       "inheritedStateModels": [
         {
           "code": "Responder",

@@ -27,6 +27,7 @@ public class StateModelService {
         result.initialState = stateModel.initialState?.code;
         result.staleAction = stateModel.staleAction?.code;
         result.overdueStatus = stateModel.overdueStatus?.code;
+        result.pickSlipPrintedAction = stateModel.pickSlipPrintedAction?.code();
 
         // Have we inherited any state models
         if (stateModel.inheritedStateModels) {
@@ -483,6 +484,7 @@ public class StateModelService {
                 jsonStateModel.initialState,
                 jsonStateModel.staleAction,
                 jsonStateModel.overdueStatus,
+                jsonStateModel.pickSlipPrintedAction,
                 states,
                 inheritedStateModels);
 
