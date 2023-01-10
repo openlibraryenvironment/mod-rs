@@ -1068,7 +1068,7 @@ class DosomethingSimple {
                 (HttpHeaders.CONTENT_TYPE) : httpEntity.getContentType().value,
                 (HttpHeaders.CONTENT_LENGTH) : httpEntity.getContentLength().toString()
             ]);
-            def uploadResponse = doPost("${baseUrl}/rs/fileDefinition/testFileUpload".toString(), null, null, {
+            def uploadResponse = doPost("${baseUrl}/rs/fileDefinition/fileUpload".toString(), null, null, {
                 // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
                 request.setBody(body);
             });
@@ -1082,7 +1082,7 @@ class DosomethingSimple {
                     'X-Okapi-Tenant': tenantId,
                     (HttpHeaders.ACCEPT) : 'application/octet-stream',
                 ]);
-                def downloadResponse = doGet("${baseUrl}rs/fileDefinition/testFileDownload/${uploadResponse.id}");
+                def downloadResponse = doGet("${baseUrl}rs/fileDefinition/fileDownload/${uploadResponse.id}");
                 if (downloadResponse instanceof String) {
                     // That is good we have the response we expected
                     dowloadedText = downloadResponse;
