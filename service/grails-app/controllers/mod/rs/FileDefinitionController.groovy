@@ -31,8 +31,8 @@ class FileDefinitionController extends OkapiTenantAwareController<FileDefinition
 	}
 
     @ApiOperation(
-        value = "Tests file upload",
-        nickname = "testFileUpload",
+        value = "File upload",
+        nickname = "fileUpload",
         httpMethod = "POST",
         consumes = "multipart/form-data",
         produces = "application/json"
@@ -67,7 +67,7 @@ class FileDefinitionController extends OkapiTenantAwareController<FileDefinition
             dataType = "file"
         )
     ])
-    def testFileUpload() {
+    def fileUpload() {
         FileDefinitionCreateResult result = null;
         def file = params.file;
         if (params.fileType) {
@@ -106,8 +106,8 @@ class FileDefinitionController extends OkapiTenantAwareController<FileDefinition
     }
 
     @ApiOperation(
-        value = "Tests file download",
-        nickname = "testFileDownload/{fileId}",
+        value = "File download",
+        nickname = "fileDownload/{fileId}",
         httpMethod = "GET",
         produces = "application/octet"
     )
@@ -125,7 +125,7 @@ class FileDefinitionController extends OkapiTenantAwareController<FileDefinition
             dataType = "string"
         )
     ])
-    def testFileDownload() {
+    def fileDownload() {
         String fileId = params.fileId;
         FileFetchResult result = fileService.fetch(fileId);
         if (result.inputStream != null) {

@@ -234,6 +234,16 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/fileDefinition/fileDownload",
+          "permissionsRequired": [ "rs.file.download" ]
+        },
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/rs/fileDefinition/fileUpload",
+          "permissionsRequired": [ "rs.file.upload" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/hostLMSLocations*",
           "permissionsRequired": [ "rs.hostlmslocations.get" ]
         },
@@ -799,6 +809,18 @@
       "description": "shipments",
       "visible": false
     },
+    {
+      "permissionName": "rs.file.download",
+      "displayName": "Can download files",
+      "description": "Can download files",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.file.upload",
+      "displayName": "Can upload files",
+      "description": "Can upload files",
+      "visible": false
+    },
     { "permissionName": "rs.hostlmslocations.get", "displayName": "get hostlmslocations", "description": "get hostlmslocations", "visible": false },
     { "permissionName": "rs.hostlmslocations.post", "displayName": "post hostlmslocations", "description": "post hostlmslocations", "visible": false },
     { "permissionName": "rs.hostlmslocations.put", "displayName": "put hostlmslocations", "description": "put hostlmslocations", "visible": false },
@@ -911,6 +933,8 @@
         "rs.shipments",
         "rs.noticePolicies",
         "rs.hostlmslocations.write",
+        "rs.file.download",
+        "rs.file.upload",
         "rs.report.admin",
 		"rs.report.execute",
         "rs.timers",
