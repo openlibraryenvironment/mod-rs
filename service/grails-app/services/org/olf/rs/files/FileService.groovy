@@ -53,7 +53,14 @@ public class FileService {
         FileFetchResult result = new FileFetchResult();
         if (fileDefinitionId) {
             FileDefinition fileDefinition = FileDefinition.get(fileDefinitionId);
-            result = fetch(fileDefinition);
+            // Did we manage to find the file definition
+            if (fileDefinition == null) {
+                // We did not, so just return an error
+                result.error = "No file definition found";
+            } else {
+                // We can now call fetch to retrieve the file definition
+                result = fetch(fileDefinition);
+            }
         } else {
             // Cannot do anything without a file identifier
             result.error = "No file identifier supplied";

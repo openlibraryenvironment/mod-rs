@@ -31,6 +31,7 @@ public class JasperReportService {
     public static final String PARAMETER_DATE_FORMAT      = "dateFormat";
     public static final String PARAMETER_DATE_TIME_FORMAT = "dateTimeFormat";
     public static final String PARAMETER_IDS              = "ids";
+    public static final String PARAMETER_IMAGE            = "image";
     public static final String PARAMETER_SCHEMA           = "schema";
     public static final String PARAMETER_TIME_FORMAT      = "timeFormat";
     public static final String PARAMETER_TIME_ZONE        = "timeZone";
@@ -83,6 +84,7 @@ public class JasperReportService {
      * @param schema The database schema that the report will be run against
      * @param outputStream Where the report should be output to
      * @param idsForReport The ids to pass into the report
+     * @param imageInputStream The input stream for the image
      * @param fallbackReportResource If we do not have a report using the file definition, the is where we obtain it from the resources
      * @return The input stream for the generated report or null if the report failed
      */
@@ -90,6 +92,7 @@ public class JasperReportService {
         FileDefinition fileDefinition,
         String schema,
         List idsForReport = null,
+        InputStream imageInputStream = null,
         String fallbackReportResource = null
     ) {
         InputStream result = null;
@@ -101,6 +104,7 @@ public class JasperReportService {
             Map<String, Object> parameters = new HashMap<String, Object>();
             parameters.put(PARAMETER_IDS, idsForReport);
             parameters.put(PARAMETER_SCHEMA, schema);
+            parameters.put(PARAMETER_IMAGE, imageInputStream);
             AddDateTimeParameters(schema, parameters);
 
             // Compile the report
@@ -119,6 +123,11 @@ public class JasperReportService {
         } finally {
             // Not forgetting to close the connection
             connection.close();
+
+            // If we have a logo input stream the close it
+            if (imageInputStream != null) {
+                imageInputStream.close();
+            }
         }
 
         // Return the result to the caller
