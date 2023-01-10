@@ -36,9 +36,10 @@ public class ReportService {
      * @param reportId The id of the report to be executed
      * @param identifiers The identifiers to be passed to the report
      * @param fallbackReportResource If a report id is not valid, then if this parameter is specified we will look in the resources with the supplies path to see if we can find the report there
+     * @param imageId The id to use for the image
      * @return A FileFetchResult object that will either give an error or an InputStream containing the generated report
      */
-    public FileFetchResult generateReport(String tenant, String reportId, List identifiers = null, String fallbackReportResource = null) {
+    public FileFetchResult generateReport(String tenant, String reportId, List identifiers = null, String imageId = null, String fallbackReportResource = null) {
         FileFetchResult result = new FileFetchResult();
 
         // tThe database schema we are looking at
@@ -49,8 +50,11 @@ public class ReportService {
             Report report = Report.lookup(reportId);
 
             try {
+                // Get hold of the logo if we have one
+                InputStream logoInputStream = getImage(imageId);
+
                 // Execute the jasper report
-                result.inputStream = jasperReportService.executeReport(report?.fileDefinition, schema, identifiers, fallbackReportResource);
+                result.inputStream = jasperReportService.executeReport(report?.fileDefinition, schema, identifiers, logoInputStream, fallbackReportResource);
 
                 // Get hold of the content type and filename for the generated report
                 if (report) {
@@ -173,22 +177,28 @@ public class ReportService {
     }
 
     /**
-     * Retrieves the logo that is to be used on the pull slip
-     * @return the InputStream for the logo or null if no logo has been specified
+     * Retrieves the id of the logo to use for the image on the picklist
+     * @return the Id for the logo or null if no logo has not been specified
      */
-    public InputStream getPullSlipLogo() {
-        // The inputStream for the logs
-        InputStream logoInputStream = null;
-
+    public String getPullSlipLogoId() {
         // Get hold of the id for the logo
-        String logoId = settingsService.getSettingValue(SettingsData.SETTING_PULL_SLIP_LOGO_ID);
+        return(settingsService.getSettingValue(SettingsData.SETTING_PULL_SLIP_LOGO_ID));
+    }
+
+    /**
+     * Retrieves the image for the supplied id
+     * @return the InputStream for the image
+     */
+    public InputStream getImage(String imageId) {
+        // The inputStream for the logs
+        InputStream imageInputStream = null;
 
         // Do we have an id for the logo
-        if (logoId != null) {
-            logoInputStream = fileService.fetch(logoId).inputStream;
+        if (imageId != null) {
+            imageInputStream = fileService.fetch(imageId).inputStream;
         }
 
         // Return the input stream to the caller
-        return(logoInputStream);
+        return(imageInputStream);
     }
 }

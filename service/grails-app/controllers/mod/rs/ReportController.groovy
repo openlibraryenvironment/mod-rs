@@ -1,5 +1,6 @@
 package mod.rs;
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.ReportCreateUpdateResult;
 import org.olf.rs.reporting.Report;
@@ -21,6 +22,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/report", tags = ["Report Controller"], description = "Report Api")
 class ReportController extends OkapiTenantAwareController<Report>  {
+
+    SettingsService settingsService;
 
 	ReportController() {
 		super(Report)
@@ -164,7 +167,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             ids = ids.take(reportService.getMaxRequestsInPullSlip());
 
             // Now generate the report, this does the render
-            generateReport(reportService.getPullSlipReportId(), ids, ReportService.pullSlipDefaultReport);
+            generateReport(reportService.getPullSlipReportId(), ids, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
         }
     }
 
@@ -217,12 +220,12 @@ class ReportController extends OkapiTenantAwareController<Report>  {
      * @param identifiers The identifiers to pass to the report
      * @param defaultReport The path to the default report in the resources
      */
-    private void generateReport(String reportId, List identifiers, String defaultReport = null) {
+    private void generateReport(String reportId, List identifiers, String imageId = null, String defaultReport = null) {
 
         // It is assumed that everything has been validated by this point
         try {
             // Attempt to execute the report
-            FileFetchResult fetchResult = reportService.generateReport(request.getHeader("X-Okapi-Tenant"), reportId, identifiers, defaultReport);
+            FileFetchResult fetchResult = reportService.generateReport(request.getHeader("X-Okapi-Tenant"), reportId, identifiers, imageId, defaultReport);
 
             // Did we manage to generate the report
             if (fetchResult.inputStream == null) {

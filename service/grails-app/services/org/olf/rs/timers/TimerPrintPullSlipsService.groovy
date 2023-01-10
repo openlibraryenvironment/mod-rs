@@ -200,7 +200,7 @@ where h.id in ( :loccodes )
                                     int nextStartPosition = startPosition + identifiers.size();
 
                                     // Now generate the report, this does the render
-                                    FileFetchResult fetchResult = reportService.generateReport(tenant, reportId, identifiers, ReportService.pullSlipDefaultReport);
+                                    FileFetchResult fetchResult = reportService.generateReport(tenant, reportId, identifiers, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
 
                                     // Did we manage to generate the report
                                     if (fetchResult.inputStream == null) {
