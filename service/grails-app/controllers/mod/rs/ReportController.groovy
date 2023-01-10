@@ -163,9 +163,6 @@ class ReportController extends OkapiTenantAwareController<Report>  {
                 ids = params.id;
             }
 
-            // Ensure we do we have more than the maximum number of requests for a pull slip
-            ids = ids.take(reportService.getMaxRequestsInPullSlip());
-
             // Now generate the report, this does the render
             generateReport(reportService.getPullSlipReportId(), ids, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
         }
