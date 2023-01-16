@@ -9,7 +9,6 @@ import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.olf.rs.timers.AbstractTimer;
 
 import grails.util.Holders;
-import groovy.json.JsonSlurper;
 
 /**
  * This handles the background tasks, these are triggered by the folio 2 minute timer
@@ -79,8 +78,7 @@ public class BackgroundTaskService {
 
                         TimeZone tz;
                         try {
-                            JsonSlurper jsonSlurper = new JsonSlurper();
-                            def tenant_locale = jsonSlurper.parseText(okapiSettingsService.getSetting('localeSettings').value);
+                            Map tenant_locale = okapiSettingsService.getLocaleSettings();
                             log.debug("Got system locale settings : ${tenant_locale}");
                             tz = TimeZone.getTimeZone(tenant_locale?.timezone);
                         } catch ( Exception e ) {

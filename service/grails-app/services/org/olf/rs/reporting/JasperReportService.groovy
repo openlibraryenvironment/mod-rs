@@ -11,7 +11,6 @@ import org.olf.rs.files.FileDefinition;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.FileService;
 
-import groovy.json.JsonSlurper;
 import groovy.util.logging.Slf4j;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -202,18 +201,16 @@ public class JasperReportService {
 
         // Do we need to lookup the locale settings
         if (schemaLocaleSettings == null) {
-            JsonSlurper jsonSlurper = new JsonSlurper();
-            Map localeSettings = okapiSettingsService.getSetting('localeSettings');
+            Map localeSettings = okapiSettingsService.getLocaleSettings();
             if (localeSettings == null) {
                 // Use the defaults, but do not add it to the cache
                 schemaLocaleSettings = DefaultLocaleSettings;
             } else {
                 // We managed to find the locale settings
-                def tenantLocale = jsonSlurper.parseText(localeSettings.value);
-                Locale locale = Locale.forLanguageTag(tenantLocale?.locale);
+                Locale locale = Locale.forLanguageTag(localeSettings.locale);
                 String datePattern =  patternFromDateFormat(DateFormat.getDateInstance(DateFormat.SHORT, locale));
                 String timePattern =  patternFromDateFormat(DateFormat.getTimeInstance(DateFormat.SHORT, locale));
-                String timeZone = tenantLocale?.timezone;
+                String timeZone = localeSettings.timezone;
 
 
                 schemaLocaleSettings = [

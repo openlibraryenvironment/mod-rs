@@ -99,4 +99,38 @@ databaseChangeLog = {
             column(name: "sm_pick_slip_printed_action", type: "varchar(36)")
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1673431889603") {
+        createTable(tableName: "batch") {
+            column(name: "b_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "batchPK")
+            }
+
+            column(name: "b_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "b_date_created", type: "TIMESTAMP WITHOUT TIME ZONE") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "b_context", type: "VARCHAR(32)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "b_description", type: "VARCHAR(256)") {
+                constraints(nullable: "false")
+            }
+        }
+        
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_pull_slip_batch", type: "varchar(36)")
+        }
+        
+        addForeignKeyConstraint(baseColumnNames: "pr_pull_slip_batch", baseTableName: "patron_request", constraintName: "FK7lx8jt9ied6s1kt34pttmwo5x", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "b_id", referencedTableName: "batch", validate: "true")
+    }
+    
+    changeSet(author: "Chas (generated)", id: "1673431889604") {
+        addForeignKeyConstraint(baseColumnNames: "sm_pick_slip_printed_action", baseTableName: "state_model", constraintName: "FKbx95gb382s198mp8wp9vv6kn0", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "ae_id", referencedTableName: "action_event", validate: "true")
+    }
 }

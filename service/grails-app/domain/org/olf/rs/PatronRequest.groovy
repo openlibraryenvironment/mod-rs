@@ -224,6 +224,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** This is the last sequence number we received */
   Integer lastSequenceReceived;
 
+  /** If the pull slip was generated in a timer and emailed, this is the batch that was given to it */
+  Batch pullSlipBatch;
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -353,6 +356,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastSequenceReceived (nullable: true)
 
     lastAuditNo (nullable: true)
+    pullSlipBatch (nullable: true)
   }
 
   static mapping = {
@@ -462,6 +466,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastSequenceReceived column: 'pr_last_sequence_received'
 
     lastAuditNo column: 'pr_last_audit_no'
+    pullSlipBatch column: 'pr_pull_slip_batch'
 
     audit(sort:'dateCreated', order:'desc')
 

@@ -77,8 +77,9 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                     result = actionService.executeAction(params.patronRequestId, request.JSON.action, request.JSON.actionParams);
                     response.status = (result.actionResult == ActionResult.SUCCESS ? 200 : (result.actionResult == ActionResult.INVALID_PARAMETERS ? 400 : 500));
 
-                    // We do not want to pass the internal action result back to the caller, so we need to remove it
+                    // We do not want to pass the internal action result or the patron request back to the caller, so we need to remove them
                     result.remove('actionResult');
+                    result.remove('patronRequest');
 				}
 			}
 		}
