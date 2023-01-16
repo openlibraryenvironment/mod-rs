@@ -1,11 +1,12 @@
 package org.olf.rs;
 
-import grails.gorm.multitenancy.Tenants
 import com.k_int.okapi.OkapiClient
+import com.k_int.okapi.OkapiTenantResolver
+
+import grails.core.GrailsApplication
+import grails.gorm.multitenancy.Tenants
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
-import grails.core.GrailsApplication
-import com.k_int.okapi.OkapiTenantResolver
 
 @Slf4j
 public class OkapiSettingsService {
@@ -69,4 +70,18 @@ public class OkapiSettingsService {
     return result;
   }
 
+  /**
+   * Obtains the locale settings as a map
+   * @return The map of locale settings
+   */
+  public Map getLocaleSettings() {
+      Map result = null;
+      Map localeSettings = getSetting('localeSettings');
+      if (localeSettings?.value != null) {
+          // We have a string as json, so we need to turn it into something useful
+          result = new JsonSlurper().parseText(localeSettings.value);
+      }
+
+      return(result);
+  }
 }

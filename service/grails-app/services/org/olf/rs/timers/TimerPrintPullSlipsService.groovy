@@ -1,5 +1,10 @@
 package org.olf.rs.timers;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.olf.rs.Batch
 import org.olf.rs.EmailService;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.OkapiSettingsService;
@@ -25,6 +30,8 @@ public class TimerPrintPullSlipsService extends AbstractTimer {
     ActionService actionService;
     ReportService reportService;
     SettingsService settingsService;
+
+    private static final DateTimeFormatter batchDateFormat = DateTimeFormatter.ofPattern("E d MMM y kk:mm:ss");
 
     private static final String PULL_SLIP_QUERY='''
 Select pr
@@ -158,38 +165,46 @@ where h.id in ( :loccodes )
 
                             // Do we need to attach the pull slips
                             if (attachPullSlips) {
+                                // For knowing the institution time zone
+                                Map localeSettings = okapiSettingsService.getLocaleSettings();
+                                ZoneId zoneId = ZoneId.of((localeSettings ==  null) ? "Z" : localeSettings.timezone);
+                                if (zoneId == null) {
+                                    // Default to UTC
+                                    zoneId = ZoneId.of("Z");
+                                }
+
                                 // This gets a bit messy as we have a limit to how many request pull slips can be in 1 email
                                 int numberOfRequestsPerPullSlip = reportService.getMaxRequestsInPullSlip();
 
-                                // The list of list request identifiers for processing when we have broken them down to what will be contained in each pull slip
-                                List requestIdentifiersList = [ ];
+                                // The list of list request maps for processing when we have broken them down to what will be contained in each pull slip
+                                List requestMapsList = [ ];
 
                                 // This is the list of requests in the current pull slip
-                                List requestIdentifiers = null;
+                                Map requests = null;
 
-                                // Loop through all the requests
+                                // Loop through all the requests as we need to group them so we do not gen
                                 pending_ps_printing.each { PatronRequest request ->
                                     // Do we have a current list
-                                    if (requestIdentifiers == null) {
+                                    if (requests == null) {
                                         // No we don't so create a new one
-                                        requestIdentifiers = new ArrayList();
-                                        requestIdentifiersList.add(requestIdentifiers);
+                                        requests = new HashMap();
+                                        requestMapsList.add(requests);
                                     }
 
                                     // Add the request identifier to the current list that
-                                    requestIdentifiers.add(request.id);
+                                    requests.put(request.id, request);
 
                                     // Have we reached the limit for the number of requests in a pull slip
-                                    if (requestIdentifiers.size()== numberOfRequestsPerPullSlip) {
+                                    if (requests.size()== numberOfRequestsPerPullSlip) {
                                         // Set the current list to null
-                                        requestIdentifiers = null;
+                                        requests = null;
                                     }
                                 }
 
-                                // Now we can generate the pull slip for each list of identifiers
+                                // Now we can generate the pull slip for each request map
                                 String reportId = reportService.getPullSlipReportId();
                                 int startPosition = 1;
-                                requestIdentifiersList.each { List identifiers ->
+                                requestMapsList.each { Map requestMap ->
                                     // The attachments to be sent
                                     List attachments = null;
 
@@ -197,15 +212,15 @@ where h.id in ( :loccodes )
                                     String subjectPostfix = null;
 
                                     // The starting position of the next block block of request ids
-                                    int nextStartPosition = startPosition + identifiers.size();
+                                    int nextStartPosition = startPosition + requestMap.size();
 
                                     // Now generate the report, this does the render
-                                    FileFetchResult fetchResult = reportService.generateReport(tenant, reportId, identifiers, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
+                                    FileFetchResult fetchResult = reportService.generateReport(tenant, reportId, requestMap.keySet().toList(), reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
 
                                     // Did we manage to generate the report
                                     if (fetchResult.inputStream == null) {
-                                        // Failed to generate the pdf, so log it as an error and send the email with the pdf
-                                        log.error("Failed to generate pdf to send as attachment containing request ids: " + identifiers.toString());
+                                        // Failed to generate the pdf, so log it as an error and send the email without the pdf
+                                        log.error("Failed to generate pdf to send as attachment containing request ids: " + requestMap.keySet().toString());
                                         sendPullSlipMail(emailAddresses, tmplResult.result.header, tmplResult.result.body, null);
                                     } else {
                                         // We need to encode the file
@@ -232,17 +247,29 @@ where h.id in ( :loccodes )
                                     // Send the email with the attachments
                                     sendPullSlipMail(emailAddresses, tmplResult.result.header + ((subjectPostfix == null) ? "" : subjectPostfix), tmplResult.result.body, attachments);
 
+                                    // Now we have sent the email, create a batch that represents the pull slip that was created
+                                    Batch batch = new Batch();
+                                    batch.context = batch.CONTEXT_PULL_SLIP;
+                                    batch.description = "Created (" + startPosition.toString() + "): " + ZonedDateTime.now(zoneId).format(batchDateFormat);
+                                    batch.save(flush: true);
+
+                                    // For each request we need to execute the action
+                                    requestMap.each() { String key, PatronRequest value ->
+                                        // Do we have an action to perform
+                                        if (value.stateModel.pickSlipPrintedAction?.code != null) {
+                                            // We do, so execute the action
+                                            Map actionResult = actionService.executeAction(key, value.stateModel.pickSlipPrintedAction.code, null);
+
+                                            // The action result contains the locked PatronRequest which we will use to store the batch
+                                            if (actionResult.patronRequest != null) {
+                                                actionResult.patronRequest.pullSlipBatch = batch;
+                                                actionResult.patronRequest.save(flush: true);
+                                            }
+                                        }
+                                    }
+
                                     // Reset the start position
                                     startPosition = nextStartPosition;
-                                }
-
-                                // For each patron request we need to mark it as printed
-                                pending_ps_printing.each { PatronRequest request ->
-                                    // If we have an action to mark the request as printed then do so
-                                    if (request.stateModel.pickSlipPrintedAction?.code != null) {
-                                        // We do, so execute the action, we do not care about the result
-                                        actionService.executeAction(request.id, request.stateModel.pickSlipPrintedAction.code, null);
-                                    }
                                 }
                             } else {
                                 // Just send the email with no attachments

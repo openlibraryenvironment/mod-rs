@@ -28,12 +28,55 @@ public class ActionService {
     public Map executeAction(String patronRequestId, String action, Object parameters) {
         Map result = [ : ];
 
-        // Lock the request
-        PatronRequest patronRequest = PatronRequest.lock(patronRequestId);
+        // Lets see if this is a valid request
+        if (patronRequestId) {
+            try {
+                // Try and find the request
+                PatronRequest patronRequest = PatronRequest.lock(patronRequestId);
 
-        // was the request valid and did we lock it
-        if (patronRequest) {
-            // We did
+                // Did we find it
+                if (patronRequest == null) {
+                    // Unable to locate request
+                    result.actionResult = ActionResult.INVALID_PARAMETERS;
+                    result.message = 'Unable to find request with id: ' + patronRequestId;
+                } else {
+                    // We did, so we can really do the work
+                    result =  executeAction(patronRequest, action, parameters);
+
+                    // add the locked request to the result
+                    result.patronRequest = patronRequest;
+                }
+            } catch (Exception e) {
+                log.error("Excption thrown while trying to execute action " + action + " on request " + patronRequestId, e);
+                result.actionResult = ActionResult.INVALID_PARAMETERS;
+                result.message = 'System error occured while trying to process request ' + patronRequestId;
+            }
+        } else {
+            // Unable to locate request
+            result.actionResult = ActionResult.INVALID_PARAMETERS;
+            result.message = 'No patron request id supplied';
+        }
+
+        // Return the result to the caller
+        return(result);
+    }
+
+    /**
+     * Executes the supplied action to the given request with the supplied parameters
+     * @param patronRequest The request the action is to be applied to
+     * @param action The action that is to be applied
+     * @param parameters The parameters to be used when processing the action
+     * @return A map containing the result of the processing
+     */
+    public Map executeAction(PatronRequest patronRequest, String action, Object parameters) {
+        Map result = [ : ];
+
+        // Do we have a request
+        if (patronRequest == null) {
+            // No we do not
+            result.actionResult = ActionResult.INVALID_PARAMETERS;
+            result.message='No patron request supplied';
+        } else {
             log.debug("Apply action ${action} to ${patronRequest.id}");
 
             // Needs to fulfil the following criteria to be valid
@@ -55,10 +98,6 @@ public class ActionService {
                 reshareApplicationEventHandlerService.auditEntry(patronRequest, patronRequest.state, patronRequest.state, result.message, null);
                 patronRequest.save(flush:true, failOnError:true);
             }
-        } else {
-            // Unknown request id or could not obtain the lock
-            result.actionResult = ActionResult.INVALID_PARAMETERS;
-            result.message='Unable to lock request with id: ' + patronRequestId;
         }
 
         // Return the result to the caller
