@@ -133,4 +133,25 @@ databaseChangeLog = {
     changeSet(author: "Chas (generated)", id: "1673431889604") {
         addForeignKeyConstraint(baseColumnNames: "sm_pick_slip_printed_action", baseTableName: "state_model", constraintName: "FKbx95gb382s198mp8wp9vv6kn0", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "ae_id", referencedTableName: "action_event", validate: "true")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1673956325000") {
+        // Reworked how the batches work, hence droping the field in this changeset that was created higher up this file
+        createTable(tableName: "batch_patron_request") {
+            column(name: "bpr_batch_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "batch_patron_requestPK")
+            }
+
+            column(name: "bpr_patron_request_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "batch_patron_requestPK")
+            }
+        }
+
+        addForeignKeyConstraint(baseColumnNames: "bpr_patron_request_id", baseTableName: "batch_patron_request", constraintName: "FKffchl98ehlbkrudevidt3cgt4", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request", validate: "true")
+
+        addForeignKeyConstraint(baseColumnNames: "bpr_batch_id", baseTableName: "batch_patron_request", constraintName: "FKfmxhxm0jsjdkaiu8cwl23j915", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "b_id", referencedTableName: "batch", validate: "true")
+
+        dropForeignKeyConstraint(baseTableName: "patron_request", constraintName: "FK7lx8jt9ied6s1kt34pttmwo5x")
+
+        dropColumn(columnName: "pr_pull_slip_batch", tableName: "patron_request")
+    }
 }

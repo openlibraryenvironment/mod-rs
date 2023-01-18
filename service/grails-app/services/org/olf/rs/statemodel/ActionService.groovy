@@ -42,9 +42,6 @@ public class ActionService {
                 } else {
                     // We did, so we can really do the work
                     result =  executeAction(patronRequest, action, parameters);
-
-                    // add the locked request to the result
-                    result.patronRequest = patronRequest;
                 }
             } catch (Exception e) {
                 log.error("Excption thrown while trying to execute action " + action + " on request " + patronRequestId, e);

@@ -17,7 +17,7 @@ class UrlMappings {
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
       '/manualCloseStates'  (controller: 'patronRequest', action: 'manualCloseStates')
     }
-
+    "/rs/patronrequests/generatePickListBatch" (controller: "patronRequest", action: "generatePickListBatch")
     "/rs/patronrequests/openURL" (controller: "patronRequest", action: "openURL")
 
     "/rs/patron/$patronIdentifier/canCreateRequest" (controller: 'patron', action: 'canCreateRequest')

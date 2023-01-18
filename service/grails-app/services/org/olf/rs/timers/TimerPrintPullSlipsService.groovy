@@ -1,10 +1,6 @@
 package org.olf.rs.timers;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
-import org.olf.rs.Batch
+import org.olf.rs.BatchService;
 import org.olf.rs.EmailService;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.OkapiSettingsService;
@@ -26,12 +22,6 @@ import groovy.json.JsonSlurper;
  *
  */
 public class TimerPrintPullSlipsService extends AbstractTimer {
-
-    ActionService actionService;
-    ReportService reportService;
-    SettingsService settingsService;
-
-    private static final DateTimeFormatter batchDateFormat = DateTimeFormatter.ofPattern("E d MMM y kk:mm:ss");
 
     private static final String PULL_SLIP_QUERY='''
 Select pr
@@ -61,8 +51,12 @@ from HostLMSLocation as h
 where h.id in ( :loccodes )
 ''';
 
+    ActionService actionService;
+    BatchService batchService;
     EmailService emailService;
     OkapiSettingsService okapiSettingsService;
+    ReportService reportService;
+    SettingsService settingsService;
     TemplatingService templatingService;
 
     @Override
@@ -165,14 +159,6 @@ where h.id in ( :loccodes )
 
                             // Do we need to attach the pull slips
                             if (attachPullSlips) {
-                                // For knowing the institution time zone
-                                Map localeSettings = okapiSettingsService.getLocaleSettings();
-                                ZoneId zoneId = ZoneId.of((localeSettings ==  null) ? "Z" : localeSettings.timezone);
-                                if (zoneId == null) {
-                                    // Default to UTC
-                                    zoneId = ZoneId.of("Z");
-                                }
-
                                 // This gets a bit messy as we have a limit to how many request pull slips can be in 1 email
                                 int numberOfRequestsPerPullSlip = reportService.getMaxRequestsInPullSlip();
 
@@ -182,7 +168,7 @@ where h.id in ( :loccodes )
                                 // This is the list of requests in the current pull slip
                                 Map requests = null;
 
-                                // Loop through all the requests as we need to group them so we do not gen
+                                // Loop through all the requests as we need to group them so we do not generate to many in one request
                                 pending_ps_printing.each { PatronRequest request ->
                                     // Do we have a current list
                                     if (requests == null) {
@@ -248,23 +234,14 @@ where h.id in ( :loccodes )
                                     sendPullSlipMail(emailAddresses, tmplResult.result.header + ((subjectPostfix == null) ? "" : subjectPostfix), tmplResult.result.body, attachments);
 
                                     // Now we have sent the email, create a batch that represents the pull slip that was created
-                                    Batch batch = new Batch();
-                                    batch.context = batch.CONTEXT_PULL_SLIP;
-                                    batch.description = "Created (" + startPosition.toString() + "): " + ZonedDateTime.now(zoneId).format(batchDateFormat);
-                                    batch.save(flush: true);
+                                    batchService.generatePickListBatchFromList(requestMap.values().toList(), "Created (" + startPosition.toString() + "):", true);
 
                                     // For each request we need to execute the action
                                     requestMap.each() { String key, PatronRequest value ->
                                         // Do we have an action to perform
                                         if (value.stateModel.pickSlipPrintedAction?.code != null) {
                                             // We do, so execute the action
-                                            Map actionResult = actionService.executeAction(key, value.stateModel.pickSlipPrintedAction.code, null);
-
-                                            // The action result contains the locked PatronRequest which we will use to store the batch
-                                            if (actionResult.patronRequest != null) {
-                                                actionResult.patronRequest.pullSlipBatch = batch;
-                                                actionResult.patronRequest.save(flush: true);
-                                            }
+                                            actionService.executeAction(key, value.stateModel.pickSlipPrintedAction.code, null);
                                         }
                                     }
 

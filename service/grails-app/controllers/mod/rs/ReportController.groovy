@@ -1,5 +1,6 @@
 package mod.rs;
 
+import org.olf.rs.BatchService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.ReportCreateUpdateResult;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "/rs/report", tags = ["Report Controller"], description = "Report Api")
 class ReportController extends OkapiTenantAwareController<Report>  {
 
+    BatchService batchService;
     SettingsService settingsService;
 
 	ReportController() {
@@ -141,30 +143,47 @@ class ReportController extends OkapiTenantAwareController<Report>  {
     ])
     @ApiImplicitParams([
         @ApiImplicitParam(
-            name = "id",
+            name = "batchId",
+            paramType = "query",
+            allowMultiple = false,
+            required = false,
+            value = "The batch to generate the picklist from",
+            dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "requestId",
             paramType = "query",
             allowMultiple = true,
-            required = true,
-            value = "The id(s) that that will be passed to the picklist",
+            required = false,
+            value = "The request identifier(s) to generate the report for",
             dataType = "string"
         )
     ])
     def generatePicklist() {
-        List ids = null;
-        if (params.id == null) {
-            Map renderResult = [ error: "No request identifies specified for the pickliist report" ];
+        List requestIdentifiers = null;
+
+        // Do we have a batch id
+        if (params.batchId != null) {
+            // Generate the request identifiers from the batch
+            requestIdentifiers = batchService.fetchRequestIdentifiersForBatch(params.batchId);
+        } else if (params.requestId != null) {
+            // We have 1 or more request identifiers
+            if (params.requestId instanceof String) {
+                requestIdentifiers = new ArrayList();
+                requestIdentifiers.add(params.requestId);
+            } else if (params.requestId != null) {
+                // it must be an array
+                requestIdentifiers = params.requestId;
+            }
+        }
+
+        // Have we been supplied any request identifiers
+        if ((requestIdentifiers == null) || (requestIdentifiers.size() == 0)) {
+            Map renderResult = [ error: "No valid batch identifier or request identifier has been specified to generate a report" ];
             render renderResult as JSON, status: 400, contentType: "application/json";
         } else {
-            if (params.id instanceof String) {
-                ids = new ArrayList();
-                ids.add(params.id);
-            } else {
-                // it must be an array
-                ids = params.id;
-            }
-
             // Now generate the report, this does the render
-            generateReport(reportService.getPullSlipReportId(), ids, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
+            generateReport(reportService.getPullSlipReportId(), requestIdentifiers, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
         }
     }
 
