@@ -18,6 +18,8 @@ class Batch implements MultiTenant<Batch> {
     /** When this batch was created */
     Date dateCreated
 
+    static hasMany = [patronRequests : PatronRequest]
+
     static constraints = {
         description (nullable: false, blank: false)
             context (nullable: false, blank: false)
@@ -25,11 +27,12 @@ class Batch implements MultiTenant<Batch> {
 
     static mapping = {
         table 'batch'
-                 id column : 'b_id', generator: 'uuid2', length: 36
-            version column : 'b_version'
-        description column : 'b_description', length: 256
-            context column : 'b_context', length: 32
-        dateCreated column : 'b_date_created'
+                    id column : 'b_id', generator: 'uuid2', length: 36
+               version column : 'b_version'
+           description column : 'b_description', length: 256
+               context column : 'b_context', length: 32
+           dateCreated column : 'b_date_created'
+        patronRequests column : 'bpr_batch_id', joinTable : 'batch_patron_request'
     }
 }
 

@@ -32,11 +32,13 @@ final def toExpand = fullRecord ? [
 
 final def toExclude = fullRecord ? [
   // Full excluded set...
+  'batches',
   'pickLocation', // Resolved explicitly
   'volumes' // Resolved explicitly
 ] : [
   // brief record excludes ...
   'audit',
+  'batches',
   'cancellationReason',
   'conditions',
   'customProperties',

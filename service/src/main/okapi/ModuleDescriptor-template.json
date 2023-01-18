@@ -22,6 +22,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.post" ]
         }, 
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/generatePickListBatch",
+          "permissionsRequired": [ "rs.patronrequests.generateBatch" ]
+        },
+        {
           "methods": [ "POST" ],
           "pathPattern": "/rs/patronrequests/{id}/performAction",
           "permissionsRequired": [ "rs.patronrequests.item.performaction" ]
@@ -423,6 +428,12 @@
       "permissionName": "rs.patronrequests.item.validactions",
       "displayName": "patronrequests item get valid actions",
       "description": "get valid actions on patronrequests item",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.generateBatch",
+      "displayName": "Generates a pick list batch",
+      "description": "Generates a pick list batch based on the supplied filters",
       "visible": false
     },
     {
@@ -919,6 +930,7 @@
       "visible": false,
       "subPermissions": [
         "rs.patronrequests.write",
+        "rs.patronrequests.generateBatch",
         "rs.refdata.write",
         "rs.settings.write",
         "rs.statistics.write",

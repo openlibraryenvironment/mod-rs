@@ -1,8 +1,9 @@
 package mod.rs;
 
+import org.olf.rs.Batch;
+import org.olf.rs.BatchService;
 import org.olf.rs.OpenUrlService;
 import org.olf.rs.PatronRequest;
-import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.Result;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
@@ -26,8 +27,8 @@ import io.swagger.annotations.ApiResponses;
 class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
 
 	ActionService actionService;
+    BatchService batchService;
     OpenUrlService openUrlService;
-	ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
 
 	PatronRequestController() {
 		super(PatronRequest)
@@ -77,9 +78,8 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                     result = actionService.executeAction(params.patronRequestId, request.JSON.action, request.JSON.actionParams);
                     response.status = (result.actionResult == ActionResult.SUCCESS ? 200 : (result.actionResult == ActionResult.INVALID_PARAMETERS ? 400 : 500));
 
-                    // We do not want to pass the internal action result or the patron request back to the caller, so we need to remove them
+                    // We do not want to pass the internal action result back to the caller, so we need to remove them
                     result.remove('actionResult');
-                    result.remove('patronRequest');
 				}
 			}
 		}
@@ -184,6 +184,66 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
             }
         }
         render result as JSON
+    }
+
+    /**
+     * Generates a batch from the passed in list of filters
+     */
+    @ApiOperation(
+        value = "Generates the pick list batch based on the passed in filter",
+        nickname = "generatePickListBatch",
+        produces = "application/json",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "term",
+            paramType = "query",
+            required = false,
+            allowMultiple = false,
+            value = "The term to be searched for",
+            dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "filters",
+            paramType = "query",
+            required = false,
+            allowMultiple = true,
+            value = "The filters to be applied",
+            dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "match",
+            paramType = "query",
+            required = false,
+            allowMultiple = true,
+            value = "The properties the match is to be applied to",
+            dataType = "string"
+        )
+    ])
+    def generatePickListBatch() {
+        List<String> filters = getParamList("filters");
+        List<String> searchFields = getParamList("match");
+        String term = params.term;
+        Map result = [ : ];
+
+        Batch.withTransaction { tstatus ->
+            // Generate the batch for the pick list
+            result = batchService.generatePickListBatchFromFilter(
+                term,
+                searchFields,
+                filters,
+                100,
+                "User generated pick list:",
+                true
+            );
+        }
+
+        // Give the result back to the caller
+        render result as JSON;
     }
 
     /**
