@@ -180,7 +180,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
         // Have we been supplied any request identifiers
         if ((requestIdentifiers == null) || (requestIdentifiers.size() == 0)) {
             Map renderResult = [ error: "No valid batch identifier or request identifier has been specified to generate a report" ];
-            render renderResult as JSON, status: 400, contentType: "application/json";
+            render renderResult as JSON, status: 200, contentType: "application/json";
         } else {
             // Now generate the report, this does the render
             generateReport(reportService.getPullSlipReportId(), requestIdentifiers, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
