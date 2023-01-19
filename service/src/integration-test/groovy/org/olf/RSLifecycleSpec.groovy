@@ -1127,4 +1127,116 @@ class DosomethingSimple {
             tenantId      | ignore
             'RSInstThree' | ''
     }
+
+    void "setup requests awaiting to be printed"(
+        String requesterTenantId,
+        String responderTenantId,
+        int scenario,
+        boolean isRequesterAction,
+        String actionFile,
+        String requesterStatus,
+        String responderStatus,
+        String newResponderTenant,
+        String newResponderStatus,
+        String patronIdentifier,
+        String expectedActionResponse
+    ) {
+        when:"Progress the request"
+            // Default state model for instance 3 should have been set to testResponder
+
+            String actionResponse = doScenarioAction(
+                requesterTenantId,
+                responderTenantId,
+                scenario,
+                isRequesterAction,
+                actionFile,
+                requesterStatus,
+                responderStatus,
+                newResponderTenant,
+                newResponderStatus,
+                patronIdentifier
+            );
+
+            log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
+            log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
+
+        then:"Check the response value"
+            assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
+            assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
+            if (expectedActionResponse != null) {
+                assert expectedActionResponse == actionResponse;
+            }
+
+        where:
+            requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | patronIdentifier | expectedActionResponse
+            "RSInstOne"       | null              | 201      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+            "RSInstOne"       | "RSInstThree"     | 20101    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+            "RSInstOne"       | null              | 202      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+            "RSInstOne"       | "RSInstThree"     | 20201    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+            "RSInstOne"       | null              | 203      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+            "RSInstOne"       | "RSInstThree"     | 20301    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+    }
+
+    void "Generate a Batch"(String tenantId, String ignore) {
+        when:"We generate a batch"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Create a batch
+            def generateBatchResponse = doGet("${baseUrl}rs/patronrequests/generatePickListBatch?filters=isRequester==false&filters=state.terminal==false&filters=state.code==RES_NEW_AWAIT_PULL_SLIP");
+            log.debug("Response from generate batch: " + generateBatchResponse.toString());
+
+            // set the batch id in the test context so the next text can retrieve it
+            testctx.batchId = generateBatchResponse.batchId;
+
+        then:"Check we have a batch id"
+            // Should have the a response
+            assert(generateBatchResponse != null);
+
+            // Should have a batch id as part of the response
+            assert(generateBatchResponse.batchId != null);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
+    }
+
+    void "Print pullslip from batch"(String tenantId, String ignore) {
+        when:"Request the pull slip from a batch"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Generate the picklist
+            def generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=${testctx.batchId}");
+
+        then:"Check we have file in response"
+            // We should have a byte array
+            assert(generatePickListResponse instanceof byte[]);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
+    }
+
+    void "Print pullslip from batch generate error"(String tenantId, String ignore) {
+        when:"Request the pull slip from a batch"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Generate the picklist
+            def generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=nonExistantBatchId");
+            log.debug("Response from generate pick list, expecting error: " + generatePickListResponse.toString());
+
+        then:"Check we have file in response"
+            // The error element should exist
+            assert(generatePickListResponse.error != null);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
+    }
 }
