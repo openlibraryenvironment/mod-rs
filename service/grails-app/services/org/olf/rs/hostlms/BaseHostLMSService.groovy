@@ -132,6 +132,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       }
     }
 
+
+    /* 
+      Allow for additional modifications to be made to the ItemLocation on a per-adapter basis.
+      enrichItemLocation can be overriden as needed
+    */
+
+    location = enrichItemLocation(location);
+
     log.debug("determineBestLocation returns ${location}");
     return location;
   }
@@ -233,12 +241,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       log.debug("Preference order of locations: ${sorted_options}");
       result = sorted_options[0];
     } else {
-      if (options.size() > 0) {
+      if ( options.size() > 0 ) {
         log.debug("Returning null for supply location because all holdings have either a location or shelving location (site) preference value < 0: ${options}");
       }
     }
 
     return result;
+  }
+
+  //default stub method
+  public ItemLocation enrichItemLocation(ItemLocation location) {
+    return location; 
   }
 
   // By default, ask for OPAC records - @override in implementation if you want different

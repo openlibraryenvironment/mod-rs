@@ -25,6 +25,8 @@ import org.olf.rs.circ.client.CirculationClient;
 
 import java.text.Normalizer;
 
+import java.net.URI;
+
 
 
 /**
@@ -65,6 +67,58 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     return availability_summary;
   }
 
+
+  //Use the Voyager API to get the barcode for the ItemLocation's itemId and replace
+  //the field value with the barcode instead
+  @Override
+  public ItemLocation enrichItemLocation(ItemLocation location) {
+    log.debug("Calling VoyagerHostLMSService::enrichItemLocation()");
+    if ( location == null ) {
+      return null;
+    }
+    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
+    String ncip_server_address = ncip_server_address_setting?.value;
+    String barcode = null;
+    try {
+      URI ncipURI = new URI(ncip_server_address);
+      int barcodeLookupPort = 7064;
+      String barcodeLookupPath = "/vxws/item/" + location.itemId;
+      String query = "view=brief"
+      URI barcodeLookupURI = new URI(
+        ncipURI.getScheme(), //scheme
+        null, //userInfo
+        ncipURI.getHost(), //host 
+        barcodeLookupPort, //port
+        barcodeLookupPath, //path
+        query, //query
+        null //fragment 
+      );
+      log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
+      barcode = lookupBarcode(barcodeLookupURL.toString());
+    } catch ( Exception e ) {
+      log.error("Unable to lookup barcode for item id " + location?.itemId + ":" + e.getLocalizedMessage());
+    }
+
+    if ( barcode != null ) {
+      log.debug("Setting ItemLocation itemId to ${barcode}");
+      location.itemId = barcode; 
+    }
+
+    return location;
+
+  }
+
+  private String lookupBarcode(String lookupURL) {
+    def httpBuilder = configure {
+      request.uri = lookupURL;
+    };
+    log.debug("Contacting Voyager API at ${lookupURL}");
+    def voyagerResponse = httpBuilder.get();
+    log.debug("Got response from Voyager API: ${voyagerResponse}");
+    String barcode = voyagerResponse?.item?.itemData?.find{ it.@name=="itemBarcode" }?.text();
+    return barcode;
+  }
+
   public Map acceptItem(String item_id,
                         String request_id,
                         String user_id,
@@ -81,7 +135,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   }
 
   private String stripDiacritics(String input) {
-    if(input == null) {
+    if ( input == null ) {
       return null; 
     }
     input = Normalizer.normalize(input, Normalizer.Form.NFD);
