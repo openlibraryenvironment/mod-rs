@@ -73,7 +73,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   @Override
   public ItemLocation enrichItemLocation(ItemLocation location) {
     log.debug("Calling VoyagerHostLMSService::enrichItemLocation()");
-    if(location == null) {
+    if ( location == null ) {
       return null;
     }
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
@@ -95,11 +95,11 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
       );
       log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
       barcode = lookupBarcode(barcodeLookupURL.toString());
-    } catch(Exception e) {
+    } catch ( Exception e ) {
       log.error("Unable to lookup barcode for item id " + location?.itemId + ":" + e.getLocalizedMessage());
     }
 
-    if(barcode != null) {
+    if ( barcode != null ) {
       log.debug("Setting ItemLocation itemId to ${barcode}");
       location.itemId = barcode; 
     }
@@ -135,7 +135,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   }
 
   private String stripDiacritics(String input) {
-    if(input == null) {
+    if ( input == null ) {
       return null; 
     }
     input = Normalizer.normalize(input, Normalizer.Form.NFD);
