@@ -1228,12 +1228,22 @@ class DosomethingSimple {
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
             // Generate the picklist
-            def generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=nonExistantBatchId");
-            log.debug("Response from generate pick list, expecting error: " + generatePickListResponse.toString());
+            def generatePickListResponse = null;
+            int statusCode = 200;
+            try {
+                generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=nonExistantBatchId");
+            } catch (groovyx.net.http.HttpException e) {
+                statusCode = e.getStatusCode();
+                log.debug("Body type: " + e.getBody().getClass().toString());
+                log.debug("Body from generatePickListResponse: " + e.getBody().toString());
+                generatePickListResponse = e.getBody();
+            }
+            log.debug("Response from generatePickListResponse: " + generatePickListResponse.toString());
 
         then:"Check we have file in response"
             // The error element should exist
-            assert(generatePickListResponse.error != null);
+            assert(generatePickListResponse?.error != null);
+            assert(statusCode == 400);
 
         where:
             tenantId      | ignore
