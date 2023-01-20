@@ -241,7 +241,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       log.debug("Preference order of locations: ${sorted_options}");
       result = sorted_options[0];
     } else {
-      if (options.size() > 0) {
+      if ( options.size() > 0 ) {
         log.debug("Returning null for supply location because all holdings have either a location or shelving location (site) preference value < 0: ${options}");
       }
     }
