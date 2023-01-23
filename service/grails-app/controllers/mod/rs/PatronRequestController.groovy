@@ -243,7 +243,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
         }
 
         // Give the result back to the caller
-        render result as JSON;
+        render result as JSON, status: result.error ? 400 : 200, contentType: "application/json";
     }
 
     /**
