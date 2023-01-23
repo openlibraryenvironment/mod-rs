@@ -5,9 +5,10 @@ import org.olf.rs.BatchService;
 import org.olf.rs.OpenUrlService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.Result;
+import org.olf.rs.reporting.ReportService;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
-import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.StateModel;
 
 import com.k_int.okapi.OkapiTenantAwareController;
 
@@ -29,6 +30,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 	ActionService actionService;
     BatchService batchService;
     OpenUrlService openUrlService;
+    ReportService reportService;
 
 	PatronRequestController() {
 		super(PatronRequest)
@@ -98,12 +100,10 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
      *     actionParams:{}
      *   }
      */
-
   	def bulkAction() {
 		  def result = [:]
 		  render result as JSON;
 	  }
-
 
     /**
      * list the valid actions for this request
@@ -236,7 +236,7 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
                 term,
                 searchFields,
                 filters,
-                100,
+                reportService.getMaxRequestsInPullSlipManual(),
                 "User generated pick list:",
                 true
             );
@@ -244,6 +244,61 @@ class PatronRequestController extends OkapiTenantAwareController<PatronRequest> 
 
         // Give the result back to the caller
         render result as JSON;
+    }
+
+    /**
+     * Marks the requests in a batch as being printed if that action is valid for the request
+     * This will return the following arrays:
+     *  1. The request ids that were successfully marked as printed
+     *  2. The request ids that failed to be marked as printed that were valid to mark as printed
+     *  3. The requests ids that were not valid to mark as printed
+     */
+    @ApiOperation(
+        value = "Actions the requests in the batch as printed",
+        nickname = "markBatchAsPrinted",
+        produces = "application/json",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success"),
+        @ApiResponse(code = 400, message = "Invalid parameters have been supplied")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "batchId",
+            paramType = "query",
+            required = true,
+            allowMultiple = false,
+            value = "The batch to mark the requests it contains as printed",
+            dataType = "string"
+        )
+    ])
+    def markBatchAsPrinted() {
+        Map result = [ : ];
+        int resultStatus = 200;
+
+        // Have we been supplied a batch id
+        if (params.batchId) {
+            // Good start, so get hod of the batch
+            Batch batch = Batch.get(params.batchId);
+
+            // Did we find the batch
+            if (batch) {
+                // Start a transaction to perform the updates against
+                PatronRequest.withTransaction { tstatus ->
+                    result = batchService.markRequestsInBatchAsPrinted(batch);
+                }
+            } else {
+                // No we did not
+                result.error = "unknown batch id supplied: " + params.batchId;
+                resultStatus = 400;
+            }
+        } else {
+            result.error = "No batch id was supplied";
+            resultStatus = 400;
+        }
+
+        render result as JSON, status: resultStatus, contentType: "application/json";
     }
 
     /**

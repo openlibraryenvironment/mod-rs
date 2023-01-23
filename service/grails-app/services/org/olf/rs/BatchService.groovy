@@ -4,6 +4,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.olf.rs.statemodel.ActionResult;
+import org.olf.rs.statemodel.ActionService;
+
 import com.k_int.web.toolkit.SimpleLookupService;
 
 /**
@@ -17,6 +20,9 @@ public class BatchService {
 
     /** The formatter to use for turning the date / time into a string to append to the description */
     private static final DateTimeFormatter batchDateFormat = DateTimeFormatter.ofPattern(" E d MMM y kk:mm:ss");
+
+    /** Required for marking the request as printed */
+    ActionService actionService;
 
     /** for getting hold of the locale settings */
     OkapiSettingsService okapiSettingsService;
@@ -90,14 +96,62 @@ public class BatchService {
     public Map generatePickListBatchFromList(
         List patronRequests,
         String description,
-        boolean appendDateTime)
+        boolean appendDateTime,
+        boolean wantBatch = false)
     {
         Map result = [ : ];
 
         // Just create the batch
-        createBatch(description, appendDateTime, patronRequests, result);
+        createBatch(description, appendDateTime, patronRequests, result, wantBatch);
 
         // Finally return the result to the caller
+        return(result);
+    }
+
+    /**
+     * Marks all the requests in the batch as being printed if it is valid for the request
+     * @param batch The batch that the requests should be marked as being printed
+     * @return A map that contains 3 arrays of request identifiers that says whether that request was a success, failed or the action is invalid for the request
+     */
+    public Map markRequestsInBatchAsPrinted(Batch batch) {
+        List successful = [ ];
+        List failed = [ ];
+        List notValid = [ ];
+        Map result = [
+            successful : successful,
+            failed : failed,
+            notValid : notValid
+        ];
+
+        // Can't do anything without a batch
+        if (batch) {
+            // For each request we need to execute the action
+            batch.patronRequests.each { PatronRequest patronRequest ->
+                // Do we have an action to perform
+                if (patronRequest.stateModel.pickSlipPrintedAction != null) {
+                    // Is the action valid for the request
+                    if (actionService.isValid(patronRequest, patronRequest.stateModel.pickSlipPrintedAction.code)) {
+                        // It is valid, so execute the action
+                        Map actionServiceResult = actionService.executeAction(patronRequest.id, patronRequest.stateModel.pickSlipPrintedAction.code, null);
+                        if (actionServiceResult.actionResult == ActionResult.SUCCESS) {
+                            // Add it to the successful array
+                            successful.add(patronRequest.id);
+                        } else {
+                            // We failed so add it to the failed array
+                            failed.add(patronRequest.id);
+                        }
+                    } else {
+                        // Add the request id to the not valid array
+                        notValid.add(patronRequest.id);
+                    }
+                } else {
+                    // Add the request id to the not valid array
+                    notValid.add(patronRequest.id);
+                }
+            }
+        }
+
+        // Return the result to the caller
         return(result);
     }
 
@@ -131,7 +185,7 @@ public class BatchService {
      * @param patronRequests The list of patron requests to be held within the batch
      * @param result The result map that will be updated with the batch id if we were successful
      */
-    private void createBatch(String description, boolean appendDateTime, List patronRequests, Map result) {
+    private void createBatch(String description, boolean appendDateTime, List patronRequests, Map result, boolean wantBatch = false) {
         // Have we been supplied with any identifiers
         if ((patronRequests == null) || patronRequests.isEmpty()) {
             // We did not find any
@@ -172,6 +226,12 @@ public class BatchService {
 
                 // Return the batch id to the caller
                 result.batchId = batch.id;
+
+                // Do they want the batch passing back
+                if (wantBatch) {
+                    // They do, so set the batch
+                    result.batch = batch;
+                }
             }
         }
     }

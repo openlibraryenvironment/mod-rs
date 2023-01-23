@@ -27,6 +27,11 @@
           "permissionsRequired": [ "rs.patronrequests.generateBatch" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/markBatchAsPrinted",
+          "permissionsRequired": [ "rs.patronrequests.markBatchPrinted" ]
+        },
+        {
           "methods": [ "POST" ],
           "pathPattern": "/rs/patronrequests/{id}/performAction",
           "permissionsRequired": [ "rs.patronrequests.item.performaction" ]
@@ -434,6 +439,12 @@
       "permissionName": "rs.patronrequests.generateBatch",
       "displayName": "Generates a pick list batch",
       "description": "Generates a pick list batch based on the supplied filters",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.patronrequests.markBatchPrinted",
+      "displayName": "Actions the requests in the batch so they are marked as being printed",
+      "description": "Actions the requests in the batch so they are marked as being printed",
       "visible": false
     },
     {
@@ -931,6 +942,7 @@
       "subPermissions": [
         "rs.patronrequests.write",
         "rs.patronrequests.generateBatch",
+        "rs.patronrequests.markBatchPrinted",
         "rs.refdata.write",
         "rs.settings.write",
         "rs.statistics.write",

@@ -9,7 +9,6 @@ import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.reporting.ReportService;
-import org.olf.rs.statemodel.ActionService;
 import org.olf.templating.TemplateContainer;
 import org.olf.templating.TemplatingService;
 
@@ -51,7 +50,6 @@ from HostLMSLocation as h
 where h.id in ( :loccodes )
 ''';
 
-    ActionService actionService;
     BatchService batchService;
     EmailService emailService;
     OkapiSettingsService okapiSettingsService;
@@ -234,15 +232,12 @@ where h.id in ( :loccodes )
                                     sendPullSlipMail(emailAddresses, tmplResult.result.header + ((subjectPostfix == null) ? "" : subjectPostfix), tmplResult.result.body, attachments);
 
                                     // Now we have sent the email, create a batch that represents the pull slip that was created
-                                    batchService.generatePickListBatchFromList(requestMap.values().toList(), "Created (" + startPosition.toString() + "):", true);
+                                    Map batchResult = batchService.generatePickListBatchFromList(requestMap.values().toList(), "Created (" + startPosition.toString() + "):", true, true);
 
-                                    // For each request we need to execute the action
-                                    requestMap.each() { String key, PatronRequest value ->
-                                        // Do we have an action to perform
-                                        if (value.stateModel.pickSlipPrintedAction?.code != null) {
-                                            // We do, so execute the action
-                                            actionService.executeAction(key, value.stateModel.pickSlipPrintedAction.code, null);
-                                        }
+                                    // Did we manage to create a new batch
+                                    if (batchResult.batch) {
+                                        // We did, so we can now mark the requests as printed
+                                        batchService.markRequestsInBatchAsPrinted(batchResult.batch);
                                     }
 
                                     // Reset the start position
