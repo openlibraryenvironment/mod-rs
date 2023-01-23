@@ -61,9 +61,10 @@ public class SettingsData {
     public static final String SETTING_WMS_REGISTRY_ID            = 'wms_registry_id';
 
     // Settings for the pull slip configuration section
-    public static final String SETTING_PULL_SLIP_LOGO_ID     = 'pull_slip_logo_id';
-    public static final String SETTING_PULL_SLIP_MAX_ITEMS   = 'pull_slip_max_items';
-    public static final String SETTING_PULL_SLIP_REPORT_ID   = 'pull_slip_report_id';
+    public static final String SETTING_PULL_SLIP_LOGO_ID          = 'pull_slip_logo_id';
+    public static final String SETTING_PULL_SLIP_MAX_ITEMS        = 'pull_slip_max_items';
+    public static final String SETTING_PULL_SLIP_MAX_ITEMS_MANUAL = 'pull_slip_max_items_manual';
+    public static final String SETTING_PULL_SLIP_REPORT_ID        = 'pull_slip_report_id';
 
     // Settings for the pullslipTemplateConfig section
     public static final String SETTING_PULL_SLIP_TEMPLATE_ID = 'pull_slip_template_id';
@@ -198,6 +199,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_PULL_SLIP_REPORT_ID, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_PULL_SLIP_LOGO_ID, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_PULL_SLIP_MAX_ITEMS, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING, null, "100", null, true);
+            ensureAppSetting(SETTING_PULL_SLIP_MAX_ITEMS_MANUAL, SECTION_PULLSLIP_CONFIGURATION, SETTING_TYPE_STRING, null, "100", null, true);
 
             ensureAppSetting(SETTING_BORROWER_CHECK, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_BORROWER_CHECK_METHOD);
             ensureAppSetting(SETTING_CHECK_OUT_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_OUT_METHOD);
