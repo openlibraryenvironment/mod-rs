@@ -1234,15 +1234,61 @@ class DosomethingSimple {
                 generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=nonExistantBatchId");
             } catch (groovyx.net.http.HttpException e) {
                 statusCode = e.getStatusCode();
-                log.debug("Body type: " + e.getBody().getClass().toString());
-                log.debug("Body from generatePickListResponse: " + e.getBody().toString());
                 generatePickListResponse = e.getBody();
             }
-            log.debug("Response from generatePickListResponse: " + generatePickListResponse.toString());
+            log.debug("Response from generatePickList: " + generatePickListResponse.toString());
+
+        then:"Check we have an error response"
+            // The error element should exist
+            assert(generatePickListResponse?.error != null);
+            assert(statusCode == 400);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
+    }
+
+    void "Action requsts as printed from batch"(String tenantId, String ignore) {
+        when:"Action requests in batch to be marked as printed"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Action the requests in the batch as printed
+            def markBatchAsPrintedResponse = doGet("${baseUrl}/rs/patronrequests/markBatchAsPrinted?batchId=${testctx.batchId}");
+            log.debug("Response from markBatchAsPrinted: " + markBatchAsPrintedResponse.toString());
 
         then:"Check we have file in response"
             // The error element should exist
-            assert(generatePickListResponse?.error != null);
+            assert(markBatchAsPrintedResponse.successful.size() == 3);
+            assert(markBatchAsPrintedResponse.failed.size() == 0);
+            assert(markBatchAsPrintedResponse.notValid.size() == 0);
+
+        where:
+            tenantId      | ignore
+            'RSInstThree' | ''
+    }
+
+    void "Action requests as printed invalid batch generate error"(String tenantId, String ignore) {
+        when:"Request the pull slip from a batch"
+
+            // Set the headers
+            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+            // Generate the picklist
+            def markBatchAsPrintedResponse = null;
+            int statusCode = 200;
+            try {
+                markBatchAsPrintedResponse = doGet("${baseUrl}/rs/patronrequests/markBatchAsPrinted?batchId=nonExistantBatchId");
+            } catch (groovyx.net.http.HttpException e) {
+                statusCode = e.getStatusCode();
+                markBatchAsPrintedResponse = e.getBody();
+            }
+            log.debug("Response from markBatchAsPrinted: " + markBatchAsPrintedResponse.toString());
+
+        then:"Check we have a valid error response"
+            // The error element should exist
+            assert(markBatchAsPrintedResponse?.error != null);
             assert(statusCode == 400);
 
         where:
