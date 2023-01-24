@@ -10,8 +10,6 @@ import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.StateModel;
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
@@ -25,7 +23,7 @@ import io.swagger.annotations.ApiResponses;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/patronrequests", tags = ["Patron Request Controller"], description = "API for all things to do with patron requests")
-class PatronRequestController extends OkapiTenantAwareController<PatronRequest>  {
+class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRequest>  {
 
 	ActionService actionService;
     BatchService batchService;
