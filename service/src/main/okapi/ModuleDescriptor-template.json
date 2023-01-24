@@ -244,6 +244,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/batch*",
+          "permissionsRequired": [ "rs.batch.get" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/fileDefinition/fileDownload",
           "permissionsRequired": [ "rs.file.download" ]
         },
@@ -832,6 +837,12 @@
       "visible": false
     },
     {
+      "permissionName": "rs.batch.get",
+      "displayName": "Can fetch batch records",
+      "description": "Can fetch batch records",
+      "visible": false
+    },
+    {
       "permissionName": "rs.file.download",
       "displayName": "Can download files",
       "description": "Can download files",
@@ -957,6 +968,7 @@
         "rs.shipments",
         "rs.noticePolicies",
         "rs.hostlmslocations.write",
+        "rs.batch.get",
         "rs.file.download",
         "rs.file.upload",
         "rs.report.admin",

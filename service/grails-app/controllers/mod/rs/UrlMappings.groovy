@@ -27,6 +27,8 @@ class UrlMappings {
     "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")
     "/rs/availableAction/createGraph/$stateModel" (controller: "availableAction", action: "createGraph")
 
+    "/rs/batch" (controller: "batch")
+
     "/rs/report/createUpdate" (controller: "report", action: "createUpdate")
     "/rs/report/execute" (controller: "report", action: "execute")
     "/rs/report/generatePicklist" (controller: "report", action: "generatePicklist")
