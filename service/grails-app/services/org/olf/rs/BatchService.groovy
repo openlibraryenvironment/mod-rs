@@ -70,7 +70,7 @@ public class BatchService {
                 // Do we have to many items
                 if (patronRequests.size() > maxBatchSize) {
                     // We do so set the error and bail out
-                    result.error = "To many items to be printed, extend the filter to reduce the number of requests selected";
+                    result.error = "Too many items to be printed, extend the filter to reduce the number of requests selected";
                     continuePageing = false;
                 } else {
                     // Move on to the next page of results
