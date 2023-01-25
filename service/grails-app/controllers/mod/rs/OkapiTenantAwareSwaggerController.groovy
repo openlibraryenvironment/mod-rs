@@ -106,6 +106,28 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareController<T>
     }
 
     @ApiOperation(
+        value = "Returns the supplied record",
+        nickname = "{id}",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "id",
+            paramType = "path",
+            required = true,
+            allowMultiple = false,
+            value = "The id of the record to return",
+            dataType = "string"
+        )
+    ])
+    def show() {
+        super.show();
+    }
+
+    @ApiOperation(
         value = "Creates a new record with the supplied data",
         nickname = "/",
         httpMethod = "POST"
