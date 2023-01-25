@@ -7,6 +7,13 @@ import swagger.grails.SwaggerService;
  * Swagger UI Controller
  */
 class SwaggerUIController {
+    private static final String RESPONSE_CREATED = "201";
+    private static final String RESPONSE_DELETED = "204";
+    private static final String RESPONSE_SUCCESS = "200";
+
+    private static final String OPERATION_DELETE = "delete";
+    private static final String OPERATION_POST   = "post";
+
     SwaggerService swaggerService
 
     /** The controllers we want to ignore, which are defined in the tags */
@@ -15,6 +22,7 @@ class SwaggerUIController {
         "Has Hidden Record Controller",
         "Login Controller",
         "Logout Controller",
+        "Okapi Tenant Aware Swagger Controller",
         "Resource Proxy Controller",
         "Tenant Controller"
     ];
@@ -72,6 +80,12 @@ class SwaggerUIController {
 
             // Now add the tenant and token parameters to all the operations
             addParametersToOperations(paths, [ parameterOkapiTenant, parameterOkapiToken ]);
+
+            // We don't want a 200 response if we have a created response
+            remove200ResponsesWhenAlternativeExist(paths, OPERATION_POST, RESPONSE_CREATED);
+
+            // We do not want a 200 response if we have a deleted response
+            remove200ResponsesWhenAlternativeExist(paths, OPERATION_DELETE, RESPONSE_DELETED);
         }
 
         // We should now just have the collers we are interested in
@@ -116,6 +130,34 @@ class SwaggerUIController {
                     // Now for each parameter we have been passed, add it to the list
                     parameters.each { additionalParameter ->
                         operationDetails.parameters.add(additionalParameter);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove the 200 response if an alternative positive response exists
+     * @param paths The paths that need the 200 potentially removing
+     * @param operation The operation that we need to check for the 200 to remove
+     * @param alternativeResponse The alternative positive response
+     */
+    void remove200ResponsesWhenAlternativeExist(Map paths, String operation, String alternativeResponse) {
+        paths.each { path, pathDetails ->
+            if (pathDetails != null) {
+                // Does this path have the operation we are interested in
+                Map operationDetails = pathDetails[operation];
+
+                // Did we find some operation details
+                if (operationDetails != null) {
+                    // It does, so we need to look at the responses
+                    if (operationDetails.responses != null) {
+                        // So do we have the 200 response as well as the alternative response
+                        if ((operationDetails.responses[RESPONSE_SUCCESS] != null) &&
+                            (operationDetails.responses[alternativeResponse] != null)) {
+                            // We do so we need to remove the 200 response
+                            operationDetails.responses.remove(RESPONSE_SUCCESS);
+                        }
                     }
                 }
             }
