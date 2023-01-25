@@ -98,6 +98,15 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
      *     actionParams:{}
      *   }
      */
+    @ApiOperation(
+        value = "Performs the specified action against the specified requests (NOT IMPLEMENTED)",
+        nickname = "bulkAction",
+        produces = "application/json",
+        httpMethod = "POST"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
   	def bulkAction() {
 		  def result = [:]
 		  render result as JSON;
