@@ -2,15 +2,13 @@ package mod.rs
 
 import org.springframework.http.HttpStatus;
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.artefact.Artefact;
 import grails.gorm.multitenancy.CurrentTenant;
 import grails.gorm.transactions.Transactional;
 
 @CurrentTenant
 @Artefact('Controller')
-class HasHiddenRecordController<T> extends OkapiTenantAwareController<T> {
+class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> {
 
     private final static String PROPERTY_HIDDEN = 'hidden';
 
