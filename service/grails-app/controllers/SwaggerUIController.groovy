@@ -24,6 +24,7 @@ class SwaggerUIController {
         "Logout Controller",
         "Okapi Tenant Aware Swagger Controller",
         "Resource Proxy Controller",
+//        "Shared Index Query Controller".
         "Tenant Controller"
     ];
 
@@ -86,6 +87,12 @@ class SwaggerUIController {
 
             // We do not want a 200 response if we have a deleted response
             remove200ResponsesWhenAlternativeExist(paths, OPERATION_DELETE, RESPONSE_DELETED);
+
+            // Replace /index with /
+            if (paths["/index"] != null) {
+                paths["/"] = paths["/index"];
+                paths.remove("/index");
+            }
         }
 
         // We should now just have the collers we are interested in

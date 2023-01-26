@@ -1,17 +1,18 @@
 package mod.rs
 
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.util.logging.Slf4j
-import com.k_int.okapi.OkapiTenantAwareController
-import grails.converters.JSON
-import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.DirectoryEntry;
+
+import grails.gorm.multitenancy.CurrentTenant;
+import groovy.util.logging.Slf4j;
+import io.swagger.annotations.Api
 
 /**
  * Access to InternalContact resources
  */
 @Slf4j
 @CurrentTenant
-class DirectoryEntryController extends OkapiTenantAwareController<DirectoryEntry>  {
+@Api(value = "/rs/directoryEntry", tags = ["Directory Entry Controller"], description = "API for all things to do with directory entries")
+class DirectoryEntryController extends OkapiTenantAwareSwaggerController<DirectoryEntry>  {
 
   DirectoryEntryController() {
     super(DirectoryEntry)

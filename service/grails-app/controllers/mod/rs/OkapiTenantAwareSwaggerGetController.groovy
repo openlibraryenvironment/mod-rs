@@ -1,26 +1,23 @@
-package mod.rs
+package mod.rs;
 
-import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.okapi.OkapiTenantAwareController;
 
-import grails.gorm.transactions.Transactional;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiImplicitParam
+import io.swagger.annotations.ApiImplicitParams
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 
-@Api(value = "/rs/settings/appSettings", tags = ["Settings (application) Controller"], description = "API for all things to do with application settings")
-class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
+class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController<T>  {
 
-    static responseFormats = ['json', 'xml'];
-
-    SettingController() {
-        super(AppSetting);
+    OkapiTenantAwareSwaggerGetController(Class<T> resource) {
+        this(resource, false);
     }
 
-    @Override
-    @Transactional
+    OkapiTenantAwareSwaggerGetController(Class<T> resource, boolean readOnly) {
+        super(resource, readOnly);
+    }
+
     @ApiOperation(
         value = "Search with the supplied criteria",
         nickname = "/",
@@ -105,24 +102,28 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         )
     ])
     def index(Integer max) {
-        // Use gorm criteria builder to always add your custom filter....
-        Closure gormFilterClosure = {
-            or {
-                isNull('hidden')
-                eq('hidden', false)
-            }
-        };
+        super.index(max);
+    }
 
-        // Are they explicitly filtering on the hidden field
-        if (params.filters != null) {
-            // they are, so see if hidden is being filtered on
-            if (params.filters.toString().indexOf("hidden") > -1) {
-                // They are explicitly filtering on it, so we do want to return hidden settings
-                gormFilterClosure = null;
-            }
-        }
-
-        // Now we can perform the lookup
-        respond doTheLookup(gormFilterClosure);
+    @ApiOperation(
+        value = "Returns the supplied record",
+        nickname = "{id}",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "id",
+            paramType = "path",
+            required = true,
+            allowMultiple = false,
+            value = "The id of the record to return",
+            dataType = "string"
+        )
+    ])
+    def show() {
+        super.show();
     }
 }

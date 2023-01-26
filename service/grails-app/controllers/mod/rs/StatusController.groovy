@@ -1,13 +1,13 @@
 package mod.rs
 
-import org.olf.rs.statemodel.Status
+import org.olf.rs.statemodel.Status;
 
-import com.k_int.okapi.OkapiTenantAwareController
+import io.swagger.annotations.Api;
 
-class StatusController extends OkapiTenantAwareController<Status> {
-  
+@Api(value = "/rs/status", tags = ["Status Controller"], description = "API for all things to do with status")
+class StatusController extends OkapiTenantAwareSwaggerGetController<Status> {
+
   StatusController() {
     super(Status, true)
   }
-  
 }

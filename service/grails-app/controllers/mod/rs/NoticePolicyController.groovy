@@ -1,17 +1,11 @@
 package mod.rs
 
-import grails.rest.*
-import grails.converters.*
+import org.olf.rs.NoticePolicy;
 
-import org.olf.rs.NoticePolicy
-import org.olf.rs.NoticePolicyNotice
+import io.swagger.annotations.Api;
 
-import com.k_int.okapi.OkapiTenantAwareController
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.util.logging.Slf4j
-import org.olf.rs.workflow.*;
-
-class NoticePolicyController extends OkapiTenantAwareController<NoticePolicy> {
+@Api(value = "/rs/noticePolicies", tags = ["Notice Policies Controller"], description = "API for all things to do with notice policies")
+class NoticePolicyController extends OkapiTenantAwareSwaggerController<NoticePolicy> {
 
   static responseFormats = ['json', 'xml']
 

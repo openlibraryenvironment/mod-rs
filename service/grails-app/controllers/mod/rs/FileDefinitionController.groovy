@@ -6,8 +6,6 @@ import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.FileService;
 import org.olf.rs.files.FileType;
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
@@ -21,7 +19,7 @@ import io.swagger.annotations.ApiResponses;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/fileDefinition", tags = ["FileDefinition Controller"], description = "FileDefinition Api")
-class FileDefinitionController extends OkapiTenantAwareController<FileDefinition>  {
+class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDefinition>  {
 
     /** The service that handles the storage and retrieval of files */
     FileService fileService;

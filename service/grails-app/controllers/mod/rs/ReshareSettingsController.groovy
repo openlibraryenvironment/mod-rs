@@ -8,6 +8,10 @@ import com.k_int.okapi.OkapiTenantAwareController;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * This controller is hit by a timer from OKAPI every 2 minutes/
@@ -18,6 +22,7 @@ import grails.gorm.multitenancy.CurrentTenant;
  *
  */
 @CurrentTenant
+@Api(value = "/rs/settings", tags = ["ReShare Settings Controller"], description = "API for all things to do with reshare settings ...")
 class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolMapping> {
 
   BackgroundTaskService backgroundTaskService;
@@ -26,6 +31,14 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
     super(TenantSymbolMapping);
   }
 
+    @ApiOperation(
+        value = "Triggers the background tasks for the instance",
+        nickname = "worker",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
   def worker() {
 
     def result = [result:'OK'];

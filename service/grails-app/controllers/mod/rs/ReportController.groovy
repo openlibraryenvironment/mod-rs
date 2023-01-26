@@ -7,8 +7,6 @@ import org.olf.rs.files.ReportCreateUpdateResult;
 import org.olf.rs.reporting.Report;
 import org.olf.rs.reporting.ReportService;
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
@@ -22,7 +20,7 @@ import io.swagger.annotations.ApiResponses;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/report", tags = ["Report Controller"], description = "Report Api")
-class ReportController extends OkapiTenantAwareController<Report>  {
+class ReportController extends OkapiTenantAwareSwaggerController<Report>  {
 
     BatchService batchService;
     SettingsService settingsService;
