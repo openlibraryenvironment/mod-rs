@@ -1,7 +1,5 @@
 package org.olf.templating
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
 import io.swagger.annotations.Api;
@@ -10,11 +8,12 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import mod.rs.OkapiTenantAwareSwaggerController;
 
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/template", tags = ["Template Container Controller"], description = "API for all things to do with template containers")
-class TemplateController extends OkapiTenantAwareController<TemplateContainer>  {
+class TemplateController extends OkapiTenantAwareSwaggerController<TemplateContainer>  {
 
   TemplateController() {
     super(TemplateContainer)

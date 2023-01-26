@@ -2,8 +2,12 @@ package mod.rs;
 
 // import com.k_int.web.toolkit.ConfigController;
 
-import grails.converters.JSON
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
+@Api(value = "/rs/kiwt", tags = ["ReShare Config Controller"], description = "API for all things to do with reshare config ...")
 // public class ReshareConfigController extends ConfigController {
 public class ReshareConfigController {
 
@@ -94,10 +98,16 @@ traits:
           type: Shipment
 '''
 
-  def raml() {
-    // yaml can be application/x-yaml or 
-    render ( text: raml_text )
-  }
-
-  
+    @ApiOperation(
+        value = "The raml file for the applications",
+        nickname = "raml",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    def raml() {
+        // yaml can be application/x-yaml or
+        render ( text: raml_text )
+    }
 }

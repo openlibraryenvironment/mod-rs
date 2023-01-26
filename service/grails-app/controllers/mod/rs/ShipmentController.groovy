@@ -1,23 +1,15 @@
 package mod.rs
 
+import org.olf.rs.Shipment;
 
-import grails.rest.*
-import grails.converters.*
+import io.swagger.annotations.Api;
 
-import org.olf.rs.Shipment
-import org.olf.rs.ShipmentItem
+@Api(value = "/rs/shipments", tags = ["Shipments Controller"], description = "API for all things to do with shipments")
+class ShipmentController extends OkapiTenantAwareSwaggerController<Shipment> {
 
-import com.k_int.okapi.OkapiTenantAwareController
-import grails.gorm.multitenancy.CurrentTenant
-import groovy.util.logging.Slf4j
-import org.olf.rs.workflow.*;
-
-class ShipmentController extends OkapiTenantAwareController<Shipment> {
-  
   static responseFormats = ['json', 'xml']
-  
+
   ShipmentController() {
     super(Shipment)
   }
-  
 }

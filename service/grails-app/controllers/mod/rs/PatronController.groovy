@@ -3,15 +3,20 @@ package mod.rs;
 import org.olf.rs.Patron;
 import org.olf.rs.ReshareActionService;
 
-import com.k_int.okapi.OkapiTenantAwareController;
-
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Slf4j
 @CurrentTenant
-class PatronController extends OkapiTenantAwareController<Patron>  {
+@Api(value = "/rs/patron", tags = ["Patron Controller"], description = "API for all things to do with patrons")
+class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
 
     PatronController() {
         super(Patron)
@@ -26,6 +31,24 @@ class PatronController extends OkapiTenantAwareController<Patron>  {
      *      problems ... An array of reasons that explains either a FAIL or the patron is not valid
      *      status ... the status of the patron (FAIL or OK)
      */
+    @ApiOperation(
+        value = "Is the user allowed to make requests",
+        nickname = "{patronIdentifier}/canCreateRequest",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "patronIdentifier",
+            paramType = "path",
+            required = true,
+            allowMultiple = false,
+            value = "The identifier of the patron",
+            dataType = "string"
+        )
+    ])
     def canCreateRequest() {
         Map result = [ : ];
         Patron.withTransaction { status ->

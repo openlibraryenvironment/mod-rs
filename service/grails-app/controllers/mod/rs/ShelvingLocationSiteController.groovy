@@ -1,9 +1,11 @@
 package mod.rs;
 
-import com.k_int.okapi.OkapiTenantAwareController;
 import org.olf.rs.ShelvingLocationSite;
 
-class ShelvingLocationSiteController extends OkapiTenantAwareController<ShelvingLocationSite> {
+import io.swagger.annotations.Api;
+
+@Api(value = "/rs/shelvingLocationSites", tags = ["Shelving Location Sites Controller"], description = "API for all things to do with shelving location sites")
+class ShelvingLocationSiteController extends OkapiTenantAwareSwaggerController<ShelvingLocationSite> {
 
   ShelvingLocationSiteController() {
     super(ShelvingLocationSite);
