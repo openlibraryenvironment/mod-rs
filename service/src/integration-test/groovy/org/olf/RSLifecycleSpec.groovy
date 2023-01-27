@@ -12,7 +12,6 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.EmailService
 import org.olf.rs.EventPublicationService
-import org.olf.rs.GrailsEventIdentifier;
 import org.olf.rs.HostLMSLocation
 import org.olf.rs.HostLMSLocationService
 import org.olf.rs.HostLMSService
@@ -24,24 +23,19 @@ import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.Status;
-import org.springframework.beans.factory.annotation.Value
-
-import com.k_int.web.toolkit.testing.HttpSpec
 
 import grails.databinding.SimpleMapDataBindingSource
-import grails.events.bus.EventBus
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import grails.web.http.HttpHeaders;
 import groovy.util.logging.Slf4j
 import spock.lang.*
-import spock.util.concurrent.PollingConditions;
 
 @Slf4j
 @Integration
 @Stepwise
-class RSLifecycleSpec extends HttpSpec {
+class RSLifecycleSpec extends TestBase {
 
     // The scenario details that are maintained between tests
     private static final String SCENARIO_PATRON_REFERENCE = "scenario-patronReference";
@@ -96,11 +90,6 @@ class RSLifecycleSpec extends HttpSpec {
     ]
   ]
 
-  @Shared
-  private static Map testctx = [
-    request_data:[:]
-  ]
-
   def grailsApplication
   DynamicGroovyService dynamicGroovyService;
   EventPublicationService eventPublicationService
@@ -113,35 +102,12 @@ class RSLifecycleSpec extends HttpSpec {
   StaticRouterService staticRouterService
   Z3950Service z3950Service
 
-  // Default grails event bus is named targetEvenBus to avoid collision with reactor's event bus.
-  @Autowired
-  EventBus targetEventBus
-
-  @Value('${local.server.port}')
-  Integer serverPort;
-
-  /** Contains the tenants that have the ref data loaded */
-  static final List<String> refDataLoadedTenants = [];
-
   // This method is declared in the HttpSpec
   def setupSpecWithSpring() {
-
-      targetEventBus.subscribe(GrailsEventIdentifier.REFERENCE_DATA_LOADED) { final String tenant ->
-          log.debug("Ref data loaded for ${tenant.replace("_mod_rs", "")}");
-          refDataLoadedTenants.add(tenant.replace("_mod_rs", ""));
-      }
-
       super.setupSpecWithSpring();
   }
 
   def setupSpec() {
-    httpClientConfig = {
-      client.clientCustomizer { HttpURLConnection conn ->
-        conn.connectTimeout = 5000
-        conn.readTimeout = 25000
-      }
-    }
-
   }
 
   def setup() {
@@ -206,17 +172,10 @@ class RSLifecycleSpec extends HttpSpec {
 
   void "Attempt to delete any old tenants"(tenantid, name) {
     when:"We post a delete request"
-      try {
-        setHeaders(['X-Okapi-Tenant': tenantid, 'accept': 'application/json; charset=UTF-8'])
-        def resp = doDelete("${baseUrl}_/tenant".toString(),null)
-        refDataLoadedTenants.remove(tenantid);
-      }
-      catch ( Exception e ) {
-        // If there is no TestTenantG we'll get an exception here, it's fine
-      }
+      boolean result = deleteTenant(tenantid, name);
 
     then:"Any old tenant removed"
-      1==1
+      assert(result);
 
     where:
       tenantid | name
@@ -255,38 +214,10 @@ class RSLifecycleSpec extends HttpSpec {
 
   void "Set up test tenants "(tenantid, name) {
     when:"We post a new tenant request to the OKAPI controller"
-
-      log.debug("Post new tenant request for ${tenantid} to ${baseUrl}_/tenant");
-
-      setHeaders([
-                   'X-Okapi-Tenant': tenantid,
-                   'X-Okapi-Token': 'dummy',
-                   'X-Okapi-User-Id': 'dummy',
-                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-                 ])
-      // post to tenant endpoint
-      // doPost(url,jsondata,params,closure)
-      def resp = doPost("${baseUrl}_/tenant".toString(), ['parameters':[[key:'loadSample', value:'true'],[key:'loadReference',value:'true']]]);
-
-      // Lets record how long it took to get the lock
-      long startTime = System.currentTimeMillis();
-
-      // Wait for the refdata to be loaded.
-      PollingConditions conditions = new PollingConditions(timeout: 30)
-      conditions.eventually {
-        // The tenant id sent through the event handler comes through as lowercase
-        refDataLoadedTenants.contains(tenantid.toLowerCase());
-      }
-
-      log.info("Ref data loaded event after " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, so it should be safe to assume the reference data has been setup");
-      log.debug("Got response for new tenant: ${resp}");
-      log.debug("refDataLoadedTenants: " + refDataLoadedTenants.toString());
+      boolean response = setupTenant(tenantid, name);
 
     then:"The response is correct"
-      assert(resp != null);
-
-      // The tenant id sent through the event handler comes through as lowercase
-      assert(refDataLoadedTenants.contains(tenantid.toLowerCase()));
+      assert(response);
 
     where:
       tenantid | name
@@ -353,36 +284,6 @@ class RSLifecycleSpec extends HttpSpec {
     'RSInstTwo' | DIRECTORY_INFO
     'RSInstThree' | DIRECTORY_INFO
   }
-
-    List changeSettings(String tenant_id, Map changes_needed, boolean hidden = false) {
-        // RequestRouter = Static
-        setHeaders([
-            'X-Okapi-Tenant': tenant_id,
-            'X-Okapi-Token': 'dummy',
-            'X-Okapi-User-Id': 'dummy',
-            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-        ]);
-        def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0', 'filters' : "hidden==${hidden}"]);
-        log.debug("Number of settings found: " + resp.size() + ", hidden: " + hidden + ", results: " + resp.toString());
-        if ( changes_needed != null ) {
-            resp.each { setting ->
-                // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
-                if ( changes_needed.containsKey(setting.key) ) {
-                    def new_value = changes_needed[setting.key];
-                    //log.debug("Post update to ${setting} ==> ${new_value}");
-                    setting.value = new_value;
-                    def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
-                    log.debug("Result of settings update: ${update_setting_result}");
-                }
-            }
-
-            // Get hold of the updated settings and return them
-            resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0', 'filters' : "hidden==${hidden}"]);
-        }
-
-        // Return the settings
-        return(resp);
-    }
 
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
