@@ -18,13 +18,12 @@ class SwaggerUIController {
 
     /** The controllers we want to ignore, which are defined in the tags */
     private static final String[] tagsToIgnore = [
-        "External Api Controller",
         "Has Hidden Record Controller",
         "Login Controller",
         "Logout Controller",
         "Okapi Tenant Aware Swagger Controller",
         "Resource Proxy Controller",
-//        "Shared Index Query Controller".
+        "Shared Index Query Controller",
         "Tenant Controller"
     ];
 
