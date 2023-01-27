@@ -10,12 +10,19 @@ import grails.converters.JSON;
 import grails.core.GrailsApplication;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam
+import io.swagger.annotations.ApiImplicitParams
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
  */
 @Slf4j
 @CurrentTenant
+@Api(value = "/rs/externalApi", tags = ["External API Controller"], description = "API for external requests that do not require authentication")
 class ExternalApiController {
 
   GrailsApplication grailsApplication
@@ -23,10 +30,16 @@ class ExternalApiController {
   ConfirmationMessageService confirmationMessageService
   StatisticsService statisticsService;
 
-  def index() {
-  }
-
   // ToDo this method needs a TTL cache and some debounce mechanism as it increases in complexity
+    @ApiOperation(
+        value = "Return the statistics",
+        nickname = "statistics",
+        produces = "application/json",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
   def statistics() {
 
     Map result=[:]
@@ -47,8 +60,28 @@ class ExternalApiController {
     render result as JSON
   }
 
+    @ApiOperation(
+        value = "Receives an ISO18626 xml message",
+        nickname = "iso18626",
+        httpMethod = "POST",
+        produces = "application/xml"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Created"),
+        @ApiResponse(code = 400, message = "Bad Request")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            paramType = "body",
+            required = true,
+            allowMultiple = false,
+            value = "The xml that contains the ISO18626 message",
+            defaultValue = "{}",
+            dataType = "string"
+        )
+    ])
   def iso18626() {
-    log.debug("externalApiController::index(${params})");
+    log.debug("externalApiController::iso18626(${params})");
 
     try {
       if ( request.XML != null ) {
@@ -126,18 +159,10 @@ class ExternalApiController {
     }
     catch ( Exception e ) {
       log.error("Exception receiving ISO message",e);
-      e.printStackTrace()
     }
     finally {
       log.debug("ExternalApiController::iso18626 exiting cleanly");
     }
-
-  }
-
-  def symbol() {
-    def result=[status:'ok']
-    log.debug("externalApiController::symbol(${params})");
-    render result as JSON
   }
 
   // ToDo this method is only used for logging purposes--consider removal
@@ -153,6 +178,15 @@ class ExternalApiController {
     return result;
   }
 
+    @ApiOperation(
+        value = "Generates a brief status report about the service",
+        nickname = "statusReport",
+        produces = "application/json",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
   def statusReport() {
     Map result = ['summary':[]]
     PatronRequest.executeQuery('select pr.state.code, count(*) from PatronRequest as pr group by pr.state.code').each { sg ->
