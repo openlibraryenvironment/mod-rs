@@ -124,20 +124,20 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
 
         if (next_strategy?.final) {
-          return location;
+          log.debug("Strategy ${next_strategy.name} is final, using result");
+          break; 
         }
       }
       else {
-        log.debug("Strategy did not pass precondition");
+        log.debug("Strategy ${next_strategy.name} did not pass precondition");
       }
     }
-
-
     /* 
       Allow for additional modifications to be made to the ItemLocation on a per-adapter basis.
       enrichItemLocation can be overriden as needed
     */
 
+    log.debug("Calling enrichItemLocation");
     location = enrichItemLocation(location);
 
     log.debug("determineBestLocation returns ${location}");
