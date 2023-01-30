@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import com.k_int.web.toolkit.testing.HttpSpec;
 
 import grails.events.bus.EventBus;
+import groovy.json.JsonBuilder;
 import groovy.util.logging.Slf4j;
-import spock.lang.Shared
+import spock.lang.Shared;
 import spock.util.concurrent.PollingConditions;
 
 @Slf4j
@@ -115,5 +116,54 @@ class TestBase extends HttpSpec {
 
         // Return the settings
         return(resp);
+    }
+
+    protected String createHostLMSShelvingLocation(String tenantId) {
+        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        Map hostLMSShelvingLocation = [
+            code : "ShelvingLocation1",
+            name : "Shelving Location 1",
+            supplyPreference: 1,
+            hidden: false
+        ];
+        String json = (new JsonBuilder(hostLMSShelvingLocation)).toString();
+
+        def response = null;
+        try {
+            response = doPost("${baseUrl}/rs/shelvingLocations".toString(), null, null, {
+                // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
+                request.setBody(json);
+            });
+        } catch (groovyx.net.http.HttpException e) {
+            response = e.getBody();
+        }
+
+        // return the id of the shelving location to the caller
+        return(response?.id);
+    }
+
+    protected String createHostLMSLocation(String tenantId) {
+        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        Map hostLMSLocation = [
+            code : "Location 1",
+            name : "Location name 1",
+            icalRule: "ical rule",
+            supplyPreference: 2,
+            hidden: false
+        ];
+        String json = (new JsonBuilder(hostLMSLocation)).toString();
+
+        def response = null;
+        try {
+            response = doPost("${baseUrl}/rs/hostLMSLocations".toString(), null, null, {
+                // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
+                request.setBody(json);
+            });
+        } catch (groovyx.net.http.HttpException e) {
+            response = e.getBody();
+        }
+
+        // Return the id of the location
+        return(response?.id);
     }
 }
