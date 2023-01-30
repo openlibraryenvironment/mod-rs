@@ -83,9 +83,13 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
       URI ncipURI = new URI(ncip_server_address);
       int barcodeLookupPort = 7064;
       String barcodeLookupPath = "/vxws/item/" + location.itemId;
-      String query = "view=brief"
+      String query = "view=brief";
+      String scheme = ncipURI.getScheme();
+      if (scheme != "http" || scheme != "https") {
+        scheme = "http";
+      }
       URI barcodeLookupURI = new URI(
-        ncipURI.getScheme(), //scheme
+        scheme, //scheme
         null, //userInfo
         ncipURI.getHost(), //host 
         barcodeLookupPort, //port
@@ -94,12 +98,12 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
         null //fragment 
       );
       log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
-      barcode = lookupBarcode(barcodeLookupURL.toString());
+      barcode = lookupBarcode(barcodeLookupURI.toString());
     } catch ( Exception e ) {
       log.error("Unable to lookup barcode for item id " + location?.itemId + ":" + e.getLocalizedMessage());
     }
 
-    if ( barcode != null ) {
+    if (barcode != null) {
       log.debug("Setting ItemLocation itemId to ${barcode}");
       location.itemId = barcode; 
     }
