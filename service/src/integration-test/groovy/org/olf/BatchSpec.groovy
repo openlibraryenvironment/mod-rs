@@ -1,9 +1,9 @@
 package org.olf
 
-import grails.testing.mixin.integration.Integration
-import groovy.json.JsonBuilder
-import groovy.util.logging.Slf4j
-import spock.lang.*
+import grails.testing.mixin.integration.Integration;
+import groovy.json.JsonBuilder;
+import groovy.util.logging.Slf4j;
+import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
@@ -67,7 +67,6 @@ class BatchSpec extends TestBase {
             testctx.batchContext = context;
 
         then:"Check we have a valid response"
-            // The error element should exist
             assert(response?.id != null);
             assert(statusCode == 201);
 
