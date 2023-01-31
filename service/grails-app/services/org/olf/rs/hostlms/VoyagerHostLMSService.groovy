@@ -81,7 +81,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     String barcode = null;
     try {
       URI ncipURI = new URI(ncip_server_address);
-      int barcodeLookupPort = 7064;
+      int barcodeLookupPort = 7014;
       String barcodeLookupPath = "/vxws/item/" + location.itemId;
       String query = "view=brief";
       String scheme = ncipURI.getScheme();
