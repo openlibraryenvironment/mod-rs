@@ -8,7 +8,7 @@ import spock.lang.Stepwise;
 @Slf4j
 @Integration
 @Stepwise
-class ShelvingLocarionSiteSpec extends TestBase {
+class ShelvingLocationSiteSpec extends TestBase {
 
     // This method is declared in the HttpSpec
     def setupSpecWithSpring() {
@@ -36,19 +36,19 @@ class ShelvingLocarionSiteSpec extends TestBase {
             TENANT_ONE | TENANT_ONE
     }
 
-    void "Create a new ShelvingLocarionSite"(String tenantId, long supplyPreference) {
-        when:"Create a new ShelvingLocarionSite"
+    void "Create a new ShelvingLocationSite"(String tenantId, long supplyPreference) {
+        when:"Create a new ShelvingLocationSite"
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
-            // Create the ShelvingLocarionSite
-            Map shelvingLocarionSite = [
+            // Create the ShelvingLocationSite
+            Map shelvingLocationSite = [
                 shelvingLocation : createHostLMSShelvingLocation(tenantId),
                 location : createHostLMSLocation(tenantId),
                 supplyPreference : supplyPreference
             ];
-            String json = (new JsonBuilder(shelvingLocarionSite)).toString();
+            String json = (new JsonBuilder(shelvingLocationSite)).toString();
 
             def response = null;
             int statusCode = 201;
@@ -61,10 +61,10 @@ class ShelvingLocarionSiteSpec extends TestBase {
                 statusCode = e.getStatusCode();
                 response = e.getBody();
             }
-            log.debug("Response from post ShelvingLocarionSite: " + response.toString());
+            log.debug("Response from post ShelvingLocationSite: " + response.toString());
 
-            // Store that ShelvingLocarionSite
-            testctx.shelvingLocarionSite = response;
+            // Store that ShelvingLocationSite
+            testctx.shelvingLocationSite = response;
 
         then:"Check we have a valid response"
             assert(response?.id != null);
@@ -75,69 +75,69 @@ class ShelvingLocarionSiteSpec extends TestBase {
             TENANT_ONE | 102
     }
 
-    void "Fetch a specific ShelvingLocarionSite"(String tenantId, String ignore) {
-        when:"Fetch the ShelvingLocarionSite"
+    void "Fetch a specific ShelvingLocationSite"(String tenantId, String ignore) {
+        when:"Fetch the ShelvingLocationSite"
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
-            // Fetch the ShelvingLocarionSite
-            def response = doGet("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocarionSite.id.toString());
+            // Fetch the ShelvingLocationSite
+            def response = doGet("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocationSite.id.toString());
             log.debug("Response from Get shelvingLocations: " + response.toString());
 
         then:"Check we have a valid response"
             // Check the various fields
             assert(response != null);
-            assert(response.id == testctx.shelvingLocarionSite.id);
-            assert(response.shelvingLocation.id == testctx.shelvingLocarionSite.shelvingLocation.id);
-            assert(response.location.id == testctx.shelvingLocarionSite.location.id);
-            assert(response.supplyPreference == testctx.shelvingLocarionSite.supplyPreference);
+            assert(response.id == testctx.shelvingLocationSite.id);
+            assert(response.shelvingLocation.id == testctx.shelvingLocationSite.shelvingLocation.id);
+            assert(response.location.id == testctx.shelvingLocationSite.location.id);
+            assert(response.supplyPreference == testctx.shelvingLocationSite.supplyPreference);
 
         where:
             tenantId   | ignore
             TENANT_ONE | ""
     }
 
-    void "Search for ShelvingLocarionSites"(String tenantId, String ignore) {
-        when:"Search for ShelvingLocarionSites"
+    void "Search for ShelvingLocationSites"(String tenantId, String ignore) {
+        when:"Search for ShelvingLocationSites"
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
             // Perform a search
-            def response = doGet("${baseUrl}/rs/shelvingLocationSites", [ filters : "id==" + testctx.shelvingLocarionSite.id ]);
+            def response = doGet("${baseUrl}/rs/shelvingLocationSites", [ filters : "id==" + testctx.shelvingLocationSite.id ]);
             log.debug("Response from searching for shelvingLocations: " + response.toString());
 
         then:"Check we have a valid response"
             // Check the various fields
             assert(response != null);
-            assert(response[0].id == testctx.shelvingLocarionSite.id);
-            assert(response[0].shelvingLocation.id == testctx.shelvingLocarionSite.shelvingLocation.id);
-            assert(response[0].location.id == testctx.shelvingLocarionSite.location.id);
-            assert(response[0].supplyPreference == testctx.shelvingLocarionSite.supplyPreference);
+            assert(response[0].id == testctx.shelvingLocationSite.id);
+            assert(response[0].shelvingLocation.id == testctx.shelvingLocationSite.shelvingLocation.id);
+            assert(response[0].location.id == testctx.shelvingLocationSite.location.id);
+            assert(response[0].supplyPreference == testctx.shelvingLocationSite.supplyPreference);
 
         where:
             tenantId   | ignore
             TENANT_ONE | ""
     }
 
-    void "Update ShelvingLocarionSite supply preference"(String tenantId, long supplyPreference) {
-        when:"Update supply preference for ShelvingLocarionSite"
+    void "Update ShelvingLocationSite supply preference"(String tenantId, long supplyPreference) {
+        when:"Update supply preference for ShelvingLocationSite"
 
-            Map shelvingLocarionSite = [
+            Map shelvingLocationSite = [
                 supplyPreference : supplyPreference
             ];
-            String json = (new JsonBuilder(shelvingLocarionSite)).toString();
+            String json = (new JsonBuilder(shelvingLocationSite)).toString();
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
             // Perform a search
-            def response = doPut("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocarionSite.id.toString(), null, null, {
+            def response = doPut("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocationSite.id.toString(), null, null, {
                 // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
                 request.setBody(json);
             });
-            log.debug("Response from updating ShelvingLocarionSite: " + response.toString());
+            log.debug("Response from updating ShelvingLocationSite: " + response.toString());
 
         then:"Check we have a valid response"
             // Check the name
@@ -149,8 +149,8 @@ class ShelvingLocarionSiteSpec extends TestBase {
             TENANT_ONE | 69
     }
 
-    void "Delete a ShelvingLocarionSite"(String tenantId, String ignore) {
-        when:"Delete a ShelvingLocarionSite"
+    void "Delete a ShelvingLocationSite"(String tenantId, String ignore) {
+        when:"Delete a ShelvingLocationSite"
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
@@ -160,12 +160,12 @@ class ShelvingLocarionSiteSpec extends TestBase {
             int statusCode = 204;
 
             try {
-                response = doDelete("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocarionSite.id.toString());
+                response = doDelete("${baseUrl}/rs/shelvingLocationSites/" + testctx.shelvingLocationSite.id.toString());
             } catch (groovyx.net.http.HttpException e) {
                 statusCode = e.getStatusCode();
                 response = e.getBody();
             }
-            log.debug("Response from deleting a ShelvingLocarionSite: " + response == null ? "" : response.toString());
+            log.debug("Response from deleting a ShelvingLocationSite: " + response == null ? "" : response.toString());
 
         then:"Check we have a valid response"
             // Check the status code

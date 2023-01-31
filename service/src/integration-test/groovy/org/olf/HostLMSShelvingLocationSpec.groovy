@@ -8,7 +8,7 @@ import spock.lang.Stepwise;
 @Slf4j
 @Integration
 @Stepwise
-class HostLMSShelvingLocarionSpec extends TestBase {
+class HostLMSShelvingLocationSpec extends TestBase {
 
     // This method is declared in the HttpSpec
     def setupSpecWithSpring() {
