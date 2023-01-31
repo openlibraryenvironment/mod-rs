@@ -8,6 +8,8 @@ import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.StatusService;
 import org.olf.rs.statemodel.Transition;
 
+import com.k_int.okapi.OkapiTenantAwareController;
+
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
 import groovy.util.logging.Slf4j;
@@ -21,7 +23,7 @@ import io.swagger.annotations.ApiResponses;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs", tags = ["Available Action Controller"], description = "AvailableAction Api")
-class AvailableActionController extends OkapiTenantAwareSwaggerController<AvailableAction>  {
+class AvailableActionController extends OkapiTenantAwareController<AvailableAction>  {
 
     GraphVizService graphVizService;
     StatusService statusService;
