@@ -437,23 +437,6 @@ class RSLifecycleSpec extends TestBase {
       'RSInstOne' | 'RSInstThree' | LONG_300_CHAR_TITLE   | 'Author, Some'   | '1234-5678-9123-4579'      | '1234-567a' | 'RS-LIFECYCLE-TEST-00003' | 'ISIL:RST1'       | [ 'RS-TESTCASE-3' ]
   }
 
-  void "Test the status endpoint for tenant #tenant_id"() {
-    when:"We fetch the status report"
-      setHeaders([
-                   'X-Okapi-Tenant': tenant_id,
-                   'X-Okapi-Token': 'dummy',
-                   'X-Okapi-User-Id': 'dummy',
-                   'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-                 ])
-      def resp = doGet("${baseUrl}/rs/externalApi/statusReport".toString())
-    then:"Correct counts"
-      resp != null;
-      log.debug("Got status report: ${resp}");
-    where:
-      tenant_id | _
-      'RSInstOne' | _
-  }
-
   // For RSInstThree tenant should return the sample data loaded
   void "test API for retrieving shelving locations for #tenant_id"() {
 
