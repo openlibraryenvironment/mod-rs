@@ -35,7 +35,7 @@ class ExternalApiSpec extends TestBase {
             TENANT_ONE | TENANT_ONE
     }
 
-    void "Test the status endpoint for tenant #tenantId"(String tenantId, String ignore) {
+    void "Test the status for tenant"(String tenantId, String ignore) {
         when:"We fetch the status report"
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
             def resp = doGet("${baseUrl}/rs/externalApi/statusReport".toString());
@@ -49,7 +49,7 @@ class ExternalApiSpec extends TestBase {
             'RSInstOne' | ""
     }
 
-    void "Test the statistics endpoint for tenant #tenantId"(String tenantId, String ignore) {
+    void "Test the statistics for tenant"(String tenantId, String ignore) {
         when:"We fetch the status report"
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
             def response = doGet("${baseUrl}/rs/externalApi/statistics".toString());
