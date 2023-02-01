@@ -31,7 +31,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     ReportService reportService;
 
 	PatronRequestController() {
-		super(PatronRequest)
+		super(PatronRequest, 100);
 	}
 
     /**
