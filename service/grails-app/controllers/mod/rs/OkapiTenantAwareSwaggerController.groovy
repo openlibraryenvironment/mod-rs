@@ -8,12 +8,12 @@ import io.swagger.annotations.ApiResponses
 
 class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetController<T>  {
 
-    OkapiTenantAwareSwaggerController(Class<T> resource) {
-        this(resource, false);
+    OkapiTenantAwareSwaggerController(Class<T> resource, int maxRecordsPerPage = 1000) {
+        this(resource, false, maxRecordsPerPage);
     }
 
-    OkapiTenantAwareSwaggerController(Class<T> resource, boolean readOnly) {
-        super(resource, readOnly);
+    OkapiTenantAwareSwaggerController(Class<T> resource, boolean readOnly, int maxRecordsPerPage = 1000) {
+        super(resource, readOnly, maxRecordsPerPage);
     }
 
     @ApiOperation(
