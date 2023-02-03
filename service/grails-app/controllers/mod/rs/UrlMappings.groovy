@@ -86,6 +86,17 @@ class UrlMappings {
     // The swagger plugin dosn't supply the UI, so
     "/rs/swaggerUI"(controller: "swaggerUI", action: "index")
 
+    // The swagger resources for display purposes
+    group "/rs/swagger", {
+        "/swagger-ui.css"(uri: '/static/swaggerUI/4.14.0/swagger-ui.css')
+        "/swagger-ui-standalone-preset.js"(uri: '/static/swaggerUI/4.14.0/swagger-ui-standalone-preset.js')
+        "/swagger-initializer.js"(uri: '/static/swaggerUI/4.14.0/swagger-initializer.js')
+        "/index.css"(uri: '/static/swaggerUI/4.14.0/index.css')
+        "/swagger-ui-bundle.js"(uri: '/static/swaggerUI/4.14.0/swagger-ui-bundle.js')
+        "/favicon-32x32.png"(uri: '/static/swaggerUI/4.14.0/favicon-32x32.png')
+        "/favicon-16x16.png"(uri: '/static/swaggerUI/4.14.0/favicon-16x16.png')
+    }
+
     "500"(view: '/error')
     "404"(view: '/notFound')
 
