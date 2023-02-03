@@ -209,6 +209,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/swagger*",
+          "permissionsRequired": [ ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/directoryEntry*",
           "permissionsRequired": [ "rs.directoryentry.get" ]
         },
