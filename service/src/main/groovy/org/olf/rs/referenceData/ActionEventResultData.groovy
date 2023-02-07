@@ -183,20 +183,20 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map requesterBorrowerCheckInvalidPatronOK = [
-        code: 'requesterBorrowerCheckInvalidPatronOK',
+    private static Map requesterBorrowerCheckInvalidPatronError = [
+        code: 'requesterBorrowerCheckInvalidPatronError',
         description: 'The borrower id is not valid',
-        result: true,
+        result: false,
         status: Status.PATRON_REQUEST_INVALID_PATRON,
         qualifier: ActionEventResultQualifier.QUALIFIER_INVALID_PATRON,
         saveRestoreState: null,
         nextActionEvent: null
     ];
 
-    private static Map requesterBorrowerCheckHostLMSCallFailedOK = [
-        code: 'requesterBorrowerCheckHostLMSCallFailedOK',
+    private static Map requesterBorrowerCheckHostLMSCallFailedError = [
+        code: 'requesterBorrowerCheckHostLMSCallFailedError',
         description: 'Failed to talk to the host LMS to validate the patron',
-        result: true,
+        result: false,
         status: null,
         qualifier: ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED,
         saveRestoreState: null,
@@ -1018,8 +1018,8 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterBorrowerCheckOK,
-            requesterBorrowerCheckInvalidPatronOK,
-            requesterBorrowerCheckHostLMSCallFailedOK
+            requesterBorrowerCheckInvalidPatronError,
+            requesterBorrowerCheckHostLMSCallFailedError
         ]
     ];
 
