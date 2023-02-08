@@ -2,26 +2,72 @@ import grails.util.BuildSettings
 import grails.util.Environment
 import org.springframework.boot.logging.logback.ColorConverter
 import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter
+import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder
+import net.logstash.logback.composite.loggingevent.*;
+import net.logstash.logback.composite.*;
+import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 
 import java.nio.charset.Charset
 
 conversionRule 'clr', ColorConverter
 conversionRule 'wex', WhitespaceThrowableProxyConverter
 
-// See http://logback.qos.ch/manual/groovy.html for details on configuration
+
 appender('STDOUT', ConsoleAppender) {
-    encoder(PatternLayoutEncoder) {
-        charset = Charset.forName('UTF-8')
-
-        pattern =
-                '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
-                '%clr(%5p) ' + // Log level
-                '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
-                "%clr(%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''})){cyan} %clr(:){faint} " +
-                '%m%n%wex' // Message
-
+encoder(LoggingEventCompositeJsonEncoder) {
+  providers(LoggingEventJsonProviders) {
+    timestamp(LoggingEventFormattedTimestampJsonProvider) {
+      fieldName = '@time'
+      timeZone = 'UTC'
+      pattern = 'yyyy-MM-dd HH:mm:ss.SSS'
     }
+    logLevel(LogLevelJsonProvider)
+    loggerName(LoggerNameJsonProvider) {
+      fieldName = 'logger'
+      shortenedLoggerNameLength = 35
+    }
+    message(MessageJsonProvider) {
+      fieldName = 'msg'
+    }
+    globalCustomFields(GlobalCustomFieldsJsonProvider) {
+      // customFields = "${toJson(pid:"${new ApplicationPid()}", app:"XYZ")}"
+    }
+    threadName(ThreadNameJsonProvider) {
+      fieldName = 'thread'
+    }
+    mdc(MdcJsonProvider)
+    arguments(ArgumentsJsonProvider)
+    stackTrace(StackTraceJsonProvider) {
+      throwableConverter(ShortenedThrowableConverter) {
+        maxDepthPerThrowable = 20
+        maxLength = 8192
+        shortenedClassNameLength = 35
+        exclude = /sun\..*/
+        exclude = /java\..*/
+        exclude = /groovy\..*/
+        exclude = /com\.sun\..*/
+        rootCauseFirst = true
+      }
+    }
+  }
 }
+}
+
+// See http://logback.qos.ch/manual/groovy.html for details on configuration
+// See also https://dzone.com/articles/implementing-structured-logging-in-groovy
+// appender('STDOUT', ConsoleAppender) {
+//     encoder(PatternLayoutEncoder) {
+//         charset = Charset.forName('UTF-8')
+// 
+//         pattern =
+//                 '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
+//                 '%clr(%5p) ' + // Log level
+//                 '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
+//                 "%clr(%-30.30logger{29} [%15X{Tenant:-_NO_TENANT_}]) {cyan} %clr(:){faint} " +
+//                 '%m%n%wex' // Message
+// 
+//     }
+// }
 
 if (Environment.currentEnvironment == Environment.TEST) {
   // logger 'groovy.net.http.JavaHttpBuilder', DEBUG

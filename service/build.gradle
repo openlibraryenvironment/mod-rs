@@ -130,6 +130,7 @@ dependencies {
   compile "org.grails.plugins:hibernate5"
   compileOnly "io.micronaut:micronaut-inject-groovy"
 
+  compile 'net.logstash.logback:logstash-logback-encoder:7.2'
 
 
   console ("org.grails:grails-console") {
