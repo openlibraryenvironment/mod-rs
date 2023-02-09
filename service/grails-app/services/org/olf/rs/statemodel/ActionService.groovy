@@ -80,7 +80,7 @@ public class ActionService {
             // 1. Is a valid action for the current status of the request
             // 2. Request has no network activity going on
             if (patronRequest.isNetworkActivityIdle() &&
-                isValid(patronRequest, action)) {
+                (isValid(patronRequest, action) || (patronRequest.isRequester && Actions.ACTION_REQUESTER_EDIT.equals(action)))) {
                 // Perform the requested action
                 ActionResultDetails resultDetails = performAction(action, patronRequest, parameters);
                 result = resultDetails.responseResult;

@@ -8,6 +8,7 @@ import org.olf.rs.Result;
 import org.olf.rs.reporting.ReportService;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
+import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 
 import grails.converters.JSON;
@@ -78,13 +79,34 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
                     result = actionService.executeAction(params.patronRequestId, request.JSON.action, request.JSON.actionParams);
                     response.status = (result.actionResult == ActionResult.SUCCESS ? 200 : (result.actionResult == ActionResult.INVALID_PARAMETERS ? 400 : 500));
 
-                    // We do not want to pass the internal action result back to the caller, so we need to remove them
+                    // We do not want to pass the internal action result back to the caller, so we need to remove it
                     result.remove('actionResult');
 				}
 			}
 		}
 		log.debug("PatronRequestController::performAction exiting");
 		render result as JSON;
+    }
+
+    /**
+     * Allows a limited number of fields on a request to be updated, why isn't this implemented as an action,
+     * to all intents and purposes I will implement this as an action so it should be straight forward to swap it over
+     */
+    def update() {
+        def result = [:]
+        log.debug("PatronRequestController::update(${request.JSON})...");
+        if ( params.id ) {
+            PatronRequest.withTransaction { tstatus ->
+                // Execute the action
+                result = actionService.executeAction(params.id, Actions.ACTION_REQUESTER_EDIT, request.JSON);
+                response.status = (result.actionResult == ActionResult.SUCCESS ? 200 : (result.actionResult == ActionResult.INVALID_PARAMETERS ? 400 : 500));
+
+                // We do not want to pass the internal action result back to the caller, so we need to remove it
+                result.remove('actionResult');
+            }
+        }
+        log.debug("PatronRequestController::update exiting");
+        render result as JSON;
     }
 
     /**

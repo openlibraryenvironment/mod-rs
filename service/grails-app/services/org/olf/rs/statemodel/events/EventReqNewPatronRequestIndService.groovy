@@ -3,13 +3,13 @@ package org.olf.rs.statemodel.events;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReshareActionService;
-import org.olf.rs.SharedIndexService
+import org.olf.rs.SharedIndexService;
+import org.olf.rs.patronRequest.PickupLocationService;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -28,7 +28,7 @@ import groovy.sql.Sql;
 public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
     HostLMSService hostLMSService;
-    // PatronNoticeService patronNoticeService;
+    PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
 
@@ -60,22 +60,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             }
 
             // If we were supplied a pickup location, attempt to resolve it here
-            DirectoryEntry pickupLoc;
-            if (request.pickupLocationSlug) {
-                pickupLoc = DirectoryEntry.findBySlug(request.pickupLocationSlug);
-            } else if (request.pickupLocationCode) { // deprecated
-                pickupLoc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: request.pickupLocationCode]);
-            }
-
-            if (pickupLoc != null) {
-                request.resolvedPickupLocation = pickupLoc;
-                List pickupSymbols  = pickupLoc?.symbols?.findResults { symbol ->
-                    symbol?.priority == 'shipping' ? symbol?.authority?.symbol + ':' + symbol?.symbol : null
-                }
-
-                // TODO this deserves a better home
-                request.pickupLocation = pickupSymbols.size > 0 ? "${pickupLoc.name} --> ${pickupSymbols [0]}" : pickupLoc.name;
-            }
+            pickupLocationService.check(request);
 
             if (request.requestingInstitutionSymbol != null) {
                 // We need to validate the requsting location - and check that we can act as requester for that symbol
