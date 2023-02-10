@@ -3,4 +3,4 @@ import org.olf.rs.PatronRequestAudit
 
 @Field PatronRequestAudit patronRequestAudit
 
-json g.render(patronRequestAudit, [expand:['fromStatus', 'toStatus']])
+json g.render(patronRequestAudit, [expand:['fromStatus', 'toStatus'], excludes: ['auditData'] ])

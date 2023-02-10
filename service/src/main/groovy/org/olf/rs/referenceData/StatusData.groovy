@@ -20,7 +20,7 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_INVALID_PATRON, StatusStage.PREPARING, '0011', true, true);
         Status.ensure(Status.PATRON_REQUEST_SOURCING_ITEM, StatusStage.PREPARING, '0015', true);
         Status.ensure(Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED, StatusStage.PREPARING, '0020', true);
-        Status.ensure(Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, StatusStage.ACTIVE_SHIPPED, '0025', true, null, false, null );
+        Status.ensure(Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, StatusStage.ACTIVE, '0025', true, null, false, null );
         Status.ensure(Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, StatusStage.ACTIVE, '0026', true, true);
         Status.ensure(Status.PATRON_REQUEST_CANCEL_PENDING, StatusStage.ACTIVE, '0027', true);
         Status.ensure(Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER, StatusStage.COMPLETED, '0028', true);
