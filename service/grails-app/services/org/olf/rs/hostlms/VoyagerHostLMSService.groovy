@@ -76,27 +76,35 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     if ( location == null ) {
       return null;
     }
+    AppSetting voyager_item_api_address_setting = AppSetting.findByKey('voyager_item_api_address');
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
+    String voyager_item_api_address = voyager_item_api_address_setting.value;
     String ncip_server_address = ncip_server_address_setting?.value;
     String barcode = null;
     try {
-      URI ncipURI = new URI(ncip_server_address);
-      int barcodeLookupPort = 7014;
-      String barcodeLookupPath = "/vxws/item/" + location.itemId;
-      String query = "view=brief";
-      String scheme = ncipURI.getScheme();
-      if (scheme != "http" || scheme != "https") {
-        scheme = "http";
+      URI barcodeLookupURI = null;
+      if (ncip_server_address == null || ncip_server_address.isEmpty())
+      {
+        URI ncipURI = new URI(ncip_server_address);
+        int barcodeLookupPort = 7014;
+        String barcodeLookupPath = "/vxws/item/" + location.itemId;
+        String query = "view=brief";
+        String scheme = ncipURI.getScheme();
+        if (scheme != "http" || scheme != "https") {
+          scheme = "http";
+        }
+        barcodeLookupURI = new URI(
+          scheme, //scheme
+          null, //userInfo
+          ncipURI.getHost(), //host 
+          barcodeLookupPort, //port
+          barcodeLookupPath, //path
+          query, //query
+          null //fragment 
+        );
+      } else {
+        barcodeLookupURI = new URI(ncip_server_address);
       }
-      URI barcodeLookupURI = new URI(
-        scheme, //scheme
-        null, //userInfo
-        ncipURI.getHost(), //host 
-        barcodeLookupPort, //port
-        barcodeLookupPath, //path
-        query, //query
-        null //fragment 
-      );
       log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
       barcode = lookupBarcode(barcodeLookupURI.toString());
     } catch ( Exception e ) {

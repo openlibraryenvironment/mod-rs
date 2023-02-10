@@ -37,6 +37,7 @@ public class SettingsData {
     private static final String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
     private static final String SECTION_STATE_MODEL            = 'state_model';
     private static final String SECTION_WMS                    = 'wmsSettings';
+    private static final String SECTION_VOYAGER                = 'voyagerSettings';
     private static final String SECTION_Z3950                  = 'z3950';
 
     // Settings for the z3950 section
@@ -59,6 +60,9 @@ public class SettingsData {
     public static final String SETTING_WMS_CONNECTOR_USERNAME     = 'wms_connector_username';
     public static final String SETTING_WMS_LOOKUP_PATRON_ENDPOINT = 'wms_lookup_patron_endpoint';
     public static final String SETTING_WMS_REGISTRY_ID            = 'wms_registry_id';
+
+    // Settings for the voyagerSettings section
+    public static final String SETTING_VOYAGER_ITEM_API_ADDRESS   = 'voyager_item_api_address';
 
     // Settings for the pull slip configuration section
     public static final String SETTING_PULL_SLIP_LOGO_ID          = 'pull_slip_logo_id';
@@ -193,6 +197,8 @@ public class SettingsData {
             ensureAppSetting(SETTING_WMS_CONNECTOR_ADDRESS, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_CONNECTOR_USERNAME, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_CONNECTOR_PASSWORD, SECTION_WMS, SETTING_TYPE_STRING);
+
+            ensureAppSetting(SETTING_VOYAGER_ITEM_API_ADDRESS, SECTION_VOYAGER, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_PULL_SLIP_TEMPLATE_ID, SECTION_PULLSLIP_TEMPLATE, SETTING_TYPE_TEMPLATE, RefdataValueData.VOCABULARY_PULL_SLIP_TEMPLATE);
 
