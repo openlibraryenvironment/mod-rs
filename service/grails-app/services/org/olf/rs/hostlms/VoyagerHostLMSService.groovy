@@ -83,8 +83,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     String barcode = null;
     try {
       URI barcodeLookupURI = null;
-      if (ncip_server_address == null || ncip_server_address.isEmpty())
-      {
+      if (ncip_server_address == null || ncip_server_address.isEmpty()) {
         URI ncipURI = new URI(ncip_server_address);
         int barcodeLookupPort = 7014;
         String barcodeLookupPath = "/vxws/item/" + location.itemId;
