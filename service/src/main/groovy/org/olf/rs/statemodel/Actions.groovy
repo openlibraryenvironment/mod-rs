@@ -33,6 +33,7 @@ public class Actions {
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
 	static public final String ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE      	 = "borrowerCheckOverride";
 	static public final String ACTION_REQUESTER_CANCEL_LOCAL                 	 = "cancelLocal";
+    static public final String ACTION_REQUESTER_EDIT                             = "edit";
 	static public final String ACTION_REQUESTER_FILL_LOCALLY                 	 = "fillLocally";
     static public final String ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE         = "ISO18626CancelResponse";
     static public final String ACTION_REQUESTER_ISO18626_RENEW_RESPONSE          = "ISO18626RenewResponse";

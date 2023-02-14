@@ -11,9 +11,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     private static final String POSSIBLE_FROM_STATES_QUERY = 'select distinct aa.fromState.code from AvailableAction as aa where aa.model.shortcode = :stateModelCode and aa.actionCode = :action and aa.triggerType = :triggerType';
     private static final String POSSIBLE_ACTIONS_FOR_MODEL_QUERY = 'select distinct aa.actionEvent from AvailableAction as aa where aa.model = :model and aa.actionEvent.code not in :excludeActions and aa.triggerType != :excludeActionType';
 
-    public static String TRIGGER_TYPE_MANUAL   = "M"; // Available to users
-    public static String TRIGGER_TYPE_PROTOCOL = "P"; // Can occur due to a protocol message
-    public static String TRIGGER_TYPE_SYSTEM   = "S";
+    public static final String TRIGGER_TYPE_MANUAL   = "M"; // Available to users
+    public static final String TRIGGER_TYPE_PROTOCOL = "P"; // Can occur due to a protocol message
+    public static final String TRIGGER_TYPE_SYSTEM   = "S";
 
     String id;
     StateModel model;

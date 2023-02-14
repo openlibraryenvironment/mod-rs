@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestLoanCondition;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
@@ -23,12 +24,10 @@ public class ActionPatronRequestRequesterAgreeConditionsService extends Abstract
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // If we are not the requester, flag it as an error
         if (request.isRequester) {
-            String responseKey = '#ReShareLoanConditionAgreeResponse#';
-
             if (parameters.isNull('note')) {
-                parameters.note = responseKey;
+                parameters.note = NoteSpecials.AGREE_LOAN_CONDITION;
             } else {
-                parameters.note = "${responseKey} ${parameters.note}";
+                parameters.note = NoteSpecials.AGREE_LOAN_CONDITION + " ${parameters.note}";
             }
 
             // Inform the responder

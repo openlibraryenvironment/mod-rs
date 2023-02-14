@@ -10,9 +10,12 @@ import org.olf.rs.dynamic.DynamicGroovyService
  */
 public class ActionService {
 
-    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType = :triggerType';
+    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType in ( :triggerTypes )';
 
     private static final Integer ZERO = Integer.valueOf(0);
+
+    private static final List TRIGGERS_MANUAL        = [ AvailableAction.TRIGGER_TYPE_MANUAL ];
+    private static final List TRIGGERS_MANUAL_SYSTEM = [ AvailableAction.TRIGGER_TYPE_MANUAL, AvailableAction.TRIGGER_TYPE_SYSTEM ];
 
     DynamicGroovyService dynamicGroovyService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
@@ -79,19 +82,28 @@ public class ActionService {
             // Needs to fulfil the following criteria to be valid
             // 1. Is a valid action for the current status of the request
             // 2. Request has no network activity going on
-            if (patronRequest.isNetworkActivityIdle() &&
-                isValid(patronRequest, action)) {
-                // Perform the requested action
-                ActionResultDetails resultDetails = performAction(action, patronRequest, parameters);
-                result = resultDetails.responseResult;
-                result.actionResult = resultDetails.result;
+            if (patronRequest.isNetworkActivityIdle()) {
+                if (isValid(patronRequest, action) || (patronRequest.isRequester && Actions.ACTION_REQUESTER_EDIT.equals(action))) {
+                    // Perform the requested action
+                    ActionResultDetails resultDetails = performAction(action, patronRequest, parameters);
+                    result = resultDetails.responseResult;
+                    result.actionResult = resultDetails.result;
+                } else {
+                    // Not a valid action or the request is busy with a previous action
+                    result.actionResult = ActionResult.INVALID_PARAMETERS;
+                    result.message = 'A valid action was not supplied, isRequester: ' + patronRequest.isRequester +
+                                     ' Current state: ' + patronRequest.state.code +
+                                     ', network status: ' + patronRequest.networkStatus.toString() +
+                                     ' Action being performed: ' + action;
+                    reshareApplicationEventHandlerService.auditEntry(patronRequest, patronRequest.state, patronRequest.state, result.message, null);
+                    patronRequest.save(flush:true, failOnError:true);
+                }
             } else {
                 // Not a valid action or the request is busy with a previous action
                 result.actionResult = ActionResult.INVALID_PARAMETERS;
-                result.message = 'A valid action was not supplied, isRequester: ' + patronRequest.isRequester +
-                                 ' Current state: ' + patronRequest.state.code +
+                result.message = 'Unable to perform action as we are waiting for existing network activity to complete' +
                                  ', network status: ' + patronRequest.networkStatus.toString() +
-                                 ' Action being performed: ' + action;
+                                 ', Action being performed: ' + action;
                 reshareApplicationEventHandlerService.auditEntry(patronRequest, patronRequest.state, patronRequest.state, result.message, null);
                 patronRequest.save(flush:true, failOnError:true);
             }
@@ -111,7 +123,7 @@ public class ActionService {
         // Can only continue if we have been supplied the values
         if (action && request?.state) {
             // Get hold of the valid actions
-            List validActions = getValidActions(request);
+            List validActions = getValidActions(request, true);
 
             // Only if the passed in action is in the list of valid actions, is the action being performed valid
             isValid = validActions.contains(action);
@@ -263,15 +275,16 @@ public class ActionService {
     /**
      * Returns the valid list of actions for a request
      * @param request The request we want the actions for
+     * @param includeSystem Include available actions that are triggered by the system, default: false
      * @return The list of valid actions
      */
-    public List getValidActions(PatronRequest request) {
+    public List getValidActions(PatronRequest request, boolean includeSystem = false) {
         List actions;
 
         // We only have valid actions if network activity is idle
         if (request.isNetworkActivityIdle()) {
             // Obtain the valid list of actions
-            actions = lookupAvailableActions(statusService.getStateModel(request), request);
+            actions = lookupAvailableActions(statusService.getStateModel(request), request, includeSystem);
 
             // Remove any duplicates as they might have come from multiple state models
             actions.unique();
@@ -294,13 +307,14 @@ public class ActionService {
      * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
      * @param stateModel The state model that we are looking for the valid actions from
      * @param request The patron requestwe are making the decision for
+     * @param includeSystem Also include system triggers when looking up the available actions
      * @return The list of actions that is valid for the state model and status combination
      */
-    private List lookupAvailableActions(StateModel stateModel, PatronRequest request) {
+    private List lookupAvailableActions(StateModel stateModel, PatronRequest request, boolean includeSystem) {
         List actions = [ ];
 
         // Was nice and simple lookup the available actions getting the distinct actions
-        AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY,[stateModel: stateModel, fromstate: request.state, triggerType: AvailableAction.TRIGGER_TYPE_MANUAL]).each { availableAction ->
+        AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY, [ stateModel: stateModel, fromstate: request.state, triggerTypes: (includeSystem ? TRIGGERS_MANUAL_SYSTEM : TRIGGERS_MANUAL) ]).each { availableAction ->
             // To try and make it more obvious as to what is selected, we extract them into variables here
             String code = availableAction[0];
             String actionGroovy = availableAction[1];
@@ -330,7 +344,7 @@ public class ActionService {
             // We do so go through each of the state models to see if we can find the available action
             stateModel.inheritedStateModels.each { inheritedStateModel ->
                 // this is where we get recursive ...
-                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, request);
+                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, request, includeSystem);
             }
         }
 

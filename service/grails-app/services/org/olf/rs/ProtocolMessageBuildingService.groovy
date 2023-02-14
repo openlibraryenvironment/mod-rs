@@ -4,22 +4,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.iso18626.NoteSpecials;
 
 class ProtocolMessageBuildingService {
 
-    private static String LAST_SEQUENCE      = 'lastSeq';
-    private static String SEQUENCE           = 'seq';
-    private static String SEQUENCE_SEPARATOR = ':';
-    private static String SEQUENCE_WRAPPER   = '#';
-
-    private static String SEQUENCE_PREFIX      = SEQUENCE_WRAPPER + SEQUENCE + SEQUENCE_SEPARATOR;
-    private static String LAST_SEQUENCE_PREFIX = SEQUENCE_WRAPPER + LAST_SEQUENCE + SEQUENCE_SEPARATOR;
-
-    private static String ALL_REGEX           = '(.*)';
-    private static String NUMBER_REGEX        = '(\\d+)';
-    private static String END_OF_STRING_REGEX = '$'
-    private static String SEQUENCE_REGEX      = ALL_REGEX + SEQUENCE_PREFIX + NUMBER_REGEX + SEQUENCE_WRAPPER + END_OF_STRING_REGEX;
-    private static String LAST_SEQUENCE_REGEX = ALL_REGEX + LAST_SEQUENCE_PREFIX + NUMBER_REGEX + SEQUENCE_WRAPPER + END_OF_STRING_REGEX;
+    private static final String ALL_REGEX           = '(.*)';
+    private static final String NUMBER_REGEX        = '(\\d+)';
+    private static final String END_OF_STRING_REGEX = '$'
+    private static final String SEQUENCE_REGEX      = ALL_REGEX + NoteSpecials.SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
+    private static final String LAST_SEQUENCE_REGEX = ALL_REGEX + NoteSpecials.LAST_SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
 
   /*
    * This method is purely for building out the structure of protocol messages
@@ -318,7 +311,7 @@ class ProtocolMessageBuildingService {
    */
   public String buildLastSequence(PatronRequest request) {
       String lastSequenceSent = request.lastSequenceSent == null ? "-1" : request.lastSequenceSent.toString();
-      return(LAST_SEQUENCE_PREFIX + lastSequenceSent + SEQUENCE_WRAPPER);
+      return(NoteSpecials.LAST_SEQUENCE_PREFIX + lastSequenceSent + NoteSpecials.SPECIAL_WRAPPER);
   }
 
   /**
@@ -371,7 +364,7 @@ class ProtocolMessageBuildingService {
 
       // Now do we need to append the sequence
       if (appendSequence) {
-          String lastSequence = SEQUENCE_PREFIX + request.incrementLastSequence().toString() + SEQUENCE_WRAPPER;
+          String lastSequence = NoteSpecials.SEQUENCE_PREFIX + request.incrementLastSequence().toString() + NoteSpecials.SPECIAL_WRAPPER;
           if (constructedNote == null) {
               constructedNote = lastSequence;
           } else {

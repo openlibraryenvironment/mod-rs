@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.statemodel.ActionResultDetails;
 
 /**
@@ -21,9 +22,9 @@ public abstract class ActionResponderConditionService extends ActionResponderSer
         Map warningParams = [:]
 
         if (parameters.isNull('holdingState') || parameters.holdingState == 'no') {
-            warningParams.note = '#ReShareSupplierConditionsAssumedAgreed#';
+            warningParams.note = NoteSpecials.CONDITIONS_ASSUMED_AGREED;
         } else {
-            warningParams.note = '#ReShareSupplierAwaitingConditionConfirmation#';
+            warningParams.note = NoteSpecials.AWAITING_CONDITION_CONFIRMED;
         }
 
         // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
