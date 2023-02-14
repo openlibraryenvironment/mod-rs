@@ -78,16 +78,16 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     }
     AppSetting voyager_item_api_address_setting = AppSetting.findByKey('voyager_item_api_address');
     AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
-    String voyager_item_api_address = voyager_item_api_address_setting.value;
+    String voyager_item_api_address = voyager_item_api_address_setting?.value;
     String ncip_server_address = ncip_server_address_setting?.value;
     String barcode = null;
     try {
       URI barcodeLookupURI = null;
+      String barcodeLookupPath = "/vxws/item/" + location.itemId;
+      String query = "view=brief";
       if (voyager_item_api_address == null || voyager_item_api_address.isEmpty()) {
         URI ncipURI = new URI(ncip_server_address);
         int barcodeLookupPort = 7014;
-        String barcodeLookupPath = "/vxws/item/" + location.itemId;
-        String query = "view=brief";
         String scheme = ncipURI.getScheme();
         if (scheme != "http" || scheme != "https") {
           scheme = "http";
@@ -102,7 +102,16 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
           null //fragment 
         );
       } else {
-        barcodeLookupURI = new URI(voyager_item_api_address);
+        URI voyager_lookup_uri = new URI(voyager_item_api_address);
+        barcodeLookupURI = new URI(
+          voyager_lookup_uri.getScheme(), //scheme
+          null, //userInfo
+          voyager_lookup_uri.getHost(), //host 
+          voyager_lookup_uri.getPort(), //port
+          barcodeLookupPath, //path
+          query, //query
+          null //fragment 
+        );
       }
       log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
       barcode = lookupBarcode(barcodeLookupURI.toString());
