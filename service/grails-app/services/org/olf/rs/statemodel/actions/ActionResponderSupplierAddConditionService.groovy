@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -23,9 +24,9 @@ public class ActionResponderSupplierAddConditionService extends ActionResponderC
         Map conditionParams = parameters
 
         if (parameters.isNull('note')) {
-            conditionParams.note = '#ReShareAddLoanCondition#';
+            conditionParams.note = NoteSpecials.ADD_LOAN_CONDITION;
         } else {
-            conditionParams.note = "#ReShareAddLoanCondition# ${parameters.note}"
+            conditionParams.note = NoteSpecials.ADD_LOAN_CONDITION + " ${parameters.note}"
         }
 
         if (conditionParams.isNull('loanCondition')) {

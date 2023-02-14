@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.patronstore.PatronStoreActions;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.ActionEvent;
@@ -451,26 +452,31 @@ public class ReshareActionService {
         Symbol messageReceiver,
         Boolean isRequester
     ) {
-        String attachedAction = actionMap.action;
-        String actionStatus = actionMap.status;
-        String actionData = actionMap.data;
+        // if we are notifying the other side of a field change then we do not want to record it
+        // Check can be removed when we get extensions
+        if ((note != null) && !note.startsWith(NoteSpecials.UPDATE_FIELD)) {
+            // It is a normal note
+            String attachedAction = actionMap.action;
+            String actionStatus = actionMap.status;
+            String actionData = actionMap.data;
 
-        PatronRequestNotification outboundMessage = new PatronRequestNotification();
-        outboundMessage.patronRequest = pr;
-        outboundMessage.timestamp = Instant.now();
-        outboundMessage.messageSender = messageSender;
-        outboundMessage.messageReceiver = messageReceiver;
-        outboundMessage.isSender = true;
+            PatronRequestNotification outboundMessage = new PatronRequestNotification();
+            outboundMessage.patronRequest = pr;
+            outboundMessage.timestamp = Instant.now();
+            outboundMessage.messageSender = messageSender;
+            outboundMessage.messageReceiver = messageReceiver;
+            outboundMessage.isSender = true;
 
-        outboundMessage.attachedAction = attachedAction;
-        outboundMessage.actionStatus = actionStatus;
-        outboundMessage.actionData = actionData;
+            outboundMessage.attachedAction = attachedAction;
+            outboundMessage.actionStatus = actionStatus;
+            outboundMessage.actionData = actionData;
 
-        outboundMessage.messageContent = note;
+            outboundMessage.messageContent = note;
 
-        log.debug("Outbound Message: ${outboundMessage.messageContent}");
-        pr.addToNotifications(outboundMessage);
-        //outboundMessage.save(flush:true, failOnError:true);
+            log.debug("Outbound Message: ${outboundMessage.messageContent}");
+            pr.addToNotifications(outboundMessage);
+            //outboundMessage.save(flush:true, failOnError:true);
+        }
     }
 
     protected Date parseDateString(String dateString, String dateFormat = DEFAULT_DATE_FORMAT) {

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.patronRequest.PickupLocationService;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
@@ -65,7 +66,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
             // Pickup location has changed, so we need to inform the supplier, but only if it is active and not shipped
             if ((request.state.stage == StatusStage.ACTIVE) || (request.state.stage == StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER)) {
                 // It is active and not been shipped
-                reshareActionService.sendMessage(request, [ note : ("#ReShareUpdatedField-PickupLocation:" + request.pickupLocation + '#')], actionResultDetails);
+                reshareActionService.sendMessage(request, [ note : (NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX + request.pickupLocation + NoteSpecials.SPECIAL_WRAPPER)], actionResultDetails);
             }
         }
 

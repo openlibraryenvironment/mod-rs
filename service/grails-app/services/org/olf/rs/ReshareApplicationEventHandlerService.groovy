@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEvent;
@@ -362,11 +363,12 @@ public class ReshareApplicationEventHandlerService {
 
   private String stripOutSystemCode(String string) {
 	  String returnString = string;
+
 	  def systemCodes = [
-		  "#ReShareAddLoanCondition#",
-		  "#ReShareLoanConditionAgreeResponse#",
-		  "#ReShareSupplierConditionsAssumedAgreed#",
-		  "#ReShareSupplierAwaitingConditionConfirmation#"
+		  NoteSpecials.ADD_LOAN_CONDITION,
+		  NoteSpecials.AGREE_LOAN_CONDITION,
+		  NoteSpecials.AWAITING_CONDITION_CONFIRMED,
+		  NoteSpecials.CONDITIONS_ASSUMED_AGREED
 	  ];
 	  systemCodes.each {code ->
 		  if (string.contains(code)) {
