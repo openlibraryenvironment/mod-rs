@@ -1,10 +1,12 @@
 package mod.rs;
 
-import io.swagger.annotations.ApiImplicitParam
-import io.swagger.annotations.ApiImplicitParams
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiResponse
-import io.swagger.annotations.ApiResponses
+import org.olf.rs.logging.ContextLogging;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetController<T>  {
 
@@ -34,8 +36,20 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
             dataType = "string"
         )
     ])
-    def createResource() {
-        super.createResource(request.JSON);
+    def save() {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "create");
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
+        log.debug("Entering create");
+
+        // Now do the work
+        super.save();
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting create");
     }
 
     @ApiOperation(
@@ -51,7 +65,7 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         @ApiImplicitParam(
             name = "id",
             paramType = "path",
-            required = false,
+            required = true,
             allowMultiple = false,
             value = "The id of the record to be updated",
             dataType = "string"
@@ -66,7 +80,20 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         )
     ])
     def update() {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "opdate");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
+        log.debug("Entering update");
+
+        // Now do the work
         super.update();
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting update");
     }
 
     @ApiOperation(
@@ -81,13 +108,25 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         @ApiImplicitParam(
             name = "id",
             paramType = "path",
-            required = false,
+            required = true,
             allowMultiple = false,
             value = "The id of the record to be deleted",
             dataType = "string"
         )
     ])
     def delete() {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
+        log.debug("Entering delete");
+
+        // Now do the work
         super.delete();
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting delete");
     }
 }

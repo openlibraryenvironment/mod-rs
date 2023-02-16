@@ -1,10 +1,16 @@
 package mod.rs
 
+import org.olf.rs.logging.ContextLogging;
 import org.springframework.http.HttpStatus;
 
 import grails.artefact.Artefact;
 import grails.gorm.multitenancy.CurrentTenant;
 import grails.gorm.transactions.Transactional;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @CurrentTenant
 @Artefact('Controller')
@@ -16,7 +22,23 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
         super(resource)
     }
 
-    def index() {
+    @Override
+    def index(Integer max) {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "search");
+        ContextLogging.setValue(ContextLogging.FIELD_TERM, params.term);
+        ContextLogging.setValue(ContextLogging.FIELD_FIELDS_TO_MATCH, params.match);
+        ContextLogging.setValue(ContextLogging.FIELD_FILTERS, params.filters);
+        ContextLogging.setValue(ContextLogging.FIELD_SORT, params.sort);
+        ContextLogging.setValue(ContextLogging.FIELD_MAXIMUM_RESULTS, max);
+        ContextLogging.setValue(ContextLogging.FIELD_NUMBER_PER_PAGE, params.perPage);
+        ContextLogging.setValue(ContextLogging.FIELD_OFFSET, params.offset);
+        ContextLogging.setValue(ContextLogging.FIELD_PAGE, params.page);
+        ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
+        log.debug("Entering index");
+
         // Closure definition can be found at https://gorm.grails.org/latest/hibernate/manual/#criteria
         respond doTheLookup(resource, {
             or {
@@ -25,10 +47,40 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
                 isNull('hidden')
             }
         });
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting index");
     }
 
     @Transactional
+    @Override
+    // Not quite sure why it dosn't inherit the @ApiImplicitParams from the paren
+    @ApiOperation(
+        value = "Deletes the record with the supplied identifier",
+        nickname = "{id}",
+        httpMethod = "DELETE"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 204, message = "Deleted")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "id",
+            paramType = "path",
+            required = true,
+            allowMultiple = false,
+            value = "The id of the record to be deleted",
+            dataType = "string"
+        )
+    ])
     def delete() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
+        log.debug("Entering delete");
+
         T instance = queryForResource(params.id)
 
         // Not found.
@@ -51,5 +103,9 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
             // It has either been deleted or marked as hidden, either way the user thinks it has been deleted
             render status : HttpStatus.NO_CONTENT;
         }
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting delete");
     }
 }

@@ -1,5 +1,7 @@
 package mod.rs;
 
+import org.olf.rs.logging.ContextLogging;
+
 import com.k_int.okapi.OkapiTenantAwareController;
 import com.k_int.web.toolkit.SimpleLookupService;
 
@@ -118,7 +120,27 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         )
     ])
     def index(Integer max) {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "search");
+        ContextLogging.setValue(ContextLogging.FIELD_TERM, params.term);
+        ContextLogging.setValue(ContextLogging.FIELD_FIELDS_TO_MATCH, params.match);
+        ContextLogging.setValue(ContextLogging.FIELD_FILTERS, params.filters);
+        ContextLogging.setValue(ContextLogging.FIELD_SORT, params.sort);
+        ContextLogging.setValue(ContextLogging.FIELD_MAXIMUM_RESULTS, max);
+        ContextLogging.setValue(ContextLogging.FIELD_NUMBER_PER_PAGE, params.perPage);
+        ContextLogging.setValue(ContextLogging.FIELD_OFFSET, params.offset);
+        ContextLogging.setValue(ContextLogging.FIELD_PAGE, params.page);
+        ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
+        log.debug("Entering index");
+
+        // Now do the work
         super.index(max);
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting index");
     }
 
     @ApiOperation(
@@ -140,7 +162,19 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         )
     ])
     def show() {
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "fetch");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
+        log.debug("Entering show");
+
+        // Now do the work
         super.show();
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug("Exiting show");
     }
 
     @Override
