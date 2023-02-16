@@ -1,25 +1,76 @@
-import grails.util.BuildSettings
-import grails.util.Environment
-import org.springframework.boot.logging.logback.ColorConverter
-import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter
+import java.nio.charset.Charset;
 
-import java.nio.charset.Charset
+import org.springframework.boot.logging.logback.ColorConverter;
+import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter;
+
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import grails.util.BuildSettings;
+import grails.util.Environment;
+
+import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import net.logstash.logback.composite.loggingevent.*;
+import net.logstash.logback.composite.*;
+import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 
 conversionRule 'clr', ColorConverter
 conversionRule 'wex', WhitespaceThrowableProxyConverter
 
 // See http://logback.qos.ch/manual/groovy.html for details on configuration
 appender('STDOUT', ConsoleAppender) {
-    encoder(PatternLayoutEncoder) {
-        charset = Charset.forName('UTF-8')
-
-        pattern =
-                '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
-                '%clr(%5p) ' + // Log level
-                '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
-                "%clr(%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''})){cyan} %clr(:){faint} " +
-                '%m%n%wex' // Message
-
+    if ( ( Environment.isDevelopmentMode() ) ||
+//         ( Environment.getCurrent().getName() == "rancher-desktop" ) ||
+         ( Environment.getCurrent() == Environment.TEST )) {
+        // Standard logging to Standard Out
+        encoder(PatternLayoutEncoder) {
+            charset = Charset.forName('UTF-8')
+    
+            pattern =
+                    '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
+                    '%clr(%5p) ' + // Log level
+                    '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
+                    "%clr(%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''})){cyan} %clr(:){faint} " +
+                    '%m%n%wex' // Message
+    
+        }
+    } else {
+        // Outputs the logging in json format, for formatted logging that can be easily parsed
+        encoder(LoggingEventCompositeJsonEncoder) {
+            providers(LoggingEventJsonProviders) {
+                timestamp(LoggingEventFormattedTimestampJsonProvider) {
+                    fieldName = '@time'
+                    timeZone = 'UTC'
+                    pattern = 'yyyy-MM-dd HH:mm:ss.SSS'
+                }
+                logLevel(LogLevelJsonProvider)
+                loggerName(LoggerNameJsonProvider) {
+                    fieldName = 'logger'
+                    shortenedLoggerNameLength = 35
+                }
+                message(MessageJsonProvider) {
+                    fieldName = 'msg'
+                }
+                globalCustomFields(GlobalCustomFieldsJsonProvider) {
+                    // customFields = "${toJson(pid:"${new ApplicationPid()}", app:"XYZ")}"
+                }
+                threadName(LoggingEventThreadNameJsonProvider) {
+                    fieldName = 'thread'
+                }
+                mdc(MdcJsonProvider)
+                arguments(ArgumentsJsonProvider)
+                stackTrace(StackTraceJsonProvider) {
+                    throwableConverter(ShortenedThrowableConverter) {
+                        maxDepthPerThrowable = 20
+                        maxLength = 8192
+                        shortenedClassNameLength = 35
+                        exclude = /sun\..*/
+                        exclude = /java\..*/
+                        exclude = /groovy\..*/
+                        exclude = /com\.sun\..*/
+                        rootCauseFirst = true
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -35,7 +86,8 @@ def targetDir = BuildSettings.TARGET_DIR
 logger ('org.hibernate.orm.deprecation', ERROR)
 
 if ( ( Environment.isDevelopmentMode() ) ||
-     ( Environment.getCurrent() == Environment.TEST ) ) {
+     ( Environment.getCurrent().getName() == "rancher-desktop" ) ||
+     ( Environment.getCurrent() == Environment.TEST )) {
   logger ('com.k_int', DEBUG)
   logger ('com.k_int.okapi.springsecurity.OkapiAuthenticationFilter', WARN)
   logger ('com.k_int.okapi', WARN)
@@ -57,34 +109,37 @@ if ( ( Environment.isDevelopmentMode() ) ||
   logger ('javax.persistence.criteria.CriteriaQuery', ERROR)
   logger ('org.olf.okapi.modules.directory.CustomBinders', WARN)
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
-  logger ('com.zaxxer.hikari.pool.HikariPool', DEBUG)
+  logger ('com.zaxxer.hikari.pool.HikariPool', INFO)
+  logger ('liquibase', INFO)
 
+  // Enable Hibernate SQL logging with param values
+  //logger ('org.hibernate.type', TRACE)
+  //logger ('org.hibernate.SQL', DEBUG)
 
   // Log HTTPBuilderNG traffic
   // logger 'org.apache.http', INFO
   // logger 'org.apache.http.headers', TRACE
   // logger 'org.apache.http.wire', TRACE
-  
+
   // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
   // logger ('com.k_int.okapi.OkapiClient', WARN)
   // logger ('com.k_int.okapi.remote_resources.RemoteOkapiLinkListener', WARN)
-  
+
   // Debugging call to mod-email
   logger ('com.k_int.okapi.OkapiClient', TRACE)
   logger ('groovyx.net.http.HttpBuilder', TRACE)
   logger ('groovyx.net.http.HttpBuilder', TRACE)
-  
+
   // logger ('com.k_int.okapi.OkapiClient', TRACE)
   // logger 'groovy.net.http.JavaHttpBuilder', DEBUG
   // logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
   // logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
-  
+
   // Uncomment below logging for output of OKAPI client http.
   //logger 'groovy.net.http.JavaHttpBuilder', DEBUG
   //logger 'groovy.net.http.JavaHttpBuilder.content', DEBUG
   //logger 'groovy.net.http.JavaHttpBuilder.headers', DEBUG
   logger 'org.olf.RSLifecycleSpec', DEBUG
-  logger 'services.k_int.core', TRACE
 }
 else {
   logger ('com.zaxxer.hikari.HikariConfig', DEBUG)
