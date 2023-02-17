@@ -5,6 +5,7 @@ import org.olf.rs.BatchService;
 import org.olf.rs.OpenUrlService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.Result;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.reporting.ReportService;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
@@ -25,6 +26,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/patronrequests", tags = ["Patron Request Controller"], description = "API for all things to do with patron requests")
 class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRequest>  {
+
+    private static final String RESOURCE_PATRON_REQUEST = PatronRequest.getSimpleName();
 
 	ActionService actionService;
     BatchService batchService;
@@ -70,9 +73,15 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     ])
 	def performAction() {
 
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "performAction");
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
 		def result = [:]
 		if ( request.method=='POST' ) {
-			log.debug("PatronRequestController::performAction(${request.JSON})...");
 			if ( params.patronRequestId ) {
 				PatronRequest.withTransaction { tstatus ->
                     // Execute the action
@@ -86,15 +95,26 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 		}
 		log.debug("PatronRequestController::performAction exiting");
 		render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
      * Allows a limited number of fields on a request to be updated, why isn't this implemented as an action,
      * to all intents and purposes I will implement this as an action so it should be straight forward to swap it over
      */
+    @Override
     def update() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "update");
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         def result = [:]
-        log.debug("PatronRequestController::update(${request.JSON})...");
         if ( params.id ) {
             PatronRequest.withTransaction { tstatus ->
                 // Execute the action
@@ -105,8 +125,13 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
                 result.remove('actionResult');
             }
         }
-        log.debug("PatronRequestController::update exiting");
+
+        // Finally render the result
         render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -156,17 +181,23 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         )
     ])
 	def validActions() {
-		log.debug("PatronRequestController::validActions() ${params}");
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "validActions");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.patronRequestId);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
 		def result = [:];
 
 		if ( params.patronRequestId ) {
-			PatronRequest patron_request = PatronRequest.get(params.patronRequestId)
+			PatronRequest patronRequest = PatronRequest.get(params.patronRequestId)
 
-			if (  patron_request != null ) {
-				result.actions = actionService.getValidActions(patron_request);
+			if (  patronRequest != null ) {
+                ContextLogging.setValue(ContextLogging.FIELD_HRID, patronRequest.hrid);
+				result.actions = actionService.getValidActions(patronRequest);
 			} else {
 				result.actions=[];
-				result.message="Unable to locate request for ID ${params.patronRequestId}";
+				result.message="Unable to locate request";
 			}
 		} else {
 			result.actions=[];
@@ -174,6 +205,10 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 		}
 
 		render result as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
 	}
 
     /**
@@ -198,21 +233,34 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         )
     ])
     def manualCloseStates() {
-        log.debug("PatronRequestController::manualCloseStates() ${params}");
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "manualCloseStates");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.patronRequestId);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         def result = [ ];
 
         // Cannot proceed if we do not have a requestId
         if (params.patronRequestId) {
             // Grab the request
-            PatronRequest request = PatronRequest.get(params.patronRequestId);
+            PatronRequest patronRequest = PatronRequest.get(params.patronRequestId);
 
             // Did we find the request
-            if (request != null) {
+            if (patronRequest != null) {
+                // Add the hrid to the logging
+                ContextLogging.setValue(ContextLogging.FIELD_HRID, patronRequest.hrid);
+
                 // Get hold of the states from the model
-                result = StateModel.getVisibleTerminalStates(request.stateModel.shortcode);
+                result = StateModel.getVisibleTerminalStates(patronRequest.stateModel.shortcode);
             }
         }
+
         render result as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -254,6 +302,14 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         )
     ])
     def generatePickListBatch() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "generatePickListBatch");
+        ContextLogging.setValue(ContextLogging.FIELD_TERM, params.term);
+        ContextLogging.setValue(ContextLogging.FIELD_FIELDS_TO_MATCH, params.match);
+        ContextLogging.setValue(ContextLogging.FIELD_FILTERS, params.filters);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         List<String> filters = getParamList("filters");
         List<String> searchFields = getParamList("match");
         String term = params.term;
@@ -273,6 +329,11 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 
         // Give the result back to the caller
         render result as JSON, status: result.error ? 400 : 200, contentType: "application/json";
+
+        // Record how long it took and the created batch id
+        ContextLogging.setValue(ContextLogging.FIELD_ID, result.batchId);
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -303,6 +364,12 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         )
     ])
     def markBatchAsPrinted() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "markBatchAsPrinted");
+        ContextLogging.setValue(ContextLogging.FIELD_ID, params.batchId);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         Map result = [ : ];
         int resultStatus = 200;
 
@@ -328,6 +395,10 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         }
 
         render result as JSON, status: resultStatus, contentType: "application/json";
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -865,10 +936,20 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         )
     ])
     def openURL() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "openURL");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         // Maps an OpenURL onto a request, originally taken from here https://github.com/openlibraryenvironment/listener-openurl/blob/master/src/ReshareRequest.js
         Result result = openUrlService.mapToRequest(params) ;
         response.status = 200;
 
         render result as JSON
+
+        // Record how long it took and the request id
+        ContextLogging.setValue(ContextLogging.FIELD_ID, result.id);
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

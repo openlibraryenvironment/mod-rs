@@ -9,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
 import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.okapi.OkapiTenantResolver
 import com.k_int.web.toolkit.async.WithPromises
@@ -16,8 +17,6 @@ import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
 import com.k_int.web.toolkit.custprops.types.CustomPropertyText
 
 import grails.async.Promise
-import grails.config.Config
-import grails.config.ConfigProperties
 import grails.core.GrailsApplication
 import grails.events.EventPublisher
 import grails.events.annotation.Subscriber
@@ -34,31 +33,31 @@ import groovy.transform.CompileStatic
  * If the message parses, emit an asynchronous grails event.
  * This class is essentially the bridge between whatever event communication system we want to use and our internal method of
  * reacting to application events. Whatever implementation is used, it ultimately needs to call notify('PREventIndication',DATA) in order
- * for 
+ * for
  */
 @CompileStatic
 public class EventConsumerService implements EventPublisher, DataBinder {
-  
+
   private static final String TOPIC_PATRON_REQUESTS_SUFFIX = '_mod_rs_PatronRequestEvents'
   private static final String TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX = '_mod_directory_DirectoryEntryUpdate'
-  
+
   private static final String[] TOPIC_SUFFIXES = [TOPIC_PATRON_REQUESTS_SUFFIX, TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX] as String[]
 
   GrailsApplication grailsApplication
 
   private KafkaConsumer consumer = null
-  
-  private static volatile boolean running = true  
+
+  private static volatile boolean running = true
   private static volatile boolean topic_list_updated = true
-  
+
   private final Set<String> topic_list = ConcurrentHashMap.newKeySet()
 
   private String version = 'development'
-  
+
   @javax.annotation.PostConstruct
   public void init() {
     log.debug("Configuring event consumer service")
-    
+
     version = grailsApplication.metadata.applicationVersion ?: version
     final Properties props = new Properties()
     try {
@@ -96,25 +95,25 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
     log.debug("EventConsumerService::init() returning")
   }
-  
-  
+
+
   private Set<String> getTopicsForTenantSchema ( final String tenantSchema ) {
     final String tenantName = OkapiTenantResolver.schemaNameToTenantId(tenantSchema)
     TOPIC_SUFFIXES.collect { "${tenantName}${it}" as String } as Set
   }
-  
+
   @Subscriber('okapi:tenant_datasource_added')
   public void addTenantSubscriptions( final String tenantSchema ) {
     topic_list.addAll( getTopicsForTenantSchema( tenantSchema ) )
     topic_list_updated = true
   }
-  
+
   @Subscriber('okapi:tenant_datasource_removed')
   public void removeTenantSubscriptions( final String tenantSchema ) {
     topic_list.removeAll( getTopicsForTenantSchema( tenantSchema ) )
     topic_list_updated = true
   }
-  
+
   protected void adjustSubscriptions() {
     if (topic_list_updated) {
       consumer.subscribe(topic_list)
@@ -124,34 +123,34 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   }
 
   private Map<String,?> parseMapFromRecord ( ConsumerRecord record ) {
-    
+
     // Cast to typecheck the value() retrunn type.
     final ConsumerRecord<?, String> typedRecord = record as ConsumerRecord<?, String>
     new JsonSlurper().parseText(typedRecord.value()) as Map
   }
-  
+
   private void consumePatronRequestEvents() {
 
     try {
       adjustSubscriptions()
-      
+
       final Duration pollTimeout = Duration.ofSeconds(1)
-      
+
       while ( running ) {
-        
+
         if (!consumer.subscription().empty) {
-        
+
           final Iterable<ConsumerRecord> consumerRecords = consumer.poll( pollTimeout )
-          
+
           // Read each topic entry.
           consumerRecords.each { final ConsumerRecord record ->
             try {
               log.debug("KAFKA_EVENT:: topic: ${record.topic()} Key: ${record.key()}, Partition:${record.partition()}, Offset: ${record.offset()}, Value: ${record.value()}")
-  
-              
+
+
               switch ( record.topic() ) {
-                
-                case { String topic -> topic.endsWith(TOPIC_PATRON_REQUESTS_SUFFIX) }: 
+
+                case { String topic -> topic.endsWith(TOPIC_PATRON_REQUESTS_SUFFIX) }:
                   final Map<String,?> data = parseMapFromRecord(record)
                   if ( data.event != null ) {
                     notify('PREventIndication', data)
@@ -160,11 +159,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                     log.debug("No event specified in payoad: ${record.value()}")
                   }
                   break
-                  
+
                 case { String topic -> topic.endsWith(TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX) }:
                   notify('DirectoryUpdate', parseMapFromRecord(record))
                   break
-                  
+
                 default:
                   log.debug("Not handling event for topic ${record.topic()}")
               }
@@ -178,7 +177,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
           }
           consumer.commitAsync()
         }
-          
+
         // Check for updated topic list
         adjustSubscriptions()
       }
@@ -225,20 +224,25 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   @Subscriber('DirectoryUpdate')
   @CompileStatic(SKIP)
   public synchronized void processDirectoryUpdate(Map<String, ?> data) {
-    log.debug("processDirectoryUpdate(${data})")
+    ContextLogging.startTime();
+    ContextLogging.setValue(ContextLogging.FIELD_ACTION, "processDirectoryUpdate");
+    ContextLogging.setValue(ContextLogging.FIELD_JSON, data);
+    ContextLogging.setValue(ContextLogging.FIELD_TENANT, data?.tenant);
+    log.debug(ContextLogging.MESSAGE_ENTERING);
 
     try {
       if ( data?.tenant ) {
-        
+
         final String tenantSchema = OkapiTenantResolver.getTenantSchemaName("${data.tenant}")
-        
+
         Tenants.withId(tenantSchema) {
           DirectoryEntry.withTransaction { status ->
-            
+
             final Map<String,?> payload = data.payload as Map
-            
+
             log.debug("Process directory entry inside ${data.tenant}_mod_rs")
             if ( payload.slug ) {
+              ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug);
               log.debug("Trying to load DirectoryEntry ${payload.slug}")
               DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
               if ( de == null ) {
@@ -256,6 +260,9 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                 clearCustomProperties(de)
                 log.debug("Update directory entry ${payload.slug} : ${payload}")
               }
+
+              // Add the identifier to the logging context
+              ContextLogging.setValue(ContextLogging.FIELD_ID, de.id);
 
               // Remove any custom properties from the payload - currently the custprops
               // processing is additive - which means we get lots of values. Need a longer term solition for this
@@ -283,10 +290,16 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     finally {
       log.debug("Directory update processing complete (${data})")
     }
+    // Record how long it took
+    ContextLogging.duration();
+    log.debug(ContextLogging.MESSAGE_EXITING);
+
+    // Clear the context, not sure if the thread is reused or not
+    ContextLogging.clear();
   }
 
   private void clearCustomProperties(DirectoryEntry de) {
-    
+
   }
 
   /**
@@ -388,11 +401,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   }
 
   @Subscriber('okapi:tenant_load_reference')
-  public void onTenantLoadReference(final String tenantId, 
-                                    final String value, 
-                                    final boolean existing_tenant, 
-                                    final boolean upgrading, 
-                                    final String toVersion, 
+  public void onTenantLoadReference(final String tenantId,
+                                    final String value,
+                                    final boolean existing_tenant,
+                                    final boolean upgrading,
+                                    final String toVersion,
                                     final String fromVersion) {
     log.info("onTenantLoadReference(${tenantId},${value},${existing_tenant},${upgrading},${toVersion},${fromVersion})")
   }
@@ -472,9 +485,9 @@ public class EventConsumerService implements EventPublisher, DataBinder {
       de.symbols.each { dbsymbol ->
         log.debug("Verify symbol ${dbsymbol} (${dbsymbol?.authority?.symbol}:${dbsymbol?.symbol})")
         // Look in payload.symbols for a map entry where dbsymbol.symbol == entry.symbol and dbsymbol.authority.symbol == entry.authority
-        
+
         List<Map<String, ?>> payloadSymbols = payload.symbols as List<Map>
-        
+
         def located_map_entry = payloadSymbols.find { ( ( it.symbol == dbsymbol.symbol ) && ( it.authority == dbsymbol.authority.symbol ) ) }
         if ( located_map_entry ) {
           // DB symbol still present in data, no action needed

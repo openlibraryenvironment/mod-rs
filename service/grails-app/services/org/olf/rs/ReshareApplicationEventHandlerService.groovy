@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.ActionResult;
@@ -69,8 +70,16 @@ public class ReshareApplicationEventHandlerService {
 
   	@Subscriber('PREventIndication')
 	public handleApplicationEvent(Map eventData) {
-		log.debug("ReshareApplicationEventHandlerService::handleApplicationEvent(${eventData})");
+		// Ignore anything without an event
 		if (eventData?.event) {
+            ContextLogging.startTime();
+            ContextLogging.setValue(ContextLogging.FIELD_ACTION, "handleApplicationEvent");
+            ContextLogging.setValue(ContextLogging.FIELD_EVENT, eventData.event);
+            ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
+            ContextLogging.setValue(ContextLogging.FIELD_TENANT, eventData.tenant?.replace("_mod_rs", ""));
+            ContextLogging.setValue(ContextLogging.FIELD_ID, eventData.payload?.id);
+            log.debug(ContextLogging.MESSAGE_ENTERING);
+
 			try {
 				// Ensure we are talking to the right tenant database
 				Tenants.withId(eventData.tenant) {
@@ -98,6 +107,9 @@ public class ReshareApplicationEventHandlerService {
 								case EventFetchRequestMethod.PAYLOAD_ID:
 									requestId = eventData.payload.id;
 									request = delayedGet(requestId, true);
+
+                                    // Add the hrid to the logging context
+                                    ContextLogging.setValue(ContextLogging.FIELD_HRID, request.hrid);
 									break;
 							}
 
@@ -142,6 +154,11 @@ public class ReshareApplicationEventHandlerService {
 
 									// Finally Save the request
 									request.save(flush:true, failOnError:true);
+
+                                    // if the request id in the event was null then it is a new request so we now need to add the request id to the context logging
+                                    if (requestId == null) {
+                                        ContextLogging.setValue(ContextLogging.FIELD_ID, request.id);
+                                    }
 								}
 							}
 						}
@@ -150,27 +167,39 @@ public class ReshareApplicationEventHandlerService {
 			} catch (Exception e) {
 				log.error("Problem trying to invoke event handler for ${eventData.event}", e);
 				throw e;
-			}
+			} finally {
+                // Record how long it took
+                ContextLogging.duration();
+                log.debug(ContextLogging.MESSAGE_EXITING);
+
+                // Clear the context, not sure if the thread is reused or not
+                ContextLogging.clear();
+            }
 		} else {
 			log.error("No event specified in the event data: " + eventData.toString());
 		}
 	}
 
-  /**
-   * A new request has been received from an external PEER institution using some comms protocol.
-   * We will need to create a request where isRequester==false
-   * This should return everything that ISO18626Controller needs to build a confirmation message
-   */
-  def handleRequestMessage(Map eventData) {
+    /**
+     * A new request has been received from an external PEER institution using some comms protocol.
+     * We will need to create a request where isRequester==false
+     * This should return everything that ISO18626Controller needs to build a confirmation message
+     */
+    def handleRequestMessage(Map eventData) {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "handleRequestMessage");
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
-    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
+        // Just call event handler directly
+        EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
 
-	// Just call it directly
-	EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
 
-    log.debug("ReshareApplicationEventHandlerService::handleRequestMessage returning");
-    return eventResultDetails.responseResult;
-  }
+        return eventResultDetails.responseResult;
+    }
 
   /**
    * An incoming message to the requesting agency FROM the supplying agency - so we look in

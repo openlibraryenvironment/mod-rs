@@ -42,14 +42,14 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, "create");
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
-        log.debug("Entering create");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Now do the work
         super.save();
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting create");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @ApiOperation(
@@ -83,17 +83,17 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "opdate");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "update");
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
-        log.debug("Entering update");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Now do the work
         super.update();
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting update");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @ApiOperation(
@@ -120,13 +120,13 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
-        log.debug("Entering delete");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Now do the work
         super.delete();
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting delete");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

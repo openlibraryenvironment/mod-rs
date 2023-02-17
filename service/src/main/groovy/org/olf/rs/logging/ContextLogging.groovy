@@ -11,20 +11,32 @@ public class ContextLogging extends MDC {
 
     static public final String FIELD_ACTION              = "action";
     static public final String FIELD_DURATION            = "duration";
+    static public final String FIELD_EVENT               = "event";
     static public final String FIELD_FIELDS_TO_MATCH     = "fieldsToMatch";
     static public final String FIELD_FILTERS             = "filters";
+    static public final String FIELD_HRID                = "hrid";
     static public final String FIELD_ID                  = "id";
     static public final String FIELD_JSON                = "json";
+    static public final String FIELD_JVM_UPTIME          = "jvmUptime";
     static public final String FIELD_MAXIMUM_RESULTS     = "maximumResults";
+    static public final String FIELD_MEMORY_ALLOCATED    = "memoryAllocated";
+    static public final String FIELD_MEMORY_FREE         = "memoryFree";
+    static public final String FIELD_MEMORY_MAX          = "memoryMax";
+    static public final String FIELD_MEMORY_TOTAL_FREE   = "memoryTotalFree";
     static public final String FIELD_NUMBER_PER_PAGE     = "numberPerPage";
     static public final String FIELD_OFFSET              =  "offset";
     static public final String FIELD_PAGE                = "page";
+    static public final String FIELD_REQUEST_ACTION      = "requestAction";
     static public final String FIELD_RESOURCE            = "resource";
+    static public final String FIELD_SLUG                = "slug";
     static public final String FIELD_SORT                = "sort";
-    static private final String FIELD_START_TIME         = "startTime";
+    static public final String FIELD_START_TIME          = "startTime";
     static public final String FIELD_STATISTICS_REQUIRED = "statisticsRequired";
+    static public final String FIELD_TENANT              = "tenant";
     static public final String FIELD_TERM                = "term";
 
+    static public final String MESSAGE_ENTERING = "Entering";
+    static public final String MESSAGE_EXITING  = "Exiting";
 
     /**
      * Adds a field to the logging MDC if its value is not null

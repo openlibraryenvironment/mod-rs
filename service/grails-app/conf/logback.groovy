@@ -18,7 +18,7 @@ conversionRule 'wex', WhitespaceThrowableProxyConverter
 // See http://logback.qos.ch/manual/groovy.html for details on configuration
 appender('STDOUT', ConsoleAppender) {
     if ( ( Environment.isDevelopmentMode() ) ||
-//         ( Environment.getCurrent().getName() == "rancher-desktop" ) ||
+         ( Environment.getCurrent().getName() == 'rancher-desktop' ) ||
          ( Environment.getCurrent() == Environment.TEST )) {
         // Standard logging to Standard Out
         encoder(PatternLayoutEncoder) {
@@ -29,6 +29,31 @@ appender('STDOUT', ConsoleAppender) {
                     '%clr(%5p) ' + // Log level
                     '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
                     "%clr(%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''})){cyan} %clr(:){faint} " +
+                    'MDC:[tenant=%X{tenant}, ' +
+                    'action=%X{action}, ' +
+                    'event=%X{event}, ' +
+                    'resource=%X{resource}, ' +
+                    'id=%X{id}, ' +
+                    'hrid=%X{hrid}, ' +
+                    'json=%X{json}, ' +
+                    'requestAction=%X{requestAction}, ' +
+                    'slug=%X{slug}, ' +
+                    'term=%X{term}, ' +
+                    'fieldsToMatch=%X{fieldsToMatch}, ' +
+                    'filters=%X{filters}, ' +
+                    'numberPerPage=%X{numberPerPage}, ' +
+                    'offset=%X{offset}, ' +
+                    'page=%X{page}, ' +
+                    'sort=%X{sort}, ' +
+                    'statisticsRequired=%X{statisticsRequired}, ' +
+                    'jvmUptime=%X{jvmUptime}, ' +
+                    'maximumResults=%X{maximumResults}, ' +
+                    'memoryAllocated=%X{memoryAllocated}, ' +
+                    'memoryFree=%X{memoryFree}, ' +
+                    'memoryMax=%X{memoryMax}, ' +
+                    'memoryTotalFree=%X{memoryTotalFree}, ' +
+                    'startTime%X{startTime}, ' +
+                    'duration=%X{duration}] ' +
                     '%m%n%wex' // Message
     
         }
