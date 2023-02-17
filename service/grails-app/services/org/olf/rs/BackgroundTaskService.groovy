@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.timers.AbstractTimer;
 
 import grails.util.Holders;
@@ -16,33 +17,39 @@ import grails.util.Holders;
  */
 public class BackgroundTaskService {
 
-  def grailsApplication;
+    def grailsApplication;
 
-  LockService lockService;
-  OkapiSettingsService okapiSettingsService;
-  PatronNoticeService patronNoticeService;
+    LockService lockService;
+    OkapiSettingsService okapiSettingsService;
+    PatronNoticeService patronNoticeService;
 
-  // Holds the services that we have discovered that perform tasks for the timers
-  private static Map serviceTimers = [ : ];
+    // Holds the services that we have discovered that perform tasks for the timers
+    private static Map serviceTimers = [ : ];
 
     def performReshareTasks(String tenant) {
-        log.debug("performReshareTasks() as at ${new Date()}");
 
         Runtime runtime = Runtime.getRuntime();
 
         NumberFormat format = NumberFormat.getInstance();
 
-        StringBuilder sb = new StringBuilder();
         long maxMemory = runtime.maxMemory();
         long allocatedMemory = runtime.totalMemory();
         long freeMemory = runtime.freeMemory();
         long jvmUpTime = ManagementFactory.getRuntimeMXBean().getUptime();
 
-        log.info("free memory: " + format.format(freeMemory / 1024));
-        log.info("allocated memory: " + format.format(allocatedMemory / 1024));
-        log.info("max memory: " + format.format(maxMemory / 1024));
-        log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
-        log.info("JVM uptime: " + format.format(jvmUpTime));
+        ContextLogging.setValue(ContextLogging.FIELD_MEMORY_FREE, format.format(freeMemory / 1024));
+        ContextLogging.setValue(ContextLogging.FIELD_MEMORY_ALLOCATED, format.format(allocatedMemory / 1024));
+        ContextLogging.setValue(ContextLogging.FIELD_MEMORY_MAX, format.format(maxMemory / 1024));
+        ContextLogging.setValue(ContextLogging.FIELD_MEMORY_TOTAL_FREE, format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
+        ContextLogging.setValue(ContextLogging.FIELD_JVM_UPTIME, format.format(jvmUpTime));
+        log.debug(ContextLogging.MESSAGE_ENTERING + " performReshareTasks");
+
+        // Only want these in the context logging once
+        ContextLogging.remove(ContextLogging.FIELD_MEMORY_FREE);
+        ContextLogging.remove(ContextLogging.FIELD_MEMORY_ALLOCATED);
+        ContextLogging.remove(ContextLogging.FIELD_MEMORY_MAX);
+        ContextLogging.remove(ContextLogging.FIELD_MEMORY_TOTAL_FREE);
+        ContextLogging.remove(ContextLogging.FIELD_JVM_UPTIME);
 
         // We do not want to do any processing if we are already performing the background processing
         // We have a distributed lock for when there are multiple mod-rs processes running
@@ -52,10 +59,12 @@ public class BackgroundTaskService {
             // Failed to obtain the lock
             log.info("Skiping background tasks as unable to obtain lock");
         }
+
+        log.debug(ContextLogging.MESSAGE_EXITING + " performReshareTasks");
     }
 
     private void doBackgroundTasks(String tenant) {
-        // Start off with the patron notices, could we move this into a timer ...
+        // Start off with the patron notices, should move this into a timer ...
         if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
             patronNoticeService.processQueue()
         }
@@ -74,7 +83,8 @@ public class BackgroundTaskService {
             if ((timers != null) && (timers.size()> 0)) {
                 timers.each { timer ->
                     try {
-                        log.debug("** Timer task ${timer.id} firing....");
+                        ContextLogging.setValue(ContextLogging.FIELD_ID, timer.id);
+                        log.debug("** Timer task firing....");
 
                         TimeZone tz;
                         try {

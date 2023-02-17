@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.dynamic.DynamicGroovyService
+import org.olf.rs.logging.ContextLogging;
 
 /**
  * Checks the incoming action to ensure it is valid and dispatches it to the appropriate service
@@ -77,6 +78,10 @@ public class ActionService {
             result.actionResult = ActionResult.INVALID_PARAMETERS;
             result.message='No patron request supplied';
         } else {
+            // Add the hrid to the logging context
+            ContextLogging.setValue(ContextLogging.FIELD_HRID, patronRequest.hrid);
+            ContextLogging.setValue(ContextLogging.FIELD_REQUEST_ACTION, action);
+
             log.debug("Apply action ${action} to ${patronRequest.id}");
 
             // Needs to fulfil the following criteria to be valid

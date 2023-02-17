@@ -133,14 +133,14 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         ContextLogging.setValue(ContextLogging.FIELD_OFFSET, params.offset);
         ContextLogging.setValue(ContextLogging.FIELD_PAGE, params.page);
         ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
-        log.debug("Entering index");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Now do the work
         super.index(max);
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting index");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @ApiOperation(
@@ -167,14 +167,14 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, "fetch");
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
-        log.debug("Entering show");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Now do the work
         super.show();
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting show");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @Override

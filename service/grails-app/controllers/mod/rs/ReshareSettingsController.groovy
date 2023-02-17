@@ -2,6 +2,7 @@ package mod.rs
 
 import org.olf.rs.BackgroundTaskService;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.shared.TenantSymbolMapping;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -25,11 +26,11 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "/rs/settings", tags = ["ReShare Settings Controller"], description = "API for all things to do with reshare settings ...")
 class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolMapping> {
 
-  BackgroundTaskService backgroundTaskService;
+    BackgroundTaskService backgroundTaskService;
 
-  ReshareSettingsController() {
-    super(TenantSymbolMapping);
-  }
+    ReshareSettingsController() {
+        super(TenantSymbolMapping);
+    }
 
     @ApiOperation(
         value = "Triggers the background tasks for the instance",
@@ -39,22 +40,26 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
     @ApiResponses([
         @ApiResponse(code = 200, message = "Success")
     ])
-  def worker() {
+    def worker() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "worker");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
-    def result = [result:'OK'];
-    String tenant = request.getHeader('X-OKAPI-TENANT')
-    log.info("worker call start tenant: ${tenant}");
-    try {
-      PatronRequest.withTransaction {
-        backgroundTaskService.performReshareTasks(tenant);
-      }
+        def result = [result:'OK'];
+        String tenant = request.getHeader('X-OKAPI-TENANT')
+        log.info("worker call start tenant: ${tenant}");
+        try {
+            PatronRequest.withTransaction {
+                backgroundTaskService.performReshareTasks(tenant);
+            }
+        } catch ( Exception e ) {
+            log.error("Problem in background task service",e);
+        } finally {
+            // Record how long it took
+            ContextLogging.duration();
+            log.debug(ContextLogging.MESSAGE_EXITING);
+        }
+        render result as JSON
     }
-    catch ( Exception e ) {
-      log.error("Problem in background task service",e);
-    }
-    finally {
-      log.info("worker call completed tenant: ${tenant}");
-    }
-    render result as JSON
-  }
 }

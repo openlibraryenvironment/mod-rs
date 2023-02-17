@@ -37,7 +37,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
         ContextLogging.setValue(ContextLogging.FIELD_OFFSET, params.offset);
         ContextLogging.setValue(ContextLogging.FIELD_PAGE, params.page);
         ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
-        log.debug("Entering index");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Closure definition can be found at https://gorm.grails.org/latest/hibernate/manual/#criteria
         respond doTheLookup(resource, {
@@ -50,7 +50,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting index");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @Transactional
@@ -79,7 +79,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
-        log.debug("Entering delete");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         T instance = queryForResource(params.id)
 
@@ -106,6 +106,6 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
 
         // Record how long it took
         ContextLogging.duration();
-        log.debug("Exiting delete");
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }
