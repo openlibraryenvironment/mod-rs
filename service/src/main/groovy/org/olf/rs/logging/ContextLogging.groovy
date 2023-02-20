@@ -34,6 +34,7 @@ public class ContextLogging extends MDC {
     static public final String FIELD_STATISTICS_REQUIRED = "statisticsRequired";
     static public final String FIELD_TENANT              = "tenant";
     static public final String FIELD_TERM                = "term";
+    static public final String FIELD_TIMER               = "timer";
     static public final String FIELD_XML                 = "xml";
 
     static public final String ACTION_CAN_CREATE_REQUEST       = "canCreateRequest";
@@ -78,7 +79,10 @@ public class ContextLogging extends MDC {
      */
     static public void setValue(String field, Object value) {
         // Only add it to the MDC if the value is not null
-        if (value != null) {
+        if (value == null) {
+            // Remove the existing value if there is one
+            remove(field);
+        } else {
             // Add it to the MDC
             put(field, value.toString());
         }

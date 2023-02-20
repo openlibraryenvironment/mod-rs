@@ -84,6 +84,8 @@ public class BackgroundTaskService {
                 timers.each { timer ->
                     try {
                         ContextLogging.setValue(ContextLogging.FIELD_ID, timer.id);
+                        ContextLogging.setValue(ContextLogging.FIELD_TIMER, timer.taskCode);
+                        ContextLogging.setValue(ContextLogging.FIELD_JSON, timer.taskConfig);
                         log.debug("** Timer task firing....");
 
                         TimeZone tz;
@@ -105,6 +107,9 @@ public class BackgroundTaskService {
                         } else {
                             runTimer(timer, tenant)
                         };
+
+                        // The timer has completed its work
+                        log.debug("** Timer task completed");
 
                         String rule_to_parse = timer.rrule.startsWith('RRULE:') ? timer.rrule.substring(6) : timer.rrule;
 
