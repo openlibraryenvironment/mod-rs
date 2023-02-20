@@ -73,7 +73,7 @@ public class ReshareApplicationEventHandlerService {
 		// Ignore anything without an event
 		if (eventData?.event) {
             ContextLogging.startTime();
-            ContextLogging.setValue(ContextLogging.FIELD_ACTION, "handleApplicationEvent");
+            ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_APPLICATION_EVENT);
             ContextLogging.setValue(ContextLogging.FIELD_EVENT, eventData.event);
             ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
             ContextLogging.setValue(ContextLogging.FIELD_TENANT, eventData.tenant?.replace("_mod_rs", ""));
@@ -187,7 +187,7 @@ public class ReshareApplicationEventHandlerService {
      */
     def handleRequestMessage(Map eventData) {
         ContextLogging.startTime();
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "handleRequestMessage");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_REQUEST_MESSAGE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 

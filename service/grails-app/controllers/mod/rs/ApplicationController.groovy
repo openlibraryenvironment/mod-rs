@@ -1,5 +1,7 @@
 package mod.rs
 
+import org.olf.rs.logging.ContextLogging;
+
 import grails.core.GrailsApplication;
 import grails.plugins.GrailsPluginManager;
 import grails.plugins.PluginManagerAware;
@@ -22,6 +24,14 @@ class ApplicationController implements PluginManagerAware {
         @ApiResponse(code = 200, message = "Success")
     ])
     def index() {
-        [grailsApplication: grailsApplication, pluginManager: pluginManager]
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_INDEX);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
+        render view: "index", model: [grailsApplication: grailsApplication, pluginManager: pluginManager]
+
+        // Record how long it took and the request id
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

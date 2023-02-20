@@ -1,5 +1,7 @@
 package mod.rs
 
+import org.olf.rs.logging.ContextLogging;
+
 import com.k_int.web.toolkit.settings.AppSetting;
 
 import grails.gorm.transactions.Transactional;
@@ -14,6 +16,8 @@ import io.swagger.annotations.ApiResponses;
 class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
 
     static responseFormats = ['json', 'xml'];
+
+    private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
 
     SettingController() {
         super(AppSetting);
@@ -105,6 +109,11 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         )
     ])
     def index(Integer max) {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_APP_SETTING);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_SEARCH);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         // Use gorm criteria builder to always add your custom filter....
         Closure gormFilterClosure = {
             or {
@@ -124,5 +133,9 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
 
         // Now we can perform the lookup
         respond doTheLookup(gormFilterClosure);
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

@@ -225,7 +225,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   @CompileStatic(SKIP)
   public synchronized void processDirectoryUpdate(Map<String, ?> data) {
     ContextLogging.startTime();
-    ContextLogging.setValue(ContextLogging.FIELD_ACTION, "processDirectoryUpdate");
+    ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_PROCESS_DIRECTORY_UPDATE);
     ContextLogging.setValue(ContextLogging.FIELD_JSON, data);
     ContextLogging.setValue(ContextLogging.FIELD_TENANT, data?.tenant);
     log.debug(ContextLogging.MESSAGE_ENTERING);

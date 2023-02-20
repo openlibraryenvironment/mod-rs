@@ -1,6 +1,7 @@
 package mod.rs;
 
 import org.grails.web.json.JSONArray;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.StateModelService;
 
@@ -20,6 +21,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/stateModel", tags = ["State Model Controller"], description = "StateModel Api")
 class StateModelController extends OkapiTenantAwareController<StateModel>  {
+
+    private static final String RESOURCE_STATE_MODEL = StateModel.getSimpleName();
 
     StateModelService stateModelService;
 
@@ -51,6 +54,10 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
         )
     ])
 	def export() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_STATE_MODEL);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_EXPORT);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
 		Map result = [ : ]
         result.stateModels = [ ];
@@ -87,6 +94,10 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
 
         // Just return the result as json
 		render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -119,6 +130,10 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
 }''')
     ])
     def ingest() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_STATE_MODEL);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_IMPORT);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Define our result object
         def result = [ : ];
@@ -175,6 +190,10 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
 
         // Just return the result as json
         render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**

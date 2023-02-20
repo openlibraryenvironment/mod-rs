@@ -40,7 +40,7 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "create");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_CREATE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
@@ -83,7 +83,7 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "update");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_UPDATE);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
         log.debug(ContextLogging.MESSAGE_ENTERING);
@@ -118,7 +118,7 @@ class OkapiTenantAwareSwaggerController<T> extends OkapiTenantAwareSwaggerGetCon
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_DELETE);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 

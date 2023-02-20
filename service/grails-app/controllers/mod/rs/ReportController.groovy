@@ -4,6 +4,7 @@ import org.olf.rs.BatchService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.ReportCreateUpdateResult;
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.reporting.Report;
 import org.olf.rs.reporting.ReportService;
 
@@ -23,6 +24,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/report", tags = ["Report Controller"], description = "Report Api")
 class ReportController extends OkapiTenantAwareController<Report>  {
+
+    private static final String RESOURCE_REPORT = Report.getSimpleName();
 
     BatchService batchService;
     SettingsService settingsService;
@@ -113,6 +116,11 @@ class ReportController extends OkapiTenantAwareController<Report>  {
         )
     ])
     def createUpdate() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_REPORT);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_CREATE_UPDATE);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         // Need to convert the parameter isSingleRecord to a boolean first
         boolean isSingleRecord = params.isSingleRecord ? params.isSingleRecord.toBoolean() : false;
 
@@ -130,6 +138,10 @@ class ReportController extends OkapiTenantAwareController<Report>  {
 
         // Render the result as json
         render result as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @ApiOperation(
@@ -160,6 +172,11 @@ class ReportController extends OkapiTenantAwareController<Report>  {
         )
     ])
     def generatePicklist() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_REPORT);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_GENERATE_PICK_LIST);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         List requestIdentifiers = null;
 
         // Do we have a batch id
@@ -185,6 +202,10 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             // Now generate the report, this does the render
             generateReport(reportService.getPullSlipReportId(), requestIdentifiers, reportService.getPullSlipLogoId(), ReportService.pullSlipDefaultReport);
         }
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     @ApiOperation(
@@ -215,6 +236,11 @@ class ReportController extends OkapiTenantAwareController<Report>  {
         )
     ])
     def execute() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_REPORT);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_EXECUTE);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         List ids;
         if (params.id == null) {
             ids = new ArrayList();
@@ -228,6 +254,10 @@ class ReportController extends OkapiTenantAwareController<Report>  {
 
         // Now generate the report, this performs the render
         generateReport(params.reportId, ids);
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
