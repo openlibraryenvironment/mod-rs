@@ -2,6 +2,7 @@ package mod.rs
 
 import org.olf.rs.Counter;
 import org.olf.rs.StatisticsService;
+import org.olf.rs.logging.ContextLogging;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
@@ -28,6 +29,9 @@ class StatisticsController {
         @ApiResponse(code = 200, message = "Success")
     ])
     def index() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_INDEX);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         def result = [
             asAt: new Date(),
@@ -36,5 +40,9 @@ class StatisticsController {
         ];
 
         render result as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

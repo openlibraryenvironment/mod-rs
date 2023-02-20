@@ -2,6 +2,8 @@ package mod.rs;
 
 // import com.k_int.web.toolkit.ConfigController;
 
+import org.olf.rs.logging.ContextLogging;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -107,7 +109,15 @@ traits:
         @ApiResponse(code = 200, message = "Success")
     ])
     def raml() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_RAML);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         // yaml can be application/x-yaml or
         render ( text: raml_text )
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

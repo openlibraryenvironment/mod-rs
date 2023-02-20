@@ -36,6 +36,7 @@ appender('STDOUT', ConsoleAppender) {
                     'id=%X{id}, ' +
                     'hrid=%X{hrid}, ' +
                     'json=%X{json}, ' +
+                    'xml=%X{xml}, ' +
                     'requestAction=%X{requestAction}, ' +
                     'slug=%X{slug}, ' +
                     'term=%X{term}, ' +

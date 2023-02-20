@@ -5,6 +5,7 @@ import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.StatisticsService;
+import org.olf.rs.logging.ContextLogging;
 
 import grails.converters.JSON;
 import grails.core.GrailsApplication;
@@ -41,6 +42,9 @@ class ExternalApiController {
         @ApiResponse(code = 200, message = "Success")
     ])
   def statistics() {
+    ContextLogging.startTime();
+    ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_STATISTICS);
+    log.debug(ContextLogging.MESSAGE_ENTERING);
 
     Map result=[:]
 
@@ -58,6 +62,10 @@ class ExternalApiController {
     }
 
     render result as JSON
+
+    // Record how long it took
+    ContextLogging.duration();
+    log.debug(ContextLogging.MESSAGE_EXITING);
   }
 
     @ApiOperation(
@@ -81,7 +89,10 @@ class ExternalApiController {
         )
     ])
   def iso18626() {
-    log.debug("externalApiController::iso18626(${params})");
+    ContextLogging.startTime();
+    ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_ISO18626);
+    ContextLogging.setValue(ContextLogging.FIELD_XML, request.XML);
+    log.debug(ContextLogging.MESSAGE_ENTERING);
 
     try {
       if ( request.XML != null ) {
@@ -163,10 +174,15 @@ class ExternalApiController {
     finally {
       log.debug("ExternalApiController::iso18626 exiting cleanly");
     }
+
+    // Record how long it took
+    ContextLogging.duration();
+    log.debug(ContextLogging.MESSAGE_EXITING);
   }
 
   // ToDo this method is only used for logging purposes--consider removal
   private String getSymbolFor(path) {
+
     String result = null;
     if ( path.agencyIdType != null && path.agencyIdValue != null ) {
       result = "${path.agencyIdType.toString()}:${path.agencyIdValue.toString()}".toString()
@@ -188,10 +204,18 @@ class ExternalApiController {
         @ApiResponse(code = 200, message = "Success")
     ])
   def statusReport() {
+    ContextLogging.startTime();
+    ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_STATUS_REPORT);
+    log.debug(ContextLogging.MESSAGE_ENTERING);
+
     Map result = ['summary':[]]
     PatronRequest.executeQuery('select pr.state.code, count(*) from PatronRequest as pr group by pr.state.code').each { sg ->
       result.summary.add(['state':sg[0], 'count':sg[1]]);
     }
     render result as JSON
+
+    // Record how long it took
+    ContextLogging.duration();
+    log.debug(ContextLogging.MESSAGE_EXITING);
   }
 }

@@ -5,6 +5,7 @@ import org.olf.rs.files.FileDefinitionCreateResult;
 import org.olf.rs.files.FileFetchResult;
 import org.olf.rs.files.FileService;
 import org.olf.rs.files.FileType;
+import org.olf.rs.logging.ContextLogging;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
@@ -20,6 +21,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/fileDefinition", tags = ["FileDefinition Controller"], description = "FileDefinition Api")
 class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDefinition>  {
+
+    private static final String RESOURCE_FILE_DEFINITION = FileDefinition.getSimpleName();
 
     /** The service that handles the storage and retrieval of files */
     FileService fileService;
@@ -66,6 +69,10 @@ class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDef
         )
     ])
     def fileUpload() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_FILE_DEFINITION);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_FILE_UPLOAD);
+
         FileDefinitionCreateResult result = null;
         def file = params.file;
         if (params.fileType) {
@@ -84,6 +91,10 @@ class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDef
         }
         Map jsonResult = [ id : result.fileDefinition?.id, error : result.error ];
         render jsonResult as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
     /**
@@ -124,6 +135,10 @@ class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDef
         )
     ])
     def fileDownload() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_FILE_DEFINITION);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_FILE_DOWNLOAD);
+
         String fileId = params.fileId;
         FileFetchResult result = fileService.fetch(fileId);
         if (result.inputStream != null) {
@@ -134,5 +149,9 @@ class FileDefinitionController extends OkapiTenantAwareSwaggerController<FileDef
             Map renderResult = [ error: result.error ];
             render renderResult as JSON, status: 404, contentType: "application/json";
         }
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

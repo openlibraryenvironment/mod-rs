@@ -27,7 +27,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "search");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_SEARCH);
         ContextLogging.setValue(ContextLogging.FIELD_TERM, params.term);
         ContextLogging.setValue(ContextLogging.FIELD_FIELDS_TO_MATCH, params.match);
         ContextLogging.setValue(ContextLogging.FIELD_FILTERS, params.filters);
@@ -77,7 +77,7 @@ class HasHiddenRecordController<T> extends OkapiTenantAwareSwaggerController<T> 
     def delete() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "delete");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_DELETE);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 

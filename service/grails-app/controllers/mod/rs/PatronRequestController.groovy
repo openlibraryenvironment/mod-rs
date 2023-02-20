@@ -76,7 +76,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "performAction");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_PERFORM_ACTION);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
@@ -109,7 +109,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     def update() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "update");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_UPDATE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.id);
         log.debug(ContextLogging.MESSAGE_ENTERING);
@@ -183,7 +183,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 	def validActions() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "validActions");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_VALID_ACTIONS);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.patronRequestId);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
@@ -235,7 +235,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     def manualCloseStates() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "manualCloseStates");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_MANUAL_CLOSE_STATES);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.patronRequestId);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
@@ -304,7 +304,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     def generatePickListBatch() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "generatePickListBatch");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_GENERATE_PICK_LIST_BATCH);
         ContextLogging.setValue(ContextLogging.FIELD_TERM, params.term);
         ContextLogging.setValue(ContextLogging.FIELD_FIELDS_TO_MATCH, params.match);
         ContextLogging.setValue(ContextLogging.FIELD_FILTERS, params.filters);
@@ -366,7 +366,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     def markBatchAsPrinted() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "markBatchAsPrinted");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_MARK_BATCH_AS_PRINTED);
         ContextLogging.setValue(ContextLogging.FIELD_ID, params.batchId);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
@@ -938,7 +938,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     def openURL() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "openURL");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_OPEN_URL);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Maps an OpenURL onto a request, originally taken from here https://github.com/openlibraryenvironment/listener-openurl/blob/master/src/ReshareRequest.js

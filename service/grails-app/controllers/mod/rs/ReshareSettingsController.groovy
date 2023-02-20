@@ -43,7 +43,7 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
     def worker() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, resource.getSimpleName());
-        ContextLogging.setValue(ContextLogging.FIELD_ACTION, "worker");
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_WORKER);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
         def result = [result:'OK'];

@@ -2,6 +2,7 @@ package mod.rs;
 
 import org.olf.rs.Patron;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.logging.ContextLogging;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
@@ -17,6 +18,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs/patron", tags = ["Patron Controller"], description = "API for all things to do with patrons")
 class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
+
+    private static final String RESOURCE_PATRON = Patron.getSimpleName();
 
     PatronController() {
         super(Patron)
@@ -50,6 +53,11 @@ class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
         )
     ])
     def canCreateRequest() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_CAN_CREATE_REQUEST);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
         Map result = [ : ];
         Patron.withTransaction { status ->
           // We do need to be supplied a patronId
@@ -66,5 +74,9 @@ class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
           }
         }
         render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

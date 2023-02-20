@@ -1,5 +1,6 @@
 package mod.rs;
 
+import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.AvailableAction;
@@ -24,6 +25,8 @@ import io.swagger.annotations.ApiResponses;
 @CurrentTenant
 @Api(value = "/rs", tags = ["Available Action Controller"], description = "AvailableAction Api")
 class AvailableActionController extends OkapiTenantAwareController<AvailableAction>  {
+
+    private static final String RESOURCE_AVAILABLE_ACTION = AvailableAction.getSimpleName();
 
     GraphVizService graphVizService;
     StatusService statusService;
@@ -64,6 +67,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
         )
     ])
 	def fromStates() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_AVAILABLE_ACTION);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_FROM_STATES);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
   		def result = [ : ]
 		if (request.method == 'GET') {
@@ -76,6 +83,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 			request.message("Only GET requests are supported");
 		}
 		render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
 	/**
@@ -118,6 +129,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
         )
     ])
 	def toStates() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_AVAILABLE_ACTION);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_TO_STATES);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
 		def result = [ : ]
 		if (request.method == 'GET') {
@@ -143,6 +158,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 			request.message("Only GET requests are supported");
 		}
 		render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 
 	/**
@@ -202,6 +221,10 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
         )
     ])
 	def createGraph() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_AVAILABLE_ACTION);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_CREATE_GRAPH);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
 		// Remove messagesAllSeen, messageSeen and message as they occur for all states
 		// We also only want to keep those for the state model we are interested in
@@ -245,5 +268,9 @@ class AvailableActionController extends OkapiTenantAwareController<AvailableActi
 		outputStream.flush();
 		response.status = 200;
 		response.setContentType("text/plain");
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
 	}
 }
