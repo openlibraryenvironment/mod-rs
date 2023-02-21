@@ -1,7 +1,6 @@
 package mod.rs
 
 import org.olf.rs.BackgroundTaskService;
-import org.olf.rs.PatronRequest;
 import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.shared.TenantSymbolMapping;
 
@@ -50,16 +49,15 @@ class ReshareSettingsController extends OkapiTenantAwareController<TenantSymbolM
         String tenant = request.getHeader('X-OKAPI-TENANT')
         log.info("worker call start tenant: ${tenant}");
         try {
-            PatronRequest.withTransaction {
-                backgroundTaskService.performReshareTasks(tenant);
-            }
+            // Just perform the background tasks, we do not need to start a new transaction as it grabs a transaction when needed
+            backgroundTaskService.performReshareTasks(tenant);
         } catch ( Exception e ) {
             log.error("Problem in background task service",e);
-        } finally {
-            // Record how long it took
-            ContextLogging.duration();
-            log.debug(ContextLogging.MESSAGE_EXITING);
         }
         render result as JSON
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }

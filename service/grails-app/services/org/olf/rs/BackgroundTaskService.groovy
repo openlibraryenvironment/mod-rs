@@ -21,7 +21,6 @@ public class BackgroundTaskService {
 
     LockService lockService;
     OkapiSettingsService okapiSettingsService;
-    PatronNoticeService patronNoticeService;
 
     // Holds the services that we have discovered that perform tasks for the timers
     private static Map serviceTimers = [ : ];
@@ -51,25 +50,24 @@ public class BackgroundTaskService {
         ContextLogging.remove(ContextLogging.FIELD_MEMORY_TOTAL_FREE);
         ContextLogging.remove(ContextLogging.FIELD_JVM_UPTIME);
 
-        // We do not want to do any processing if we are already performing the background processing
-        // We have a distributed lock for when there are multiple mod-rs processes running
-        if (!lockService.performWorkIfLockObtained(tenant, LockIdentifier.BACKGROUND_TASKS, 0) {
-            doBackgroundTasks(tenant);
-        }) {
-            // Failed to obtain the lock
-            log.info("Skiping background tasks as unable to obtain lock");
+        // We need a transaction in order to obtain the lock
+        PatronRequest.withTransaction {
+            // We do not want to do any processing if we are already performing the background processing
+            // We have a distributed lock for when there are multiple mod-rs processes running
+            if (!lockService.performWorkIfLockObtained(tenant, LockIdentifier.BACKGROUND_TASKS, 0) {
+                doBackgroundTasks(tenant);
+            }) {
+                // Failed to obtain the lock
+                log.info("Skiping background tasks as unable to obtain lock");
+            }
         }
 
         log.debug(ContextLogging.MESSAGE_EXITING + " performReshareTasks");
     }
 
     private void doBackgroundTasks(String tenant) {
-        // Start off with the patron notices, should move this into a timer ...
-        if ( grailsApplication.config?.reshare?.patronNoticesEnabled == true ) {
-            patronNoticeService.processQueue()
-        }
 
-        // Now we move onto the timers
+        // Everything should now be in a timer
         try {
             // Process any timers for sending pull slip notification emails
             // Refactor - lastExcecution now contains the next scheduled execution or 0
