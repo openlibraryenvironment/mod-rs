@@ -32,6 +32,7 @@ appender('STDOUT', ConsoleAppender) {
                     'MDC:[tenant=%X{tenant}, ' +
                     'action=%X{action}, ' +
                     'event=%X{event}, ' +
+                    'timer=%X{timer}, ' +
                     'resource=%X{resource}, ' +
                     'id=%X{id}, ' +
                     'hrid=%X{hrid}, ' +

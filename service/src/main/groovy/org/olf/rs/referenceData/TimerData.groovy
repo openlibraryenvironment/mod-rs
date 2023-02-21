@@ -47,6 +47,14 @@ public class TimerData {
             true,
             true
         );
+
+        // Check for patron notices
+        Timer.ensure(
+            "ProcessPatronNotices",
+            "Process patron notices",
+            "FREQ=MINUTELY;INTERVAL=10",
+            "ProcessPatronNotices"
+        );
 	}
 
 	public static void loadAll() {
