@@ -97,6 +97,9 @@ class UrlMappings {
         "/favicon-16x16.png"(uri: '/static/swaggerUI/4.14.0/favicon-16x16.png')
     }
 
+    // For dynamically changing the logging level
+    '/rs/logging'(controller:'logging', action:'index')
+
     "500"(view: '/error')
     "404"(view: '/notFound')
 

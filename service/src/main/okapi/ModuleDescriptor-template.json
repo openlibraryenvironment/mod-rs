@@ -214,6 +214,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/logging*",
+          "permissionsRequired": [ "rs.logging" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/directoryEntry*",
           "permissionsRequired": [ "rs.directoryentry.get" ]
         },
@@ -918,6 +923,12 @@
       ]
     },
     {
+      "permissionName": "rs.logging",
+      "displayName": "logging",
+      "description": "logging",
+      "visible": false
+    }, 
+    {
       "permissionName": "rs.report.admin",
       "displayName": "Can administer reports",
       "description": "Can administer reports",
@@ -979,7 +990,8 @@
         "rs.report.admin",
 		"rs.report.execute",
         "rs.timers",
-        "rs.shelvingLocations"
+        "rs.shelvingLocations",
+        "rs.logging"
       ]
     },
     {
