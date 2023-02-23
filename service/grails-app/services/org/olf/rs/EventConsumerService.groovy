@@ -3,12 +3,12 @@ package org.olf.rs
 import static groovy.transform.TypeCheckingMode.SKIP
 
 import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
 import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.utils.TopicList;
 
 import com.k_int.okapi.OkapiTenantResolver
 import com.k_int.web.toolkit.async.WithPromises
@@ -49,9 +49,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   private KafkaConsumer consumer = null
   
   private static volatile boolean running = true  
-  private static volatile boolean topic_list_updated = true
-  
-  private final Set<String> topic_list = ConcurrentHashMap.newKeySet()
+  private static final TopicList topicList = new TopicList();
 
   private String version = 'development'
   
@@ -105,21 +103,18 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   
   @Subscriber('okapi:tenant_datasource_added')
   public void addTenantSubscriptions( final String tenantSchema ) {
-    topic_list.addAll( getTopicsForTenantSchema( tenantSchema ) )
-    topic_list_updated = true
+    topicList.addAll( getTopicsForTenantSchema( tenantSchema ) )
   }
   
   @Subscriber('okapi:tenant_datasource_removed')
   public void removeTenantSubscriptions( final String tenantSchema ) {
-    topic_list.removeAll( getTopicsForTenantSchema( tenantSchema ) )
-    topic_list_updated = true
+    topicList.removeAll( getTopicsForTenantSchema( tenantSchema ) )
   }
   
   protected void adjustSubscriptions() {
-    if (topic_list_updated) {
-      consumer.subscribe(topic_list)
-      log.info("this instance of mod-rs (${version}) is now listening out for topics : ${topic_list}")
-      topic_list_updated = false
+    topicList.process() { List<String> topics ->
+      consumer.subscribe(topics);
+      log.info("this instance of mod-rs (${version}) is now listening out for topics : ${topics}")
     }
   }
 
