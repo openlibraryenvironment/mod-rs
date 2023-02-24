@@ -5,7 +5,7 @@ import org.olf.rs.circ.client.CirculationClient
 
 import com.k_int.web.toolkit.settings.AppSetting
 
-public class NCSUHostLMSService extends SymphonyHostLMSService {
+public class NcsuHostLMSService extends SymphonyHostLMSService {
 
   @Override
   public CirculationClient getCirculationClient(String address) {
