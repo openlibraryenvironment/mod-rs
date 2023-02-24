@@ -10,6 +10,7 @@ import org.olf.rs.EmailService
 import org.olf.rs.EventPublicationService
 import org.olf.rs.HostLMSLocation
 import org.olf.rs.HostLMSLocationService
+import org.olf.rs.HostLMSShelvingLocationService
 import org.olf.rs.HostLMSService
 import org.olf.rs.HostLMSShelvingLocation
 import org.olf.rs.PatronRequest
@@ -94,6 +95,7 @@ class RSLifecycleSpec extends TestBase {
   EmailService emailService
   HostLMSService hostLMSService
   HostLMSLocationService hostLMSLocationService
+  HostLMSShelvingLocationService hostLMSShelvingLocationService
   StaticRouterService staticRouterService
   Z3950Service z3950Service
 
@@ -511,8 +513,10 @@ class RSLifecycleSpec extends TestBase {
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
         // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
-        def nonlending = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve','');
-        nonlending.setSupplyPreference(-1);
+        def nonlendingVoyager = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve','');
+        nonlendingVoyager.setSupplyPreference(-1);
+
+        def nonlendingFolioShelvingLocation = hostLMSShelvingLocationService.ensureExists('Olin Reserve','', -1);
 
         def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
@@ -527,6 +531,8 @@ class RSLifecycleSpec extends TestBase {
       result?.viaId?.location == location;
       result?.viaPrefix?.location == location;
       result?.location?.code == location;
+      result?.viaId?.shelvingLocation == shelvingLocation;
+      result?.viaPrefix?.shelvingLocation == shelvingLocation;
       result?.shelvingLocation?.code == shelvingLocation;
 
     where:
@@ -537,6 +543,7 @@ class RSLifecycleSpec extends TestBase {
       'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
       'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
       'RSInstThree' | 'voyager' | 'voyager-temp.xml' | null | null | _
+      'RSInstThree' | 'folio' | 'folio-not-requestable.xml' | null | null | _
   }
 
     /**

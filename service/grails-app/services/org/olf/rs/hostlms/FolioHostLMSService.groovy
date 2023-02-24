@@ -84,7 +84,7 @@ public class FolioHostLMSService extends BaseHostLMSService {
                   reason: reason,
                   location: loc,
                   shelvingLocation: hld?.shelvingLocation?.text()?.trim() ?: null,
-                  temporaryLocation: circ?.temporaryLocation?.text()?.trim() ?: null,
+                  temporaryShelvingLocation: circ?.temporaryLocation?.text()?.trim() ?: null,
                   itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
                   itemId: circ?.itemId?.text()?.trim() ?: null,
                   callNumber: hld?.callNumber?.text()?.trim() ?: null)
