@@ -190,7 +190,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         }
       }
 
-      // create a HostLMSShelvingLocation in respect of shelvingLocation
+      // find or create a HostLMSShelvingLocation in respect of shelvingLocation
       if ( o?.shelvingLocation != null ) {
         sl = hostLMSShelvingLocationService.ensureExists(o.shelvingLocation, o.shelvingLocation);
       }
@@ -204,6 +204,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       // if temporary shelving location is present, use it in lieu of shelving location for determining availability
       if ( o?.temporaryShelvingLocation != null ) {
+        log.debug("Using temporaryShelvingLocation to calculate shelving location preference");
         sl = hostLMSShelvingLocationService.ensureExists(o.temporaryShelvingLocation, o.temporaryShelvingLocation);
       }
 
@@ -229,8 +230,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
       // Fall back to the preference for the shelving location when no sls preference is defined
       // ...can't just chain ?: here because we want an sls pref of 0 to take precedence
+      log.debug("Option ${o} using shelving location of ${sl}");
       o.shelvingPreference = sls?.supplyPreference != null ? sls?.supplyPreference : (sl?.supplyPreference ?: 0);
-      log.debug("Shelving preference set to ${o.shelvingPreference}");
+      log.debug("Shelving preference for ${o} set to ${o.shelvingPreference}");
     }
 
     List<ItemLocation> sorted_options = options.findAll { it.preference >= 0 && it.shelvingPreference >= 0 }.sort {
