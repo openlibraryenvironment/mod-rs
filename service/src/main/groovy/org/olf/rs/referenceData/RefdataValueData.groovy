@@ -77,6 +77,7 @@ public class RefdataValueData {
     public static final String HOST_LMS_INTEGRATION_ADAPTER_TLC       = 'TLC';
     public static final String HOST_LMS_INTEGRATION_ADAPTER_VOYAGER   = 'Voyager';
     public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS       = 'WMS';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS2       = 'WMS2';
     public static final String HOST_LMS_INTEGRATION_ADAPTER_HORIZON   = 'Horizon';
 
     // Loan Policy
@@ -191,6 +192,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_TLC);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_VOYAGER);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_WMS);
+            RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_WMS2);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_HORIZON);
 
 
