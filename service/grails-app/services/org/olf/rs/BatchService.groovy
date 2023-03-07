@@ -216,6 +216,9 @@ public class BatchService {
                 batch.context = batch.CONTEXT_PULL_SLIP;
                 batch.description = description + dateTime;
 
+                // We just look at the first request to see if it is a requester batch or not
+                batch.isRequester = patronRequests[0].isRequester;
+
                 // Add each request
                 patronRequests.each { PatronRequest patronRequest ->
                     batch.addToPatronRequests(patronRequest);
