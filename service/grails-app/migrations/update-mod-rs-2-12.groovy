@@ -154,4 +154,12 @@ databaseChangeLog = {
 
         dropColumn(columnName: "pr_pull_slip_batch", tableName: "patron_request")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1678199897725") {
+        addColumn(tableName: "batch") {
+            column(defaultValueComputed: "true", name: "b_is_requester", type: "boolean") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }
