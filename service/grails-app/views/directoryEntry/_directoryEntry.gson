@@ -4,30 +4,30 @@ import org.olf.okapi.modules.directory.ServiceAccount
 
 @Field DirectoryEntry directoryEntry
 
-final def toExpand = (param.full == "true") ? [ 'customProperties',
-                                                'tags',
-                                                'status',
-                                                'type',
-                                                'symbols',
-                                                'announcements',
-                                                'addresses',
-                                                'units'] :
-                                              [ 'tags', 
-                   								'status', 
-                   								'addresses' ];
+final def toExpand = (params.full == "true") ? [ 'customProperties',
+                                                 'tags',
+                                                 'status',
+                                                 'type',
+                                                 'symbols',
+                                                 'announcements',
+                                                 'addresses',
+                                                 'units'] :
+                                               [ 'tags', 
+                   								 'status', 
+                   								 'addresses' ];
                    								
-final def toExclude = (param.full == "true") ? [ 'parent',
-												 'members',
-												 'services' ] :
-											   [ 'services', 
-							                     'customProperties', 
-							                     'parent', 
-							                     'symbols', 
-							                     'addresses', 
-							                     'announcements', 
-							                     'units',
-							                     'friends',
-							                     'members' ];
+final def toExclude = (params.full == "true") ? [ 'parent',
+												  'members',
+												  'services' ] :
+											    [ 'services', 
+							                      'customProperties', 
+							                      'parent', 
+							                      'symbols', 
+							                      'addresses', 
+							                      'announcements', 
+							                      'units',
+							                      'friends',
+							                      'members' ];
                    								
 json g.render(directoryEntry, [
         expand: toExpand, 
