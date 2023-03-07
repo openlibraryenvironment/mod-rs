@@ -31,6 +31,7 @@ class UrlMappings {
     "/rs/report/execute" (controller: "report", action: "execute")
     "/rs/report/generatePicklist" (controller: "report", action: "generatePicklist")
 
+    "/rs/fileDefinition" (resources: 'fileDefinition')
     "/rs/fileDefinition/fileUpload" (controller: "fileDefinition", action: "fileUpload")
     "/rs/fileDefinition/fileDownload/$fileId" (controller: "fileDefinition", action: "fileDownload")
 
