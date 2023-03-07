@@ -1,0 +1,5 @@
+import groovy.transform.*
+import org.olf.okapi.modules.directory.Service
+
+@Field Service service
+json g.render(service, [expand: [ 'businessFunction', 'customProperties', 'tags', 'type' ]])

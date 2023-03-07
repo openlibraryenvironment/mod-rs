@@ -3,24 +3,36 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.ServiceAccount
 
 @Field DirectoryEntry directoryEntry
+
+final def toExpand = (param.full == "true") ? [ 'customProperties',
+                                                'tags',
+                                                'status',
+                                                'type',
+                                                'symbols',
+                                                'announcements',
+                                                'addresses',
+                                                'units'] :
+                                              [ 'tags', 
+                   								'status', 
+                   								'addresses' ];
+                   								
+final def toExclude = (param.full == "true") ? [ 'parent',
+												 'members',
+												 'services' ] :
+											   [ 'services', 
+							                     'customProperties', 
+							                     'parent', 
+							                     'symbols', 
+							                     'addresses', 
+							                     'announcements', 
+							                     'units',
+							                     'friends',
+							                     'members' ];
+                   								
 json g.render(directoryEntry, [
-        expand: [ 
-                  'tags', 
-                  'status', 
-                  'addresses' ], 
-        excludes:[ 
-                  'services', 
-                  'customProperties', 
-                  'parent', 
-                  'symbols', 
-                  'services', 
-                  'addresses', 
-                  'announcements', 
-                  'units',
-                  'friends',
-                  'members' ]]) {
-
-
+        expand: toExpand, 
+        excludes: toExclude ]) {
+        
   if ( directoryEntry.members ) {
     def memlist = directoryEntry.members?.collect {
       [
@@ -42,4 +54,10 @@ json g.render(directoryEntry, [
   tagSummary directoryEntry.getTagSummary()
   symbolSummary directoryEntry.getSymbolSummary()
   fullyQualifiedName directoryEntry.getFullyQualifiedName()
+  
+  // If it is the full listing output, then output the service directory     
+  if (params.full == "true") {
+    services g.render(template:"/serviceAccount/serviceAccount", collection: directoryEntry.services, var:'serviceAccount',
+      model:[excludes:['accountHolder'], expand:['service','customProperties']])
+  }
 }

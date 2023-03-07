@@ -2,4 +2,4 @@ import groovy.transform.*
 import org.olf.okapi.modules.directory.Symbol
 
 @Field Symbol symbol
-json g.render(symbol, [expand: [ 'owner' ], excludes: []])
+json g.render(symbol, [expand: [ ], excludes: [ 'owner' ]])
