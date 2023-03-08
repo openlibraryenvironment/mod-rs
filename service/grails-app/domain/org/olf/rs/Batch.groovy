@@ -18,6 +18,9 @@ class Batch implements MultiTenant<Batch> {
     /** When this batch was created */
     Date dateCreated
 
+    /** Is this a requester or responder batch */
+    boolean isRequester;
+
     static hasMany = [patronRequests : PatronRequest]
 
     static constraints = {
@@ -32,6 +35,7 @@ class Batch implements MultiTenant<Batch> {
            description column : 'b_description', length: 256
                context column : 'b_context', length: 32
            dateCreated column : 'b_date_created'
+           isRequester column : 'b_is_requester', defaultValue: '1'
         patronRequests column : 'bpr_batch_id', joinTable : 'batch_patron_request'
     }
 }
