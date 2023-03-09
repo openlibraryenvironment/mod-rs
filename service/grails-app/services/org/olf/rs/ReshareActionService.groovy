@@ -40,7 +40,6 @@ public class ReshareActionService {
     ProtocolMessageService protocolMessageService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     HostLMSService hostLMSService;
-    PatronNoticeService patronNoticeService;
     PatronStoreService patronStoreService;
     SettingsService settingsService;
 
