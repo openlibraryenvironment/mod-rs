@@ -88,6 +88,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
             // Add service information to Patron Request
             Map serviceInfo = eventData.serviceInfo;
             if (serviceInfo != null) {
+                if (serviceInfo.preferredFormat) {
+                    pr.itemFormat = pr.lookupItemFormat(serviceInfo.preferredFormat);
+                }
                 if (serviceInfo.serviceType) {
                     pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
                 }

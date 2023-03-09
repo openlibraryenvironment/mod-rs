@@ -612,6 +612,7 @@ and sa.service.businessFunction.value=:ill
     void makeServiceInfo(def del, eventData) {
     exec(del) {
       serviceInfo {
+        preferredFormat(eventData.serviceInfo.preferredFormat)
         serviceType(eventData.serviceInfo.serviceType)
         needBeforeDate(eventData.serviceInfo.needBeforeDate)
         serviceLevel(eventData.serviceInfo.serviceLevel)

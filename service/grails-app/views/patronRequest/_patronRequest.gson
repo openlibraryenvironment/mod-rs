@@ -9,6 +9,7 @@ final def toExpand = fullRecord ? [
   'state',
   'serviceType',
   'publicationType',
+  'itemFormat',
   'pickLocation',
   'pickShelvingLocation',
   'rota',
@@ -27,6 +28,7 @@ final def toExpand = fullRecord ? [
   'pickShelvingLocation',
   'resolvedSupplier',
   'serviceType',
+  'itemFormat',
   'state'
 ]
 

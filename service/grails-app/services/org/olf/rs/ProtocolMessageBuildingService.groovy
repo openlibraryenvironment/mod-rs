@@ -91,6 +91,7 @@ class ProtocolMessageBuildingService {
       placeOfPublication: req.placeOfPublication
     ]
     message.serviceInfo = [
+       preferredFormat: req.itemFormat?.value,
       //TODO the following fields are permitted here but not currently included:
       /*
        * RequestType

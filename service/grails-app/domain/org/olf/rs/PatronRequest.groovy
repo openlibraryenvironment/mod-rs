@@ -30,6 +30,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
+  @Defaults(['Printed', 'URL'])
+  @CategoryId(ProtocolReferenceDataValue.CATEGORY_ITEM_FORMAT)
+  ProtocolReferenceDataValue itemFormat
+
 
   // A string representing the institution of the requesting patron
   // resolvable in the directory.
@@ -270,6 +274,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     awaitingProtocolResponse (bindable: false)
     rotaPosition (nullable: true, bindable: false)
     publicationType (nullable: true)
+    itemFormat (nullable: true)
 
     title (nullable: true, blank : false, maxSize:255)
     author (nullable: true, blank : false)
@@ -378,6 +383,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     awaitingProtocolResponse column : 'pr_awaiting_protocol_response'
     rotaPosition column : 'pr_rota_position'
     publicationType column : 'pr_pub_type_fk'
+    itemFormat column : 'pr_item_format_fk'
 
     title column : 'pr_title'
     author column : 'pr_author'
