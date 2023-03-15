@@ -8,7 +8,6 @@ final def toExpand = (params.full == "true") ? [ 'customProperties',
                                                  'tags',
                                                  'status',
                                                  'type',
-                                                 'symbols',
                                                  'announcements',
                                                  'addresses',
                                                  'units'] :
@@ -18,7 +17,8 @@ final def toExpand = (params.full == "true") ? [ 'customProperties',
                    								
 final def toExclude = (params.full == "true") ? [ 'parent',
 												  'members',
-												  'services' ] :
+												  'services',
+												  'symbols' ] :
 											    [ 'services', 
 							                      'customProperties', 
 							                      'parent', 
