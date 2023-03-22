@@ -10,15 +10,17 @@ import org.olf.rs.EmailService
 import org.olf.rs.EventPublicationService
 import org.olf.rs.HostLMSLocation
 import org.olf.rs.HostLMSLocationService
-import org.olf.rs.HostLMSShelvingLocationService
 import org.olf.rs.HostLMSService
 import org.olf.rs.HostLMSShelvingLocation
+import org.olf.rs.HostLMSShelvingLocationService
 import org.olf.rs.PatronRequest
+import org.olf.rs.SettingsService;
 import org.olf.rs.Z3950Service
 import org.olf.rs.dynamic.DynamicGroovyService;
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.settings.ISettings
 import org.olf.rs.statemodel.Status;
 
 import grails.databinding.SimpleMapDataBindingSource
@@ -98,6 +100,7 @@ class RSLifecycleSpec extends TestBase {
   HostLMSShelvingLocationService hostLMSShelvingLocationService
   StaticRouterService staticRouterService
   Z3950Service z3950Service
+  SettingsService settingsService;
 
   // This method is declared in the HttpSpec
   def setupSpecWithSpring() {
@@ -509,7 +512,7 @@ class RSLifecycleSpec extends TestBase {
 
   void "test determineBestLocation for LMS adapters"() {
     when:"We mock z39 and run determineBestLocation"
-      z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
+      z3950Service.metaClass.query = { ISettings settings, String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
         // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
@@ -520,9 +523,9 @@ class RSLifecycleSpec extends TestBase {
 
         def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
-        result['viaId'] = actions.determineBestLocation(pr);
+        result['viaId'] = actions.determineBestLocation(settingsService, pr);
         pr = new PatronRequest(isbn: '123');
-        result['viaPrefix'] = actions.determineBestLocation(pr);
+        result['viaPrefix'] = actions.determineBestLocation(settingsService, pr);
         result['location'] = HostLMSLocation.findByCode(location);
         result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
       }
