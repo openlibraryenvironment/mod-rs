@@ -64,6 +64,11 @@ public class ContextLogging extends MDC {
     static public final String ACTION_SEARCH                   = "search";
     static public final String ACTION_STATISTICS               = "statistics";
     static public final String ACTION_STATUS_REPORT            = "statusReport";
+    static public final String ACTION_TEST_DETERMINE_BEST_LOC  = "testDetermineBestLocation";
+    static public final String ACTION_TEST_NCIP_ACCEPT_ITEM    = "testNCIPAcceptItem";
+    static public final String ACTION_TEST_NCIP_CHECK_IN       = "testNCIPCheckIn";
+    static public final String ACTION_TEST_NCIP_CHECK_OUT      = "testNCIPCheckOut";
+    static public final String ACTION_TEST_NCIP_VALIDATE       = "testNCIPValidate";
     static public final String ACTION_TO_STATES                = "toStates";
     static public final String ACTION_UPDATE                   = "update";
     static public final String ACTION_VALID_ACTIONS            = "validActions";

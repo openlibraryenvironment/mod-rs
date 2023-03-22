@@ -1,37 +1,18 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
-import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.HostLMSActions;
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.circ.client.LookupUser;
-import org.olf.rs.circ.client.CheckoutItem;
-import org.olf.rs.circ.client.CheckinItem;
-import org.olf.rs.circ.client.AcceptItem;
-
-import org.olf.rs.circ.client.NCIPClientWrapper
-
-import org.json.JSONObject;
-import org.json.JSONArray;
 import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.settings.ISettings;
 
 public class TlcHostLMSService extends BaseHostLMSService {
-
 
   @Override
   protected String getHoldingsQueryRecsyn() {
     return 'marcxml';
   }
 
-  public CirculationClient getCirculationClient(String address) {
+  public CirculationClient getCirculationClient(ISettings settings, String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP1"]).circulationClient;
   }
@@ -57,9 +38,6 @@ public class TlcHostLMSService extends BaseHostLMSService {
     return "tlc";
   }
 
-
-
-  
   @Override
   public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
     //<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
@@ -108,12 +86,10 @@ public class TlcHostLMSService extends BaseHostLMSService {
         } catch(Exception e) {
           log.debug("Unable to parse holdings (982): ${e.message}");
         }
-        
+
       }
     }
     log.debug("Tlc Host availability: ${availability_summary}")
     return availability_summary;
-
   }
-
 }

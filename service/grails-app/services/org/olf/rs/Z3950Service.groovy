@@ -3,16 +3,16 @@ package org.olf.rs;
 /**
  * Send a query to a Z39.50 system. Currently this abstraction likely only supports doing so if a proxy is configured.
  */
-import com.k_int.web.toolkit.settings.AppSetting;
-import groovyx.net.http.HttpBuilder
 import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.settings.ISettings;
+
+import groovyx.net.http.HttpBuilder;
 
 class Z3950Service {
-    def query(String query, int max = 3, String schema = null) {
-        def proxySetting = AppSetting.findByKey(SettingsData.SETTING_Z3950_PROXY_ADDRESS);
-        String z3950_proxy = proxySetting?.value ?: proxySetting.defValue;
+    def query(ISettings settings, String query, int max = 3, String schema = null) {
+        String z3950_proxy = settings.getSettingValue(SettingsData.SETTING_Z3950_PROXY_ADDRESS);
         if (!z3950_proxy) throw new Exception('Unable to query Z39.50, no proxy configured');
-        String z3950_server = AppSetting.findByKey(SettingsData.SETTING_Z3950_SERVER_ADDRESS)?.value;
+        String z3950_server = settings.getSettingValue(SettingsData.SETTING_Z3950_SERVER_ADDRESS);
         if (!z3950_server) throw new Exception('Unable to query Z39.50, no server configured');
 
         def z_response = HttpBuilder.configure {

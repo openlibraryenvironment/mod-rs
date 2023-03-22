@@ -3,7 +3,8 @@ package org.olf.rs.statemodel.events;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
-import org.olf.rs.SharedIndexService
+import org.olf.rs.SettingsService;
+import org.olf.rs.SharedIndexService;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
@@ -22,6 +23,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
     ReshareActionService reshareActionService;
+    SettingsService settingsService;
     SharedIndexService sharedIndexService;
 
     @Override
@@ -61,7 +63,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         log.debug('autoRespond....');
 
         // Use the hostLMSService to determine the best location to send a pull-slip to
-        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(request);
+        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(settingsService, request);
 
         log.debug("result of determineBestLocation = ${location}");
 

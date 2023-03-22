@@ -59,7 +59,7 @@ public class ReshareActionService {
     public Map lookupPatron(Map actionParams) {
         // The result object
         Map result = [callSuccess: false, patronValid: false ];
-        Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(actionParams.patronIdentifier);
+        Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(settingsService, actionParams.patronIdentifier);
         if (patronDetails != null) {
             if (patronDetails.result) {
                 result.callSuccess = true;

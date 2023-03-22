@@ -100,6 +100,13 @@ class UrlMappings {
     // For dynamically changing the logging level
     '/rs/logging'(controller:'logging', action:'index')
 
+    // For testing the host lms
+    '/rs/testHostLMS/acceptItem'(controller: 'testHostLMS', action: 'acceptItem')
+    '/rs/testHostLMS/checkIn'(controller: 'testHostLMS', action: 'checkIn')
+    '/rs/testHostLMS/checkOut'(controller: 'testHostLMS', action: 'checkOut')
+    '/rs/testHostLMS/determineBestLocation'(controller: 'testHostLMS', action: 'determineBestLocation')
+    '/rs/testHostLMS/validate'(controller: 'testHostLMS', action: 'validate')
+
     "500"(view: '/error')
     "404"(view: '/notFound')
 

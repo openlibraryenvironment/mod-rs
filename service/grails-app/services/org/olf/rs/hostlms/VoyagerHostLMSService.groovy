@@ -1,33 +1,14 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
 import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.HostLMSActions;
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.circ.client.LookupUser;
-import org.olf.rs.circ.client.CheckoutItem;
-import org.olf.rs.circ.client.CheckinItem;
-import org.olf.rs.circ.client.AcceptItem;
-
-import org.olf.rs.circ.client.NCIPClientWrapper
-
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.olf.rs.circ.client.CirculationClient;
 
 import java.text.Normalizer;
 
-import java.net.URI;
-
-
+import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.settings.ISettings;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -35,7 +16,7 @@ import java.net.URI;
  */
 public class VoyagerHostLMSService extends BaseHostLMSService {
 
-  public CirculationClient getCirculationClient(String address) {
+  public CirculationClient getCirculationClient(ISettings settings, String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP1_SOCKET", strictSocket:true]).circulationClient;
   }
@@ -71,15 +52,13 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
   //Use the Voyager API to get the barcode for the ItemLocation's itemId and replace
   //the field value with the barcode instead
   @Override
-  public ItemLocation enrichItemLocation(ItemLocation location) {
+  public ItemLocation enrichItemLocation(ISettings settings, ItemLocation location) {
     log.debug("Calling VoyagerHostLMSService::enrichItemLocation()");
     if ( location == null ) {
       return null;
     }
-    AppSetting voyager_item_api_address_setting = AppSetting.findByKey('voyager_item_api_address');
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
-    String voyager_item_api_address = voyager_item_api_address_setting?.value;
-    String ncip_server_address = ncip_server_address_setting?.value;
+    String voyager_item_api_address = settings.getSettingValue(SettingsData.SETTING_VOYAGER_ITEM_API_ADDRESS);
+    String ncip_server_address = settings.getSettingValue(SettingsData.SETTING_NCIP_SERVER_ADDRESS);
     String barcode = null;
     try {
       URI barcodeLookupURI = null;
@@ -95,22 +74,22 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
         barcodeLookupURI = new URI(
           scheme, //scheme
           null, //userInfo
-          ncipURI.getHost(), //host 
+          ncipURI.getHost(), //host
           barcodeLookupPort, //port
           barcodeLookupPath, //path
           query, //query
-          null //fragment 
+          null //fragment
         );
       } else {
         URI voyager_lookup_uri = new URI(voyager_item_api_address);
         barcodeLookupURI = new URI(
           voyager_lookup_uri.getScheme(), //scheme
           null, //userInfo
-          voyager_lookup_uri.getHost(), //host 
+          voyager_lookup_uri.getHost(), //host
           voyager_lookup_uri.getPort(), //port
           barcodeLookupPath, //path
           query, //query
-          null //fragment 
+          null //fragment
         );
       }
       log.debug("Voyager barcode lookup url is " + barcodeLookupURI.toString());
@@ -121,7 +100,7 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
 
     if (barcode != null) {
       log.debug("Setting ItemLocation itemId to ${barcode}");
-      location.itemId = barcode; 
+      location.itemId = barcode;
     }
 
     return location;
@@ -139,7 +118,8 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     return barcode;
   }
 
-  public Map acceptItem(String item_id,
+  public Map acceptItem(ISettings settings,
+                        String item_id,
                         String request_id,
                         String user_id,
                         String author,
@@ -149,14 +129,14 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
                         String pickup_location,
                         String requested_action) {
     log.debug("Calling VoyagerHostLMSService::acceptItem");
-    return super.acceptItem(item_id, request_id, user_id, stripDiacritics(author),
+    return super.acceptItem(settings, item_id, request_id, user_id, stripDiacritics(author),
      stripDiacritics(title), isbn, call_number, pickup_location, requested_action);
 
   }
 
   private String stripDiacritics(String input) {
     if ( input == null ) {
-      return null; 
+      return null;
     }
     input = Normalizer.normalize(input, Normalizer.Form.NFD);
     input = input.replaceAll("[^\\p{ASCII}]", ""); //Remove all non ASCII chars

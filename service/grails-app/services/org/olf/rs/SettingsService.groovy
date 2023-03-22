@@ -1,8 +1,10 @@
 package org.olf.rs;
 
+import org.olf.rs.settings.ISettings;
+
 import com.k_int.web.toolkit.settings.AppSetting;
 
-public class SettingsService {
+public class SettingsService implements ISettings {
 
 	/**
 	 * Returns the value for a setting
@@ -53,7 +55,7 @@ public class SettingsService {
 	 * Retrieves a settings as an integer
 	 * @param setting the setting to be retrieved
 	 * @param defaultValue if the value is null, the default value to be returned (default: 0)
-	 * @param allowNegative If the value is false and the value is less than 0 then the default value is returned
+	 * @param allowNegative If the value is false and the value is less than 0 then the default value is returned (default: false)
 	 * @return The determined value, either from the setting or the default value
 	 */
 	public int getSettingAsInt(String setting, int defaultValue = 0, boolean allowNegative = false) {

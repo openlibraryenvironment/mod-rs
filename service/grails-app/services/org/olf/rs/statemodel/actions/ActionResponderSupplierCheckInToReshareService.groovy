@@ -120,10 +120,10 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                          * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
                          * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block
                          */
-                        Map checkoutResult = hostLMS.checkoutItem(request.hrid,
+                        Map checkoutResult = hostLMS.checkoutItem(settingsService,
+                                                                  request.hrid,
                                                                   vol.itemId,
-                                                                  institutionalPatronIdValue,
-                                                                  request.resolvedRequester);
+                                                                  institutionalPatronIdValue);
 
                         // Otherwise, if the checkout succeeded or failed, set appropriately
                         if (checkoutResult.result == true) {
