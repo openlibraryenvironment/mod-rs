@@ -43,6 +43,7 @@ public class SettingsData {
     // Settings for the localNCIP section
     public static final String SETTING_NCIP_APP_PROFILE     = 'ncip_app_profile';
     public static final String SETTING_NCIP_FROM_AGENCY     = 'ncip_from_agency';
+    public static final String SETTING_NCIP_FROM_AGENCY_AUTHENTICATION = 'ncip_from_agency_authentication';
     public static final String SETTING_NCIP_SERVER_ADDRESS  = 'ncip_server_address';
     public static final String SETTING_NCIP_TO_AGENCY       = 'ncip_to_agency';
     public static final String SETTING_NCIP_USE_DUE_DATE    = 'ncip_use_due_date';
@@ -164,6 +165,7 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_NCIP_SERVER_ADDRESS, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_NCIP_FROM_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
+            ensureAppSetting(SETTING_NCIP_FROM_AGENCY_AUTHENTICATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_NCIP_TO_AGENCY, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_APP_PROFILE, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, 'EZBORROW');
             ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
