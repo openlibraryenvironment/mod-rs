@@ -259,7 +259,7 @@
         },
         {
           "methods": [ "GET" ],
-          "pathPattern": "/rs/fileDefinition/fileDownload",
+          "pathPattern": "/rs/fileDefinition*",
           "permissionsRequired": [ "rs.file.download" ]
         },
         {
