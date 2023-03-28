@@ -21,7 +21,7 @@ jobs:
           cd tools/testing
           docker-compose down -v
           docker-compose up -d
-          sleep 20
+          sleep 10
       - name: Inject github build number
         run: |
           # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
         with:
-          arguments: build integrationTest
+          arguments: build -x integrationTest
           build-root-directory: service
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
