@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
         with:
-          arguments: build -x integrationTest
+          arguments: build integrationTest
           build-root-directory: service
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
