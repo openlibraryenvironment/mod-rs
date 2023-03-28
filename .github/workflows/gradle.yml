@@ -21,7 +21,7 @@ jobs:
           cd tools/testing
           docker-compose down -v
           docker-compose up -d
-          sleep 5
+          sleep 20
       - name: Inject github build number
         run: |
           # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
