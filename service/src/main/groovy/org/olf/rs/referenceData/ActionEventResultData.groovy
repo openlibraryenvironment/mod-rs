@@ -526,8 +526,8 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map responderAnwserYesOK = [
-        code: 'responderAnwserYesOK',
+    private static Map responderAnswerYesOK = [
+        code: 'responderAnswerYesOK',
         description: 'Responder has said that they will supply',
         result: true,
         status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
@@ -536,8 +536,8 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map responderAnwserConditionalHoldingOK = [
-        code: 'responderAnwserConditionalHoldingOK',
+    private static Map responderAnswerConditionalHoldingOK = [
+        code: 'responderAnswerConditionalHoldingOK',
         description: 'Responder has responded with a conditional and placed the request on hold',
         result: true,
         status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
@@ -547,8 +547,8 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map responderAnwserConditionalOK = [
-        code: 'responderAnwserConditionalOK',
+    private static Map responderAnswerConditionalOK = [
+        code: 'responderAnswerConditionalOK',
         description: 'Responder has responded with a conditional without placing the request on hold',
         result: true,
         status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
@@ -1197,7 +1197,7 @@ public class ActionEventResultData {
         description: 'The responder has said that they will supply the item(s) ',
         model: StateModel.MODEL_RESPONDER,
         results: [
-            responderAnwserYesOK
+            responderAnswerYesOK
         ]
     ];
 
@@ -1206,8 +1206,8 @@ public class ActionEventResultData {
         description: 'The responder has said that they will supply the item(s) ',
         model: StateModel.MODEL_RESPONDER,
         results: [
-            responderAnwserConditionalOK,
-            responderAnwserConditionalHoldingOK
+            responderAnswerConditionalOK,
+            responderAnswerConditionalHoldingOK
         ]
     ];
 
