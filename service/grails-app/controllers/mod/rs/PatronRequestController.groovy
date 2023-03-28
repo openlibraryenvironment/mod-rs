@@ -7,6 +7,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.Result;
 import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.reporting.ReportService;
+import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionService;
 import org.olf.rs.statemodel.Actions;
@@ -68,11 +69,17 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
             paramType = "body",
             required = false,
             value = "The parameters required to perform the action, in a json format",
+            defaultValue = '''
+{
+    "action": "",
+    "actionParams": {
+    }
+}
+''',
             dataType = "string"
         )
     ])
 	def performAction() {
-
         // Setup the variables we want to log
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
@@ -146,7 +153,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
      *   }
      */
     @ApiOperation(
-        value = "Performs the specified action against the specified requests (NOT IMPLEMENTED)",
+        value = "Performs the specified action against the specified requests",
         nickname = "bulkAction",
         produces = "application/json",
         httpMethod = "POST"
@@ -154,10 +161,95 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     @ApiResponses([
         @ApiResponse(code = 200, message = "Success")
     ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "actionParameters",
+            paramType = "body",
+            required = false,
+            value = "The parameters required to perform the action, in a json format",
+            defaultValue = '''
+{
+    "requestIds": [ ],
+    "action": "",
+    "actionParams": {
+    }
+}
+''',
+            dataType = "string"
+        )
+    ])
   	def bulkAction() {
-		  def result = [:]
-		  render result as JSON;
-	  }
+        // Setup the variables we want to log
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_PATRON_REQUEST);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_BULK_ACTION);
+        ContextLogging.setValue(ContextLogging.FIELD_JSON, request.JSON);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
+        // We will return an array of results
+        Map result = [ : ];
+        List successfulRequests = [ ];
+        List failedRequests = [ ];
+        result.successful = successfulRequests;
+        result.failed = failedRequests;
+
+        // The request ids are part of the body
+        def requestIds = request.JSON?.requestIds;
+
+        // Set the action action in the result
+        result.action = request.JSON?.action;
+
+        // Have we been supplied any request identifiers to action
+        if (requestIds && (requestIds instanceof List<String>)) {
+            // Have we been supplied an action
+            if (request.JSON?.action) {
+                // Lookup the action event
+                ActionEvent actionEvent = ActionEvent.lookup(request.JSON.action);
+
+                // Is it valid to perform a bulk action
+                if ((actionEvent != null) && actionEvent.isAction && actionEvent.isAvailableForBulk) {
+                    // We have so loop through them
+                    requestIds.each { String requestId ->
+                        // Start a new transaction for each request
+                        PatronRequest.withTransaction { tstatus ->
+                            // Execute the action
+                            Map actionRequestResult = actionService.executeAction(requestId, request.JSON.action, request.JSON.actionParams);
+
+                            // Remove the ActionResult, once we know we have been successful or not
+                            boolean successful = (actionRequestResult.actionResult == ActionResult.SUCCESS);
+                            actionRequestResult.remove('actionResult');
+
+                            // Add the request id to the result
+                            actionRequestResult.requestId = requestId;
+
+                            // Add the result to our result list
+                            if (successful) {
+                                successfulRequests.add(actionRequestResult);
+                            } else {
+                                failedRequests.add(actionRequestResult);
+                            }
+                        }
+                    }
+                } else {
+                    result.error = "The action supplied to perform the bulk action is not applicable";
+                    response.status = 400;
+                }
+            } else {
+                result.error = "No action supplied";
+                response.status = 400;
+            }
+        } else {
+            result.error = "No request identifiers supplied to bulk action";
+            response.status = 400;
+        }
+
+        // Render the result
+        render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
+	}
 
     /**
      * list the valid actions for this request

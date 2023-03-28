@@ -45,6 +45,9 @@ class ActionEvent implements MultiTenant<ActionEvent> {
     /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
     String isAvailableGroovy;
 
+    /** Is this a ction applicable for bulk action, only applicable for actions */
+    boolean isAvailableForBulk;
+
     static constraints = {
                          code (nullable: false, blank: false, unique: true)
                   description (nullable: false, blank: false)
@@ -67,6 +70,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
                  serviceClass column: 'ae_service_class', length: 64
         responderServiceClass column: 'ae_responder_service_class', length: 64
             isAvailableGroovy column: 'ae_is_available_groovy', length: 512
+           isAvailableForBulk column: 'ae_is_available_for_bulk', defaultValue: "false"
     }
 
     public static ActionEvent ensure(
@@ -75,6 +79,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         boolean isAction,
         String serviceClass,
         String resultListCode,
+        boolean isAvailableForBulk = false,
         UndoStatus undoStatus = UndoStatus.NO,
         String responderServiceClass = null,
         String isAvailableGroovy = null
@@ -95,6 +100,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         actionEvent.isAction = isAction;
         actionEvent.resultList = ActionEventResultList.lookup(resultListCode);
         actionEvent.serviceClass = serviceClass;
+        actionEvent.isAvailableForBulk = isAvailableForBulk;
         actionEvent.undoStatus = undoStatus;
         actionEvent.responderServiceClass = responderServiceClass;
         actionEvent.isAvailableGroovy = isAvailableGroovy;
