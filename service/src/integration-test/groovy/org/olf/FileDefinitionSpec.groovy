@@ -29,18 +29,6 @@ class FileDefinitionSpec extends TestBase {
     def cleanup() {
     }
 
-    void "Set up test tenants"(String tenantId, String name) {
-        when:"We post a new tenant request to the OKAPI controller"
-            boolean response = setupTenant(tenantId, name);
-
-        then:"The response is correct"
-            assert(response);
-
-        where:
-            tenantId   | name
-            TENANT_ONE | TENANT_ONE
-    }
-
     void "Configure Tenants for S3 storage"(String tenantId, String key, String value) {
         when:"We fetch the existing settings for ${tenantId}"
             List settings = changeSettings(tenantId, [ (key) : value ]);
