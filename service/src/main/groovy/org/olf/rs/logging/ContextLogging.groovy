@@ -37,6 +37,7 @@ public class ContextLogging extends MDC {
     static public final String FIELD_TIMER               = "timer";
     static public final String FIELD_XML                 = "xml";
 
+    static public final String ACTION_BULK_ACTION              = "bulkAction";
     static public final String ACTION_CAN_CREATE_REQUEST       = "canCreateRequest";
     static public final String ACTION_CREATE                   = "create";
     static public final String ACTION_CREATE_GRAPH             = "createGraph";

@@ -75,6 +75,10 @@ class SwaggerUIController {
         Map docApiAsJson = (new JsonSlurper()).parseText(docApiAsString);
         Map paths = docApiAsJson.paths;
         if (paths != null) {
+            // Sort the paths
+            paths = paths.sort();
+            docApiAsJson.paths = paths;
+
             // Remove the paths we are not interested in
             tagsToIgnore.each{ tag -> removePathsWithTag(paths, tag) };
 

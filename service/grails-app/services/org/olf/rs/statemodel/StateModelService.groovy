@@ -110,6 +110,7 @@ public class StateModelService {
                 actionEventResult.serviceClass = actionEvent.serviceClass;
                 actionEventResult.responderServiceClass = actionEvent.responderServiceClass;
                 actionEventResult.isAvailableGroovy = actionEvent.isAvailableGroovy;
+                actionEventResult.isAvailableForBulk = actionEvent.isAvailableForBulk;
             }
         }
 
@@ -396,6 +397,7 @@ public class StateModelService {
                 isAction,
                 jsonActionEvent. serviceClass,
                 jsonActionEvent.resultList,
+                (jsonActionEvent.isAvailableForBulk == null) ? false : jsonActionEvent.isAvailableForBulk,
                 convertUndoStatus(jsonActionEvent.undoStatus),
                 jsonActionEvent.responderServiceClass,
                 jsonActionEvent.isAvailableGroovy) != null);
