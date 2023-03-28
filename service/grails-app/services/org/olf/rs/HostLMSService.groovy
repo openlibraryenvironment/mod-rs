@@ -14,6 +14,7 @@ public class HostLMSService {
 
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+  SettingsService settingsService;
   StatisticsService statisticsService
 
   public HostLMSActions getHostLMSActionsFor(String lms) {
@@ -59,7 +60,7 @@ public class HostLMSService {
       resultMap.hostLMS = true;
       for( def vol : volumesNotCheckedIn ) {
         def checkInMap = [:];
-        def check_in_result = host_lms.checkInItem(vol.temporaryItemBarcode);
+        def check_in_result = host_lms.checkInItem(settingsService, vol.temporaryItemBarcode);
         checkInMap.result = check_in_result;
         checkInMap.volume = vol;
         String message;

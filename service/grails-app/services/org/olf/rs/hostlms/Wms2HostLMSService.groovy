@@ -1,27 +1,27 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.circ.client.NCIPClientWrapper
-import org.olf.rs.circ.client.CirculationClient
-import org.olf.rs.lms.ItemLocation
+import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.settings.ISettings;
 
-import com.k_int.web.toolkit.settings.AppSetting
-
+import groovyx.net.http.HttpBuilder;
 
 public class Wms2HostLMSService extends BaseHostLMSService {
 
   @Override
-  public CirculationClient getCirculationClient(String address) {
-    AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
-    AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
-    AppSetting wms_lookup_patron_endpoint = AppSetting.findByKey('wms_lookup_patron_endpoint')
-    
-    
+  public CirculationClient getCirculationClient(ISettings settings, String address) {
+    String wms_api_key = settings.getSettingValue(SettingsData.SETTING_WMS_API_KEY);
+    String wms_api_secret = settings.getSettingValue(SettingsData.SETTING_WMS_API_SECRET);
+    String wms_lookup_patron_endpoint = settings.getSettingValue(SettingsData.SETTING_WMS_LOOKUP_PATRON_ENDPOINT);
+
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
       protocol: "WMS2",
-      apiKey: wms_api_key?.value,
-      apiSecret: wms_api_secret?.value,
-      lookupPatronEndpoint: wms_lookup_patron_endpoint?.value
+      apiKey: wms_api_key,
+      apiSecret: wms_api_secret,
+      lookupPatronEndpoint: wms_lookup_patron_endpoint
       ]).circulationClient;
   }
 
@@ -36,41 +36,40 @@ public class Wms2HostLMSService extends BaseHostLMSService {
       [
         name:'Adapter_By_OCLC_Number',
         precondition: { pr -> return ( pr.oclcNumber != null ) },
-        strategy: { pr, service -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3") }
+        strategy: { pr, service, settings -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_Title_And_Identifier',
         precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
-        strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3") }
+        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_ISBN_Identifier',
         precondition: { pr -> return ( pr.isbn != null ) },
-        strategy: { pr, service -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3") }
+        strategy: { pr, service, settings -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_Title',
         precondition: { pr -> return ( pr.title != null ) },
-        strategy: { pr, service -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3") }
-      ],
+        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3", settings) }
+      ]
     ]
   }
 
-  List<ItemLocation> lookupViaConnector(String query) {
+  List<ItemLocation> lookupViaConnector(String query, ISettings settings) {
 
     List<ItemLocation> result = [];
 
     //Override this method on BaseHost to use RTAC connector provided by IndexData
-    AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address')
-    AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username')
-    AppSetting wms_connector_password = AppSetting.findByKey('wms_connector_password')
-    AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
-    AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
-    AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-    
+    String wms_connector_address = settings.getSettingValue(SettingsData.SETTING_WMS_CONNECTOR_ADDRESS);
+    String wms_connector_username = settings.getSettingValue(SettingsData.SETTING_WMS_CONNECTOR_USERNAME);
+    String wms_connector_password = settings.getSettingValue(SettingsData.SETTING_WMS_CONNECTOR_PASSWORD);
+    String wms_api_key = settings.getSettingValue(SettingsData.SETTING_WMS_API_KEY);
+    String wms_api_secret = settings.getSettingValue(SettingsData.SETTING_WMS_API_SECRET);
+    String wms_registry_id = settings.getSettingValue(SettingsData.SETTING_WMS_REGISTRY_ID);
 
     //API key and API secret get embedded in the URL
-    String z3950Connector = "${wms_connector_address?.value},user=${wms_api_key?.value}&password=${wms_api_secret?.value}&x-registryId=${wms_registry_id?.value}"
+    String z3950Connector = "${wms_connector_address},user=${wms_api_key}&password=${wms_api_secret}&x-registryId=${wms_registry_id}"
 
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
@@ -78,10 +77,10 @@ public class Wms2HostLMSService extends BaseHostLMSService {
         request.uri.query = [
                               'version':'2.0',
                               'operation': 'searchRetrieve',
-                              'x-username': wms_connector_username?.value,
-                              'x-password': wms_connector_password?.value,                              
+                              'x-username': wms_connector_username,
+                              'x-password': wms_connector_password,
                               'query': query
-                          
+
                             ]
         log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
     }
@@ -107,7 +106,4 @@ public class Wms2HostLMSService extends BaseHostLMSService {
 
     return result
   }
-
-
-
 }

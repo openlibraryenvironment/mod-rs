@@ -259,6 +259,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/testHostLMS/*",
+          "permissionsRequired": [ "rs.testHostLMS" ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/fileDefinition/fileDownload",
           "permissionsRequired": [ "rs.file.download" ]
         },
@@ -853,6 +858,12 @@
       "visible": false
     },
     {
+      "permissionName": "rs.testHostLMS",
+      "displayName": "Can Test Host LMS Circ integtration",
+      "description": "Can Test Host LMS Circ integtration",
+      "visible": false
+    },
+    {
       "permissionName": "rs.file.download",
       "displayName": "Can download files",
       "description": "Can download files",
@@ -991,7 +1002,8 @@
 		"rs.report.execute",
         "rs.timers",
         "rs.shelvingLocations",
-        "rs.logging"
+        "rs.logging",
+		"rs.testHostLMS"
       ]
     },
     {

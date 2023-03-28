@@ -2,27 +2,26 @@ package org.olf.rs.hostlms;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.HostLMSItemLoanPolicy;
 import org.olf.rs.HostLMSLocation;
 import org.olf.rs.HostLMSLocationService;
 import org.olf.rs.HostLMSShelvingLocation;
 import org.olf.rs.HostLMSShelvingLocationService;
-import org.olf.rs.PatronNoticeService;
-import org.olf.rs.PatronRequest
-import org.olf.rs.ShelvingLocationSite
+import org.olf.rs.PatronRequest;
+import org.olf.rs.ShelvingLocationSite;
 import org.olf.rs.Z3950Service;
 import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.CheckoutItem;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.LookupUser;
+import org.olf.rs.lms.ConnectionDetailsNCIP;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.settings.ISettings;
 
-import com.k_int.web.toolkit.settings.AppSetting
-
-import grails.gorm.multitenancy.Tenants.CurrentTenant
+import grails.gorm.multitenancy.Tenants.CurrentTenant;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -30,9 +29,10 @@ import grails.gorm.multitenancy.Tenants.CurrentTenant
  */
 public abstract class BaseHostLMSService implements HostLMSActions {
 
+  private static final String CIRCULATION_NCIP = "ncip";
+
   HostLMSLocationService hostLMSLocationService;
   HostLMSShelvingLocationService hostLMSShelvingLocationService;
-  PatronNoticeService patronNoticeService;
   Z3950Service z3950Service;
 
   // http://www.loc.gov/z3950/agency/defns/bib1.html
@@ -41,19 +41,19 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       [
         name:'Local_identifier_By_Z3950',
         precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
-        strategy: { pr, service -> return service.z3950ItemsByIdentifier(pr) },
+        strategy: { pr, service, settings -> return service.z3950ItemsByIdentifier(pr, settings) },
         // We don't want to try other strategies if the precondition passes and available copies are not found
         final: true
       ],
       [
         name:'ISBN_identifier_By_Z3950',
         precondition: { pr -> return ( pr.isbn != null ) },
-        strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString() ) }
+        strategy: { pr, service, settings -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString(), settings ) }
       ],
       [
         name:'Title_By_Z3950',
         precondition: { pr -> return ( pr.title != null ) },
-        strategy: { pr, service -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString()) }
+        strategy: { pr, service, settings -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString(), settings ) }
       ],
     ]
   }
@@ -61,13 +61,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   void validatePatron(String patronIdentifier) {
   }
 
-  public abstract CirculationClient getCirculationClient(String address);
+  public abstract CirculationClient getCirculationClient(ISettings settings, String address);
 
    //Method to inquire whether this LMS adapter speaks NCIP v2. Defaults to false, override if true
   public boolean isNCIP2() {
     return false;
   }
-
 
   /**
    *
@@ -92,7 +91,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    * is located.
    * Lookup strategies go from most specific to least.
    */
-  ItemLocation determineBestLocation(PatronRequest pr) {
+  ItemLocation determineBestLocation(ISettings settings, PatronRequest pr) {
 
     log.debug("determineBestLocation(${pr})");
 
@@ -106,7 +105,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( next_strategy.precondition(pr) == true ) {
         log.debug("Strategy ${next_strategy.name} passed precondition");
         try {
-          def strategy_result = next_strategy.strategy(pr, this);
+          def strategy_result = next_strategy.strategy(pr, this, settings);
           if ( strategy_result instanceof ItemLocation ) {
             log.debug("Legacy strategy - return top holding");
             location = strategy_result;
@@ -125,25 +124,24 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
         if (next_strategy?.final) {
           log.debug("Strategy ${next_strategy.name} is final, using result");
-          break; 
+          break;
         }
       }
       else {
         log.debug("Strategy ${next_strategy.name} did not pass precondition");
       }
     }
-    /* 
+    /*
       Allow for additional modifications to be made to the ItemLocation on a per-adapter basis.
       enrichItemLocation can be overriden as needed
     */
 
     log.debug("Calling enrichItemLocation");
-    location = enrichItemLocation(location);
+    location = enrichItemLocation(settings, location);
 
     log.debug("determineBestLocation returns ${location}");
     return location;
   }
-
 
   /**
    * Cross reference the ItemLocation options returned from the local catalog with our internal information which
@@ -252,8 +250,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
   //default stub method
-  public ItemLocation enrichItemLocation(ItemLocation location) {
-    return location; 
+  public ItemLocation enrichItemLocation(ISettings settings, ItemLocation location) {
+    return location;
   }
 
   // By default, ask for OPAC records - @override in implementation if you want different
@@ -294,12 +292,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    * which locations are to be preferred for lending. This variant of the method returns all possible locations
    * it is the callers job to rank the response records.
    */
-  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
 
     List<ItemLocation> result = [];
 
     def prefix_query_string = "@attr 1=12 ${pr.supplierUniqueRecordId}";
-    def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( z_response?.numberOfRecords == 1 ) {
@@ -318,16 +316,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string) {
+  public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string, ISettings settings) {
 
     List<ItemLocation> result = [];
-
-    String z3950_server = getZ3950Server();
 
     // We need to fetch multiple records here as some sites may have separate records for electronic
     // and we'll also need a few results to determine if a title search was too broad to be useful eg.
     // we can't use title if there is more than exactly one record with holdings
-    def z_response = z3950Service.query(prefix_query_string, 3, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 3, getHoldingsQueryRecsyn());
 
     log.debug("Got Z3950 response: ${z_response}");
 
@@ -346,24 +342,23 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-
-  public Map lookupPatron(String patron_id) {
+  public Map lookupPatron(ISettings settings, String patron_id) {
     log.debug("lookupPatron(${patron_id})");
     Map result = [ result: true, status: 'OK', reason: 'spoofed' ];
-    AppSetting borrower_check_setting = AppSetting.findByKey('borrower_check')
-    if ( ( borrower_check_setting != null ) && ( borrower_check_setting.value != null ) )  {
-      switch ( borrower_check_setting.value ) {
-        case 'ncip':
-          result = ncip2LookupPatron(patron_id)
+    String borrowerCheckValue = settings.getSettingValue(SettingsData.SETTING_BORROWER_CHECK)
+    if (borrowerCheckValue != null) {
+      switch (borrowerCheckValue) {
+        case CIRCULATION_NCIP:
+          result = ncip2LookupPatron(settings, patron_id)
           result.reason = 'ncip'
           break;
+
         default:
-          log.debug("Borrower check - no action, config ${borrower_check_setting?.value}");
+          log.debug("Borrower check - no action, config ${borrowerCheckValue}");
           // Borrower check is not configured, so return OK
           break;
       }
-    }
-    else {
+    } else {
       log.warn('borrower check not configured');
     }
 
@@ -371,8 +366,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result
   }
 
-
-  private Map ncip2Lookup(String keyValue, Boolean useUserId = true) {
+  private Map ncip2Lookup(ISettings settings, String keyValue, Boolean useUserId = true) {
     Map result = [ status: 'FAIL' ];
     String key = null;
     if(useUserId) {
@@ -385,15 +379,15 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     if( (keyValue != null) && (keyValue.length() > 0)) {
       try {
-        Map ncipValues = getNCIPLookupValues();
-        CirculationClient ncip_client = getCirculationClient(ncipValues.ncip_server_address);
+        ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+        CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
         if(!useUserId && !isNCIP2() ) {
           log.debug("Cannot look up by username for NCIP1 currently, skipping");
           result.result = false;
           result.problems = "Username lookup unsupported";
           return result;
         }
-        log.debug("Requesting patron from ${ncipValues.ncip_server_address}");
+        log.debug("Requesting patron from ${ncipConnectionDetails.ncipServerAddress}");
         LookupUser lookupUser = null;
         if(useUserId) {
           lookupUser = new LookupUser().setUserId(keyValue);
@@ -404,17 +398,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           .includeUserAddressInformation()
           .includeUserPrivilege()
           .includeNameInformation()
-          .setToAgency(ncipValues.ncip_to_agency)
-          .setFromAgency(ncipValues.ncip_from_agency)
-          .setRegistryId(ncipValues.registry_id)
-          .setApplicationProfileType(ncipValues.ncip_app_profile);
+          .setToAgency(ncipConnectionDetails.ncipToAgency)
+          .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+          .setRegistryId(ncipConnectionDetails.registryId)
+          .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
 
         log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser request ${lookupUser}");
         JSONObject response = ncip_client.send(lookupUser);
         log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
 
         processLookupUserResponse(result, response);
-      
+
       } catch(Exception e) {
         result.problems = "Unexpected problem in NCIP Call: ${e.message}";
         result.result = false;
@@ -428,35 +422,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-
-  private Map ncip2LookupById(String user_id) {
-    return ncip2Lookup(user_id, true);
+  private Map ncip2LookupById(ISettings settings, String user_id) {
+    return ncip2Lookup(settings, user_id, true);
   }
 
-  private Map ncip2LookupByUsername(String username) {
-    return ncip2Lookup(username, false);
-  }
-
-  private Map getNCIPLookupValues() {
-    Map values = [:];
-    AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address');
-    AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency');
-    AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency');
-    AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile');
-    AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id');
-    values['ncip_server_address'] = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue;
-    values['ncip_from_agency'] = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue;
-    values['ncip_to_agency'] = ncip_to_agency_setting?.value ?: ncip_from_agency;
-    values['ncip_app_profile'] = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue;
-    values['registry_id'] = wms_registry_id?.value;
-
-    if( (values.ncip_server_address == null) ||
-          (values.ncip_from_agency == null) ||
-          (values.ncip_app_profile == null) ) {
-      throw new RuntimeException("ncip_server_address, ncip_from_agency and ncip_app_profile must be defined");
-    }
-
-    return values;
+  private Map ncip2LookupByUsername(ISettings settings, String username) {
+    return ncip2Lookup(settings, username, false);
   }
 
   // {"firstName":"Stacey",
@@ -484,10 +455,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     else {
       result.problems=response.get('problems')
       result.result=false
-    }   
+    }
   }
-
-
 
   /**
    * @param patron_id - the patron to look up
@@ -500,18 +469,18 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    *   result: true|false
    * }
    */
-  private Map ncip2LookupPatron(String patron_id) {
+  private Map ncip2LookupPatron(ISettings settings, String patron_id) {
     Map user_id_result = null;
     Map username_result = null;
-    user_id_result = ncip2LookupById(patron_id);
+    user_id_result = ncip2LookupById(settings, patron_id);
     if(user_id_result.result == false) {
       log.debug("No result from userId patron lookup, attempting username");
-      /* 
+      /*
       If the user_id lookup failed, try a lookup with the patron_id
       assigned to the username value instead, and return that result if
       and only if it is successful
       */
-      username_result = ncip2LookupByUsername(patron_id);
+      username_result = ncip2LookupByUsername(settings, patron_id);
       if(username_result.result != false) {
         return username_result;
       }
@@ -546,25 +515,27 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
   }
 
-  public Map checkoutItem(String requestId,
-                          String itemBarcode,
-                          String borrowerBarcode,
-                          Symbol requesterDirectorySymbol) {
-
-    log.debug("checkoutItem(${requestId}. ${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+  public Map checkoutItem(
+    ISettings settings,
+    String requestId,
+    String itemBarcode,
+    String borrowerBarcode
+  ) {
+    log.debug("checkoutItem(${requestId}. ${itemBarcode})");
     Map result = [
       result: true,
       reason: 'spoofed'
     ];
 
-    AppSetting check_out_setting = AppSetting.findByKey('check_out_item')
-    if ( ( check_out_setting != null ) && ( check_out_setting.value != null ) )  {
-      switch ( check_out_setting.value ) {
-        case 'ncip':
-          result = ncip2CheckoutItem(requestId, itemBarcode, borrowerBarcode)
+    String checkOutValue = settings.getSettingValue(SettingsData.SETTING_CHECK_OUT_ITEM);
+    if (checkOutValue != null) {
+      switch (checkOutValue) {
+        case CIRCULATION_NCIP:
+          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode)
           break;
+
         default:
-          log.debug("Check out - no action, config ${check_out_setting?.value}");
+          log.debug("Check out - no action, config ${checkOutValue}");
           // Check in is not configured, so return true
           break;
       }
@@ -572,35 +543,24 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public Map ncip2CheckoutItem(String requestId, String itemBarcode, String borrowerBarcode) {
+  public Map ncip2CheckoutItem(ISettings settings, String requestId, String itemBarcode, String borrowerBarcode) {
     // set reason to ncip
     Map result = [reason: 'ncip'];
 
     // borrowerBarcode could be null or blank, error out if so
     if (borrowerBarcode != null && borrowerBarcode != '') {
       log.debug("ncip2CheckoutItem(${itemBarcode},${borrowerBarcode})");
-      AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-      AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-      AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
-      AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
-      AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
 
-      String ncip_server_address = ncip_server_address_setting?.value ?: ncip_server_address_setting?.defValue
-      String ncip_from_agency = ncip_from_agency_setting?.value ?: ncip_from_agency_setting?.defValue
-      String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
-      String ncip_app_profile = ncip_app_profile_setting?.value ?: ncip_app_profile_setting?.defValue
-      // Will only be used by the client for WMS LMSs
-      String registry_id = wms_registry_id?.value
-
-      CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+      ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+      CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
       CheckoutItem checkoutItem = new CheckoutItem()
                     .setUserId(borrowerBarcode)
                     .setItemId(itemBarcode)
                     .setRequestId(requestId)
-                    .setToAgency(ncip_to_agency)
-                    .setFromAgency(ncip_from_agency)
-                    .setRegistryId(registry_id)
-                    .setApplicationProfileType(ncip_app_profile);
+                    .setToAgency(ncipConnectionDetails.ncipToAgency)
+                    .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+                    .setRegistryId(ncipConnectionDetails.registryId)
+                    .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
                     //.setDesiredDueDate("2020-03-18");
 
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
@@ -623,49 +583,33 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  protected String getZ3950Server() {
-    return AppSetting.findByKey('z3950_server_address')?.value
-  }
-
-  public Map acceptItem(String item_id,
-                        String request_id,
-                        String user_id,
-                        String author,
-                        String title,
-                        String isbn,
-                        String call_number,
-                        String pickup_location,
-                        String requested_action) {
-
+  public Map acceptItem(
+    ISettings settings,
+    String item_id,
+    String request_id,
+    String user_id,
+    String author,
+    String title,
+    String isbn,
+    String call_number,
+    String pickup_location,
+    String requested_action
+  ) {
     log.debug("acceptItem(${request_id},${user_id})");
     Map result = [
       result: true,
       reason: 'spoofed'
     ]
 
-    AppSetting accept_item_setting = AppSetting.findByKey('accept_item')
-    if ( ( accept_item_setting != null ) && ( accept_item_setting.value != null ) )  {
-
-
-      switch ( accept_item_setting.value ) {
-        case 'ncip':
+    String acceptItemValue = settings.getSettingValue(SettingsData.SETTING_ACCEPT_ITEM);
+    if (acceptItemValue != null) {
+      switch (acceptItemValue) {
+        case CIRCULATION_NCIP:
           // set reason block to ncip from 'spoofed'
           result.reason = 'ncip'
 
-          AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-          AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-          AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
-          AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
-          AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-
-          String ncip_server_address = ncip_server_address_setting?.value
-          String ncip_from_agency = ncip_from_agency_setting?.value
-          String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
-          String ncip_app_profile = ncip_app_profile_setting?.value
-          // Will only be used by the client for WMS LMSs
-          String registry_id = wms_registry_id?.value
-
-          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+          ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+          CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
           AcceptItem acceptItem = new AcceptItem()
                         .setItemId(item_id)
                         .setRequestId(request_id)
@@ -675,11 +619,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setIsbn(isbn)
                         .setCallNumber(call_number)
                         .setPickupLocation(pickup_location)
-                        .setToAgency(ncip_to_agency)
-                        .setFromAgency(ncip_from_agency)
-                        .setRegistryId(registry_id)
+                        .setToAgency(ncipConnectionDetails.ncipToAgency)
+                        .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+                        .setRegistryId(ncipConnectionDetails.registryId)
                         .setRequestedActionTypeString(requested_action)
-                        .setApplicationProfileType(ncip_app_profile);
+                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
 
           if(getNCIPTemplatePrefix() != null) {
             log.debug("[${CurrentTenant.get()}] setting NCIP template prefix to ${getNCIPTemplatePrefix()}");
@@ -695,8 +639,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.problems = response.get('problems')
           }
           break;
+
         default:
-          log.debug("Accept item - no action, config ${accept_item_setting?.value}");
+          log.debug("Accept item - no action, config ${acceptItemValue}");
           // Check in is not configured, so return true
           break;
       }
@@ -705,48 +650,34 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
 
-  public Map checkInItem(String item_id) {
+  public Map checkInItem(ISettings settings, String item_id) {
     Map result = [
       result: true,
       reason: 'spoofed',
       already_checked_in: false
     ]
 
-    AppSetting check_in_setting = AppSetting.findByKey('check_in_item')
-    if ( ( check_in_setting != null ) && ( check_in_setting.value != null ) )  {
-
-      switch ( check_in_setting.value ) {
-        case 'ncip':
+    String checkInValue = settings.getSettingValue(SettingsData.SETTING_CHECK_IN_ITEM);
+    if (checkInValue != null) {
+      switch (checkInValue) {
+        case CIRCULATION_NCIP:
           // Set the reason from 'spoofed'
           result.reason = 'ncip'
 
           log.debug("checkInItem(${item_id})");
-          AppSetting ncip_server_address_setting = AppSetting.findByKey('ncip_server_address')
-          AppSetting ncip_from_agency_setting = AppSetting.findByKey('ncip_from_agency')
-          AppSetting ncip_to_agency_setting = AppSetting.findByKey('ncip_to_agency')
-          AppSetting ncip_app_profile_setting = AppSetting.findByKey('ncip_app_profile')
-          AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-
-          String ncip_server_address = ncip_server_address_setting?.value
-          String ncip_from_agency = ncip_from_agency_setting?.value
-          String ncip_to_agency = ncip_to_agency_setting?.value ?: ncip_from_agency
-          String ncip_app_profile = ncip_app_profile_setting?.value
-          // Will only be used by the client for WMS LMSs
-          String registry_id = wms_registry_id?.value
-
-          CirculationClient ncip_client = getCirculationClient(ncip_server_address);
+          ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+          CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
           CheckinItem checkinItem = new CheckinItem()
                         .setItemId(item_id)
-                        .setToAgency(ncip_to_agency)
-                        .setFromAgency(ncip_from_agency)
-                        .setRegistryId(registry_id)
+                        .setToAgency(ncipConnectionDetails.ncipToAgency)
+                        .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+                        .setRegistryId(ncipConnectionDetails.registryId)
                         .includeBibliographicDescription()
-                        .setApplicationProfileType(ncip_app_profile);
+                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
 
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}");
-
 
           log.debug(response?.toString());
           if ( response != null && response.has('problems') ) {
@@ -772,8 +703,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.problems = response.get('problems')
           }
           break;
+
         default:
-          log.debug("Check In - no action, config ${check_in_setting?.value}");
+          log.debug("Check In - no action, config ${checkInValue}");
           // Check in is not configured, so return true
           break;
       }

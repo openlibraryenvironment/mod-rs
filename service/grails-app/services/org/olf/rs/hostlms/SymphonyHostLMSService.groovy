@@ -1,41 +1,22 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
-import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
-import org.olf.rs.lms.HostLMSActions;
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.circ.client.LookupUser;
-import org.olf.rs.circ.client.CheckoutItem;
-import org.olf.rs.circ.client.CheckinItem;
-import org.olf.rs.circ.client.AcceptItem;
-
-import org.olf.rs.circ.client.NCIPClientWrapper
-
-import org.json.JSONObject;
-import org.json.JSONArray;
+import org.olf.rs.PatronRequest;
 import org.olf.rs.circ.client.CirculationClient;
-
-
+import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.settings.ISettings;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
  *
  * Sirsi Z3950 behaves a little differently when looking for available copies.
- * The format of the URL for metaproxy needs to be 
+ * The format of the URL for metaproxy needs to be
  * http://mpserver:9000/?x-target=http://unicornserver:2200/UNICORN&x-pquery=@attr 1=1016 @attr 3=3 water&maximumRecords=1&recordSchema=marcxml
  *
  */
 public class SymphonyHostLMSService extends BaseHostLMSService {
 
-  public CirculationClient getCirculationClient(String address) {
+  public CirculationClient getCirculationClient(ISettings settings, String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP1"]).circulationClient;
   }
@@ -47,13 +28,13 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
 
   //Override to search on attribute 1016, and prepend '^C' to search string
   @Override
-  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
 
     List<ItemLocation> result = [];
 
     String search_id = pr.supplierUniqueRecordId;
     String prefix_query_string = "@attr 1=1016 ${search_id}";
-    def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( z_response?.numberOfRecords == 1 ) {
@@ -142,5 +123,4 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
   }
-
 }

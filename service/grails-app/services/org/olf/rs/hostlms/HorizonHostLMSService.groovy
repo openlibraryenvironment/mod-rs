@@ -1,14 +1,14 @@
 package org.olf.rs.hostlms;
 
-import org.olf.rs.circ.client.NCIPClientWrapper;
-
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.circ.client.CirculationClient;
+import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.settings.ISettings;
 
 public class HorizonHostLMSService extends BaseHostLMSService {
 
-  public CirculationClient getCirculationClient(String address) {
+  public CirculationClient getCirculationClient(ISettings settings, String address) {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [protocol: "NCIP1"]).circulationClient;
   }
@@ -45,12 +45,12 @@ public class HorizonHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr) {
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
 
     List<ItemLocation> result = [];
 
     def prefix_query_string = "@attr 1=100 ${pr.supplierUniqueRecordId}";
-    def z_response = z3950Service.query(prefix_query_string, 1, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( z_response?.numberOfRecords == 1 ) {
@@ -68,7 +68,4 @@ public class HorizonHostLMSService extends BaseHostLMSService {
 
     return result;
   }
-
-
-
 }

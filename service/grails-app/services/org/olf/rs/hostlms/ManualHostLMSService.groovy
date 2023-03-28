@@ -1,19 +1,9 @@
 package org.olf.rs.hostlms;
 
 import org.olf.rs.PatronRequest
-import groovyx.net.http.HttpBuilder
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.statemodel.Status;
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.StreamingMarkupBuilder
-import static groovyx.net.http.HttpBuilder.configure
-import groovyx.net.http.FromServer;
-import com.k_int.web.toolkit.refdata.RefdataValue
-import static groovyx.net.http.ContentTypes.XML
 import org.olf.rs.lms.HostLMSActions;
-import org.olf.okapi.modules.directory.Symbol;
-
-
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.settings.ISettings;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -25,22 +15,24 @@ public class ManualHostLMSService implements HostLMSActions {
     result
   }
 
-  ItemLocation determineBestLocation(PatronRequest pr) {
+  ItemLocation determineBestLocation(ISettings settings, PatronRequest pr) {
     ItemLocation location = null;
     return location;
   }
-  
-  public Map lookupPatron(String patron_id) {
+
+  public Map lookupPatron(ISettings settings, String patron_id) {
     log.debug("lookupPatron(${patron_id})");
     Map result = [status: 'OK', reason: 'spoofed', result: true ];
     return result
   }
 
-  public Map checkoutItem(String requestId,
-                          String itemBarcode,
-                          String borrowerBarcode,
-                          Symbol requesterDirectorySymbol) {
-    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode},${requesterDirectorySymbol})");
+  public Map checkoutItem(
+    ISettings settings,
+    String requestId,
+    String itemBarcode,
+    String borrowerBarcode
+  ) {
+    log.debug("checkoutItem(${itemBarcode},${borrowerBarcode})");
 
     return [
       result:true,
@@ -48,15 +40,18 @@ public class ManualHostLMSService implements HostLMSActions {
     ]
   }
 
-  public Map acceptItem(String item_id,
-                            String request_id,
-                            String user_id,
-                            String author,
-                            String title,
-                            String isbn,
-                            String call_number,
-                            String pickup_location,
-                            String requested_action) {
+  public Map acceptItem(
+    ISettings settings,
+    String item_id,
+    String request_id,
+    String user_id,
+    String author,
+    String title,
+    String isbn,
+    String call_number,
+    String pickup_location,
+    String requested_action
+  ) {
 
     return [
       result:true,
@@ -64,12 +59,10 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map checkInItem(String item_id) {
-
+  public Map checkInItem(ISettings settings, String item_id) {
     return [
       result:true,
       reason: 'spoofed'
     ];
   }
-
 }

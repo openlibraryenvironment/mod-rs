@@ -8,6 +8,7 @@ import org.olf.rs.PatronRequestRota;
 import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.SettingsService;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
@@ -27,6 +28,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
+    SettingsService settingsService;
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
@@ -172,7 +174,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
         log.debug('Checking to see if we have a local copy available');
 
         //Let's still go ahead and try to call the LMS Adapter to find a copy of the request
-        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(pr);
+        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(settingsService, pr);
         log.debug("Got ${location} as a result of local host lms lookup");
 
         return(location != null);

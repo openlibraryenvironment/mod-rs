@@ -4,6 +4,7 @@ import org.olf.rs.Counter;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.RequestVolume;
+import org.olf.rs.SettingsService;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
@@ -24,6 +25,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
     private static final String REASON_SPOOFED = 'spoofed';
 
     HostLMSService hostLMSService;
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -48,6 +50,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                 try {
                     // Call the host lms to check the item out of the host system and in to reshare
                     Map acceptResult = hostLMS.acceptItem(
+                        settingsService,
                         vol.temporaryItemBarcode,
                         request.hrid,
                         request.patronIdentifier, // user_idA
