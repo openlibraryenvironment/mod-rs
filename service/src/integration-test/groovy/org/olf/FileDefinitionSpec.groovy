@@ -29,6 +29,18 @@ class FileDefinitionSpec extends TestBase {
     def cleanup() {
     }
 
+    void "Set up test tenant "(tenantid, name) {
+        when:"We post a new tenant request to the OKAPI controller"
+            boolean response = setupTenant(tenantid, name);
+
+      then:"The response is correct"
+          assert(response);
+
+      where:
+          tenantid   | name
+          TENANT_ONE | TENANT_ONE
+    }
+
     void "Set up test tenants"(String tenantId, String name) {
         when:"We post a new tenant request to the OKAPI controller"
             boolean response = setupTenant(tenantId, name);
