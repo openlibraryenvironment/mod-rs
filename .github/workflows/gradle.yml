@@ -21,16 +21,12 @@ jobs:
           cd tools/testing
           docker-compose down -v
           docker-compose up -d
-          sleep 60
+          sleep 10
       - name: Inject github build number
         run: |
           # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
           # echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${{github.run_number}}" >> $GITHUB_ENV
-          # Up the logging level to see what is happening with the tests
-          echo "LOGGING_LEVEL_ORG_OLF=DEBUG" >> $GITHUB_ENV
-          echo "LOGGING_LEVEL_COM_K_INT=DEBUG" >> $GITHUB_ENV
-          echo "LOGGING_LEVEL_ROOT=DEBUG" >> $GITHUB_ENV
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
         with:
@@ -41,6 +37,7 @@ jobs:
         if: always()
         with:
           files: "service/build/test-results/**/*.xml"
+          large_files: true
       - name: Prepare env for docker build
         run: | 
           echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
