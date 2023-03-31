@@ -130,19 +130,33 @@ class ProtocolMessageBuildingService {
      * AvailabilityNote
     ]
      */
-    message.requestedDeliveryInfo = [
-      // SortOrder
-      address:[
-        physicalAddress:[
-          line1:req.pickupLocation,
-          line2:null,
-          locality:null,
-          postalCode:null,
-          region:null,
-          county:null
+
+    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+    if (req.deliveryMethod) {
+      message.requestedDeliveryInfo = [
+        address: [
+          electronicAddress: [
+            electronicAddressType: req.deliveryMethod?.value
+          ]
         ]
       ]
-    ]
+    } else {
+      message.requestedDeliveryInfo = [
+        // SortOrder
+        address:[
+          physicalAddress:[
+            line1:req.pickupLocation,
+            line2:null,
+            locality:null,
+            postalCode:null,
+            region:null,
+            county:null
+          ]
+        ]
+      ]
+    }
+
+
     // TODO Will this information be taken from the directory entry?
     /* message.requestingAgencyInfo = [
      * Name
