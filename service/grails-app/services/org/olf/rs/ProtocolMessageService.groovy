@@ -464,6 +464,13 @@ and sa.service.businessFunction.value=:ill
                 county(eventData.requestedDeliveryInfo.address.physicalAddress.county)
               }
             }
+            if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
+                    ( eventData.requestedDeliveryInfo?.address?.electronicAddress != null ) ) {
+              electronicAddress {
+                electronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData)
+                electronicAddressType(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressType)
+              }
+            }
           }
         }
 

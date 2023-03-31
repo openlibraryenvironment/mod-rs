@@ -119,6 +119,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         pr.pickupLocation = stringifiedPickupLocation;
                     }
                 }
+
+                // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
+                    pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
+                }
             }
 
             // Add patron information to Patron Request

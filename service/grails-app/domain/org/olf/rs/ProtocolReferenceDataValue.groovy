@@ -8,12 +8,22 @@ import grails.gorm.MultiTenant
 class ProtocolReferenceDataValue extends RefdataValue implements MultiTenant<ProtocolReferenceDataValue>{
 
 	static public final String CATEGORY_PUBLICATION_TYPE = "request.publicationType";
+    static public final String CATEGORY_DELIVERY_METHOD = "request.deliveryMethod";
 	static public final String CATEGORY_SERVICE_LEVEL    = "request.serviceLevel";
 	static public final String CATEGORY_SERVICE_TYPE     = "request.serviceType";
 
     static public final String SERVICE_TYPE_LOAN = "Loan";
 
 	static hasMany = [protocolConversions : ProtocolConversion];
+
+    /**
+     * Looks to see if the supplied value is a valid delivery method and if so returns the ProtocolReferenceDataValue for it
+     * @param value The delivery method to lookup
+     * @return The ProtocolReferenceDataValue that represents the publication type being looked up, which may be null if it is not found
+     */
+    static public ProtocolReferenceDataValue lookupDeliveryMethod(String value) {
+        return(lookup(CATEGORY_DELIVERY_METHOD, value));
+    }
 
     /**
      * Looks to see if the supplied value is a valid publication type and if so returns the ProtocolReferenceDataValue for it
