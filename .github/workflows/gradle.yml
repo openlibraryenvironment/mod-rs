@@ -37,14 +37,20 @@ jobs:
         if: always()
         with:
           files: "service/build/test-results/**/*.xml"
+      - name: Stop containers
+        if: always()
+        run: |
+          cd tools/testing
+          docker-compose down -v
+          sleep 10
       - name: Upload Test Results Files
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: testLogfiles
           path: |
-            "service/build/test-results/**/*.xml"
-            "tools/testing/dockerOutput.log"
+            service/build/test-results/**/*.xml
+            tools/testing/dockerOutput.log
           retention-days: 2
       - name: Prepare env for docker build
         run: | 
