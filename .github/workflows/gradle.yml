@@ -20,7 +20,7 @@ jobs:
         run: |
           cd tools/testing
           docker-compose down -v
-          docker-compose up -d > dockerOutput.log
+          docker-compose up -d &> dockerOutput.log
           sleep 20
       - name: Inject github build number
         run: |
@@ -51,7 +51,7 @@ jobs:
           path: |
             service/build/test-results/**/*.xml
             tools/testing/dockerOutput.log
-          retention-days: 2
+          retention-days: 1
       - name: Prepare env for docker build
         run: | 
           echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
