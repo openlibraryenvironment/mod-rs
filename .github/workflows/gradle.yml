@@ -37,7 +37,12 @@ jobs:
         if: always()
         with:
           files: "service/build/test-results/**/*.xml"
-          large_files: true
+      - name: Upload Test Results Files
+        uses: actions/upload-artifact@v3
+        with:
+          name: testLogfiles
+          path: "service/build/test-results/**/*.xml"
+          retention-days: 2
       - name: Prepare env for docker build
         run: | 
           echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
