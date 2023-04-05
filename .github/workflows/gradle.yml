@@ -20,8 +20,8 @@ jobs:
         run: |
           cd tools/testing
           docker-compose down -v
-          docker-compose up -d
-          sleep 30
+          docker-compose up -d > dockerOutput.log
+          sleep 20
       - name: Inject github build number
         run: |
           # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
@@ -42,7 +42,9 @@ jobs:
         if: always()
         with:
           name: testLogfiles
-          path: "service/build/test-results/**/*.xml"
+          path: |
+            "service/build/test-results/**/*.xml"
+            "tools/testing/dockerOutput.log"
           retention-days: 2
       - name: Prepare env for docker build
         run: | 
