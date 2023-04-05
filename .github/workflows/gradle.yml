@@ -39,6 +39,7 @@ jobs:
           files: "service/build/test-results/**/*.xml"
       - name: Upload Test Results Files
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: testLogfiles
           path: "service/build/test-results/**/*.xml"
