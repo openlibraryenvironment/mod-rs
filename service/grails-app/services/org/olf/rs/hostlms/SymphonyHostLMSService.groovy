@@ -26,13 +26,14 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     return 'marcxml';
   }
 
-  //Override to search on attribute 1016, and prepend '^C' to search string
+  //Override to search on attribute 1016 and tweak identifier for search string
   @Override
   public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
 
     List<ItemLocation> result = [];
 
     String search_id = pr.supplierUniqueRecordId;
+    search_id = modifyIdentifier(search_id);
     String prefix_query_string = "@attr 1=1016 ${search_id}";
     def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
     log.debug("Got Z3950 response: ${z_response}");
@@ -48,6 +49,18 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     }
 
     return result;
+  }
+
+  //Strip any non-numeric characters from the front of the string and prepend ^C
+  protected String modifyIdentifier(String id) {
+    def pattern = /([a-zA-Z]+)?(.*)/;
+    def matcher = id =~ pattern;
+    matcher.find();
+    if (matcher.matches() && matcher.group(2)?.length() > 0) {
+      return '^C' + matcher.group(2);
+    }
+    log.debug("Unable to determine characters to strip from identifier");
+    return '^C' + id; 
   }
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
