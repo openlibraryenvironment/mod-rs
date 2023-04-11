@@ -65,6 +65,8 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String RESPONDER_SHIPPED_RETURN_ISO18626        = 'responderShippedReturnISO18626';
     static public final String RESPONDER_STATUS_REQUEST_ISO18626        = 'responderStausRequestISO18626';
 
+    static public final String CDL_RESPONDER_CHECK_INTO_RESHARE         = 'cdlResponderCheckInToReshare';
+
     // Responder event lists
     static public final String RESPONDER_EVENT_NEW_PATRON_REQUEST = 'responderNewPatronRequestIndList';
 

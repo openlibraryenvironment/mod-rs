@@ -1349,6 +1349,27 @@ public class ActionEventResultData {
         ]
     ];
 
+    // CDL Responder
+    private static Map cdlResponderCheckInToReshareOK = [
+        code: 'responderCheckInToReshareOK',
+        description: 'Responder has successfully checked the items out of the LMS into reshare',
+        result: true,
+        status: Status.RESPONDER_SEQUESTERED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+    private static Map cdlResponderCheckInToReshareList = [
+        code: ActionEventResultList.CDL_RESPONDER_CHECK_INTO_RESHARE,
+        description: 'The responder has said that they will supply the item(s) ',
+        model: StateModel.MODEL_CDL_RESPONDER,
+        results: [
+            responderCheckInToReshareFailure,
+            cdlResponderCheckInToReshareOK,
+        ]
+    ];
+
+
     // Now specify all the ones we are going to load
     private static Map[] allResultLists = [
         // Requester lists
@@ -1389,6 +1410,9 @@ public class ActionEventResultData {
         responderNewPatronRequestIndList,
         responderNoStatusChangeList,
         responderPrintPullSlipList,
+
+        // CDL responder lists
+        cdlResponderCheckInToReshareList,
 
         // ISO18626 lists
         requesterAwaitingReturnShippingISO18626,

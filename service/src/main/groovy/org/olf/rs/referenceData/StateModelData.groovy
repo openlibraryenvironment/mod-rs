@@ -62,12 +62,31 @@ public class StateModelData {
         [ status : Status.RESPONDER_UNFILLED, isTerminal : true ]
     ];
 
+    // The states available to the default CDL responder state model
+    static private final List cdlResponderStates = [
+            [ status : Status.RESPONDER_AWAIT_PICKING ],
+            [ status : Status.RESPONDER_AWAIT_SHIP ],
+            [ status : Status.RESPONDER_AWAITING_RETURN_SHIPPING ],
+            [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
+            [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
+            [ status : Status.RESPONDER_COMPLETE, isTerminal : true ],
+            [ status : Status.RESPONDER_IDLE, canTriggerStaleRequest : true ],
+            [ status : Status.RESPONDER_ITEM_RETURNED ],
+            [ status : Status.RESPONDER_ITEM_SHIPPED, canTriggerOverdueRequest : true ],
+            [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
+            [ status : Status.RESPONDER_NOT_SUPPLIED, isTerminal : true ],
+            [ status : Status.RESPONDER_OVERDUE ],
+            [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
+            [ status : Status.RESPONDER_UNFILLED, isTerminal : true ]
+    ];
+
 	public void load() {
 		log.info("Adding state model records to the database");
 
         // Now update the state models with the initial state
         StateModel.ensure(StateModel.MODEL_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, requesterStates);
         StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, responderStates);
+        StateModel.ensure(StateModel.MODEL_CDL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, cdlResponderStates, [[ stateModel: StateModel.MODEL_RESPONDER, priority: 5 ]]);
 	}
 
 	public static void loadAll() {

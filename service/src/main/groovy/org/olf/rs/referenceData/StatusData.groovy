@@ -65,6 +65,10 @@ public class StatusData {
         Status.ensure(Status.RESPONDER_CANCELLED, StatusStage.COMPLETED, '9999', true, null, true, 3);
         Status.ensure(Status.RESPONDER_ERROR, StatusStage.ACTIVE, '9999', true, true);
         Status.ensure(Status.RESPONDER_OVERDUE, StatusStage.ACTIVE_SHIPPED, '9997', true);
+
+        // CDL Responder
+        Status.ensure(Status.RESPONDER_SEQUESTERED, StatusStage.ACTIVE, '0020', true);
+
 	}
 
 	public static void loadAll() {

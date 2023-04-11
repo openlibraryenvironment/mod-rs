@@ -55,6 +55,8 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_PENDING_CONDITIONAL_ANSWER = "RES_PENDING_CONDITIONAL_ANSWER";
   public static final String RESPONDER_UNFILLED                   = "RES_UNFILLED";
 
+  public static final String RESPONDER_SEQUESTERED              = "RES_SEQUESTERED";
+
   // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database
   public static final String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";
