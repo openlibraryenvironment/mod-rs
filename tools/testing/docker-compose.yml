@@ -84,7 +84,7 @@ services:
       echo This command adds an alias to the mc config file so we can refer to the server as minio;
       /usr/bin/mc config host add minio http://minio:9000 DEVDEVDEV001 DEVDEVDEV001;
       echo Added host http://minio:9000
-      /usr/bin/mc admin policy add minio reshare-readwrite /minio_config/reshare-readwrite-policy.json;
+      /usr/bin/mc admin policy create minio reshare-readwrite /minio_config/reshare-readwrite-policy.json;
       echo Added policy reshare-readwrite
       /usr/bin/mc admin user add minio RESHARE_AGG_ACCESS_KEY RESHARE_AGG_SECRET_KEY;
       echo Added user RESHARE_AGG_ACCESS_KEY
