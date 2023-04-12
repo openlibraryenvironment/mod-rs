@@ -88,7 +88,7 @@ services:
       echo Added policy reshare-readwrite >> /tmp/minioSetup.txt 2>&1;
       /usr/bin/mc admin user add minio RESHARE_AGG_ACCESS_KEY RESHARE_AGG_SECRET_KEY >> /tmp/minioSetup.txt 2>&1;
       echo Added user RESHARE_AGG_ACCESS_KEY >> /tmp/minioSetup.txt 2>&1;
-      /usr/bin/mc admin policy set minio reshare-readwrite user=RESHARE_AGG_ACCESS_KEY >> /tmp/minioSetup.txt 2>&1;
+      /usr/bin/mc admin policy attach minio reshare-readwrite --user RESHARE_AGG_ACCESS_KEY >> /tmp/minioSetup.txt 2>&1;
       echo Associated user RESHARE_AGG_ACCESS_KEY with policy reshare-readwrite >> /tmp/minioSetup.txt 2>&1;
       /usr/bin/mc mb minio/reshare-general >> /tmp/minioSetup.txt 2>&1;
       echo Mounted / created bucket minio/reshare-general >> /tmp/minioSetup.txt 2>&1;
