@@ -20,7 +20,7 @@ jobs:
         run: |
           cd tools/testing
           docker-compose down -v
-          docker-compose up -T -d &> dockerOutput.log
+          docker-compose up -d &> dockerOutput.log
           sleep 20
       - name: Inject github build number
         run: |
