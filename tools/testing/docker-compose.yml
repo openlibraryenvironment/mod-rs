@@ -80,7 +80,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       echo sleeping;
-      sleep 20;
+      sleep 40;
       echo This command adds an alias to the mc config file so we can refer to the server as minio;
       /usr/bin/mc config host add minio http://minio:9000 DEVDEVDEV001 DEVDEVDEV001;
       echo Added host http://minio:9000;
