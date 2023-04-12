@@ -42,11 +42,11 @@ jobs:
         run: |
           cd tools/testing
           docker ps -a > ps.log
-          docker logs `docker ps -a | grep "testing-setup-1" | cut -d " " -f 1` > minioSetup.log
+          docker logs `docker ps -a | grep "testing_setup-1" | cut -d " " -f 1` > minioSetup.log
           docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
-          docker logs `docker ps | grep "testing-kafka1-1" | cut -d " " -f 1` > kafka.log
+          docker logs `docker ps | grep "testing_kafka1-1" | cut -d " " -f 1` > kafka.log
           docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
-          docker logs `docker ps | grep "testing-zoo1-1" | cut -d " " -f 1` > zookeeper.log
+          docker logs `docker ps | grep "testing_zoo1-1" | cut -d " " -f 1` > zookeeper.log
       - name: Stop containers
         if: always()
         run: |
@@ -60,7 +60,6 @@ jobs:
           name: testLogfiles
           path: |
             service/build/test-results/**/*.xml
-            tools/testing/dockerOutput.log
             tools/testing/*.log
           retention-days: 1
       - name: Prepare env for docker build
