@@ -37,6 +37,11 @@ jobs:
         if: always()
         with:
           files: "service/build/test-results/**/*.xml"
+      - name: Capture minio output
+        if: always()
+        run: |
+          cd tools/testing
+          docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
       - name: Stop containers
         if: always()
         run: |
@@ -51,6 +56,7 @@ jobs:
           path: |
             service/build/test-results/**/*.xml
             tools/testing/dockerOutput.log
+            tools/testing/minio.log
           retention-days: 1
       - name: Prepare env for docker build
         run: | 
