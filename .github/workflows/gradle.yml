@@ -41,6 +41,7 @@ jobs:
         if: always()
         run: |
           cd tools/testing
+          docker ps -a > ps.log
           docker logs `docker ps -a | grep "testing-setup-1" | cut -d " " -f 1` > minioSetup.log
           docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
           docker logs `docker ps | grep "testing-kafka1-1" | cut -d " " -f 1` > kafka.log
