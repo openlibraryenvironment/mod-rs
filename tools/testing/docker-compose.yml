@@ -102,5 +102,6 @@ services:
       # /usr/bin/mc admin config export
       # echo Minio user creation: https://docs.min.io/docs/minio-multi-user-quickstart-guide.html
       # echo https://github.com/minio/minio/issues/6811 - policy example
+      echo Completed setup
       exit 0;
       "
