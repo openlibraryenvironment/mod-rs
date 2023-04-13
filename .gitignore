@@ -5,3 +5,4 @@
 Vagrantfile
 tools/testing/zk-single-kafka-single
 *.log
+tools/testing/minio_data
