@@ -132,7 +132,7 @@ class ProtocolMessageBuildingService {
      */
 
     // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-    if (req.deliveryMethod) {
+    if (req.deliveryMethod?.value == 'url') {
       message.requestedDeliveryInfo = [
         address: [
           electronicAddress: [
