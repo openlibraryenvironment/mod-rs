@@ -20,8 +20,8 @@ jobs:
         run: |
           cd tools/testing
           docker-compose down -v
-          docker-compose up -d
-          sleep 10
+          docker-compose up -d &> dockerOutput.log
+          sleep 20
       - name: Inject github build number
         run: |
           # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
@@ -37,6 +37,31 @@ jobs:
         if: always()
         with:
           files: "service/build/test-results/**/*.xml"
+      - name: Capture container output
+        if: always()
+        run: |
+          cd tools/testing
+          docker ps -a > ps.log
+          docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
+          docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
+          docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
+          docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
+          docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
+      - name: Stop containers
+        if: always()
+        run: |
+          cd tools/testing
+          docker-compose down -v
+          sleep 10
+      - name: Upload Test Results Files
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: testLogfiles
+          path: |
+            service/build/test-results/**/*.xml
+            tools/testing/*.log
+          retention-days: 1
       - name: Prepare env for docker build
         run: | 
           echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
