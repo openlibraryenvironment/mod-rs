@@ -188,7 +188,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Boolean needsAttention
 
-  int unreadMessageCount
+  /** Gives the count of unread messages, do not use this to test if there any unread messages */
+  int unreadMessageCount;
+
+  /** Is true if there are unread messages, use this instead of unreadMessageCount > 0  */
+  Boolean hasUnreadMessages;
 
   String dueDateFromLMS
   Date parsedDueDateFromLMS
@@ -357,6 +361,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   static mapping = {
     unreadMessageCount formula: '(SELECT COUNT(*) FROM patron_request_notification AS prn INNER JOIN patron_request as pr ON prn.prn_patron_request_fk = pr.pr_id WHERE pr.pr_id = pr_id AND prn.prn_seen = false AND prn.prn_is_sender = false )'
+	hasUnreadMessages formula: 'exists (SELECT 1 FROM patron_request_notification AS prn INNER JOIN patron_request as pr ON prn.prn_patron_request_fk = pr.pr_id WHERE pr.pr_id = pr_id AND prn.prn_seen = false AND prn.prn_is_sender = false )'
 
     id column : 'pr_id', generator: 'uuid2', length:36
     version column : 'pr_version'
