@@ -15,6 +15,19 @@ import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 conversionRule 'clr', ColorConverter
 conversionRule 'wex', WhitespaceThrowableProxyConverter
 
+appender("FILE", FileAppender) {
+    file = "../logs/reshare.log"
+    append = false
+    encoder(PatternLayoutEncoder) {
+        pattern =
+            '%d{yyyy-MM-dd HH:mm:ss.SSS} ' + // Date
+            '%5p ' + // Log level
+            '--- [%15.15t] ' + // Thread
+            "%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : " +
+            '%m%n%wex' // Message
+    }
+}
+
 // See http://logback.qos.ch/manual/groovy.html for details on configuration
 appender('STDOUT', ConsoleAppender) {
     if ( ( Environment.isDevelopmentMode() ) ||
@@ -175,4 +188,4 @@ else {
   logger ('mod.rs', INFO)
 }
 
-root(WARN, ['STDOUT'])
+root(WARN, ['STDOUT', 'FILE'])
