@@ -99,7 +99,7 @@ class ExternalApiController {
         org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
         log.debug("GPATH MESSAGE: ${iso18626_msg}")
 
-        // TODO This string is purely used for logging messages atm--decide if necessary
+        // This string is purely used for logging messages
         String recipient;
 
         if ( iso18626_msg.request != null ) {
@@ -180,7 +180,6 @@ class ExternalApiController {
     log.debug(ContextLogging.MESSAGE_EXITING);
   }
 
-  // ToDo this method is only used for logging purposes--consider removal
   private String getSymbolFor(path) {
 
     String result = null;
