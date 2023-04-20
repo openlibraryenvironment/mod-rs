@@ -232,6 +232,7 @@ public class StatusService {
 
     /**
      * Performs a reverse lookup to find which status could be saved when we change to a specific state
+     * Note: this does not take into account events
      * @param status The status that we change to when the state is changed
      * @return The list of status that could have taken us to this state
      */
@@ -261,9 +262,6 @@ public class StatusService {
                     }
                 }
             }
-
-            // TODO: how do we deal with events ... With any luck events do not trigger a save ...
-            // We will deal with that when events are added to the diagram
         }
 
         // Return a unique list
