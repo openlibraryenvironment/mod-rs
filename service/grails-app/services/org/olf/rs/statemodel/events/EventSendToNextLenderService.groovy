@@ -144,7 +144,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                 }
             }
 
-            // ToDo - there are three possible states here,not two - Send, End of Rota, Error
             // Did we send a request?
             if (request.networkStatus == NetworkStatus.Sent) {
                 log.debug('sendToNextLender sent to next lender.....');
