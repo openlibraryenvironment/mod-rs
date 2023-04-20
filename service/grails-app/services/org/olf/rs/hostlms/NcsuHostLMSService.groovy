@@ -10,7 +10,7 @@ public class NcsuHostLMSService extends SymphonyHostLMSService {
   @Override
   public CirculationClient getCirculationClient(ISettings settings, String address) {
     String password = settings.getSettingValue(SettingsData.SETTING_NCIP_FROM_AGENCY_AUTHENTICATION);
-    // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
+    // This wrapper creates the circulationClient we need
     return new NCIPClientWrapper(address,
      [
       fromAgencyAuthentication: password,
