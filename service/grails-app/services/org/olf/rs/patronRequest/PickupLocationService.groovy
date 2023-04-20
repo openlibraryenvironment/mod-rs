@@ -4,7 +4,7 @@ import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.PatronRequest;
 
 /**
- * Deals with all things to do qith a pickup location
+ * Deals with all things to do with a pickup location
  * @author Chas
  */
 public class PickupLocationService {
@@ -36,7 +36,7 @@ public class PickupLocationService {
                     symbol?.priority == 'shipping' ? symbol?.authority?.symbol + ':' + symbol?.symbol : null
                 }
 
-                // TODO this deserves a better home
+                // Set the descriptive part of the pickup location on the request
                 request.pickupLocation = pickupSymbols.size > 0 ? "${pickupLoc.name} --> ${pickupSymbols [0]}" : pickupLoc.name;
             }
         } else {
