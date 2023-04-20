@@ -7,7 +7,6 @@ import groovy.xml.StreamingMarkupBuilder
 
 class ConfirmationMessageService {
 
-  // ToDo this method is currently also only used for logging purposes, consider removal
   public def confirmationMessageReadable(def confirmationMessage, boolean add_prolog = false) {
     StringWriter sw = new StringWriter();
 
