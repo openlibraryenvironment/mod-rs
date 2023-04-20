@@ -107,7 +107,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
                     // At this point we have a list of NCIP calls to make.
                     // We should make those calls and track which succeeded/failed
-                    // TODO perhaps test by inserting a temporary % chance of NCIP failure in manual adapter
 
                     // Store a string and a Date to save onto the request at the end
                     Date parsedDate
