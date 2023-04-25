@@ -1,30 +1,30 @@
 package org.olf.rs
 
-import static groovy.transform.TypeCheckingMode.SKIP
+import static groovy.transform.TypeCheckingMode.SKIP;
 
-import java.time.Duration
+import java.time.Duration;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.errors.WakeupException
-import org.olf.okapi.modules.directory.DirectoryEntry
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
+import org.olf.okapi.modules.directory.DirectoryEntry;
+import org.olf.rs.constants.Directory;
 import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.utils.TopicList;
 
-import com.k_int.okapi.OkapiTenantResolver
-import com.k_int.web.toolkit.async.WithPromises
-import com.k_int.web.toolkit.custprops.CustomPropertyDefinition
-import com.k_int.web.toolkit.custprops.types.CustomPropertyText
+import com.k_int.okapi.OkapiTenantResolver;
+import com.k_int.web.toolkit.async.WithPromises;
+import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
+import com.k_int.web.toolkit.custprops.types.CustomPropertyText;
 
-import grails.async.Promise
-import grails.core.GrailsApplication
-import grails.events.EventPublisher
-import grails.events.annotation.Subscriber
-import grails.gorm.multitenancy.Tenants
-import grails.web.databinding.DataBinder
-import groovy.json.JsonSlurper
-import groovy.transform.CompileStatic
-
+import grails.async.Promise;
+import grails.core.GrailsApplication;
+import grails.events.EventPublisher;
+import grails.events.annotation.Subscriber;
+import grails.gorm.multitenancy.Tenants;
+import grails.web.databinding.DataBinder;
+import groovy.json.JsonSlurper;
+import groovy.transform.CompileStatic;
 
 /**
  * Listen to configured KAFKA topics and react to them.
@@ -312,11 +312,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     payload?.customProperties?.each { k, v ->
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
       // we need to see if we can find
-      if ( ['local_institutionalPatronId',
-            'policy.ill.loan_policy',
-            'policy.ill.last_resort',
-            'policy.ill.returns',
-            'policy.ill.InstitutionalLoanToBorrowRatio'].contains(k) ) {
+      if ( [Directory.KEY_LOCAL_INSTITUTION_PATRON_ID,
+            Directory.KEY_ILL_POLICY_LOAN,
+            Directory.KEY_ILL_POLICY_LAST_RESORT,
+            Directory.KEY_ILL_POLICY_RETURNS,
+            Directory.KEY_ILL_POLICY_BORROW_RATIO].contains(k) ) {
         log.debug("processing binding for ${k} -> ${v}")
         boolean first = true
 
@@ -408,11 +408,11 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   private void cleanCustomProperties(DirectoryEntry de) {
 
     // Fror each of these custprops - we should have a scalar, not a set
-    ['local_institutionalPatronId',
-     'policy.ill.loan_policy',
-     'policy.ill.last_resort',
-     'policy.ill.returns',
-     'policy.ill.InstitutionalLoanToBorrowRatio'].each { k ->
+    [Directory.KEY_LOCAL_INSTITUTION_PATRON_ID,
+     Directory.KEY_ILL_POLICY_LOAN,
+     Directory.KEY_ILL_POLICY_LAST_RESORT,
+     Directory.KEY_ILL_POLICY_RETURNS,
+     Directory.KEY_ILL_POLICY_BORROW_RATIO].each { k ->
 
       boolean first = true
       boolean updated = false

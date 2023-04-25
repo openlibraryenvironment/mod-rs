@@ -2,31 +2,25 @@ package org.olf.rs;
 
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.constants.Directory;
 
-import com.k_int.web.toolkit.custprops.CustomProperty
+import com.k_int.web.toolkit.custprops.CustomProperty;
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Slf4j;
 
 
 @Slf4j
 /* This service will hold some statics and some methods dedicated to parsing information out of a DirectoryEntry */
 public class DirectoryEntryService {
-  /* This collection of statics allows us to update in one place when things change.
-   * TODO we probably ought to collect some of these keys/values here if they're likely to change.
-   * The change from "ill.loan_policy" to "policy.ill.loan_policy" broke some things.
-   */
-  static final ill_policy_custprop_key = 'policy.ill.loan_policy'
-
-
 
   boolean directoryEntryIsLending(DirectoryEntry dirEnt) {
-    def entry_loan_policy = parseCustomPropertyValue(dirEnt, ill_policy_custprop_key)
+    def entry_loan_policy = parseCustomPropertyValue(dirEnt, Directory.KEY_ILL_POLICY_LOAN);
 
     log.debug("directoryEntry(${dirEnt}) loan_policy : ${entry_loan_policy}");
     return (
       entry_loan_policy == null ||
-      entry_loan_policy == 'lending_all_types' ||
-      entry_loan_policy == 'lending_physical_only'
+      entry_loan_policy == Directory.LOAN_POLICY_LENDING_ALL ||
+      entry_loan_policy == Directory.LOAN_POLICY_LENDING_PHYSICAL_ONLY
     )
   }
 

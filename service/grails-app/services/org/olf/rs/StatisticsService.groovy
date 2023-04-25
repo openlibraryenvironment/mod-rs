@@ -1,9 +1,10 @@
 package org.olf.rs
 
-import org.olf.okapi.modules.directory.ServiceAccount
+import org.olf.okapi.modules.directory.ServiceAccount;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.constants.Directory;
 
-import groovy.json.JsonSlurper
+import groovy.json.JsonSlurper;
 
 /**
  * This service takes responsibility for assembling/aggregating all the data needed
@@ -84,11 +85,11 @@ public class StatisticsService {
 
         // symbol.owner.customProperties is a CustomPropertyContainer which means it's value is a list of custom properties
         try {
-          def ratio_custprop = symbol.owner.customProperties.value.find { it.definition?.name == 'policy.ill.InstitutionalLoanToBorrowRatio' }
+          def ratio_custprop = symbol.owner.customProperties.value.find { it.definition?.name == Directory.KEY_ILL_POLICY_BORROW_RATIO };
           String ratio = ratio_custprop?.value
 
           if ( ratio == null ) {
-            log.warn('Unable to find policy.ill.InstitutionalLoanToBorrowRatio in custom properties, using 1:1 as a default');
+            log.warn('Unable to find ${Directory.KEY_ILL_POLICY_BORROW_RATIO} in custom properties, using 1:1 as a default');
             ratio = "1:1"
             symbol.owner.customProperties.value.each { cp ->
               log.info("    custom properties that are present: ${cp.definition?.name} -> ${cp.value}");

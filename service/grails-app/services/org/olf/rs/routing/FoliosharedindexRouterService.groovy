@@ -1,13 +1,11 @@
 package org.olf.rs.routing;
 
-import org.olf.rs.routing.RequestRouter;
-import org.olf.rs.routing.RankedSupplier;
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.AvailabilityStatement;
+import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.SharedIndexService;
-import org.olf.rs.StatisticsService
-import org.olf.rs.DirectoryEntryService
+import org.olf.rs.StatisticsService;
+import org.olf.rs.constants.Directory;
 
 
 public class FoliosharedindexRouterService implements RequestRouter {
@@ -53,8 +51,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
       if ( s != null ) {
         log.debug("Refine availability statement ${av_stmt} for symbol ${s}");
 
-        // 2. See if the entry has policy.ill.loan_policy set to "Not Lending" - if so - skip
-        // s.owner.customProperties is a container :: com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
+        // 2. Is the directory entry lending
         def isLending = directoryEntryService.directoryEntryIsLending(s.owner);
 
         if ( isLending ) {
@@ -67,7 +64,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
 
           if ( ownerStatus == null ) {
             log.debug("Unable to get owner status for ${s}");
-          } 
+          }
 
           if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
             loadBalancingScore = 10000;
@@ -83,7 +80,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
             loadBalancingReason = 'No load balancing information available for peer'
           }
 
-          RankedSupplier rota_entry = new RankedSupplier( 
+          RankedSupplier rota_entry = new RankedSupplier(
                                                supplier_symbol: av_stmt.symbol,
                                                instance_identifier: av_stmt.instanceIdentifier,
                                                copy_identifier: av_stmt.copyIdentifier,
@@ -93,15 +90,15 @@ public class FoliosharedindexRouterService implements RequestRouter {
           result.add(rota_entry)
         }
         else {
-          def entry_loan_policy = directoryEntryService.parseCustomPropertyValue(s.owner, directoryEntryService.ill_policy_custprop_key)
+          def entry_loan_policy = directoryEntryService.parseCustomPropertyValue(s.owner, Directory.KEY_ILL_POLICY_LOAN);
           log.debug("Directory entry says not currently lending - ${av_stmt.symbol}/policy=${entry_loan_policy}");
         }
       }
       else {
         log.debug("Unable to locate symbol ${av_stmt.symbol}");
-      } 
+      }
     }
-    
+
     def sorted_result = result.toSorted { a,b -> b.rank <=> a.rank }
     log.debug("createRankedRota returns ${sorted_result}");
     return sorted_result;
