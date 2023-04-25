@@ -4,9 +4,10 @@ import org.olf.rs.Counter;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
-import org.olf.rs.PatronRequestAudit
+import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.SettingsService;
+import org.olf.rs.constants.Directory;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractAction;
@@ -97,7 +98,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     * Finally we can extract the value from that custprop.
                     * Here that value is a string, but in the refdata case we'd need value?.value
                     */
-                    CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, 'local_institutionalPatronId');
+                    CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
                     String institutionalPatronIdValue = institutionalPatronId?.value
                     if (!institutionalPatronIdValue) {
                         // If nothing on the Directory Entry then fallback to the default in settings
