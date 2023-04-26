@@ -90,7 +90,8 @@ public class BackgroundTaskService {
                         try {
                             Map tenant_locale = okapiSettingsService.getLocaleSettings();
                             log.debug("Got system locale settings : ${tenant_locale}");
-                            tz = TimeZone.getTimeZone(tenant_locale?.timezone);
+                            String localeTimeZone = tenant_locale?.timezone;
+                            tz = TimeZone.getTimeZone(localeTimeZone);
                         } catch ( Exception e ) {
                             log.debug("Failure getting locale to determine timezone, processing timer in UTC:", e);
                             tz = TimeZone.getTimeZone('UTC');
