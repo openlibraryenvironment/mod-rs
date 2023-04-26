@@ -1,11 +1,9 @@
 package org.olf.rs
 
-import javax.persistence.LockModeType;
-
-import org.hibernate.LockOptions;
-import org.hibernate.query.Query;
+import org.hibernate.LockMode;
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.templating.TemplateContainer;
 import org.olf.templating.TemplatingService;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
@@ -87,31 +85,30 @@ public class PatronNoticeService {
         log.debug("Processing patron notice queue")
         try {
             NoticeEvent.withSession { sess ->
-                // Using SKIP_LOCKED we avoid selecting rows that other timers may be operating on
-                Query query = sess.createQuery('from NoticeEvent where sent=false');
-                query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-                query.setHint('javax.persistence.lock.timeout', LockOptions.SKIP_LOCKED);
-                query.list().each { ev ->
-                    Map values = null;
-                    if (ev.jsonData == null) {
-                        // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
-                        values = requestValues(ev.patronRequest);
-                    } else {
-                        // The new way of doing it
-                        values = new groovy.json.JsonSlurper().parseText(ev.jsonData);
-                    }
+                NoticeEvent.executeQuery('select ne, npn from NoticeEvent ne, NoticePolicyNotice npn where ne.sent = false and npn.trigger.id = ne.trigger.id').each { selectedObjects ->
+                    NoticeEvent noticeEvent = selectedObjects[0];
+                    // Now see if we can lock the NoticeEvent record
+                    if (lockNoticeEvent(noticeEvent)) {
+                        NoticePolicyNotice noticePolicyNotice = selectedObjects[1];
+                        NoticePolicy noticePolicy = noticePolicyNotice.noticePolicy;
+                        Map values = null;
+                        if (noticeEvent.jsonData == null) {
+                            // This shouldn't happen, it will be for those requests that occurred, just before the upgrade to when we started using jsonData
+                            values = requestValues(noticeEvent.patronRequest);
+                        } else {
+                            // The new way of doing it
+                            values = new groovy.json.JsonSlurper().parseText(noticeEvent.jsonData);
+                        }
 
-                    // If we do not have an email address then do not attempt to send it
-                    if (values.email != null) {
-                        // TODO: incorporate this into the above query
-                        NoticePolicyNotice[] notices = NoticePolicyNotice.findAll { noticePolicy.active == true && trigger.id == ev.trigger.id };
-                        notices.each { notice ->
-                            log.debug("Generating patron notice corresponding to trigger ${ev.trigger.value} for policy ${notice.noticePolicy.name} and template ${notice.template.name}")
+                        // If we do not have an email address or the policy is not active then do not attempt to send it
+                        if ((values.email != null) && (noticePolicy.active == true)) {
+                            TemplateContainer template = noticePolicyNotice.template;
+                            log.debug("Generating patron notice corresponding to trigger ${noticeEvent.trigger.value} for policy ${noticePolicy.name} and template ${template.name}")
                             try {
-                                Map tmplResult = templatingService.performTemplate(notice.template, values, 'en');
+                                Map tmplResult = templatingService.performTemplate(template, values, 'en');
                                 if (tmplResult.result.body && tmplResult.result.body.trim()) {
                                     Map emailParams = [
-                                        notificationId: notice.id,
+                                        notificationId: noticePolicyNotice.id,
                                         to: values.email,
                                         header: tmplResult.result.header,
                                         body: tmplResult.result.body,
@@ -123,11 +120,11 @@ public class PatronNoticeService {
                                 log.error("Problem sending notice", e);
                             }
                         }
-                    }
 
-                    // "sent" in this case is more like processed -- not all events necessarily result in notices
-                    ev.sent = true;
-                    ev.save(flush:true, failOnError:true);
+                        // "sent" in this case is more like processed -- not all events necessarily result in notices
+                        noticeEvent.sent = true;
+                        noticeEvent.save(flush:true, failOnError:true);
+                    }
                 }
             }
             NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.sent = true');
@@ -136,6 +133,23 @@ public class PatronNoticeService {
         } finally {
             log.debug("Completed processing of patron notice triggers");
         }
+    }
+
+    private boolean lockNoticeEvent(NoticeEvent noticeEvent) {
+        boolean lockObtained = false;
+        try {
+            NoticeEvent.withCriteria {
+                eq "id", Long.valueOf(noticeEvent.id)
+                delegate.criteria.lockMode = LockMode.UPGRADE_NOWAIT
+            };
+
+            // the noticeEvent record is now locked
+            lockObtained = true;
+        } catch (Exception e) {
+            log.error("Failed to lock NoticeEvent record with id: " + noticeEvent.id);
+        }
+
+        return(lockObtained);
     }
 
     private Map requestValues(PatronRequest pr) {
