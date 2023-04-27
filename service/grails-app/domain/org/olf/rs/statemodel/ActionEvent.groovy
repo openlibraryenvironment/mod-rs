@@ -45,8 +45,11 @@ class ActionEvent implements MultiTenant<ActionEvent> {
     /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
     String isAvailableGroovy;
 
-    /** Is this a ction applicable for bulk action, only applicable for actions */
+    /** Is this an action applicable for bulk action, only applicable for actions */
     boolean isAvailableForBulk;
+
+    /** Is this action / event displayable in the UI audit trail */
+    boolean showInAuditTrail;
 
     static constraints = {
                          code (nullable: false, blank: false, unique: true)
@@ -71,6 +74,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         responderServiceClass column: 'ae_responder_service_class', length: 64
             isAvailableGroovy column: 'ae_is_available_groovy', length: 512
            isAvailableForBulk column: 'ae_is_available_for_bulk', defaultValue: "false"
+             showInAuditTrail column: 'ae_show_in_audit_trail', defaultValue: "false"
     }
 
     public static ActionEvent ensure(
@@ -80,6 +84,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         String serviceClass,
         String resultListCode,
         boolean isAvailableForBulk = false,
+        boolean showInAuditTrail = true,
         UndoStatus undoStatus = UndoStatus.NO,
         String responderServiceClass = null,
         String isAvailableGroovy = null
@@ -101,6 +106,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         actionEvent.resultList = ActionEventResultList.lookup(resultListCode);
         actionEvent.serviceClass = serviceClass;
         actionEvent.isAvailableForBulk = isAvailableForBulk;
+        actionEvent.showInAuditTrail = showInAuditTrail;
         actionEvent.undoStatus = undoStatus;
         actionEvent.responderServiceClass = responderServiceClass;
         actionEvent.isAvailableGroovy = isAvailableGroovy;

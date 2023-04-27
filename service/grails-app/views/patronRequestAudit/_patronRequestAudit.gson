@@ -3,4 +3,8 @@ import org.olf.rs.PatronRequestAudit
 
 @Field PatronRequestAudit patronRequestAudit
 
-json g.render(patronRequestAudit, [expand:['fromStatus', 'toStatus'], excludes: ['auditData'] ])
+json g.render(patronRequestAudit, [expand:['fromStatus', 'toStatus' ], excludes: ['auditData'] ]) {
+  if (patronRequestAudit.actionEvent != null) {
+  	showInAuditTrail patronRequestAudit.actionEvent.showInAuditTrail
+  }
+}
