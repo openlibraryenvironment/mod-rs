@@ -29,7 +29,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.RESPONDER_ANWSER_YES);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, 'The responder has added a loan condition', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION.capitalize(), ActionEventResultList.RESPONDER_ADD_CONDITIONAL);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, 'The responder is saying they cannot supply the item(s)', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY.capitalize(), ActionEventResultList.RESPONDER_CANNOT_SUPPLY, true);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, 'The item(s) has been checked out of the responders LMS to Reshare', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE.capitalize(), ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE, false, UndoStatus.YES);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, 'The item(s) has been checked out of the responders LMS to Reshare', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE.capitalize(), ActionEventResultList.RESPONDER_CHECK_INTO_RESHARE, false, true, UndoStatus.YES);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, 'The item(s) have been checked into reshare from the responders LMS and shipped to the requester', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED.capitalize(), ActionEventResultList.RESPONDER_CHECK_IN_AND_SHIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, 'The item(s) has been checked backed into the responders LMS from Reshare', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE.capitalize(), ActionEventResultList.RESPONDER_ITEM_RETURNED, true);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, 'The responder is specifying conditions before they supply the item(s)', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY.capitalize(), ActionEventResultList.RESPONDER_ANWSER_CONDITIONAL);
@@ -62,12 +62,12 @@ public class ActionEventData {
 
         // Both Requester and Responder actions
         ActionEvent.ensure(Actions.ACTION_INCOMING_ISO18626, 'An incoming ISO 18626 message', true, Actions.ACTION_INCOMING_ISO18626.capitalize(), null);
-        ActionEvent.ensure(Actions.ACTION_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize(), null, false, UndoStatus.DECIDE, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize());
+        ActionEvent.ensure(Actions.ACTION_ISO18626_NOTIFICATION, 'An ISO-18626 Notification has been received', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize(), null, false, true, UndoStatus.DECIDE, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_ISO18626_NOTIFICATION.capitalize());
         ActionEvent.ensure(Actions.ACTION_MANUAL_CLOSE, 'Close the request', true, 'ManualClose', null);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, 'Message', null, false, UndoStatus.SKIP);
-        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, 'MessagesAllSeen', null, false, UndoStatus.SKIP);
-        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Mark a specific message as being seen', true, 'MessageSeen', null, false, UndoStatus.SKIP);
-        ActionEvent.ensure(Actions.ACTION_UNDO, 'Attempts to undo the last action performed', true, Actions.ACTION_UNDO.capitalize(), null, false, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE, 'A message is to be sent to the other side of the conversation', true, 'Message', null, false, true, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGES_ALL_SEEN, 'Mark all message as being seen', true, 'MessagesAllSeen', null, false, false, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_MESSAGE_SEEN, 'Mark a specific message as being seen', true, 'MessageSeen', null, false, true, UndoStatus.SKIP);
+        ActionEvent.ensure(Actions.ACTION_UNDO, 'Attempts to undo the last action performed', true, Actions.ACTION_UNDO.capitalize(), null, false, true, UndoStatus.SKIP);
 
         // All the various events
         ActionEvent.ensure(Events.EVENT_MESSAGE_REQUEST_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_MESSAGE_REQUEST_INDICATION), null);
