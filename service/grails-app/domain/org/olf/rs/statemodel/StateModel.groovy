@@ -10,6 +10,7 @@ import grails.gorm.MultiTenant;
 class StateModel implements MultiTenant<StateModel> {
 
     public static final String MODEL_REQUESTER = 'PatronRequest';
+    public static final String MODEL_DIGITAL_RETURNABLE_REQUESTER = 'DigitalReturnableRequester';
     public static final String MODEL_RESPONDER = 'Responder';
     public static final String MODEL_CDL_RESPONDER = 'CDLResponder';
 

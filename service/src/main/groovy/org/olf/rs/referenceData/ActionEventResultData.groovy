@@ -91,6 +91,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map digitalReturnableRequesterISO18626Loaned = [
+      code: 'digitalReturnableRequesterISO18626Loaned',
+      description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
+      result: true,
+      status: Status.REQUESTER_LOANED_DIGITALLY,
+      qualifier: 'Loaned',
+      saveRestoreState: null,
+      nextActionEvent: null
+    ];
+
     private static Map requesterISO18626Overdue = [
         code: 'requesterISO18626Overdue',
         description: 'An incoming ISO-18626 message for the requester has said that the status is Overdue',
@@ -897,6 +907,18 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map digitalReturnableRequesterExpectToSupplyISO18626 = [
+      code: ActionEventResultList.DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626,
+      description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+      model: StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER,
+      results: [
+        requesterISO18626Conditional,
+        digitalReturnableRequesterISO18626Loaned,
+        requesterISO18626Unfilled,
+        defaultNoStatusChangeOK
+      ]
+    ];
+
     private static Map requesterNotificationReceivedISO18626 = [
         code: ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626,
         description: 'An incoming ISO18626 notifications has been received by the requester',
@@ -1359,6 +1381,15 @@ public class ActionEventResultData {
         saveRestoreState: null,
         nextActionEvent: null
     ];
+    private static Map cdlResponderFillDigitalLoanOK = [
+        code: 'responderFillDigitalLoanOK',
+        description: 'Responder has successfully filled the loan digitally',
+        result: true,
+        status: Status.RESPONDER_LOANED_DIGITALLY,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
     private static Map cdlResponderCheckInToReshareList = [
         code: ActionEventResultList.CDL_RESPONDER_CHECK_INTO_RESHARE,
         description: 'The responder has said that they will supply the item(s) ',
@@ -1366,6 +1397,14 @@ public class ActionEventResultData {
         results: [
             responderCheckInToReshareFailure,
             cdlResponderCheckInToReshareOK,
+        ]
+    ];
+    private static Map cdlResponderFillDigitalLoanList = [
+        code: ActionEventResultList.CDL_RESPONDER_FILL_DIGITAL_LOAN,
+        description: 'The responder has said that they will supply the item(s) ',
+        model: StateModel.MODEL_CDL_RESPONDER,
+        results: [
+            cdlResponderFillDigitalLoanOK
         ]
     ];
 
@@ -1392,6 +1431,9 @@ public class ActionEventResultData {
         requesterSendToNextLocationList,
         requesterValidateIndList,
 
+        // Digital returnable requester lists
+        digitalReturnableRequesterExpectToSupplyISO18626,
+
         // Responder lists
         responderAddConditionalList,
         responderAnswerConditionalList,
@@ -1413,6 +1455,7 @@ public class ActionEventResultData {
 
         // CDL responder lists
         cdlResponderCheckInToReshareList,
+        cdlResponderFillDigitalLoanList,
 
         // ISO18626 lists
         requesterAwaitingReturnShippingISO18626,

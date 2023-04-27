@@ -40,6 +40,8 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_VALIDATED                   = "REQ_VALIDATED";
   public static final String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
 
+  public static final String REQUESTER_LOANED_DIGITALLY                 = "REQ_LOANED_DIGITALLY";
+
   public static final String RESPONDER_AWAIT_PICKING              = "RES_AWAIT_PICKING";
   public static final String RESPONDER_AWAIT_SHIP                 = "RES_AWAIT_SHIP";
   public static final String RESPONDER_AWAITING_RETURN_SHIPPING   = "RES_AWAITING_RETURN_SHIPPING";
@@ -56,6 +58,7 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_UNFILLED                   = "RES_UNFILLED";
 
   public static final String RESPONDER_SEQUESTERED              = "RES_SEQUESTERED";
+  public static final String RESPONDER_LOANED_DIGITALLY         = "RES_LOANED_DIGITALLY";
 
   // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database

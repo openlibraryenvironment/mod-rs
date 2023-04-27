@@ -110,6 +110,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String pickupLocationCode
   String pickupLocationSlug
   DirectoryEntry resolvedPickupLocation
+  String pickupURL
 
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
@@ -341,6 +342,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocationCode (nullable: true)
     pickupLocationSlug (nullable: true)
     resolvedPickupLocation (nullable: true)
+    pickupURL (nullable: true, blank:false)
 
     resolvedPatron (nullable: true)
     // this is Boolean - does not support nullable - must be true or false - comment out to remove warning
@@ -454,6 +456,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     pickupLocationCode column : 'pr_pref_service_point_code'
     pickupLocationSlug column : 'pr_pickup_location_slug'
     resolvedPickupLocation column : 'pr_resolved_pickup_location_fk'
+    pickupURL column : 'pr_pickup_url'
     resolvedPatron column : 'pr_resolved_patron_fk'
     requestToContinue column: 'pr_request_to_continue'
     previousStates column: 'pr_previous_states'

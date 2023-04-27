@@ -39,8 +39,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'The responder has printed the pull slip', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.RESPONDER_PRINT_PULL_SLIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, 'The responder is responding to a request to cancel the request from the requester', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL.capitalize(), ActionEventResultList.RESPONDER_CANCEL);
         // CDL specific
-//        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MARK_SEQUESTERED, 'The responder has sequestered the item(s)', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED.capitalize(), ActionEventResultList.RESPONDER_MARK_SHIPPED, true);
-
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN, 'The responder has filled the loan digitally', true, 'ResponderFillDigitalLoan', ActionEventResultList.CDL_RESPONDER_FILL_DIGITAL_LOAN);
 
 
         // Requester Actions

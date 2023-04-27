@@ -246,6 +246,13 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
+    if (messageParams.deliveredFormat) {
+      message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
+      if (messageParams.url) {
+        message.deliveryInfo['url'] = messageParams.url;
+      }
+    }
+
     switch (pr.volumes.size()) {
       case 0:
         break;
