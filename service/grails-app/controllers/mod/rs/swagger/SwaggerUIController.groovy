@@ -1,3 +1,4 @@
+package mod.rs.swagger
 
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurper;
