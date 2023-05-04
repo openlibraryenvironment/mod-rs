@@ -20,4 +20,12 @@ databaseChangeLog = {
             }
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1683194796434") {
+        addColumn(tableName: "action_event_result") {
+            column(defaultValueBoolean: "false", name: "aer_update_rota_location", type: "boolean") {
+                constraints(nullable: "false")
+            }
+        }
+    }
 }

@@ -12,6 +12,7 @@ import org.olf.rs.statemodel.ActionEvent;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.statemodel.NewStatusResult;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusService;
 import org.olf.rs.statemodel.events.EventISO18626IncomingRequesterService;
@@ -135,7 +136,14 @@ public class ReshareApplicationEventHandlerService {
 								// Do we want to save the request and create an audit entry
 								if (resultDetails.saveData == true) {
 									// Set the status of the request
-									request.state = statusService.lookupStatus(request, eventData.event, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, false);
+                                    NewStatusResult newResultStatus = statusService.lookupStatus(request, eventData.event, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, false);
+                                    request.state = newResultStatus.status;
+
+                                    // Do we need to update the rota location with the status
+                                    if (newResultStatus.updateRotaLocation) {
+                                        // we do
+                                        request.updateRotaState(request.state);
+                                    }
 
 									// Adding an audit entry so we can see what states we are going to for the event
 									// Do not commit this uncommented, here to aid seeing what transition changes we allow

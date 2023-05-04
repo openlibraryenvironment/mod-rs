@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.statemodel.Status;
 
 import grails.gorm.MultiTenant;
 
@@ -52,6 +53,11 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
    */
   String loadBalancingReason
 
+  /**
+   * a workflow state for this rota entry
+   */
+  Status state
+
   Symbol peerSymbol
 
   String note
@@ -71,6 +77,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           (nullable : false) // unique['patronRequest'] if you wanted to - but I don't know why you would.
     shelfmark              (nullable : true,  blank: false)
     systemIdentifier       (nullable : true,  blank: false)
+    state                  (nullable : true)
     peerSymbol             (nullable : true)
     instanceIdentifier     (nullable : true)
     copyIdentifier         (nullable : true)
@@ -93,6 +100,7 @@ class PatronRequestRota implements MultiTenant<PatronRequestRota> {
     rotaPosition           column : "prr_rota_position"
     shelfmark              column : "prr_shelfmark"
     systemIdentifier       column : "prr_system_identifier"
+    state                  column : "prr_state_fk"
     peerSymbol             column : "prr_peer_symbol_fk"
     instanceIdentifier     column : "prr_instance_identifier"
     copyIdentifier         column : "prr_copy_identifier"
