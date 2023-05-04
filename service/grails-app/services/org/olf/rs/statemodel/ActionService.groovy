@@ -188,7 +188,14 @@ public class ActionService {
         // if we have an override status then we shall use that and not calculate the status, this is primarily for the undo action where we look at the audit trail to see what we need to set the status to
         if (resultDetails.overrideStatus == null) {
             // Normal scenario of an action being performed
-            newStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
+            NewStatusResult newResultStatus = statusService.lookupStatus(request, action, resultDetails.qualifier, resultDetails.result == ActionResult.SUCCESS, true);
+            newStatus = newResultStatus.status;
+
+            // Do we need to update the rota location with the status
+            if (newResultStatus.updateRotaLocation) {
+                // we do
+                request.updateRotaState(newStatus);
+            }
         } else {
             // The status has been overridden in the code
             newStatus = resultDetails.overrideStatus;

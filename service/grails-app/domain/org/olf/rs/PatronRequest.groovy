@@ -565,6 +565,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       return(Holders.grailsApplication.mainContext.getBean('actionService').getValidActions(this));
   }
 
+  public void updateRotaState(Status status) {
+      PatronRequestRota patronRequestRota = rota.find({ rota -> rota.rotaPosition == rotaPosition });
+      if (patronRequestRota) {
+          patronRequestRota.state = status;
+          patronRequestRota.save(flush:true, failOnError: true);
+      }
+  }
+
   private String truncateAndLog(String fieldName, String field, int truncateLength = 255) {
     if ( field?.length() > truncateLength ) {
       String truncatedField = "${field.take(truncateLength - 3)}..."

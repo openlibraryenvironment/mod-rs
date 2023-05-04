@@ -164,6 +164,7 @@ public class StateModelService {
             actionEventResultResult.saveRestoreState = actionEventResult.saveRestoreState?.label;
             actionEventResultResult.overrideSaveStatus = actionEventResult.overrideSaveStatus?.code;
             actionEventResultResult.fromStatus = actionEventResult.fromStatus?.code;
+            actionEventResultResult.updateRotaLocation = actionEventResult.updateRotaLocation;
             actionEventResultResult.nextActionEvent = actionEventResult.nextActionEvent?.code;
         }
 
@@ -336,6 +337,7 @@ public class StateModelService {
                 saveRestoreState,
                 Status.lookup(jsonActionEventResult.overrideSaveStatus),
                 Status.lookup(jsonActionEventResult.fromStatus),
+                jsonActionEventResult.updateRotaLocation  == null ? false : jsonActionEventResult.updateRotaLocation,
                 jsonActionEventResult.nextActionEvent) != null);
         }
 
