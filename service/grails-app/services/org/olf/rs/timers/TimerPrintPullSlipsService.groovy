@@ -127,7 +127,7 @@ where h.id in ( :loccodes )
                             });
 
                             // Build the filter for the pick locations
-                            String locFilters = loccodes.collect { "pickLocation.id==${it }"}.join('%7C%7C');
+                            String locFilters = loccodes.collect { "pickLocation.${it }"}.join('%2C');
 
                             // Grab the unique list of states that have triggered the bull slip email
                             String stateFilters = null;
@@ -137,9 +137,9 @@ where h.id in ( :loccodes )
                                 if (stateFilters == null) {
                                     stateFilters = "";
                                 } else {
-                                    stateFilters += "%7C%7C";
+                                    stateFilters += "%2C";
                                 }
-                                stateFilters += "state.code==" + request.state.code;
+                                stateFilters += "state." + request.state.code;
                             }
 
                             // Convert the template into something that we can send in the email
@@ -150,7 +150,7 @@ where h.id in ( :loccodes )
                                     pendingRequests: pending_ps_printing,
                                     numRequests:pending_ps_printing.size(),
                                     summary: pull_slip_overall_summary,
-                                    reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}&filters=${stateFilters}&sort=-dateCreated"
+                                    reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}%2C${stateFilters}&sort=-dateCreated"
                                 ],
                                 'en'
                             );
