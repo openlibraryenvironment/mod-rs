@@ -91,7 +91,7 @@ group by pr.pickLocation.code
                                 output + (output != '' ? ', ' : '') + (loc.name ?: loc.code);
                             });
 
-                            String locFilters = loccodes.collect { "pickLocation.id==${it }"}.join('%7C%7C');
+                            String locFilters = loccodes.collect { "location.${it }"}.join('%2C');
 
                             // Grab the unique list of states that have triggered the bull slip email
                             String stateFilters = null;
@@ -101,9 +101,9 @@ group by pr.pickLocation.code
                                 if (stateFilters == null) {
                                     stateFilters = "";
                                 } else {
-                                    stateFilters += "%7C%7C";
+                                    stateFilters += "%2C";
                                 }
-                                stateFilters += "state.code==" + request.state.code;
+                                stateFilters += "state." + request.state.code;
                             }
 
                             // If there is more than 1 state that can trigger this then
@@ -115,7 +115,7 @@ group by pr.pickLocation.code
                                     pendingRequests: pending_ps_printing,
                                     numRequests:pending_ps_printing.size(),
                                     summary: pull_slip_overall_summary,
-                                    reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}&filters=${stateFilters}&sort=-dateCreated"
+                                    reshareURL: "${okapiSettingsService.getSetting('FOLIO_HOST')?.value}/supply/requests?filters=${locFilters}%2C${stateFilters}&sort=-dateCreated"
                                 ],
                                 'en'
                             );
