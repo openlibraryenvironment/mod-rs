@@ -117,7 +117,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           }
         }
         catch ( Exception e ) {
-          log.error("Problem attempting strategy ${next_strategy.name}",e);
+          log.error("Problem attempting strategy ${next_strategy.name}: ${e?.getLocalizedMessage()}",e);
         }
         finally {
           log.debug("Completed strategy ${next_strategy.name}, location = ${location}");
@@ -155,6 +155,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     // Values < 0 are considered "DO NOT USE" - E.G. bindery
     options.each { o ->
       // See if we can find a HostLMSLocation for the given item - create one if not
+      log.debug("Looking up (or creating) HostLMSLocation for ItemLocation ${o}");
       HostLMSLocation loc = hostLMSLocationService.ensureActive(o.location, o.location);
 
       HostLMSItemLoanPolicy ilp = null;
@@ -170,6 +171,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             ilp = new HostLMSItemLoanPolicy( code: o.itemLoanPolicy, name: o.itemLoanPolicy ).save(flush:true, failOnError:true);
             break;
           case 1:
+            log.debug("Found one HostLMSItemLoanPolicy for ${o.itemLoanPolicy}, using");
             ilp = ilps.get(0);
             if (ilp.hidden) {
               ilp.hidden = false;
@@ -198,6 +200,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( o?.temporaryShelvingLocation != null ) {
         sl = hostLMSShelvingLocationService.ensureExists(o.temporaryShelvingLocation, o.temporaryShelvingLocation);
       }
+
+      log.debug("Using HostLMSShelvingLocation ${sl} and HostLMSLocation ${loc}");
 
       // Create an instance of shelving location site to record the association
       if ( ( sl != null ) && ( loc != null ) ) {
