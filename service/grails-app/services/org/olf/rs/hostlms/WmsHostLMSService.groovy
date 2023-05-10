@@ -97,7 +97,9 @@ public class WmsHostLMSService extends BaseHostLMSService {
       result = z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.findResults { hld ->
         if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
           log.debug("Holding available now");
-          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
+          ItemLocation il = new ItemLocation( location: hld.localLocation?.text()?.trim(),
+                  shelvingLocation:hld.shelvingLocation?.text()?.trim(),
+                  callNumber:hld.callNumber.text()?.trim() );
           availability_summary << il;
           if( availability_summary?.size() > 0) { result = availability_summary; }
         } else {
