@@ -22,6 +22,7 @@ import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
 import grails.gorm.multitenancy.Tenants.CurrentTenant;
+import groovy.json.StringEscapeUtils;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -445,6 +446,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.userid=response.opt('userId') ?: response.opt('userid')
       result.givenName=response.opt('firstName')
       result.surname=response.opt('lastName')
+      protocolInformationToResult(response, result);
       if ( response.has('electronicAddresses') ) {
         JSONArray ea = response.getJSONArray('electronicAddresses')
         // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
@@ -456,6 +458,24 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.problems=response.get('problems')
       result.result=false
     }
+  }
+
+  private void protocolInformationToResult(JSONObject response, Map result) {
+      result.protocolInformation = [ : ];
+      result.protocolInformation.request = [ : ];
+      result.protocolInformation.request.endPoint = response.protocolInformation.request.endPoint;
+      result.protocolInformation.request.requestbody = unescapeJson(response.protocolInformation.request.requestbody);
+      result.protocolInformation.response = [ : ];
+      result.protocolInformation.response.responseStatus = response.protocolInformation.response.responseStatus;
+      result.protocolInformation.response.responseBody = unescapeJson(response.protocolInformation.response.responseBody);
+  }
+
+  private String unescapeJson(String jsonString) {
+      String unescaped = null;
+      if (jsonString != null) {
+          unescaped = StringEscapeUtils.unescapeJava(jsonString);
+      }
+      return(unescaped);
   }
 
   /**
@@ -566,6 +586,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
       JSONObject response = ncip_client.send(checkoutItem);
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem response ${response}");
+      protocolInformationToResult(response, result);
 
       if ( response.has('problems') ) {
         result.result = false;
@@ -633,6 +654,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("[${CurrentTenant.get()}] NCIP acceptItem request ${acceptItem}");
           JSONObject response = ncip_client.send(acceptItem);
           log.debug("[${CurrentTenant.get()}] NCIP acceptItem response ${response}");
+          protocolInformationToResult(response, result);
 
           if ( response.has('problems') ) {
             result.result = false;
@@ -678,6 +700,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}");
+          protocolInformationToResult(response, result);
 
           log.debug(response?.toString());
           if ( response != null && response.has('problems') ) {
