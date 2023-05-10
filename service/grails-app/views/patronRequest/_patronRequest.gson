@@ -25,6 +25,7 @@ final def toExpand = fullRecord ? [
 ] : [
   // brief record view..
   'pickShelvingLocation',
+  'resolvedRequester',
   'resolvedSupplier',
   'serviceType',
   'state'
@@ -49,7 +50,6 @@ final def toExclude = fullRecord ? [
   'requestIdentifiers',
   'resolvedPatron',
   'resolvedPickupLocation',
-  'resolvedRequester',
   'rota',
   'stateModel',
   'tags',
