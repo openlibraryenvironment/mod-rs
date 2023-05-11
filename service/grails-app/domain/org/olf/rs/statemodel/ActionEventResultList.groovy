@@ -44,6 +44,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
     // Digital returnable requester event lists
     static public final String DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'digitalReturnableRequesterExpectsToSupplyISO18626';
+    static public final String DIGITAL_RETURNABLE_REQUESTER_LOANED_DIGITALLY_ISO18626          = 'digitalReturnableRequesterLoanedDigitallyISO18626';
 
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';

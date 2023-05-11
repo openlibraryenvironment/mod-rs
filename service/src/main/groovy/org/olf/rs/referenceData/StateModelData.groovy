@@ -105,7 +105,7 @@ public class StateModelData {
             [ status : Status.RESPONDER_COMPLETE, isTerminal : true ],
             [ status : Status.RESPONDER_IDLE, canTriggerStaleRequest : true ],
             [ status : Status.RESPONDER_ITEM_RETURNED ],
-            [ status : Status.RESPONDER_ITEM_SHIPPED, canTriggerOverdueRequest : true ],
+            [ status : Status.RESPONDER_LOANED_DIGITALLY, canTriggerOverdueRequest : true ],
             [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
             [ status : Status.RESPONDER_NOT_SUPPLIED, isTerminal : true ],
             [ status : Status.RESPONDER_OVERDUE ],
@@ -120,7 +120,7 @@ public class StateModelData {
         StateModel.ensure(StateModel.MODEL_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, requesterStates);
         StateModel.ensure(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, digitalReturnableRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 5]]);
         StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, responderStates);
-        StateModel.ensure(StateModel.MODEL_CDL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, cdlResponderStates, [[ stateModel: StateModel.MODEL_RESPONDER, priority: 5 ]]);
+        StateModel.ensure(StateModel.MODEL_CDL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_AWAIT_DESEQUESTRATION, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, cdlResponderStates, [[ stateModel: StateModel.MODEL_RESPONDER, priority: 5 ]]);
 	}
 
 	public static void loadAll() {

@@ -59,6 +59,7 @@ class Status implements MultiTenant<Status> {
 
   public static final String RESPONDER_SEQUESTERED              = "RES_SEQUESTERED";
   public static final String RESPONDER_LOANED_DIGITALLY         = "RES_LOANED_DIGITALLY";
+  public static final String RESPONDER_AWAIT_DESEQUESTRATION    = "RES_AWAIT_DESEQUESTRATION";
 
   // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database

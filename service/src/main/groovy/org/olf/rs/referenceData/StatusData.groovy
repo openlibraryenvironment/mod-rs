@@ -72,6 +72,7 @@ public class StatusData {
         // CDL Responder
         Status.ensure(Status.RESPONDER_SEQUESTERED, StatusStage.ACTIVE, '0020', true);
         Status.ensure(Status.RESPONDER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0040', true);
+        Status.ensure(Status.RESPONDER_AWAIT_DESEQUESTRATION, StatusStage.ACTIVE_SHIPPED, '0040', true);
 
 	}
 

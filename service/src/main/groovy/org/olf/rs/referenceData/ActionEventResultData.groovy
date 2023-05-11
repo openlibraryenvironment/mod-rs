@@ -91,16 +91,6 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map digitalReturnableRequesterISO18626Loaned = [
-      code: 'digitalReturnableRequesterISO18626Loaned',
-      description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
-      result: true,
-      status: Status.REQUESTER_LOANED_DIGITALLY,
-      qualifier: 'Loaned',
-      saveRestoreState: null,
-      nextActionEvent: null
-    ];
-
     private static Map requesterISO18626Overdue = [
         code: 'requesterISO18626Overdue',
         description: 'An incoming ISO-18626 message for the requester has said that the status is Overdue',
@@ -907,18 +897,6 @@ public class ActionEventResultData {
         ]
     ];
 
-    private static Map digitalReturnableRequesterExpectToSupplyISO18626 = [
-      code: ActionEventResultList.DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626,
-      description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
-      model: StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER,
-      results: [
-        requesterISO18626Conditional,
-        digitalReturnableRequesterISO18626Loaned,
-        requesterISO18626Unfilled,
-        defaultNoStatusChangeOK
-      ]
-    ];
-
     private static Map requesterNotificationReceivedISO18626 = [
         code: ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626,
         description: 'An incoming ISO18626 notifications has been received by the requester',
@@ -1371,7 +1349,50 @@ public class ActionEventResultData {
         ]
     ];
 
-    // CDL Responder
+    // Digital returnable requester
+    private static Map digitalReturnableRequesterISO18626Overdue = [
+      code: 'digitalReturnableRequesterISO18626Overdue',
+      description: 'An incoming ISO-18626 message for the requester has said that the status is Overdue',
+      result: true,
+      status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
+      qualifier: 'Overdue',
+      saveRestoreState: null,
+      nextActionEvent: null
+    ];
+    private static Map digitalReturnableRequesterISO18626Loaned = [
+      code: 'digitalReturnableRequesterISO18626Loaned',
+      description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
+      result: true,
+      status: Status.REQUESTER_LOANED_DIGITALLY,
+      qualifier: 'Loaned',
+      saveRestoreState: null,
+      nextActionEvent: null
+    ];
+
+    private static Map digitalReturnableRequesterExpectToSupplyISO18626 = [
+      code: ActionEventResultList.DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626,
+      description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+      model: StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER,
+      results: [
+        requesterISO18626Conditional,
+        digitalReturnableRequesterISO18626Loaned,
+        requesterISO18626Unfilled,
+        defaultNoStatusChangeOK
+      ]
+    ];
+    private static Map digitalReturnableRequesterLoanedDigitallyISO18626 = [
+      code: ActionEventResultList.DIGITAL_RETURNABLE_REQUESTER_LOANED_DIGITALLY_ISO18626,
+      description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+      model: StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER,
+      results: [
+        digitalReturnableRequesterISO18626Overdue,
+        defaultNoStatusChangeOK
+      ]
+    ];
+
+
+
+    // CDL responder
     private static Map cdlResponderCheckInToReshareOK = [
         code: 'responderCheckInToReshareOK',
         description: 'Responder has successfully checked the items out of the LMS into reshare',
@@ -1433,6 +1454,7 @@ public class ActionEventResultData {
 
         // Digital returnable requester lists
         digitalReturnableRequesterExpectToSupplyISO18626,
+        digitalReturnableRequesterLoanedDigitallyISO18626,
 
         // Responder lists
         responderAddConditionalList,
