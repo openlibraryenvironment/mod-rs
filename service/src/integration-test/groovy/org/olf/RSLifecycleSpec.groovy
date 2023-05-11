@@ -239,6 +239,7 @@ class RSLifecycleSpec extends HttpSpec {
       'alma'    | true
       'aleph'   | true
       'wms'     | true
+      'wms2'    | true
       'default' | true
       'manual'  | true
       'folio'   | true
@@ -610,6 +611,30 @@ class RSLifecycleSpec extends HttpSpec {
       'RSInstThree' | _
   }
 
+  void "test determineBestLocation for WMS LMS adapters" () {
+    when: "We mock lookupViaConnector and run determineBestLocation for WMS"
+      def result = [:];
+      Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        def actions = hostLMSService.getHostLMSActionsFor(lms);
+        actions.metaClass.lookupViaConnector { String query = null -> actions.extractAvailableItemsFrom(
+                new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text))
+        };
+        def pr = new PatronRequest(oclcNumber: '1010578748');
+        result['viaOCLC'] = actions.determineBestLocation(pr);
+        result['location'] = HostLMSLocation.findByCode(location);
+        result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
+      }
+
+    then: 'Confirm location and shelving location'
+      result?.viaOCLC?.location == location;
+      result?.location?.code == location;
+      result?.shelvingLocation?.code == shelvingLocation;
+
+    where:
+    tenant_id | lms | zResponseFile | location | shelvingLocation | _
+    'RSInstThree' | 'wms' | 'wms-lfmm.xml' | 'LFMM' | 'General Collection' | _
+    'RSInstThree' | 'wms2' | 'wms-lfmm.xml' | 'LFMM' | 'General Collection' | _
+  }
   void "test determineBestLocation for LMS adapters"() {
     when:"We mock z39 and run determineBestLocation"
       z3950Service.metaClass.query = { String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
