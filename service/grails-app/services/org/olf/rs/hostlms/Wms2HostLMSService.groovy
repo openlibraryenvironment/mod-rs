@@ -1,8 +1,11 @@
 package org.olf.rs.hostlms;
 
+import groovyx.net.http.HttpBuilder
+
 import org.olf.rs.circ.client.NCIPClientWrapper
 import org.olf.rs.circ.client.CirculationClient
 import org.olf.rs.lms.ItemLocation
+
 
 import com.k_int.web.toolkit.settings.AppSetting
 
