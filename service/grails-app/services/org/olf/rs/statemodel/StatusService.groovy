@@ -232,6 +232,7 @@ public class StatusService {
 
     /**
      * Performs a reverse lookup to find which status could be saved when we change to a specific state
+     * Note: this does not take into account events
      * @param status The status that we change to when the state is changed
      * @return The list of status that could have taken us to this state
      */
@@ -261,9 +262,6 @@ public class StatusService {
                     }
                 }
             }
-
-            // TODO: how do we deal with events ... With any luck events do not trigger a save ...
-            // We will deal with that when events are added to the diagram
         }
 
         // Return a unique list
@@ -377,9 +375,9 @@ public class StatusService {
      * @param availableActionMustExist If trye it means an AvailableAction record must exist
      * @return The determined status
      */
-    public Status lookupStatus(PatronRequest request, String action, String qualifier, boolean successful, boolean availableActionMustExist) {
+    public NewStatusResult lookupStatus(PatronRequest request, String action, String qualifier, boolean successful, boolean availableActionMustExist) {
         // We default to staying at the current status
-        Status newStatus = request.state;
+        NewStatusResult newStatusResult = new NewStatusResult(request.state);
 
         // Now lets see if we can find the ActionEventResult record
         ActionEventResult actionEventResult = findResult(getStateModel(request), request.state, action, successful, qualifier, availableActionMustExist);
@@ -395,7 +393,8 @@ public class StatusService {
                     String newStatusCode = request.previousStates.get(statusCode);
                     if (newStatusCode != null) {
                         // That is good we have a saved status
-                        newStatus = Status.lookup(newStatusCode);
+                        newStatusResult.status = Status.lookup(newStatusCode);
+                        newStatusResult.updateRotaLocation = actionEventResult.updateRotaLocation;
 
                         // We also clear the saved value
                         request.previousStates[statusCode] = null;
@@ -415,7 +414,8 @@ public class StatusService {
                     }
 
                     // So set our new status
-                    newStatus = actionEventResult.status;
+                    newStatusResult.status = actionEventResult.status;
+                    newStatusResult.updateRotaLocation = actionEventResult.updateRotaLocation;
                 }
             } else {
                 String error = 'The status is null on the found actionEventResult, so status is staying the same for, From Status: ' + request.state.code +
@@ -431,7 +431,7 @@ public class StatusService {
         }
 
         // Return the new status to the caller
-        return(newStatus);
+        return(newStatusResult);
     }
 
     /**

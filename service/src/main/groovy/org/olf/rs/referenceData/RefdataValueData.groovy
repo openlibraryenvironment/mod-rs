@@ -1,5 +1,7 @@
 package org.olf.rs.referenceData;
 
+import org.olf.rs.constants.Directory;
+
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
 import com.k_int.web.toolkit.custprops.types.CustomPropertyRefdataDefinition;
 import com.k_int.web.toolkit.refdata.RefdataCategory;
@@ -259,9 +261,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION);
 
-            ensureRefdataProperty('policy.ill.returns', false, 'YNO', 'Accept Returns');
-            ensureRefdataProperty('policy.ill.loan_policy', false, 'LoanPolicy', 'ILL Loan Policy');
-            ensureRefdataProperty('policy.ill.last_resort', false, 'YNO', 'Consider Institution As Last Resort');
+            ensureRefdataProperty(Directory.KEY_ILL_POLICY_RETURNS, false, Directory.CATEGORY_YES_NO, 'Accept Returns');
+            ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
+            ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);

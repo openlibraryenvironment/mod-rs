@@ -1,11 +1,17 @@
+package mod.rs.swagger
 
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import swagger.grails.SwaggerService;
 
 /**
  * Swagger UI Controller
  */
+@Api(value = "/rs/swagger", tags = ["Swagger UI Controller"], description = "API for all things to do with swagger")
 class SwaggerUIController {
     private static final String RESPONSE_CREATED = "201";
     private static final String RESPONSE_DELETED = "204";
@@ -55,18 +61,19 @@ class SwaggerUIController {
     ];
 
     /**
-     * Provides the Swagger UI interface, the index.gsp file
-     * @return
-     */
-    def index() {
-    }
-
-    /**
      * Generates the api documentation, as we do not want all package being documented and there is no way to configure
      * which packages we want or to exclude, we do not use the default SwaggerController api call, but simulate it here
      * and then manipulate what is returned, it is hard coded.
      * @return The api document in json form
      */
+    @ApiOperation(
+        value = "API documentation for the application",
+        nickname = "api",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
     def api() {
         // Generate the document
         String docApiAsString = swaggerService.generate();
@@ -152,7 +159,7 @@ class SwaggerUIController {
      * @param operation The operation that we need to check for the 200 to remove
      * @param alternativeResponse The alternative positive response
      */
-    void remove200ResponsesWhenAlternativeExist(Map paths, String operation, String alternativeResponse) {
+    private void remove200ResponsesWhenAlternativeExist(Map paths, String operation, String alternativeResponse) {
         paths.each { path, pathDetails ->
             if (pathDetails != null) {
                 // Does this path have the operation we are interested in

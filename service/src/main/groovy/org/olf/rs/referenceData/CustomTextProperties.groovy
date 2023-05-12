@@ -1,8 +1,10 @@
 package org.olf.rs.referenceData;
 
+import org.olf.rs.constants.Directory;
+
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
 
-import groovy.util.logging.Slf4j
+import groovy.util.logging.Slf4j;
 
 @Slf4j
 public class CustomTextProperties {
@@ -29,7 +31,7 @@ public class CustomTextProperties {
 	}
 
 	/**
-	 * Loads the settings into the database	
+	 * Loads the settings into the database
 	 */
 	public void load() {
 		try {
@@ -38,16 +40,16 @@ public class CustomTextProperties {
 			ensureTextProperty("ILLPreferredNamespaces", false);
 			ensureTextProperty("url", false);
 			ensureTextProperty("Z3950BaseName", false);
-			ensureTextProperty("local_institutionalPatronId", true, "Institutional patron ID");
+			ensureTextProperty(Directory.KEY_LOCAL_INSTITUTION_PATRON_ID, true, "Institutional patron ID");
 			ensureTextProperty("ALMA_AGENCY_ID", true, "ALMA Agency ID");
 			ensureTextProperty("AdditionalHeaders", false, "Additional Headers");
-			ensureTextProperty("policy.ill.InstitutionalLoanToBorrowRatio", false, "ILL Loan To Borrow Ratio");
-		  
+			ensureTextProperty(Directory.KEY_ILL_POLICY_BORROW_RATIO, false, "ILL Loan To Borrow Ratio");
+
 		} catch ( Exception e ) {
 			log.error("Exception thrown while loading custom text properties", e);
 		}
 	}
-	
+
 	public static void loadAll() {
 		(new CustomTextProperties()).load();
 	}

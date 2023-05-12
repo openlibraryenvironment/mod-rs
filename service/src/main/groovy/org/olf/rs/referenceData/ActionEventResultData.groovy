@@ -25,6 +25,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
         qualifier: 'Cancelled',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -35,6 +36,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_CANCEL_PENDING,
         qualifier: ActionEventResultQualifier.QUALIFIER_NO,
         saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -46,6 +48,7 @@ public class ActionEventResultData {
         qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONAL,
         saveRestoreState: null,
         fromStatus: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -58,6 +61,7 @@ public class ActionEventResultData {
 //        saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
         saveRestoreState: null,
         fromStatus: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -68,6 +72,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
         qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -78,6 +83,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
         qualifier: 'LoanCompleted',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -88,6 +94,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_SHIPPED,
         qualifier: 'Loaned',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -98,6 +105,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_OVERDUE,
         qualifier: 'Overdue',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -108,6 +116,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_RECALLED,
         qualifier: 'Recalled',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -118,6 +127,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_UNFILLED,
         qualifier: 'Unfilled',
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -129,6 +139,7 @@ public class ActionEventResultData {
         qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONS_AGREED,
         saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
         fromStatus: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -230,6 +241,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_CANCELLED,
         qualifier: null,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -240,6 +252,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_FILLED_LOCALLY,
         qualifier: null,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -250,6 +263,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_UNFILLED,
         qualifier: null,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -481,6 +495,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
         qualifier: null,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -491,6 +506,7 @@ public class ActionEventResultData {
         status: Status.PATRON_REQUEST_LOCAL_REVIEW,
         qualifier: ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW,
         saveRestoreState: null,
+        updateRotaLocation: true,
         nextActionEvent: null
     ];
 
@@ -1513,6 +1529,7 @@ public class ActionEventResultData {
                 RefdataValue saveRestoreState = referenceDataService.lookup(RefdataValueData.VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE, result.saveRestoreState);
 
                 // We need to lookup the status
+                log.info("Chas: Ensuring ActionEventResult " + result.code + " exists");
                 resultItems.add(
                     ActionEventResult.ensure(
                         result.code,
@@ -1523,6 +1540,7 @@ public class ActionEventResultData {
                         saveRestoreState,
                         Status.lookup(result.overrideSaveStatus),
                         Status.lookup(result.fromStatus),
+                        result.updateRotaLocation == null ? false : result.updateRotaLocation,
                         result.nextActionEvent
                     )
                 );

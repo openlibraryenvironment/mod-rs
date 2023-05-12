@@ -85,7 +85,7 @@ class UrlMappings {
     "/rs/swagger/api"(controller: "swaggerUI", action: "api")
 
     // The swagger plugin dosn't supply the UI, so
-    "/rs/swaggerUI"(controller: "swaggerUI", action: "index")
+    "/rs/swaggerUI"(uri: '/static/swaggerUI/index.html')
 
     // The swagger resources for display purposes
     group "/rs/swagger", {

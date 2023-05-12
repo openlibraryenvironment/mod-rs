@@ -11,7 +11,7 @@ import org.olf.rs.settings.ISettings;
 public class AlmaHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(ISettings settings, String address) {
-    // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
+    // This wrapper creates the circulationClient we need
     return new NCIPClientWrapper(address, [protocol: "NCIP2"]).circulationClient;
   }
 

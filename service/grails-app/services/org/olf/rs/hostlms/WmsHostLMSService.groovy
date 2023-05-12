@@ -19,8 +19,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
     String wms_api_secret = settings.getSettingValue(SettingsData.SETTING_WMS_API_SECRET);
     String wms_lookup_patron_endpoint = settings.getSettingValue(SettingsData.SETTING_WMS_LOOKUP_PATRON_ENDPOINT);
 
-
-    // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
+    // This wrapper creates the circulationClient we need
     return new NCIPClientWrapper(address, [
       protocol: "WMS",
       apiKey: wms_api_key,

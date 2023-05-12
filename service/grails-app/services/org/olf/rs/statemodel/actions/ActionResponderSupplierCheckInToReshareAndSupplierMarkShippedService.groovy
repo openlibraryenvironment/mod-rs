@@ -1,7 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.DirectoryEntryService;
-import org.olf.rs.HostLMSService
+import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;

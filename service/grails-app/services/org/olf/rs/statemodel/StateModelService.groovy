@@ -111,6 +111,7 @@ public class StateModelService {
                 actionEventResult.responderServiceClass = actionEvent.responderServiceClass;
                 actionEventResult.isAvailableGroovy = actionEvent.isAvailableGroovy;
                 actionEventResult.isAvailableForBulk = actionEvent.isAvailableForBulk;
+                actionEventResult.showInAuditTrail = actionEvent.showInAuditTrail;
             }
         }
 
@@ -163,6 +164,7 @@ public class StateModelService {
             actionEventResultResult.saveRestoreState = actionEventResult.saveRestoreState?.label;
             actionEventResultResult.overrideSaveStatus = actionEventResult.overrideSaveStatus?.code;
             actionEventResultResult.fromStatus = actionEventResult.fromStatus?.code;
+            actionEventResultResult.updateRotaLocation = actionEventResult.updateRotaLocation;
             actionEventResultResult.nextActionEvent = actionEventResult.nextActionEvent?.code;
         }
 
@@ -335,6 +337,7 @@ public class StateModelService {
                 saveRestoreState,
                 Status.lookup(jsonActionEventResult.overrideSaveStatus),
                 Status.lookup(jsonActionEventResult.fromStatus),
+                jsonActionEventResult.updateRotaLocation  == null ? false : jsonActionEventResult.updateRotaLocation,
                 jsonActionEventResult.nextActionEvent) != null);
         }
 
@@ -398,6 +401,7 @@ public class StateModelService {
                 jsonActionEvent. serviceClass,
                 jsonActionEvent.resultList,
                 (jsonActionEvent.isAvailableForBulk == null) ? false : jsonActionEvent.isAvailableForBulk,
+                (jsonActionEvent.showInAuditTrail == null) ? true : jsonActionEvent.showInAuditTrail,
                 convertUndoStatus(jsonActionEvent.undoStatus),
                 jsonActionEvent.responderServiceClass,
                 jsonActionEvent.isAvailableGroovy) != null);

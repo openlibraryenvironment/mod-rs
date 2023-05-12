@@ -18,6 +18,7 @@ class ApplicationController implements PluginManagerAware {
 
     @ApiOperation(
         value = "The settings for the applications",
+        nickname = "rs",
         httpMethod = "GET"
     )
     @ApiResponses([

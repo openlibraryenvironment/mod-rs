@@ -8,21 +8,21 @@ services:
   minio:
     container_name: minio
     hostname: minio
-    image:  docker.io/bitnami/minio:2021
+    image:  docker.io/bitnami/minio:2023.3.24
     environment:
       - MINIO_ROOT_USER=DEVDEVDEV001
       - MINIO_ROOT_PASSWORD=DEVDEVDEV001
       - MINIO_DEFAULT_BUCKETS=
       - MINIO_CONFIG_DIR=/minio_config
     volumes:
-      - minio_data:/data
+      - ./minio_data:/data
       - ./minio_config:/minio_config
     ports:
       - 9000:9000
       - 9001:9001
 
   setup:
-    image: minio/mc
+    image: docker.io/bitnami/minio:2023.3.24
     depends_on:
       - minio
     volumes:
@@ -32,19 +32,26 @@ services:
       echo sleeping;
       sleep 20;
       echo This command adds an alias to the mc config file so we can refer to the server as minio;
-      /usr/bin/mc config host add minio http://minio:9000 DEVDEVDEV001 DEVDEVDEV001;
-      /usr/bin/mc admin policy add minio/ reshare-readwrite /minio_config/reshare-readwrite-policy.json;
-      /usr/bin/mc admin user add minio RESHARE_AGG_ACCESS_KEY RESHARE_AGG_SECRET_KEY;
-      /usr/bin/mc admin policy set minio reshare-readwrite user=RESHARE_AGG_ACCESS_KEY;
-      /usr/bin/mc mb minio/reshare-general;
+      
+      /opt/bitnami/minio-client/bin/mc alias set minio http://minio:9000 DEVDEVDEV001 DEVDEVDEV001;
+      echo Added host http://minio:9000;
+      /opt/bitnami/minio-client/bin/mc admin policy create minio/ reshare-readwrite /minio_config/reshare-readwrite-policy.json;
+      echo Added policy reshare-readwrite;
+      /opt/bitnami/minio-client/bin/mc admin user add minio RESHARE_AGG_ACCESS_KEY RESHARE_AGG_SECRET_KEY;
+      echo Added user RESHARE_AGG_ACCESS_KEY;
+      /opt/bitnami/minio-client/bin/mc admin policy attach minio reshare-readwrite --user RESHARE_AGG_ACCESS_KEY;
+      echo Associated user RESHARE_AGG_ACCESS_KEY with policy reshare-readwrite;
+      /opt/bitnami/minio-client/bin/mc mb minio/reshare-general;
+      echo Mounted / created bucket minio/reshare-general;
+      
       echo List policies known;
-      /usr/bin/mc admin policy list minio/;
+      /opt/bitnami/minio-client/bin/mc admin policy list minio/;
       echo List users using json;
-      /usr/bin/mc admin user list --json minio/;
-      # /usr/bin/mc rm -r --force tn-reshare/somebucketname;
-      # /usr/bin/mc mb tn-reshare/somebucketname;
-      # /usr/bin/mc policy download tn-reshare/somebucketname;
-      # /usr/bin/mc admin config export
+      /opt/bitnami/minio-client/bin/mc admin user list --json minio/;
+      # /opt/bitnami/minio-client/bin/mc rm -r --force tn-reshare/somebucketname;
+      # /opt/bitnami/minio-client/bin/mc mb tn-reshare/somebucketname;
+      # /opt/bitnami/minio-client/bin/mc policy download tn-reshare/somebucketname;
+      # /opt/bitnami/minio-client/bin/mc admin config export
       # echo Minio user creation: https://docs.min.io/docs/minio-multi-user-quickstart-guide.html
       # echo https://github.com/minio/minio/issues/6811 - policy example
       exit 0;

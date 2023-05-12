@@ -37,6 +37,9 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
     /** The status the request must currently be in */
     Status fromStatus;
 
+    /** Do we need to update the current rota location with the current state */
+    boolean updateRotaLocation;
+
     /** Is there a follow on action or event to be executed, will be passed the same parameters passed to this action, so could have been modified ... */
     ActionEvent nextActionEvent;
 
@@ -63,6 +66,7 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
           saveRestoreState column : 'aer_save_restore_state'
         overrideSaveStatus column : 'aer_override_save_state'
                 fromStatus column : 'aer_from_state'
+        updateRotaLocation column : 'aer_update_rota_location', defaultValue: 'false'
            nextActionEvent column : 'aer_next_action_event'
     }
 
@@ -75,6 +79,7 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         RefdataValue saveRestoreState = null,
         Status overrideSaveStatus = null,
         Status fromStatus = null,
+        boolean updateRotaLocation = false,
         ActionEvent nextActionEvent = null
     ) {
         // Lookup to see if the code exists
@@ -96,6 +101,7 @@ class ActionEventResult implements MultiTenant<ActionEventResult> {
         actionEventResult.saveRestoreState = saveRestoreState;
         actionEventResult.overrideSaveStatus = overrideSaveStatus;
         actionEventResult.fromStatus = fromStatus;
+        actionEventResult.updateRotaLocation = updateRotaLocation;
         actionEventResult.nextActionEvent = nextActionEvent;
 
         // and save it

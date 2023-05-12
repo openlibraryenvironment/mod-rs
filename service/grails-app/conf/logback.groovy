@@ -15,16 +15,21 @@ import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 conversionRule 'clr', ColorConverter
 conversionRule 'wex', WhitespaceThrowableProxyConverter
 
-appender("FILE", FileAppender) {
-    file = "../logs/reshare.log"
-    append = false
-    encoder(PatternLayoutEncoder) {
-        pattern =
-            '%d{yyyy-MM-dd HH:mm:ss.SSS} ' + // Date
-            '%5p ' + // Log level
-            '--- [%15.15t] ' + // Thread
-            "%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : " +
-            '%m%n%wex' // Message
+// Can only have the file appender in non production mode, due to it being in a container
+if ( ( Environment.isDevelopmentMode() ) ||
+     ( Environment.getCurrent().getName() == 'rancher-desktop' ) ||
+     ( Environment.getCurrent() == Environment.TEST )) {
+    appender("FILE", FileAppender) {
+        file = "../logs/reshare.log"
+        append = false
+        encoder(PatternLayoutEncoder) {
+            pattern =
+                '%d{yyyy-MM-dd HH:mm:ss.SSS} ' + // Date
+                '%5p ' + // Log level
+                '--- [%15.15t] ' + // Thread
+                "%-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : " +
+                '%m%n%wex' // Message
+        }
     }
 }
 
@@ -188,4 +193,11 @@ else {
   logger ('mod.rs', INFO)
 }
 
-root(WARN, ['STDOUT', 'FILE'])
+// In non production we also have a file logger
+if ( ( Environment.isDevelopmentMode() ) ||
+     ( Environment.getCurrent().getName() == 'rancher-desktop' ) ||
+     ( Environment.getCurrent() == Environment.TEST )) {
+     root(WARN, ['STDOUT', 'FILE'])
+} else {
+     root(WARN, ['STDOUT'])
+}
