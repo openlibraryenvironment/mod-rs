@@ -47,13 +47,9 @@ public class StateModelData {
 
   // The states available to the default digital returnable requester state model
   static private final List digitalReturnableRequesterStates = [
-    [ status : Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING ],
-    [ status : Status.PATRON_REQUEST_BORROWER_RETURNED ],
-    [ status : Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED ],
     [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
     [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
-    [ status : Status.PATRON_REQUEST_CHECKED_IN ],
     [ status : Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED ],
     [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_ERROR ],
@@ -62,19 +58,17 @@ public class StateModelData {
     [ status : Status.PATRON_REQUEST_IDLE ],
     [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
     [ status : Status.PATRON_REQUEST_LOCAL_REVIEW ],
-    [ status : Status.PATRON_REQUEST_OVERDUE ],
     [ status : Status.PATRON_REQUEST_PENDING ],
     [ status : Status.PATRON_REQUEST_RECALLED ],
     [ status : Status.PATRON_REQUEST_REQUEST_COMPLETE, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
-    [ status : Status.PATRON_REQUEST_SHIPPED ],
-    [ status : Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER ],
     [ status : Status.PATRON_REQUEST_SOURCING_ITEM ],
     [ status : Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED ],
     [ status : Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER ],
     [ status : Status.PATRON_REQUEST_UNFILLED ],
     [ status : Status.PATRON_REQUEST_VALIDATED ],
-    [ status : Status.PATRON_REQUEST_WILL_SUPPLY ]
+    [ status : Status.PATRON_REQUEST_WILL_SUPPLY ],
+    [ status : Status.REQUESTER_LOANED_DIGITALLY ]
   ];
 
     // The states available to the default responder state model
@@ -97,9 +91,8 @@ public class StateModelData {
 
     // The states available to the default CDL responder state model
     static private final List cdlResponderStates = [
+            [ status : Status.RESPONDER_AWAIT_DESEQUESTRATION ],
             [ status : Status.RESPONDER_AWAIT_PICKING ],
-            [ status : Status.RESPONDER_AWAIT_SHIP ],
-            [ status : Status.RESPONDER_AWAITING_RETURN_SHIPPING ],
             [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
             [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
             [ status : Status.RESPONDER_COMPLETE, isTerminal : true ],
@@ -110,6 +103,7 @@ public class StateModelData {
             [ status : Status.RESPONDER_NOT_SUPPLIED, isTerminal : true ],
             [ status : Status.RESPONDER_OVERDUE ],
             [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
+            [ status : Status.RESPONDER_SEQUESTERED ],
             [ status : Status.RESPONDER_UNFILLED, isTerminal : true ]
     ];
 
