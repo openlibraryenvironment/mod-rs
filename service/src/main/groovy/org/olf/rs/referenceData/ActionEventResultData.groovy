@@ -1410,7 +1410,7 @@ public class ActionEventResultData {
 
     // CDL responder
     private static Map cdlResponderCheckInToReshareOK = [
-        code: 'responderCheckInToReshareOK',
+        code: 'cdlResponderCheckInToReshareOK',
         description: 'Responder has successfully checked the items out of the LMS into reshare',
         result: true,
         status: Status.RESPONDER_SEQUESTERED,
@@ -1419,7 +1419,7 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
     private static Map cdlResponderFillDigitalLoanOK = [
-        code: 'responderFillDigitalLoanOK',
+        code: 'cdlResponderFillDigitalLoanOK',
         description: 'Responder has successfully filled the loan digitally',
         result: true,
         status: Status.RESPONDER_LOANED_DIGITALLY,
