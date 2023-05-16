@@ -98,7 +98,7 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION, 'Status has changed to Checked into Reshare', false, eventServiceName(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION), ActionEventResultList.RESPONDER_CHECKED_INTO_RESHARE_IND);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_IDLE_INDICATION, 'Status has changed to Idle', false, eventServiceName(Events.EVENT_STATUS_RES_IDLE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, eventServiceName(Events.EVENT_STATUS_RES_OVERDUE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
-          ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
 	}
 

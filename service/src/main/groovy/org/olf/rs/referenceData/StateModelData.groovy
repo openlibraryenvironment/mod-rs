@@ -1,6 +1,5 @@
 package org.olf.rs.referenceData
 
-import org.apache.kafka.common.metrics.Stat
 import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
