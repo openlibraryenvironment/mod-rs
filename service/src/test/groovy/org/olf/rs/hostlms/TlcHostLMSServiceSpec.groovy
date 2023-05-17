@@ -12,7 +12,7 @@ class TlcHostLMSServiceSpec extends Specification implements ServiceUnitTest<Tlc
         def parsedSample = new XmlSlurper().parseText(new File('src/test/resources/zresponsexml/tlc-eastern.xml').text);
 
         when: 'We extract holdings'
-        def result = service.extractAvailableItemsFrom(parsedSample, "", new DoNothingHoldingLogDetails());
+        def result = service.extractAvailableItemsFrom(parsedSample, null, new DoNothingHoldingLogDetails());
 
         then:
         def resultJson = JsonOutput.toJson(result.first());

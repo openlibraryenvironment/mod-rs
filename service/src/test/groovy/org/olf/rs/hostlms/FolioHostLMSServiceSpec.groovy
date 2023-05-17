@@ -15,7 +15,7 @@ class FolioHostLMSServiceSpec extends Specification implements ServiceUnitTest<F
 
         when: 'We extract holdings'
 
-        def result = service.extractAvailableItemsFrom(parsedSample, "", new DoNothingHoldingLogDetails());
+        def result = service.extractAvailableItemsFrom(parsedSample, null, new DoNothingHoldingLogDetails());
 
         then:
         def resultJson = JsonOutput.toJson(result);

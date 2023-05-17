@@ -12,7 +12,7 @@ class SierraHostLMSServiceSpec extends Specification implements ServiceUnitTest<
         def parsedSample = new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text);
 
         when: 'We extract holdings'
-        def result = service.extractAvailableItemsFrom(parsedSample, "", new DoNothingHoldingLogDetails());
+        def result = service.extractAvailableItemsFrom(parsedSample, null, new DoNothingHoldingLogDetails());
 
         then:
         def resultJson = JsonOutput.toJson(result);
