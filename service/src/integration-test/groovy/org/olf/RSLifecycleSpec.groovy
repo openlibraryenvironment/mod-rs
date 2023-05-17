@@ -19,6 +19,7 @@ import org.olf.rs.Z3950Service
 import org.olf.rs.dynamic.DynamicGroovyService;
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.logging.DoNothingHoldingLogDetails;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.settings.ISettings
@@ -513,7 +514,7 @@ class RSLifecycleSpec extends TestBase {
 
   void "test determineBestLocation for LMS adapters"() {
     when:"We mock z39 and run determineBestLocation"
-      z3950Service.metaClass.query = { ISettings settings, String query, int max = 3, String schema = null -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
+      z3950Service.metaClass.query = { ISettings settings, String query, int max, String schema, IHoldingLogDetails holdingLogDetails -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
       def result = [:];
       Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
         // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
