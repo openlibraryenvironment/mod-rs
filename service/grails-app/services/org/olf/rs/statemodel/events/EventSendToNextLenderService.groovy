@@ -7,9 +7,12 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
 import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ProtocolMessageService;
+import org.olf.rs.ProtocolType;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -25,6 +28,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
 public abstract class EventSendToNextLenderService extends AbstractEvent {
 
     HostLMSService hostLMSService;
+    ProtocolAuditService protocolAuditService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
@@ -169,11 +173,13 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     //Check to see if we can find a local copy of the item. If yes, then we go
     //ahead and transitition to local review. If not, transitition to send-to-next-lender
 
-    private boolean checkForLocalCopy(PatronRequest pr) {
+    private boolean checkForLocalCopy(PatronRequest request) {
         log.debug('Checking to see if we have a local copy available');
 
         //Let's still go ahead and try to call the LMS Adapter to find a copy of the request
-        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(settingsService, pr);
+        IHoldingLogDetails holdingLogDetails = protocolAuditService.getHoldingLogDetails(ProtocolType.Z3950_REQUESTER);
+        ItemLocation location = hostLMSService.getHostLMSActions().determineBestLocation(settingsService, request, holdingLogDetails);
+        protocolAuditService.save(request, holdingLogDetails);
         log.debug("Got ${location} as a result of local host lms lookup");
 
         return(location != null);

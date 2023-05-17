@@ -28,4 +28,47 @@ databaseChangeLog = {
             }
         }
     }
+    
+    changeSet(author: "Chas (generated)", id: "1684233996004") {
+        createTable(tableName: "protocol_audit") {
+            column(name: "pa_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "protocol_auditPK")
+            }
+
+            column(name: "version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pa_response_body", type: "TEXT")
+
+            column(name: "pa_date_created", type: "TIMESTAMP WITHOUT TIME ZONE")
+
+            column(name: "pa_uri", type: "VARCHAR(255)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pa_protocol_method", type: "VARCHAR(30)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pa_protocol_type", type: "VARCHAR(30)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pa_request_body", type: "TEXT")
+
+            column(name: "pa_response_status", type: "VARCHAR(30)")
+
+            column(name: "pa_patron_request", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "pa_duration", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+        }
+        
+        // Not forgetting the foreign key constraint
+        addForeignKeyConstraint(baseColumnNames: "pa_patron_request", baseTableName: "protocol_audit", constraintName: "FKlyemccy64kx2cm6mlbuaqjkb6", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request", validate: "true")
+    }
 }

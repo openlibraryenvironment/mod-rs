@@ -38,22 +38,22 @@ public class WmsHostLMSService extends BaseHostLMSService {
       [
         name:'Adapter_By_OCLC_Number',
         precondition: { pr -> return ( pr.oclcNumber != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_Title_And_Identifier',
         precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_ISBN_Identifier',
         precondition: { pr -> return ( pr.isbn != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ],
       [
         name:'Adapter_By_Title',
         precondition: { pr -> return ( pr.title != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3", settings) }
       ]
     ]
   }

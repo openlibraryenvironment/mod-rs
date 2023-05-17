@@ -1,6 +1,7 @@
 package org.olf.rs.lms;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.settings.ISettings;
 
 public interface HostLMSActions {
@@ -40,7 +41,7 @@ public interface HostLMSActions {
    * @See https://github.com/openlibraryenvironment/mod-rs/blob/master/service/grails-app/domain/org/olf/rs/PatronRequest.groovy
    * @See https://github.com/openlibraryenvironment/mod-rs/blob/master/service/src/main/groovy/org/olf/rs/AvailabilityStatement.groovy
    */
-  public ItemLocation determineBestLocation(ISettings settings, PatronRequest pr);
+  public ItemLocation determineBestLocation(ISettings settings, PatronRequest pr, IHoldingLogDetails holdingLogDetails);
 
 
   public Map acceptItem(ISettings settings,

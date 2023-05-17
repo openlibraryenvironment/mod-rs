@@ -18,11 +18,14 @@ import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.lms.ConnectionDetailsNCIP;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.DoNothingHoldingLogDetails;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
 import grails.gorm.multitenancy.Tenants.CurrentTenant;
 import groovy.json.StringEscapeUtils;
+import groovy.util.slurpersupport.GPathResult;
 
 /**
  * The interface between mod-rs and any host Library Management Systems
@@ -31,6 +34,8 @@ import groovy.json.StringEscapeUtils;
 public abstract class BaseHostLMSService implements HostLMSActions {
 
   private static final String CIRCULATION_NCIP = "ncip";
+
+  private static IHoldingLogDetails defaultHoldingLogDetails = new DoNothingHoldingLogDetails();
 
   HostLMSLocationService hostLMSLocationService;
   HostLMSShelvingLocationService hostLMSShelvingLocationService;
@@ -42,19 +47,19 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       [
         name:'Local_identifier_By_Z3950',
         precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
-        strategy: { pr, service, settings -> return service.z3950ItemsByIdentifier(pr, settings) },
+        strategy: { pr, service, settings, holdingLogDetails -> return service.z3950ItemsByIdentifier(pr, settings, holdingLogDetails) },
         // We don't want to try other strategies if the precondition passes and available copies are not found
         final: true
       ],
       [
         name:'ISBN_identifier_By_Z3950',
         precondition: { pr -> return ( pr.isbn != null ) },
-        strategy: { pr, service, settings -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString(), settings ) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=7 \"${pr.isbn?.trim()}\"".toString(), settings, holdingLogDetails ) }
       ],
       [
         name:'Title_By_Z3950',
         precondition: { pr -> return ( pr.title != null ) },
-        strategy: { pr, service, settings -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString(), settings ) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.z3950ItemsByPrefixQuery(pr,"@attr 1=4 \"${pr.title?.trim()}\"".toString(), settings, holdingLogDetails ) }
       ],
     ]
   }
@@ -92,7 +97,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    * is located.
    * Lookup strategies go from most specific to least.
    */
-  ItemLocation determineBestLocation(ISettings settings, PatronRequest pr) {
+  ItemLocation determineBestLocation(
+      ISettings settings,
+      PatronRequest pr,
+      IHoldingLogDetails holdingLogDetails = defaultHoldingLogDetails
+  ) {
 
     log.debug("determineBestLocation(${pr})");
 
@@ -106,7 +115,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       if ( next_strategy.precondition(pr) == true ) {
         log.debug("Strategy ${next_strategy.name} passed precondition");
         try {
-          def strategy_result = next_strategy.strategy(pr, this, settings);
+          def strategy_result = next_strategy.strategy(pr, this, settings, holdingLogDetails);
+          holdingLogDetails.availableLocations(strategy_result);
           if ( strategy_result instanceof ItemLocation ) {
             log.debug("Legacy strategy - return top holding");
             location = strategy_result;
@@ -141,6 +151,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     location = enrichItemLocation(settings, location);
 
     log.debug("determineBestLocation returns ${location}");
+    holdingLogDetails.bestAvailableLocation(location);
     return location;
   }
 
@@ -265,18 +276,38 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return null;
   }
 
+  /**
+   * Record the details of the holdings for each of the records in the collection
+   * @param records The records that have been found
+   * @param holdingLogDetails Where we are recording the details
+   */
+  protected void logOpacHoldings(GPathResult records, IHoldingLogDetails holdingLogDetails) {
+      // Have we been supplied any records
+      if (records != null) {
+          // We have so process them
+          records.each { record ->
+              holdingLogDetails.newRecord();
+              holdingLogDetails.holdings(record?.recordData?.opacRecord?.holdings);
+          }
+      }
+  }
+
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
-  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.opacRecord != null ) {
       def withHoldings = z_response.records.record.findAll { it?.recordData?.opacRecord?.holdings?.holding?.size() > 0 };
+
+      // Log the holdings
+      logOpacHoldings(withHoldings, holdingLogDetails);
+
       if (withHoldings.size() < 1) {
         log.warn("BaseHostLMSService failed to find an OPAC record with holdings");
         return null;
       } else if (withHoldings.size() > 1) {
-        log.warn("BaseHostLMSService found multiple OPAC records with holdings");
-        return null;
+          log.warn("BaseHostLMSService found multiple OPAC records with holdings");
+          return null;
       }
       log.debug("[BaseHostLMSService] Extract available items from OPAC record ${z_response}, reason: ${reason}");
       availability_summary = extractAvailableItemsFromOpacRecord(withHoldings?.first()?.recordData?.opacRecord, reason);
@@ -293,17 +324,17 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    * which locations are to be preferred for lending. This variant of the method returns all possible locations
    * it is the callers job to rank the response records.
    */
-  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings, IHoldingLogDetails holdingLogDetails) {
 
     List<ItemLocation> result = [];
 
     def prefix_query_string = "@attr 1=12 ${pr.supplierUniqueRecordId}";
-    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn(), holdingLogDetails);
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( z_response?.numberOfRecords == 1 ) {
       // Got exactly 1 record
-      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}")
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=12 ${pr.supplierUniqueRecordId}", holdingLogDetails);
       if ( availability_summary?.size() > 0 ) {
         result = availability_summary;
       }
@@ -317,19 +348,19 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string, ISettings settings) {
+  public List<ItemLocation> z3950ItemsByPrefixQuery(PatronRequest pr, String prefix_query_string, ISettings settings, IHoldingLogDetails holdingLogDetails) {
 
     List<ItemLocation> result = [];
 
     // We need to fetch multiple records here as some sites may have separate records for electronic
     // and we'll also need a few results to determine if a title search was too broad to be useful eg.
     // we can't use title if there is more than exactly one record with holdings
-    def z_response = z3950Service.query(settings, prefix_query_string, 3, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 3, getHoldingsQueryRecsyn(), holdingLogDetails);
 
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( ((z_response?.numberOfRecords?.text() ?: -1) as int) > 0 ) {
-      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}");
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response, "Match by ${prefix_query_string}", holdingLogDetails);
       if ( availability_summary?.size() > 0 ) {
         result = availability_summary;
       }
@@ -767,7 +798,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
-  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason, IHoldingLogDetails holdingLogDetails) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -788,8 +819,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     //             <subfield code="f">2</subfield>
     //           </datafield>
     List<ItemLocation> availability_summary = [];
+    holdingLogDetails.newRecord();
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {
+        holdingLogDetails.holdings(df);
         Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
           if ( sf.'@code' != null ) {
