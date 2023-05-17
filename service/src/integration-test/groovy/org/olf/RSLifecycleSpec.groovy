@@ -18,6 +18,7 @@ import org.olf.rs.SettingsService;
 import org.olf.rs.Z3950Service
 import org.olf.rs.dynamic.DynamicGroovyService;
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.logging.DoNothingHoldingLogDetails;
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.settings.ISettings
@@ -525,7 +526,7 @@ class RSLifecycleSpec extends TestBase {
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
         result['viaId'] = actions.determineBestLocation(settingsService, pr);
         pr = new PatronRequest(isbn: '123');
-        result['viaPrefix'] = actions.determineBestLocation(settingsService, pr);
+        result['viaPrefix'] = actions.determineBestLocation(settingsService, pr, new DoNothingHoldingLogDetails());
         result['location'] = HostLMSLocation.findByCode(location);
         result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
       }
