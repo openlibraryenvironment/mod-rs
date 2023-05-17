@@ -3,6 +3,7 @@ package org.olf.rs.hostlms;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.settings.ISettings;
 
 public class TlcHostLMSService extends BaseHostLMSService {
@@ -18,7 +19,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     log.debug("Extract available items from TLC marcxml record ${z_response}, reason ${reason}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from TLC Z39.50 server, unable to extract available items. Record: ${z_response}");
@@ -27,7 +28,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
 
     List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason, holdingLogDetails);
     }
     return availability_summary;
 
@@ -39,7 +40,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason, IHoldingLogDetails holdingLogDetails) {
     //<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
     //  <zs:numberOfRecords>1359</zs:numberOfRecords>
     //  <zs:records>
@@ -66,8 +67,10 @@ public class TlcHostLMSService extends BaseHostLMSService {
     //        </datafield>
     log.debug("extractAvailableItemsFromMARCXMLRecord (TlcHostLMSService)");
     List<ItemLocation> availability_summary = [];
+    holdingLogDetails.newRecord();
     record.datafield.each { df ->
       if( df.'@tag' == "982") {
+        holdingLogDetails.holdings(df);
         Map<String,String> tag_data = [:];
         df.subfield.each { sf ->
           if( sf.@code != null ) {

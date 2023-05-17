@@ -3,9 +3,11 @@ package org.olf.rs.hostlms;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
+import groovy.xml.XmlUtil;
 import groovyx.net.http.HttpBuilder;
 
 public class Wms2HostLMSService extends BaseHostLMSService {
@@ -36,27 +38,27 @@ public class Wms2HostLMSService extends BaseHostLMSService {
       [
         name:'Adapter_By_OCLC_Number',
         precondition: { pr -> return ( pr.oclcNumber != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3", settings, holdingLogDetails) }
       ],
       [
         name:'Adapter_By_Title_And_Identifier',
         precondition: { pr -> return ( pr.isbn != null && pr.title != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("dc.title=${pr.title?.trim()} and bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings, holdingLogDetails) }
       ],
       [
         name:'Adapter_By_ISBN_Identifier',
         precondition: { pr -> return ( pr.isbn != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("bath.isbn=${pr.isbn?.trim()}&startRecord=1&maximumRecords=3", settings, holdingLogDetails) }
       ],
       [
         name:'Adapter_By_Title',
         precondition: { pr -> return ( pr.title != null ) },
-        strategy: { pr, service, settings -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3", settings) }
+        strategy: { pr, service, settings, holdingLogDetails -> return service.lookupViaConnector("dc.title=${pr.title?.trim()}&startRecord=1&maximumRecords=3", settings, holdingLogDetails) }
       ]
     ]
   }
 
-  List<ItemLocation> lookupViaConnector(String query, ISettings settings) {
+  List<ItemLocation> lookupViaConnector(String query, ISettings settings, IHoldingLogDetails holdingLogDetails) {
 
     List<ItemLocation> result = [];
 
@@ -82,13 +84,20 @@ public class Wms2HostLMSService extends BaseHostLMSService {
                               'query': query
 
                             ]
+        holdingLogDetails.newSearch(request.uri?.toURI().toString());
         log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
     }
-    log.debug("Got Z3950 response: ${z_response}")
+
+    log.debug("Got Z3950 response: ${XmlUtil.serialize(z_response)}");
+    holdingLogDetails.numberOfRecords(z_response?.numberOfRecords?.toLong());
+    holdingLogDetails.searchRequest(z_response?.echoedSearchRetrieveRequest);
 
     if ( z_response?.numberOfRecords?.size() > 0) {
+      holdingLogDetails.newRecord();
+
       List<ItemLocation> availability_summary = [];
       result = z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.findResults { hld ->
+        holdingLogDetails.holdings(hld);
         if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
           log.debug("Holding available now");
           ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )

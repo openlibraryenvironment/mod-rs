@@ -240,6 +240,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     batches : Batch,
     conditions: PatronRequestLoanCondition,
     notifications: PatronRequestNotification,
+    protocolAudit: ProtocolAudit,
     requestIdentifiers: RequestIdentifier,
     rota  : PatronRequestRota,
     tags  : Tag,
@@ -251,6 +252,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     audit: 'patronRequest',
     conditions: 'patronRequest',
     notifications: 'patronRequest',
+    protocolAudit: 'patronRequest',
     requestIdentifiers: 'patronRequest',
     volumes: 'patronRequest'
   ]

@@ -3,6 +3,7 @@ package org.olf.rs.hostlms;
 import org.olf.rs.PatronRequest
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -15,7 +16,7 @@ public class ManualHostLMSService implements HostLMSActions {
     result
   }
 
-  ItemLocation determineBestLocation(ISettings settings, PatronRequest pr) {
+  ItemLocation determineBestLocation(ISettings settings, PatronRequest pr, IHoldingLogDetails holdingLogDetails) {
     ItemLocation location = null;
     return location;
   }

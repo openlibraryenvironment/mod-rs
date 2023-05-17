@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -28,18 +29,18 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
 
   //Override to search on attribute 1016, and prepend '^C' to search string
   @Override
-  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings) {
+  public List<ItemLocation> z3950ItemsByIdentifier(PatronRequest pr, ISettings settings, IHoldingLogDetails holdingLogDetails) {
 
     List<ItemLocation> result = [];
 
     String search_id = pr.supplierUniqueRecordId;
     String prefix_query_string = "@attr 1=1016 ${search_id}";
-    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn());
+    def z_response = z3950Service.query(settings, prefix_query_string, 1, getHoldingsQueryRecsyn(), holdingLogDetails);
     log.debug("Got Z3950 response: ${z_response}");
 
     if ( z_response?.numberOfRecords == 1 ) {
       // Got exactly 1 record
-      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=1016 ${search_id}")
+      List<ItemLocation> availability_summary = extractAvailableItemsFrom(z_response,"Match by @attr 1=1016 ${search_id}", holdingLogDetails)
       if ( availability_summary.size() > 0 ) {
         result = availability_summary;
       }
@@ -53,7 +54,7 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     log.debug("Extract holdings from Symphony marcxml record ${z_response}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from Symphony Z39.50 server, unable to extract available items. Record: ${z_response}");
@@ -62,14 +63,14 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
 
     List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason, holdingLogDetails);
     }
     return availability_summary;
 
   }
 
   @Override
-  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason, IHoldingLogDetails holdingLogDetails) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -91,8 +92,10 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     //           </datafield>
     log.debug("extractAvailableItemsFromMARCXMLRecord (SymphonyHostLMSService)");
     List<ItemLocation> availability_summary = [];
+    holdingLogDetails.newRecord();
     record.datafield.each { df ->
       if ( df.'@tag' == "926" ) {
+        holdingLogDetails.holdings(df);
         Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
           if ( sf.@code != null ) {

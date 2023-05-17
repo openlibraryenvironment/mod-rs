@@ -27,6 +27,7 @@ public class SettingsData {
     private static final String SECTION_FILE_STORAGE           = 'fileStorage';
     private static final String SECTION_HOST_LMS_INTEGRATION   = 'hostLMSIntegration';
     private static final String SECTION_LOCAL_NCIP             = 'localNCIP';
+    private static final String SECTION_LOGGING                = 'logging';
     private static final String SECTION_NETWORK                = 'network';
     private static final String SECTION_PATRON_STORE           = 'patronStore';
     private static final String SECTION_PULLSLIP_CONFIGURATION = 'pullslipConfiguration';
@@ -140,6 +141,15 @@ public class SettingsData {
     public static final String SETTING_FILE_STORAGE_S3_BUCKET_NAME   = 'S3BucketName';
     public static final String SETTING_FILE_STORAGE_S3_BUCKET_REGION = 'S3BucketRegion';
     public static final String SETTING_FILE_STORAGE_S3_OBJECT_PREFIX = 'S3ObjectPrefix';
+
+    public static final String SETTING_LOGGING_ISO18626             = 'loggingISO18626';
+    public static final String SETTING_LOGGING_ISO18626_DAYS        = 'loggingISO18626Days';
+    public static final String SETTING_LOGGING_NCIP                 = 'loggingNCIP';
+    public static final String SETTING_LOGGING_NCIP_DAYS            = 'loggingNCIPDays';
+    public static final String SETTING_LOGGING_Z3950_REQUESTER      = 'loggingZ3950Requester';
+    public static final String SETTING_LOGGING_Z3950_REQUESTER_DAYS = 'loggingZ3950RequesterDays';
+    public static final String SETTING_LOGGING_Z3950_RESPONDER      = 'loggingZ3950Responder';
+    public static final String SETTING_LOGGING_Z3950_RESPONDER_DAYS = 'loggingZ3950ResponderDays';
 
     public static void loadAll() {
         (new SettingsData()).load();
@@ -268,6 +278,15 @@ public class SettingsData {
             ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_NAME, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_BUCKET_REGION, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_OBJECT_PREFIX, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, 'reshare-');
+
+            ensureAppSetting(SETTING_LOGGING_ISO18626, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_LOGGING_ISO18626_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_LOGGING_NCIP, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_LOGGING_NCIP_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_LOGGING_Z3950_REQUESTER, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_LOGGING_Z3950_REQUESTER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);

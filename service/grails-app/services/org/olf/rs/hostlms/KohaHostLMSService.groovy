@@ -3,6 +3,7 @@ package org.olf.rs.hostlms;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -24,7 +25,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
   // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
   @Override
-  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     log.debug("Extract holdings from Koha marcxml record ${z_response}");
     if ( z_response?.numberOfRecords != 1 ) {
       log.warn("Multiple records seen in response from Koha Z39.50 server, unable to extract available items. Record: ${z_response}");
@@ -33,7 +34,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
 
     List<ItemLocation> availability_summary = null;
     if ( z_response?.records?.record?.recordData?.record != null ) {
-      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason);
+      availability_summary = extractAvailableItemsFromMARCXMLRecord(z_response?.records?.record?.recordData?.record, reason, holdingLogDetails);
     }
     return availability_summary;
 
@@ -47,7 +48,7 @@ public class KohaHostLMSService extends BaseHostLMSService {
   /**
    * N.B. this method may be overriden in the LMS specific subclass - check there first - this is the default implementation
    */
-  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason=null) {
+  public List<ItemLocation> extractAvailableItemsFromMARCXMLRecord(record, String reason, IHoldingLogDetails holdingLogDetails) {
     // <zs:searchRetrieveResponse>
     //   <zs:numberOfRecords>9421</zs:numberOfRecords>
     //   <zs:records>
@@ -69,8 +70,10 @@ public class KohaHostLMSService extends BaseHostLMSService {
     //           </datafield>
     log.debug("KohaHostLMSService extracting available items from record ${record}");
     List<ItemLocation> availability_summary = []
+    holdingLogDetails.newRecord();
     record.datafield.each { df ->
       if ( df.'@tag' == "952" ) {
+        holdingLogDetails.holdings(df);
         Map<String,String> tag_data = [:]
         df.subfield.each { sf ->
           if ( sf.'@code' != null ) {

@@ -2,12 +2,17 @@ package mod.rs;
 
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.ProtocolMethod;
+import org.olf.rs.ProtocolType;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.logging.ContextLogging;
+import org.olf.rs.logging.HoldingLogDetails;
+import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.MapSettings;
 
-import com.k_int.okapi.OkapiTenantAwareController
+import com.k_int.okapi.OkapiTenantAwareController;
 
 import grails.converters.JSON;
 import groovy.util.logging.Slf4j;
@@ -27,6 +32,7 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
     private static final String HOST_LMS_ADAPTERS = "aleph,alma,default,folio,horizon,koha,manual,millennium,ncsu,sierra,symphony,tlc,voyager,wms,wms2";
 
     HostLMSService hostLMSService;
+    ProtocolAuditService protocolAuditService;
 
 	TestHostLMSController() {
         super(PatronRequest);
@@ -797,7 +803,9 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                     PatronRequest.withTransaction { tstatus ->
                         try {
                             // Now we can make the call
-                            result.itemLocation = hostLMSActions.determineBestLocation(settings, patronRequest);
+                            IHoldingLogDetails holdingLogDetails = new HoldingLogDetails(ProtocolType.Z3950_RESPONDER, ProtocolMethod.GET);
+                            result.itemLocation = hostLMSActions.determineBestLocation(settings, patronRequest, holdingLogDetails);
+                            result.logging = holdingLogDetails.toMap();
                         } catch (Exception e) {
                             log.error("Exception thrown, while determining best location", e);
                             result.error = "Exception: " + e.detailMessage;
