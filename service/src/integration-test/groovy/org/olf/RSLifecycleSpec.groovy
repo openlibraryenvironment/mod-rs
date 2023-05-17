@@ -524,7 +524,7 @@ class RSLifecycleSpec extends TestBase {
 
         def actions = hostLMSService.getHostLMSActionsFor(lms);
         def pr = new PatronRequest(supplierUniqueRecordId: '123');
-        result['viaId'] = actions.determineBestLocation(settingsService, pr);
+        result['viaId'] = actions.determineBestLocation(settingsService, pr, new DoNothingHoldingLogDetails());
         pr = new PatronRequest(isbn: '123');
         result['viaPrefix'] = actions.determineBestLocation(settingsService, pr, new DoNothingHoldingLogDetails());
         result['location'] = HostLMSLocation.findByCode(location);
