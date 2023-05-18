@@ -7,6 +7,7 @@ import java.text.Normalizer;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.INcipLogDetails;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
@@ -118,20 +119,32 @@ public class VoyagerHostLMSService extends BaseHostLMSService {
     return barcode;
   }
 
-  public Map acceptItem(ISettings settings,
-                        String item_id,
-                        String request_id,
-                        String user_id,
-                        String author,
-                        String title,
-                        String isbn,
-                        String call_number,
-                        String pickup_location,
-                        String requested_action) {
+  public Map acceptItem(
+      ISettings settings,
+      String item_id,
+      String request_id,
+      String user_id,
+      String author,
+      String title,
+      String isbn,
+      String call_number,
+      String pickup_location,
+      String requested_action,
+      INcipLogDetails ncipLogDetails
+  ) {
     log.debug("Calling VoyagerHostLMSService::acceptItem");
-    return super.acceptItem(settings, item_id, request_id, user_id, stripDiacritics(author),
-     stripDiacritics(title), isbn, call_number, pickup_location, requested_action);
-
+    return super.acceptItem(
+        settings,
+        item_id,
+        request_id,
+        user_id,
+        stripDiacritics(author),
+        stripDiacritics(title),
+        isbn, call_number,
+        pickup_location,
+        requested_action,
+        ncipLogDetails
+    );
   }
 
   private String stripDiacritics(String input) {

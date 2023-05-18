@@ -57,16 +57,4 @@ public interface IHoldingLogDetails extends IBaseAuditDetails {
      * @param bestAvailableLocation The best available location
      */
     void bestAvailableLocation(ItemLocation bestAvailableLocation);
-
-    /**
-     * A map representing everything that was recorded
-     * @return The map with all the recorded details
-     */
-    Map toMap();
-
-    /**
-     * Returns a json string of everything that has been recorded
-     * @return A json string representing the information recorded
-     */
-    String toString();
 }

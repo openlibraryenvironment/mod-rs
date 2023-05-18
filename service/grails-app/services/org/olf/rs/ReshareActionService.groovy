@@ -45,6 +45,7 @@ public class ReshareActionService {
 
     /**
      * Looks up a patron identifier to see if it is valid for requesting or not
+     * @param request the patron request that any auditing should be associated with
      * @param actionParams the parameters that we use to make our decision
      *      patronIdentifier ... the id to be checked
      *      override ... if the patron turns out to be invalid, this allows us to say they are valid
@@ -56,10 +57,10 @@ public class ReshareActionService {
      *      status ... the status of the patron (FAIL or OK)
      *
      */
-    public Map lookupPatron(Map actionParams) {
+    private Map lookupPatronInternal(PatronRequest request, Map actionParams) {
         // The result object
         Map result = [callSuccess: false, patronValid: false ];
-        Map patronDetails = hostLMSService.getHostLMSActions().lookupPatron(settingsService, actionParams.patronIdentifier);
+        Map patronDetails = hostLMSService.lookupPatron(request, actionParams.patronIdentifier);
         if (patronDetails != null) {
             if (patronDetails.result) {
                 result.callSuccess = true;
@@ -96,6 +97,15 @@ public class ReshareActionService {
         return(result);
     }
 
+    /**
+     * Looks up the patron without an active request
+     * @param actionParams The parameters required for the lookup
+     * @return a Map containing the result of the lookup
+     */
+    public Map lookupPatron(Map actionParams) {
+        return(lookupPatronInternal(null, actionParams));
+    }
+
     /*
      * WARNING: this method is NOT responsible for saving or for managing state
      * changes. It simply performs the lookupAction and appends relevant info to the
@@ -111,7 +121,7 @@ public class ReshareActionService {
 
         // before we call lookupPatron we need to set the patronIdentifier on the actionParams
         params.patronIdentifier = pr.patronIdentifier;
-        Map result = lookupPatron(params);
+        Map result = lookupPatronInternal(pr, params);
 
         if (result.patronDetails != null) {
             if (result.patronDetails.userid != null) {

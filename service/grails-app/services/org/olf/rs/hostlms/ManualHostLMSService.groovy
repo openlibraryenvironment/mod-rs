@@ -4,6 +4,7 @@ import org.olf.rs.PatronRequest
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.INcipLogDetails;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -21,7 +22,7 @@ public class ManualHostLMSService implements HostLMSActions {
     return location;
   }
 
-  public Map lookupPatron(ISettings settings, String patron_id) {
+  public Map lookupPatron(ISettings settings, String patron_id, INcipLogDetails ncipLogDetails) {
     log.debug("lookupPatron(${patron_id})");
     Map result = [status: 'OK', reason: 'spoofed', result: true ];
     return result
@@ -31,7 +32,8 @@ public class ManualHostLMSService implements HostLMSActions {
     ISettings settings,
     String requestId,
     String itemBarcode,
-    String borrowerBarcode
+    String borrowerBarcode,
+    INcipLogDetails ncipLogDetails
   ) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode})");
 
@@ -51,7 +53,8 @@ public class ManualHostLMSService implements HostLMSActions {
     String isbn,
     String call_number,
     String pickup_location,
-    String requested_action
+    String requested_action,
+    INcipLogDetails ncipLogDetails
   ) {
 
     return [
@@ -60,7 +63,7 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map checkInItem(ISettings settings, String item_id) {
+  public Map checkInItem(ISettings settings, String item_id, INcipLogDetails ncipLogDetails) {
     return [
       result:true,
       reason: 'spoofed'
