@@ -1,6 +1,10 @@
 package org.olf.rs;
 
 import org.olf.rs.lms.HostLMSActions;
+import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.INcipLogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
@@ -12,10 +16,16 @@ import grails.core.GrailsApplication;
  */
 public class HostLMSService {
 
-  GrailsApplication grailsApplication
-  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
+    private static final Map resultHostLMSNotConfigured = [
+        result : false,
+        problems : "Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings."
+    ];
+
+  GrailsApplication grailsApplication;
+  ProtocolAuditService protocolAuditService;
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
   SettingsService settingsService;
-  StatisticsService statisticsService
+  StatisticsService statisticsService;
 
   public HostLMSActions getHostLMSActionsFor(String lms) {
     log.debug("HostLMSService::getHostLMSActionsFor(${lms})");
@@ -60,7 +70,9 @@ public class HostLMSService {
       resultMap.hostLMS = true;
       for( def vol : volumesNotCheckedIn ) {
         def checkInMap = [:];
-        def check_in_result = host_lms.checkInItem(settingsService, vol.temporaryItemBarcode);
+        INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+        def check_in_result = host_lms.checkInItem(settingsService, vol.temporaryItemBarcode, ncipLogDetails);
+        protocolAuditService.save(request, ncipLogDetails);
         checkInMap.result = check_in_result;
         checkInMap.volume = vol;
         String message;
@@ -136,7 +148,101 @@ public class HostLMSService {
     }
     resultMap.result = result;
     return resultMap;
-
   }
 
+    /**
+     * looks up the patron using NCIP and records the messages are stored in the protocol audit table if enabled
+     * @param request the request associated with the patron lookup
+     * @param patronIdentifier the id of the patron to be looked up
+     * @return a map containing the result of the lookup
+     */
+    public Map lookupPatron(PatronRequest request, String patronIdentifier) {
+        Map patronDetails;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+            patronDetails = hostLMSActions.lookupPatron(settingsService, patronIdentifier, ncipLogDetails);
+            protocolAuditService.save(request, ncipLogDetails);
+        } else {
+            patronDetails = resultHostLMSNotConfigured;
+        }
+        return(patronDetails);
+    }
+
+    /**
+     * looks to see if the requested item is available using Z3950 and records the messages are stored in the protocol audit table if enabled
+     * @param request the request this lookup is for
+     * @param protocolType The protocol type it is for
+     * @return The location holding this item where it is available or null if it has not been found or it is not available
+     */
+    public ItemLocation determineBestLocation(PatronRequest request, ProtocolType protocolType) {
+        ItemLocation location = null;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            IHoldingLogDetails holdingLogDetails = protocolAuditService.getHoldingLogDetails(protocolType);
+            location = hostLMSActions.determineBestLocation(settingsService, request, holdingLogDetails);
+            protocolAuditService.save(request, holdingLogDetails);
+        }
+        return(location);
+    }
+
+    /**
+     * Checks out the specified item using NCIP and records the messages are stored in the protocol audit table if enabled
+     * @param request the request this item is associated with
+     * @param itemId the id of the item to be checked out
+     * @param institutionalPatronIdValue the patron that the item should be checked out to
+     * @return A Map containg the result of the checkout
+     */
+    public Map checkoutItem(PatronRequest request, String itemId, String institutionalPatronIdValue) {
+        Map checkoutResult;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+            checkoutResult = hostLMSActions.checkoutItem(
+                settingsService,
+                request.hrid,
+                itemId,
+                institutionalPatronIdValue,
+                ncipLogDetails
+            );
+            protocolAuditService.save(request, ncipLogDetails);
+        } else {
+            checkoutResult = resultHostLMSNotConfigured;
+            request.needsAttention = true;
+        }
+        return(checkoutResult);
+    }
+
+    /**
+     * Creates a temporary item in the local lms using NCIP and records the messages are stored in the protocol audit table if enabled
+     * @param request the request triggering the accept item message
+     * @param temporaryItemBarcode the id of the temporary item to be created
+     * @param requestedAction the action to be performed (no idea what actions can be performed)
+     * @return a map containing the outcome of the accept item call
+     */
+    public Map acceptItem(PatronRequest request, String temporaryItemBarcode, String requestedAction) {
+        Map acceptResult;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+        INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+            acceptResult = getHostLMSActions().acceptItem(
+                settingsService,
+                temporaryItemBarcode,
+                request.hrid,
+                request.patronIdentifier, // user_idA
+                request.author, // author,
+                request.title, // title,
+                request.isbn, // isbn,
+                request.localCallNumber, // call_number,
+                request.resolvedPickupLocation?.lmsLocationCode, // pickup_location,
+                requestedAction, // requested_action
+                ncipLogDetails
+            );
+            protocolAuditService.save(request, ncipLogDetails);
+        } else {
+            acceptResult = resultHostLMSNotConfigured;
+            request.needsAttention = true;
+        }
+        return(acceptResult);
+    }
 }

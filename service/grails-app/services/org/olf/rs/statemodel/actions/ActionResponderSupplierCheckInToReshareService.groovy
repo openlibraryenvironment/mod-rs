@@ -8,7 +8,6 @@ import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.SettingsService;
 import org.olf.rs.constants.Directory;
-import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
@@ -83,106 +82,97 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
             }
 
             if (volumesNotCheckedIn.size() > 0) {
-                HostLMSActions hostLMS = hostLMSService.getHostLMSActions();
-                if (hostLMS) {
-                    // Call the host lms to check the item out of the host system and in to reshare
+                // Call the host lms to check the item out of the host system and in to reshare
 
+                /*
+                * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
+                * Instead use institutionalPatronID saved on DirEnt or default from settings.
+                */
+
+                /*
+                * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
+                * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
+                * Finally we can extract the value from that custprop.
+                * Here that value is a string, but in the refdata case we'd need value?.value
+                */
+                CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
+                String institutionalPatronIdValue = institutionalPatronId?.value
+                if (!institutionalPatronIdValue) {
+                    // If nothing on the Directory Entry then fallback to the default in settings
+                    AppSetting defaultInstitutionalPatronId = AppSetting.findByKey('default_institutional_patron_id')
+                    institutionalPatronIdValue = defaultInstitutionalPatronId?.value
+                }
+
+                // At this point we have a list of NCIP calls to make.
+                // We should make those calls and track which succeeded/failed
+
+                // Store a string and a Date to save onto the request at the end
+                Date parsedDate
+                String stringDate
+
+                // Iterate over volumes not yet checked in in for loop so we can break out if we need to
+                for (def vol : volumesNotCheckedIn) {
                     /*
-                    * The supplier shouldn't be attempting to check out of their host LMS with the requester's side patronID.
-                    * Instead use institutionalPatronID saved on DirEnt or default from settings.
-                    */
+                     * Be aware that institutionalPatronIdValue here may well be blank or null.
+                     * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
+                     * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block
+                     */
+                    Map checkoutResult = hostLMSService.checkoutItem(request, vol.itemId, institutionalPatronIdValue);
 
-                    /*
-                    * This takes the resolvedRequester symbol, then looks at its owner, which is a DirectoryEntry
-                    * We then feed that into extractCustomPropertyFromDirectoryEntry to get a CustomProperty.
-                    * Finally we can extract the value from that custprop.
-                    * Here that value is a string, but in the refdata case we'd need value?.value
-                    */
-                    CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
-                    String institutionalPatronIdValue = institutionalPatronId?.value
-                    if (!institutionalPatronIdValue) {
-                        // If nothing on the Directory Entry then fallback to the default in settings
-                        AppSetting defaultInstitutionalPatronId = AppSetting.findByKey('default_institutional_patron_id')
-                        institutionalPatronIdValue = defaultInstitutionalPatronId?.value
-                    }
-
-                    // At this point we have a list of NCIP calls to make.
-                    // We should make those calls and track which succeeded/failed
-
-                    // Store a string and a Date to save onto the request at the end
-                    Date parsedDate
-                    String stringDate
-
-                    // Iterate over volumes not yet checked in in for loop so we can break out if we need to
-                    for (def vol : volumesNotCheckedIn) {
-                        /*
-                         * Be aware that institutionalPatronIdValue here may well be blank or null.
-                         * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
-                         * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block
-                         */
-                        Map checkoutResult = hostLMS.checkoutItem(settingsService,
-                                                                  request.hrid,
-                                                                  vol.itemId,
-                                                                  institutionalPatronIdValue);
-
-                        // Otherwise, if the checkout succeeded or failed, set appropriately
-                        if (checkoutResult.result == true) {
-                            RefdataValue volStatus = checkoutResult.reason == REASON_SPOOFED ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete');
-                            if (volStatus) {
-                                vol.status = volStatus;
-                            }
-                            vol.save(failOnError: true);
-                            reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkoutResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
-
-                            // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
-                            try {
-                                Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate, settingsService.getSettingValue(SettingsData.SETTING_NCIP_DUE_DATE_FORMAT));
-                                if (!request.parsedDueDateFromLMS || parsedDate.before(request.parsedDueDateFromLMS)) {
-                                    parsedDate = tempParsedDate;
-                                    stringDate = checkoutResult?.dueDate;
-                                }
-                            } catch (Exception e) {
-                                log.warn("Unable to parse ${checkoutResult?.dueDate} to date: ${e.getMessage()}");
-                            }
-                        } else {
-                            reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);
+                    // Otherwise, if the checkout succeeded or failed, set appropriately
+                    if (checkoutResult.result == true) {
+                        RefdataValue volStatus = checkoutResult.reason == REASON_SPOOFED ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete');
+                        if (volStatus) {
+                            vol.status = volStatus;
                         }
-                    }
+                        vol.save(failOnError: true);
+                        reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkoutResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
 
-                    // Save the earliest Date we found as the dueDate
-                    request.dueDateFromLMS = stringDate;
-                    request.parsedDueDateFromLMS = parsedDate;
-                    request.save(flush:true, failOnError:true);
-
-                    // At this point we should have all volumes checked out. Check that again
-                    volumesNotCheckedIn = request.volumes.findAll { rv ->
-                        rv.status.value == VOLUME_STATUS_AWAITING_LMS_CHECK_OUT;
-                    }
-
-                    if (volumesNotCheckedIn.size() == 0) {
-                        statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
-                        request.activeLoan = true;
-                        request.needsAttention = false;
-                        AppSetting useLMSDueDate = AppSetting.findByKey('ncip_use_due_date');
-                        if (!request?.dueDateRS && useLMSDueDate?.value != 'off') {
-                            request.dueDateRS = request.dueDateFromLMS;
-                        }
-
+                        // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
                         try {
-                            request.parsedDueDateRS = reshareActionService.parseDateString(request.dueDateRS);
+                            Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate, settingsService.getSettingValue(SettingsData.SETTING_NCIP_DUE_DATE_FORMAT));
+                            if (!request.parsedDueDateFromLMS || parsedDate.before(request.parsedDueDateFromLMS)) {
+                                parsedDate = tempParsedDate;
+                                stringDate = checkoutResult?.dueDate;
+                            }
                         } catch (Exception e) {
-                            log.warn("Unable to parse ${request.dueDateRS} to date: ${e.getMessage()}");
+                            log.warn("Unable to parse ${checkoutResult?.dueDate} to date: ${e.getMessage()}");
                         }
-
-                        request.overdue = false;
-                        actionResultDetails.auditMessage = 'Items successfully checked in to ReShare';
-                        result = true;
                     } else {
-                        actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.';
-                        request.needsAttention = true;
+                        reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);
                     }
+                }
+
+                // Save the earliest Date we found as the dueDate
+                request.dueDateFromLMS = stringDate;
+                request.parsedDueDateFromLMS = parsedDate;
+                request.save(flush:true, failOnError:true);
+
+                // At this point we should have all volumes checked out. Check that again
+                volumesNotCheckedIn = request.volumes.findAll { rv ->
+                    rv.status.value == VOLUME_STATUS_AWAITING_LMS_CHECK_OUT;
+                }
+
+                if (volumesNotCheckedIn.size() == 0) {
+                    statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
+                    request.activeLoan = true;
+                    request.needsAttention = false;
+                    AppSetting useLMSDueDate = AppSetting.findByKey('ncip_use_due_date');
+                    if (!request?.dueDateRS && useLMSDueDate?.value != 'off') {
+                        request.dueDateRS = request.dueDateFromLMS;
+                    }
+
+                    try {
+                        request.parsedDueDateRS = reshareActionService.parseDateString(request.dueDateRS);
+                    } catch (Exception e) {
+                        log.warn("Unable to parse ${request.dueDateRS} to date: ${e.getMessage()}");
+                    }
+
+                    request.overdue = false;
+                    actionResultDetails.auditMessage = 'Items successfully checked in to ReShare';
+                    result = true;
                 } else {
-                    actionResultDetails.auditMessage = 'Host LMS integration not configured: Choose Host LMS in settings or deconfigure host LMS integration in settings.';
+                    actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.';
                     request.needsAttention = true;
                 }
             } else {

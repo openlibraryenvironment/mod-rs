@@ -119,8 +119,7 @@ public class HoldingLogDetails extends BaseAuditDetails implements IHoldingLogDe
     }
 
     @Override
-    public String toString() {
-        addDuration();
+    public String getResponseBody() {
         return(new JsonBuilder(logDetails).toPrettyString());
     }
 

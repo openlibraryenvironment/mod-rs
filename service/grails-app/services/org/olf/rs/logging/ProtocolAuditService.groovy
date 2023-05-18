@@ -51,23 +51,40 @@ public class ProtocolAuditService {
     }
 
     /**
-     * Associates the logging details with request
-     * @param patronRequest The request that the log details need to be associated with
-     * @param holdingLogDetails The logging details
+     * Gets hold of the appropriate NCIP logging object depending on whether logging is enabled or not
+     * @return An INcipLogDetails object
      */
-    public void save(PatronRequest patronRequest, IHoldingLogDetails holdingLogDetails) {
-        // Do we have anything to save
-        String logDetails = holdingLogDetails.toString();
-        if (logDetails != null) {
-            // We have some details to save
-            ProtocolAudit protocolAudit = new ProtocolAudit();
+    public INcipLogDetails getNcipLogDetails() {
+        // Allocate an appropriate object depending on whether auditing is enabled
+        return(settingsService.hasSettingValue(SettingsData.SETTING_LOGGING_NCIP, getRefDataYes()) ?
+                new NcipLogDetails() :        // Logging is enabled
+                new DoNothingNcipLogDetails() // Logging is not enabled
+        );
+    }
 
-            protocolAudit.protocolType = holdingLogDetails.getProtocolType();
-            protocolAudit.protocolMethod = holdingLogDetails.getProtocolMethod();
-            protocolAudit.url = holdingLogDetails.getURL();
-            protocolAudit.responseBody = logDetails;
-            protocolAudit.duration = holdingLogDetails.duration();
-            patronRequest.addToProtocolAudit(protocolAudit);
+    /**
+     * Associates the audit details with request
+     * @param patronRequest The request that the audit details need to be associated with
+     * @param baseAuditDetails The audit details
+     */
+    public void save(PatronRequest patronRequest, IBaseAuditDetails baseAuditDetails) {
+        // Have we been supplied a request
+        if (patronRequest != null) {
+            // Do we have anything to save
+            String responseBody = baseAuditDetails.getResponseBody();
+            if (responseBody != null) {
+                // We have some details to save
+                ProtocolAudit protocolAudit = new ProtocolAudit();
+
+                protocolAudit.protocolType = baseAuditDetails.getProtocolType();
+                protocolAudit.protocolMethod = baseAuditDetails.getProtocolMethod();
+                protocolAudit.url = baseAuditDetails.getURL();
+                protocolAudit.requestBody = baseAuditDetails.getRequestBody();
+                protocolAudit.responseStatus = baseAuditDetails.getResponseStatus();
+                protocolAudit.responseBody = responseBody;
+                protocolAudit.duration = baseAuditDetails.duration();
+                patronRequest.addToProtocolAudit(protocolAudit);
+            }
         }
     }
 

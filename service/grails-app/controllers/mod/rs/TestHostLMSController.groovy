@@ -8,6 +8,8 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.logging.HoldingLogDetails;
 import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.INcipLogDetails;
+import org.olf.rs.logging.NcipLogDetails;
 import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.MapSettings;
@@ -155,7 +157,9 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                     settings.add(SettingsData.SETTING_BORROWER_CHECK, CIRC_TYPE_NCIP);
 
                     // Now we can make the call
-                    result = hostLMSActions.lookupPatron(settings, params.patronId);
+                    INcipLogDetails ncipLogDetails = new NcipLogDetails();
+                    result = hostLMSActions.lookupPatron(settings, params.patronId, ncipLogDetails);
+                    result.logging = ncipLogDetails.toMap();
                 } else {
                     result.error = "no patronId supplied";
                 }
@@ -302,7 +306,9 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                     settings.add(SettingsData.SETTING_CHECK_OUT_ITEM, CIRC_TYPE_NCIP);
 
                     // Now we can make the call
-                    result = hostLMSActions.checkoutItem(settings, params.requestId, params.itemBarcode, params.borrowerBarcode);
+                    INcipLogDetails ncipLogDetails = new NcipLogDetails();
+                    result = hostLMSActions.checkoutItem(settings, params.requestId, params.itemBarcode, params.borrowerBarcode, ncipLogDetails);
+                    result.logging = ncipLogDetails.toMap();
                 } else {
                     result.error = "Need to supply the requestId, itemBarcode and borrowerBarcodeno parameters to test check in";
                 }
@@ -435,7 +441,9 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                     settings.add(SettingsData.SETTING_CHECK_IN_ITEM, CIRC_TYPE_NCIP);
 
                     // Now we can make the call
-                    result = hostLMSActions.checkInItem(settings, params.itemBarcode);
+                    INcipLogDetails ncipLogDetails = new NcipLogDetails();
+                    result = hostLMSActions.checkInItem(settings, params.itemBarcode, ncipLogDetails);
+                    result.logging = ncipLogDetails.toMap();
                 } else {
                     result.error = "Need to supply the itemBarcode to check the item in";
                 }
@@ -622,6 +630,7 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                     settings.add(SettingsData.SETTING_ACCEPT_ITEM, CIRC_TYPE_NCIP);
 
                     // Now we can make the call
+                    INcipLogDetails ncipLogDetails = new NcipLogDetails();
                     result = hostLMSActions.acceptItem(
                         settings,
                         params.itemBarcode,
@@ -632,7 +641,10 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
                         params.isbn,
                         params.callNumber,
                         params.pickupLocation,
-                        null);
+                        null,
+                        ncipLogDetails
+                    );
+                    result.logging = ncipLogDetails.toMap();
                 } else {
                     result.error = "Need to supply all the following fields itemBarcode, requestId, userId, author, title and pickupLocation to accept the item";
                 }

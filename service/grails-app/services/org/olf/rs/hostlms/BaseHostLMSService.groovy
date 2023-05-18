@@ -20,6 +20,7 @@ import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.logging.DoNothingHoldingLogDetails;
 import org.olf.rs.logging.IHoldingLogDetails;
+import org.olf.rs.logging.INcipLogDetails;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
@@ -374,14 +375,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public Map lookupPatron(ISettings settings, String patron_id) {
+  public Map lookupPatron(ISettings settings, String patron_id, INcipLogDetails ncipLogDetails) {
     log.debug("lookupPatron(${patron_id})");
     Map result = [ result: true, status: 'OK', reason: 'spoofed' ];
     String borrowerCheckValue = settings.getSettingValue(SettingsData.SETTING_BORROWER_CHECK)
     if (borrowerCheckValue != null) {
       switch (borrowerCheckValue) {
         case CIRCULATION_NCIP:
-          result = ncip2LookupPatron(settings, patron_id)
+          result = ncip2LookupPatron(settings, patron_id, ncipLogDetails)
           result.reason = 'ncip'
           break;
 
@@ -398,7 +399,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result
   }
 
-  private Map ncip2Lookup(ISettings settings, String keyValue, Boolean useUserId = true) {
+  private Map ncip2Lookup(ISettings settings, String keyValue, Boolean useUserId, INcipLogDetails ncipLogDetails) {
     Map result = [ status: 'FAIL' ];
     String key = null;
     if(useUserId) {
@@ -439,7 +440,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         JSONObject response = ncip_client.send(lookupUser);
         log.debug("[${CurrentTenant.get()}] NCIP2 lookupUser response ${response}");
 
-        processLookupUserResponse(result, response);
+        processLookupUserResponse(result, response, ncipLogDetails);
 
       } catch(Exception e) {
         result.problems = "Unexpected problem in NCIP Call: ${e.message}";
@@ -454,12 +455,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  private Map ncip2LookupById(ISettings settings, String user_id) {
-    return ncip2Lookup(settings, user_id, true);
+  private Map ncip2LookupById(ISettings settings, String user_id, INcipLogDetails ncipLogDetails) {
+    return ncip2Lookup(settings, user_id, true, ncipLogDetails);
   }
 
-  private Map ncip2LookupByUsername(ISettings settings, String username) {
-    return ncip2Lookup(settings, username, false);
+  private Map ncip2LookupByUsername(ISettings settings, String username, INcipLogDetails ncipLogDetails) {
+    return ncip2Lookup(settings, username, false, ncipLogDetails);
   }
 
   // {"firstName":"Stacey",
@@ -467,7 +468,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
   //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
   //  "userId":"M00069192"}
-  private void processLookupUserResponse(Map result, JSONObject response) {
+  private void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
     if ( ( response ) && ( ! response.has('problems') ) ) {
       JSONArray priv = response.getJSONArray('privileges')
       // Return a status of BLOCKED if the user is blocked, else OK for now
@@ -477,7 +478,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.userid=response.opt('userId') ?: response.opt('userid')
       result.givenName=response.opt('firstName')
       result.surname=response.opt('lastName')
-      protocolInformationToResult(response, result);
+      protocolInformationToResult(response, ncipLogDetails);
       if ( response.has('electronicAddresses') ) {
         JSONArray ea = response.getJSONArray('electronicAddresses')
         // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
@@ -491,14 +492,13 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
   }
 
-  private void protocolInformationToResult(JSONObject response, Map result) {
-      result.protocolInformation = [ : ];
-      result.protocolInformation.request = [ : ];
-      result.protocolInformation.request.endPoint = response.protocolInformation.request.endPoint;
-      result.protocolInformation.request.requestbody = unescapeJson(response.protocolInformation.request.requestbody);
-      result.protocolInformation.response = [ : ];
-      result.protocolInformation.response.responseStatus = response.protocolInformation.response.responseStatus;
-      result.protocolInformation.response.responseBody = unescapeJson(response.protocolInformation.response.responseBody);
+  private void protocolInformationToResult(JSONObject response, INcipLogDetails ncipLogDetails) {
+      ncipLogDetails.result(
+          response.protocolInformation.request.endPoint,
+          unescapeJson(response.protocolInformation.request.requestbody),
+          response.protocolInformation.response.responseStatus,
+          unescapeJson(response.protocolInformation.response.responseBody)
+      );
   }
 
   private String unescapeJson(String jsonString) {
@@ -520,10 +520,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
    *   result: true|false
    * }
    */
-  private Map ncip2LookupPatron(ISettings settings, String patron_id) {
+  private Map ncip2LookupPatron(ISettings settings, String patron_id, INcipLogDetails ncipLogDetails) {
     Map user_id_result = null;
     Map username_result = null;
-    user_id_result = ncip2LookupById(settings, patron_id);
+    user_id_result = ncip2LookupById(settings, patron_id, ncipLogDetails);
     if(user_id_result.result == false) {
       log.debug("No result from userId patron lookup, attempting username");
       /*
@@ -531,7 +531,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       assigned to the username value instead, and return that result if
       and only if it is successful
       */
-      username_result = ncip2LookupByUsername(settings, patron_id);
+      username_result = ncip2LookupByUsername(settings, patron_id, ncipLogDetails);
       if(username_result.result != false) {
         return username_result;
       }
@@ -570,7 +570,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ISettings settings,
     String requestId,
     String itemBarcode,
-    String borrowerBarcode
+    String borrowerBarcode,
+    INcipLogDetails ncipLogDetails
   ) {
     log.debug("checkoutItem(${requestId}. ${itemBarcode})");
     Map result = [
@@ -582,7 +583,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if (checkOutValue != null) {
       switch (checkOutValue) {
         case CIRCULATION_NCIP:
-          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode)
+          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode, ncipLogDetails)
           break;
 
         default:
@@ -594,7 +595,13 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
-  public Map ncip2CheckoutItem(ISettings settings, String requestId, String itemBarcode, String borrowerBarcode) {
+  public Map ncip2CheckoutItem(
+      ISettings settings,
+      String requestId,
+      String itemBarcode,
+      String borrowerBarcode,
+      INcipLogDetails ncipLogDetails
+  ) {
     // set reason to ncip
     Map result = [reason: 'ncip'];
 
@@ -617,7 +624,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
       JSONObject response = ncip_client.send(checkoutItem);
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem response ${response}");
-      protocolInformationToResult(response, result);
+      protocolInformationToResult(response, ncipLogDetails);
 
       if ( response.has('problems') ) {
         result.result = false;
@@ -645,7 +652,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String isbn,
     String call_number,
     String pickup_location,
-    String requested_action
+    String requested_action,
+    INcipLogDetails ncipLogDetails
   ) {
     log.debug("acceptItem(${request_id},${user_id})");
     Map result = [
@@ -685,7 +693,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("[${CurrentTenant.get()}] NCIP acceptItem request ${acceptItem}");
           JSONObject response = ncip_client.send(acceptItem);
           log.debug("[${CurrentTenant.get()}] NCIP acceptItem response ${response}");
-          protocolInformationToResult(response, result);
+          protocolInformationToResult(response, ncipLogDetails);
 
           if ( response.has('problems') ) {
             result.result = false;
@@ -703,7 +711,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   }
 
 
-  public Map checkInItem(ISettings settings, String item_id) {
+  public Map checkInItem(ISettings settings, String item_id, INcipLogDetails ncipLogDetails) {
     Map result = [
       result: true,
       reason: 'spoofed',
@@ -731,7 +739,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}");
           JSONObject response = ncip_client.send(checkinItem);
           log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}");
-          protocolInformationToResult(response, result);
+          protocolInformationToResult(response, ncipLogDetails);
 
           log.debug(response?.toString());
           if ( response != null && response.has('problems') ) {
