@@ -49,6 +49,9 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_CANCELLED, StatusStage.COMPLETED, '9998', true, null, true, 4);
         Status.ensure(Status.PATRON_REQUEST_ERROR, StatusStage.ACTIVE, '9999', true, true);
 
+        // Digital Returnable Requester
+        Status.ensure(Status.REQUESTER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false);
+
         // Responder / Lender State Model
         Status responderIdle = Status.ensure(Status.RESPONDER_IDLE, StatusStage.ACTIVE, '0005', true);
         Status.ensure(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER, '0006', true);
@@ -65,6 +68,12 @@ public class StatusData {
         Status.ensure(Status.RESPONDER_CANCELLED, StatusStage.COMPLETED, '9999', true, null, true, 3);
         Status.ensure(Status.RESPONDER_ERROR, StatusStage.ACTIVE, '9999', true, true);
         Status.ensure(Status.RESPONDER_OVERDUE, StatusStage.ACTIVE_SHIPPED, '9997', true);
+
+        // CDL Responder
+        Status.ensure(Status.RESPONDER_SEQUESTERED, StatusStage.ACTIVE, '0020', true);
+        Status.ensure(Status.RESPONDER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0040', true);
+        Status.ensure(Status.RESPONDER_AWAIT_DESEQUESTRATION, StatusStage.ACTIVE_SHIPPED, '0040', true);
+
 	}
 
 	public static void loadAll() {

@@ -38,6 +38,9 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, 'The responder has shipped the item(s) to the requester', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED.capitalize(), ActionEventResultList.RESPONDER_MARK_SHIPPED, true);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'The responder has printed the pull slip', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.RESPONDER_PRINT_PULL_SLIP);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, 'The responder is responding to a request to cancel the request from the requester', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL.capitalize(), ActionEventResultList.RESPONDER_CANCEL);
+        // CDL specific
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN, 'The responder has filled the loan digitally', true, 'ResponderFillDigitalLoan', ActionEventResultList.CDL_RESPONDER_FILL_DIGITAL_LOAN);
+
 
         // Requester Actions
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
@@ -95,6 +98,7 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION, 'Status has changed to Checked into Reshare', false, eventServiceName(Events.EVENT_STATUS_RES_CHECKED_IN_TO_RESHARE_INDICATION), ActionEventResultList.RESPONDER_CHECKED_INTO_RESHARE_IND);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_IDLE_INDICATION, 'Status has changed to Idle', false, eventServiceName(Events.EVENT_STATUS_RES_IDLE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, eventServiceName(Events.EVENT_STATUS_RES_OVERDUE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
 	}
 

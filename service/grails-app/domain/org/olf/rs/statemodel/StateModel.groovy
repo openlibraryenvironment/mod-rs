@@ -10,7 +10,9 @@ import grails.gorm.MultiTenant;
 class StateModel implements MultiTenant<StateModel> {
 
     public static final String MODEL_REQUESTER = 'PatronRequest';
+    public static final String MODEL_DIGITAL_RETURNABLE_REQUESTER = 'DigitalReturnableRequester';
     public static final String MODEL_RESPONDER = 'Responder';
+    public static final String MODEL_CDL_RESPONDER = 'CDLResponder';
 
     /** The query to find the states that are for a particular stage for a state model */
     private static final String STATES_FOR_STAGES_QUERY = """
