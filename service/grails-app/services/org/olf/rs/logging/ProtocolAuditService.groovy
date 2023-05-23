@@ -9,6 +9,8 @@ import org.olf.rs.SettingsService;
 import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.referenceData.SettingsData;
 
+import groovyx.net.http.URIBuilder;
+
 /**
  * Provides the necessary methods for interfacing with the ProtocolAudit table
  * @author Chas
@@ -16,6 +18,12 @@ import org.olf.rs.referenceData.SettingsData;
  */
 public class ProtocolAuditService {
 
+    private static final String OBSCURED = "xxx";
+    private static final List queryKeysToObscure = [
+        "apikey",
+        "user",
+        "password"
+    ];
     private static String refDataYes = null;
 
     ReferenceDataService referenceDataService;
@@ -63,6 +71,18 @@ public class ProtocolAuditService {
     }
 
     /**
+     * Allocates an object that implements the IIso18626LogDetails interface depending on whether auditing is enabled or not
+     * @return An IIso18626LogDetails object
+     */
+    public IIso18626LogDetails getIso18626LogDetails() {
+        // Allocate an appropriate object depending on whether auditing is enabled
+        return(settingsService.hasSettingValue(SettingsData.SETTING_LOGGING_ISO18626, getRefDataYes()) ?
+                new Iso18626LogDetails() :        // Logging is enabled
+                new DoNothingIso18626LogDetails() // Logging is not enabled
+        );
+    }
+
+    /**
      * Associates the audit details with request
      * @param patronRequest The request that the audit details need to be associated with
      * @param baseAuditDetails The audit details
@@ -76,9 +96,10 @@ public class ProtocolAuditService {
                 // We have some details to save
                 ProtocolAudit protocolAudit = new ProtocolAudit();
 
+                // Populate the protocol audit
                 protocolAudit.protocolType = baseAuditDetails.getProtocolType();
                 protocolAudit.protocolMethod = baseAuditDetails.getProtocolMethod();
-                protocolAudit.url = baseAuditDetails.getURL();
+                protocolAudit.url = removePrivateDataFromURI(baseAuditDetails.getURL());
                 protocolAudit.requestBody = baseAuditDetails.getRequestBody();
                 protocolAudit.responseStatus = baseAuditDetails.getResponseStatus();
                 protocolAudit.responseBody = responseBody;
@@ -86,6 +107,31 @@ public class ProtocolAuditService {
                 patronRequest.addToProtocolAudit(protocolAudit);
             }
         }
+    }
+
+    /**
+     * Obfuscates certain query parameters so that usernames / passwords / apikeys are not recorded
+     * @param uri The uri that may need query parameters obfuscating
+     * @return The uri with parameters obfuscated
+     */
+    private String removePrivateDataFromURI(String uri) {
+        // We need to manipulate the query string to remove any passwords, apikeys or secrets
+        URIBuilder uriBuilder = new URIBuilder(uri);
+        Map queryParameters = uriBuilder.getQuery();
+        if (queryParameters) {
+            queryKeysToObscure.each { String parameter ->
+                if (queryParameters[parameter]) {
+                    // it is set, so reset to xxx
+                    queryParameters.put(parameter, OBSCURED);
+                }
+            }
+
+            // Now replace the query parameters
+            uriBuilder.setQuery(queryParameters);
+        }
+
+        // Return the actual url that we accessed
+        return(uriBuilder.toString());
     }
 
     /**

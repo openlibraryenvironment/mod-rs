@@ -5,6 +5,8 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ProtocolResultStatus;
+import org.olf.rs.logging.IIso18626LogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
 /**
@@ -15,6 +17,7 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  */
 public class TimerRequestNetworkTimeoutService extends AbstractTimerRequestNetworkService {
 
+    ProtocolAuditService protocolAuditService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
 
@@ -58,7 +61,9 @@ public class TimerRequestNetworkTimeoutService extends AbstractTimerRequestNetwo
         }
 
         // Attempt to send the message, this is just a quick check to see if they receieved the previous message, before we attempt to resend it
-        Map sendResult = protocolMessageService.sendProtocolMessage(symbols.senderSymbol, symbols.receivingSymbol, message);
+        IIso18626LogDetails iso18626LogDetails = protocolAuditService.getIso18626LogDetails();
+        Map sendResult = protocolMessageService.sendProtocolMessage(symbols.senderSymbol, symbols.receivingSymbol, message, iso18626LogDetails);
+        protocolAuditService.save(request, iso18626LogDetails);
 
         // Was it successfully sent
         switch (sendResult.status) {

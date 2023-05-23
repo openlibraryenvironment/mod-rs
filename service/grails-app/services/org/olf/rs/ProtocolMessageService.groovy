@@ -8,6 +8,8 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.grails.databinding.xml.GPathResultMap;
 import org.olf.okapi.modules.directory.ServiceAccount;
+import org.olf.rs.logging.IIso18626LogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
@@ -22,8 +24,9 @@ import groovyx.net.http.*;
  */
 class ProtocolMessageService {
 
-  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
-  EventPublicationService eventPublicationService
+  ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+  EventPublicationService eventPublicationService;
+  ProtocolAuditService protocolAuditService;
   SettingsService settingsService;
   def grailsApplication
 
@@ -88,26 +91,33 @@ class ProtocolMessageService {
         return((request.hrid ?: request.id) + REQUESTER_ID_SEPARATOR + request.rotaPosition.toString());
     }
 
-  /**
-   * @param eventData : A map structured as followed
-   *   event: {
-   *     envelope:{
-   *       sender:{
-   *         symbol:''
-   *       }
-          recipient:{
-   *         symbol:''
-   *       }
-   *       messageType:''
-   *       messageBody:{
-   *       }
-   *     }
-   *   }
-   *
-   * @return a map containing properties including any confirmationId the underlying protocol implementation provides us
-   *
-   */
-  public Map sendProtocolMessage(String message_sender_symbol, String peer_symbol, Map eventData) {
+    /**
+     * @param eventData : A map structured as followed
+     *   event: {
+     *     envelope:{
+     *       sender:{
+     *         symbol:''
+     *       }
+     *       recipient:{
+     *         symbol:''
+     *       }
+     *       messageType:''
+     *       messageBody:{
+     *       }
+     *     }
+     *   }
+     *
+     * @return a map containing properties including any confirmationId the underlying protocol implementation provides us
+     *
+     */
+    public Map sendProtocolMessage(PatronRequest patronRequest, String message_sender_symbol, String peer_symbol, Map eventData) {
+        IIso18626LogDetails iso18626LogDetails= protocolAuditService.getIso18626LogDetails();
+        Map result = sendProtocolMessage(message_sender_symbol, peer_symbol, eventData, iso18626LogDetails);
+        protocolAuditService.save(patronRequest, iso18626LogDetails);
+        return(result);
+    }
+
+  public Map sendProtocolMessage(String message_sender_symbol, String peer_symbol, Map eventData, IIso18626LogDetails iso18626LogDetails) {
 
     Map result = [:]
     Map auditMap = initialiseAuditMap(message_sender_symbol, peer_symbol, eventData);
@@ -155,7 +165,7 @@ class ProtocolMessageService {
           }
         }
       }
-      result.response = sendISO18626Message(eventData, serviceAddress, additional_headers, auditMap)
+      result.response = sendISO18626Message(eventData, serviceAddress, additional_headers, auditMap, iso18626LogDetails);
       result.status = (result.response.messageStatus == EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR) ? ProtocolResultStatus.ProtocolError : ProtocolResultStatus.Sent;
       log.debug("ISO18626 message sent")
     } catch(Exception e) {
@@ -299,17 +309,21 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
-  Map sendISO18626Message(Map eventData, String address, Map additionalHeaders = [ : ], Map auditMap = [ : ]) {
+  private Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ];
     StringWriter sw = new StringWriter();
     sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
+//    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
 
     if ( address != null ) {
       // It is stored as seconds in the settings, so need to multiply by 1000
       int timeoutPeriod = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_TIMEOUT_PERIOD, DEFAULT_TIMEOUT_PERIOD, false) * 1000;
+
+      // Audit this message
+      iso18626LogDetails.request(address, message);
 
       HttpBuilder http_client = ApacheHttpBuilder.configure {
         // HttpBuilder http_client = configure {
@@ -337,10 +351,13 @@ and sa.service.businessFunction.value=:ill
         response.failure { FromServer fs ->
           logMessageAudit(transactionStarted, new Date(), address, fs.getStatusCode(), message, auditMap);
           log.error("Got failure response from remote ISO18626 site (${address}): ${fs.getStatusCode()} ${fs}");
+          String respomseStatus = fs.getStatusCode().toString() + " " + fs.getMessage();
+          iso18626LogDetails.response(respomseStatus, fs.hasBody ? fs.toString() : null);
           throw new RuntimeException("Failure response from remote ISO18626 service (${address}): ${fs.getStatusCode()} ${fs}");
         }
 
         response.success { FromServer fs, xml ->
+          String respomseStatus = fs.getStatusCode().toString() + " " + fs.getMessage();
           logMessageAudit(transactionStarted, new Date(), address, fs.getStatusCode(), message, auditMap);
           log.debug("Got OK response: ${fs}");
           if (xml == null) {
@@ -348,7 +365,15 @@ and sa.service.businessFunction.value=:ill
               result.messageStatus = EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR;
               result.errorData = EventISO18626IncomingAbstractService.ERROR_TYPE_NO_XML_SUPPLIED;
               result.rawData = fs.toString();
+              iso18626LogDetails.response(respomseStatus, fs.hasBody ? fs.toString() : null);
           } else {
+              // Pass back the raw xml, just in case the caller wants to do anything with it
+              result.rawData = groovy.xml.XmlUtil.serialize(xml);
+
+              // Add an audit record
+              iso18626LogDetails.response(respomseStatus, result.rawData);
+
+              // Now attempt to interpret the result
               GPathResultMap iso18626Response = new GPathResultMap(xml);
               GPathResultMap responseNode = null
               if (iso18626Response.requestConfirmation != null) {
@@ -372,9 +397,6 @@ and sa.service.businessFunction.value=:ill
                   result.messageStatus = responseNode.confirmationHeader.messageStatus;
                   result.errorData = responseNode.confirmationHeader.errorData;
               }
-
-              // Pass back the raw xml, just in case the caller wants to do anything with it
-              result.rawData = groovy.xml.XmlUtil.serialize(xml);
           }
         }
       }

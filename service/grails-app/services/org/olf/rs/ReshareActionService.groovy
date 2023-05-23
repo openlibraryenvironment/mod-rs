@@ -9,6 +9,8 @@ import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.iso18626.NoteSpecials;
+import org.olf.rs.logging.IIso18626LogDetails;
+import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.patronstore.PatronStoreActions;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.ActionEvent;
@@ -37,6 +39,7 @@ public class ReshareActionService {
 
     HostLMSPatronProfileService hostLMSPatronProfileService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
+    ProtocolAuditService protocolAuditService;
     ProtocolMessageService protocolMessageService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     HostLMSService hostLMSService;
@@ -277,7 +280,10 @@ public class ReshareActionService {
             request.numberOfSendAttempts = 0;
         }
 
-        Map sendResult  = protocolMessageService.sendProtocolMessage(sendingSymbol, receivingSymbol, eventData);
+        IIso18626LogDetails iso18626LogDetails = protocolAuditService.getIso18626LogDetails();
+        Map sendResult  = protocolMessageService.sendProtocolMessage(sendingSymbol, receivingSymbol, eventData, iso18626LogDetails);
+        protocolAuditService.save(request, iso18626LogDetails);
+
         switch (sendResult.status) {
             case ProtocolResultStatus.Sent:
                 // TODO: Need to take into account a status of ERROR being returned in the protocol message, this assumed everything was received and processed without problems at the moment
