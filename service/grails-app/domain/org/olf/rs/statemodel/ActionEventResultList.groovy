@@ -42,6 +42,10 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     // Requester event lists
     static public final String REQUESTER_EVENT_NEW_PATRON_REQUEST = 'requesterNewPatronRequestIndList';
 
+    // Digital returnable requester event lists
+    static public final String DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'digitalReturnableRequesterExpectsToSupplyISO18626';
+    static public final String DIGITAL_RETURNABLE_REQUESTER_LOANED_DIGITALLY_ISO18626          = 'digitalReturnableRequesterLoanedDigitallyISO18626';
+
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
     static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';
@@ -64,6 +68,9 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String RESPONDER_RECEIVED_ISO18626              = 'responderReceivedISO18626';
     static public final String RESPONDER_SHIPPED_RETURN_ISO18626        = 'responderShippedReturnISO18626';
     static public final String RESPONDER_STATUS_REQUEST_ISO18626        = 'responderStausRequestISO18626';
+
+    static public final String CDL_RESPONDER_CHECK_INTO_RESHARE         = 'cdlResponderCheckInToReshare';
+    static public final String CDL_RESPONDER_FILL_DIGITAL_LOAN          = 'cdlResponderFillDigitalLoan';
 
     // Responder event lists
     static public final String RESPONDER_EVENT_NEW_PATRON_REQUEST = 'responderNewPatronRequestIndList';

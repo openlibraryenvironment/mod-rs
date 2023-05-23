@@ -715,6 +715,7 @@ and sa.service.businessFunction.value=:ill
         loanCondition(eventData.deliveryInfo.loanCondition)
         deliveredFormat(eventData.deliveryInfo.deliveredFormat)
         deliveryCosts(eventData.deliveryInfo.deliveryCosts)
+        URL(eventData.deliveryInfo.url)
       }
     }
   }

@@ -29,6 +29,9 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL      			 = "supplierRespondToCancel";
 	static public final String ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED = "supplierCheckInToReshareAndSupplierMarkShipped"
 
+	// CDL Responder Actions
+	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
+
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
 	static public final String ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE      	 = "borrowerCheckOverride";
