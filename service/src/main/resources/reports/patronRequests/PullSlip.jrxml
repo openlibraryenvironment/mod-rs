@@ -36,6 +36,8 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[select pr_patron_identifier,
+            pr_patron_name,
+            pr_patron_surname,
             coalesce(pr_volume, '') "volume" ,
             pr_hrid,
             coalesce(pr_author, '') "author",
@@ -100,6 +102,16 @@ where $X{IN, pr.pr_id, ids}]]>
 	<field name="pick_shelving_location" class="java.lang.String"/>
 	<field name="itemBarcode" class="java.lang.String"/>
 	<field name="isRequester" class="java.lang.Boolean"/>
+	<field name="pr_patron_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="pr_patron_name"/>
+		<property name="com.jaspersoft.studio.field.name" value="pr_patron_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pr_patron_name"/>
+	</field>
+	<field name="pr_patron_surname" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="pr_patron_surname"/>
+		<property name="com.jaspersoft.studio.field.name" value="pr_patron_surname"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pr_patron_surname"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -131,7 +143,7 @@ where $X{IN, pr.pr_id, ids}]]>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					</reportElement>
-					<textFieldExpression><![CDATA[$F{pr_patron_identifier}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{pr_patron_surname}.concat(", ").concat($F{pr_patron_name})]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement style="FieldBold" x="0" y="68" width="275" height="20" uuid="0a085f83-6da3-49b9-a0ff-b925fabfb1aa">
