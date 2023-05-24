@@ -55,6 +55,17 @@ public class TimerData {
             "FREQ=MINUTELY;INTERVAL=10",
             "ProcessPatronNotices"
         );
+
+        // Timer to clear out data from the ProtocolAuditTable
+        Timer.ensure(
+            "RemoveFromProtocolAudit",
+            "Removes records from the ProtocolAudit table that have become old",
+            "FREQ=DAILY",
+            "RemoveFromProtocolAudit",
+            null,
+            true,
+            true
+        );
 	}
 
 	public static void loadAll() {
