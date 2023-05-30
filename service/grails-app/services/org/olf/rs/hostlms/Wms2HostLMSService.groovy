@@ -2,6 +2,7 @@ package org.olf.rs.hostlms;
 
 import org.olf.rs.circ.client.NCIPClientWrapper
 import org.olf.rs.circ.client.CirculationClient
+import groovyx.net.http.HttpBuilder
 import org.olf.rs.lms.ItemLocation
 
 import com.k_int.web.toolkit.settings.AppSetting
@@ -58,8 +59,6 @@ public class Wms2HostLMSService extends BaseHostLMSService {
 
   List<ItemLocation> lookupViaConnector(String query) {
 
-    List<ItemLocation> result = [];
-
     //Override this method on BaseHost to use RTAC connector provided by IndexData
     AppSetting wms_connector_address = AppSetting.findByKey('wms_connector_address')
     AppSetting wms_connector_username = AppSetting.findByKey('wms_connector_username')
@@ -67,7 +66,7 @@ public class Wms2HostLMSService extends BaseHostLMSService {
     AppSetting wms_api_key = AppSetting.findByKey('wms_api_key')
     AppSetting wms_api_secret = AppSetting.findByKey('wms_api_secret')
     AppSetting wms_registry_id = AppSetting.findByKey('wms_registry_id')
-    
+
 
     //API key and API secret get embedded in the URL
     String z3950Connector = "${wms_connector_address?.value},user=${wms_api_key?.value}&password=${wms_api_secret?.value}&x-registryId=${wms_registry_id?.value}"
@@ -75,37 +74,54 @@ public class Wms2HostLMSService extends BaseHostLMSService {
     def z_response = HttpBuilder.configure {
       request.uri = z3950Connector
     }.get {
-        request.uri.query = [
-                              'version':'2.0',
-                              'operation': 'searchRetrieve',
-                              'x-username': wms_connector_username?.value,
-                              'x-password': wms_connector_password?.value,                              
-                              'query': query
-                          
-                            ]
-        log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
+      request.uri.query = [
+              'version':'2.0',
+              'operation': 'searchRetrieve',
+              'x-username': wms_connector_username?.value,
+              'x-password': wms_connector_password?.value,
+              'query': query
+
+      ]
+      log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
     }
     log.debug("Got Z3950 response: ${z_response}")
 
+    return extractAvailableItemsFrom(z_response);
+  }
+
+  @Override
+  protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason=null) {
+    List<ItemLocation> availability_summary = [];
     if ( z_response?.numberOfRecords?.size() > 0) {
-      List<ItemLocation> availability_summary = [];
-      result = z_response?.records?.record?.recordData?.opacRecord?.holdings?.holding?.findResults { hld ->
-        if ( hld.circulations?.circulation?.availableNow?.@value=='1' ) {
-          log.debug("Holding available now");
-          ItemLocation il = new ItemLocation( location: hld.localLocation, shelvingLocation:hld.shelvingLocation, callNumber:hld.callNumber )
-          availability_summary << il;
-          if( availability_summary?.size() > 0) { result = availability_summary; }
-        } else {
-          log.debug("Holding unavailable");
-          return null;
+      def withHoldings = z_response.records.record.findAll {
+        it?.recordData?.opacRecord?.holdings?.holding?.size() > 0
+      };
+      if (withHoldings.size() < 1) {
+        log.warn("Wms2HostLMSService failed to find an OPAC record with holdings");
+        return null;
+      }
+      def opacRecord = withHoldings?.first()?.recordData?.opacRecord;
+      opacRecord?.holdings?.holding?.each { hld ->
+        log.debug("Wms2HostLMSService holdings record: ${hld}");
+        hld?.circulations?.circulation?.each { circ ->
+          def loc = hld?.localLocation?.text()?.trim();
+          if (loc && circ?.availableNow?.@value=='1') {
+            log.debug("Holding available now");
+            ItemLocation il = new ItemLocation(
+                    location: loc,
+                    shelvingLocation:hld.shelvingLocation?.text()?.trim(),
+                    callNumber:hld.callNumber.text()?.trim()
+            );
+            availability_summary << il;
+          }
         }
       }
       log.debug("At end, availability summary: ${availability_summary}");
     } else {
-      log.debug("WMS connector lookup (${query}) returned no matches. Unable to determine availability.")
+      log.debug("WMS2 connector lookup returned no matches. Unable to determine availability.")
     }
 
-    return result
+    return availability_summary;
   }
 
 
