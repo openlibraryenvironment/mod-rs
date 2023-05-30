@@ -65,7 +65,7 @@ public class ReshareActionService {
         Map result = [callSuccess: false, patronValid: false ];
         Map patronDetails = hostLMSService.lookupPatron(request, actionParams.patronIdentifier);
         if (patronDetails != null) {
-            if (patronDetails.result) {
+            if (patronDetails.result || actionParams.override) {
                 result.callSuccess = true;
 
                 // Ensure the patron details has a user id
