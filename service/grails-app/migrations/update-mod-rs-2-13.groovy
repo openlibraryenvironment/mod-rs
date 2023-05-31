@@ -78,4 +78,32 @@ databaseChangeLog = {
         // Not forgetting the foreign key constraint
         addForeignKeyConstraint(baseColumnNames: "pa_patron_request", baseTableName: "protocol_audit", constraintName: "FKlyemccy64kx2cm6mlbuaqjkb6", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request", validate: "true")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1685009183653") {
+        createTable(tableName: "state_model_do_not_inherit_transition") {
+            column(name: "smdnit_id", type: "VARCHAR(36)") {
+                constraints(nullable: "false", primaryKey: "true", primaryKeyName: "state_model_do_not_inherit_transitionPK")
+            }
+
+            column(name: "smdnit_version", type: "BIGINT") {
+                constraints(nullable: "false")
+            }
+
+            column(name: "smdnit_action_event", type: "VARCHAR(36)")
+
+            column(name: "smdnit_state", type: "VARCHAR(36)")
+
+            column(name: "smdnit_state_model", type: "VARCHAR(36)") {
+                constraints(nullable: "false")
+            }
+        }
+
+        addUniqueConstraint(columnNames: "smdnit_action_event, smdnit_state, smdnit_state_model", constraintName: "UK6733f2d7bc0ed4dfc7d0f6ea4670", tableName: "state_model_do_not_inherit_transition")
+
+        addForeignKeyConstraint(baseColumnNames: "smdnit_state", baseTableName: "state_model_do_not_inherit_transition", constraintName: "FK4rxfhi3178dvyj8mjm57jxk2r", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "st_id", referencedTableName: "status", validate: "true")
+
+        addForeignKeyConstraint(baseColumnNames: "smdnit_action_event", baseTableName: "state_model_do_not_inherit_transition", constraintName: "FKqulkd03dg64ujc7j6mjn2xmad", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "ae_id", referencedTableName: "action_event", validate: "true")
+
+        addForeignKeyConstraint(baseColumnNames: "smdnit_state_model", baseTableName: "state_model_do_not_inherit_transition", constraintName: "FKsysqbrevxc3hnai0vil5yqml2", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "sm_id", referencedTableName: "state_model", validate: "true")
+    }
 }

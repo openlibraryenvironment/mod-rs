@@ -11,7 +11,17 @@ import org.olf.rs.logging.ContextLogging;
  */
 public class ActionService {
 
-    private static final String POSSIBLE_ACTIONS_QUERY = 'select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy from AvailableAction as aa where aa.model = :stateModel and aa.fromState = :fromstate and aa.triggerType in ( :triggerTypes )';
+    private static final String POSSIBLE_ACTIONS_QUERY = '''
+select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy
+from AvailableAction as aa
+where aa.model = :stateModel and
+      aa.fromState = :fromstate and
+      aa.triggerType in ( :triggerTypes )
+''';
+
+private static final String POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY =
+    POSSIBLE_ACTIONS_QUERY + ' and aa.actionEvent not in ( :excludedActions )';
+
 
     private static final Integer ZERO = Integer.valueOf(0);
 
@@ -296,7 +306,7 @@ public class ActionService {
         // We only have valid actions if network activity is idle
         if (request.isNetworkActivityIdle()) {
             // Obtain the valid list of actions
-            actions = lookupAvailableActions(statusService.getStateModel(request), request, includeSystem);
+            actions = lookupAvailableActions(statusService.getStateModel(request), request, null, includeSystem);
 
             // Remove any duplicates as they might have come from multiple state models
             actions.unique();
@@ -319,14 +329,28 @@ public class ActionService {
      * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
      * @param stateModel The state model that we are looking for the valid actions from
      * @param request The patron requestwe are making the decision for
+     * @param excludeActions actions if any to exclude from the valid actions
      * @param includeSystem Also include system triggers when looking up the available actions
      * @return The list of actions that is valid for the state model and status combination
      */
-    private List lookupAvailableActions(StateModel stateModel, PatronRequest request, boolean includeSystem) {
+    private List lookupAvailableActions(StateModel stateModel, PatronRequest request, List excludeActions, boolean includeSystem) {
         List actions = [ ];
 
+        String query = POSSIBLE_ACTIONS_QUERY;
+        Map parameters = [
+            stateModel: stateModel,
+            fromstate: request.state,
+            triggerTypes: (includeSystem ? TRIGGERS_MANUAL_SYSTEM : TRIGGERS_MANUAL)
+        ];
+
+        // Do we need to exclude actions
+        if (excludeActions) {
+            query = POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY;
+            parameters.excludedActions = excludeActions;
+        }
+
         // Was nice and simple lookup the available actions getting the distinct actions
-        AvailableAction.executeQuery(POSSIBLE_ACTIONS_QUERY, [ stateModel: stateModel, fromstate: request.state, triggerTypes: (includeSystem ? TRIGGERS_MANUAL_SYSTEM : TRIGGERS_MANUAL) ]).each { availableAction ->
+        AvailableAction.executeQuery(query, parameters).each { availableAction ->
             // To try and make it more obvious as to what is selected, we extract them into variables here
             String code = availableAction[0];
             String actionGroovy = availableAction[1];
@@ -353,10 +377,35 @@ public class ActionService {
 
         // We need to take into account any transitions we may be inheriting
         if (stateModel.inheritedStateModels) {
-            // We do so go through each of the state models to see if we can find the available action
-            stateModel.inheritedStateModels.each { inheritedStateModel ->
-                // this is where we get recursive ...
-                actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, request, includeSystem);
+            boolean excludeAllActions = false;
+            List inheritedExcludeActions = excludeActions ? excludeActions.collect() : [ ];
+
+            // Do we have any action / events that we need to exclude ?
+            if (stateModel.doNotInheritTransitions != null) {
+                // Now iterate through the do not inherit actions
+                stateModel.doNotInheritTransitions.each { StateModelDoNotInheritTransition doNotInheritTransition ->
+                    // Is this one for the current state
+                    if (request.state == doNotInheritTransition.state ||
+                        request.state == doNotInheritTransition.state == null) {
+                        // Do we ignore all inherited actions at this state
+                        if (doNotInheritTransition.actionEvent == null) {
+                            // We do
+                            excludeAllActions = true;
+                        } else {
+                            // Add the action to the list of those to be ignored
+                            inheritedExcludeActions.add(doNotInheritTransition.actionEvent);
+                        }
+                    }
+                }
+            }
+
+            // Have we excluded all actions from being inherited
+            if (!excludeAllActions) {
+                // We have not so go through each of the state models to see if we can find the available actions that are available
+                stateModel.inheritedStateModels.each { inheritedStateModel ->
+                    // this is where we get recursive ...
+                    actions += lookupAvailableActions(inheritedStateModel.inheritedStateModel, request, inheritedExcludeActions, includeSystem);
+                }
             }
         }
 
