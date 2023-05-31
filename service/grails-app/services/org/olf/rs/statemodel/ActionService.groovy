@@ -386,7 +386,7 @@ private static final String POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY =
                 stateModel.doNotInheritTransitions.each { StateModelDoNotInheritTransition doNotInheritTransition ->
                     // Is this one for the current state
                     if (request.state == doNotInheritTransition.state ||
-                        request.state == doNotInheritTransition.state == null) {
+                        doNotInheritTransition.state == null) {
                         // Do we ignore all inherited actions at this state
                         if (doNotInheritTransition.actionEvent == null) {
                             // We do
