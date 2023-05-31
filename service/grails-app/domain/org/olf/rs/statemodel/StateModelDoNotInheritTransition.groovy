@@ -25,7 +25,7 @@ class StateModelDoNotInheritTransition implements MultiTenant<StateModelDoNotInh
     static belongsTo = [ stateModel: StateModel ];
 
     static constraints = {
-         stateModel (nullable: false, unique  : ['state', 'actionEvent'])
+         stateModel (nullable: false)
               state (nullable: true)
         actionEvent (nullable: true)
     }

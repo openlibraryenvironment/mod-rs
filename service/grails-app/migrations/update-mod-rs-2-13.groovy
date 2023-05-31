@@ -106,4 +106,9 @@ databaseChangeLog = {
 
         addForeignKeyConstraint(baseColumnNames: "smdnit_state_model", baseTableName: "state_model_do_not_inherit_transition", constraintName: "FKsysqbrevxc3hnai0vil5yqml2", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "sm_id", referencedTableName: "state_model", validate: "true")
     }
+
+    changeSet(author: "Chas (generated)", id: "1685548332293") {
+        // I should not have added the unique constraint as the fields are nullable
+        dropUniqueConstraint(constraintName: "UK6733f2d7bc0ed4dfc7d0f6ea4670", tableName: "state_model_do_not_inherit_transition")
+    }
 }

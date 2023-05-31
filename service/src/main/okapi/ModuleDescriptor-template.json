@@ -104,6 +104,11 @@
         },
         {
           "methods": [ "GET" ],
+          "pathPattern": "/rs/stateModel/getValidActions",
+          "permissionsRequired": [ ]
+        },
+        {
+          "methods": [ "GET" ],
           "pathPattern": "/rs/stateModel/export*",
           "permissionsRequired": [ "rs.stateModel.export" ]
         },

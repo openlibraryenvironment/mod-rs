@@ -1,7 +1,9 @@
 package org.olf.rs.statemodel;
 
 import org.grails.web.json.JSONArray;
+import org.olf.rs.PatronRequest
 import org.olf.rs.ReferenceDataService;
+import org.olf.rs.dynamic.DynamicGroovyService;
 import org.olf.rs.referenceData.RefdataValueData;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
@@ -12,6 +14,151 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
 public class StateModelService {
 
     ReferenceDataService referenceDataService;
+
+    private static final String POSSIBLE_ACTIONS_QUERY = '''
+select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy
+from AvailableAction as aa
+where aa.model = :stateModel and
+      aa.fromState = :fromstate and
+      aa.triggerType in ( :triggerTypes )
+''';
+
+    private static final String POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY =
+        POSSIBLE_ACTIONS_QUERY + ' and aa.actionEvent not in ( :excludedActions )';
+
+    private static final List TRIGGERS_MANUAL        = [ AvailableAction.TRIGGER_TYPE_MANUAL ];
+    private static final List TRIGGERS_MANUAL_SYSTEM = [ AvailableAction.TRIGGER_TYPE_MANUAL, AvailableAction.TRIGGER_TYPE_SYSTEM ];
+
+    DynamicGroovyService dynamicGroovyService;
+
+    /**
+     * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
+     * @param stateModel The state model that we are looking for the valid actions from
+     * @param status The status that we want the valid actions for
+     * @param excludeActions actions if any to exclude from the valid actions
+     * @param includeSystem Also include system triggers when looking up the available actions
+     * @param request the request to pass into any dynamic groovy that may be executed
+     * @return The list of actions that is valid for the state model and status combination
+     */
+    public List getValidActions(
+        StateModel stateModel,
+        Status status,
+        List excludeActions,
+        boolean includeSystem,
+        PatronRequest request
+    ) {
+        // Wee have an internal method that does the job
+        List actions = getValidActionsInternal(stateModel, status, excludeActions, includeSystem, request);
+
+        // Remove any duplicates as they might have come from multiple state models
+        actions.unique();
+
+        // Return the actions
+        return(actions);
+    }
+
+    /**
+     * Returns the list of valid actions for a state model from the given state, taking into account any inherited state models
+     * @param stateModel The state model that we are looking for the valid actions from
+     * @param status The status that we want the valid actions for
+     * @param excludeActions actions if any to exclude from the valid actions
+     * @param includeSystem Also include system triggers when looking up the available actions
+     * @param request the request to pass into any dynamic groovy that may be executed
+     * @return The list of actions that is valid for the state model and status combination
+     */
+    private List getValidActionsInternal(
+        StateModel stateModel,
+        Status status,
+        List excludeActions,
+        boolean includeSystem,
+        PatronRequest request
+    ) {
+        List actions = [ ];
+
+        String query = POSSIBLE_ACTIONS_QUERY;
+        Map parameters = [
+            stateModel: stateModel,
+            fromstate: status,
+            triggerTypes: (includeSystem ? TRIGGERS_MANUAL_SYSTEM : TRIGGERS_MANUAL)
+        ];
+
+        // Do we need to exclude actions
+        if (excludeActions) {
+            query = POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY;
+            parameters.excludedActions = excludeActions;
+        }
+
+        // Was nice and simple lookup the available actions getting the distinct actions
+        AvailableAction.executeQuery(query, parameters).each { availableAction ->
+            // To try and make it more obvious as to what is selected, we extract them into variables here
+            String code = availableAction[0];
+
+            // If we do not have a request then we cannot execute the dynamic groovy
+            if (request == null) {
+                // No request so just add the action
+                actions.add(code);
+            } else {
+                String actionGroovy = availableAction[1];
+                String availableActionGroovy = availableAction[2];
+
+                // Do we have some groovy to execute on the available action
+                if (availableActionGroovy) {
+                    // We do for the available action, if it returns true then we add it to the available actions list
+                    if (dynamicGroovyService.executeScript("availableAction:isAvailable:" + code, availableActionGroovy, [ patronRequest : request ])) {
+                        // Script says yes
+                        actions.add(code);
+                    }
+                } else if (actionGroovy) {
+                    // We do for the action, if it returns true then we add it to the available actions list
+                    if (dynamicGroovyService.executeScript("actionEvent:isAvailable:" + code, actionGroovy, [ patronRequest : request ])) {
+                        // Script says yes
+                        actions.add(code);
+                    }
+                } else {
+                    // We do not have any groovy so just add the action
+                    actions.add(code);
+                }
+            }
+        }
+
+        // We need to take into account any transitions we may be inheriting
+        if (stateModel.inheritedStateModels) {
+            boolean excludeAllActions = false;
+            List inheritedExcludeActions = excludeActions ? excludeActions.collect() : [ ];
+
+            // Do we have any action / events that we need to exclude ?
+            if (stateModel.doNotInheritTransitions != null) {
+                // Now iterate through the do not inherit actions
+                stateModel.doNotInheritTransitions.each { StateModelDoNotInheritTransition doNotInheritTransition ->
+                    // Is this one for the current state
+                    if (status == doNotInheritTransition.state ||
+                        doNotInheritTransition.state == null) {
+                        // Do we ignore all inherited actions at this state
+                        if (doNotInheritTransition.actionEvent == null) {
+                            // We do
+                            excludeAllActions = true;
+                        } else {
+                            // Add the action to the list of those to be ignored
+                            inheritedExcludeActions.add(doNotInheritTransition.actionEvent);
+                        }
+                    }
+                }
+            }
+
+            // Have we excluded all actions from being inherited
+            if (!excludeAllActions) {
+                // We have not so go through each of the state models to see if we can find the available actions that are available
+                stateModel.inheritedStateModels.each { StateModelInheritsFrom inheritedStateModel ->
+                    // this is where we get recursive ...
+
+                    actions += getValidActionsInternal(inheritedStateModel.inheritedStateModel, status, inheritedExcludeActions, includeSystem, request);
+                }
+            }
+        }
+
+        // Return the result to the caller
+        return(actions);
+    }
 
     /**
      * Returns the supplied state model for export purposes

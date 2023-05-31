@@ -37,6 +37,7 @@ class UrlMappings {
 
     "/rs/stateModel/export" (controller: "stateModel", action: "export")
     "/rs/stateModel/import" (controller: "stateModel", action: "ingest")
+    "/rs/stateModel/getValidActions" (controller: "stateModel", action: "getValidActions")
 
     '/rs/noticePolicies' (resources: 'noticePolicy')
 

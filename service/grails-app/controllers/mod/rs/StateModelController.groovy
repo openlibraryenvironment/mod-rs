@@ -4,6 +4,7 @@ import org.grails.web.json.JSONArray;
 import org.olf.rs.logging.ContextLogging;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.StateModelService;
+import org.olf.rs.statemodel.Status
 
 import com.k_int.okapi.OkapiTenantAwareController;
 
@@ -29,6 +30,80 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
 	StateModelController() {
 		super(StateModel)
 	}
+
+    /**
+     * Retrieves the valid actions for a state table for a given state
+     */
+    @ApiOperation(
+        value = "Retrieves the valid actions for state table for a given state",
+        nickname = "getValidActions",
+        produces = "application/json",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "stateModel",
+            paramType = "query",
+            required = true,
+            value = "The state model code ",
+            dataType = "string",
+            defaultValue = "PatronRequest"
+        ),
+        @ApiImplicitParam(
+            name = "status",
+            paramType = "query",
+            required = false,
+            value = "The status ",
+            dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "includeSystemActions",
+            paramType = "query",
+            required = false,
+            value = "Do we include system actions or not",
+            dataType = "boolean",
+            defaultValue = "false"
+        )
+    ])
+    def getValidActions() {
+        ContextLogging.startTime();
+        ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_STATE_MODEL);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_VALID_ACTIONS);
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+
+        Map result = [ : ]
+
+        // Have we been supplied a state model
+        if (params.stateModel) {
+            // Have we been supplied a valid code
+            StateModel stateModel = StateModel.lookup(params.stateModel);
+            if (stateModel == null) {
+                // No we havn't
+                result.message = "No state model with code \"" + params.stateModel + "\" exists";
+            } else {
+                // Excellent start we have a state model to be returned, do we have a valid status
+                Status status = Status.lookup(params.status);
+                if (status == null) {
+                    result.message = "No state model with code \"" + params.status + "\" exists";
+                } else {
+                    Boolean includeSystemActions = (params.includeSystemActions == null) ? false : params.includeSystemActions.toBoolean();
+                    result.validActions = stateModelService.getValidActions(stateModel, status, null, includeSystemActions, null);
+                }
+            }
+        } else {
+            result.message = "No state model supplied";
+        }
+
+        // Just return the result as json
+        render result as JSON;
+
+        // Record how long it took
+        ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
+    }
 
 	/**
 	 * Exports the tables that defines the state models, if a state model is specified in the parameters then only that state model is output
