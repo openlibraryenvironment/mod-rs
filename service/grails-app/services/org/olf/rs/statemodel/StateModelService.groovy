@@ -84,6 +84,22 @@ public class StateModelService {
             }
         }
 
+        // Do we have any transitions we do not want to inherit
+        if (stateModel.doNotInheritTransitions) {
+            // We do
+            List doNotInheritTransitions = [ ];
+            result.doNotInheritTransitions = doNotInheritTransitions;
+
+            stateModel.doNotInheritTransitions.each { StateModelDoNotInheritTransition doNotInheritTransition ->
+                Map doNotInheritTransitionResult = [ : ];
+                doNotInheritTransitions.add(doNotInheritTransitionResult);
+
+                // Just need to export the actionEvent and state
+                doNotInheritTransitionResult.actionEvent = doNotInheritTransition.actionEvent?.code;
+                doNotInheritTransitionResult.state = doNotInheritTransition.state?.code;
+            }
+        }
+
         // return the result to the caller
         return(result);
     }
@@ -440,6 +456,7 @@ public class StateModelService {
             boolean result = false;
             List states = [ ];
             List inheritedStateModels = [ ];
+            List doNotInheritTransitions = [ ];
 
             // Check for any inherited state models
             if (jsonStateModel.inheritedStateModels) {
@@ -467,6 +484,17 @@ public class StateModelService {
                 stateModelMessages.add("No states specified for state model with code: \"" + jsonStateModel.code + "\"");
             }
 
+            // Do we have any transitions we do not want to inherit
+            if (jsonStateModel.doNotInheritTransitions) {
+                // Loop through all the transitions we do not want to inherit
+                jsonStateModel.doNotInheritTransitions.each { jsonDoNotInheritTransition ->
+                    Map doNotInheritTransition = [ : ];
+                    doNotInheritTransitions.add(doNotInheritTransition);
+                    doNotInheritTransition.actionEvent = jsonDoNotInheritTransition.actionEvent;
+                    doNotInheritTransition.state = jsonDoNotInheritTransition.state;
+                }
+            }
+
             // Delete all available actions for this state model first
             StateModel stateModel = StateModel.lookup(jsonStateModel.code);
 
@@ -492,7 +520,8 @@ public class StateModelService {
                 jsonStateModel.overdueStatus,
                 jsonStateModel.pickSlipPrintedAction,
                 states,
-                inheritedStateModels);
+                inheritedStateModels,
+                doNotInheritTransitions);
 
             if (stateModel != null) {
                 // Successfully created

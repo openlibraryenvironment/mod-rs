@@ -79,10 +79,16 @@ where s in (select sms.state
         inheritedStateModels : StateModelInheritsFrom,
 
         /** The available actions that are applicable to this state model */
-        availableActions : AvailableAction
+        availableActions : AvailableAction,
+
+        /** The transitions we do want to inherit from */
+        doNotInheritTransitions : StateModelDoNotInheritTransition
     ];
 
-    static mappedBy = [ inheritedStateModels : 'stateModel' ];
+    static mappedBy = [
+         inheritedStateModels : 'stateModel',
+         doNotInheritTransitions : 'stateModel'
+    ];
 
     static constraints = {
                     shortcode (nullable: false, blank: false)
@@ -94,17 +100,18 @@ where s in (select sms.state
     }
 
     static mapping = {
-                           id column: 'sm_id', generator: 'uuid2', length:36
-                      version column: 'sm_version'
-                    shortcode column: 'sm_shortcode'
-                         name column: 'sm_name'
-                 initialState column: 'sm_initial_state'
-                  staleAction column: 'sm_stale_action'
-                overdueStatus column: 'sm_overdue_status'
-        pickSlipPrintedAction column: 'sm_pick_slip_printed_action'
-                       states cascade: 'all-delete-orphan'
-         inheritedStateModels cascade: 'all-delete-orphan', sort: 'priority' // Guarantees the set is sorted by priority
-             availableActions cascade: 'all-delete-orphan'
+                             id column: 'sm_id', generator: 'uuid2', length:36
+                        version column: 'sm_version'
+                      shortcode column: 'sm_shortcode'
+                           name column: 'sm_name'
+                   initialState column: 'sm_initial_state'
+                    staleAction column: 'sm_stale_action'
+                  overdueStatus column: 'sm_overdue_status'
+          pickSlipPrintedAction column: 'sm_pick_slip_printed_action'
+                         states cascade: 'all-delete-orphan'
+           inheritedStateModels cascade: 'all-delete-orphan', sort: 'priority' // Guarantees the set is sorted by priority
+               availableActions cascade: 'all-delete-orphan'
+        doNotInheritTransitions cascade: 'all-delete-orphan'
     }
 
     static public StateModel ensure(
@@ -115,7 +122,8 @@ where s in (select sms.state
         String overdueStatusCode = null,
         String pickSlipPrintedAction = null,
         List states = null,
-        List inheritedStateModels = null
+        List inheritedStateModels = null,
+        List doNotInheritTransitions = null
     ) {
         // Does this state model already exist
         StateModel stateModel = lookup(code);
@@ -132,6 +140,7 @@ where s in (select sms.state
         stateModel.pickSlipPrintedAction = ActionEvent.lookup(pickSlipPrintedAction);
         stateModel.ensureStates(states);
         stateModel.ensureInheritedStateModels(inheritedStateModels);
+        stateModel.ensureDoNotInheritTransitions(doNotInheritTransitions);
 
         // Save the state model, if any changes have been made
         stateModel.save(flush: true, failOnError: true);
@@ -186,6 +195,60 @@ where s in (select sms.state
                 // Now add the state as its not already there
                 addToInheritedStateModels(stateModelInheritsFrom);
             }
+        }
+    }
+
+    private void ensureDoNotInheritTransitions(List suppliedDoNotInheritTransitions) {
+        // We create ourselves a working list as we want to modify as we process it
+        List working = ((suppliedDoNotInheritTransitions == null) ? [ ] : suppliedDoNotInheritTransitions.collect());
+
+        // Go through removing the items that no longer need to be there
+        if ((doNotInheritTransitions != null) && (doNotInheritTransitions.size() > 0)) {
+            // Process all the current records
+            doNotInheritTransitions.collect().each { StateModelDoNotInheritTransition doNotInheritTransition ->
+                // now look to see if it is in the working list
+                Map foundDoNotInheritTransition = working.find { workingDoNotInheritTransition ->
+                    return(((workingDoNotInheritTransition.actionEvent == null &&
+                             doNotInheritTransition.actionEvent == null) ||
+                            (workingDoNotInheritTransition.actionEvent != null &&
+                             workingDoNotInheritTransition.actionEvent.equals(doNotInheritTransition.actionEvent?.code))) &&
+                           ((workingDoNotInheritTransition.state == null &&
+                             doNotInheritTransition.state == null) ||
+                            (workingDoNotInheritTransition.state != null &&
+                             workingDoNotInheritTransition.state.equals(doNotInheritTransition.state?.code))));
+                };
+                if (foundDoNotInheritTransition == null) {
+                    // no longer required so remove from the database
+                    // Failed miserably to get removeFrom to work so just deleting the record directly, need to remove it from the set first
+                    doNotInheritTransitions.remove(doNotInheritTransition);
+                    doNotInheritTransition.delete();
+                } else {
+                    // Remove it from the working inheritsFrom as it is already in the database
+                    int indexToRemove = working.findIndexOf{ workingDoNotInheritTransition ->
+                        return(((workingDoNotInheritTransition.actionEvent == null &&
+                                 foundDoNotInheritTransition.actionEvent == null) ||
+                                (workingDoNotInheritTransition.actionEvent != null &&
+                                 workingDoNotInheritTransition.actionEvent.equals(foundDoNotInheritTransition.actionEvent))) &&
+                               ((workingDoNotInheritTransition.state == null &&
+                                 foundDoNotInheritTransition.state == null) ||
+                                (workingDoNotInheritTransition.state != null &&
+                                 workingDoNotInheritTransition.state.equals(foundDoNotInheritTransition.state))));
+                    };
+                    working.remove(indexToRemove);
+                }
+            }
+        }
+
+        // if There is anything left in working then they need adding to the database
+        working.each{ workingDoNotInheritTransition ->
+            // Create a new StateModelDoNotInheritTransition record
+            StateModelDoNotInheritTransition stateModelDoNotInheritTransition = new StateModelDoNotInheritTransition();
+            stateModelDoNotInheritTransition.stateModel = this;
+            stateModelDoNotInheritTransition.actionEvent = ActionEvent.lookup(workingDoNotInheritTransition.actionEvent);
+            stateModelDoNotInheritTransition.state = Status.lookup(workingDoNotInheritTransition.state);
+
+            // Now add it to the state model
+            addToDoNotInheritTransitions(stateModelDoNotInheritTransition);
         }
     }
 
