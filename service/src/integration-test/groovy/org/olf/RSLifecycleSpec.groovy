@@ -555,7 +555,7 @@ class RSLifecycleSpec extends TestBase {
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
      * so if the scenario test is moved out we will also need to setup the directories and settings in that spec file as well
      */
-    private void createScenarioRequest(String requesterTenantId, int scenarioNo, String patronIdentifier = null) {
+    private void createScenarioRequest(String requesterTenantId, int scenarioNo, String patronIdentifier = null, String deliveryMethod = null) {
         // Create the request based on the scenario
         Map request = [
             patronReference: 'Scenario-' + scenarioNo + '-' + scenarioDateFormatter.format(new Date()),
@@ -566,6 +566,8 @@ class RSLifecycleSpec extends TestBase {
             patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
             isRequester: true
         ];
+        deliveryMethod && (request.deliveryMethod = deliveryMethod);
+
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
@@ -613,7 +615,8 @@ class RSLifecycleSpec extends TestBase {
         String responderStatus,
         String newResponderTenant,
         String newResponderStatus,
-        String patronIdentifier = null
+        String patronIdentifier = null,
+        String deliveryMethod = null
     ) {
         String actionResponse = null;
 
@@ -622,7 +625,7 @@ class RSLifecycleSpec extends TestBase {
             // Are we creating a fresh request
             if (responderTenantId == null) {
                 // So we need to create  new request
-                createScenarioRequest(requesterTenantId, scenario, patronIdentifier);
+                createScenarioRequest(requesterTenantId, scenario, patronIdentifier, deliveryMethod);
             } else {
                 // We need to perform an action
                 actionResponse = performScenarioAction(requesterTenantId, responderTenantId, isRequesterAction, actionFile);
@@ -661,6 +664,7 @@ class RSLifecycleSpec extends TestBase {
         String responderStatus,
         String newResponderTenant,
         String newResponderStatus,
+        String deliveryMethod,
         String expectedActionResponse
     ) {
         when:"Progress the request"
@@ -674,7 +678,9 @@ class RSLifecycleSpec extends TestBase {
                 requesterStatus,
                 responderStatus,
                 newResponderTenant,
-                newResponderStatus
+                newResponderStatus,
+                null,
+                deliveryMethod
             );
 
             log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
@@ -689,31 +695,37 @@ class RSLifecycleSpec extends TestBase {
             }
 
         where:
-            requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | expectedActionResponse
-            "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "{status=true}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkShipped.json"          | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 1        | true              | "patronReturnedItem.json"           | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | "{status=true}"
-            "RSInstOne"       | "RSInstThree"     | 1        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | "{status=true}"
-            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | "{status=true}"
-            "RSInstOne"       | null              | 2        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
-            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierCannotSupply.json"         | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | "{}"
-            "RSInstOne"       | null              | 3        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
-            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 3        | true              | "requesterRejectConditions.json"    | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | "RSInstTwo"        | Status.RESPONDER_IDLE | "{}"
-            "RSInstOne"       | null              | 4        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null
-            "RSInstOne"       | "RSInstThree"     | 4        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "{}"
-            "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | null               | null                  | null
+            requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | deliveryMethod                      | expectedActionResponse
+            "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null                                | null
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | null                                | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkShipped.json"          | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "patronReturnedItem.json"           | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null                                | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null                                | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null                                | "{status=true}"
+            "RSInstOne"       | null              | 2        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null                                | null
+            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 2        | false             | "supplierCannotSupply.json"         | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | null                                | "{}"
+            "RSInstOne"       | null              | 3        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null                                | null
+            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 3        | true              | "requesterRejectConditions.json"    | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | "RSInstTwo"        | Status.RESPONDER_IDLE | null                                | "{}"
+            "RSInstOne"       | null              | 4        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null                                | null
+            "RSInstOne"       | "RSInstThree"     | 4        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null                                | "{}"
+            "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | null               | null                  | null                                | null
+            "RSInstOne"       | null              | 5        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"                               | null
+            "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"                               | "{}"
+            "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "URL"                               | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_SEQUESTERED                | null               | null                  | "URL"                               | "{}"
+            "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierFillDigitalLoan.json"      | Status.REQUESTER_LOANED_DIGITALLY                 | Status.RESPONDER_LOANED_DIGITALLY           | null               | null                  | "URL"                               | "{}"
+
     }
 
     void "test Dynamic Groovy"() {

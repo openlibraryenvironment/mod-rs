@@ -496,29 +496,35 @@ public class StatusService {
 
     /**
      * Determines the state model for a patron request
-     * @param request The request we want the syaye model for
+     * @param request The request we want the state model for
      * @return The state model that is applicable for that request
      */
     public StateModel getStateModel(PatronRequest request) {
-        return((request.stateModel == null) ? getStateModel(request.isRequester) : request.stateModel);
-    }
-
-    /**
-     * Returns the state model currently in use (this will need to be extended to take into account the institution once we have determined where the institution is coming from)
-     * @param isRequester Are we playing the role of requester
-     * @return The state model that is being used
-     */
-    public StateModel getStateModel(boolean isRequester) {
-        // Generate the settings key
-        String settingsKey = isRequester ? SettingsData.SETTING_STATE_MODEL_REQUESTER : SettingsData.SETTING_STATE_MODEL_RESPONDER;
-        String stateModelCode = settingsService.getSettingValue(settingsKey);
+        String settingsKey;
+        String stateModelCode;
+        if (request.isRequester) {
+            if (request?.deliveryMethod?.value == 'url') {
+                stateModelCode = StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER;
+            } else {
+                settingsKey = SettingsData.SETTING_STATE_MODEL_REQUESTER;
+            }
+        } else {
+            if (request?.deliveryMethod?.value == 'url') {
+                stateModelCode = StateModel.MODEL_CDL_RESPONDER;
+            } else {
+                settingsKey = SettingsData.SETTING_STATE_MODEL_RESPONDER;
+            }
+        }
+        if (settingsKey) {
+            stateModelCode = settingsService.getSettingValue(settingsKey);
+        }
 
         // Lookup the state model
         StateModel stateModel = StateModel.lookup(stateModelCode);
         if (stateModel == null) {
             // Log the fact that we cannot find the state model and return a default
             log.error("unable to find state model with code " + stateModelCode + " in StatusService.getStateModel(" + boolean.toString() + ")");
-            stateModel = StateModel.lookup(isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER);
+            stateModel = StateModel.lookup(request.isRequester ? StateModel.MODEL_REQUESTER : StateModel.MODEL_RESPONDER);
         }
 
         // Return the found state model

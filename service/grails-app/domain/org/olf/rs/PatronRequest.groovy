@@ -497,7 +497,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   def beforeInsert() {
     // If the state model is null then set it
     if (this.stateModel == null) {
-        this.stateModel = Holders.grailsApplication.mainContext.getBean('statusService').getStateModel(this.isRequester);
+        this.stateModel = Holders.grailsApplication.mainContext.getBean('statusService').getStateModel(this);
     }
 
     // If the state is null, then we need to set it to the initial state for the model in play
