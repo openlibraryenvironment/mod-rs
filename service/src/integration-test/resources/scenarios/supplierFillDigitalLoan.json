@@ -1,0 +1,6 @@
+{
+    "action": "supplierFillDigitalLoan",
+    "actionParams": {
+        "url": "https://some.domain?param=value"
+    }
+}
