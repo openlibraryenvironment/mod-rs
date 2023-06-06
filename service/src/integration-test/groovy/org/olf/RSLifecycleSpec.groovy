@@ -160,6 +160,11 @@ class RSLifecycleSpec extends TestBase {
       }
       elapsed = System.currentTimeMillis() - start_time
     }
+
+    if ( required_state != request_state ) {
+      throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+    }
+
     return request_id;
   }
 
@@ -719,7 +724,7 @@ class RSLifecycleSpec extends TestBase {
             "RSInstOne"       | "RSInstThree"     | 3        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | "RSInstTwo"        | Status.RESPONDER_IDLE | null                                | "{}"
             "RSInstOne"       | null              | 4        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null                                | null
             "RSInstOne"       | "RSInstThree"     | 4        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null                                | "{}"
-            "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_CANCELLED                  | null               | null                  | null                                | null
+            "RSInstOne"       | "RSInstThree"     | 4        | false             | "supplierRespondToCancelYes.json"   | Status.PATRON_REQUEST_CANCELLED                   | Status.RESPONDER_CANCELLED                  | null               | null                  | null                                | null
             "RSInstOne"       | null              | 5        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"                               | null
             "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"                               | "{}"
             "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "URL"                               | "{status=true}"
