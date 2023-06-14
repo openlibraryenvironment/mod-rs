@@ -129,14 +129,15 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkoutResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
 
                         // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored
+                        String dateFormatSetting = settingsService.getSettingValue(SettingsData.SETTING_NCIP_DUE_DATE_FORMAT);
                         try {
-                            Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate, settingsService.getSettingValue(SettingsData.SETTING_NCIP_DUE_DATE_FORMAT));
+                            Date tempParsedDate = reshareActionService.parseDateString(checkoutResult?.dueDate, dateFormatSetting);
                             if (!request.parsedDueDateFromLMS || parsedDate.before(request.parsedDueDateFromLMS)) {
                                 parsedDate = tempParsedDate;
                                 stringDate = checkoutResult?.dueDate;
                             }
                         } catch (Exception e) {
-                            log.warn("Unable to parse ${checkoutResult?.dueDate} to date: ${e.getMessage()}");
+                            log.warn("Unable to parse ${checkoutResult?.dueDate} to date with format string ${dateFormatSetting}: ${e.getMessage()}");
                         }
                     } else {
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);

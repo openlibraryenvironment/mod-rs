@@ -497,6 +497,8 @@ public class ReshareActionService {
     protected Date parseDateString(String dateString, String dateFormat = DEFAULT_DATE_FORMAT) {
         Date date;
 
+        log.debug("Attempting to parse input date string '${dateString}' with format string '${dateFormat}'")
+
         if (dateString == null) {
             throw new Exception('Attempted to parse null as date')
         }
