@@ -35,6 +35,7 @@ class ReshareActionServiceSpec extends Specification implements ServiceUnitTest<
       '2021-09-30 00:00' | null | 1632960000000
       '2021-09-30T00:00:00-0500' | null | 1632978000000
       '2021-09-30T00:00:00.000+01:00' | null | 1632956400000
+      '2023-10-17T03:59Z' | null | 1697515140000
       // II: Comment out the remaining ones here - they don't seem to work as expected and cause test
       // failures. Possibly needs work in implementation of service.parseDateString
       // Strangely, these do not use the expected offsets
