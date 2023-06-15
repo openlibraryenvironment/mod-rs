@@ -21,6 +21,23 @@ public class ActionPatronRequestEditService extends AbstractAction {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
 
+    private static final List updateAbleFields = [
+        [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
+        [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
+        [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
+        [ field: "issn", notePrefix: NoteSpecials.UPDATED_FIELD_ISSN_PREFIX, isDate: false ],
+        [ field: "neededBy", notePrefix: NoteSpecials.UPDATED_FIELD_NEEDED_BY_PREFIX, isDate: true ],
+        [ field: "oclcNumber", notePrefix: NoteSpecials.UPDATED_FIELD_OCLC_NUMBER_PREFIX, isDate: false ],
+        [ field: "patronNote", notePrefix: NoteSpecials.UPDATED_FIELD_PATRON_NOTE_PREFIX, isDate: false ],
+        [ field: "pickupLocationSlug", notePrefix: NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX, isDate: false, noteField: "pickupLocation", doPickupCheck: true ],
+        [ field: "placeOfPublication", notePrefix: NoteSpecials.UPDATED_FIELD_PLACE_OF_PUBLICATION_PREFIX, isDate: false ],
+        [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
+        [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
+        [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
+        [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
+        [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ]
+    ];
+
     @Override
     String name() {
         return(Actions.ACTION_REQUESTER_EDIT);
@@ -44,29 +61,30 @@ public class ActionPatronRequestEditService extends AbstractAction {
         // 13. OCLC number
         // 14. Pickup location
         StringBuffer auditMessage = new StringBuffer("Record has been edited:");
-        updateField(request, parameters, "neededBy", auditMessage, true);
-        updateField(request, parameters, "volume", auditMessage);
-        updateField(request, parameters, "patronNote", auditMessage);
-        updateField(request, parameters, "systemInstanceIdentifier", auditMessage);
-        updateField(request, parameters, "title", auditMessage);
-        updateField(request, parameters, "author", auditMessage);
-        updateField(request, parameters, "publicationDate", auditMessage);
-        updateField(request, parameters, "publisher", auditMessage);
-        updateField(request, parameters, "edition", auditMessage);
-        updateField(request, parameters, "placeOfPublication", auditMessage);
-        updateField(request, parameters, "isbn", auditMessage);
-        updateField(request, parameters, "issn", auditMessage);
-        updateField(request, parameters, "oclcNumber", auditMessage);
+        StringBuffer noteToSend = new StringBuffer();
+        updateAbleFields.each() { fieldDetails ->
+            // Update the field
+            if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
+                // It has changed
+                if (fieldDetails.doPickupCheck) {
+                    // Perform the appropriate checks on the pickup location
+                    pickupLocationService.check(request);
+                }
 
-        // We need to do additional stuff with pickup location
-        if (updateField(request, parameters, "pickupLocationSlug", auditMessage)) {
-            // Perform the appropriate checks on the pickup location
-            pickupLocationService.check(request);
+                // Update the note
+                String fieldToSend = (fieldDetails.noteField == null ? fieldDetails.field : fieldDetails.noteField);
+                noteToSend.append(fieldDetails.notePrefix);
+                noteToSend.append(request[fieldToSend]);
+                noteToSend.append(NoteSpecials.SPECIAL_WRAPPER);
+            }
+        }
 
-            // Pickup location has changed, so we need to inform the supplier, but only if it is active and not shipped
+        // If anything has changed we may need to send a message
+        if (noteToSend.length() > 0) {
+            // We need to inform the supplier, but only if it is active and not shipped
             if ((request.state.stage == StatusStage.ACTIVE) || (request.state.stage == StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER)) {
                 // It is active and not been shipped
-                reshareActionService.sendMessage(request, [ note : (NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX + request.pickupLocation + NoteSpecials.SPECIAL_WRAPPER)], actionResultDetails);
+                reshareActionService.sendMessage(request, [ note : noteToSend.toString() ], actionResultDetails);
             }
         }
 
