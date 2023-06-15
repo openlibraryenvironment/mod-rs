@@ -484,6 +484,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastAuditNo column: 'pr_last_audit_no'
 
     audit(sort:'dateCreated', order:'desc')
+    protocolAudit(sort:'dateCreated', order:'desc')
 
     requestIdentifiers cascade: 'all-delete-orphan'
     volumes cascade: 'all-delete-orphan'
