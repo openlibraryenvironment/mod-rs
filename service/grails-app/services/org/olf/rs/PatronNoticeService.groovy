@@ -165,6 +165,7 @@ public class PatronNoticeService {
             request: [
                 id: pr.hrid,
                 pickupLocation: pr?.pickupLocation ?: '',
+                pickupURL: pr?.pickupURL ?: '',
                 neededBy: pr?.neededBy?.toString() ?: '',
                 cancellationReason: pr?.cancellationReason?.label ?: ''
             ],
