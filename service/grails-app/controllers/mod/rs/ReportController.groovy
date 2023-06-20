@@ -268,6 +268,10 @@ class ReportController extends OkapiTenantAwareController<Report>  {
      */
     private void generateReport(String reportId, List identifiers, String imageId = null, String defaultReport = null) {
 
+        // Set the no cache header, should catch all permentations of the browser not cacheing it
+        // As the conents may have changed, the next time they view the report
+        header('Cache-Control', 'max-age=0, no-cache, no-store');
+
         // It is assumed that everything has been validated by this point
         try {
             // Attempt to execute the report
@@ -280,9 +284,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
                 render renderResult as JSON, status: 404, contentType: "application/json";
             } else {
                 // Present the pdf
-                // Ensure we have the Content-Disposition header in the response
-                response.addHeader("Content-Disposition", ": attachment; filename=" + fetchResult.filename);
-                render file: fetchResult.inputStream, contentType: fetchResult.contentType, status: 200
+                render file: fetchResult.inputStream, contentType: fetchResult.contentType, status: 200, filename: fetchResult.filename
             }
         } catch (Exception e) {
             String message = "Exception thrown generating report";
