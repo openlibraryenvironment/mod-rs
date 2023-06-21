@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
@@ -15,7 +16,7 @@ public class ActionPatronRequestISO18626CancelResponseService extends ActionISO1
 
     @Override
     String name() {
-        return(EventISO18626IncomingAbstractService.MESSAGE_REASON_CANCEL_RESPONSE);
+        return(ReasonForMessage.MESSAGE_REASON_CANCEL_RESPONSE);
     }
 
     @Override

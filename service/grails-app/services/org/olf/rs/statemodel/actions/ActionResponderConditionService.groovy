@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.iso18626.NoteSpecials;
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.statemodel.ActionResultDetails;
 
 /**
@@ -29,7 +30,7 @@ public abstract class ActionResponderConditionService extends ActionResponderSer
 
         // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
         if (request.isRequester == false) {
-            result = reshareActionService.sendSupplyingAgencyMessage(request, 'Notification', null, warningParams, resultDetails);
+            result = reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_NOTIFICATION, null, warningParams, resultDetails);
         } else {
             log.warn('The requesting agency should not be able to call sendSupplierConditionalWarning.');
         }

@@ -1,9 +1,9 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
-import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
 /**
  * Action that deals with the ISO18626 StatusChange message
@@ -14,7 +14,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
     @Override
     String name() {
-        return(EventISO18626IncomingAbstractService.MESSAGE_REASON_STATUS_CHANGE);
+        return(ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE);
     }
 
     @Override

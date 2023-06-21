@@ -233,6 +233,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** This is the last sequence number we received */
   Integer lastSequenceReceived;
 
+  /** As an ISO18626 supplier, we should only send the RequestResponse reason message, so this is to say we have sent it, so we do not send it again */
+  Boolean sentISO18626RequestResponse;
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -370,6 +373,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastSequenceReceived (nullable: true)
 
     lastAuditNo (nullable: true)
+    sentISO18626RequestResponse (nullable: true)
   }
 
   static mapping = {
@@ -482,6 +486,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     lastSequenceReceived column: 'pr_last_sequence_received'
 
     lastAuditNo column: 'pr_last_audit_no'
+    sentISO18626RequestResponse column: 'pr_sent_iso18626_request_response'
 
     audit(sort:'dateCreated', order:'desc')
     protocolAudit(sort:'dateCreated', order:'desc')

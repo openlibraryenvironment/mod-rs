@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolMessageBuildingService;
 import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ProtocolResultStatus;
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.logging.IIso18626LogDetails;
 import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
@@ -52,7 +53,7 @@ public class TimerRequestNetworkTimeoutService extends AbstractTimerRequestNetwo
             // Need to populate messageInfo of the message
             // As the supplier we send it as a status change message
             message.messageInfo = [
-                reasonForMessage: EventISO18626IncomingAbstractService.MESSAGE_REASON_STATUS_CHANGE,
+                reasonForMessage: ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE,
                 note: note
             ];
 
