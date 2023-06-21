@@ -44,14 +44,6 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String ACTION_SHIPPED_RETURN  = 'ShippedReturn';
     public static final String ACTION_STATUS_REQUEST  = 'StatusRequest';
 
-    // The message reasons, only applicable for receiving by a requester
-    public static final String MESSAGE_REASON_CANCEL_RESPONSE         = 'CancelResponse';
-    public static final String MESSAGE_REASON_NOTIFICATION            = 'Notification';
-    public static final String MESSAGE_REASON_RENEW_RESPONSE          = 'RenewResponse';
-    public static final String MESSAGE_REASON_REQUEST_RESPONSE        = 'RequestResponse';
-    public static final String MESSAGE_REASON_STATUS_CHANGE           = 'StatusChange';
-    public static final String MESSAGE_REASON_STATUS_REQUEST_RESPONSE = 'StatusRequestResponse';
-
     // The service used to run the actions
     ActionService actionService;
 

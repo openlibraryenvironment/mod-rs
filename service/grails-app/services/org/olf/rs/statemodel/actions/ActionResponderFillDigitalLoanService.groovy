@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions
 
 import org.olf.rs.PatronRequest
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
@@ -18,7 +19,7 @@ public class ActionResponderFillDigitalLoanService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        reshareActionService.sendSupplyingAgencyMessage(request, 'StatusChange', 'Loaned', [deliveredFormat: 'URL', *:parameters], actionResultDetails);
+        reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, 'Loaned', [deliveredFormat: 'URL', *:parameters], actionResultDetails);
         actionResultDetails.auditMessage = 'Loaned digitally';
 
         return(actionResultDetails);

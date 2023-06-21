@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.iso18626.NoteSpecials;
+import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.logging.IIso18626LogDetails;
 import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.patronstore.PatronStoreActions;
@@ -174,7 +175,7 @@ public class ReshareActionService {
                 result = sendRequestingAgencyMessage(pr, MESSAGE_NOTIFICATION, actionParams, eventResultDetails)
             } else {
                 // This is for sending a SUPPLYING AGENCY message to the REQUESTING AGENCY
-                result = sendSupplyingAgencyMessage(pr, MESSAGE_NOTIFICATION, null, actionParams, eventResultDetails)
+                result = sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_NOTIFICATION, null, actionParams, eventResultDetails)
             }
 
             if (result == false) {
@@ -208,7 +209,7 @@ public class ReshareActionService {
 
             // Only the supplier should ever be able to send one of these messages, otherwise something has gone wrong.
             if (pr.isRequester == false) {
-                result = sendSupplyingAgencyMessage(pr, 'CancelResponse', status, actionParams, eventResultDetails);
+                result = sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_CANCEL_RESPONSE, status, actionParams, eventResultDetails);
             } else {
                 log.warn('The requesting agency should not be able to call sendSupplierConditionalWarning.');
             }
@@ -388,7 +389,24 @@ public class ReshareActionService {
         Map responseParams,
         EventResultDetails eventResultDetails
     ) {
-        sendSupplyingAgencyMessage(pr, 'RequestResponse', status, responseParams, eventResultDetails);
+        sendSupplyingAgencyMessage(pr, determineISO18626ReasonForMessage(pr), status, responseParams, eventResultDetails);
+    }
+
+    private String determineISO18626ReasonForMessage(PatronRequest request) {
+        // Default to status change
+        String reasonForMessage = ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE;
+
+        // Only the first response can be a RequestResponse
+        if (!request.sentISO18626RequestResponse) {
+            // it has not previously been sent, so send the RequestResponse as the reason for the message
+            reasonForMessage = ReasonForMessage.MESSAGE_REASON_REQUEST_RESPONSE;
+
+            // And we need to mark it as being sent, so we do not send it again
+            request.sentISO18626RequestResponse = true;
+        }
+
+        // Return it to the caller
+        return(reasonForMessage);
     }
 
     // Unused ??
@@ -403,7 +421,7 @@ public class ReshareActionService {
             params = [note: note]
         }
 
-        sendSupplyingAgencyMessage(pr, 'StatusChange', status, params, eventResultDetails);
+        sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, status, params, eventResultDetails);
     }
 
     // see

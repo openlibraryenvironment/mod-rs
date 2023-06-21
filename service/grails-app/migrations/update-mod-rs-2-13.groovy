@@ -111,4 +111,10 @@ databaseChangeLog = {
         // I should not have added the unique constraint as the fields are nullable
         dropUniqueConstraint(constraintName: "UK6733f2d7bc0ed4dfc7d0f6ea4670", tableName: "state_model_do_not_inherit_transition")
     }
+    
+    changeSet(author: "Chas (generated)", id: "1687338130013") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_sent_iso18626_request_response", type: "boolean")
+        }
+    }
 }
