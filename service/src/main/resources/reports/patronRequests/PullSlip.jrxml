@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TestPullSlip" language="groovy" columnCount="2" pageWidth="595" pageHeight="842" columnWidth="280" leftMargin="10" rightMargin="10" topMargin="8" bottomMargin="0" uuid="b4f2714a-3193-4a8e-83ee-36ebf13d67c1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Folio Vagrant"/>
@@ -60,7 +60,9 @@
             de_req.de_email_address "requesterEMail",
             hll.hll_name "pickLocation",
             pr_req_inst_symbol "requesterSymbol",
-            concat(na_sup.na_symbol, ':', sym_sup.sym_symbol) "responderSymbol"
+            concat(na_sup.na_symbol, ':', sym_sup.sym_symbol) "responderSymbol",
+            concat(na_pickup_location.na_symbol, ':', sym_pickup_location.sym_symbol) "requesterPickupSymbol",
+            concat(na_pick_location.na_symbol, ':', sym_pick_location.sym_symbol) "responderPickSymbol"
  from $P!{schema}.patron_request pr
            LEFT JOIN $P!{schema}.symbol sym_req ON pr.pr_resolved_req_inst_symbol_fk = sym_req.sym_id
 		   LEFT JOIN $P!{schema}.directory_entry de_req on sym_req.sym_owner_fk = de_req.de_id
@@ -69,6 +71,13 @@
 		   LEFT JOIN $P!{schema}.directory_entry de_sup on sym_sup.sym_owner_fk = de_sup.de_id
 		   LEFT JOIN $P!{schema}.host_lms_location hll on pr.pr_pick_location_fk = hll.hll_id
 		   LEFT JOIN $P!{schema}.host_lms_shelving_loc hlsl on pr.pr_pick_shelving_location_fk = hlsl.hlsl_id
+		   LEFT JOIN $P!{schema}.directory_entry de_pickup_location ON (de_req.de_id = de_pickup_location.de_parent and pr.pr_pref_service_point = de_pickup_location.de_name)
+		   LEFT JOIN LATERAL (select * from $P!{schema}.symbol where sym_owner_fk = de_pickup_location.de_id LIMIT 1) sym_pickup_location ON true
+           LEFT JOIN $P!{schema}.naming_authority na_pickup_location on sym_pickup_location.sym_authority_fk = na_pickup_location.na_id
+		   LEFT JOIN $P!{schema}.host_lms_location location_pick ON pr.pr_pick_shelving_location_fk = location_pick.hll_id
+		   LEFT JOIN $P!{schema}.directory_entry de_pick_location ON location_pick.hll_corresponding_de = de_pick_location.de_id
+		   LEFT JOIN LATERAL (select * from $P!{schema}.symbol where sym_owner_fk = de_pick_location.de_id LIMIT 1) sym_pick_location ON true
+           LEFT JOIN $P!{schema}.naming_authority na_pick_location on sym_pick_location.sym_authority_fk = na_pick_location.na_id
 where $X{IN, pr.pr_id, ids}]]>
 	</queryString>
 	<field name="pr_patron_identifier" class="java.lang.String">
@@ -129,6 +138,8 @@ where $X{IN, pr.pr_id, ids}]]>
 	</field>
 	<field name="requesterSymbol" class="java.lang.String"/>
 	<field name="responderSymbol" class="java.lang.String"/>
+	<field name="requesterPickupSymbol" class="java.lang.String"/>
+	<field name="responderPickSymbol" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
