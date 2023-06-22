@@ -116,7 +116,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
                     // If we've not been given any address information, don't translate that into a pickup location
                     if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                        pr.pickupLocation = stringifiedPickupLocation;
+                        pr.pickupLocation = stringifiedPickupLocation.trim();
                     }
                 }
 
