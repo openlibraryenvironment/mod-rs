@@ -1,8 +1,7 @@
 package org.olf.rs.iso18626;
 
 /**
- * Holds the definitions of all the specials that we have incorporated into the note field
- * Once extensions are added this can be removed
+ * Defines the values that can go in the ISO18626 reasonForMessage field
  * @author Chas
  *
  */
