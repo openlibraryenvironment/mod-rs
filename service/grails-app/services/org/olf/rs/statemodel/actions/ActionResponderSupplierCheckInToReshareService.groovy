@@ -158,8 +158,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
                     request.activeLoan = true;
                     request.needsAttention = false;
-                    AppSetting useLMSDueDate = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_DUE_DATE);
-                    if (!request?.dueDateRS && useLMSDueDate?.value != 'off') {
+                    if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')) {
                         request.dueDateRS = request.dueDateFromLMS;
                     }
 
@@ -217,8 +216,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
         request.parsedDueDateFromLMS = null;
 
         // Remove the RS due date too if that was likely set from the LMS one,
-        AppSetting useLMSDueDate = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_DUE_DATE);
-        if (useLMSDueDate?.value != 'off') {
+        if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')) {
             request.dueDateRS = null;
             request.parsedDueDateRS = null;
         }
