@@ -86,8 +86,12 @@ public class KohaHostLMSService extends BaseHostLMSService {
         try {
           if ( tag_data['7'] != null ) {
             if ( tag_data['7'] == '0' ) {
-              log.debug("Assuming ${tag_data['7']}");
-              availability_summary << new ItemLocation( location: tag_data['b'], shelvingLocation: tag_data['c'], callNumber:tag_data['o'] )
+              if ( tag_data['q'] != null ) {
+                log.debug("q field present '${tag_data['q']}' in holding, assuming checked out");
+              } else {
+                log.debug("Assuming ${tag_data['7']}");
+                availability_summary << new ItemLocation(location: tag_data['b'], shelvingLocation: tag_data['c'], callNumber: tag_data['o'])
+              }
             } else {
               log.debug("Subfield '7' is not zero (${tag_data['7']})");
             }
