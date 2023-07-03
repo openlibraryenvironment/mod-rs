@@ -24,9 +24,9 @@ public class Wms2HostLMSService extends BaseHostLMSService {
     // TODO this wrapper contains the 'send' command we need and returns a Map rather than JSONObject, consider switching to that instead
     return new NCIPClientWrapper(address, [
       protocol: "WMS2",
-      apiKey: wms_api_key?.value,
-      apiSecret: wms_api_secret?.value,
-      lookupPatronEndpoint: wms_lookup_patron_endpoint?.value
+      apiKey: wms_api_key,
+      apiSecret: wms_api_secret,
+      lookupPatronEndpoint: wms_lookup_patron_endpoint
       ]).circulationClient;
   }
 
