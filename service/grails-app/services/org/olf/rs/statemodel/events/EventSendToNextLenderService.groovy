@@ -122,6 +122,9 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                         if ((prr.instanceIdentifier != null) && (prr.instanceIdentifier.length() > 0)) {
                             // update requestMessageRequest.supplierUniqueRecordId to the system number specified in the rota
                             requestMessageRequest.bibliographicInfo.supplierUniqueRecordId = prr.instanceIdentifier;
+                            log.debug("Setting supplierUniqueRecordId to ${prr.instanceIdentifier} from PatronRequestRota ${prr}");
+                        } else {
+                            log.debug("No instanceIdentifier present for PatronRequestRota ${prr}");
                         }
                         requestMessageRequest.bibliographicInfo.supplyingInstitutionSymbol = nextResponder;
 
