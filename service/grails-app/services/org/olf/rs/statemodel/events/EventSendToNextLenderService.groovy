@@ -74,6 +74,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                         //copies
                         String localAutoRespond = AppSetting.findByKey('auto_responder_local')?.value;
                         if (localAutoRespond?.toLowerCase()?.startsWith('on')) {
+                            log.debug("Setting request.supplierUniqueRecordId to ${prr.instanceIdentifier}");
+                            request.supplierUniqueRecordId = prr.instanceIdentifier;
                             boolean hasLocalCopy = checkForLocalCopy(request);
                             if (hasLocalCopy) {
                                 reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, 'Local auto-responder located a local copy - requires review', null);
