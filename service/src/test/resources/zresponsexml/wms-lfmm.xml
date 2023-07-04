@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
+    <zs:numberOfRecords>1</zs:numberOfRecords>
+    <zs:records>
+        <zs:record>
+            <zs:recordSchema/>
+        <zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData>
+            <opacRecord>
+                <bibliographicRecord>
+                    <r xmlns="http://www.indexdata.com/turbomarc">
+                        <l>00026 am a22000253u 450 </l>
+                    </r>
+                </bibliographicRecord>
+                <holdings>
+                    <holding>
+                        <localLocation>LFMM</localLocation>
+                        <shelvingLocation>General Collection</shelvingLocation>
+                        <callNumber>PS3557.R48935 S67 2018, </callNumber>
+                        <circulations>
+                            <circulation>
+                                <availableNow value="1"/>
+                                <itemId>0111504744439</itemId>
+                                <renewable value="0"/>
+                                <onHold value="0"/>
+                            </circulation>
+                        </circulations>
+                    </holding>
+                </holdings>
+            </opacRecord>
+        </zs:recordData>
+            <zs:recordPosition>1</zs:recordPosition>
+        </zs:record>
+    </zs:records>
+    <zs:echoedSearchRetrieveRequest>
+        <zs:version>2.0</zs:version>
+        <zs:query>rec.identifier=1010578748</zs:query>
+        <zs:startRecord>1</zs:startRecord>
+        <zs:maximumRecords>3</zs:maximumRecords>
+        <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+    </zs:echoedSearchRetrieveRequest>
+</zs:searchRetrieveResponse>
