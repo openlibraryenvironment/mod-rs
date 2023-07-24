@@ -204,6 +204,7 @@ public class JasperReportService {
             Map localeSettings = okapiSettingsService.getLocaleSettings();
             if (localeSettings == null) {
                 // Use the defaults, but do not add it to the cache
+                log.warn("Failed to retrieve locale settings, falling back on default locale for pull slip");
                 schemaLocaleSettings = DefaultLocaleSettings;
             } else {
                 // We managed to find the locale settings
