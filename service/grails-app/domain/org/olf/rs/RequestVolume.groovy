@@ -57,14 +57,14 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   String generateTemporaryItemBarcode(def enforceMultivolGeneration = null) {
     String temporaryItemBarcode
 
-    if(patronRequest.isRequester) {
+    if (patronRequest.isRequester) {
 
       String useBarcodeValue = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_BARCODE);
       String temporaryItemBarcodeKey;
 
-      if("Yes".equals(useBarcodeValue)) {
+      if ("Yes".equals(useBarcodeValue)) {
         temporaryItemBarcodeKey = patronRequest.selectedItemBarcode;
-        if(temporaryItemBarcodeKey == null) {
+        if (temporaryItemBarcodeKey == null) {
           log.warn("selectedItemBarcode for PatronRequest ${patronRequest} is null");
         }
       } else {
