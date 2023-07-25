@@ -21,6 +21,10 @@ public class RefdataValueData {
     private static final String OFF = 'Off';
     private static final String ON  = 'On';
 
+    // Yes / No
+    public static final String YES_NO_NO  = 'No';
+    public static final String YES_NO_YES = 'Yes';
+
     public static final String VOCABULARY_ACCEPT_ITEM_METHOD               = 'AcceptItemMethod';
     public static final String VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE = 'ActopnEventResultSaveRestore';
     public static final String VOCABULARY_AUTO_RESPONDER                   = 'AutoResponder';
@@ -45,6 +49,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_SHARED_INDEX_ADAPTER             = 'SharedIndexAdapter';
     public static final String VOCABULARY_YES_NO                           = 'YesNo';
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
+    public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -93,6 +98,10 @@ public class RefdataValueData {
     public static final String NCIP_DUE_DATE_OFF = OFF;
     public static final String NCIP_DUE_DATE_ON  = ON;
 
+    // NCIP use barcode for Accept Item
+    public static final String NCIP_BARCODE_NO = YES_NO_NO;
+    public static final String NCIP_BARCODE_YES = YES_NO_NO;
+
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
     public static final String NOTICE_TRIGGER_LOANED_DIGITALLY               = 'Loaned digitally';
@@ -115,9 +124,6 @@ public class RefdataValueData {
     public static final String SHARED_INDEX_ADAPTER_JISC_LHD = 'jiscDiscover';
     public static final String SHARED_INDEX_ADAPTER_OAIPMH = 'OAIPMH';
 
-    // Yes / No
-    public static final String YES_NO_NO  = 'No';
-    public static final String YES_NO_YES = 'Yes';
 
     public static void loadAll() {
         (new RefdataValueData()).load();
@@ -156,7 +162,7 @@ public class RefdataValueData {
     }
 
     /**
-     * Loads the RfdataValue records into the database
+     * Loads the RefdataValue records into the database
      */
     private void load() {
         try {
@@ -167,6 +173,9 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_DUE_DATE, NCIP_DUE_DATE_ON);
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_DUE_DATE, NCIP_DUE_DATE_OFF);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_NO);
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_YES);
 
 
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead

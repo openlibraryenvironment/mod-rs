@@ -53,6 +53,7 @@ public class SettingsData {
     public static final String SETTING_NCIP_TO_AGENCY                  = 'ncip_to_agency';
     public static final String SETTING_NCIP_USE_DUE_DATE               = 'ncip_use_due_date';
     public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
+    public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
 
     // Settings for the wmsSettings section
     public static final String SETTING_WMS_API_KEY                = 'wms_api_key';
@@ -201,6 +202,8 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_APP_PROFILE, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, 'EZBORROW');
             ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
             ensureAppSetting(SETTING_NCIP_DUE_DATE_FORMAT, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, ReshareActionService.DEFAULT_DATE_FORMAT);
+            ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
+
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
