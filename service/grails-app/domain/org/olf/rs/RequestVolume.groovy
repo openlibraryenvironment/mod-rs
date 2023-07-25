@@ -59,22 +59,34 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
     if(patronRequest.isRequester) {
 
+      String useBarcodeValue = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_BARCODE);
+      String temporaryItemBarcodeKey;
+
+      if("Yes".equals(useBarcodeValue)) {
+        temporaryItemBarcodeKey = patronRequest.selectedItemBarcode;
+        if(temporaryItemBarcodeKey == null) {
+          log.warn("selectedItemBarcode for PatronRequest ${patronRequest} is null");
+        }
+      } else {
+        temporaryItemBarcodeKey = patronRequest.hrid;
+      }
+
       // For multi volume requests we include itemId to ensure uniqueness
       if (enforceMultivolGeneration || patronRequest.volumes.size() > 1) {
 
         // We assume last 4 digits of barcode is sufficient for uniqueness...
         // The below will not fail for itemId < 4
-        temporaryItemBarcode = "${patronRequest.hrid}-${itemId.drop(itemId.size() - 4)}";
+        temporaryItemBarcode = "${temporaryItemBarcodeKey}-${itemId.drop(itemId.size() - 4)}";
       } else {
         // For requests with only one item, can use the hrid of the request
-        temporaryItemBarcode = patronRequest.hrid;
+        temporaryItemBarcode = temporaryItemBarcodeKey;
       }
 
     } else {
       //Use the actual barcode for supply-side requests
       temporaryItemBarcode = itemId;
     }
-    
+
     return temporaryItemBarcode;
   }
 
