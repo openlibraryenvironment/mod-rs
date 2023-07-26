@@ -2,11 +2,13 @@ package org.olf.rs.statemodel.actions.iso18626;
 
 import java.util.regex.Matcher;
 
+import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StatusService;
+import org.olf.rs.referenceData.SettingsData;
 
 /**
  * Action that deals with interpreting ISO18626 on the requester side
@@ -52,6 +54,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId;
             if (itemId) {
+                def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
+                String useBarcodeValue = useBarcodeSetting?.value ?: "No";
+                log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
+                Boolean useBarcode = "Yes".equals(useBarcodeValue);
                 if (itemId instanceof Collection) {
                     // Item ids coming in, handle those
                     itemId.each { iid ->
@@ -65,9 +71,9 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId };
                             if (!rv) {
                                 rv = new RequestVolume(
-                                    name: iidName ?: request.volume ?: iidId,
-                                    itemId: iidId,
-                                    status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
+                                        name: iidName ?: request.volume ?: iidId,
+                                        itemId: iidId,
+                                        status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
                                 );
 
                                 request.addToVolumes(rv);
@@ -80,7 +86,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                                     we can enforce the multivolume rule so that the first item
                                     does not rely on `volumes.size() > 1`
                                 */
-                                rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(true)
+                                rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(true, useBarcode)
                             }
                         }
                     }
@@ -90,28 +96,20 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == itemId };
                     if (!rv) {
                         rv = new RequestVolume(
-                            name: request.volume ?: itemId,
-                            itemId: itemId,
-                            status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
+                                name: request.volume ?: itemId,
+                                itemId: itemId,
+                                status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
                         );
 
                         request.addToVolumes(rv);
 
                         /*
                             This _should_ be handled on the following save,
-                            but there seems to not be an intial save which
+                            but there seems to not be an initial save which
                             adds the temporary barcode necessary for acceptItem.
                         */
-                        rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode()
+                        rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(false, useBarcode)
                     }
-                }
-            }
-
-            // If the deliveredFormat is URL and a URL is present, store it on the request
-            if (parameters.deliveryInfo?.deliveredFormat == 'URL') {
-                Object pickupURL = parameters.deliveryInfo?.URL;
-                if (pickupURL) {
-                    request.pickupURL = pickupURL;
                 }
             }
         }

@@ -54,27 +54,39 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
   // We need to ensure this is unique at the _very_ least per request -- better unique per reshare
   // Bear in mind that we may have to swap generation in and out depending on user input in future
-  String generateTemporaryItemBarcode(def enforceMultivolGeneration = null) {
+  String generateTemporaryItemBarcode(def enforceMultivolGeneration = null, def useBarcode = false) {
     String temporaryItemBarcode
 
-    if(patronRequest.isRequester) {
+    if (patronRequest.isRequester) {
+
+      String temporaryItemBarcodeKey;
+
+      if (useBarcode) {
+        temporaryItemBarcodeKey = patronRequest.selectedItemBarcode;
+        if (temporaryItemBarcodeKey == null) {
+          log.warn("selectedItemBarcode for PatronRequest ${patronRequest} is null");
+        }
+      } else {
+        temporaryItemBarcodeKey = patronRequest.hrid;
+      }
 
       // For multi volume requests we include itemId to ensure uniqueness
       if (enforceMultivolGeneration || patronRequest.volumes.size() > 1) {
 
         // We assume last 4 digits of barcode is sufficient for uniqueness...
         // The below will not fail for itemId < 4
-        temporaryItemBarcode = "${patronRequest.hrid}-${itemId.drop(itemId.size() - 4)}";
+        temporaryItemBarcode = "${temporaryItemBarcodeKey}-${itemId.drop(itemId.size() - 4)}";
       } else {
         // For requests with only one item, can use the hrid of the request
-        temporaryItemBarcode = patronRequest.hrid;
+        temporaryItemBarcode = temporaryItemBarcodeKey;
       }
 
     } else {
       //Use the actual barcode for supply-side requests
       temporaryItemBarcode = itemId;
     }
-    
+
+    log.debug("Generated temporaryItemBarcode of ${temporaryItemBarcode}");
     return temporaryItemBarcode;
   }
 
