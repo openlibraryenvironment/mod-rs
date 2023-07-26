@@ -54,15 +54,14 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
   // We need to ensure this is unique at the _very_ least per request -- better unique per reshare
   // Bear in mind that we may have to swap generation in and out depending on user input in future
-  String generateTemporaryItemBarcode(def enforceMultivolGeneration = null) {
+  String generateTemporaryItemBarcode(def enforceMultivolGeneration = null, def useBarcode = false) {
     String temporaryItemBarcode
 
     if (patronRequest.isRequester) {
 
-      String useBarcodeValue = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_BARCODE);
       String temporaryItemBarcodeKey;
 
-      if ("Yes".equals(useBarcodeValue)) {
+      if (useBarcode) {
         temporaryItemBarcodeKey = patronRequest.selectedItemBarcode;
         if (temporaryItemBarcodeKey == null) {
           log.warn("selectedItemBarcode for PatronRequest ${patronRequest} is null");
@@ -87,6 +86,7 @@ class RequestVolume implements MultiTenant<RequestVolume> {
       temporaryItemBarcode = itemId;
     }
 
+    log.debug("Generated temporaryItemBarcode of ${temporaryItemBarcode}");
     return temporaryItemBarcode;
   }
 
