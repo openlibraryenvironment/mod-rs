@@ -57,7 +57,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
-                Boolean useBarcode = "Yes".equals(useBarcodeValue);
+                Boolean useBarcode = "Yes".equalsIgnoreCase(useBarcodeValue);
                 if (itemId instanceof Collection) {
                     // Item ids coming in, handle those
                     itemId.each { iid ->
