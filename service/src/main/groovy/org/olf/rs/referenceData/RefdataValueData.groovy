@@ -100,7 +100,7 @@ public class RefdataValueData {
 
     // NCIP use barcode for Accept Item
     public static final String NCIP_BARCODE_NO = YES_NO_NO;
-    public static final String NCIP_BARCODE_YES = YES_NO_NO;
+    public static final String NCIP_BARCODE_YES = YES_NO_YES;
 
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';

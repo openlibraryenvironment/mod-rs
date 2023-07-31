@@ -50,7 +50,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         if (request != null) {
-            // Generate a human readabe ID to use
+            // Generate a human readable ID to use
             request.hrid = generateHrid()
             log.debug("set request.hrid to ${request.hrid}");
 
@@ -63,7 +63,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             pickupLocationService.check(request);
 
             if (request.requestingInstitutionSymbol != null) {
-                // We need to validate the requsting location - and check that we can act as requester for that symbol
+                // We need to validate the requesting location - and check that we can act as requester for that symbol
                 Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
                 if (s != null) {
                     // We do this separately so that an invalid patron does not stop information being appended to the request
