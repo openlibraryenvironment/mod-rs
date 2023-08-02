@@ -11,7 +11,8 @@ env:
 
 on:
   workflow_run:
-    workflows: [Build mod-rs]
+    workflows:
+      - Build mod-rs
     types:
       - completed
 jobs: 
