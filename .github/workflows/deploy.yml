@@ -10,11 +10,8 @@ env:
   K8S_DEPLOYMENT: 'mod-rs-latest'
 
 on:
-  workflow_run:
-    workflows:
-      - Build mod-rs
-    types:
-      - completed
+  push:
+
 jobs: 
   k8s-deploy-latest:
 
