@@ -12,6 +12,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps: 
+      - name: Deactivate mod-rs
+        run: /usr/bin/python3 ./.github/scripts/disable.py
+
       - name: Deploy latest to K8s
         uses: actions-hub/kubectl@v1.21.2
         env: 
