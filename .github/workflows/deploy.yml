@@ -1,8 +1,3 @@
-# Very simple workflow to deploy the *latest* published container image with the 'latest' tag. 
-# This does not post updated module descriptors to okapi, update permissions or enable 
-# new versions of a module with the tenant.  If that is needed,  it should be done manually
-# via the Okapi API. 
-
 name: k8s-deploy-latest
 
 env:
