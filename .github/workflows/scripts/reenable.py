@@ -15,32 +15,38 @@ TENANTS = ['reshare_east', 'reshare_west']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
-def main():
-    print("DISABLE SCRIPT")
+# for now hard code 8080
+PORT = "8080"
 
-def main_in_progress():
+def main():
     args = parse_command_line_args()
+    action = args.action
     okapi_url = args.okapi_url
     username = args.username
     password = args.password
+    registry = args.registry
     token = get_token(username, password, okapi_url)
 
-    # get currently enabled module versions
+    if action == "disable":
+        disable_result = disable(args, token)
+    elif action == "enable":
+        enable_result = enable(args, token)
+    elif action == "all":
+        disable_result = disable(args, token)
+        enable_result = enable(args, token)
+    else:
+        print("Unkown action: {}. User enable, disable, or all".format(action))
+
+def disable(args, token):
+    action = args.action
+    okapi_url = args.okapi_url
+    username = args.username
+    password = args.password
+    registry = args.registry
+
     disable_versions = []
-    # for now just enable the exact same versions
-    #enable_versions = []
-
-    # get new versions from registry
-    r = okapi_get(REGISTRY +
-                  '/_/proxy/modules?filter=mod-rs&latest=1',
-                  tenant='supertenant')
-    new_rs_version = json.loads(r)[0]['id']
-    r = okapi_get(REGISTRY +
-                  '/_/proxy/modules?filter=mod-directory&latest=1',
-                  tenant='supertenant')
-    new_directory_version = json.loads(r)[0]['id']
-
-    for module in RESHARE_MODULES:
+ 
+    for module in MODULES:
         r = okapi_get(okapi_url +
                       '/_/proxy/tenants/{}/modules?filter={}'.format(TENANTS[0], module),
                       token=token)
@@ -50,29 +56,97 @@ def main_in_progress():
                 "action" : "disable"
             })
 
-    enable_versions = [{
-        "id" : new_rs_version,
-        "action" : "enable"
-    },{
-        "id" : new_directory_version,
-        "action" : "enable"
-    }]
-
-    # disable for both tenants
-    print("Disable current reshare backend modules")
+    # disable for all
+    print("Disable current module")
     for tenant in TENANTS:
         r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install'.format(tenant),
             payload=json.dumps(disable_versions).encode('UTF-8'),
             tenant='supertenant',
             token=token
         )
+        print(r)
+
+    # delete old deployment descriptors
+    #print("deleting deployment descriptors...")
+    #for module in disable_versions:
+    #    r = okapi_delete(okapi_url + '/_/discovery/modules/{}'.format(module['id']),
+    #                     tenant='supertenant',
+    #                     token=token,
+    #                     return_headers=False)
+
+    ## return true on success
+    #return True
+
+def enable(args, token):
+    action = args.action
+    okapi_url = args.okapi_url
+    username = args.username
+    password = args.password
+    registry = args.registry
+    port = PORT
+    # get new versions from registry
+    latest_versions = []
+
+    # sync mds
+    print("syncing module descriptors from registry...")
+    r = okapi_post(okapi_url + '/_/proxy/pull/modules',
+        payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
+        tenant='supertenant',
+        token=token
+    )
+
+    new_directory_version = json.loads(r)[0]['id']
+
+    for module in MODULES:
+        r = okapi_get(REGISTRY +
+                      '/_/proxy/modules?filter={}&latest=1'.format(module),
+                      tenant='supertenant')
+        latest_versions.append(json.loads(r)[0]['id'])
+
+    # post new deployment descriptors
+    for module in latest_versions:
+        payload = json.dumps({
+            "instId": "{}-cluster".format(module),
+            "srvcId": module,
+            "url": "http://{}-latest:{}".format('-'.join(module.split('-', 2)[:2]), port)
+        }).encode('UTF-8')
+        try:
+            print("posting new deployment descriptors...")
+            r = okapi_post(okapi_url + '/_/discovery/modules', payload=payload, tenant='supertenant', token=token)
+        except:
+            print("deployment descriptor exists, moving on")
+
+    # re-enable modules
+    print("re-enabling pods on tenants...")
+    enable_payload = []
+    for module in latest_versions:
+        enable_payload.append(
+            {
+                "id" : module,
+                "action" : "enable"
+            })
+    for tenant in TENANTS:
+        print("enabling on {}".format(tenant))
+        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?tenantParameters=loadSample%3Dtrue'.format(tenant),
+            payload=json.dumps(enable_payload).encode('UTF-8'),
+            tenant='supertenant',
+            token=token
+        )
+        print(r)
+        time.sleep(5)
+
+
+
 
 def parse_command_line_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-a', '--action', help='disable, enable, all', default="all", required=False)
     parser.add_argument('-u', '--username', help='okapi super user username', required=True)
     parser.add_argument('-p', '--password', help='okapi super user password', required=True)
     parser.add_argument('-o', '--okapi-url', help='okapi url',
-                        default='https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com', required=False)
+                        default='http://localhost:9130', required=False)
+    parser.add_argument('-r', '--registry', help='registry to pull mds from',
+                        default='http://folio-registry.dev.folio.org', required=False)
 
     args = parser.parse_args()
 
@@ -140,5 +214,6 @@ def get_token(username, password, okapi_url):
     r = okapi_post(okapi_url + '/authn/login', payload, return_headers=True)
     return r['x-okapi-token']
 
+   
 if __name__ == "__main__":
    main()
