@@ -1,11 +1,7 @@
 name: deploy
 
 on:
-  workflow_run:
-    branches: [actions-rebuild, master, main]
-    workflows: ["Build mod-rs"]
-    types:
-      - completed
+  workflow_dispatch:
 
 env:
   K8S_NAMESPACE: 'reshare'
