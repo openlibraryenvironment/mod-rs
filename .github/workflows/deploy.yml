@@ -2,8 +2,7 @@ name: deploy
 
 on:
   workflow_run:
-    #branches: ${{ github.event.repository.default_branch }} # master
-    branches: actions-rebuild
+    branches: [actions-rebuild, master, main]
     workflows: ["Build mod-rs"]
     types:
       - completed
