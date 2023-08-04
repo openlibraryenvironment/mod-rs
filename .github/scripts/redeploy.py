@@ -1,1 +1,0 @@
-print("REDEPLOY SCRIPT")

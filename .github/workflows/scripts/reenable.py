@@ -214,6 +214,5 @@ def get_token(username, password, okapi_url):
     r = okapi_post(okapi_url + '/authn/login', payload, return_headers=True)
     return r['x-okapi-token']
 
-   
 if __name__ == "__main__":
    main()

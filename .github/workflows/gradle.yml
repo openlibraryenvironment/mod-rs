@@ -1,11 +1,19 @@
 name: Build mod-rs
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 on:
   push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v3
@@ -14,86 +22,79 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      #- name: Validate Gradle wrapper
-      #  uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      #- name: Start containers
-      #  run: |
-      #    cd tools/testing
-      #    docker-compose down -v
-      #    docker-compose up -d &> dockerOutput.log
-      #    sleep 20
-      #- name: Inject github build number
-      #  run: |
-      #    # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
-      #    # echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
-      #    echo "BUILD_NUMBER=${{github.run_number}}" >> $GITHUB_ENV
-      #- name: Build with Gradle
-      #  uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
-      #  with:
-      #    arguments: build integrationTest
-      #    build-root-directory: service
-      #- name: Publish Test Results
-      #  uses: EnricoMi/publish-unit-test-result-action@v1
-      #  if: always()
-      #  with:
-      #    files: "service/build/test-results/**/*.xml"
-      #- name: Capture container output
-      #  if: always()
-      #  run: |
-      #    cd tools/testing
-      #    docker ps -a > ps.log
-      #    docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
-      #    docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
-      #    docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
-      #    docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
-      #    docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
-      #- name: Stop containers
-      #  if: always()
-      #  run: |
-      #    cd tools/testing
-      #    docker-compose down -v
-      #    sleep 10
-      #- name: Upload Test Results Files
-      #  uses: actions/upload-artifact@v3
-      #  if: always()
-      #  with:
-      #    name: testLogfiles
-      #    path: |
-      #      service/build/test-results/**/*.xml
-      #      tools/testing/*.log
-      #    retention-days: 1
-      #- name: Prepare env for docker build
-      #  run: | 
-      #    echo "module_name=$(grep info.app.name ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
-      #    echo "module_version=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | cut -f2 -d=)" >> $GITHUB_ENV
-      #    echo "is_snapshot=$(grep info.app.version ./service/build/resources/main/META-INF/grails.build.info | grep -i SNAPSHOT | wc -l)" >> $GITHUB_ENV
-      #- name: Pre build info
-      #  run: echo "ref:${{github.REF}} name:${{env.module_name}} ver:${{env.module_version}} is_snapshot:${{env.is_snapshot}}"
-      #- name: Docker Build
-      #  run: docker build --pull=true --no-cache=true -t ${{ env.module_name }}:${{ env.module_version }} .
-      #- if: env.is_snapshot == '1'
-      #  name: Publish to snapshot
-      #  run: |
-      #    echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
-      #    docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
-      #    docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
-      #    docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
-      #    docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
-      #    docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:snapshot-latest
-      #  env:
-      #    dockerRepo: docker.libsdev.k-int.com
-      #- if: env.is_snapshot == '0'
-      #  name: Publish to release
-      #  run: |
-      #    echo "push to snapshot repo ${{env.module_name}} ${{env.module_version}}"
-      #    docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }} $dockerRepo
-      #    docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
-      #    docker tag ${{ env.module_name }}:${{ env.module_version }} $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
-      #    docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:${{ env.module_version }}
-      #    docker push $dockerRepo/knowledgeintegration/${{ env.module_name }}:latest
-      #  env:
-      #    dockerRepo: docker.libsdev.k-int.com
-      #- name: Publish Descriptor
-      #  run: |
-      #    echo Post to public registry
-      #    curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Start containers
+        run: |
+          cd tools/testing
+          docker-compose down -v
+          docker-compose up -d &> dockerOutput.log
+          sleep 20
+      - name: Inject github build number
+        run: |
+          # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
+          # echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{github.run_number}}" >> $GITHUB_ENV
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+        with:
+          arguments: build integrationTest
+          build-root-directory: service
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "service/build/test-results/**/*.xml"
+      - name: Capture container output
+        if: always()
+        run: |
+          cd tools/testing
+          docker ps -a > ps.log
+          docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
+          docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
+          docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
+          docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
+          docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
+      - name: Stop containers
+        if: always()
+        run: |
+          cd tools/testing
+          docker-compose down -v
+          sleep 10
+      - name: Upload Test Results Files
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: testLogfiles
+          path: |
+            service/build/test-results/**/*.xml
+            tools/testing/*.log
+          retention-days: 1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+Uses the docker/login-action action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+This step uses docker/metadata-action to extract tags and labels that will be applied to the specified image. The id "meta" allows the output of this step to be referenced in a subsequent step. The images value provides the base name for the tags and labels.
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Publish Descriptor
+        run: |
+          echo Post to public registry
+          curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
