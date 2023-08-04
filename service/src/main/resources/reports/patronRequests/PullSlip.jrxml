@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TestPullSlip" language="groovy" columnCount="2" pageWidth="595" pageHeight="842" columnWidth="280" leftMargin="10" rightMargin="10" topMargin="8" bottomMargin="0" uuid="b4f2714a-3193-4a8e-83ee-36ebf13d67c1">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TestPullSlip" language="groovy" columnCount="2" pageWidth="595" pageHeight="842" columnWidth="285" columnSpacing="8" leftMargin="3" rightMargin="14" topMargin="8" bottomMargin="0" uuid="b4f2714a-3193-4a8e-83ee-36ebf13d67c1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Folio Vagrant"/>
 	<property name="net.sf.jasperreports.export.pdf.force.linebreak.policy" value="true"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<style name="ReportDefault" isDefault="true" markup="styled" isBlankWhenNull="true" fontName="SansSerif" fontSize="11">
 		<paragraph leftIndent="10"/>
 	</style>
@@ -568,7 +577,7 @@ where $X{IN, pr.pr_id, ids}]]>
 				</graphicElement>
 			</ellipse>
 			<staticText>
-				<reportElement style="FieldSmall" positionType="Float" x="190" y="392" width="82" height="30" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
+				<reportElement style="FieldSmall" positionType="Float" x="190" y="386" width="82" height="38" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -578,7 +587,7 @@ where $X{IN, pr.pr_id, ids}]]>
 				<text><![CDATA[Do not remove this slip.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="FieldSmall" positionType="Float" x="190" y="422" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
+				<reportElement style="FieldSmall" positionType="Float" x="190" y="427" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
