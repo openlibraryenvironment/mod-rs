@@ -47,6 +47,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         updateField(request, parameters, "neededBy", auditMessage, true);
         updateField(request, parameters, "volume", auditMessage);
         updateField(request, parameters, "patronNote", auditMessage);
+        updateField(request, parameters, "patronIdentifier", auditMessage); // TODO temporary fix pending PR-1530
         updateField(request, parameters, "systemInstanceIdentifier", auditMessage);
         updateField(request, parameters, "title", auditMessage);
         updateField(request, parameters, "author", auditMessage);
