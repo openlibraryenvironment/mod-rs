@@ -95,8 +95,6 @@ def enable(args, token):
         token=token
     )
 
-    new_directory_version = json.loads(r)[0]['id']
-
     for module in MODULES:
         r = okapi_get(REGISTRY +
                       '/_/proxy/modules?filter={}&latest=1'.format(module),
