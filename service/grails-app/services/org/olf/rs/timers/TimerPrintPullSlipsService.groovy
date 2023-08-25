@@ -31,7 +31,7 @@ where pr.pickLocation.id in ( :loccodes ) and
                        inner join sm.states as sms
                    where sm = pr.stateModel and
                          sms.triggerPullSlipEmail = true)
-order by pr.pickLocation.code, pr.title
+order by pr.pickLocation.code asc, pr.title asc
 ''';
 
     private static final String PULL_SLIP_SUMMARY = '''
