@@ -164,7 +164,7 @@ public class ReportService {
      * @return The maximum number of requests that can be printed on a pull slip
      */
     public int getMaxRequestsInPullSlip() {
-        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS, 100, false));
+        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS, 500, false));
     }
 
     /**
@@ -172,7 +172,7 @@ public class ReportService {
      * @return The maximum number of requests that can be printed on a pull slip for a manually generated batch
      */
     public int getMaxRequestsInPullSlipManual() {
-        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS_MANUAL, 100, false));
+        return(settingsService.getSettingAsInt(SettingsData.SETTING_PULL_SLIP_MAX_ITEMS_MANUAL, 500, false));
     }
 
     /**
