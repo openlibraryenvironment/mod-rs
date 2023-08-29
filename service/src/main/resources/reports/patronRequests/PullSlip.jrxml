@@ -87,7 +87,8 @@
 		   LEFT JOIN $P!{schema}.directory_entry de_pick_location ON location_pick.hll_corresponding_de = de_pick_location.de_id
 		   LEFT JOIN LATERAL (select * from $P!{schema}.symbol where sym_owner_fk = de_pick_location.de_id LIMIT 1) sym_pick_location ON true
            LEFT JOIN $P!{schema}.naming_authority na_pick_location on sym_pick_location.sym_authority_fk = na_pick_location.na_id
-where $X{IN, pr.pr_id, ids}]]>
+where $X{IN, pr.pr_id, ids}
+order by hll.hll_code, pr.pr_local_call_number]]>
 	</queryString>
 	<field name="pr_patron_identifier" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="pr_patron_identifier"/>
@@ -153,7 +154,7 @@ where $X{IN, pr.pr_id, ids}]]>
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="834">
+		<band height="686">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<frame>
 				<reportElement x="10" y="63" width="275" height="158" uuid="889543dd-f6c3-49c0-9ca7-90bc8c7cf380">
@@ -173,7 +174,7 @@ where $X{IN, pr.pr_id, ids}]]>
 					</reportElement>
 					<text><![CDATA[B O R R O W E R  &amp;  M O R E]]></text>
 				</staticText>
-				<textField>
+				<textField textAdjust="ScaleFont">
 					<reportElement style="FieldBigBold" x="0" y="21" width="269" height="29" uuid="09761958-637d-4bac-af44-90a101a1ae68">
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -183,9 +184,9 @@ where $X{IN, pr.pr_id, ids}]]>
 					<textElement>
 						<font size="18"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{pr_patron_surname}.concat(", ").concat($F{pr_patron_name})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{pr_patron_surname} ? $F{pr_patron_surname}.concat(", ").concat($F{pr_patron_name}) : $F{pr_patron_identifier}]]></textFieldExpression>
 				</textField>
-				<textField>
+				<textField textAdjust="StretchHeight">
 					<reportElement style="FieldBold" x="0" y="51" width="275" height="20" uuid="0a085f83-6da3-49b9-a0ff-b925fabfb1aa">
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -193,31 +194,10 @@ where $X{IN, pr.pr_id, ids}]]>
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					</reportElement>
 					<textElement markup="styled">
-						<font size="14"/>
+						<font size="12"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{pickupLocation}]]></textFieldExpression>
 				</textField>
-				<staticText>
-					<reportElement style="Header" positionType="Float" x="0" y="73" width="270" height="15" uuid="391e75dd-8913-41c4-9236-3a69dd2611b5">
-						<property name="com.jaspersoft.studio.unit.x" value="px"/>
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-						<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					</reportElement>
-					<textElement>
-						<font size="12" isBold="true"/>
-					</textElement>
-					<text><![CDATA[Due: ]]></text>
-				</staticText>
-				<componentElement>
-					<reportElement positionType="Float" x="10" y="94" width="120" height="30" uuid="959add1e-d78c-4004-98f6-8d05c58f5bd8">
-						<property name="com.jaspersoft.studio.unit.x" value="px"/>
-						<property name="com.jaspersoft.studio.unit.width" value="px"/>
-						<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					</reportElement>
-					<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="none">
-						<jr:codeExpression><![CDATA[$F{pr_hrid}]]></jr:codeExpression>
-					</jr:Code39>
-				</componentElement>
 				<textField>
 					<reportElement style="FieldSmall" positionType="Float" x="0" y="132" width="130" height="16" uuid="15ecdb60-01f6-4e08-8c27-dc29f6eb0258">
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -227,9 +207,9 @@ where $X{IN, pr.pr_id, ids}]]>
 					<textFieldExpression><![CDATA["Request: ".concat($F{pr_hrid})]]></textFieldExpression>
 				</textField>
 				<frame>
-					<reportElement x="137" y="95" width="125" height="63" uuid="42935e12-7753-4963-98ec-953843ff392d"/>
+					<reportElement x="163" y="123" width="112" height="37" uuid="42935e12-7753-4963-98ec-953843ff392d"/>
 					<image evaluationTime="Report">
-						<reportElement stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="6" y="2" width="104" height="55" uuid="b1935157-8bef-4268-90a4-9653fbead389">
+						<reportElement stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="7" y="4" width="100" height="33" uuid="b1935157-8bef-4268-90a4-9653fbead389">
 							<property name="com.jaspersoft.studio.unit.x" value="px"/>
 							<property name="com.jaspersoft.studio.unit.y" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -238,6 +218,12 @@ where $X{IN, pr.pr_id, ids}]]>
 						<imageExpression><![CDATA[$P{image}]]></imageExpression>
 					</image>
 				</frame>
+				<componentElement>
+					<reportElement x="11" y="96" width="221" height="31" uuid="1a67fd85-bd77-451c-94ae-5ecfdbbeb968"/>
+					<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0" intercharGapWidth="1.0">
+						<jr:codeExpression><![CDATA[$F{pr_hrid}]]></jr:codeExpression>
+					</jr:Code39>
+				</componentElement>
 			</frame>
 			<frame>
 				<reportElement positionType="Float" x="10" y="221" width="275" height="203" uuid="b3a0d073-8d24-4e3a-b352-4fdb63b8e6a0">
@@ -266,7 +252,7 @@ where $X{IN, pr.pr_id, ids}]]>
 						<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
 					</reportElement>
 					<textElement>
-						<font isBold="true"/>
+						<font fontName="SansSerif" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{pr_title}]]></textFieldExpression>
 				</textField>
@@ -312,8 +298,8 @@ where $X{IN, pr.pr_id, ids}]]>
 					</reportElement>
 					<textFieldExpression><![CDATA["Contact: ".concat($F{requesterName}).concat( " or" )]]></textFieldExpression>
 				</textField>
-				<textField>
-					<reportElement style="Field" positionType="Float" x="0" y="181" width="275" height="19" uuid="b976c666-fc9d-4115-a125-8deaadcf7fa6">
+				<textField textAdjust="ScaleFont">
+					<reportElement style="Field" positionType="Float" x="0" y="181" width="180" height="19" uuid="b976c666-fc9d-4115-a125-8deaadcf7fa6">
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -332,6 +318,38 @@ where $X{IN, pr.pr_id, ids}]]>
 					</textElement>
 					<textFieldExpression><![CDATA["Volumes: ".concat($F{volume})]]></textFieldExpression>
 				</textField>
+				<ellipse>
+					<reportElement style="FieldSmall" positionType="Float" x="170" y="127" width="100" height="100" backcolor="#FFFFFF" uuid="a5d25b44-e7f7-46fe-b8cc-a8c7dd847c72">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<graphicElement>
+						<pen lineWidth="2.0"/>
+					</graphicElement>
+				</ellipse>
+				<staticText>
+					<reportElement style="FieldSmall" positionType="Float" x="179" y="150" width="82" height="38" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Do not remove this slip.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="FieldSmall" positionType="Float" x="180" y="190" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Thank you!]]></text>
+				</staticText>
 			</frame>
 			<frame>
 				<reportElement positionType="Float" x="10" y="424" width="275" height="256" uuid="a70ed7c4-723f-4a04-9e3a-8df372682e2d">
@@ -411,8 +429,8 @@ where $X{IN, pr.pr_id, ids}]]>
 						<topPen lineWidth="1.0" lineStyle="Dotted"/>
 						<bottomPen lineWidth="1.0" lineStyle="Dotted"/>
 					</box>
-					<textField>
-						<reportElement style="Field" positionType="Float" x="0" y="3" width="275" height="15" isRemoveLineWhenBlank="true" uuid="47bc3aea-b63b-4c39-a181-b5b350280845">
+					<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+						<reportElement style="Field" positionType="Float" x="0" y="3" width="275" height="15" uuid="47bc3aea-b63b-4c39-a181-b5b350280845">
 							<property name="com.jaspersoft.studio.unit.x" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -542,7 +560,7 @@ where $X{IN, pr.pr_id, ids}]]>
 							<property name="com.jaspersoft.studio.unit.y" value="px"/>
 							<printWhenExpression><![CDATA[($F{itemBarcode} != null) && !$F{itemBarcode}.startsWith("[multivol:")]]></printWhenExpression>
 						</reportElement>
-						<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" evaluationTime="Page" textPosition="none">
+						<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0" intercharGapWidth="0.5">
 							<jr:codeExpression><![CDATA[$F{itemBarcode}]]></jr:codeExpression>
 						</jr:Code39>
 					</componentElement>
@@ -566,38 +584,6 @@ where $X{IN, pr.pr_id, ids}]]>
 					<text><![CDATA[Static Text]]></text>
 				</staticText>
 			</frame>
-			<ellipse>
-				<reportElement style="FieldSmall" positionType="Float" x="180" y="367" width="100" height="100" backcolor="#FFFFFF" uuid="a5d25b44-e7f7-46fe-b8cc-a8c7dd847c72">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineWidth="2.0"/>
-				</graphicElement>
-			</ellipse>
-			<staticText>
-				<reportElement style="FieldSmall" positionType="Float" x="190" y="386" width="82" height="38" uuid="7a4bae95-be06-4fd9-b644-169eedc04080">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Do not remove this slip.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement style="FieldSmall" positionType="Float" x="190" y="427" width="82" height="20" uuid="157f5693-6516-4ad6-aa6d-a80c2ea54bc4">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Thank you!]]></text>
-			</staticText>
 		</band>
 	</detail>
 </jasperReport>
