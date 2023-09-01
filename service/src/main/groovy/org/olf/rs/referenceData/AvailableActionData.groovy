@@ -205,6 +205,12 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
 
+        // REQ_DUPLICATE_REVIEW Or "New request flagged as possible duplicate, needs review"
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
+            Actions.ACTION_REQUESTER_APPROVE_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
+            Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
+
         // REQ_FILLED_LOCALLY OR "Filled locally"
 
         // REQ_BORROWER_RETURNED

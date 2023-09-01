@@ -19,6 +19,7 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_CANCELLED_WITH_SUPPLIER     = "REQ_CANCELLED_WITH_SUPPLIER";
   public static final String PATRON_REQUEST_CHECKED_IN                  = "REQ_CHECKED_IN";
   public static final String PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED = "REQ_CONDITIONAL_ANSWER_RECEIVED";
+  public static final String PATRON_REQUEST_DUPLICATE_REVIEW            = "REQ_DUPLICATE_REVIEW";
   public static final String PATRON_REQUEST_END_OF_ROTA                 = "REQ_END_OF_ROTA";
   public static final String PATRON_REQUEST_ERROR                       = "REQ_ERROR";
   public static final String PATRON_REQUEST_EXPECTS_TO_SUPPLY           = "REQ_EXPECTS_TO_SUPPLY";

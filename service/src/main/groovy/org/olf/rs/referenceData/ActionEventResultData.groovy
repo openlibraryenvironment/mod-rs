@@ -245,6 +245,17 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterCancelDuplicateOK = [
+        code: 'requesterCancelDuplicateOK',
+        description: 'Requester is cancelling the duplicate request',
+        result: true,
+        status: Status.PATRON_REQUEST_CANCELLED,
+        qualifier: null,
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
+    ]
+
     private static Map requesterFillLocallyOK = [
         code: 'requesterFillLocallyOK',
         description: 'Requester is is fulfilling the request locally',
@@ -258,7 +269,7 @@ public class ActionEventResultData {
 
     private static Map requesterLocalCannotSupplyOK = [
         code: 'requesterLocalCannotSupplyOK',
-        description: 'Lcal supplier cannot supply',
+        description: 'Local supplier cannot supply',
         result: true,
         status: Status.PATRON_REQUEST_UNFILLED,
         qualifier: null,
@@ -269,7 +280,7 @@ public class ActionEventResultData {
 
     private static Map requesterManualCheckInOK = [
         code: 'requesterManualCheckInOK',
-        description: 'Requester has manuually checked the item(s) into the local LMS',
+        description: 'Requester has manually checked the item(s) into the local LMS',
         result: true,
         status: Status.PATRON_REQUEST_CHECKED_IN,
         qualifier: null,
@@ -457,6 +468,18 @@ public class ActionEventResultData {
         saveRestoreState: null,
         nextActionEvent: null
     ];
+
+
+    private static Map requesterNewPatronRequestIndOKDuplicateReview = [
+        code: 'requesterNewPatronRequestIndOKDuplicateReview',
+        description: 'New request flagged as possible duplicate, needs review',
+        result: true,
+        status: Status.PATRON_REQUEST_DUPLICATE_REVIEW,
+        qualifier: ActionEventResultQualifier.QUALIFIER_DUPLICATE_REVIEW,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
 
     private static Map requesterValidateIndIndOK = [
         code: 'requesterValidateIndIndOK',
@@ -1116,9 +1139,28 @@ public class ActionEventResultData {
             requesterNewPatronRequestIndOK,
             requesterNewPatronRequestIndOKnoInstitutionSymbol,
             requesterNewPatronRequestIndOKinvalidPatron,
-            requesterNewPatronRequestIndOKhostLMSCallFailed
+            requesterNewPatronRequestIndOKhostLMSCallFailed,
+            requesterNewPatronRequestIndOKDuplicateReview
         ]
     ];
+
+    private static Map requesterApprovedDuplicate = [
+        code: ActionEventResultList.REQUESTER_APPROVED_DUPLICATE,
+        description: 'Requester has approved the duplicate request',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterNewPatronRequestIndOK
+        ]
+    ];
+
+    private static Map requesterCancelledDuplicate = [
+            code: ActionEventResultList.REQUESTER_CANCELLED_DUPLICATE,
+            description: 'Requester has cancelled the duplicate request',
+            model: StateModel.MODEL_REQUESTER,
+            results: [
+                    requesterCancelDuplicateOK
+            ]
+    ]
 
     private static Map requesterNoStatusChangeList = [
         code: ActionEventResultList.REQUESTER_NO_STATUS_CHANGE,
@@ -1229,7 +1271,7 @@ public class ActionEventResultData {
 
     private static Map responderCancelList = [
         code: ActionEventResultList.RESPONDER_CANCEL,
-        description: 'The responder has reported that the reqquester has agreed to the conditions',
+        description: 'The responder has reported that the requester has agreed to the conditions',
         model: StateModel.MODEL_RESPONDER,
         results: [
             responderCancelOK,
@@ -1467,6 +1509,8 @@ public class ActionEventResultData {
         requesterShippedReturnList,
         requesterSendToNextLocationList,
         requesterValidateIndList,
+        requesterApprovedDuplicate,
+        requesterCancelledDuplicate,
 
         // Digital returnable requester lists
         digitalReturnableRequesterExpectToSupplyISO18626,

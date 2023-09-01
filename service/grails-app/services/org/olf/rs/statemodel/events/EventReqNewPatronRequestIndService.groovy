@@ -8,6 +8,7 @@ import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.SettingsService;
 import org.olf.rs.SharedIndexService;
 import org.olf.rs.patronRequest.PickupLocationService;
 import org.olf.rs.statemodel.AbstractEvent;
@@ -17,9 +18,13 @@ import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
 import com.k_int.web.toolkit.settings.AppSetting;
+import org.olf.rs.referenceData.SettingsData;
 
 import groovy.json.JsonSlurper;
 import groovy.sql.Sql;
+
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 
 /**
  * This event service takes a new requester patron request and validates it and tries to determine the rota
@@ -31,6 +36,8 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
+
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -139,6 +146,12 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
         }
 
+        //Check for duplicate request
+        if(isPossibleDuplicate(request)) {
+            log.warn("Request ${request.hrid} appears to be duplicate");
+            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DUPLICATE_REVIEW;
+        }
+
         return(eventResultDetails);
     }
 
@@ -168,5 +181,32 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             return matcher.group(2);
         }
         return(null);
+    }
+
+    private Boolean isPossibleDuplicate(PatronRequest request) {
+        int duplicateTimeHours = settingsService.getSettingAsInt(
+                SettingsData.SETTING_CHECK_DUPLICATE_TIME, 0);
+        if (duplicateTimeHours > 0) {
+            //public Duration(int sign, int days, int hours, int minutes, int seconds)
+            Duration duration = new Duration(-1, 0, duplicateTimeHours, 0, 0);
+            DateTime beforeDate = DateTime.now().addDuration(duration);
+            String query = """
+                FROM PatronRequest AS pr 
+                WHERE pr.title = :requestTitle 
+                AND pr.patronIdentifier = :requestPatronIdentifier
+                AND pr.dateCreated > :dateDelta
+                """;
+            def sqlValues = [
+                    'requestTitle' : request.title,
+                    'requestPatronIdentifier' : request.patronIdentifier,
+                    'dateDelta' : beforeDate
+            ];
+            def results = PatronRequest.findAll(query, sqlValues);
+
+            if (results.size() > 0) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
     }
 }

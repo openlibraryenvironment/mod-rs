@@ -17,6 +17,7 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_CONDITIONAL           = 'Conditional';
     static public final String QUALIFIER_CONDITIONS_AGREED     = 'conditionsAgreed';
     static public final String QUALIFIER_CONTINUE              = 'continue';
+    static public final String QUALIFIER_DUPLICATE_REVIEW      = 'duplicateReview';
     static public final String QUALIFIER_END_OF_ROTA           = 'endOfRota';
     static public final String QUALIFIER_EXPECT_TO_SUPPLY      = 'ExpectToSupply';
     static public final String QUALIFIER_HOLDING               = 'holding';
