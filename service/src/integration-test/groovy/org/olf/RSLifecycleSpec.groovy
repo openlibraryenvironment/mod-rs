@@ -1,5 +1,7 @@
 package org.olf
 
+import org.olf.rs.referenceData.SettingsData
+
 import java.text.SimpleDateFormat;
 
 import javax.sql.DataSource
@@ -151,6 +153,8 @@ class RSLifecycleSpec extends TestBase {
       if ( resp?.size() == 1 ) {
         request_id = resp[0].id
         request_state = resp[0].state?.code
+      } else {
+        log.debug("waitForRequestState: Request with patronReference ${patron_reference} not found");
       }
 
       if ( required_state != request_state ) {
@@ -1156,5 +1160,72 @@ class DosomethingSimple {
         where:
             tenantId      | ignore
             'RSInstThree' | ''
+    }
+
+    void "Test to see if duplicate requests get flagged properly"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+      when: "Post new duplicate requests"
+        changeSettings(tenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 3 ]);
+
+        def headers = [
+            'X-Okapi-Tenant': tenantId,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]
+
+        def req_one_json = [
+            requestingInstitutionSymbol: requestSymbol,
+            title: requestTitle,
+            author: requestAuthor,
+            systemInstanceIdentifier: requestSystemId,
+            patronIdentifier: requestPatronId,
+            isRequester: true,
+            patronReference: requestPatronId + "_one",
+            tags: [ 'RS-DUPLICATE-TEST-1']
+        ];
+
+        def req_two_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                tags: [ 'RS-DUPLICATE-TEST-2']
+        ];
+
+
+        setHeaders(headers);
+
+        def respOne = doPost("${baseUrl}/rs/patronrequests".toString(), req_one_json);
+        log.debug("Created PatronRequest 1: RESP: ${respOne} ID: ${respOne?.id}");
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_one",
+                Status.PATRON_REQUEST_IDLE);
+
+       Thread.sleep(5000); //I hate doing this
+
+        def respTwo = doPost("${baseUrl}/rs/patronrequests".toString(), req_two_json);
+        log.debug("Created PatronRequest 2: RESP: ${respTwo} ID: ${respTwo?.id}");
+
+      waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+              Status.PATRON_REQUEST_DUPLICATE_REVIEW);
+
+
+      then: "Check values"
+        assert true;
+
+      where:
+        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'Excellent Argument, However...'  | 'Mom, U.R.'   | '1234-5678-9123-4567' | '9876-1234'       | 'ISIL:RST1'
+
+
     }
 }

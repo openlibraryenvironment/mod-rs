@@ -148,7 +148,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
         //Check for duplicate request
         if(isPossibleDuplicate(request)) {
-            log.warn("Request ${request.hrid} appears to be duplicate");
+            log.warn("Request ${request.hrid} appears to be a duplicate (patronReference ${request.patronReference})");
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DUPLICATE_REVIEW;
         }
 
@@ -186,24 +186,34 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     private Boolean isPossibleDuplicate(PatronRequest request) {
         int duplicateTimeHours = settingsService.getSettingAsInt(
                 SettingsData.SETTING_CHECK_DUPLICATE_TIME, 0);
+        log.debug("Checking PatronRequest ${request} ( patronReference ${request.patronReference} ) for duplicates within the last ${duplicateTimeHours} hours");
         if (duplicateTimeHours > 0) {
             //public Duration(int sign, int days, int hours, int minutes, int seconds)
             Duration duration = new Duration(-1, 0, duplicateTimeHours, 0, 0);
             DateTime beforeDate = DateTime.now().addDuration(duration);
-            String query = """
-                FROM PatronRequest AS pr 
-                WHERE pr.title = :requestTitle 
+            String query =
+                """FROM PatronRequest AS pr 
+                WHERE pr.id != :requestId
+                AND pr.title = :requestTitle 
                 AND pr.patronIdentifier = :requestPatronIdentifier
                 AND pr.dateCreated > :dateDelta
                 """;
             def sqlValues = [
+                    'requestId' : request.id,
                     'requestTitle' : request.title,
                     'requestPatronIdentifier' : request.patronIdentifier,
-                    'dateDelta' : beforeDate
+                    'dateDelta' : new Date(beforeDate.getTimestamp())
             ];
+            log.debug("Using values ${sqlValues} for duplicateQuery");
             def results = PatronRequest.findAll(query, sqlValues);
 
+            log.debug("Found ${results.size()} possible duplicate(s)");
             if (results.size() > 0) {
+                /*
+                for (result in results) {
+                    log.debug("Query matches PR with id ${result.id} and patronReference ${result.patronReference} to original id ${request.id}, patronRefernece ${request.patronReference}");
+                }
+                 */
                 return Boolean.TRUE;
             }
         }
