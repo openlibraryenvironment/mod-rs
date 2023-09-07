@@ -1210,7 +1210,7 @@ class DosomethingSimple {
         waitForRequestState(tenantId, 20000, requestPatronId + "_one",
                 Status.PATRON_REQUEST_IDLE);
 
-       Thread.sleep(5000); //I hate doing this
+       Thread.sleep(2000); // I hate doing this
 
         def respTwo = doPost("${baseUrl}/rs/patronrequests".toString(), req_two_json);
         log.debug("Created PatronRequest 2: RESP: ${respTwo} ID: ${respTwo?.id}");

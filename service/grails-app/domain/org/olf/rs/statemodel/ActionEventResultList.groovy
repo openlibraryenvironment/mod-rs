@@ -7,7 +7,7 @@ import grails.gorm.MultiTenant;
  */
 
 class ActionEventResultList implements MultiTenant<ActionEventResultList> {
-    static public final String REQUESTER_APPROVED_DUPLICATE                  = 'requesterApprovedDuplicate';
+    static public final String REQUESTER_APPROVE_DUPLICATE                  = 'requesterApprovedDuplicate';
     static public final String REQUESTER_AGREE_CONDITIONS                    = 'requesterAgreeConditions';
     static public final String REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626   = 'requesterAwaitingReturnShippingISO18626';
     static public final String REQUESTER_BORROWER_CHECK                      = 'requesterBorrowerCheck';
@@ -15,7 +15,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_BORROWING_LIBRARY_RECEIVED_ISO18626 = 'requesterBorrowingLibraryReceivedISO18626';
     static public final String REQUESTER_CANCEL                              = 'requesterCancel';
     static public final String REQUESTER_CANCEL_LOCAL                        = 'requesterCancelLocal';
-    static public final String REQUESTER_CANCELLED_DUPLICATE                 = 'requesterCancelledDuplicate';
+    static public final String REQUESTER_CANCEL_DUPLICATE                 = 'requesterCancelledDuplicate';
     static public final String REQUESTER_CANCEL_PENDING_ISO18626             = 'requesterCancelPendingISO18626';
     static public final String REQUESTER_CANCEL_WITH_SUPPLER_INDICATION      = 'requesterCancelWithSupplierIndList';
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';

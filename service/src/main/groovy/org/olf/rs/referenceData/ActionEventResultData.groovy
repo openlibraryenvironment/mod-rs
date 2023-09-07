@@ -1145,7 +1145,7 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterApprovedDuplicate = [
-        code: ActionEventResultList.REQUESTER_APPROVED_DUPLICATE,
+        code: ActionEventResultList.REQUESTER_APPROVE_DUPLICATE,
         description: 'Requester has approved the duplicate request',
         model: StateModel.MODEL_REQUESTER,
         results: [
@@ -1154,7 +1154,7 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterCancelledDuplicate = [
-            code: ActionEventResultList.REQUESTER_CANCELLED_DUPLICATE,
+            code: ActionEventResultList.REQUESTER_CANCEL_DUPLICATE,
             description: 'Requester has cancelled the duplicate request',
             model: StateModel.MODEL_REQUESTER,
             results: [

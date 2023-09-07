@@ -146,8 +146,8 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
         }
 
-        //Check for duplicate request
-        if(isPossibleDuplicate(request)) {
+        // Check for duplicate request
+        if (isPossibleDuplicate(request)) {
             log.warn("Request ${request.hrid} appears to be a duplicate (patronReference ${request.patronReference})");
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DUPLICATE_REVIEW;
         }
@@ -209,11 +209,9 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
             log.debug("Found ${results.size()} possible duplicate(s)");
             if (results.size() > 0) {
-                /*
                 for (result in results) {
                     log.debug("Query matches PR with id ${result.id} and patronReference ${result.patronReference} to original id ${request.id}, patronRefernece ${request.patronReference}");
                 }
-                 */
                 return Boolean.TRUE;
             }
         }
