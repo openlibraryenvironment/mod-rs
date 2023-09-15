@@ -39,11 +39,11 @@ public class Wms2HostLMSService extends BaseHostLMSService {
   List getLookupStrategies() {
     [
       [
-        name:'Adapter_By_OCLC_Number',
-        precondition: { pr -> return ( pr.oclcNumber != null ) },
+        name:'Adapter_By_Local_Identifier',
+        precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
         strategy: { pr, service, settings, holdingLogDetails ->
           return service.lookupViaConnector(
-                  "rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3",
+                  "rec.identifier=${pr.supplierUniqueRecordId?.trim()}&startRecord=1&maximumRecords=3",
                   settings, holdingLogDetails
           ) }
       ],
