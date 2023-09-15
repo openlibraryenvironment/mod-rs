@@ -468,7 +468,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
   //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
   //  "userId":"M00069192"}
-  private void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
+  protected void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
     if ( ( response ) && ( ! response.has('problems') ) ) {
       JSONArray priv = response.getJSONArray('privileges')
       // Return a status of BLOCKED if the user is blocked, else OK for now
@@ -479,26 +479,29 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.givenName=response.opt('firstName')
       result.surname=response.opt('lastName')
       protocolInformationToResult(response, ncipLogDetails);
+      }
       if ( response.has('electronicAddresses') ) {
         JSONArray ea = response.getJSONArray('electronicAddresses')
         // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
         result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
         result.tel=(ea.find { it.key=='tel' })?.value
-      }
-    }
-    else {
+      } else {
       result.problems=response.get('problems')
       result.result=false
     }
   }
 
   private void protocolInformationToResult(JSONObject response, INcipLogDetails ncipLogDetails) {
+    try {
       ncipLogDetails.result(
-          response.protocolInformation.request.endPoint,
-          unescapeJson(response.protocolInformation.request.requestbody),
-          response.protocolInformation.response.responseStatus,
-          unescapeJson(response.protocolInformation.response.responseBody)
+              response.protocolInformation.request.endPoint,
+              unescapeJson(response.protocolInformation.request.requestbody),
+              response.protocolInformation.response.responseStatus,
+              unescapeJson(response.protocolInformation.response.responseBody)
       );
+    } catch(Exception e) {
+      log.error("Unable to extract protocolInformation from NCIP response: ${e}");
+    }
   }
 
   private String unescapeJson(String jsonString) {
