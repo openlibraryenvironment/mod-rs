@@ -24,6 +24,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
     static public final String REQUESTER_FILLED_LOCALLY                      = 'requesterFilledLocally';
     static public final String REQUESTER_LOCAL_CANNOT_SUPPLY                 = 'requesterLocalCannotSupply';
+    static public final String REQUESTER_MARK_END_OF_ROTA_REVIEWED           = 'requesterMarkEndOfRotaReviewed';
     static public final String REQUESTER_MANUAL_CHECK_IN                     = 'requesterManualCheckIn';
     static public final String REQUESTER_NO_STATUS_CHANGE                    = 'requesterNoStatusChange';
     static public final String REQUESTER_NOTIFICATION_RECEIVED_ISO18626      = 'requesterNotificationReceivedISO18626';
@@ -33,6 +34,8 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
     static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
     static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
+    static public final String REQUESTER_REREQUEST_CANCELLED                 = 'requesterRerequestCancelled';
+    static public final String REQUESTER_REREQUEST_END_OF_ROTA               = 'requesterRerequestEndOfRota';
     static public final String REQUESTER_SENT_TO_SUPPLIER_ISO18626           = 'requesterSentToSupplierISO18626';
     static public final String REQUESTER_SHIPPED_ISO18626                    = 'requesterShippedISO18626';
     static public final String REQUESTER_SHIPPED_RETURN                      = 'requesterShippedReturn';

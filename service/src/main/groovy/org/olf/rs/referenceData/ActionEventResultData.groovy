@@ -398,6 +398,26 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterRerequestCancelledOK = [
+        code: 'requesterRerequestCancelledOK',
+        description: 'Re-requested with changes',
+        result: true,
+        status: null,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterRerequestEndOfRotaOK = [
+        code: 'requesterRerequestEndOfRotaOK',
+        description: 'Re-requested with changes',
+        result: true,
+        status: Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterShippedReturnOK = [
         code: 'requesterShippedReturnOK',
         description: 'Requester has sent the the item(s) to the responder',
@@ -425,6 +445,16 @@ public class ActionEventResultData {
         result: true,
         status: Status.PATRON_REQUEST_UNFILLED,
         qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterMarkEndOfRotaReviewed = [
+        code: 'requesterMarkEndOfRotaReviewed',
+        description: 'Marked a request at the end of rota as reviewed',
+        result: true,
+        status: Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED,
+        qualifier: null,
         saveRestoreState: null,
         nextActionEvent: null
     ];
@@ -1162,6 +1192,15 @@ public class ActionEventResultData {
             ]
     ]
 
+    private static Map requesterMarkEndOfRotaReviewedList = [
+        code: ActionEventResultList.REQUESTER_MARK_END_OF_ROTA_REVIEWED,
+        description: 'Marked a request at the end of rota as reviewed',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterMarkEndOfRotaReviewed
+        ]
+    ]
+
     private static Map requesterNoStatusChangeList = [
         code: ActionEventResultList.REQUESTER_NO_STATUS_CHANGE,
         description: 'Default for when we do not have a status change for the requester',
@@ -1206,6 +1245,24 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterRejectConditionsOK
+        ]
+    ];
+
+    private static Map requesterRerequestCancelledList = [
+        code: ActionEventResultList.REQUESTER_REREQUEST_CANCELLED,
+        description: 'Re-requested with changes',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterRerequestCancelledOK
+        ]
+    ];
+
+    private static Map requesterRerequestEndOfRotaList = [
+        code: ActionEventResultList.REQUESTER_REREQUEST_END_OF_ROTA,
+        description: 'Re-requested with changes',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterRerequestEndOfRotaOK
         ]
     ];
 
@@ -1498,6 +1555,7 @@ public class ActionEventResultData {
         requesterCancelWithSupplierIndList,
         requesterFilledLocallyList,
         requesterLocalCannotSupplyList,
+        requesterMarkEndOfRotaReviewedList,
         requesterManualCheckInList,
         requesterManualCloseList,
         requesterNewPatronRequestIndList,
@@ -1506,6 +1564,8 @@ public class ActionEventResultData {
         requesterPatronReturnedShippedList,
         requesterReceivedList,
         requesterRejectConditionsList,
+        requesterRerequestCancelledList,
+        requesterRerequestEndOfRotaList,
         requesterShippedReturnList,
         requesterSendToNextLocationList,
         requesterValidateIndList,
