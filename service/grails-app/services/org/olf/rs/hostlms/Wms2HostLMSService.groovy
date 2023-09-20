@@ -105,10 +105,10 @@ public class Wms2HostLMSService extends BaseHostLMSService {
       ]
       holdingLogDetails.newSearch(request.uri?.toURI().toString());
       log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
-      holdingLogDetails.numberOfRecords(z_response?.numberOfRecords?.toLong());
-      holdingLogDetails.searchRequest(z_response?.echoedSearchRetrieveRequest);
     }
     log.debug("Got Z3950 response: ${XmlUtil.serialize(z_response)}");
+    holdingLogDetails.numberOfRecords(z_response?.numberOfRecords?.toLong());
+    holdingLogDetails.searchRequest(z_response?.echoedSearchRetrieveRequest);
 
     return extractAvailableItemsFrom(z_response, null, holdingLogDetails);
   }
