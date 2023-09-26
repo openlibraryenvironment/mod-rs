@@ -101,8 +101,8 @@ public class WmsHostLMSService extends BaseHostLMSService {
       request.uri.query = [
               'version':'2.0',
               'operation': 'searchRetrieve',
-              'x-username': wms_connector_username?.value,
-              'x-password': wms_connector_password?.value,
+              'x-username': wms_connector_username,
+              'x-password': wms_connector_password,
               'query': query
 
       ]
