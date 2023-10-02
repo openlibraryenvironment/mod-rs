@@ -7,4 +7,8 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "pr_preceded_by_fk", baseTableName: "patron_request", constraintName: "FK_pr_preceded_by", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request")
         addForeignKeyConstraint(baseColumnNames: "pr_succeeded_by_fk", baseTableName: "patron_request", constraintName: "FK_pr_succeeded_by", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "pr_id", referencedTableName: "patron_request")
     }
+
+    changeSet(author: "jskomorowski", id: "20231002-1630-001") {
+        modifyDataType(tableName: "protocol_audit", columnName: "pa_uri", newDataType: "TEXT")
+    }
 }
