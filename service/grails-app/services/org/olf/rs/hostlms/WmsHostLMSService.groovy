@@ -108,10 +108,10 @@ public class WmsHostLMSService extends BaseHostLMSService {
       ]
       holdingLogDetails.newSearch(request.uri?.toURI().toString());
       log.debug("Querying connector with URL ${request.uri?.toURI().toString()}");
-      holdingLogDetails.numberOfRecords(z_response?.numberOfRecords?.toLong());
-      holdingLogDetails.searchRequest(z_response?.echoedSearchRetrieveRequest);
-    }
+          }
     log.debug("Got Z3950 response: ${XmlUtil.serialize(z_response)}");
+    holdingLogDetails.numberOfRecords(z_response?.numberOfRecords?.toLong());
+    holdingLogDetails.searchRequest(z_response?.echoedSearchRetrieveRequest);
 
     return extractAvailableItemsFrom(z_response, null, holdingLogDetails);
   }
@@ -147,7 +147,7 @@ public class WmsHostLMSService extends BaseHostLMSService {
       }
       log.debug("At end, availability summary: ${availability_summary}");
     } else {
-      log.debug("WMS2 connector lookup returned no matches. Unable to determine availability.")
+      log.debug("WMS/WMS2 connector lookup returned no matches. Unable to determine availability.")
     }
 
     return availability_summary;
