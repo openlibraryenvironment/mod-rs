@@ -280,6 +280,8 @@ public class StatusService {
      */
     private ActionEventResult findResult(StateModel model, Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
         // We return null if we could not find a status
+        log.debug("Calling StatusService.findResult with model ${model}, fromStatus ${fromStatus}, actionCode ${actionCode}" +
+            " successful ${successful}, qualifier ${qualifier}, availableActionMustExist ${availableActionMustExist}");
         ActionEventResult actionEventResult = null;
 
         // Must have a from status and action code, qualifier is optional
