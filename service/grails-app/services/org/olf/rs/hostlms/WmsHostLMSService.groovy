@@ -42,11 +42,11 @@ public class WmsHostLMSService extends BaseHostLMSService {
   List getLookupStrategies() {
     [
       [
-        name:'Adapter_By_OCLC_Number',
-        precondition: { pr -> return ( pr.oclcNumber != null ) },
+        name:'Adapter_By_Local_Identifier',
+        precondition: { pr -> return ( pr.supplierUniqueRecordId != null ) },
         strategy: { pr, service, settings, holdingLogDetails ->
           return service.lookupViaConnector(
-                  "rec.identifier=${pr.oclcNumber?.trim()}&startRecord=1&maximumRecords=3",
+                  "rec.identifier=${pr.supplierUniqueRecordId?.trim()}&startRecord=1&maximumRecords=3",
                   settings, holdingLogDetails
           ) }
       ],
@@ -101,8 +101,8 @@ public class WmsHostLMSService extends BaseHostLMSService {
       request.uri.query = [
               'version':'2.0',
               'operation': 'searchRetrieve',
-              'x-username': wms_connector_username?.value,
-              'x-password': wms_connector_password?.value,
+              'x-username': wms_connector_username,
+              'x-password': wms_connector_password,
               'query': query
 
       ]

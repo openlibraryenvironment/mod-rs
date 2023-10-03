@@ -528,7 +528,7 @@ class RSLifecycleSpec extends TestBase {
         actions.metaClass.lookupViaConnector { String query, ISettings settings, IHoldingLogDetails holdingLogDetails ->
             actions.extractAvailableItemsFrom(xml, null, new DoNothingHoldingLogDetails())
         };
-        def pr = new PatronRequest(oclcNumber: '1010578748');
+        def pr = new PatronRequest(supplierUniqueRecordId: '1010578748');
         result['viaOCLC'] = actions.determineBestLocation(settingsService, pr, new DoNothingHoldingLogDetails());
         result['location'] = HostLMSLocation.findByCode(location);
         result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
