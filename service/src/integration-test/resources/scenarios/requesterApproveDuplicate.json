@@ -1,0 +1,6 @@
+{
+  "action": "requesterApproveDuplicate",
+  "actionParams": {
+    "reason": "duplicate_approved"
+  }
+}
