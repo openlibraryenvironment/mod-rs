@@ -13,7 +13,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<style name="ReportDefault" isDefault="true" markup="styled" isBlankWhenNull="true" fontName="SansSerif" fontSize="11">
+	<style name="ReportDefault" isDefault="true" markup="styled" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="11">
 		<paragraph leftIndent="10"/>
 	</style>
 	<style name="Section" style="ReportDefault">
@@ -252,7 +252,7 @@ order by hll.hll_code, pr.pr_local_call_number]]>
 						<property name="net.sf.jasperreports.text.truncate.suffix" value="..."/>
 					</reportElement>
 					<textElement>
-						<font fontName="SansSerif" isBold="true"/>
+						<font fontName="DejaVu Sans" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{pr_title}]]></textFieldExpression>
 				</textField>
