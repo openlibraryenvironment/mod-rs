@@ -9,6 +9,7 @@ public class AvailabilityStatement {
   public Long totalCopies
   public Long availableCopies
 
+  public static final String LENDABLE_POLICY = 'Will lend';
 
   public String toString() {
     return "AvailabilityStatement(${symbol},${instanceIdentifier},${copyIdentifier},${illPolicy})".toString()
