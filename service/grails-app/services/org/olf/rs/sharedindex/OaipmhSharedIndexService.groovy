@@ -139,9 +139,9 @@ public class OaipmhSharedIndexService implements SharedIndexActions {
                   copyIdentifier    : null])
         } else {
           log.debug("Located existing entry in result for ${sym} - not adding another");
-          if (existing?.illPolicy != LENDABLE_RS && pol == LENDABLE_RS) {
+          if (existing?.illPolicy != AvailabilityStatement.LENDABLE_POLICY && pol == AvailabilityStatement.LENDABLE_POLICY) {
             log.debug("Updating existing entry for ${sym} - found lendable copy");
-            existing.illPolicy = LENDABLE_RS;
+            existing.illPolicy = AvailabilityStatement.LENDABLE_POLICY;
           }
         }
       } else {
