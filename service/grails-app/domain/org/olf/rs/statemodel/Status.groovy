@@ -12,6 +12,7 @@ import grails.gorm.MultiTenant;
 class Status implements MultiTenant<Status> {
 
   public static final String PATRON_REQUEST_AWAITING_RETURN_SHIPPING    = "REQ_AWAITING_RETURN_SHIPPING";
+  public static final String PATRON_REQUEST_BLANK_FORM_REVIEW           = "REQ_BLANK_FORM_REVIEW";
   public static final String PATRON_REQUEST_BORROWER_RETURNED           = "REQ_BORROWER_RETURNED";
   public static final String PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED  = "REQ_BORROWING_LIBRARY_RECEIVED";
   public static final String PATRON_REQUEST_CANCEL_PENDING              = "REQ_CANCEL_PENDING";

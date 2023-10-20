@@ -510,6 +510,15 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterNewPatronRequestIndOKBlankFormReview = [
+        code: 'requesterNewPatronRequestIndOKBlankFormReview',
+        description: 'New request flagged as not having cluster ID, needs review',
+        result: true,
+        status: Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
+        qualifier: ActionEventResultQualifier.QUALIFIER_BLANK_FORM_REVIEW,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
 
     private static Map requesterValidateIndIndOK = [
         code: 'requesterValidateIndIndOK',
@@ -1184,12 +1193,12 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterCancelledDuplicate = [
-            code: ActionEventResultList.REQUESTER_CANCEL_DUPLICATE,
-            description: 'Requester has cancelled the duplicate request',
-            model: StateModel.MODEL_REQUESTER,
-            results: [
-                    requesterCancelDuplicateOK
-            ]
+        code: ActionEventResultList.REQUESTER_CANCEL_DUPLICATE,
+        description: 'Requester has cancelled the duplicate request',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterCancelDuplicateOK
+        ]
     ]
 
     private static Map requesterMarkEndOfRotaReviewedList = [
@@ -1247,6 +1256,24 @@ public class ActionEventResultData {
             requesterRejectConditionsOK
         ]
     ];
+
+    private static Map requesterRetriedRequestList = [
+        code: ActionEventResultList.REQUESTER_RETRY_REQUEST,
+        description: 'Requester is re-trying evaluation of the request',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterNewPatronRequestIndOK
+        ]
+    ];
+
+    private static Map requesterCancelledBlankFormList = [
+        code: ActionEventResultList.REQUESTER_CANCEL_BLANK_FORM,
+        description: 'Blank form request is being cancelled',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+            requesterCancelOK
+        ]
+    ]
 
     private static Map requesterRerequestCancelledList = [
         code: ActionEventResultList.REQUESTER_REREQUEST_CANCELLED,
