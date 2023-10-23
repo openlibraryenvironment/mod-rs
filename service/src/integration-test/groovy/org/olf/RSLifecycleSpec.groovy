@@ -1229,4 +1229,49 @@ class DosomethingSimple {
 
 
     }
+
+    void "Test to see if blank form requests are properly handled" (
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+            def headers = [
+                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Token': 'dummy',
+                    'X-Okapi-User-Id': 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ];
+
+            def request_json = [
+                    requestingInstitutionSymbol: requestSymbol,
+                    title: requestTitle,
+                    author: requestAuthor,
+                    patronIdentifier: requestPatronId,
+                    isRequester: true,
+                    patronReference: requestPatronId + "_one",
+                    tags: [ 'RS-BLANK-FORM-TEST-1']
+            ];
+
+            setHeaders(headers);
+
+            def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+            waitForRequestState(tenantId, 20000, requestPatronId + "_one",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+            then: "Whatever"
+                assert true;
+
+            where:
+
+                tenantId    | requestTitle          | requestAuthor | requestPatronId   | requestSymbol
+                'RSInstOne' | 'Missing References'  | 'Dunno, Ivan' | '9977-2244'       | 'ISIL:RST1'
+
+
+    }
+
+
 }

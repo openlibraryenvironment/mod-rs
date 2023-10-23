@@ -4,6 +4,7 @@ package org.olf.rs.statemodel
  * Defines the various qualifiers that influence the status
  */
 public class ActionEventResultQualifier {
+    static public final String QUALIFIER_BLANK_FORM_REVIEW     = 'blankFormReview';
     static public final String QUALIFIER_CANCELLED             = 'cancelled';
     static public final String QUALIFIER_CHECKED_IN            = 'checkedIn';
     static public final String QUALIFIER_CLOSE_CANCELLED       = 'REQ_CANCELLED';

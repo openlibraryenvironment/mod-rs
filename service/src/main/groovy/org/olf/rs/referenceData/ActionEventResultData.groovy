@@ -1179,7 +1179,8 @@ public class ActionEventResultData {
             requesterNewPatronRequestIndOKnoInstitutionSymbol,
             requesterNewPatronRequestIndOKinvalidPatron,
             requesterNewPatronRequestIndOKhostLMSCallFailed,
-            requesterNewPatronRequestIndOKDuplicateReview
+            requesterNewPatronRequestIndOKDuplicateReview,
+            requesterNewPatronRequestIndOKBlankFormReview
         ]
     ];
 
@@ -1258,7 +1259,7 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterRetriedRequestList = [
-        code: ActionEventResultList.REQUESTER_RETRY_REQUEST,
+        code: ActionEventResultList.REQUESTER_RETRIED_REQUEST,
         description: 'Requester is re-trying evaluation of the request',
         model: StateModel.MODEL_REQUESTER,
         results: [
@@ -1267,7 +1268,7 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterCancelledBlankFormList = [
-        code: ActionEventResultList.REQUESTER_CANCEL_BLANK_FORM,
+        code: ActionEventResultList.REQUESTER_CANCELLED_BLANK_FORM,
         description: 'Blank form request is being cancelled',
         model: StateModel.MODEL_REQUESTER,
         results: [
@@ -1598,6 +1599,8 @@ public class ActionEventResultData {
         requesterValidateIndList,
         requesterApprovedDuplicate,
         requesterCancelledDuplicate,
+        requesterRetriedRequestList,
+        requesterCancelledBlankFormList,
 
         // Digital returnable requester lists
         digitalReturnableRequesterExpectToSupplyISO18626,
