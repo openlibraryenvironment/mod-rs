@@ -1,0 +1,6 @@
+{
+  "action": "requesterCancelDuplicate",
+  "actionParams": {
+    "reason": "duplicate_cencelled"
+  }
+}

@@ -13,7 +13,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
 /**
  * Action class that handles cancelling a request that has been marked as a duplicate
  */
-public class ActionPatronRequestCancelDuplicateService extends AbstractAction {
+public class ActionPatronRequestRequesterCancelDuplicateService extends AbstractAction {
 
     @Override
     String name() {

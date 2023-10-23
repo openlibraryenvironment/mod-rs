@@ -638,8 +638,10 @@ class RSLifecycleSpec extends TestBase {
         log.debug("Action json: ${jsonAction}");
         setHeaders([ 'X-Okapi-Tenant': actionTenant ]);
 
+        String actionUrl = "${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString();
+        log.debug("Posting to action url at $actionUrl");
         // Execute the action
-        def actionResponse = doPost("${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString(), jsonAction);
+        def actionResponse = doPost(actionUrl, jsonAction);
         return(actionResponse.toString());
     }
 
@@ -1213,11 +1215,23 @@ class DosomethingSimple {
 
        Thread.sleep(2000); // I hate doing this
 
-        def respTwo = doPost("${baseUrl}/rs/patronrequests".toString(), req_two_json);
+        String patronRequestTwoPost = "${baseUrl}/rs/patronrequests".toString();
+      log.debug("Posting duplicate Patron Request to $patronRequestTwoPost");
+        def respTwo = doPost(patronRequestTwoPost, req_two_json);
         log.debug("Created PatronRequest 2: RESP: ${respTwo} ID: ${respTwo?.id}");
 
       waitForRequestState(tenantId, 20000, requestPatronId + "_two",
               Status.PATRON_REQUEST_DUPLICATE_REVIEW);
+
+      String jsonPayload = new File("src/integration-test/resources/scenarios/requesterApproveDuplicate.json").text;
+
+      log.debug("jsonPayload: ${jsonPayload}");
+      String performActionURL = "${baseUrl}/rs/patronrequests/${respTwo.id}/performAction".toString();
+      log.debug("Posting to performAction at $performActionURL");
+      def actionResponse = doPost(performActionURL, jsonPayload);
+
+      waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+              Status.PATRON_REQUEST_VALIDATED);
 
 
       then: "Check values"
@@ -1229,6 +1243,84 @@ class DosomethingSimple {
 
 
     }
+
+    void "Test to see if we can cancel a duplicate request"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+        when: "Post new duplicate requests"
+        changeSettings(tenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 3 ]);
+
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]
+
+        def req_one_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_one",
+                tags: [ 'RS-DUPLICATE-TEST-1']
+        ];
+
+        def req_two_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                tags: [ 'RS-DUPLICATE-TEST-2']
+        ];
+
+        setHeaders(headers);
+
+        def respOne = doPost("${baseUrl}/rs/patronrequests".toString(), req_one_json);
+        log.debug("Created PatronRequest 1: RESP: ${respOne} ID: ${respOne?.id}");
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_one",
+                Status.PATRON_REQUEST_IDLE);
+
+        Thread.sleep(2000); // Booo
+
+        String patronRequestTwoPost = "${baseUrl}/rs/patronrequests".toString();
+        log.debug("Posting duplicate Patron Request to $patronRequestTwoPost");
+        def respTwo = doPost(patronRequestTwoPost, req_two_json);
+        log.debug("Created PatronRequest 2: RESP: ${respTwo} ID: ${respTwo?.id}");
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_DUPLICATE_REVIEW);
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterCancelDuplicate.json").text;
+
+        log.debug("jsonPayload: ${jsonPayload}");
+        String performActionURL = "${baseUrl}/rs/patronrequests/${respTwo.id}/performAction".toString();
+        log.debug("Posting to performAction at $performActionURL");
+        def actionResponse = doPost(performActionURL, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_CANCELLED);
+
+        then: "Check values"
+        assert true;
+
+        where:
+        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'Not My Problem'  | 'Brokit, C.U.'   | '4321-8765-1239-1234' | '6789-3241'       | 'ISIL:RST1'
+
+
+    }
+
 
     void "Test to see if blank form requests are properly handled" (
             String tenantId,
@@ -1272,6 +1364,5 @@ class DosomethingSimple {
 
 
     }
-
 
 }
