@@ -11,7 +11,6 @@ import static groovyx.net.http.HttpBuilder.configure
 public class OaipmhSharedIndexService implements SharedIndexActions {
 
   final String LENDABLE_SI = 'LOANABLE';
-  final String LENDABLE_RS = 'Will lend';
 
  /**
    * A shared index implementation based on the GetRecord OAI-PMH verb as used by the Reservoir SI
@@ -52,18 +51,6 @@ public class OaipmhSharedIndexService implements SharedIndexActions {
     }
     catch ( Exception e ) {
       log.error("Failure in shared index lookup", e);
-    }
-
-    // See if we have an app setting for lender of last resort
-    AppSetting last_resort_lenders_setting = AppSetting.findByKey('last_resort_lenders');
-    String last_resort_lenders = last_resort_lenders_setting?.value ?: last_resort_lenders_setting?.defValue;
-    if ( last_resort_lenders && ( last_resort_lenders.length() > 0 ) ) {
-      String[] additionals = last_resort_lenders.split(',');
-      additionals.each { al ->
-        if ( ( al != null ) && ( al.trim().length() > 0 ) ) {
-          result.add(new AvailabilityStatement(symbol:al.trim(), instanceIdentifier:null, copyIdentifier:null));
-        }
-      }
     }
 
     return result;
@@ -137,8 +124,8 @@ public class OaipmhSharedIndexService implements SharedIndexActions {
     cluster?.GetRecord?.record?.metadata?.record?.datafield?.findAll { it.'@tag' == cfg.tag && it.'@ind1' == cfg.ind1 && it.'@ind2' == cfg.ind2 }.each { field ->
       String localId = field?.subfield.find { it.'@code' == cfg.localIdSub }.text();
       String sym = field?.subfield.find { it.'@code' == cfg.symbolSub }.text();
-      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text() ?: LENDABLE_RS;
-      if (pol == LENDABLE_SI) pol = LENDABLE_RS;
+      String pol = field?.subfield.find { it.'@code' == cfg.policySub }.text() ?: AvailabilityStatement.LENDABLE_POLICY;
+      if (pol == LENDABLE_SI) pol = AvailabilityStatement.LENDABLE_POLICY;
 
       if (sym && localId) {
         // Do we already have an entry in the result for the given symbol?
@@ -152,9 +139,9 @@ public class OaipmhSharedIndexService implements SharedIndexActions {
                   copyIdentifier    : null])
         } else {
           log.debug("Located existing entry in result for ${sym} - not adding another");
-          if (existing?.illPolicy != LENDABLE_RS && pol == LENDABLE_RS) {
+          if (existing?.illPolicy != AvailabilityStatement.LENDABLE_POLICY && pol == AvailabilityStatement.LENDABLE_POLICY) {
             log.debug("Updating existing entry for ${sym} - found lendable copy");
-            existing.illPolicy = LENDABLE_RS;
+            existing.illPolicy = AvailabilityStatement.LENDABLE_POLICY;
           }
         }
       } else {

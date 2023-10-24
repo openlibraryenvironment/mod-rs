@@ -1320,4 +1320,51 @@ class DosomethingSimple {
 
 
     }
+
+    void "Ensure the lenders of last resort populate the rota"(
+        String tenantId,
+        String requestTitle,
+        String requestAuthor,
+        String requestSystemId,
+        String requestPatronId,
+        String requestSymbol,
+        String lastResort) {
+        when: "Post new request with last resort enabled"
+        changeSettings(tenantId, [ (SettingsData.SETTING_LAST_RESORT_LENDERS) : lastResort ]);
+
+        def headers = [
+            'X-Okapi-Tenant': tenantId,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]
+
+        def req_json = [
+            requestingInstitutionSymbol: requestSymbol,
+            title: requestTitle,
+            author: requestAuthor,
+            systemInstanceIdentifier: requestSystemId,
+            patronIdentifier: requestPatronId,
+            isRequester: true,
+            patronReference: requestPatronId + "_one",
+            tags: [ 'RS-LAST_RESORT' ]
+        ];
+
+        setHeaders(headers);
+
+        def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json);
+        log.debug("Created PatronRequest 1: RESP: ${resp} ID: ${resp?.id}");
+
+        waitForRequestState(tenantId, 20000, requestPatronId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        def fresh = doGet("${baseUrl}rs/patronrequests/${resp.id}");
+        def lastResorts = lastResort.split(',');
+
+        then: "Ensure all last resort lenders added to the rota"
+        assert (fresh.rota.findAll {it?.directoryId in lastResort.split(',')}).size() == lastResort.split(',').size()
+
+        where:
+        tenantId    | requestTitle              | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | lastResort
+        'RSInstOne' | 'This Is My Last Resort'  | 'Brokit, C.U.'| '4321-8765-1239-1234' | '1717-1717'       | 'ISIL:RST1'   | 'TLA:SNAFU,OMG:SCUBA'
+    }
 }

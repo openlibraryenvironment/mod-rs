@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel.events;
 
+import com.k_int.web.toolkit.settings.AppSetting;
+import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
 import org.olf.rs.RequestRouterService;
@@ -53,6 +55,24 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
 
             List<RankedSupplier> possibleSuppliers = selectedRouter.findMoreSuppliers(request.getDescriptiveMetadata(), []);
 
+            // See if we have an app setting for lender of last resort
+            AppSetting last_resort_lenders_setting = AppSetting.findByKey('last_resort_lenders');
+            String last_resort_lenders = last_resort_lenders_setting?.value ?: last_resort_lenders_setting?.defValue;
+            if ( last_resort_lenders && ( last_resort_lenders.length() > 0 ) ) {
+                String[] additionals = last_resort_lenders.split(',');
+                additionals.each { al ->
+                    if ( ( al != null ) && ( al.trim().length() > 0 ) ) {
+                        possibleSuppliers.add(new RankedSupplier(
+                            supplier_symbol: al.trim(),
+                            instance_identifier: null,
+                            copy_identifier: null,
+                            ill_policy: AvailabilityStatement.LENDABLE_POLICY
+                        ));
+                    }
+                }
+            }
+
+
             log.debug("Created ranked rota: ${possibleSuppliers}");
 
             if (possibleSuppliers.size() > 0) {
@@ -62,7 +82,7 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
                 possibleSuppliers?.each { rankedSupplier  ->
                     if (rankedSupplier .supplier_symbol != null) {
                         operationData.candidates.add([symbol:rankedSupplier .supplier_symbol, message:'Added']);
-                        if (rankedSupplier .ill_policy == 'Will lend') {
+                        if (rankedSupplier.ill_policy == AvailabilityStatement.LENDABLE_POLICY) {
                             log.debug("Adding to rota: ${rankedSupplier }");
 
                             // Pull back any data we need from the shared index in order to sort the list of candidates
@@ -85,11 +105,10 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
                     }
                 }
 
-                // Procesing
+                // Processing
                 eventResultDetails.qualifier = null;
                 eventResultDetails.auditMessage = 'Ratio-Ranked lending string calculated by ' + selectedRouter.getRouterInfo()?.description;
             } else {
-                // ToDo: Ethan: if LastResort app setting is set, add lenders to the request.
                 log.error("Unable to identify any suppliers for patron request ID ${eventData.payload.id}")
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
                 eventResultDetails.auditMessage =  'Unable to locate lenders';
