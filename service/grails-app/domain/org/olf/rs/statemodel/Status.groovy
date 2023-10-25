@@ -134,16 +134,12 @@ class Status implements MultiTenant<Status> {
       s.terminalSequence = terminalSequence;
 
       // Reflect new tag values, removing tags if none provided
+      s.tags.clear();
       if ( tags != null ) {
-          s.tags = [];
           tags.each { tag ->
-              if ( s.tags.find { it.value == tag } == null ) {
-                  def tag_obj = Tag.findByNormValue(Tag.normalizeValue(tag)) ?: new Tag(value:tag);
-                  s.tags.add(tag_obj);
-              }
+              def tag_obj = Tag.findByNormValue(Tag.normalizeValue(tag)) ?: new Tag(value:tag);
+              s.addToTags(tag_obj);
           }
-      } else {
-          s.tags = null;
       }
 
       // Save the status
