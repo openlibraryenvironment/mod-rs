@@ -59,18 +59,6 @@ public class FolioSharedIndexService implements SharedIndexActions {
       log.error("Graphql failed",e);
     }
 
-    // See if we have an app setting for lender of last resort
-    AppSetting last_resort_lenders_setting = AppSetting.findByKey('last_resort_lenders');
-    String last_resort_lenders = last_resort_lenders_setting?.value ?: last_resort_lenders_setting?.defValue;
-    if ( last_resort_lenders && ( last_resort_lenders.length() > 0 ) ) {
-      String[] additionals = last_resort_lenders.split(',');
-      additionals.each { al ->
-        if ( ( al != null ) && ( al.trim().length() > 0 ) ) {
-          result.add(new AvailabilityStatement(symbol:al.trim(), instanceIdentifier:null, copyIdentifier:null));
-        }
-      }
-    }
-
     return result;
   }
 

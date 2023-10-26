@@ -2,6 +2,7 @@ package org.olf.rs.sharedindex
 
 import grails.testing.services.ServiceUnitTest
 import groovy.util.logging.Slf4j
+import org.olf.rs.AvailabilityStatement
 import org.olf.rs.sharedindex.OaipmhSharedIndexService
 import spock.lang.Specification
 
@@ -156,8 +157,8 @@ class OaipmhSharedIndexServiceSpec extends Specification implements ServiceUnitT
 
     then:
     log.info("parsed as ${result}");
-    result.find { it.symbol == 'SYM-BOL' }.illPolicy == service.LENDABLE_RS;
-    result.find { it.symbol == 'OTH-ER' }.illPolicy == service.LENDABLE_RS;
+    result.find { it.symbol == 'SYM-BOL' }.illPolicy == AvailabilityStatement.LENDABLE_POLICY;
+    result.find { it.symbol == 'OTH-ER' }.illPolicy == AvailabilityStatement.LENDABLE_POLICY;
     result.find { it.symbol == 'THI-RD' }.illPolicy == 'UNLOANABLE';
     result.find { it.symbol == 'THI-RD' }.instanceIdentifier == '123456';
   }

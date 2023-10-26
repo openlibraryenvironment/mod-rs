@@ -1,5 +1,6 @@
 package org.olf.rs.routing;
 
+import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.routing.RequestRouter;
 import org.olf.rs.routing.RankedSupplier;
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -47,7 +48,7 @@ public class StaticRouterService implements RequestRouter {
           result.add(new RankedSupplier(supplier_symbol:symbolString,
                                         copy_identifier:'', 
                                         instance_identifier:'',
-                                        ill_policy:'Will lend',
+                                        ill_policy: AvailabilityStatement.LENDABLE_POLICY,
                                         rank:0, 
                                         rankReason:'static rank'));
 

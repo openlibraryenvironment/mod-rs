@@ -4,11 +4,6 @@ import com.k_int.web.toolkit.tags.Tag;
 
 import grails.gorm.MultiTenant;
 
-/**
- * PatronRequest - Instances of this class represent an occurrence of a patron (Researcher, Undergrad, Faculty)
- * requesting that reshare locate and deliver a resource from a remote partner.
- */
-
 class Status implements MultiTenant<Status> {
 
   public static final String PATRON_REQUEST_AWAITING_RETURN_SHIPPING    = "REQ_AWAITING_RETURN_SHIPPING";
@@ -115,8 +110,8 @@ class Status implements MultiTenant<Status> {
                      tags cascade: 'save-update'
     }
 
-    // Assert is a helper method that helps us ensure refdata is up to date - create any missing entries, update any ones
-    // where the tags have changed and return the located value
+    // A helper method that helps us ensure Status instances persisted in code are up to date
+    // and returns the updated object
     public static Status ensure(
         String code,
         StatusStage stage,
@@ -129,28 +124,24 @@ class Status implements MultiTenant<Status> {
       Status s = Status.findByCode(code)
       if ( s == null ) {
           s = new Status(code:code, tags: tags);
-      } else {
-          // We already know about this status code - just check if we need to install any new tags
-          if ( tags != null ) {
-              if ( s.tags == null ) {
-                  s.tags = []
-              }
-              tags.each { tag ->
-                  if ( s.tags.find { it.value == tag } == null ) {
-                      def tag_obj = Tag.findByNormValue(Tag.normalizeValue(tag)) ?: new Tag(value:tag);
-                      s.tags.add(tag_obj);
-                  }
-              }
-          }
       }
 
-      // Just update the the fields in case they have changed
+      // Update the the fields in case they have changed
       s.presSeq = presSeq;
       s.visible = visible;
       s.needsAttention = needsAttention;
       s.terminal = terminal;
       s.stage = stage;
       s.terminalSequence = terminalSequence;
+
+      // Reflect new tag values, removing tags if none provided
+      s.tags.clear();
+      if ( tags != null ) {
+          tags.each { tag ->
+              def tag_obj = Tag.findByNormValue(Tag.normalizeValue(tag)) ?: new Tag(value:tag);
+              s.addToTags(tag_obj);
+          }
+      }
 
       // Save the status
 	  s.save(flush:true, failOnError:true);
