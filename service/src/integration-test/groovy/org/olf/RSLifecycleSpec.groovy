@@ -160,7 +160,7 @@ class RSLifecycleSpec extends TestBase {
       if ( required_state != request_state ) {
         // Request not found OR not yet in required state
         log.debug("Not yet found.. sleeping");
-        Thread.sleep(1000);
+        Thread.sleep(200);
       }
       elapsed = System.currentTimeMillis() - start_time
     }
@@ -1354,6 +1354,16 @@ class DosomethingSimple {
             waitForRequestState(tenantId, 20000, requestPatronId + "_one",
                 Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
 
+            String jsonPayload = new File("src/integration-test/resources/scenarios/requesterCancel.json").text;
+        log.debug("cancel request payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterCencel payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_one",
+                Status.PATRON_REQUEST_CANCELLED);
+
             then: "Whatever"
                 assert true;
 
@@ -1361,6 +1371,75 @@ class DosomethingSimple {
 
                 tenantId    | requestTitle          | requestAuthor | requestPatronId   | requestSymbol
                 'RSInstOne' | 'Missing References'  | 'Dunno, Ivan' | '9977-2244'       | 'ISIL:RST1'
+
+
+    }
+
+    void "Attempt to retry a blank request"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
+
+        def request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                tags: [ 'RS-BLANK-FORM-TEST-2']
+        ];
+
+        setHeaders(headers);
+
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+        def updated_request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                systemInstanceIdentifier: requestSystemId,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                tags: [ 'RS-BLANK-FORM-TEST-2']
+        ];
+
+        def put_response = doPut("${baseUrl}/rs/patronrequests/${response?.id}".toString(), updated_request_json);
+        log.debug("got response from put request ${put_response}");
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterRetryRequest.json").text;
+        log.debug("retryRequest payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_VALIDATED);
+
+
+        then: "Whatever"
+        assert true;
+
+        where:
+
+        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'Believe in Second Chances'  | 'Ageen, Trey' | '5533-2233-6654-9191' | '8877-6644'       | 'ISIL:RST1'
 
 
     }
