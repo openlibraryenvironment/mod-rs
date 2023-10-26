@@ -100,10 +100,10 @@ class TestBase extends HttpSpec {
         log.debug("Number of settings found: " + resp.size() + ", hidden: " + hidden + ", results: " + resp.toString());
         if ( changesNeeded != null ) {
             resp.each { setting ->
-                // log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
+                //log.debug("Considering updating setting ${setting.id}, ${setting.section} ${setting.key} (currently = ${setting.value})");
                 if ( changesNeeded.containsKey(setting.key) ) {
                     def new_value = changesNeeded[setting.key];
-                    //log.debug("Post update to ${setting} ==> ${new_value}");
+                    log.debug("Post update to tenant ${tenantId} setting ${setting} ==> ${new_value}");
                     setting.value = new_value;
                     def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
                     log.debug("Result of settings update: ${update_setting_result}");
