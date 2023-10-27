@@ -51,6 +51,8 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, 'The requester has cancelled a duplicate request',
                 true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_DUPLICATE.capitalize(),
                 ActionEventResultList.REQUESTER_CANCEL_DUPLICATE);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_REQUEST, 'Retry a request that previously could not go through',
+                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_REQUEST.capitalize(), ActionEventResultList.REQUESTER_RETRIED_REQUEST);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_LOCAL.capitalize(), ActionEventResultList.REQUESTER_CANCEL_LOCAL);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_EDIT, 'Edits a request', true, 'PatronRequestEdit', ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_FILL_LOCALLY.capitalize(), ActionEventResultList.REQUESTER_FILLED_LOCALLY);

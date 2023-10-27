@@ -49,6 +49,7 @@ public class Actions {
 	static public final String ACTION_REQUESTER_REQUESTER_CANCEL             	 = "requesterCancel";
 	static public final String ACTION_REQUESTER_APPROVE_DUPLICATE				 = "requesterApproveDuplicate";
 	static public final String ACTION_REQUESTER_CANCEL_DUPLICATE                 = "requesterCancelDuplicate";
+	static public final String ACTION_REQUESTER_RETRY_REQUEST					 = "requesterRetryRequest";
 	static public final String ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED        = "requesterMarkEndOfRotaReviewed";
 	static public final String ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN     	 = "requesterManualCheckIn";
 	static public final String ACTION_REQUESTER_REQUESTER_RECEIVED           	 = "requesterReceived";

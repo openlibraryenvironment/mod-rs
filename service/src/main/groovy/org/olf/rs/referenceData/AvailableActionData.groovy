@@ -218,6 +218,12 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
             Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
 
+        // REQ_BLANK_FORM_REVIEW
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
+            Actions.ACTION_REQUESTER_RETRY_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
+            Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+
         // REQ_FILLED_LOCALLY OR "Filled locally"
 
         // REQ_BORROWER_RETURNED

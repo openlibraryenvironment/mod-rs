@@ -57,90 +57,98 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         if (request != null) {
-            // Generate a human readable ID to use
-            request.hrid = generateHrid()
-            log.debug("set request.hrid to ${request.hrid}");
 
-            // if we do not have a service type set it to loan
-            if (request.serviceType == null) {
-                request.serviceType = ProtocolReferenceDataValue.lookupServiceType(ProtocolReferenceDataValue.SERVICE_TYPE_LOAN);
-            }
+            if (!hasClusterID(request)) {
+                log.warn("No cluster id set for request ${request.id}");
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_BLANK_FORM_REVIEW;
+                eventResultDetails.auditMessage = 'Blank Request Form, needs review';
+            } else {
+                // Generate a human readable ID to use
+                request.hrid = generateHrid()
+                log.debug("set request.hrid to ${request.hrid}");
 
-            // If we were supplied a pickup location, attempt to resolve it here
-            pickupLocationService.check(request);
 
-            if (request.requestingInstitutionSymbol != null) {
-                // We need to validate the requesting location - and check that we can act as requester for that symbol
-                Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
-                if (s != null) {
-                    // We do this separately so that an invalid patron does not stop information being appended to the request
-                    request.resolvedRequester = s;
+                // if we do not have a service type set it to loan
+                if (request.serviceType == null) {
+                    request.serviceType = ProtocolReferenceDataValue.lookupServiceType(ProtocolReferenceDataValue.SERVICE_TYPE_LOAN);
                 }
 
-                Map lookupPatron = reshareActionService.lookupPatron(request, null);
-                if (lookupPatron.callSuccess) {
-                    boolean patronValid = lookupPatron.patronValid;
+                // If we were supplied a pickup location, attempt to resolve it here
+                pickupLocationService.check(request);
 
-                    // If s != null and patronValid == true then the request has passed validation
-                    if (s != null && patronValid) {
-                        log.debug("Got request ${request}");
-                    } else if (s == null) {
-                        // An unknown requesting institution symbol is a bigger deal than an invalid patron
-                        request.needsAttention = true;
-                        log.warn("Unkown requesting institution symbol : ${request.requestingInstitutionSymbol}");
-                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
-                        eventResultDetails.auditMessage = 'Unknown Requesting Institution Symbol: ' + request.requestingInstitutionSymbol;
+                if (request.requestingInstitutionSymbol != null) {
+                    // We need to validate the requesting location - and check that we can act as requester for that symbol
+                    Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+                    if (s != null) {
+                        // We do this separately so that an invalid patron does not stop information being appended to the request
+                        request.resolvedRequester = s;
+                    }
+
+                    Map lookupPatron = reshareActionService.lookupPatron(request, null);
+                    if (lookupPatron.callSuccess) {
+                        boolean patronValid = lookupPatron.patronValid;
+
+                        // If s != null and patronValid == true then the request has passed validation
+                        if (s != null && patronValid) {
+                            log.debug("Got request ${request}");
+                        } else if (s == null) {
+                            // An unknown requesting institution symbol is a bigger deal than an invalid patron
+                            request.needsAttention = true;
+                            log.warn("Unkown requesting institution symbol : ${request.requestingInstitutionSymbol}");
+                            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
+                            eventResultDetails.auditMessage = 'Unknown Requesting Institution Symbol: ' + request.requestingInstitutionSymbol;
+                        } else {
+                            // If we're here then the requesting institution symbol was fine but the patron is invalid
+                            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
+                            String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
+                            String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
+                            eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString();
+                            request.needsAttention = true;
+                        }
                     } else {
-                        // If we're here then the requesting institution symbol was fine but the patron is invalid
-                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
-                        String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
-                        String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
-                        eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString();
+                        // unexpected error in Host LMS call
                         request.needsAttention = true;
+                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
+                        eventResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + lookupPatron?.problems;
                     }
                 } else {
-                    // unexpected error in Host LMS call
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
                     request.needsAttention = true;
-                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
-                    eventResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + lookupPatron?.problems;
+                    eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
                 }
-            } else {
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
-                request.needsAttention = true;
-                eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
-            }
 
-            // This is a bit dirty - some clients continue to send request.systemInstanceIdentifier rather than request.bibliographicRecordId
-            // If we find we are missing a bib record id but do have a system instance identifier, copy it over. Needs sorting properly post PALCI go live
-            if ((request.bibliographicRecordId == null) && (request.systemInstanceIdentifier != null)) {
-                request.bibliographicRecordId = request.systemInstanceIdentifier
-            }
+                // This is a bit dirty - some clients continue to send request.systemInstanceIdentifier rather than request.bibliographicRecordId
+                // If we find we are missing a bib record id but do have a system instance identifier, copy it over. Needs sorting properly post PALCI go live
+                if ((request.bibliographicRecordId == null) && (request.systemInstanceIdentifier != null)) {
+                    request.bibliographicRecordId = request.systemInstanceIdentifier
+                }
 
-            if ((request.bibliographicRecordId != null) && (request.bibliographicRecordId.length() > 0)) {
-                log.debug('calling fetchSharedIndexRecords');
-                List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: request.bibliographicRecordId]);
-                if (bibRecords?.size() == 1) {
-                    request.bibRecord = bibRecords[0];
-                    // If our OCLC field isn't set, let's try to set it from our bibrecord
-                    if (!request.oclcNumber) {
-                        try {
-                            JsonSlurper slurper = new JsonSlurper();
-                            Object bibJson = slurper.parseText(bibRecords[0]);
-                            for (identifier in bibJson.identifiers) {
-                                String oclcId = getOCLCId(identifier.value);
-                                if (oclcId) {
-                                    log.debug("Setting request oclcNumber to ${oclcId}");
-                                    request.oclcNumber = oclcId;
-                                    break;
+                if ((request.bibliographicRecordId != null) && (request.bibliographicRecordId.length() > 0)) {
+                    log.debug('calling fetchSharedIndexRecords');
+                    List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: request.bibliographicRecordId]);
+                    if (bibRecords?.size() == 1) {
+                        request.bibRecord = bibRecords[0];
+                        // If our OCLC field isn't set, let's try to set it from our bibrecord
+                        if (!request.oclcNumber) {
+                            try {
+                                JsonSlurper slurper = new JsonSlurper();
+                                Object bibJson = slurper.parseText(bibRecords[0]);
+                                for (identifier in bibJson.identifiers) {
+                                    String oclcId = getOCLCId(identifier.value);
+                                    if (oclcId) {
+                                        log.debug("Setting request oclcNumber to ${oclcId}");
+                                        request.oclcNumber = oclcId;
+                                        break;
+                                    }
                                 }
+                            } catch (Exception e) {
+                                log.warn("Unable to parse bib json: ${e}");
                             }
-                        } catch (Exception e) {
-                            log.warn("Unable to parse bib json: ${e}");
                         }
                     }
+                } else {
+                    log.debug("No request.bibliographicRecordId : ${request.bibliographicRecordId}");
                 }
-            } else {
-                log.debug("No request.bibliographicRecordId : ${request.bibliographicRecordId}");
             }
         } else {
             log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
@@ -216,5 +224,12 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             }
         }
         return Boolean.FALSE;
+    }
+
+    private Boolean hasClusterID(PatronRequest request) {
+        if (request.systemInstanceIdentifier != null) {
+            return true;
+        }
+        return false;
     }
 }
