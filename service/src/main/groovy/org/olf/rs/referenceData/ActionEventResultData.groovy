@@ -459,6 +459,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterNewPatronRequestRetry = [
+        code: 'requesterNewPatronRequestRetry',
+        description: 'Retry a patron request as if new',
+        result: true,
+        status: Status.PATRON_REQUEST_IDLE,
+        qualifer: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterNewPatronRequestIndOK = [
         code: 'requesterNewPatronRequestIndOK',
         description: 'Event triggered by a new patron request',
@@ -1263,7 +1273,7 @@ public class ActionEventResultData {
         description: 'Requester is re-trying evaluation of the request',
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterNewPatronRequestIndOK
+            requesterNewPatronRequestRetry
         ]
     ];
 

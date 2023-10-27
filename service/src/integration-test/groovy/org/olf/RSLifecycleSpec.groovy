@@ -1421,6 +1421,7 @@ class DosomethingSimple {
 
     }
 
+
     void "Attempt to retry a blank request"(
             String tenantId,
             String requestTitle,
@@ -1476,7 +1477,7 @@ class DosomethingSimple {
         def actionResponse = doPost(performActionUrl, jsonPayload);
 
         waitForRequestState(tenantId, 20000, requestPatronId + "_two",
-                Status.PATRON_REQUEST_VALIDATED);
+                Status.PATRON_REQUEST_IDLE);
 
 
         then: "Whatever"
@@ -1489,5 +1490,7 @@ class DosomethingSimple {
 
 
     }
+
+
 
 }
