@@ -1422,7 +1422,9 @@ class DosomethingSimple {
     }
 
 
-    void "Attempt to retry a blank request"(
+
+    void "Attempt to retry a blank request after fixing"(
+
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -1463,7 +1465,9 @@ class DosomethingSimple {
                 patronIdentifier: requestPatronId,
                 isRequester: true,
                 patronReference: requestPatronId + "_two",
-                tags: [ 'RS-BLANK-FORM-TEST-2']
+
+                tags: [ 'RS-BLANK-FORM-TEST-3']
+
         ];
 
         def put_response = doPut("${baseUrl}/rs/patronrequests/${response?.id}".toString(), updated_request_json);
@@ -1490,6 +1494,64 @@ class DosomethingSimple {
 
 
     }
+
+
+    void "Attempt to retry a blank request without fixing"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
+
+        def request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_three",
+                tags: [ 'RS-BLANK-FORM-TEST-2']
+        ];
+
+        setHeaders(headers);
+
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_three",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterRetryRequest.json").text;
+        log.debug("retryRequest payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_three",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+
+        then: "Whatever"
+        assert true;
+
+        where:
+
+        tenantId    | requestTitle      | requestAuthor | requestPatronId   | requestSymbol
+        'RSInstOne' | 'How to be Lazy'  | 'Aroon, Lion' | '8577-6554'       | 'ISIL:RST1'
+
+
+    }
+
+
 
 
 
