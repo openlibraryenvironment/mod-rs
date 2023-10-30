@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.actions
 
+
 import grails.gorm.multitenancy.Tenants
 import org.olf.rs.EventPublicationService
 import org.olf.rs.PatronRequest
@@ -9,11 +10,13 @@ import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.Events;
 
+
 /**
  * Action to send a request back to the "new request" state to be re-tried
  */
 
 public class ActionPatronRequestRequesterRetryRequestService extends AbstractAction {
+
 
     EventPublicationService eventPublicationService;
 
@@ -25,6 +28,7 @@ public class ActionPatronRequestRequesterRetryRequestService extends AbstractAct
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         actionResultDetails.responseResult.status = true;
+
         String tenant = Tenants.currentId();
 
         //Send a new patron request event
@@ -41,6 +45,7 @@ public class ActionPatronRequestRequesterRetryRequestService extends AbstractAct
                         ]
                 ]
         );
+
 
         return(actionResultDetails);
     }

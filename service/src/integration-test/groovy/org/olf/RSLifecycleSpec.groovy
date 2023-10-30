@@ -1422,7 +1422,9 @@ class DosomethingSimple {
     }
 
 
+
     void "Attempt to retry a blank request after fixing"(
+
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -1463,7 +1465,9 @@ class DosomethingSimple {
                 patronIdentifier: requestPatronId,
                 isRequester: true,
                 patronReference: requestPatronId + "_two",
+
                 tags: [ 'RS-BLANK-FORM-TEST-3']
+
         ];
 
         def put_response = doPut("${baseUrl}/rs/patronrequests/${response?.id}".toString(), updated_request_json);
@@ -1490,6 +1494,7 @@ class DosomethingSimple {
 
 
     }
+
 
     void "Attempt to retry a blank request without fixing"(
             String tenantId,
@@ -1545,6 +1550,7 @@ class DosomethingSimple {
 
 
     }
+
 
 
 
