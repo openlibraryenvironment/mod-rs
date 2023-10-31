@@ -2,7 +2,7 @@ import groovy.transform.*
 import org.olf.rs.PatronRequest;
 
 @Field PatronRequest patronRequest
-final boolean fullRecord = params.get('_view', (actionName == 'index' ? 'brief' : 'full')) == 'full'
+final boolean fullRecord = (params.get('_view', (actionName == 'index' ? 'brief' : 'full')) == 'full') || (params.fullRecord == "true")
 
 final def toExpand = fullRecord ? [
   // Full expanded set...
@@ -63,8 +63,9 @@ final def toExclude = fullRecord ? [
 
 json g.render(patronRequest, [expand: toExpand,
                               excludes: toExclude]) {
-  // Required for the Update tab
-  validActions patronRequest.getValidActions()
+  if (fullRecord) {
+    validActions patronRequest.getValidActions()
+  }
 
   // Required for list display  
   volumes g.render(patronRequest.volumes?.sort {a,b ->
