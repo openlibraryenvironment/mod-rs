@@ -176,6 +176,15 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 }
 ''',
             dataType = "string"
+        ),
+        @ApiImplicitParam(
+            name = "fullRecord",
+            paramType = "query",
+            required = false,
+            allowMultiple = false,
+            value = "Return fully expanded record, even in list view",
+            defaultValue = "false",
+            dataType = "boolean"
         )
     ])
   	def bulkAction() {

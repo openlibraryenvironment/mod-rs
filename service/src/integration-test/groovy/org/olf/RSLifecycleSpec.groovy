@@ -394,6 +394,21 @@ class RSLifecycleSpec extends TestBase {
       'RSInstOne' | 'RSInstThree' | 'Brain of the firm' | 'Beer, Stafford' | '1234-5678-9123-4566'      | '1234-5678' | 'RS-LIFECYCLE-TEST-00001' | 'ISIL:RST1'       | 'ISIL:RST3'
   }
 
+  void "Confirm fullRecord flag expands records in request list"(String tenant_id) {
+    when:"Fetch requests"
+      setHeaders([ 'X-Okapi-Tenant': tenant_id ]);
+      def resp = doGet("${baseUrl}rs/patronrequests",
+        [
+          'max':'1',
+          'fullRecord':'true'
+        ]);
+    then:
+      assert resp?.size() == 1 && resp[0].containsKey('rota') && resp[0].containsKey('audit');
+    where:
+      tenant_id | _
+      'RSInstOne' | _
+  }
+
   /**
    * Important note for this test case:: peer_tenant is set to RSInstThree and this works because RSInstOne has a static rota set up
    * so that RSInstThree is the first option for sending a request to. Any changes in the test data will likely break this test. Watch out
