@@ -64,7 +64,9 @@ public class ActionPatronRequestEditService extends AbstractAction {
         // 14. Pickup location
         StringBuffer auditMessage = new StringBuffer("Record has been edited:");
         StringBuffer noteToSend = new StringBuffer();
+        log.debug("Updating request ${request.id} with parameters ${parameters}");
         updateAbleFields.each() { fieldDetails ->
+            log.debug("Updating field ${fieldDetails.field} in request ${request.id}");
             // Update the field
             if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
                 // It has changed
@@ -84,7 +86,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         // If anything has changed we may need to send a message
         if (noteToSend.length() > 0) {
             // We need to inform the supplier, but only if it is active and not shipped
-            if ((request.state.stage == StatusStage.ACTIVE) || (request.state.stage == StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER)) {
+            if ((request.state?.stage == StatusStage.ACTIVE) || (request.state?.stage == StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER)) {
                 // It is active and not been shipped
                 reshareActionService.sendMessage(request, [ note : noteToSend.toString() ], actionResultDetails);
             }
