@@ -42,7 +42,7 @@ public class ActionService {
                     result =  executeAction(patronRequest, action, parameters);
                 }
             } catch (Exception e) {
-                log.error("Excption thrown while trying to execute action " + action + " on request " + patronRequestId, e);
+                log.error("Exception thrown while trying to execute action ${action} on request ${patronRequestId}: ${e?.getLocalizedMessage()}", e);
                 result.actionResult = ActionResult.INVALID_PARAMETERS;
                 result.message = 'System error occured while trying to process request ' + patronRequestId;
             }
