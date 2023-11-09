@@ -530,6 +530,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterNewPatronRequestIndOverLimit = [
+      code: 'requesterNewPatronRequestIndOverLimit',
+      description: 'New request exceeds request limit for this patron',
+      result: true,
+      status: Status.PATRON_REQUEST_OVER_LIMIT,
+      qualifier: ActionEventResultQualifier.QUALIFIER_OVER_LIMIT,
+      saveRestoreState: null,
+      nextActionEvent: null
+    ];
+
     private static Map requesterValidateIndIndOK = [
         code: 'requesterValidateIndIndOK',
         description: 'Event triggered by a status change to Validate',
@@ -1190,7 +1200,8 @@ public class ActionEventResultData {
             requesterNewPatronRequestIndOKinvalidPatron,
             requesterNewPatronRequestIndOKhostLMSCallFailed,
             requesterNewPatronRequestIndOKDuplicateReview,
-            requesterNewPatronRequestIndOKBlankFormReview
+            requesterNewPatronRequestIndOKBlankFormReview,
+            requesterNewPatronRequestIndOverLimit
         ]
     ];
 
