@@ -108,9 +108,11 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                     patronNoticeService.triggerNotices(request,  RefdataValue.lookupOrCreate('noticeTriggers', RefdataValueData.NOTICE_TRIGGER_OVER_LIMIT));
 
                 } else if (isPossibleDuplicate(request)) {
+                    request.needsAttention = true;
                     log.warn("Request ${request.hrid} appears to be a duplicate (patronReference ${request.patronReference})");
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DUPLICATE_REVIEW;
                 } else if (!hasClusterID(request)) {
+                    request.needsAttention = true;
                     log.warn("No cluster id set for request ${request.id}");
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_BLANK_FORM_REVIEW;
                     eventResultDetails.auditMessage = 'Blank Request Form, needs review';
