@@ -181,6 +181,12 @@ class RSLifecycleSpec extends TestBase {
     return response;
   }
 
+  private String randomCrap(int length) {
+      String source = (('A'..'Z') + ('a'..'z')).join();
+      Random rand = new Random();
+      return (1..length).collect { source[rand.nextInt(source.length())]}.join();
+  }
+
   void "Attempt to delete any old tenants"(tenantid, name) {
     when:"We post a delete request"
       boolean result = deleteTenant(tenantid, name);
@@ -1566,8 +1572,60 @@ class DosomethingSimple {
 
     }
 
+    void "Attempt a request when we're over limit"(
+            String tenantId,
+            String requestPatronId,
+            String requestSystemId,
+            String requestSymbol,
+            int requestLimit) {
+        when: "Post requests over limit"
 
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
 
+        setHeaders(headers);
 
+        for(int i=0 ; i < requestLimit ; i++) {
+            def req = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: randomCrap(25),
+                author: randomCrap(20),
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_" + i
+            ];
+            doPost("${baseUrl}/rs/patronrequests".toString(), req);
+        }
+
+        changeSettings(tenantId, [ (SettingsData.SETTING_MAX_REQUESTS) : requestLimit ]);
+
+        def over_limit_req = [
+            requestingInstitutionSymbol: requestSymbol,
+            title: randomCrap(25),
+            author: randomCrap(20),
+            systemInstanceIdentifier: requestSystemId,
+            patronIdentifier: requestPatronId,
+            isRequester: true,
+            patronReference: requestPatronId + "_over_limit"
+        ];
+
+        doPost("${baseUrl}/rs/patronrequests".toString(), over_limit_req);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_over_limit",
+                Status.PATRON_REQUEST_IDLE);
+
+        then:
+        assert true;
+
+        where:
+        tenantId    | requestPatronId | requestSystemId       | requestSymbol | requestLimit
+        'RSInstOne' | '4512-9034'     | '2199-7171-9343-6532' | 'ISIL:RST1'   | 3
+
+    }
 
 }

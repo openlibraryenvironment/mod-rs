@@ -88,6 +88,7 @@ public class SettingsData {
     public static final String SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID = 'default_institutional_patron_id';
     public static final String SETTING_DEFAULT_REQUEST_SYMBOL          = 'default_request_symbol';
     public static final String SETTING_LAST_RESORT_LENDERS             = 'last_resort_lenders';
+    public static final String SETTING_MAX_REQUESTS                    = 'max_requests';
     public static final String SETTING_REQUEST_ID_PREFIX               = 'request_id_prefix';
 
     // Settings for the sharedIndex section
@@ -233,6 +234,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_REQUEST_ID_PREFIX, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_REQUEST_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_LAST_RESORT_LENDERS, SECTION_REQUESTS, SETTING_TYPE_STRING, null, '');
+            ensureAppSetting(SETTING_MAX_REQUESTS, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID, SECTION_REQUESTS, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO).value);

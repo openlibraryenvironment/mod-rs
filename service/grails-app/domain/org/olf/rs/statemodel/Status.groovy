@@ -25,6 +25,7 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_INVALID_PATRON              = "REQ_INVALID_PATRON";
   public static final String PATRON_REQUEST_LOCAL_REVIEW                = "REQ_LOCAL_REVIEW";
   public static final String PATRON_REQUEST_OVERDUE                     = "REQ_OVERDUE";
+  public static final String PATRON_REQUEST_OVER_LIMIT                  = "REQ_OVER_LIMIT";
   public static final String PATRON_REQUEST_PENDING                     = "REQ_PENDING";
   public static final String PATRON_REQUEST_RECALLED                    = "REQ_RECALLED";
   public static final String PATRON_REQUEST_REQUEST_COMPLETE            = "REQ_REQUEST_COMPLETE";

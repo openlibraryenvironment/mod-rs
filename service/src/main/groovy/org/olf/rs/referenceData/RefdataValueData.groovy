@@ -105,6 +105,7 @@ public class RefdataValueData {
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
     public static final String NOTICE_TRIGGER_LOANED_DIGITALLY               = 'Loaned digitally';
+    public static final String NOTICE_TRIGGER_OVER_LIMIT                     = 'Over limit';
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION          = 'New Host LMS Location';
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION = 'New Host LMS Shelving Location';
     public static final String NOTICE_TRIGGER_NEW_PATRON_PROFILE             = 'New patron profile';
@@ -267,6 +268,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_REQUEST);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_END_OF_ROTA);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_LOANED_DIGITALLY);
+            RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_OVER_LIMIT);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_REQUEST_CANCELLED);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_PATRON_PROFILE);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION);
