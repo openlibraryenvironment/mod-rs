@@ -1205,9 +1205,9 @@ public class ActionEventResultData {
         ]
     ];
 
-    private static Map requesterApprovedDuplicate = [
-        code: ActionEventResultList.REQUESTER_APPROVE_DUPLICATE,
-        description: 'Requester has approved the duplicate request',
+    private static Map requesterForcedValidate = [
+        code: ActionEventResultList.REQUESTER_FORCE_VALIDATE,
+        description: 'Requester has forced progression to validated status',
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterNewPatronRequestIndOK
@@ -1618,7 +1618,7 @@ public class ActionEventResultData {
         requesterShippedReturnList,
         requesterSendToNextLocationList,
         requesterValidateIndList,
-        requesterApprovedDuplicate,
+        requesterForcedValidate,
         requesterCancelledDuplicate,
         requesterRetriedRequestList,
         requesterCancelledBlankFormList,
