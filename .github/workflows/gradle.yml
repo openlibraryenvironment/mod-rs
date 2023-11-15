@@ -43,7 +43,7 @@ jobs:
           echo "BUILD_NUMBER=${{github.run_number}}" >> $GITHUB_ENV
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: build integrationTest
           build-root-directory: service
