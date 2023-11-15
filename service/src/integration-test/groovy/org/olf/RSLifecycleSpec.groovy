@@ -160,7 +160,7 @@ class RSLifecycleSpec extends TestBase {
       if ( required_state != request_state ) {
         // Request not found OR not yet in required state
         log.debug("Not yet found.. sleeping");
-        Thread.sleep(200);
+        Thread.sleep(1000);
       }
       elapsed = System.currentTimeMillis() - start_time
     }
@@ -1568,6 +1568,61 @@ class DosomethingSimple {
 
         tenantId    | requestTitle      | requestAuthor | requestPatronId   | requestSymbol
         'RSInstOne' | 'How to be Lazy'  | 'Aroon, Lion' | '8577-6554'       | 'ISIL:RST1'
+
+
+    }
+
+    void "Attempt to send a blank request on to validated"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
+
+        def request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_four",
+                tags: [ 'RS-BLANK-FORM-TEST-4']
+        ];
+
+        setHeaders(headers);
+
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_four",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterForceValidate.json").text;
+        log.debug("force validate payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_four",
+                Status.PATRON_REQUEST_VALIDATED);
+
+
+        then: "Whatever"
+        assert true;
+
+        where:
+
+        tenantId    | requestTitle          | requestAuthor  | requestPatronId   | requestSymbol
+        'RSInstOne' | 'How NOT to be Lazy'  | 'Herd, Werkin' | '8577-6554'       | 'ISIL:RST1'
 
 
     }

@@ -48,11 +48,12 @@ jobs:
           arguments: build integrationTest
           build-root-directory: service
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+      - name: Upload test results
         if: always()
+        uses: actions/upload-artifact@v3
         with:
-          files: "service/build/test-results/**/*.xml"
+          name: integration-test-results
+          path: service/build/test-results/integrationTest/
 
       - name: Capture container output
         if: always()
@@ -64,6 +65,13 @@ jobs:
           docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
           docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
           docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
+
+      - name: Upload container logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: container-logs
+          path: tools/testing/*.log
 
       - name: Stop containers
         if: always()

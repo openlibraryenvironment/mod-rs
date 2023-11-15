@@ -43,9 +43,9 @@ public class ActionEventData {
 
 
         // Requester Actions
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_APPROVE_DUPLICATE, 'The requester has approved a duplicate request',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_APPROVE_DUPLICATE.capitalize(),
-                ActionEventResultList.REQUESTER_APPROVE_DUPLICATE);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_FORCE_VALIDATE, 'The requester has approved a duplicate request',
+                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_FORCE_VALIDATE.capitalize(),
+                ActionEventResultList.REQUESTER_FORCE_VALIDATE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, 'Check that the borrower id is valid and they are able to request an item, if they are not valid or cannot request an item the librarian can override this to say they are', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, 'The requester has cancelled a duplicate request',
