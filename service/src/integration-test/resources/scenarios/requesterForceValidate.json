@@ -1,6 +1,6 @@
 {
   "action": "requesterForceValidate",
   "actionParams": {
-    "reason": "duplicate_approved"
+    "reason": "forced_validate"
   }
 }

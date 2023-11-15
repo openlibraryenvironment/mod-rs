@@ -7,7 +7,7 @@ import grails.gorm.MultiTenant;
  */
 
 class ActionEventResultList implements MultiTenant<ActionEventResultList> {
-    static public final String REQUESTER_APPROVE_DUPLICATE                   = 'requesterApproveDuplicate';
+    static public final String REQUESTER_FORCE_VALIDATE	                     = 'requesterForceValidate';
     static public final String REQUESTER_AGREE_CONDITIONS                    = 'requesterAgreeConditions';
     static public final String REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626   = 'requesterAwaitingReturnShippingISO18626';
     static public final String REQUESTER_BORROWER_CHECK                      = 'requesterBorrowerCheck';

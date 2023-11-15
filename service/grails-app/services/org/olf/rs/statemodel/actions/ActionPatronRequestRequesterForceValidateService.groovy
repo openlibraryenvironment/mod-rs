@@ -8,10 +8,10 @@ import org.olf.rs.statemodel.Actions;
 /**
  * Action to approve the creation of a duplicate request
  */
-public class ActionPatronRequestRequesterApproveDuplicateService extends AbstractAction {
+public class ActionPatronRequestRequesterForceValidateService extends AbstractAction {
     @Override
     String name() {
-        return(Actions.ACTION_REQUESTER_APPROVE_DUPLICATE);
+        return(Actions.ACTION_REQUESTER_FORCE_VALIDATE);
     }
 
     @Override

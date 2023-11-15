@@ -34,7 +34,8 @@ public class AvailableActionData {
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED ],
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_MANUAL_CLOSE ],
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_MESSAGE ],
-            [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION ]
+            [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION ],
+            [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_APPROVE_DUPLICATE ]
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
@@ -214,7 +215,7 @@ public class AvailableActionData {
 
         // REQ_DUPLICATE_REVIEW Or "New request flagged as possible duplicate, needs review"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
-            Actions.ACTION_REQUESTER_APPROVE_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
+            Actions.ACTION_REQUESTER_FORCE_VALIDATE, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
             Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
 
@@ -223,6 +224,8 @@ public class AvailableActionData {
             Actions.ACTION_REQUESTER_RETRY_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
             Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
+            Actions.ACTION_REQUESTER_FORCE_VALIDATE, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         // REQ_FILLED_LOCALLY OR "Filled locally"
 

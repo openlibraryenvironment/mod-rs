@@ -49,8 +49,8 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_CHECKED_IN, StatusStage.ACTIVE_SHIPPED, '0077', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_LOCAL_REVIEW, StatusStage.LOCAL, '0079', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_FILLED_LOCALLY, StatusStage.COMPLETED, '0081', true, null, true, 2);
-        Status.ensure(Status.PATRON_REQUEST_DUPLICATE_REVIEW, StatusStage.PREPARING, '0082', true, null, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.PATRON_REQUEST_BLANK_FORM_REVIEW, StatusStage.PREPARING, '0083', true, null, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.PATRON_REQUEST_DUPLICATE_REVIEW, StatusStage.PREPARING, '0082', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.PATRON_REQUEST_BLANK_FORM_REVIEW, StatusStage.PREPARING, '0083', true, true, false, null, [ tags.ACTIVE_PATRON ]);
 
         // This one doesn't appear to be in use
         // Status.lookupOrCreate('REQ_AWAIT_RETURN_SHIPPING', StatusStage.ACTIVE_SHIPPED, '0078', true);
