@@ -1606,7 +1606,7 @@ class DosomethingSimple {
 
 
         String jsonPayload = new File("src/integration-test/resources/scenarios/requesterForceValidate.json").text;
-        log.debug("retryRequest payload: ${jsonPayload}");
+        log.debug("force validate payload: ${jsonPayload}");
         String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
         log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
 
@@ -1621,8 +1621,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle      | requestAuthor | requestPatronId   | requestSymbol
-        'RSInstOne' | 'How to be Lazy'  | 'Aroon, Lion' | '8577-6554'       | 'ISIL:RST1'
+        tenantId    | requestTitle          | requestAuthor  | requestPatronId   | requestSymbol
+        'RSInstOne' | 'How NOT to be Lazy'  | 'Herd, Werkin' | '8577-6554'       | 'ISIL:RST1'
 
 
     }
