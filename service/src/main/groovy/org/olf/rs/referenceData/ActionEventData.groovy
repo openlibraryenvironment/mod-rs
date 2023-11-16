@@ -43,16 +43,16 @@ public class ActionEventData {
 
 
         // Requester Actions
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_FORCE_VALIDATE, 'The requester has approved a duplicate request',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_FORCE_VALIDATE.capitalize(),
-                ActionEventResultList.REQUESTER_FORCE_VALIDATE);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_BYPASS_VALIDATION, 'The requester has approved a duplicate request',
+                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
+                ActionEventResultList.REQUESTER_BYPASSED_VALIDATION);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, 'Check that the borrower id is valid and they are able to request an item, if they are not valid or cannot request an item the librarian can override this to say they are', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, 'The requester has cancelled a duplicate request',
                 true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_DUPLICATE.capitalize(),
                 ActionEventResultList.REQUESTER_CANCEL_DUPLICATE);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_REQUEST, 'Retry a request that previously could not go through',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_REQUEST.capitalize(), ActionEventResultList.REQUESTER_RETRIED_REQUEST);
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_VALIDATION, 'Retry a request that previously could not go through',
+                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(), ActionEventResultList.REQUESTER_RETRIED_VALIDATION);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_LOCAL.capitalize(), ActionEventResultList.REQUESTER_CANCEL_LOCAL);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_EDIT, 'Edits a request', true, 'PatronRequestEdit', ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_FILL_LOCALLY, 'The item can be filled locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_FILL_LOCALLY.capitalize(), ActionEventResultList.REQUESTER_FILLED_LOCALLY);

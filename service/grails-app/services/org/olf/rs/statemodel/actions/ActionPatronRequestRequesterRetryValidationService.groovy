@@ -15,14 +15,14 @@ import org.olf.rs.statemodel.Events;
  * Action to send a request back to the "new request" state to be re-tried
  */
 
-public class ActionPatronRequestRequesterRetryRequestService extends AbstractAction {
+public class ActionPatronRequestRequesterRetryValidationService extends AbstractAction {
 
 
     EventPublicationService eventPublicationService;
 
     @Override
     String name() {
-        return(Actions.ACTION_REQUESTER_RETRY_REQUEST);
+        return(Actions.ACTION_REQUESTER_RETRY_VALIDATION);
     }
 
     @Override

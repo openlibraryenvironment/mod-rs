@@ -48,9 +48,11 @@ public class Actions {
 	static public final String ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS   	 = "requesterAgreeConditions";
 	static public final String ACTION_REQUESTER_REQUESTER_CANCEL             	 = "requesterCancel";
 	static public final String ACTION_REQUESTER_APPROVE_DUPLICATE                = "requesterApproveDuplicate";
-	static public final String ACTION_REQUESTER_FORCE_VALIDATE				     = "requesterForceValidate";
+	static public final String ACTION_REQUESTER_FORCE_VALIDATE                   = "requesterForceValidate";
+	static public final String ACTION_REQUESTER_BYPASS_VALIDATION				 = "requesterBypassValidation";
 	static public final String ACTION_REQUESTER_CANCEL_DUPLICATE                 = "requesterCancelDuplicate";
-	static public final String ACTION_REQUESTER_RETRY_REQUEST					 = "requesterRetryRequest";
+	static public final String ACTION_REQUESTER_RETRY_REQUEST			         = "requesterRetryRequest";
+	static public final String ACTION_REQUESTER_RETRY_VALIDATION			     = "requesterRetryValidation";
 	static public final String ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED        = "requesterMarkEndOfRotaReviewed";
 	static public final String ACTION_REQUESTER_REQUESTER_MANUAL_CHECKIN     	 = "requesterManualCheckIn";
 	static public final String ACTION_REQUESTER_REQUESTER_RECEIVED           	 = "requesterReceived";

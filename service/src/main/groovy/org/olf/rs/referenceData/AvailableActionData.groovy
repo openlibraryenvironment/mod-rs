@@ -35,7 +35,9 @@ public class AvailableActionData {
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_MANUAL_CLOSE ],
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_MESSAGE ],
             [ StateModel.MODEL_RESPONDER, Status.RESPONDER_CHECKED_IN_TO_RESHARE, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION ],
-            [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_APPROVE_DUPLICATE ]
+            [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_APPROVE_DUPLICATE ],
+            [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_FORCE_VALIDATE ],
+            [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_RETRY_REQUEST ]
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
@@ -127,8 +129,8 @@ public class AvailableActionData {
 
         // REQ_INVALID_PATRON OR "Invalid patron"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BORROWER_CHECK, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         // REQ_CANCEL_PENDING OR "Cancel pending"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626);
@@ -215,17 +217,17 @@ public class AvailableActionData {
 
         // REQ_DUPLICATE_REVIEW Or "New request flagged as possible duplicate, needs review"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
-            Actions.ACTION_REQUESTER_FORCE_VALIDATE, AvailableAction.TRIGGER_TYPE_MANUAL);
+            Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW,
             Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         // REQ_BLANK_FORM_REVIEW
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
-            Actions.ACTION_REQUESTER_RETRY_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
+            Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
             Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW,
-            Actions.ACTION_REQUESTER_FORCE_VALIDATE, AvailableAction.TRIGGER_TYPE_MANUAL);
+            Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         // REQ_FILLED_LOCALLY OR "Filled locally"
 
