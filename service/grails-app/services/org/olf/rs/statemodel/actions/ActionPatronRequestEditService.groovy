@@ -21,7 +21,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
 
-    private static final List updateAbleFields = [
+    private static final List updateableFields = [
         [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
         [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
@@ -65,7 +65,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         StringBuffer auditMessage = new StringBuffer("Record has been edited:");
         StringBuffer noteToSend = new StringBuffer();
         log.debug("Updating request ${request.id} with parameters ${parameters}");
-        updateAbleFields.each() { fieldDetails ->
+        updateableFields.each() { fieldDetails ->
             log.debug("Updating field ${fieldDetails.field} in request ${request.id}");
             // Update the field
             if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
@@ -124,7 +124,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
      * @param originalRecord The original request record that will get updated
      * @param newRecord The updated request record that we want to take values from
      * @param field The field that we want to update it
-     * @param updateMessage The string buffer that we use to build up the audit messsage of what has been changed tree
+     * @param updateMessage The string buffer that we use to build up the audit message of what has been changed tree
      * @param isDate Is this a LocalDate field
      * @return true if the field was updated otherwise false
      */

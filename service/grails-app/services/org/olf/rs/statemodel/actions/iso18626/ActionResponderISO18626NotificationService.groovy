@@ -18,7 +18,7 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 public class ActionResponderISO18626NotificationService extends ActionISO18626ResponderService {
 
     // These are all the fields that can be updated through the note
-    private static final List updateAbleFields = [
+    private static final List updateableFields = [
         [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
         [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
@@ -68,7 +68,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
             } else {
                 // Do we have any fields that need updating
                 StringBuffer auditMessage = new StringBuffer();
-                updateAbleFields.each() { fieldDetails ->
+                updateableFields.each() { fieldDetails ->
                     Map extractedFieldResult = extractFieldFromNote(note, fieldDetails.notePrefix);
                     if (extractedFieldResult.data != null) {
                         boolean validValue = true;
@@ -102,7 +102,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
                     // Set the audit message to what we have updated
                     actionResultDetails.auditMessage = auditMessage.toString();
                 } else {
-                    // Nothing updated so we just trat it as a message
+                    // Nothing updated so we just treat it as a message
                     actionResultDetails.auditMessage = "Notification message received from requesting agency: ${note}";
                 }
             }
