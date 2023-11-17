@@ -21,7 +21,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
 
-    private static final List updateableFields = [
+    protected static final List updateableFields = [
         [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
         [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
@@ -128,7 +128,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
      * @param isDate Is this a LocalDate field
      * @return true if the field was updated otherwise false
      */
-    private boolean updateField(Object originalRecord, Object newRecord, String field, StringBuffer updateMessage, boolean isDate = false) {
+    protected boolean updateField(Object originalRecord, Object newRecord, String field, StringBuffer updateMessage, boolean isDate = false) {
         boolean updated = false;
 
         Object newValue = newRecord[field];
