@@ -1,5 +1,5 @@
 {
-  "action" : "requesterRetryRequest",
+  "action" : "requesterRetryValidation",
   "actionParams" : {
     "reason" : "retrying_request",
   }

@@ -1205,8 +1205,8 @@ public class ActionEventResultData {
         ]
     ];
 
-    private static Map requesterForcedValidate = [
-        code: ActionEventResultList.REQUESTER_FORCE_VALIDATE,
+    private static Map requesterBypassedValidationList = [
+        code: ActionEventResultList.REQUESTER_BYPASSED_VALIDATION,
         description: 'Requester has forced progression to validated status',
         model: StateModel.MODEL_REQUESTER,
         results: [
@@ -1279,8 +1279,8 @@ public class ActionEventResultData {
         ]
     ];
 
-    private static Map requesterRetriedRequestList = [
-        code: ActionEventResultList.REQUESTER_RETRIED_REQUEST,
+    private static Map requesterRetriedValidationList = [
+        code: ActionEventResultList.REQUESTER_RETRIED_VALIDATION,
         description: 'Requester is re-trying evaluation of the request',
         model: StateModel.MODEL_REQUESTER,
         results: [
@@ -1618,9 +1618,9 @@ public class ActionEventResultData {
         requesterShippedReturnList,
         requesterSendToNextLocationList,
         requesterValidateIndList,
-        requesterForcedValidate,
+        requesterBypassedValidationList,
         requesterCancelledDuplicate,
-        requesterRetriedRequestList,
+        requesterRetriedValidationList,
         requesterCancelledBlankFormList,
 
         // Digital returnable requester lists

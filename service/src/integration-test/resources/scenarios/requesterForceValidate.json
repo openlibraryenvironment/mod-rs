@@ -1,5 +1,5 @@
 {
-  "action": "requesterForceValidate",
+  "action": "requesterBypassValidation",
   "actionParams": {
     "reason": "forced_validate"
   }
