@@ -43,7 +43,7 @@ public class ActionEventData {
 
 
         // Requester Actions
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_BYPASS_VALIDATION, 'The requester has approved a duplicate request',
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
                 true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
                 ActionEventResultList.REQUESTER_BYPASSED_VALIDATION);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
@@ -51,7 +51,7 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_DUPLICATE, 'The requester has cancelled a duplicate request',
                 true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_DUPLICATE.capitalize(),
                 ActionEventResultList.REQUESTER_CANCEL_DUPLICATE);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_VALIDATION, 'Retry a request that previously could not go through',
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_VALIDATION, 'Retry validation on a request',
                 true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(), ActionEventResultList.REQUESTER_RETRIED_VALIDATION);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_CANCEL_LOCAL, 'Cancel a request that has been made locally', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_CANCEL_LOCAL.capitalize(), ActionEventResultList.REQUESTER_CANCEL_LOCAL);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_EDIT, 'Edits a request', true, 'PatronRequestEdit', ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
