@@ -1516,6 +1516,74 @@ class DosomethingSimple {
 
     }
 
+    void "Attempt to fix a blank request via retryValidation action"(
+
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
+
+        def request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_five",
+                tags: [ 'RS-BLANK-FORM-TEST-5']
+        ];
+
+        setHeaders(headers);
+
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_five",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+        def jsonPayload = [
+                action: "requesterRetryValidation",
+                actionParams: [
+                    requestingInstitutionSymbol: requestSymbol,
+                    systemInstanceIdentifier: requestSystemId,
+                    title: requestTitle,
+                    author: requestAuthor,
+                    patronIdentifier: requestPatronId,
+                ]
+        ];
+
+
+        //String jsonPayload = new File("src/integration-test/resources/scenarios/requesterRetryRequest.json").text;
+        log.debug("retryRequest payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_five",
+                Status.PATRON_REQUEST_VALIDATED);
+
+
+        then: "Whatever"
+        assert true;
+
+        where:
+
+        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'Believe in Second Chances'  | 'Ageen, Trey' | '5533-2233-6654-9191' | '8177-6144'       | 'ISIL:RST1'
+
+
+    }
+
 
     void "Attempt to retry a blank request without fixing"(
             String tenantId,

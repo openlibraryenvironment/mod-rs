@@ -34,10 +34,11 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
         log.debug("Updating/Retrying request ${request.id} with parameters ${parameters}");
         StringBuffer auditMessage = new StringBuffer("Record has been edited:");
         boolean updateFields = hasUpdateableFields(parameters);
+        log.debug("updateFields is ${updateFields}");
 
         if (updateFields) {
             updateableFields.each() { fieldDetails ->
-                log.debug("Updating field ${fieldDetails.field} in request ${request.id}");
+                log.debug("Updating field prior to retrying ${fieldDetails.field} in request ${request.id}");
                 // Update the field
                 if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
                     // It has changed
@@ -47,6 +48,7 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
                     }
                 }
             }
+            request.save();
         }
 
 
@@ -94,7 +96,7 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
 
     boolean hasUpdateableFields(Object parameters) {
         updateableFields.each() { fieldDetails ->
-            if (parameters?.hasProperty(fieldDetails.field)) {
+            if (parameters.containsKey(fieldDetails.field)) {
                 return true;
             }
         }
