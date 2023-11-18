@@ -33,7 +33,7 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
                                       Object parameters, ActionResultDetails actionResultDetails) {
         log.debug("Updating/Retrying request ${request.id} with parameters ${parameters}");
         StringBuffer auditMessage = new StringBuffer("Record has been edited:");
-        boolean updateFields = hasUpdateableFields(parameters);
+        boolean updateFields = !parameters.isEmpty();
         log.debug("updateFields is ${updateFields}");
 
         if (updateFields) {
@@ -93,13 +93,5 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
 
         return(actionResultDetails);
     }
-
-    boolean hasUpdateableFields(Object parameters) {
-        updateableFields.each() { fieldDetails ->
-            if (parameters.containsKey(fieldDetails.field)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    
 }

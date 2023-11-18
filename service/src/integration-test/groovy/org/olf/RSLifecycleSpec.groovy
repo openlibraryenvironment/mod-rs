@@ -1570,7 +1570,7 @@ class DosomethingSimple {
         def actionResponse = doPost(performActionUrl, jsonPayload);
 
         waitForRequestState(tenantId, 20000, requestPatronId + "_five",
-                Status.PATRON_REQUEST_VALIDATED);
+                Status.PATRON_REQUEST_IDLE);
 
 
         then: "Whatever"
