@@ -23,6 +23,10 @@ public class PatronNoticeService {
     private static final String DIRECTORY_ENTRY_STATUS_MANAGED   = 'Managed';
     private static final String DIRECTORY_ENTRY_TYPE_INSTITUTION = 'Institution';
 
+    static final Map TRIGGERS_SUPERSEDE = [
+      (RefdataValueData.NOTICE_TRIGGER_END_OF_ROTA): [ RefdataValueData.NOTICE_TRIGGER_NEW_REQUEST ]
+    ];
+
     EmailService emailService
     TemplatingService templatingService
 
@@ -77,8 +81,14 @@ public class PatronNoticeService {
     }
 
     public void triggerNotices(String jsonData, RefdataValue trigger, PatronRequest pr) {
-        NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger)
-        ne.save(flush:true, failOnError:true)
+        NoticeEvent ne = new NoticeEvent(patronRequest: pr, jsonData: jsonData, trigger: trigger);
+        if (this.TRIGGERS_SUPERSEDE[trigger.label]) {
+            def subQuery = 'select ne2.id from NoticeEvent ne2 where ne2.patronRequest = :pr and ne2.trigger.label in (:superseded)';
+            def deleteResult = NoticeEvent.executeUpdate('delete NoticeEvent ne where ne.id in (' + subQuery + ')',
+              [ pr: pr, superseded: this.TRIGGERS_SUPERSEDE[trigger.label] ]);
+            if (deleteResult) log.debug("Deleted ${deleteResult} notice events of types ${this.TRIGGERS_SUPERSEDE[trigger.label]} superseded by a new ${trigger.label} event on the same request");
+        }
+        ne.save(flush:true, failOnError:true);
     }
 
     public void processQueue() {
@@ -183,7 +193,7 @@ public class PatronNoticeService {
     /**
      * returns the administrators email address for the managed institution
      * If there is more than 1 institution for the tenant, then it just returns the first one it finds for a managed directory entry
-     * The institution itself dosn't necessarily need to be managed, as long a one of its children is as it will look up the hierarchy of all managed entries until it finds an institution record
+     * The institution itself doesn't necessarily need to be managed, as long a one of its children is as it will look up the hierarchy of all managed entries until it finds an institution record
      * @return The administrators email address or null if it does not find one
      */
     private String getAdminEmail() {
