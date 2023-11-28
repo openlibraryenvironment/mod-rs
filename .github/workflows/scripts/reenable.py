@@ -30,10 +30,6 @@ def main():
     if action == "disable":
         disable_result = disable(args, token)
     elif action == "enable":
-        enable_result = enable(args, token)
-    elif action == "all":
-        disable_versions = disable(args, token)
-        print("THESE ARE THE DISABLE VERSIONS")
         enable_result = enable(args, token, ["mod-rs-2.14.0"])
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
