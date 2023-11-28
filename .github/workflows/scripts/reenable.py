@@ -33,7 +33,8 @@ def main():
         enable_result = enable(args, token)
     elif action == "all":
         disable_versions = disable(args, token)
-        enable_result = enable(args, token, disable_versions)
+        print("THESE ARE THE DISABLE VERSIONS")
+        enable_result = enable(args, token, ["mod-rs-2.14.0"])
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
@@ -94,15 +95,6 @@ def enable(args, token, versions=[]):
         tenant='supertenant',
         token=token
     )
-
-    # if we didn't tell this function to use a particular version, grab the latest
-    if len(versions) == 0:
-        for module in MODULES:
-            r = okapi_get(REGISTRY +
-                          '/_/proxy/modules?filter={}&latest=1'.format(module),
-                          tenant='supertenant')
-            latest_versions.append(json.loads(r)[0]['id'])
-
     # post new deployment descriptors
     for module in latest_versions:
         payload = json.dumps({
