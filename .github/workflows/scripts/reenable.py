@@ -15,6 +15,7 @@ TENANTS = ['reshare_north', 'reshare_south']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
+RELEASE_VERSION = ["mod-rs-2.14.0"]
 # for now hard code 8080
 PORT = "8080"
 
@@ -30,7 +31,7 @@ def main():
     if action == "disable":
         disable_result = disable(args, token)
     elif action == "enable":
-        enable_result = enable(args, token, ["mod-rs-2.14.0"])
+        enable_result = enable(args, token, RELEASE_VERSION)
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
