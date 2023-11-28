@@ -208,7 +208,7 @@ class NoticeSpec extends TestBase {
 
         then:"Verify NoticeEvent"
             assert(afterEOR.size() == 1);
-            assert(afterEOR[0].trigger = triggerEOR);
+            assert(afterEOR[0].trigger == triggerEOR);
 
         where:
             tenantId   | ignore
