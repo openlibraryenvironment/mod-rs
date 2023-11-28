@@ -11,10 +11,11 @@ import urllib.request
 MODULES = ['mod-rs']
 
 # names of tenants to operate on
-TENANTS = ['reshare_east', 'reshare_west']
+TENANTS = ['reshare_north', 'reshare_south']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
+RELEASE_VERSION = ["mod-rs-2.14.0"]
 # for now hard code 8080
 PORT = "8080"
 
@@ -30,10 +31,7 @@ def main():
     if action == "disable":
         disable_result = disable(args, token)
     elif action == "enable":
-        enable_result = enable(args, token)
-    elif action == "all":
-        disable_result = disable(args, token)
-        enable_result = enable(args, token)
+        enable_result = enable(args, token, RELEASE_VERSION)
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
@@ -74,10 +72,10 @@ def disable(args, token):
     #                     token=token,
     #                     return_headers=False)
 
-    ## return true on success
-    #return True
+    # return disable_versions
+    return disable_versions
 
-def enable(args, token):
+def enable(args, token, versions=[]):
     action = args.action
     okapi_url = args.okapi_url
     username = args.username
@@ -85,7 +83,7 @@ def enable(args, token):
     registry = args.registry
     port = PORT
     # get new versions from registry
-    latest_versions = []
+    latest_versions = versions 
 
     # sync mds
     print("syncing module descriptors from registry...")
@@ -94,19 +92,12 @@ def enable(args, token):
         tenant='supertenant',
         token=token
     )
-
-    for module in MODULES:
-        r = okapi_get(REGISTRY +
-                      '/_/proxy/modules?filter={}&latest=1'.format(module),
-                      tenant='supertenant')
-        latest_versions.append(json.loads(r)[0]['id'])
-
     # post new deployment descriptors
     for module in latest_versions:
         payload = json.dumps({
             "instId": "{}-cluster".format(module),
             "srvcId": module,
-            "url": "http://{}-latest:{}".format('-'.join(module.split('-', 2)[:2]), port)
+            "url": "http://{}-release:{}".format('-'.join(module.split('-', 2)[:2]), port)
         }).encode('UTF-8')
         try:
             print("posting new deployment descriptors...")
