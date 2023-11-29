@@ -1,14 +1,23 @@
 package org.olf
 
+import grails.gorm.multitenancy.Tenants;
 import grails.testing.mixin.integration.Integration;
 import groovy.json.JsonBuilder;
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
+import com.k_int.web.toolkit.refdata.RefdataValue
+import org.olf.rs.NoticeEvent;
+import org.olf.rs.Patron
+import org.olf.rs.PatronNoticeService
+import org.olf.rs.PatronRequest
+import org.olf.rs.referenceData.RefdataValueData;
 import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
 @Stepwise
-class NoticePolicySpec extends TestBase {
+class NoticeSpec extends TestBase {
+
+    PatronNoticeService patronNoticeService;
 
     // This method is declared in the HttpSpec
     def setupSpecWithSpring() {
@@ -27,6 +36,7 @@ class NoticePolicySpec extends TestBase {
     void "Set up test tenants"(String tenantId, String name) {
         when:"We post a new tenant request to the OKAPI controller"
             boolean response = setupTenant(tenantId, name);
+            changeSettings(tenantId, [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'']);
 
         then:"The response is correct"
             assert(response);
@@ -98,8 +108,8 @@ class NoticePolicySpec extends TestBase {
             TENANT_ONE | ""
     }
 
-    void "Search for NoticePolicys"(String tenantId, String ignore) {
-        when:"Search for NoticePolicys"
+    void "Search for NoticePolicies"(String tenantId, String ignore) {
+        when:"Search for NoticePolicies"
 
             // Set the headers
             setHeaders([ 'X-Okapi-Tenant': tenantId ]);
@@ -171,6 +181,34 @@ class NoticePolicySpec extends TestBase {
             // Check the status code
             assert(response == null);
             assert(statusCode == 204);
+
+        where:
+            tenantId   | ignore
+            TENANT_ONE | ""
+    }
+
+    void "Trigger notice and supersede"(String tenantId, String ignore) {
+        when:"Send triggers"
+            def pr, beforeEOR, afterEOR;
+            def triggerNew;
+            def triggerEOR;
+            Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+                triggerNew = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_NEW_REQUEST);
+                triggerEOR = RefdataValue.lookupOrCreate(RefdataValueData.VOCABULARY_NOTICE_TRIGGERS, RefdataValueData.NOTICE_TRIGGER_END_OF_ROTA);
+                pr = new PatronRequest(supplierUniqueRecordId: '123');
+                pr.save();
+
+                // I would have expected the above to trigger a "new request" NoticeEvent, but since it
+                // doesn't seem to in this environment we can do that explicitly
+                patronNoticeService.triggerNotices('{}', triggerNew, pr);
+                beforeEOR = NoticeEvent.findAllByPatronRequest(pr);
+                patronNoticeService.triggerNotices('{}', triggerEOR, pr);
+                afterEOR = NoticeEvent.findAllByPatronRequest(pr);
+            }
+
+        then:"Verify NoticeEvent"
+            assert(afterEOR.size() == 1);
+            assert(afterEOR[0].trigger == triggerEOR);
 
         where:
             tenantId   | ignore
