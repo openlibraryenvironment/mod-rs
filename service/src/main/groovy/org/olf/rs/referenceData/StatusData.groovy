@@ -34,8 +34,8 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_OVERDUE, StatusStage.ACTIVE_SHIPPED, '0036', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_RECALLED, StatusStage.ACTIVE_SHIPPED, '0037', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED, StatusStage.ACTIVE_SHIPPED, '0040', true, null, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, StatusStage.ACTIVE_SHIPPED, '0045', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, StatusStage.ACTIVE_SHIPPED, '0046', true, null, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, StatusStage.ACTIVE_SHIPPED, '0045', true, null, false, null, [ tags.ACTIVE_BORROW ]);
+        Status.ensure(Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, StatusStage.ACTIVE_SHIPPED, '0046', true);
         Status.ensure(Status.PATRON_REQUEST_BORROWER_RETURNED, StatusStage.ACTIVE_SHIPPED, '0050', true);
         Status.ensure(Status.PATRON_REQUEST_REQUEST_COMPLETE, StatusStage.COMPLETED, '0055', true, null, true, 1);
         Status.ensure(Status.PATRON_REQUEST_PENDING, StatusStage.ACTIVE, '0060', true, null, false, null, [ tags.ACTIVE_PATRON ]);
