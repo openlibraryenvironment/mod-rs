@@ -91,7 +91,7 @@ jobs:
           retention-days: 1
 
       - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*') }}
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
