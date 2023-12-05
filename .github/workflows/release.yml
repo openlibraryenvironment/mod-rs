@@ -10,7 +10,7 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     permissions:
@@ -96,10 +96,10 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
-        flavor: |
-          latest=false
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=branch
             type=ref,event=pr
