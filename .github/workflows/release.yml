@@ -1,4 +1,4 @@
-name: Build mod-rs
+name: Release mod-rs
 
 env:
   REGISTRY: ghcr.io
@@ -6,9 +6,11 @@ env:
 
 on:
   push:
+    tags:
+      - 'v*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     permissions:
@@ -35,12 +37,6 @@ jobs:
           docker-compose down -v
           docker-compose up -d &> dockerOutput.log
           sleep 20
-
-      - name: Inject github build number
-        run: |
-          # Make github run id available to gradle script via env var BUILD_NUMBER so it ends up in our module descriptor version
-          # echo "BUILD_NUMBER=${{github.run_id}}" >> $GITHUB_ENV
-          echo "BUILD_NUMBER=${{github.run_number}}" >> $GITHUB_ENV
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
@@ -91,22 +87,26 @@ jobs:
           retention-days: 1
 
       - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
+      - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -115,7 +115,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Publish Descriptor
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' }}
         run: |
           echo Post to public registry
           curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
