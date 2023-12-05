@@ -5,6 +5,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 name: CI
+
 on:
   push:
     tags:
