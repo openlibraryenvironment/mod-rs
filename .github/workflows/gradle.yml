@@ -99,14 +99,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*') }}
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release*') }}
         uses: docker/build-push-action@v4
         with:
           context: .
