@@ -104,14 +104,27 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
+ 
+      # master and main
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' }}
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # extra tags for release branch
+      - name: Build and push Docker image
+        if: ${{ contains(github.ref, 'release') }}
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags:
+          - ${{ steps.meta.outputs.tags }}
+          - 'rc'
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Publish Descriptor
