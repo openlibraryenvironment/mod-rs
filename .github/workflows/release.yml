@@ -1,4 +1,4 @@
-name: Build mod-rs
+name: Release mod-rs
 
 env:
   REGISTRY: ghcr.io
