@@ -1011,16 +1011,18 @@
         "rs.kiwt",
         "rs.shipments",
         "rs.noticePolicies",
+        "rs.hostlmsitemloanpolicies.write",
         "rs.hostlmslocations.write",
+        "rs.hostlmspatronprofiles.write",
+        "rs.shelvingLocations.write",
         "rs.batch.get",
         "rs.file.download",
         "rs.file.upload",
         "rs.report.admin",
-		"rs.report.execute",
+        "rs.report.execute",
         "rs.timers",
-        "rs.shelvingLocations",
         "rs.logging",
-		"rs.testHostLMS"
+        "rs.testHostLMS"
       ]
     },
     {
