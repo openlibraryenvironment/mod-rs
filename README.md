@@ -122,3 +122,9 @@ Links:
 http://shared-index.reshare-dev.indexdata.com/inventory?sort=Title
 http://vufind.aws.indexdata.com/vufindfolio/Search/Results?lookfor=&type=AllFields&limit=20
 
+
+## Release Procedures
+* To prepare for a release, create a branch called release-N.N.x where N.N is the major and minor versions, and x is the letter x. 
+* Push a tag to the release branch when changes are finalized
+* From the Github repository page, create a release from the tag created in the previous step.
+* CI will publish appropriate artifacts when the release is published.
