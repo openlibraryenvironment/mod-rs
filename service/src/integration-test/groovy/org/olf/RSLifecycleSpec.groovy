@@ -228,6 +228,7 @@ class RSLifecycleSpec extends TestBase {
       'folio'   | true
       'symphony'| true
       'sierra'  | true
+      'polaris' | true
       'wibble'  | false
   }
 
@@ -608,6 +609,9 @@ class RSLifecycleSpec extends TestBase {
       'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
       'RSInstThree' | 'voyager' | 'voyager-temp.xml' | null | null | _
       'RSInstThree' | 'folio' | 'folio-not-requestable.xml' | null | null | _
+      'RSInstThree' | 'polaris' | 'polaris-with-in-item-status.xml' | 'Juvenile nonfiction shelves' | 'Main Library' | _
+      'RSInstThree' | 'polaris' | 'polaris-with-out-item-status.xml' | null | null | _
+      'RSInstThree' | 'polaris' | 'polaris-with-held-item-status.xml' | null | null | _
   }
 
     /**

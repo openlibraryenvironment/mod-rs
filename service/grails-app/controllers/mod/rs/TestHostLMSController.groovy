@@ -31,7 +31,7 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
 
     private static final String CIRC_TYPE_NCIP = "ncip";
 
-    private static final String HOST_LMS_ADAPTERS = "aleph,alma,default,folio,horizon,koha,manual,millennium,ncsu,sierra,symphony,tlc,voyager,wms,wms2";
+    private static final String HOST_LMS_ADAPTERS = "aleph,alma,default,folio,horizon,koha,manual,millennium,ncsu,sierra,symphony,tlc,voyager,wms,wms2,polaris";
 
     HostLMSService hostLMSService;
     ProtocolAuditService protocolAuditService;
