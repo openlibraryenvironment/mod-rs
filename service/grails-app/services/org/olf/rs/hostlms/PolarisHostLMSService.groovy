@@ -14,12 +14,7 @@ public class PolarisHostLMSService extends BaseHostLMSService {
 
   public CirculationClient getCirculationClient(ISettings settings, String address) {
     // This wrapper creates the circulationClient we need
-    return new NCIPClientWrapper(address, [protocol: "NCIP2", useNamespace: false]).circulationClient;
-  }
-
-  @Override
-  public boolean isNCIP2() {
-    return true;
+    return new NCIPClientWrapper(address, [protocol: "NCIP1", useNamespace: false]).circulationClient;
   }
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
