@@ -1,7 +1,10 @@
 package mod.rs;
 
+import groovy.xml.XmlUtil;
+import org.olf.rs.HostLMSService;
 import org.olf.rs.Patron;
 import org.olf.rs.ReshareActionService;
+import org.olf.rs.SettingsService;
 import org.olf.rs.logging.ContextLogging;
 
 import grails.converters.JSON;
@@ -13,6 +16,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.olf.rs.logging.INcipLogDetails;
+import org.olf.rs.logging.NcipLogDetails;
 
 @Slf4j
 @CurrentTenant
@@ -25,7 +30,9 @@ class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
         super(Patron)
     }
 
+    HostLMSService hostLMSService;
     ReshareActionService reshareActionService;
+    SettingsService settingsService;
 
     /**
      * Looks up the patron to see if the profile they belong to is allowed to make requests
@@ -78,5 +85,54 @@ class PatronController extends OkapiTenantAwareSwaggerController<Patron>  {
         // Record how long it took
         ContextLogging.duration();
         log.debug(ContextLogging.MESSAGE_EXITING);
+    }
+
+    @ApiOperation(
+        value = "Validate barcode/pin and determine authorization",
+        nickname = "validate",
+        produces = "application/json",
+        httpMethod = "POST"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success"),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 403, message = "User not authorized to place requests"),
+        @ApiResponse(code = 401, message = "Invalid barcode/pin"),
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            paramType = "body",
+            required = true,
+            allowMultiple = false,
+            value = 'JSON with properties "barcode" and "pin"',
+            defaultValue = "{}",
+            dataType = "string"
+        )
+    ])
+    def validate() {
+        String barcode = request.JSON?.barcode;
+        String pin = request.JSON?.pin
+        if (!barcode || !pin) {
+            response.status = 400;
+            render ([message: 'Missing required barcode and pin']) as JSON;
+            return;
+        }
+        String escapedBarcode = XmlUtil.escapeXml(XmlUtil.escapeControlCharacters(request.JSON.barcode));
+        String escapedPin = XmlUtil.escapeXml(XmlUtil.escapeControlCharacters(request.JSON.pin));
+        if (!(escapedBarcode == barcode) || !(escapedPin == pin)) {
+            response.status = 400;
+            render ([message: 'Unsupported characters']) as JSON;
+            return;
+        }
+        def lmsActions = hostLMSService.getHostLMSActions();
+        INcipLogDetails ncipLogDetails = new NcipLogDetails();
+        def ncipResult = lmsActions.lookupPatronByBarcodePin(settingsService, request.JSON.barcode, request.JSON.pin, ncipLogDetails);
+        if (ncipResult.status == 'OK' && ncipResult.userid) {
+            render (['userid':ncipResult.userid]) as JSON;
+        } else if (ncipResult.status == 'BLOCKED') {
+            response.status = 403;
+        } else {
+            response.status = 401;
+        }
     }
 }

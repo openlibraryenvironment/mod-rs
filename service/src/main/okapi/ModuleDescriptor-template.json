@@ -52,6 +52,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.post" ]
         },
         {
+          "methods": ["POST" ],
+          "pathPattern": "/rs/patron/validate",
+          "permissionsRequired": ["rs.patron.validate"]
+        },
+        {
           "methods": [ "GET" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
           "permissionsRequired": [ "rs.patronrequests.item.get" ]
@@ -423,6 +428,12 @@
     }
   ],
   "permissionSets": [
+    {
+      "permissionName": "rs.patrons.validate",
+      "displayName": "Validate patron",
+      "description": "Determine if barcode/pin are valid and patron authorised to place requests",
+      "visible": false
+    },
     {
       "permissionName": "rs.patronrequests.collection.get",
       "displayName": "patronrequests collection get",
@@ -1022,6 +1033,7 @@
         "rs.report.execute",
         "rs.timers",
         "rs.logging",
+        "rs.patron.validate",
         "rs.testHostLMS"
       ]
     },
