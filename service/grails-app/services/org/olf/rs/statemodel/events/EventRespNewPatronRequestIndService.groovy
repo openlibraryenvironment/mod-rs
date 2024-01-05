@@ -20,6 +20,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
  * @author Chas
  */
 public class EventRespNewPatronRequestIndService extends AbstractEvent {
+    private static final String SETTING_REQUEST_ITEM_YES = "Yes";
 
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
@@ -72,10 +73,14 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         if (location != null) {
             // set localCallNumber to whatever we managed to look up
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
                 log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
                 reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
+                if (settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
+                } else {
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
+                }
             } else {
                 unfilled = true;
                 eventResultDetails.auditMessage = 'AutoResponder Failed to route to location ' + location;

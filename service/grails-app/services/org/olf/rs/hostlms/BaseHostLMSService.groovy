@@ -13,6 +13,8 @@ import org.olf.rs.Z3950Service;
 import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.RequestItem;
+import org.olf.rs.circ.client.CancelRequestItem;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.LookupUser;
 import org.olf.rs.lms.ConnectionDetailsNCIP;
@@ -776,6 +778,76 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       }
     }
     return result;
+  }
+
+  public Map requestItem(
+          ISettings settings,
+          String requestId,
+          String bibliographicId,
+          String bibliographicIdCode,
+          String borrowerBarcode,
+          INcipLogDetails ncipLogDetails
+  ) {
+    Map result = [
+        result: true,
+        reason: 'ncip'
+    ];
+
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+
+    RequestItem requestItem = new RequestItem()
+      .setUserId(borrowerBarcode)
+      .setRequestid(requestId)
+      .setBibliographicRecordId(bibliographicId)
+      .setBibligraphicRecordIdCode(bibliographicIdCode)
+      .setToAgency(ncipConnectionDetails.ncipToAgency)
+      .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+      .setRegistryId(ncipConnectionDetails.registryId);
+
+    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
+    JSONObject response = client.send(requestItem);
+
+    if ( response.has('problems') ) {
+      result.result = false;
+      result.problems = response.get('problems');
+    } else {
+      result.itemId = response.opt("itemId");
+      result.requestId = response.opt("requestId");
+    }
+
+    return result;
+  }
+
+  public Map cancelRequestItem(
+          ISettings settings,
+          String requestId,
+          INcipLogDetails ncipLogDetails
+  ) {
+    Map result = [
+            result: true,
+            reason: 'ncip'
+    ];
+
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+
+    CancelRequestItem cancelRequestItem = new RequestItem()
+            .setRequestid(requestId)
+            .setToAgency(ncipConnectionDetails.ncipToAgency)
+            .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+            .setRegistryId(ncipConnectionDetails.registryId);
+
+    log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem request ${cancelRequestItem}");
+    JSONObject response = client.send(requestItem);
+
+    if ( response.has('problems') ) {
+      result.result = false;
+      result.problems = response.get('problems');
+    }
+
+    return result;
+
   }
 
   /**
