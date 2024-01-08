@@ -18,7 +18,7 @@ public class PolarisHostLMSService extends BaseHostLMSService {
   }
 
   // Given the record syntax above, process response records as Opac recsyn. If you change the recsyn string above
-  // you need to change the handler here. SIRSI for example needs to return us marcxml with a different location for the holdings
+  // you need to change the handler here. Polaris for example needs to return us marcxml with a different location for the holdings
   @Override
   protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     log.debug("Extract holdings from Polaris marcxml record ${z_response}");
