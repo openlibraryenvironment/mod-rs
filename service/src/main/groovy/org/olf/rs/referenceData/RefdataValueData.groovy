@@ -73,21 +73,22 @@ public class RefdataValueData {
     public static final String CHECK_IN_ON_RETURN_ON  = 'On';
 
     // Host LMS integration adapter
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_ALEPH     = 'Aleph';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_ALMA      = 'ALMA';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_FOLIO     = 'FOLIO';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_KOHA      = 'Koha';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_MANUAL    = 'Manual';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_MILLENIUM = 'Millennium';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_SIERRA    = 'Sierra';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_SYMPHONY  = 'Symphony';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_TLC       = 'TLC';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_VOYAGER   = 'Voyager';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS       = 'WMS';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS2      = 'WMS2';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_HORIZON   = 'Horizon';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_NCSU      = 'NCSU';
-    public static final String HOST_LMS_INTEGRATION_ADAPTER_POLARIS   = 'Polaris';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_ALEPH       = 'Aleph';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_ALMA        = 'ALMA';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_FOLIO       = 'FOLIO';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_KOHA        = 'Koha';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_MANUAL      = 'Manual';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_MILLENIUM   = 'Millennium';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_SIERRA      = 'Sierra';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_SYMPHONY    = 'Symphony';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_TLC         = 'TLC';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_VOYAGER     = 'Voyager';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS         = 'WMS';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_WMS2        = 'WMS2';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_HORIZON     = 'Horizon';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_NCSU        = 'NCSU';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_POLARIS     = 'Polaris';
+    public static final String HOST_LMS_INTEGRATION_ADAPTER_EVERGREEN   = 'Evergreen';
 
     // Loan Policy
     public static final String LOAN_POLICY_LENDING_ALL_TYPES        = 'Lending all types';
@@ -211,7 +212,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_HORIZON);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_NCSU);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_POLARIS);
-
+            RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_EVERGREEN);
 
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_JISC_LHD);
