@@ -17,7 +17,7 @@ class TlcHostLMSServiceSpec extends Specification implements ServiceUnitTest<Tlc
         then:
         def resultJson = JsonOutput.toJson(result.first());
         result.size() == 1;
-        resultJson == '{"temporaryShelvingLocation":null,"itemId":null,"temporaryLocation":null,"shelvingLocation":"WARNER STACKS","callNumber":null,"reason":null,"shelvingPreference":null,"preference":null,"location":"Warner Library","itemLoanPolicy":null}';
+        resultJson == '{"temporaryShelvingLocation":null,"itemId":null,"temporaryLocation":null,"shelvingLocation":"WARNER STACKS","callNumber":"PQ2683.I32 Z52313 1996","reason":null,"shelvingPreference":null,"preference":null,"location":"Warner Library","itemLoanPolicy":null}';
     }
 }
 

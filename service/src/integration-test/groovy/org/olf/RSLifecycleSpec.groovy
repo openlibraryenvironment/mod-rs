@@ -230,6 +230,7 @@ class RSLifecycleSpec extends TestBase {
       'sierra'    | true
       'polaris'   | true
       'evergreen' | true
+      'tlc'       | true
       'wibble'    | false
   }
 
@@ -618,6 +619,7 @@ class RSLifecycleSpec extends TestBase {
       'RSInstThree' | 'evergreen' | 'evergreen-lake-agassiz-with-available-item-status.xml'       | 'HAWLEY'                      | 'Main'                        | _
       'RSInstThree' | 'evergreen' | 'evergreen-north-west-with-available-item-status.xml'         | 'ROSEAU'                      | 'Main'                        | _
       'RSInstThree' | 'evergreen' | 'evergreen-traverse-de-sioux-with-available-item-status.xml'  | 'AM'                          | 'Children\'s Literature Area' | _
+      'RSInstThree' | 'tlc'       | 'tlc-eastern.xml'                                             | 'Warner Library'              | 'WARNER STACKS'               | _
   }
 
     /**
