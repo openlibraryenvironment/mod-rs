@@ -62,7 +62,7 @@ public class TlcHostLMSService extends BaseHostLMSService {
     //          <subfield code="b">Snowden Library</subfield>
     //          <subfield code="c">E-BOOK (DDA)</subfield>
     //          <subfield code="i">ebc1823214</subfield>
-    //          <subfield code="m"/>
+    //          <subfield code="m">PQ2683.I32 Z52313 1996</subfield>
     //          <subfield code="s">A</subfield>
     //        </datafield>
     log.debug("extractAvailableItemsFromMARCXMLRecord (TlcHostLMSService)");
@@ -83,7 +83,8 @@ public class TlcHostLMSService extends BaseHostLMSService {
             log.debug("Available now");
             def location = tag_data['b'];
             def shelvingLocation = tag_data['c'];
-            ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation );
+            def callNumber = tag_data['m'];
+            ItemLocation il = new ItemLocation( location: location, shelvingLocation: shelvingLocation, callNumber: callNumber );
             availability_summary << il;
           }
         } catch(Exception e) {
