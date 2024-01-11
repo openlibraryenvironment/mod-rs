@@ -718,61 +718,68 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       already_checked_in: false
     ]
 
-    String checkInValue = settings.getSettingValue(SettingsData.SETTING_CHECK_IN_ITEM);
+    String checkInValue = settings.getSettingValue(SettingsData.SETTING_CHECK_IN_ITEM)
     if (checkInValue != null) {
       switch (checkInValue) {
         case CIRCULATION_NCIP:
-          // Set the reason from 'spoofed'
+          // Set the reason from 'spoofed'.
           result.reason = 'ncip'
 
           log.debug("checkInItem(${item_id})");
           ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
-          CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+          CirculationClient ncip_client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress)
           CheckinItem checkinItem = new CheckinItem()
                         .setItemId(item_id)
                         .setToAgency(ncipConnectionDetails.ncipToAgency)
                         .setFromAgency(ncipConnectionDetails.ncipFromAgency)
                         .setRegistryId(ncipConnectionDetails.registryId)
                         .includeBibliographicDescription()
-                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
+                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile)
 
-          log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}");
+          log.debug("[${CurrentTenant.get()}] NCIP checkinItem request ${checkinItem}")
           JSONObject response = ncip_client.send(checkinItem);
-          log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}");
-          protocolInformationToResult(response, ncipLogDetails);
+          log.debug("[${CurrentTenant.get()}] NCIP checkinItem response ${response}")
+          protocolInformationToResult(response, ncipLogDetails)
 
-          log.debug(response?.toString());
+          log.debug(response?.toString())
           if ( response != null && response.has('problems') ) {
             // If there is a problem block, something went wrong, so change response to false.
-            result.result = false;
+            result.result = false
 
-            // If the problem block is just because the item is already checked in, then make response true
+            // If the problem block is just because the item is already checked in, then make response true.
             try {
-              JSONArray problemJsonArray = response.getJSONArray('problems');
-              if(problemJsonArray.length() == 1) //Only if this is our ONLY problem
-              {
-                JSONObject problemJson = problemJsonArray.getJSONObject(0);
-                if(problemJson.has("type") && problemJson.getString("type").equalsIgnoreCase("Item Not Checked Out")) {
-                  result.result = true;
-                  result.already_checked_in = true;
-                  log.debug("[${CurrentTenant.get()}] NCIP checkinItem not needed: already checked in")
-                  break;
+              JSONArray problemJsonArray = response.getJSONArray('problems')
+              // Only if this is our ONLY problem.
+              if (problemJsonArray.length() == 1) {
+                JSONObject problemJson = problemJsonArray.getJSONObject(0)
+                if (problemJson.has("type")) {
+                  String value = problemJson.getString("type")
+
+                  if (value.equalsIgnoreCase("Item Not Checked Out") ||
+                          value.equalsIgnoreCase("9022") ||
+                              value.equalsIgnoreCase("Not On Loan") ||
+                                  value.equalsIgnoreCase("Unknown Item")) {
+                    result.result = true;
+                    result.already_checked_in = true;
+                    log.debug("[${CurrentTenant.get()}] NCIP checkinItem not needed: already checked in")
+                    break;
+                  }
                 }
               }
             } catch(Exception e) {
-              log.debug("[${CurrentTenant.get()}] Error getting problem type: ${e.getLocalizedMessage()}");
+              log.debug("[${CurrentTenant.get()}] Error getting problem type: ${e.getLocalizedMessage()}")
             }
             result.problems = response.get('problems')
           }
-          break;
+          break
 
         default:
-          log.debug("Check In - no action, config ${checkInValue}");
+          log.debug("Check In - no action, config ${checkInValue}")
           // Check in is not configured, so return true
-          break;
+          break
       }
     }
-    return result;
+    return result
   }
 
   /**
