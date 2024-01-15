@@ -77,6 +77,8 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                 log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
                 reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
                 if (settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
+                    //send the RequestItem request
+                    hostLMSService.requestItem(request, )
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
                 } else {
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;

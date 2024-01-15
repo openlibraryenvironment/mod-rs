@@ -780,11 +780,22 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return result;
   }
 
+  //The code for the bibliographic id for request item (if used). Override for specific LMS requirements
+  public String getRequestItemBibIdCode() {
+    return "SYSNUMBER";
+  }
+
+  /**
+   * @param settings - the settings object
+   * @param requestId - The id associated with this request
+   * @param itemId - depending on the LMS, this can either be a bibliographicRecordId, or itemId
+   * @param borrowBarcode - the patron identifier
+   * @param ncipLogDetails - the log object
+   */
   public Map requestItem(
           ISettings settings,
           String requestId,
-          String bibliographicId,
-          String bibliographicIdCode,
+          String itemId,
           String borrowerBarcode,
           INcipLogDetails ncipLogDetails
   ) {
@@ -793,13 +804,14 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         reason: 'ncip'
     ];
 
+    String bibliographicIdCode = getRequestItemBibIdCode();
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
     RequestItem requestItem = new RequestItem()
       .setUserId(borrowerBarcode)
       .setRequestid(requestId)
-      .setBibliographicRecordId(bibliographicId)
+      .setBibliographicRecordId(itemId)
       .setBibligraphicRecordIdCode(bibliographicIdCode)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)

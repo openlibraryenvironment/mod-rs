@@ -245,4 +245,41 @@ public class HostLMSService {
         }
         return(acceptResult);
     }
+
+    public Map requestItem(PatronRequest request, String requestId,
+            String bibliographicId, String patronId) {
+        Map requestItemResult;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+            requestItemResult = getHostLMSActions().requestItem(
+                settingsService,
+                request.hrid,
+                bibliographicId,
+                patronId,
+                ncipLogDetails);
+            protocolAuditService.save(request, ncipLogDetails);
+        } else {
+            requestItemResult = resultHostLMSNotConfigured;
+            request.needsAttention = true;
+        }
+        return requestItemResult;
+    }
+
+    public Map cancelRequestItem(PatronRequest request, String requestId) {
+        Map cancelRequestItemResult;
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
+            cancelRequestItemResult = getHostLMSActions().cancelRequestItem(
+                    settingsService,
+                    requestId,
+                    ncipLogDetails);
+            protocolAuditService.save(request, ncipLogDetails);
+        } else {
+            cancelRequestItemResult = resultHostLMSNotConfigured;
+            request.needsAttention = true;
+        }
+        return cancelRequestItemResult;
+    }
 }
