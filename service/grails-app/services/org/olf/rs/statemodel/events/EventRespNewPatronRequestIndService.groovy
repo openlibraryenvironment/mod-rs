@@ -74,13 +74,23 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
             // set localCallNumber to whatever we managed to look up
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
-                log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
                 if (settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
                     //send the RequestItem request
-                    hostLMSService.requestItem(request, )
-                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
+                    log.debug("Attempt hold with RequestItem");
+                    Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+                            request.supplierUniqueRecordId, request.patronIdentifier);
+                    if (requestItemResult.result == true) {
+                        log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
+                        reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
+                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
+                    } else {
+                        unfilled = true;
+                        eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid '
+                                + request.supplierUniqueRecordId;
+                    }
                 } else {
+                    log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
+                    reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 }
             } else {
