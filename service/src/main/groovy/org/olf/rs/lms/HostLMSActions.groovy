@@ -64,4 +64,14 @@ public interface HostLMSActions {
   );
 
   public Map checkInItem(ISettings settings, String item_id, INcipLogDetails ncipLogDetails);
+
+  public Map requestItem(
+          ISettings settings,
+          String requestId,
+          String itemId,
+          String borrowerBarcode,
+          INcipLogDetails ncipLogDetails
+  );
+
+  public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails);
 }

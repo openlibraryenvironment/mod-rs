@@ -897,6 +897,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map responderNewPatronRequestIndOKRequestItem = [
+        code: 'responderNewPatronRequestIndOKRequestItem',
+        description: 'Event triggered by a new incoming request, the item has been located and we are configured to use request item',
+        result: true,
+        status: Status.RESPONDER_AWAIT_PICKING,
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map responderNewPatronRequestIndOKunfilled = [
         code: 'responderNewPatronRequestIndOKunfilled',
         description: 'Event triggered by a new incoming request and the item was not found',
@@ -1214,7 +1224,7 @@ public class ActionEventResultData {
         ]
     ];
 
-    private static Map requesterCancelledDuplicate = [
+    private static Map requesterCancelledDuplicateList = [
         code: ActionEventResultList.REQUESTER_CANCEL_DUPLICATE,
         description: 'Requester has cancelled the duplicate request',
         model: StateModel.MODEL_REQUESTER,
@@ -1500,6 +1510,7 @@ public class ActionEventResultData {
         results: [
             responderNewPatronRequestIndOK,
             responderNewPatronRequestIndOKlocated,
+            responderNewPatronRequestIndOKRequestItem,
             responderNewPatronRequestIndOKunfilled
         ]
     ];
@@ -1596,78 +1607,78 @@ public class ActionEventResultData {
 
     // Now specify all the ones we are going to load
     private static Map[] allResultLists = [
-        // Requester lists
-        requesterAgreeConditionsList,
-        requesterBorrowerCheckList,
-        requesterCancelList,
-        requesterCancelLocalList,
-        requesterCancelWithSupplierIndList,
-        requesterFilledLocallyList,
-        requesterLocalCannotSupplyList,
-        requesterMarkEndOfRotaReviewedList,
-        requesterManualCheckInList,
-        requesterManualCloseList,
-        requesterNewPatronRequestIndList,
-        requesterNoStatusChangeList,
-        requesterPatronReturnedList,
-        requesterPatronReturnedShippedList,
-        requesterReceivedList,
-        requesterRejectConditionsList,
-        requesterRerequestCancelledList,
-        requesterRerequestEndOfRotaList,
-        requesterShippedReturnList,
-        requesterSendToNextLocationList,
-        requesterValidateIndList,
-        requesterBypassedValidationList,
-        requesterCancelledDuplicate,
-        requesterRetriedValidationList,
-        requesterCancelledBlankFormList,
+            // Requester lists
+            requesterAgreeConditionsList,
+            requesterBorrowerCheckList,
+            requesterCancelList,
+            requesterCancelLocalList,
+            requesterCancelWithSupplierIndList,
+            requesterFilledLocallyList,
+            requesterLocalCannotSupplyList,
+            requesterMarkEndOfRotaReviewedList,
+            requesterManualCheckInList,
+            requesterManualCloseList,
+            requesterNewPatronRequestIndList,
+            requesterNoStatusChangeList,
+            requesterPatronReturnedList,
+            requesterPatronReturnedShippedList,
+            requesterReceivedList,
+            requesterRejectConditionsList,
+            requesterRerequestCancelledList,
+            requesterRerequestEndOfRotaList,
+            requesterShippedReturnList,
+            requesterSendToNextLocationList,
+            requesterValidateIndList,
+            requesterBypassedValidationList,
+            requesterCancelledDuplicateList,
+            requesterRetriedValidationList,
+            requesterCancelledBlankFormList,
 
-        // Digital returnable requester lists
-        digitalReturnableRequesterExpectToSupplyISO18626,
-        digitalReturnableRequesterLoanedDigitallyISO18626,
+            // Digital returnable requester lists
+            digitalReturnableRequesterExpectToSupplyISO18626,
+            digitalReturnableRequesterLoanedDigitallyISO18626,
 
-        // Responder lists
-        responderAddConditionalList,
-        responderAnswerConditionalList,
-        responderAnswerYesList,
-        responderCancelList,
-        responderCancelRequestReceivedIndList,
-        responderCannotSupplyList,
-        responderCheckInAndShipList,
-        responderCheckInToReshareList,
-        responderCheckedIntoReshareIndList,
-        responderCloseManualList,
-        responderItemReturnedList,
-        responderManualCheckOutList,
-        responderMarkConditionsAgreedList,
-        responderMarkShippedList,
-        responderNewPatronRequestIndList,
-        responderNoStatusChangeList,
-        responderPrintPullSlipList,
+            // Responder lists
+            responderAddConditionalList,
+            responderAnswerConditionalList,
+            responderAnswerYesList,
+            responderCancelList,
+            responderCancelRequestReceivedIndList,
+            responderCannotSupplyList,
+            responderCheckInAndShipList,
+            responderCheckInToReshareList,
+            responderCheckedIntoReshareIndList,
+            responderCloseManualList,
+            responderItemReturnedList,
+            responderManualCheckOutList,
+            responderMarkConditionsAgreedList,
+            responderMarkShippedList,
+            responderNewPatronRequestIndList,
+            responderNoStatusChangeList,
+            responderPrintPullSlipList,
 
-        // CDL responder lists
-        cdlResponderCheckInToReshareList,
-        cdlResponderFillDigitalLoanList,
+            // CDL responder lists
+            cdlResponderCheckInToReshareList,
+            cdlResponderFillDigitalLoanList,
 
-        // ISO18626 lists
-        requesterAwaitingReturnShippingISO18626,
-        requesterBorrowerReturnedISO18626,
-        requesterBorrowingLibraryReceivedISO18626,
-        requesterCancelPendingISO18626,
-        requesterCheckedInISO18626,
-        requesterConditionalAnswerReceivedISO18626,
-        requesterExpectToSupplyISO18626,
-        requesterNotificationReceivedISO18626,
-        requesterOverdueISO18626,
-        requesterRecalledISO18626,
-        requesterSentToSupplierISO18626,
-        requesterShippedISO18626,
-        requesterShippedToSupplierISO18626,
-        responderCancelReceivedISO18626,
-        responderNotificationReceivedISO18626,
-        responderReceivedISO18626,
-        responderShippedReturnISO18626
+            // ISO18626 lists
+            requesterAwaitingReturnShippingISO18626,
+            requesterBorrowerReturnedISO18626,
+            requesterBorrowingLibraryReceivedISO18626,
+            requesterCancelPendingISO18626,
+            requesterCheckedInISO18626,
+            requesterConditionalAnswerReceivedISO18626,
+            requesterExpectToSupplyISO18626,
+            requesterNotificationReceivedISO18626,
+            requesterOverdueISO18626,
+            requesterRecalledISO18626,
+            requesterSentToSupplierISO18626,
+            requesterShippedISO18626,
+            requesterShippedToSupplierISO18626,
+            responderCancelReceivedISO18626,
+            responderNotificationReceivedISO18626,
+            responderReceivedISO18626,
+            responderShippedReturnISO18626
     ];
 
 	public void load() {
