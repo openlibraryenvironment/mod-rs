@@ -23,6 +23,7 @@ class UrlMappings {
     "/rs/patronrequests/openURL" (controller: "patronRequest", action: "openURL")
 
     "/rs/patron/$patronIdentifier/canCreateRequest" (controller: 'patron', action: 'canCreateRequest')
+    "/rs/patron/validate" (controller: 'patron', action: 'validate')
 
     "/rs/availableAction/fromStates/$stateModel/$actionCode" (controller: "availableAction", action: "fromStates")
     "/rs/availableAction/toStates/$stateModel/$actionCode" (controller: "availableAction", action: "toStates")

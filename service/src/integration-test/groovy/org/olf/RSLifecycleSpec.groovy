@@ -217,18 +217,21 @@ class RSLifecycleSpec extends TestBase {
       }
 
     where:
-      name      | should_be_found
-      'alma'    | true
-      'aleph'   | true
-      'ncsu'    | true
-      'wms'     | true
-      'wms2'    | true
-      'default' | true
-      'manual'  | true
-      'folio'   | true
-      'symphony'| true
-      'sierra'  | true
-      'wibble'  | false
+      name        | should_be_found
+      'alma'      | true
+      'aleph'     | true
+      'ncsu'      | true
+      'wms'       | true
+      'wms2'      | true
+      'default'   | true
+      'manual'    | true
+      'folio'     | true
+      'symphony'  | true
+      'sierra'    | true
+      'polaris'   | true
+      'evergreen' | true
+      'tlc'       | true
+      'wibble'    | false
   }
 
   void "Set up test tenants "(tenantid, name) {
@@ -601,13 +604,22 @@ class RSLifecycleSpec extends TestBase {
 
     where:
       tenant_id | lms | zResponseFile | location | shelvingLocation | _
-      'RSInstThree' | 'alma' | 'alma-princeton.xml' | 'Firestone Library' | 'stacks: Firestone Library' | _
-      'RSInstThree' | 'alma' | 'alma-princeton-notfound.xml' | null | null | _
-      'RSInstThree' | 'alma' | 'alma-dickinson-multiple.xml' | null | null | _
-      'RSInstThree' | 'horizon' | 'horizon-jhu.xml' | 'Eisenhower' | null | _
-      'RSInstThree' | 'symphony' | 'symphony-stanford.xml' | 'SAL3' | 'STACKS' | _
-      'RSInstThree' | 'voyager' | 'voyager-temp.xml' | null | null | _
-      'RSInstThree' | 'folio' | 'folio-not-requestable.xml' | null | null | _
+      'RSInstThree' | 'alma'      | 'alma-princeton.xml'                                          | 'Firestone Library'           | 'stacks: Firestone Library'   | _
+      'RSInstThree' | 'alma'      | 'alma-princeton-notfound.xml'                                 | null                          | null                          | _
+      'RSInstThree' | 'alma'      | 'alma-dickinson-multiple.xml'                                 | null                          | null                          | _
+      'RSInstThree' | 'horizon'   | 'horizon-jhu.xml'                                             | 'Eisenhower'                  | null                          | _
+      'RSInstThree' | 'symphony'  | 'symphony-stanford.xml'                                       | 'SAL3'                        | 'STACKS'                      | _
+      'RSInstThree' | 'voyager'   | 'voyager-temp.xml'                                            | null                          | null                          | _
+      'RSInstThree' | 'folio'     | 'folio-not-requestable.xml'                                   | null                          | null                          | _
+      'RSInstThree' | 'polaris'   | 'polaris-with-in-item-status.xml'                             | 'Juvenile nonfiction shelves' | 'Main Library'                | _
+      'RSInstThree' | 'polaris'   | 'polaris-with-out-item-status.xml'                            | null                          | null                          | _
+      'RSInstThree' | 'polaris'   | 'polaris-with-held-item-status.xml'                           | null                          | null                          | _
+      'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-checked-out-item-status.xml'     | null                          | null                          | _
+      'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-in-transit-item-status.xml'      | null                          | null                          | _
+      'RSInstThree' | 'evergreen' | 'evergreen-lake-agassiz-with-available-item-status.xml'       | 'HAWLEY'                      | 'Main'                        | _
+      'RSInstThree' | 'evergreen' | 'evergreen-north-west-with-available-item-status.xml'         | 'ROSEAU'                      | 'Main'                        | _
+      'RSInstThree' | 'evergreen' | 'evergreen-traverse-de-sioux-with-available-item-status.xml'  | 'AM'                          | 'Children\'s Literature Area' | _
+      'RSInstThree' | 'tlc'       | 'tlc-eastern.xml'                                             | 'Warner Library'              | 'WARNER STACKS'               | _
   }
 
     /**
