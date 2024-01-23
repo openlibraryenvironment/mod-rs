@@ -7,6 +7,7 @@ import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.SharedIndexService;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
