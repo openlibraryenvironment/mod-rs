@@ -54,7 +54,7 @@ public class SettingsData {
     public static final String SETTING_NCIP_USE_DUE_DATE               = 'ncip_use_due_date';
     public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
     public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
-    public static final String SETTING_NCIP_USE_REQUEST_ITEM           = 'ncip_use_request_item';
+
 
     // Settings for the wmsSettings section
     public static final String SETTING_WMS_API_KEY                = 'wms_api_key';
@@ -84,6 +84,7 @@ public class SettingsData {
     public static final String SETTING_CHECK_OUT_ITEM       = 'check_out_item';
     public static final String SETTING_CHECK_IN_ON_RETURN   = 'check_in_on_return';
     public static final String SETTING_HOST_LMS_INTEGRATION = 'host_lms_integration';
+    public static final String SETTING_USE_REQUEST_ITEM     = 'use_request_item';
 
     // Settings for the requests section
     public static final String SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID = 'default_institutional_patron_id';
@@ -206,8 +207,6 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
             ensureAppSetting(SETTING_NCIP_DUE_DATE_FORMAT, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, ReshareActionService.DEFAULT_DATE_FORMAT);
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
-            ensureAppSetting(SETTING_NCIP_USE_REQUEST_ITEM, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
-
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
@@ -232,6 +231,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_CHECK_IN_ON_RETURN, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHECK_IN_ON_RETURN, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_CHECK_IN_ON_RETURN, RefdataValueData.CHECK_IN_ON_RETURN_OFF).value);
             ensureAppSetting(SETTING_ACCEPT_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_ACCEPT_ITEM_METHOD);
             ensureAppSetting(SETTING_HOST_LMS_INTEGRATION, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, RefdataValueData.HOST_LMS_INTEGRATION_ADAPTER_MANUAL).value);
+            ensureAppSetting(SETTING_USE_REQUEST_ITEM, SECTION_HOST_LMS_INTEGRATION, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
             ensureAppSetting(SETTING_REQUEST_ID_PREFIX, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_REQUEST_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);

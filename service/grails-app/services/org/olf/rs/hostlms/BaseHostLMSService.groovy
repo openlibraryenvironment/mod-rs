@@ -823,6 +823,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);
+    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem respnse ${response}")
+    protocolInformationToResult(response, ncipLogDetails);
 
     if ( response.has('problems') ) {
       result.result = false;
@@ -856,6 +858,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem request ${cancelRequestItem}");
     JSONObject response = client.send(requestItem);
+    log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem response ${response}");
+    protocolInformationToResult(response, ncipLogDetails);
 
     if ( response.has('problems') ) {
       result.result = false;
