@@ -21,7 +21,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
  * @author Chas
  */
 public class EventRespNewPatronRequestIndService extends AbstractEvent {
-    private static final String SETTING_REQUEST_ITEM_YES = "Yes";
+    private static final String SETTING_REQUEST_ITEM_YES = "yes"; //refdata seems to set values to lowercase
 
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
@@ -75,7 +75,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
             // set localCallNumber to whatever we managed to look up
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
-                if (settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
+                if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
                     Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
