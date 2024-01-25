@@ -814,7 +814,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     RequestItem requestItem = new RequestItem()
       .setUserId(borrowerBarcode)
-      .setRequestid(requestId)
+      .setRequestId(requestId)
       .setBibliographicRecordId(itemId)
       .setBibligraphicRecordIdCode(bibliographicIdCode)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
@@ -851,7 +851,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
     CancelRequestItem cancelRequestItem = new RequestItem()
-            .setRequestid(requestId)
+            .setRequestId(requestId)
             .setToAgency(ncipConnectionDetails.ncipToAgency)
             .setFromAgency(ncipConnectionDetails.ncipFromAgency)
             .setRegistryId(ncipConnectionDetails.registryId);
