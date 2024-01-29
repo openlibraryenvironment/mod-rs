@@ -7,6 +7,7 @@ import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.SharedIndexService;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -20,6 +21,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
  * @author Chas
  */
 public class EventRespNewPatronRequestIndService extends AbstractEvent {
+    private static final String SETTING_REQUEST_ITEM_YES = "yes"; //refdata seems to set values to lowercase
 
     HostLMSService hostLMSService;
     // PatronNoticeService patronNoticeService;
@@ -72,10 +74,26 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
         if (location != null) {
             // set localCallNumber to whatever we managed to look up
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
-                log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
+                if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
+                    //send the RequestItem request
+                    log.debug("Attempt hold with RequestItem");
+                    Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+                            request.supplierUniqueRecordId, request.patronIdentifier);
+                    if (requestItemResult.result == true) {
+                        log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
+                        reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
+                        eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
+                    } else {
+                        unfilled = true;
+                        eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid '
+                                + request.supplierUniqueRecordId;
+                    }
+                } else {
+                    log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
+                    reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
+                }
             } else {
                 unfilled = true;
                 eventResultDetails.auditMessage = 'AutoResponder Failed to route to location ' + location;

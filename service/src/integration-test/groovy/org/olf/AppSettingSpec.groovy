@@ -1,9 +1,14 @@
 package org.olf
 
 import grails.testing.mixin.integration.Integration;
+import grails.gorm.multitenancy.Tenants;
 import groovy.json.JsonBuilder;
 import groovy.util.logging.Slf4j;
 import spock.lang.Stepwise;
+
+import org.olf.rs.referenceData.SettingsData;
+import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.rs.ReferenceDataService;
 
 @Slf4j
 @Integration
@@ -89,28 +94,111 @@ class AppSettingSpec extends TestBase {
     void "Fetch a specific AppSetting"(String tenantId, String ignore) {
         when:"Fetch the AppSetting"
 
-            // Set the headers
-            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        // Set the headers
+        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
 
-            // Fetch the AppSetting
-            def response = doGet("${baseUrl}/rs/settings/appSettings/" + testctx.appSetting.id.toString());
-            log.debug("Response from Get appSettings: " + response.toString());
+        // Fetch the AppSetting
+        def response = doGet("${baseUrl}/rs/settings/appSettings/" + testctx.appSetting.id.toString());
+        log.debug("Response from Get appSettings: " + response.toString());
 
         then:"Check we have a valid response"
-            // Check the various fields
-            assert(response != null);
-            assert(response.id == testctx.appSetting.id);
-            assert(response.section == testctx.appSetting.section);
-            assert(response.key == testctx.appSetting.key);
-            assert(response.settingType == testctx.appSetting.settingType);
-            assert(response.vocab == testctx.appSetting.vocab);
-            assert(response.defValue == testctx.appSetting.defValue);
-            assert(response.value == testctx.appSetting.value);
+        // Check the various fields
+        assert(response != null);
+        assert(response.id == testctx.appSetting.id);
+        assert(response.section == testctx.appSetting.section);
+        assert(response.key == testctx.appSetting.key);
+        assert(response.settingType == testctx.appSetting.settingType);
+        assert(response.vocab == testctx.appSetting.vocab);
+        assert(response.defValue == testctx.appSetting.defValue);
+        assert(response.value == testctx.appSetting.value);
 
         where:
-            tenantId   | ignore
-            TENANT_ONE | ""
+        tenantId   | ignore
+        TENANT_ONE | ""
     }
+
+    void "Create a new Refdata AppSetting"(
+            String tenantId,
+            String section,
+            String key,
+            String settingType,
+            String vocab,
+            String defValue,
+            String category,
+            String value
+    ) {
+        when:"Create a new RefData AppSetting"
+
+        // Set the headers
+        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+        // Create the AppSetting
+        ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
+        def refDataValue;
+        Tenants.withId((tenantId + '_mod_rs').toLowerCase()) {
+            refDataValue = referenceDataService.lookup(category, value).value;
+        }
+        Map appSetting = [
+                section : section,
+                key : key,
+                settingType : settingType,
+                vocab : vocab,
+                defValue : defValue,
+                value : refDataValue
+        ];
+        String json = (new JsonBuilder(appSetting)).toString();
+
+        def response = null;
+        int statusCode = 201;
+        try {
+            response = doPost("${baseUrl}/rs/settings/appSettings".toString(), null, null, {
+                // Note: request is of type groovyx.net.http.HttpConfigs$BasicRequest
+                request.setBody(json);
+            });
+        } catch (groovyx.net.http.HttpException e) {
+            statusCode = e.getStatusCode();
+            response = e.getBody();
+        }
+        log.debug("Response from post AppSetting: " + response.toString());
+
+        // Store that AppSetting
+        testctx.refDataAppSetting = response;
+
+        then:"Check we have a valid response"
+        assert(response?.id != null);
+        assert(statusCode == 201);
+
+        where:
+        tenantId   | section        | key           | settingType | vocab        | defValue  | category | value
+        TENANT_ONE | "test section" | "other key"   | SettingsData.SETTING_TYPE_REF_DATA | RefdataValueData.VOCABULARY_YES_NO | null | RefdataValueData.VOCABULARY_YES_NO | RefdataValueData.YES_NO_NO
+    }
+
+    void "Fetch the Refdata AppSetting"(String tenantId, String ignore) {
+        when:"Fetch the AppSetting"
+
+        // Set the headers
+        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+
+        // Fetch the AppSetting
+        def response = doGet("${baseUrl}/rs/settings/appSettings/" + testctx.refDataAppSetting.id.toString());
+        log.debug("Response from Get refata appSettings: " + response.toString());
+
+        then:"Check we have a valid response"
+        // Check the various fields
+        assert(response != null);
+        assert(response.id == testctx.refDataAppSetting.id);
+        assert(response.section == testctx.refDataAppSetting.section);
+        assert(response.key == testctx.refDataAppSetting.key);
+        assert(response.settingType == testctx.refDataAppSetting.settingType);
+        assert(response.vocab == testctx.refDataAppSetting.vocab);
+        assert(response.defValue == testctx.refDataAppSetting.defValue);
+        assert(response.value == testctx.refDataAppSetting.value);
+
+        where:
+        tenantId   | ignore
+        TENANT_ONE | ""
+    }
+
 
     void "Search for AppSettings"(String tenantId, String ignore) {
         when:"Search for AppSettings"

@@ -26,6 +26,7 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_INVALID_PATRON        = 'invalidPatron';
     static public final String QUALIFIER_LOCAL_REVIEW          = 'localReview';
     static public final String QUALIFIER_LOCATED               = 'located';
+    static public final String QUALIFIER_LOCATED_REQUEST_ITEM  = 'locatedRequestItem';
     static public final String QUALIFIER_NO                    = 'no';
     static public final String QUALIFIER_NO_INSTITUTION_SYMBOL = 'noInstitutionSymbol';
     static public final String QUALIFIER_NO_SUPPLIER           = 'noSupplier';
