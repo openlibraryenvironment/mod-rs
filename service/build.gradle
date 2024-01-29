@@ -10,6 +10,7 @@ buildscript {
   repositories {
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
+
   }
   dependencies {
     classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -96,6 +97,10 @@ repositories {
   maven { url 'https://repo.grails.org/grails/core' }
   maven { url 'http://maven.indexdata.com/' }
   maven { url "https://repository.folio.org/repository/maven-folio" }
+  maven {
+    name "reposiliteRepositoryReleases"
+    url "https://reposilite.reshare.indexdata.com/releases"
+  }
 }
 
 sourceSets {
@@ -202,7 +207,7 @@ dependencies {
   }
 
   // NCIP deps
-  compile 'org.olf.rs:lib-ncip-client:0.22.0'
+  compile 'org.olf.rs:lib-ncip-client:0.23.3'
   compile 'com.github.jknack:handlebars:4.2.0'
   compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
   compile 'org.apache.commons:commons-collections4:4.4'
