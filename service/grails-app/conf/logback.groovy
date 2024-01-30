@@ -164,7 +164,7 @@ if ( ( Environment.isDevelopmentMode() ) ||
   // Log HTTPBuilderNG traffic
   // logger 'org.apache.http', INFO
   // logger 'org.apache.http.headers', TRACE
-  // logger 'org.apache.http.wire', TRACE
+  logger 'org.apache.http.wire', TRACE
 
   // logger ('com.k_int.okapi.OkapiSchemaHandler', WARN)
   // logger ('com.k_int.okapi.OkapiClient', WARN)
