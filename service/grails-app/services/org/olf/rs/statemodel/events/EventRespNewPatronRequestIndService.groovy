@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events;
 
+import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolType;
@@ -15,6 +16,7 @@ import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
 import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.custprops.CustomProperty;
 
 /**
  * This event service takes a new responder patron request and attempts to locate the item if enabled
@@ -22,9 +24,10 @@ import com.k_int.web.toolkit.settings.AppSetting;
  */
 public class EventRespNewPatronRequestIndService extends AbstractEvent {
     private static final String SETTING_REQUEST_ITEM_YES = "yes"; //refdata seems to set values to lowercase
+    private static final String SETTING_INSTITUTIONAL_ID = 'default_institutional_patron_id';
 
+    DirectoryEntryService directoryEntryService;
     HostLMSService hostLMSService;
-    // PatronNoticeService patronNoticeService;
     ReshareActionService reshareActionService;
     SettingsService settingsService;
     SharedIndexService sharedIndexService;
@@ -76,10 +79,20 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
             if (reshareApplicationEventHandlerService.routeRequestToLocation(request, location)) {
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
                 if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_YES)) { //is request item enabled for this responder?
+
+                    //Get the institutionalPatronID from the directory entry, or fall back on the default in settings
+                    CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
+                        request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
+                    String institutionalPatronIdValue = institutionalPatronId?.value;
+                    if (!institutionalPatronIdValue) {
+                        // If nothing on the Directory Entry then fallback to the default in settings
+                        AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SETTING_INSTITUTIONAL_ID);
+                        institutionalPatronIdValue = defaultInstitutionalPatronId?.value;
+                    }
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
                     Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
-                            request.supplierUniqueRecordId, request.patronIdentifier);
+                            request.supplierUniqueRecordId, institutionalPatronIdValue);
                     if (requestItemResult.result == true) {
                         log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
                         reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
