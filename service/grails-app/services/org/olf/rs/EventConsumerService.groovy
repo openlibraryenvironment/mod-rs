@@ -307,7 +307,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
   private void bindCustomProperties(DirectoryEntry de, Map payload) {
     log.debug("Iterate over custom properties sent in directory entry payload ${payload.customProperties}")
 
-    cleanAllCustomProperties(de)
+    cleanAllCustomProperties(de, payload?.customProperties)
 
     payload?.customProperties?.each { k, v ->
       // de.custprops is an instance of com.k_int.web.toolkit.custprops.types.CustomPropertyContainer
@@ -405,48 +405,14 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     log.info("onTenantLoadReference(${tenantId},${value},${existing_tenant},${upgrading},${toVersion},${fromVersion})")
   }
 
-  private void cleanCustomProperties(DirectoryEntry de) {
-
-    // Fror each of these custprops - we should have a scalar, not a set
-    [Directory.KEY_LOCAL_INSTITUTION_PATRON_ID,
-     Directory.KEY_ILL_POLICY_LOAN,
-     Directory.KEY_ILL_POLICY_LAST_RESORT,
-     Directory.KEY_ILL_POLICY_RETURNS,
-     Directory.KEY_ILL_POLICY_BORROW_RATIO].each { k ->
-
-      boolean first = true
-      boolean updated = false
-
-      List cps_to_remove = []
-
-      de.customProperties?.value.each { cp ->
-        if ( cp.definition.name == k ) {
-          if ( first ) {
-            first=false
-          }
-          else {
-            // Extra value - dispose of it.
-            cps_to_remove.add(cp)
-            // de.customProperties?.removeFromValue(cp)
-          }
-        }
-      }
-
-      cps_to_remove.each { cp ->
-        de.customProperties?.removeFromValue(cp)
-        updated = true
-      }
-    }
-  }
-
-  private void cleanAllCustomProperties(DirectoryEntry de) {
+  private void cleanAllCustomProperties(DirectoryEntry de, Map updatedCustomProperties) {
 
     boolean updated = false
     List props_seen = []
     List cps_to_remove = []
 
     de.customProperties?.value.each { cp ->
-      if ( props_seen.contains(cp.definition.name) ) {
+      if ( props_seen.contains(cp.definition.name) || !updatedCustomProperties?.containsKey(cp.definition.name)) {
         log.debug("Removing unwanted prop value for ${cp.definition.name}")
         cps_to_remove.add(cp)
       }
