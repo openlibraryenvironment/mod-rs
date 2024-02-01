@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events;
 
+import org.olf.rs.constants.Directory;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
