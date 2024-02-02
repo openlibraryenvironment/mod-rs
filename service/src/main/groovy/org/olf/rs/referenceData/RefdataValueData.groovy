@@ -50,6 +50,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_YES_NO                           = 'YesNo';
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
     public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
+    public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -196,6 +197,9 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_ACCEPT_ITEM_METHOD, 'None');
             RefdataValue.lookupOrCreate(VOCABULARY_ACCEPT_ITEM_METHOD, 'NCIP');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ITEM_METHOD, 'None');
+            RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ITEM_METHOD, 'NCIP');
 
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_ALMA);
             RefdataValue.lookupOrCreate(VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER, HOST_LMS_INTEGRATION_ADAPTER_ALEPH);
