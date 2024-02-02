@@ -72,10 +72,8 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
       // For multi volume requests we include itemId to ensure uniqueness
       if (enforceMultivolGeneration || patronRequest.volumes.size() > 1) {
-
-        // We assume last 4 digits of barcode is sufficient for uniqueness...
-        // The below will not fail for itemId < 4
-        temporaryItemBarcode = "${temporaryItemBarcodeKey}-${itemId.drop(itemId.size() - 4)}";
+        // For multiple item request use itemId because it is item barcode
+        temporaryItemBarcode = itemId;
       } else {
         // For requests with only one item, can use the hrid of the request
         temporaryItemBarcode = temporaryItemBarcodeKey;
