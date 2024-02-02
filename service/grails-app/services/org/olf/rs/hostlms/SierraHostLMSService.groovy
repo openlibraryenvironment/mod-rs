@@ -11,7 +11,7 @@ import org.olf.rs.settings.ISettings;
  */
 public class SierraHostLMSService extends BaseHostLMSService {
 
-  List<String> NOTES_CONSIDERED_AVAILABLE = ['AVAILABLE', 'CHECK SHELVES'];
+  List<String> NOTES_CONSIDERED_AVAILABLE = ['AVAILABLE', 'CHECK SHELVES', 'CHECK SHELF'];
 
   public CirculationClient getCirculationClient(ISettings settings, String address) {
     // This wrapper creates the circulationClient we need
