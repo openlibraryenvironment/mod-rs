@@ -179,8 +179,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
             pr.save(flush:true, failOnError:true)
 
             result.messageType = 'REQUEST';
-            result.supIdType = header.supplyingAgencyId.agencyIdType;
-            result.supId = header.supplyingAgencyId.agencyIdValue;
+            result.supIdType = header.supplyingAgencyId?.agencyIdType;
+            result.supId = header.supplyingAgencyId?.agencyIdValue;
             result.reqAgencyIdType = header.requestingAgencyId.agencyIdType;
             result.reqAgencyId = header.requestingAgencyId.agencyIdValue;
             result.reqId = header.requestingAgencyRequestId;
