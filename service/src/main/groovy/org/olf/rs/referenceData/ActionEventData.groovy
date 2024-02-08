@@ -15,8 +15,8 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class ActionEventData {
 
-	public void load() {
-		log.info("Adding action and events to the database");
+    public void load() {
+        log.info("Adding action and events to the database");
 
         // Note: The calls to capitalize and prefixing the with the model are for backward compatibility,
         // in future an actions service class should not be related to the model unless they are very specific to the model
@@ -44,7 +44,7 @@ public class ActionEventData {
 
         // Requester Actions
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
+                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
                 ActionEventResultList.REQUESTER_BYPASSED_VALIDATION);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK, 'Check that the borrower id is valid and they are able to request an item', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
         ActionEvent.ensure(Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE, 'Check that the borrower id is valid and they are able to request an item, if they are not valid or cannot request an item the librarian can override this to say they are', true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE.capitalize(), ActionEventResultList.REQUESTER_BORROWER_CHECK, true);
@@ -111,20 +111,20 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, eventServiceName(Events.EVENT_STATUS_RES_OVERDUE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
-	}
+    }
 
     private String eventServiceName(String eventName) {
         // We only do this for backward compatibility, no need to call this in the future
         // We split the event name on the underscores then capitalize each word and then join it back together
         String[] eventNameWords = eventName.replace(' ', '_').toLowerCase().split("_");
         String eventNameNormalised = "";
-        eventNameWords.each{ word ->
+        eventNameWords.each { word ->
             eventNameNormalised += word.capitalize();
         }
-        return(eventNameNormalised);
+        return (eventNameNormalised);
     }
 
-	public static void loadAll() {
-		(new ActionEventData()).load();
-	}
+    public static void loadAll() {
+        (new ActionEventData()).load();
+    }
 }
