@@ -602,6 +602,152 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    // SLNP Requester actions
+
+    private static Map slnpRequesterCancelRequest = [
+        code: 'slnpRequesterCancelRequest',
+        description: 'The request has been cancelled by the requester staff and is completed. No further actions can be taken including the action Create revised request.',
+        result: true,
+        status: Status.SLNP_REQUESTER_CANCELLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpRequesterReceived = [
+        code: 'slnpRequesterReceived',
+        description: 'Mark received',
+        result: true,
+        status: Status.SLNP_REQUESTER_CHECKED_IN,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpRequesterCheckedIn = [
+        code: 'slnpRequesterCheckedIn',
+        description: 'Mark returned by patron',
+        result: true,
+        status: Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpRequesterShippedReturn = [
+        code: 'slnpRequesterShippedReturn',
+        description: 'Mark return shipped',
+        result: true,
+        status: Status.SLNP_REQUESTER_COMPLETE,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    // SLNP responder actions
+
+    private static Map slnpResponderRespondYes = [
+        code: 'slnpResponderRespondYes',
+        description: 'Item has been located and we expect to supply, staff is awaiting printing pull slip',
+        result: true,
+        status: Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderCannotSupply = [
+        code: 'slnpResponderCannotSupply',
+        description: 'Request cannot be filled and is complete',
+        result: true,
+        status: Status.SLNP_RESPONDER_UNFILLED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderAbortSupply = [
+        code: 'slnpResponderAbortSupply',
+        description: 'Request has been aborted due to missing metadata and is complete',
+        result: true,
+        status: Status.SLNP_RESPONDER_ABORTED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderConditionalSupply = [
+        code: 'slnpResponderConditionalSupply',
+        description: 'Item has been located and we expect to supply, staff is awaiting printing pull slip',
+        result: true,
+        status: Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderSupplierPrintPullSlip = [
+        code: 'slnpResponderSupplierPrintPullSlip',
+        description: 'Pull slip has been printed and item is being pulled from the shelves',
+        result: true,
+        status: Status.SLNP_RESPONDER_AWAIT_PICKING,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderSupplierCheckInReshare = [
+        code: 'slnpResponderSupplierCheckInReshare',
+        description: 'Item has been checked out from the host ILS and into ReShare',
+        result: true,
+        status: Status.SLNP_RESPONDER_AWAIT_SHIP,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderSupplierMarkShipped = [
+        code : 'slnpResponderSupplierMarkShipped',
+        description: 'Request has been shipped to the requesting library',
+        result: true,
+        status: Status.SLNP_RESPONDER_ITEM_SHIPPED,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderSupplierUndoLastAction = [
+        code: 'slnpResponderSupplierUndoLastAction',
+        description: 'Item has been checked out from the host ILS and into ReShare',
+        result: true,
+        status: Status.SLNP_RESPONDER_AWAIT_SHIP,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    private static Map slnpResponderItemReturned = [
+        code: 'slnpResponderItemReturned',
+        description: 'Request is complete',
+        result: true,
+        status: Status.SLNP_RESPONDER_COMPLETE,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
+    // SLNP default requester/responder no status change action
+
+    private static Map slnpDefaultNoStatusChangeOK = [
+        code: 'slnpDefaultNoStatusChangeOK',
+        description: 'Default scenario, status is not changing',
+        result: true,
+        status: null,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent : null
+    ];
+
     // The responder actions
     private static Map responderAddConditionalHoldingOK = [
         code: 'responderAddConditionalHoldingOK',
@@ -1524,6 +1670,154 @@ public class ActionEventResultData {
         ]
     ];
 
+    // SLNP Requester lists
+
+    private static Map slnpRequesterCancelList = [
+        code : ActionEventResultList.SLNP_REQUESTER_CANCEL,
+        description: 'Status has changed to canceled',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpRequesterCancelRequest
+        ]
+    ];
+
+    private static Map slnpRequesterReceivedList = [
+        code: ActionEventResultList.SLNP_REQUESTER_RECEIVED,
+        description: 'Request has been updated by the supplier with the shipped status.',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpRequesterReceived
+        ]
+    ];
+
+    private static Map slnpRequesterAbortedList = [
+        code: ActionEventResultList.SLNP_REQUESTER_ABORTED,
+        description: 'Status has changed to canceled',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpRequesterCancelRequest
+        ]
+    ];
+
+    private static Map slnpRequesterPrintPullSlipList = [
+        code: ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP,
+        description: 'Requester has triggered print pull slip action',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpDefaultNoStatusChangeOK
+        ]
+    ];
+
+    private static Map slnpRequesterCheckedInList = [
+        code: ActionEventResultList.SLNP_REQUESTER_CHECKED_IN,
+        description: 'Request has been checked-in to the local ILS',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpRequesterCheckedIn
+        ]
+    ];
+
+    private static Map slnpRequesterShippedReturnList = [
+        code: ActionEventResultList.SLNP_REQUESTER_SHIPPED_RETURN,
+        description: 'Request has been returned by patron and awaits return shipping to the lender.',
+        model: StateModel.MODEL_SLNP_REQUESTER,
+        results: [
+            slnpRequesterShippedReturn
+        ]
+    ];
+
+    // SLNP responder lists
+
+    private static Map slnpResponderRespondYesList = [
+        code: ActionEventResultList.SLNP_RESPONDER_RESPOND_YES,
+        description: 'The responder has said that they will supply the item(s)',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderRespondYes
+        ]
+    ];
+
+    private static Map slnpResponderRespondCannotSupplyList = [
+        code: ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY,
+        description: 'The responder has said that they cannot supply the item(s)',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderCannotSupply
+        ]
+    ];
+
+    private static Map slnpResponderAbortSupplyList = [
+        code: ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY,
+        description: 'The responder has said that they will abort the supply of the item(s)',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderAbortSupply
+        ]
+    ];
+
+    private static Map slnpResponderConditionalSupplyList = [
+        code: ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY,
+        description: 'The responder has said that they will supply the item(s) conditionally',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderConditionalSupply
+        ]
+    ];
+
+    private static Map slnpResponderConditionalSupplyNoTransitionList = [
+        code: ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION,
+        description: 'Add loan condition',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpDefaultNoStatusChangeOK
+        ]
+    ];
+
+    private static Map slnpResponderSupplierPrintPullSlipList = [
+        code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
+        description: 'Print pull slip',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderSupplierPrintPullSlip
+        ]
+    ];
+
+    private static Map slnpResponderSupplierCheckInReshareList = [
+        code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE,
+        description: 'Scan item barcode to fill this request',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderSupplierCheckInReshare
+        ]
+    ];
+
+    private static Map slnpResponderSupplierMarkShippedList = [
+        code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED,
+        description: 'Mark request shipped',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderSupplierMarkShipped
+        ]
+    ];
+
+    private static Map slnpResponderSupplierUndoLastActionList = [
+        code: ActionEventResultList.SLNP_RESPONDER_UNDO_LAST_ACTION,
+        description: 'Mark request shipped',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderSupplierUndoLastAction
+        ]
+    ];
+
+    private static Map slnpResponderItemReturnedList = [
+        code: ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED,
+        description: 'Scan request ID to mark request returned',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpResponderItemReturned
+        ]
+    ];
+
     // Digital returnable requester
     private static Map digitalReturnableRequesterISO18626Overdue = [
       code: 'digitalReturnableRequesterISO18626Overdue',
@@ -1660,6 +1954,26 @@ public class ActionEventResultData {
             // CDL responder lists
             cdlResponderCheckInToReshareList,
             cdlResponderFillDigitalLoanList,
+
+            // SLNP requester lists
+            slnpRequesterCancelList,
+            slnpRequesterReceivedList,
+            slnpRequesterAbortedList,
+            slnpRequesterPrintPullSlipList,
+            slnpRequesterCheckedInList,
+            slnpRequesterShippedReturnList,
+
+            // SLNP responder lists
+            slnpResponderRespondYesList,
+            slnpResponderRespondCannotSupplyList,
+            slnpResponderAbortSupplyList,
+            slnpResponderConditionalSupplyList,
+            slnpResponderSupplierPrintPullSlipList,
+            slnpResponderConditionalSupplyNoTransitionList,
+            slnpResponderSupplierCheckInReshareList,
+            slnpResponderSupplierUndoLastActionList,
+            slnpResponderSupplierMarkShippedList,
+            slnpResponderItemReturnedList,
 
             // ISO18626 lists
             requesterAwaitingReturnShippingISO18626,
