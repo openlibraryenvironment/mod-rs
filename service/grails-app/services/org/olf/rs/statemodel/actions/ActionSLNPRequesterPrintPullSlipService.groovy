@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
  * This action is performed when the responder responds "Abort Supply"
- * @author Chas
  *
  */
 public class ActionSLNPRequesterPrintPullSlipService extends AbstractAction {

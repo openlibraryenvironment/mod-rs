@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
  * This action is performed when the requester initiates print pull slip
- * @author Chas
  *
  */
 public class ActionSLNPResponderAbortSupplyService extends AbstractAction {

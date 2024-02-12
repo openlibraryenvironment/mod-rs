@@ -7,7 +7,6 @@ import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
  * This action is performed when the requester aborts the request
- * @author Chas
  *
  */
 public class ActionSLNPRequesterHandleAbortService extends AbstractAction {
