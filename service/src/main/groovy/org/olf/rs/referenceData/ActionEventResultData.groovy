@@ -644,6 +644,26 @@ public class ActionEventResultData {
         nextActionEvent : null
     ];
 
+    private static Map slnpRequesterISO18626Aborted = [
+            code: 'slnpRequesterISO18626Aborted',
+            description: 'Request has been aborted by the supplier and it\'s been added to the abort queue in ZFL. Requester staff must handle the request in ZFL, either close it or restart with updated metadata as a new request.',
+            result: true,
+            status: Status.SLNP_REQUESTER_ABORTED,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpRequesterISO18626Shipped = [
+            code: 'slnpRequesterISO18626Shipped',
+            description: 'Request has been updated by the supplier with the shipped status.',
+            result: true,
+            status: Status.SLNP_REQUESTER_SHIPPED,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
     // SLNP responder actions
 
     private static Map slnpResponderRespondYes = [
@@ -1699,6 +1719,24 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map slnpRequesterISO18626AbortedList = [
+            code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED,
+            description: 'Abort patron request (special to SLNP, sent as Notification)',
+            model: StateModel.MODEL_SLNP_REQUESTER,
+            results: [
+                    slnpRequesterISO18626Aborted
+            ]
+    ];
+
+    private static Map slnpRequesterISO18626ShippedList = [
+            code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED,
+            description: 'Patron request is shipped',
+            model: StateModel.MODEL_SLNP_REQUESTER,
+            results: [
+                    slnpRequesterISO18626Shipped
+            ]
+    ];
+
     private static Map slnpRequesterPrintPullSlipList = [
         code: ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP,
         description: 'Requester has triggered print pull slip action',
@@ -1962,6 +2000,8 @@ public class ActionEventResultData {
             slnpRequesterPrintPullSlipList,
             slnpRequesterCheckedInList,
             slnpRequesterShippedReturnList,
+            slnpRequesterISO18626AbortedList,
+            slnpRequesterISO18626ShippedList,
 
             // SLNP responder lists
             slnpResponderRespondYesList,

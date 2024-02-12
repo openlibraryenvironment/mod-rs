@@ -33,7 +33,6 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
 
 	// SLNP Responder Actions
-	// TODO: Create this new action later
 	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY =        "abortSupply";
 
 	// Requester Actions
@@ -66,9 +65,8 @@ public class Actions {
 	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn"
 
 	// SLNP Requester Actions
-	// TODO: Create these new actions later
-	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT     = "handleAbort";
-	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP  = "printPullSlip";
+	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT      = "handleAbort";
+	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP   = "printPullSlip";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";
