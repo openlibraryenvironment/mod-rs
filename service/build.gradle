@@ -1,27 +1,35 @@
-
-/** / // Disables caching of artefacts ensuring latest snapshots are used.
-configurations.all {
- // Check for updates every build
- resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+repositories {
+  //mavenLocal()
+  mavenCentral()
+  maven { url 'https://maven.indexdata.com/' }
+  maven { url "https://repo.grails.org/grails/core" }
+  maven { url "https://repo.grails.org/grails/plugins" }
+  maven { url "https://jitpack.io" }
+  maven { url "https://repository.folio.org/repository/maven-folio" }
+  maven { url "https://maven.k-int.com/content/repositories/public" }
+  maven { url "https://maven.k-int.com/repository/releases" }
+  maven {
+    name "reposiliteRepositoryReleases"
+    url "https://reposilite.reshare.indexdata.com/releases"
+  }
 }
-/**/
 
 buildscript {
   repositories {
     mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
     maven { url "https://repo.grails.org/grails/core" }
-
+    maven { url "https://repo.grails.org/grails/plugins" }
   }
   dependencies {
-    classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-    classpath "org.grails.plugins:views-gradle:2.0.1"
+    classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+    classpath "org.grails.plugins:views-gradle:2.3.2"
     classpath "gradle.plugin.com.github.erdi.webdriver-binaries:webdriver-binaries-gradle-plugin:2.0"
-    classpath "org.grails.plugins:hibernate5:${gormHibernate-".RELEASE"}"
-    classpath 'org.grails.plugins:database-migration:3.1.0'
+    classpath "org.grails.plugins:hibernate5:7.3.0"
+    classpath 'org.grails.plugins:database-migration:4.2.0'
     classpath 'com.bmuschko:gradle-docker-plugin:6.6.1'
   }
 }
-
 
 final String version_regex = /^(((\d+)\.\d+)\.\d+)(-([a-zA-Z]+(\.\d+)?))?$/
 Map<String, String> env = System.getenv();
@@ -39,68 +47,14 @@ else {
 version "${calculated_version}"
 group "mod.rs"
 
-apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.grails.grails-web'
 apply plugin: 'org.grails.plugins.views-json'
-apply plugin: 'com.github.erdi.webdriver-binaries'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
     grails { pathingJar = true }
-}
-
-eclipse {
-  autoBuildTasks ([':processResources'])
-  synchronizationTasks ([':processResources'])
-  
-  classpath {
-    defaultOutputDir = new File(project.buildDir.canonicalPath, 'main')
-    file {
-      
-      whenMerged { classpath ->
-        
-        Set<String> resources = sourceSets.main?.resources?.srcDirs?.collect { it.canonicalPath }
-        
-        entries.collect().each {
-          
-          if (it.path =='grails-app/conf' && it.output?.toLowerCase().endsWith('test')) {
-            classpath.entries.remove( it )
-            println "Removed ${it}"
-            return
-          }
-
-          if (it.hasProperty('output') && it.output.startsWith('bin/')) {
-            it.output = 'build/' + it.output.substring(4)
-          }
-          
-          // Eclude the output of the resources added to the source sets for grails.
-          // Instead we add the results of the 'processResources' tasks to the classpath later.
-          if (it.hasProperty('dir') && resources.find { res -> it.dir?.canonicalPath?.startsWith(res) } ) {
-            it.exported = false
-            it.excludes << '**/*'
-          }
-        }
-        def lib = new org.gradle.plugins.ide.eclipse.model.Library(fileReference(file("${tasks.processResources.destinationDir}")))
-        println "Adding: ${lib}"
-        entries << lib
-      }
-    }
-  }
-}
-
-repositories {
-  //mavenLocal()
-  mavenCentral()
-  maven { url "https://maven.k-int.com/content/repositories/public" }
-  maven { url 'https://repo.grails.org/grails/core' }
-  maven { url 'http://maven.indexdata.com/' }
-  maven { url "https://repository.folio.org/repository/maven-folio" }
-  maven {
-    name "reposiliteRepositoryReleases"
-    url "https://reposilite.reshare.indexdata.com/releases"
-  }
 }
 
 sourceSets {
@@ -112,161 +66,166 @@ sourceSets {
   }
 }
 
+// https://github.com/grails/grails-core/issues/12181
+bootJar {
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
 dependencies {
-
- /**** Grails 4 *****/
-  compile "org.springframework.boot:spring-boot-starter-logging"
-  compile "org.springframework.boot:spring-boot-autoconfigure"
-  compile "org.grails:grails-core"
-  compile "org.springframework.boot:spring-boot-starter-actuator"
-  compile "org.grails:grails-plugin-url-mappings"
-  compile "org.grails:grails-plugin-rest"
-  compile "org.grails:grails-plugin-codecs"
-  compile "org.grails:grails-plugin-interceptors"
-  compile "org.grails:grails-plugin-services"
-  compile "org.grails:grails-plugin-datasource"
-  compile "org.grails:grails-plugin-databinding"
-  compile "org.grails:grails-web-boot"
-  compile "org.grails:grails-logging"
-  compile "org.grails.plugins:async"
-  compile "org.grails.plugins:views-json"
-  compile "org.grails.plugins:views-json-templates"
-  compile "org.grails.plugins:events"
-  compile "org.grails.plugins:hibernate5"
+  /* ---- Grails 5 ---- */
+  //developmentOnly("org.springframework.boot:spring-boot-devtools")
   compileOnly "io.micronaut:micronaut-inject-groovy"
+  console "org.grails:grails-console"
+  // The version here is the version that in theory is pulled in from spring-boot-starter-logging according to dependenies
+  implementation "org.springframework.boot:spring-boot-starter-logging"
+//  implementation "org.springframework.boot:spring-boot-starter-validation"
+  implementation "org.springframework.boot:spring-boot-autoconfigure"
+  implementation "org.grails:grails-core"
+  implementation "org.springframework.boot:spring-boot-starter-actuator"
+  //implementation "org.springframework.boot:spring-boot-starter-tomcat"
+  implementation "org.grails:grails-plugin-url-mappings"
+  implementation "org.grails:grails-plugin-rest"
+  implementation "org.grails:grails-plugin-codecs"
+  implementation "org.grails:grails-plugin-interceptors"
+  implementation "org.grails:grails-plugin-services"
+  implementation "org.grails:grails-plugin-datasource"
+  implementation "org.grails:grails-plugin-databinding"
+  implementation "org.grails:grails-web-boot"
+  implementation "org.grails:grails-logging"
+  //implementation "org.grails.plugins:cache"
+  implementation "org.grails.plugins:async"
+  implementation "org.grails.plugins:hibernate5"
+  implementation "org.hibernate:hibernate-core:5.6.11.Final"
+  implementation "org.grails.plugins:events"
+  implementation "org.grails.plugins:views-json"
+  implementation "org.grails.plugins:views-json-templates"
+  profile "org.grails.profiles:rest-api"
+  //runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
+  //runtimeOnly "com.h2database:h2"
+  //runtimeOnly "org.apache.tomcat:tomcat-jdbc"
+  runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
 
 
+  // Testing
+  testImplementation "org.mockito:mockito-core"
+  testImplementation "org.grails:grails-web-testing-support"
 
-  console ("org.grails:grails-console") {
-    // The gpars transient depends on an older version of groovy-all.
-    exclude group: 'org.codehaus.groovy', module: 'groovy'
+  /*  ---- Manually installed dependencies ---- */
+  implementation 'org.grails.plugins:spring-security-core:5.2.1'
+
+  // K-int
+  implementation 'com.k_int.grails:web-toolkit-ce:8.1.0'
+  implementation ('com.k_int.okapi:grails-okapi:6.0.0-rc.4') {
+    exclude group: 'com.vaadin.external.google', module: 'android-json'
   }
 
-  profile "org.grails.profiles:rest-api"
-  // runtime "com.h2database:h2"
-  runtime "javax.xml.bind:jaxb-api:2.3.1"
-
-  profile "org.grails.profiles:rest-api"
-
-
-
-
-  /************** Testing ************/
-  testCompile "org.grails:grails-gorm-testing-support"
-
-  testCompile "org.mockito:mockito-core"
-  testCompile "org.grails:grails-web-testing-support"
-  testCompile "org.grails.plugins:geb"
-  //  testCompile "io.micronaut:micronaut-http-client"
-  testCompile "org.seleniumhq.selenium:selenium-remote-driver:3.14.0"
-  testCompile "org.seleniumhq.selenium:selenium-api:3.14.0"
-  testCompile "org.seleniumhq.selenium:selenium-support:3.14.0"
-  testCompile 'org.grails:grails-datastore-rest-client:6.1.9.RELEASE'
-  testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
-  testRuntime "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
-  compile 'org.z3950.zing:cql-java:1.13'
-
-
-  compile "org.springframework.boot:spring-boot-starter-undertow" // Replaces spring-boot-starter-tomcat
-  compile "org.hibernate:hibernate-core:5.4.19.Final"             // Update to latest 5.4
-  compile "org.hibernate:hibernate-java8:5.4.19.Final"
-  runtime "com.zaxxer:HikariCP:5.0.1"
-  // runtime "com.zaxxer:HikariCP:3.4.5"                             // Replaces Tomcat JDBC pool
-  runtime "org.postgresql:postgresql:42.2.23"
-
-  compile ('org.grails.plugins:database-migration:3.1.0') {       // Required by Grails Okapi
+  implementation 'io.github.http-builder-ng:http-builder-ng-core:1.0.4'
+  implementation 'org.codehaus.janino:janino:3.1.9'
+  implementation "org.springframework.boot:spring-boot-starter-undertow" // Replaces spring-boot-starter-tomcat
+  implementation "org.hibernate:hibernate-java8:5.4.28.Final"
+  runtimeOnly "com.zaxxer:HikariCP:5.0.1"                             // Replaces Tomcat JDBC pool
+  runtimeOnly "org.postgresql:postgresql:42.5.3"
+  implementation ('org.grails.plugins:database-migration:4.2.0') {
     exclude group: 'org.liquibase', module: 'liquibase-core'
+    exclude group: 'com.vaadin.external.google', module: 'android-json'
   }
-  compile 'org.liquibase:liquibase-core:3.9.0'
+  // For getting the correct version of liquibase
+  // implementation 'org.liquibase:liquibase-core:4.17.2'
+  implementation 'org.liquibase:liquibase-core:4.19.1'
+  implementation 'org.yaml:snakeyaml:1.33'
 
-  compile 'com.opencsv:opencsv:4.6'
-  compile 'commons-io:commons-io:2.7'
-  
-  compile 'com.k_int.grails:web-toolkit-ce:6.4.1'
-  compile 'com.k_int.okapi:grails-okapi:5.0.1'
-  
-  
-  // Data-model dependency
-//  compile 'org.olf.reshare.dm.directory:dm-directory:2.0.1'
-  
-  compile ('org.olf.reshare.dm.directory:dm-directory:2.0.1') {       // Required by Grails Okapi
-    exclude group: 'com.k_int.grails', module: 'web-toolkit-ce'
-  }
+  implementation 'commons-io:commons-io:2.6'
 
-  // Custom non profile deps.
-  compile 'org.apache.kafka:kafka-clients:2.8.1'
-  runtime "org.grails.plugins:async"
-  runtime "org.grails.plugins:events"
-  // compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
-  compile 'io.github.http-builder-ng:http-builder-ng-apache:1.0.4'
-  
+  /*  ---- Manually installed testing dependencies ---- */
+  testImplementation "org.grails.plugins:geb"
+  testImplementation "org.seleniumhq.selenium:selenium-remote-driver:3.14.0"
+  testImplementation "org.seleniumhq.selenium:selenium-api:3.14.0"
+  testImplementation "org.seleniumhq.selenium:selenium-support:3.14.0"
+  testRuntimeOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
+  testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
+  implementation 'org.z3950.zing:cql-java:1.13'
 
+  /* ---- Custom non profile deps ---- */
+  implementation 'org.apache.kafka:kafka-clients:2.3.0'
+  implementation 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.2'
+
+  // implementation 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.2'
   // Better test reports.
-  testCompile( 'com.athaydes:spock-reports:1.6.1' ) {
+  testImplementation( 'com.athaydes:spock-reports:2.3.2-groovy-3.0' ) {
     transitive = false // this avoids affecting your version of Groovy/Spock
   }
 
+  // Data-model dependency
+//  compile 'org.olf.reshare.dm.directory:dm-directory:2.0.1'
+  implementation ('org.olf.reshare.dm.directory:dm-directory:2.0.1') {       // Required by Grails Okapi
+    exclude group: 'com.k_int.grails', module: 'web-toolkit-ce'
+  }
+
   // NCIP deps
-  compile 'org.olf.rs:lib-ncip-client:0.23.5'
-  compile 'com.github.jknack:handlebars:4.2.0'
-  compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
-  compile 'org.apache.commons:commons-collections4:4.4'
-  compile 'org.jsoup:jsoup:1.10.2'
-  compile 'org.json:json:20190722'
-  compile 'org.extensiblecatalog.ncip.v2:service:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:common:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0_bc:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-wclv1_0:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
-  compile 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
+  implementation 'org.olf.rs:lib-ncip-client:0.23.5'
+  implementation 'com.github.jknack:handlebars:4.2.0'
+  implementation 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
+  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation 'org.jsoup:jsoup:1.10.2'
+  implementation 'org.json:json:20190722'
+  implementation 'org.extensiblecatalog.ncip.v2:service:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:common:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0_bc:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-wclv1_0:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
 
   // Domain model for directory
-  compile 'org.scala-saddle:google-rfc-2445:20110304'
+  implementation 'org.scala-saddle:google-rfc-2445:20110304'
   // For RRule processing
-  compile 'org.dmfs:lib-recur:0.11.6'
-  
-  // For graphviz
-  compile 'guru.nidi:graphviz-java-all-j2v8:0.18.1'
-  
-  // For jasper reports
-  compile 'net.sf.jasperreports:jasperreports:6.19.1'
-  compile 'net.sf.jasperreports:jasperreports-fonts:6.19.1'
-  compile 'net.sf.barcode4j:barcode4j:2.1'
-  compile 'org.apache.xmlgraphics:batik-bridge:1.14'
-  
-  // For swagger - was trying to use t
-  compile 'org.grails.plugins:swagger-grails:0.4.0'
-  compile 'io.swagger.core.v3:swagger-models:2.2.2'
-  
-  // For using the minio ibrary, when storing to S3
-  compile "io.minio:minio:8.3.3"
-  compile 'com.squareup.okhttp3:okhttp:4.8.1'
-  compile 'org.jetbrains.kotlin:kotlin-stdlib:1.3.70'
+  implementation 'org.dmfs:lib-recur:0.11.6'
 
-  // For generating json log files  
-   compile 'net.logstash.logback:logstash-logback-encoder:7.2'
+  // For graphviz
+  implementation 'guru.nidi:graphviz-java-all-j2v8:0.18.1'
+
+  // For jasper reports
+  implementation 'net.sf.jasperreports:jasperreports:6.19.1'
+  implementation 'net.sf.jasperreports:jasperreports-fonts:6.19.1'
+  implementation 'net.sf.barcode4j:barcode4j:2.1'
+  implementation 'org.apache.xmlgraphics:batik-bridge:1.14'
+
+  // For swagger
+  implementation 'org.grails.plugins:swagger-grails:0.5.0'
+  implementation("io.swagger:swagger-annotations:1.6.6") {
+    exclude group: "javax.validation", module: "validation-api"
+  }
+  implementation("io.swagger:swagger-models:1.6.6") {
+    exclude group: "javax.validation", module: "validation-api"
+  }
+
+  // Minio, used to store to S3
+  implementation "io.minio:minio:8.3.3"
+  implementation 'com.squareup.okhttp3:okhttp:4.8.1'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.70'
+
+  // For generating json log files
+  implementation 'net.logstash.logback:logstash-logback-encoder:7.2'
+
+  // For the http builder
+  implementation 'io.github.http-builder-ng:http-builder-ng-apache:1.0.4'
+
+  // For the uri builder
+  implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 }
 
 bootRun {
   ignoreExitValue true
   jvmArgs(
       '-Dspring.output.ansi.enabled=always',
-      '-server',
       '-noverify',
       '-XX:TieredStopAtLevel=1',
-      '-Xmx1024m')
+      '-Xmx1024m'
+  )
   sourceResources sourceSets.main
   String springProfilesActive = 'spring.profiles.active'
   systemProperty springProfilesActive, System.getProperty(springProfilesActive)
-}
-
-tasks.withType(Test) {
-    systemProperty "geb.env", System.getProperty('geb.env')
-    systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
-    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
-    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
 }
 
 task generateDescriptors(type: Copy) {
@@ -388,3 +347,18 @@ buildProperties.doLast {
 }
 
 processResources.dependsOn generateDescriptors
+
+tasks.named('bootJarMainClassName') { it.mustRunAfter(tasks.named('compileGsonViews')) }
+tasks.named('compileIntegrationTestGroovy') { it.mustRunAfter(tasks.named('compileGsonViews')) }
+tasks.named('test') { it.mustRunAfter(tasks.named('compileGsonViews')) }
+tasks.named('integrationTest') { it.mustRunAfter(tasks.named('compileGsonViews')) }
+tasks.named('mergeTestReports') { it.mustRunAfter(tasks.named('test')) }
+tasks.named('compileTestGroovy') { it.mustRunAfter(tasks.named('compileGsonViews')) }
+
+tasks.withType(Test) {
+  useJUnitPlatform()
+  systemProperty "geb.env", System.getProperty('geb.env')
+  systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
+  systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
+  systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
+}

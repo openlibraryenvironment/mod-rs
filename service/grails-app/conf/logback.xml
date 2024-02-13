@@ -1,0 +1,152 @@
+<configuration>
+    <!-- The log file we will output to if file logging is enabled -->
+    <!-- Probably should take this from the environment -->
+    <variable name="LOG_FILE" value="../logs/rs.log" />
+    <property name="grailsEnv" value="${grails.env}" />
+
+    <!-- If the environment variable logAsJson is set to true, then the console output is in json format -->
+    <property name="logAsJson" value="${logAsJson}" />
+
+    <!-- If the environment variable logSql is set to true, then the sql statements are logged -->
+    <property name="logSql" value="${logSql}" />
+
+    <!-- If the environment variable logSqlParams is set to true then we also output the bind parameters for the sql,
+         Setting this variable to true will infer logSql is also set to true, so no need to also set logSql
+    -->
+    <property name="logSqlParams" value="${logSqlParams}" />
+
+    <if condition='property("grailsEnv").equalsIgnoreCase("test") || property("grailsEnv").equalsIgnoreCase("development")'>
+        <then>
+            <property name="logToFile" value="okForFileOutput" />
+        </then>
+    </if>
+
+    <!-- Define the appender for sending it to the console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : %m%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <!-- Define the appender for sending it to a file, this overwrites on each restart -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE}</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : %m%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- Define the appender for json output to the console
+         Ensure you include the library net.logstash.logback:logstash-logback-encoder in the build to find the classes defined below
+         Additional elements we can use are version, pattern and logstashMarkers, there may be others as well
+         Explore the project at https://github.com/logfellow/logstash-logback-encoder/tree/main/src/main/java/net/logstash/logback
+         to see how you may configure it.
+    -->
+    <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers class="net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders">
+                <timestamp class="net.logstash.logback.composite.loggingevent.LoggingEventFormattedTimestampJsonProvider">
+                    <fieldName>@time</fieldName>
+                    <timeZone>UTC</timeZone>
+                    <pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+                </timestamp>
+                <message class="net.logstash.logback.composite.loggingevent.MessageJsonProvider">
+                    <fieldName>msg</fieldName>
+                </message>
+                <loggerName class="net.logstash.logback.composite.loggingevent.LoggerNameJsonProvider">
+                    <fieldName>logger</fieldName>
+                    <shortenedLoggerNameLength>35</shortenedLoggerNameLength>
+                </loggerName>
+                <threadName class="net.logstash.logback.composite.loggingevent.LoggingEventThreadNameJsonProvider">
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <logLevel class="net.logstash.logback.composite.loggingevent.LogLevelJsonProvider"/>
+                <mdc class="net.logstash.logback.composite.loggingevent.MdcJsonProvider"/>
+                <arguments class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider"/>
+                <stackTrace class="net.logstash.logback.composite.loggingevent.StackTraceJsonProvider">
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>20</maxDepthPerThrowable>
+                        <maxLength>8192</maxLength>
+                        <shortenedClassNameLength>35</shortenedClassNameLength>
+                        <exclude>sun\..*</exclude>
+                        <exclude>java\..*</exclude>
+                        <exclude>groovy\..*</exclude>
+                        <exclude>com\.sun\..*</exclude>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+                <globalCustomFields class="net.logstash.logback.composite.GlobalCustomFieldsJsonProvider">
+                    <!-- Not to sure how this one works, will need to experiment, the example here has been taken from a groovy implementation, so will need to change to fit in with xml
+                    <customFields>${toJson(pid:"${new ApplicationPid()}", app:"XYZ")}</customFields>
+                    -->
+                </globalCustomFields>
+            </providers>
+        </encoder>
+    </appender>
+
+    <logger name="folio" level="debug"/>
+    <logger name="mod.rs" level="debug"/>
+    <logger name="org.olf" level="debug"/>
+    <logger name="org.olf.okapi.modules.directory.CustomBinders" level="warn"/>
+
+    <logger name="com.k_int" level="debug"/>
+    <logger name="com.k_int.okapi" level="warn"/>
+    <logger name="com.k_int.okapi.DataloadingService" level="debug"/>
+    <logger name="com.k_int.okapi.TenantController" level="debug"/>
+    <logger name="com.k_int.web.toolkit.refdata.GrailsDomainRefdataHelpers" level="warn"/>
+
+    <logger name="javax.persistence.criteria.CriteriaQuery" level="error"/>
+    <logger name="org.grails.datastore" level="warn"/>
+    <logger name="org.hibernate.orm.deprecation" level="error"/>
+
+
+
+    <!-- Are we logging the sql statements -->
+    <if condition='property("logSql").equals("true") || property("logSqlParams").equals("true")'>
+        <then>
+            <!-- Enable Sql logging -->
+            <logger name="org.hibernate.SQL" level="debug" />
+        </then>
+    </if>
+
+    <!-- Are we logging the sql parameters -->
+    <if condition='property("logSqlParams").equals("true")'>
+        <then>
+            <logger name="org.hibernate.type" level="trace" />
+        </then>
+    </if>
+
+    <!-- Are we logging HTTP bodies -->
+    <if condition='property("logHttp").equals("true")'>
+        <then>
+            <logger name="com.k_int.okapi.OkapiClient" level="trace" />
+            <logger name="groovyx.net.http.HttpBuilder" level="trace" />
+            <logger name="org.apache.http.wire" level="trace" />
+        </then>
+    </if>
+
+    <!-- For everything else we log as info -->
+    <root level="info">
+        <!-- For non production we also log to a file -->
+        <if condition='isDefined("logToFile")'>
+            <then>
+                <appender-ref ref="FILE"/>
+            </then>
+        </if>
+
+        <!-- Do they want the output as json, which is much better for examining the output -->
+        <if condition='property("logAsJson").equals("true")'>
+            <then>
+                <appender-ref ref="jsonConsole"/>
+            </then>
+            <else>
+                <!-- By default we just send it to the console -->
+                <appender-ref ref="CONSOLE"/>
+            </else>
+        </if>
+    </root>
+</configuration>
