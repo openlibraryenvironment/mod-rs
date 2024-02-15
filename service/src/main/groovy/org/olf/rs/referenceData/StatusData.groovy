@@ -22,10 +22,6 @@ public class StatusData {
 
         // Requester / Borrower State Model
         Status requesterIdle = Status.ensure(Status.PATRON_REQUEST_IDLE, StatusStage.PREPARING, '0005', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-
-        Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        // TODO: Populate all the statuses here but first need to understand these fields and their values: stage,presSeq, tags.
-
         Status.ensure(Status.PATRON_REQUEST_VALIDATED, StatusStage.PREPARING, '0010', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_INVALID_PATRON, StatusStage.PREPARING, '0011', true, true);
         Status.ensure(Status.PATRON_REQUEST_SOURCING_ITEM, StatusStage.PREPARING, '0015', true, null, false, null, [ tags.ACTIVE_PATRON ]);
@@ -46,6 +42,26 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_WILL_SUPPLY, StatusStage.ACTIVE, '0065', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, StatusStage.ACTIVE, '0070', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_UNFILLED, StatusStage.COMPLETED, '0075', true);
+
+        // SLNP Requester statuses
+        Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_CANCELLED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_SHIPPED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_CHECKED_IN, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_COMPLETE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+
+        // SLNP Responder statuses
+        Status.ensure(Status.SLNP_RESPONDER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_UNFILLED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_AWAIT_PICKING, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_AWAIT_SHIP, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_ITEM_SHIPPED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_COMPLETE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
 
         // Add in the ability to tag states with meaningful semantics for reporting
         // model, code, presSeq, visible, needsAttention, terminal, tags
