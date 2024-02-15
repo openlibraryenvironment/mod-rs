@@ -7,13 +7,10 @@ import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.PatronRequest
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
-import org.olf.rs.statemodel.Actions
-import org.olf.rs.statemodel.NewStatusResult
-import org.olf.rs.statemodel.StateModel
-import org.olf.rs.statemodel.Status
-import org.olf.rs.statemodel.StatusService
+import org.olf.rs.statemodel.*
 import spock.lang.Shared
 import spock.lang.Stepwise
 
@@ -226,8 +223,12 @@ class SLNPStateModelSpec extends TestBase {
             String requestPatronId,
             String requestSymbol,
             String initialState,
-            String resultState) {
+            String resultState,
+            String action,
+            String jsonFileName) {
         when: "When initial state transitions to action result state"
+
+        changeSettings(tenantId, [ (SettingsData.SETTING_STATE_MODEL_REQUESTER): StateModel.MODEL_SLNP_REQUESTER ]);
 
         Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
             // Define headers
@@ -269,7 +270,7 @@ class SLNPStateModelSpec extends TestBase {
             NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, false);
             validateStateTransition(newResultStatus, initialState);
 
-            String jsonPayload = new File("src/integration-test/resources/scenarios/slnpRequesterSlnpISO18626Aborted.json").text;
+            String jsonPayload = new File('src/integration-test/resources/scenarios/' + jsonFileName + '.json').text;
 
             log.debug("jsonPayload: ${jsonPayload}");
             String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
@@ -279,7 +280,7 @@ class SLNPStateModelSpec extends TestBase {
             doPost(performActionURL, jsonPayload);
 
             // Lookup the status of the SLNP patron request after performed action and validate it with expected initial status
-            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED, null, true, false);
+            newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, false);
             validateStateTransition(newResultStatus, resultState);
         }
 
@@ -287,7 +288,7 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState    | resultState
-        'RSInstOne' | 'Excellent Argument, However...'  | 'Mom, U.R.'   | '1234-5678-9123-4567' | '9876-1234'       | 'ISIL:RST1'   | 'SLNP_REQ_IDLE' | 'SLNP_REQ_ABORTED'
+        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState    | resultState          | action                                 | jsonFileName
+        'RSInstOne' | 'Excellent Argument, However...'  | 'Mom, U.R.'   | '1234-5678-9123-4567' | '9876-1234'       | 'ISIL:RST1'   | 'SLNP_REQ_IDLE' | 'SLNP_REQ_CANCELLED' | Actions.ACTION_REQUESTER_CANCEL_LOCAL  | 'slnpRequesterCancelLocal'
     }
 }
