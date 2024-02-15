@@ -77,6 +77,10 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, 'The requester has canceled the request', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT.capitalize(), ActionEventResultList.SLNP_REQUESTER_ABORTED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP, true);
 
+        // SLNP Requester ISO18626 actions
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED, true);
+
         // SLNP Responder actions
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
 
@@ -118,11 +122,7 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, eventServiceName(Events.EVENT_STATUS_RES_OVERDUE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
-
-        // SLNP Requester events
-        ActionEvent.ensure(Events.EVENT_SLNP_REQUESTER_ISO_18626_ABORTED_INDICATION, 'Abort patron request (special to SLNP, sent as Notification)', false, eventServiceName(Events.EVENT_SLNP_REQUESTER_ISO_18626_ABORTED_INDICATION), ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED);
-        ActionEvent.ensure(Events.EVENT_SLNP_REQUESTER_ISO_18626_SHIPPED_INDICATION, 'Patron request is shipped', false, eventServiceName(Events.EVENT_SLNP_REQUESTER_ISO_18626_SHIPPED_INDICATION), ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED);
-	}
+    }
 
     private String eventServiceName(String eventName) {
         // We only do this for backward compatibility, no need to call this in the future

@@ -6,14 +6,14 @@ import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
- * This action is performed when the responder responds "Abort Supply"
+ * This action is performed when the requester aborts the request
  *
  */
-public class ActionSLNPRequesterPrintPullSlipService extends AbstractAction {
+public class ActionSLNPRequesterSlnpHandleAbortService extends AbstractAction {
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY);
+        return(Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT);
     }
 
     @Override

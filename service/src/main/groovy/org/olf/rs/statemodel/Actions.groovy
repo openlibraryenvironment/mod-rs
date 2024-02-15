@@ -68,6 +68,10 @@ public class Actions {
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT      = "slnpHandleAbort";
 	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP   = "slnpPrintPullSlip";
 
+	// SLNP ISO18626 Requester actions
+	static public final String ACTION_SLNP_REQUESTER_ISO18626_ABORTED      = "slnpISO18626Aborted";
+	static public final String ACTION_SLNP_REQUESTER_ISO18626_LOANED       = "slnpISO18626Loaned";
+
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";
 }

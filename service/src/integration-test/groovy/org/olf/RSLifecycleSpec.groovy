@@ -1,38 +1,27 @@
 package org.olf
 
-import org.olf.rs.referenceData.SettingsData
-
-import java.text.SimpleDateFormat;
-
-import javax.sql.DataSource
-
-import org.grails.orm.hibernate.HibernateDatastore
-import org.olf.okapi.modules.directory.DirectoryEntry
-import org.olf.rs.EmailService
-import org.olf.rs.EventPublicationService
-import org.olf.rs.HostLMSLocation
-import org.olf.rs.HostLMSLocationService
-import org.olf.rs.HostLMSService
-import org.olf.rs.HostLMSShelvingLocation
-import org.olf.rs.HostLMSShelvingLocationService
-import org.olf.rs.PatronRequest
-import org.olf.rs.SettingsService;
-import org.olf.rs.Z3950Service
-import org.olf.rs.dynamic.DynamicGroovyService;
-import org.olf.rs.lms.HostLMSActions
-import org.olf.rs.logging.DoNothingHoldingLogDetails;
-import org.olf.rs.logging.IHoldingLogDetails;
-import org.olf.rs.routing.RankedSupplier
-import org.olf.rs.routing.StaticRouterService
-import org.olf.rs.settings.ISettings
-import org.olf.rs.statemodel.Status;
-
 import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
-import spock.lang.*
+import org.grails.orm.hibernate.HibernateDatastore
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.*
+import org.olf.rs.dynamic.DynamicGroovyService
+import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.logging.DoNothingHoldingLogDetails
+import org.olf.rs.logging.IHoldingLogDetails
+import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.routing.RankedSupplier
+import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.settings.ISettings
+import org.olf.rs.statemodel.Status
+import spock.lang.Shared
+import spock.lang.Stepwise
+
+import javax.sql.DataSource
+import java.text.SimpleDateFormat
 
 @Slf4j
 @Integration
@@ -92,13 +81,8 @@ class RSLifecycleSpec extends TestBase {
     ]
   ]
 
-  def grailsApplication
   DynamicGroovyService dynamicGroovyService;
-  EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
-  HibernateDatastore hibernateDatastore
-  DataSource dataSource
-  EmailService emailService
   HostLMSService hostLMSService
   HostLMSLocationService hostLMSLocationService
   HostLMSShelvingLocationService hostLMSShelvingLocationService
@@ -133,7 +117,7 @@ class RSLifecycleSpec extends TestBase {
   }
 
   // For the given tenant, block up to timeout ms until the given request is found in the given state
-  private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
+  String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
     long start_time = System.currentTimeMillis();
     String request_id = null;
     String request_state = null;
