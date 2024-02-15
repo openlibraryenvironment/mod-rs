@@ -15,11 +15,8 @@
     -->
     <property name="logSqlParams" value="${logSqlParams}" />
 
-    <if condition='property("grailsEnv").equalsIgnoreCase("test") || property("grailsEnv").equalsIgnoreCase("development")'>
-        <then>
-            <property name="logToFile" value="okForFileOutput" />
-        </then>
-    </if>
+    <!-- If the environment variable logToFile is set to true, then additionally append logs to the file specified in LOG_FILE -->
+    <property name="logToFile" value="${logToFile}" />
 
     <!-- Define the appender for sending it to the console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -132,7 +129,7 @@
     <!-- For everything else we log as info -->
     <root level="info">
         <!-- For non production we also log to a file -->
-        <if condition='isDefined("logToFile")'>
+        <if condition='property("logToFile").equals("true")'>
             <then>
                 <appender-ref ref="FILE"/>
             </then>
