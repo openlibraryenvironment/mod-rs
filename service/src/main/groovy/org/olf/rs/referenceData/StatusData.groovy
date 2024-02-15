@@ -22,6 +22,10 @@ public class StatusData {
 
         // Requester / Borrower State Model
         Status requesterIdle = Status.ensure(Status.PATRON_REQUEST_IDLE, StatusStage.PREPARING, '0005', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+
+        Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        // TODO: Populate all the statuses here but first need to understand these fields and their values: stage,presSeq, tags.
+
         Status.ensure(Status.PATRON_REQUEST_VALIDATED, StatusStage.PREPARING, '0010', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_INVALID_PATRON, StatusStage.PREPARING, '0011', true, true);
         Status.ensure(Status.PATRON_REQUEST_SOURCING_ITEM, StatusStage.PREPARING, '0015', true, null, false, null, [ tags.ACTIVE_PATRON ]);

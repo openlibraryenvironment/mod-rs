@@ -9,8 +9,11 @@ import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.PatronRequest
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.statemodel.Actions
+import org.olf.rs.statemodel.NewStatusResult
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.Status
+import org.olf.rs.statemodel.StatusService
 import spock.lang.Shared
 import spock.lang.Stepwise
 
@@ -61,6 +64,7 @@ class SLNPStateModelSpec extends TestBase {
 
     GrailsWebDataBinder grailsWebDataBinder
     StaticRouterService staticRouterService
+    StatusService statusService
 
     // This method is declared in the HttpSpec
     def setupSpecWithSpring() {
@@ -86,44 +90,11 @@ class SLNPStateModelSpec extends TestBase {
 
     def cleanup() {}
 
-    // For the given tenant, block up to timeout ms until the given request is found in the given state
-    private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
-        long start_time = System.currentTimeMillis();
-        String request_id = null;
-        String request_state = null;
-        long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders([ 'X-Okapi-Tenant': tenant ]);
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    [
-                            'max':'100',
-                            'offset':'0',
-                            'match':'patronReference',
-                            'term':patron_reference
-                    ])
-            if ( resp?.size() == 1 ) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with patronReference ${patron_reference} not found");
-            }
-
-            if ( required_state != request_state ) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping");
-                Thread.sleep(1000);
-            }
-            elapsed = System.currentTimeMillis() - start_time
+    private void validateStateTransition(NewStatusResult newStatusResult, expectedState) {
+        if (newStatusResult == null) {
+            throw new Exception("New status result is null");
         }
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-        }
-
-        return request_id;
+        assert(newStatusResult.status.code == expectedState);
     }
 
     void "Attempt to delete any old tenants"(tenantid, name) {
@@ -258,20 +229,20 @@ class SLNPStateModelSpec extends TestBase {
             String resultState) {
         when: "When initial state transitions to action result state"
 
-        // Define headers
-        def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
-                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-        ]
-
-        setHeaders(headers);
-
-        // Create mock SLNP patron request
-        PatronRequest slnpPatronRequest = new PatronRequest();
-
         Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Token': 'dummy',
+                    'X-Okapi-User-Id': 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Create mock SLNP patron request
+            PatronRequest slnpPatronRequest = new PatronRequest();
+
             // Set isRequester to true
             slnpPatronRequest.isRequester = true;
 
@@ -281,9 +252,7 @@ class SLNPStateModelSpec extends TestBase {
             stateModel.shortcode = StateModel.MODEL_SLNP_REQUESTER;
 
             // Create Status with initial state and assign to StateModel
-            Status initialStatus = new Status();
-            initialStatus.code = initialState;
-            initialStatus.terminal = false;
+            Status initialStatus = Status.lookup(initialState);
 
             stateModel.initialState = initialStatus
 
@@ -293,27 +262,26 @@ class SLNPStateModelSpec extends TestBase {
 
             // Save the SLNP Patron request
             slnpPatronRequest = slnpPatronRequest.save(flush: true, failOnError: true);
+
+            log.debug("Mocked SNLP Patron Request response: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
+
+            // Lookup the status of the SLNP patron request and validate it with expected initial status
+            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, false);
+            validateStateTransition(newResultStatus, initialState);
+
+            String jsonPayload = new File("src/integration-test/resources/scenarios/slnpRequesterSlnpISO18626Aborted.json").text;
+
+            log.debug("jsonPayload: ${jsonPayload}");
+            String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
+            log.debug("Posting to performAction at $performActionURL");
+
+            // Execute action
+            doPost(performActionURL, jsonPayload);
+
+            // Lookup the status of the SLNP patron request after performed action and validate it with expected initial status
+            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED, null, true, false);
+            validateStateTransition(newResultStatus, resultState);
         }
-
-        log.debug("Mocked SNLP Patron Request response: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
-
-        // Validate initial state is correct
-        waitForRequestState(tenantId, 20000, requestPatronId, initialState);
-
-        // Sleep
-        Thread.sleep(2000);
-
-        String jsonPayload = new File("src/integration-test/resources/scenarios/slnpRequesterSlnpISO18626Aborted.json").text;
-
-        log.debug("jsonPayload: ${jsonPayload}");
-        String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
-        log.debug("Posting to performAction at $performActionURL");
-
-        // Execute action
-        doPost(performActionURL, jsonPayload);
-
-        // Validate state transition
-        waitForRequestState(tenantId, 20000, requestPatronId, resultState);
 
         then: "Check values"
         assert true;
