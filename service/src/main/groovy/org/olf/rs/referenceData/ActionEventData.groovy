@@ -78,8 +78,8 @@ public class ActionEventData {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP, true);
 
         // SLNP Requester ISO18626 actions
-        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED, true);
-        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED, 'Abort patron request (special to SLNP, sent as Notification)', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_ABORTED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED, 'Patron request is shipped', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_ISO18626_LOANED.capitalize(), ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED, true);
 
         // SLNP Responder actions
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
