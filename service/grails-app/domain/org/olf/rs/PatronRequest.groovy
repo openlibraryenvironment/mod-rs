@@ -242,7 +242,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Request created from this request */
   PatronRequest succeededBy;
 
-  static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
+  static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed', 'validActions'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
   static hasMany = [
@@ -584,8 +584,12 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   List getValidActions() {
-      // This has moved into the actionService, I do not know how to redirect the json to the actionService so doing it here
-      return(Holders.grailsApplication.mainContext.getBean('actionService').getValidActions(this));
+      // Valid actions are determined via ActionService.getValidActions() however this seemingly cannot be called from a view.
+      // Now with Grails 5 there is no hibernate session when it's called that way so one needs to be explicitly created here.
+      // Prefer using the ActionService method where possible.
+      withNewSession { session ->
+        return(Holders.grailsApplication.mainContext.getBean('actionService').getValidActions(this));
+      }
   }
 
   public void updateRotaState(Status status) {
