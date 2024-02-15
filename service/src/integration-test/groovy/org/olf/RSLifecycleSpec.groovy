@@ -117,7 +117,7 @@ class RSLifecycleSpec extends TestBase {
   }
 
   // For the given tenant, block up to timeout ms until the given request is found in the given state
-  String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
+  private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
     long start_time = System.currentTimeMillis();
     String request_id = null;
     String request_state = null;

@@ -67,8 +67,7 @@ class SLNPStateModelSpec extends TestBase {
         super.setupSpecWithSpring();
     }
 
-    def setupSpec() {
-    }
+    def setupSpec() {}
 
     def setup() {
         if ( testctx.initialised == null ) {
@@ -85,7 +84,46 @@ class SLNPStateModelSpec extends TestBase {
         }
     }
 
-    def cleanup() {
+    def cleanup() {}
+
+    // For the given tenant, block up to timeout ms until the given request is found in the given state
+    private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
+        long start_time = System.currentTimeMillis();
+        String request_id = null;
+        String request_state = null;
+        long elapsed = 0;
+        while ( ( required_state != request_state ) &&
+                ( elapsed < timeout ) ) {
+
+            setHeaders([ 'X-Okapi-Tenant': tenant ]);
+            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+            def resp = doGet("${baseUrl}rs/patronrequests",
+                    [
+                            'max':'100',
+                            'offset':'0',
+                            'match':'patronReference',
+                            'term':patron_reference
+                    ])
+            if ( resp?.size() == 1 ) {
+                request_id = resp[0].id
+                request_state = resp[0].state?.code
+            } else {
+                log.debug("waitForRequestState: Request with patronReference ${patron_reference} not found");
+            }
+
+            if ( required_state != request_state ) {
+                // Request not found OR not yet in required state
+                log.debug("Not yet found.. sleeping");
+                Thread.sleep(1000);
+            }
+            elapsed = System.currentTimeMillis() - start_time
+        }
+
+        if ( required_state != request_state ) {
+            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+        }
+
+        return request_id;
     }
 
     void "Attempt to delete any old tenants"(tenantid, name) {
@@ -230,20 +268,23 @@ class SLNPStateModelSpec extends TestBase {
 
         setHeaders(headers);
 
-        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
-            // Create mock SLNP patron request
-            PatronRequest slnpPatronRequest = new PatronRequest();
+        // Create mock SLNP patron request
+        PatronRequest slnpPatronRequest = new PatronRequest();
 
+        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
             // Set isRequester to true
             slnpPatronRequest.isRequester = true;
 
             // Create SLNP Requester State Model
             StateModel stateModel = new StateModel();
             stateModel.name = StateModel.MODEL_SLNP_REQUESTER;
+            stateModel.shortcode = StateModel.MODEL_SLNP_REQUESTER;
 
             // Create Status with initial state and assign to StateModel
             Status initialStatus = new Status();
             initialStatus.code = initialState;
+            initialStatus.terminal = false;
+
             stateModel.initialState = initialStatus
 
             // Set SLNP Requester StateModel and initial state
@@ -251,13 +292,13 @@ class SLNPStateModelSpec extends TestBase {
             slnpPatronRequest.state = initialStatus;
 
             // Save the SLNP Patron request
-            slnpPatronRequest.save(flush: true, failOnError: true);
+            slnpPatronRequest = slnpPatronRequest.save(flush: true, failOnError: true);
         }
 
         log.debug("Mocked SNLP Patron Request response: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
         // Validate initial state is correct
-        RSLifecycleSpec.waitForRequestState(tenantId, 20000, requestPatronId, initialState);
+        waitForRequestState(tenantId, 20000, requestPatronId, initialState);
 
         // Sleep
         Thread.sleep(2000);
@@ -272,7 +313,7 @@ class SLNPStateModelSpec extends TestBase {
         doPost(performActionURL, jsonPayload);
 
         // Validate state transition
-        RSLifecycleSpec.waitForRequestState(tenantId, 20000, requestPatronId, resultState);
+        waitForRequestState(tenantId, 20000, requestPatronId, resultState);
 
         then: "Check values"
         assert true;
