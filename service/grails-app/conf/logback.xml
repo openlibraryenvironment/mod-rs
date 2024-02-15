@@ -15,8 +15,6 @@
     -->
     <property name="logSqlParams" value="${logSqlParams}" />
 
-    <!-- If the environment variable logToFile is set to true, then additionally append logs to the file specified in LOG_FILE -->
-    <property name="logToFile" value="${logToFile}" />
 
     <!-- Define the appender for sending it to the console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -25,15 +23,6 @@
                 %d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : %m%n
             </Pattern>
         </layout>
-    </appender>
-
-    <!-- Define the appender for sending it to a file, this overwrites on each restart -->
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_FILE}</file>
-        <append>false</append>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-30.30logger{29} %15(%replace([%X{tenant:-_NO_TENANT_}]){'\\[_NO_TENANT_\\]',''}) : %m%n</pattern>
-        </encoder>
     </appender>
 
 
@@ -128,13 +117,6 @@
 
     <!-- For everything else we log as info -->
     <root level="info">
-        <!-- For non production we also log to a file -->
-        <if condition='property("logToFile").equals("true")'>
-            <then>
-                <appender-ref ref="FILE"/>
-            </then>
-        </if>
-
         <!-- Do they want the output as json, which is much better for examining the output -->
         <if condition='property("logAsJson").equals("true")'>
             <then>
