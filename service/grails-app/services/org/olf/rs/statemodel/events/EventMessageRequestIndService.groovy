@@ -170,7 +170,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType);
+            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType); // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
             pr.stateModel = statusService.getStateModel(pr);
             pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
@@ -180,8 +180,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             result.messageType = 'REQUEST';
             result.supIdType = header.supplyingAgencyId?.agencyIdType;
-            result.supId = header.supplyingAgencyId?.agencyIdValue;
-            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType;
+            result.supId = header.supplyingAgencyId?.agencyIdValue; // supplyingAgencyId can be null
+            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType; // supplyingAgencyId can be null
             result.reqAgencyId = header.requestingAgencyId.agencyIdValue;
             result.reqId = header.requestingAgencyRequestId;
             result.timeRec = header.timestamp;
