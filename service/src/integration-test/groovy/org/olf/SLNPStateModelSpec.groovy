@@ -1,5 +1,6 @@
 package org.olf
 
+import com.k_int.web.toolkit.settings.AppSetting
 import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -228,8 +229,6 @@ class SLNPStateModelSpec extends TestBase {
             String jsonFileName) {
         when: "When initial state transitions to action result state"
 
-        changeSettings(tenantId, [ (SettingsData.SETTING_STATE_MODEL_REQUESTER): StateModel.MODEL_SLNP_REQUESTER ]);
-
         Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
             // Define headers
             def headers = [
@@ -241,20 +240,21 @@ class SLNPStateModelSpec extends TestBase {
 
             setHeaders(headers);
 
+            // Save the app settings
+            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_REQUESTER);
+            setting.value = StateModel.MODEL_SLNP_REQUESTER;
+            setting.save(flush: true, failOnError: true)
+
             // Create mock SLNP patron request
             PatronRequest slnpPatronRequest = new PatronRequest();
 
             // Set isRequester to true
             slnpPatronRequest.isRequester = true;
 
-            // Create SLNP Requester State Model
-            StateModel stateModel = new StateModel();
-            stateModel.name = StateModel.MODEL_SLNP_REQUESTER;
-            stateModel.shortcode = StateModel.MODEL_SLNP_REQUESTER;
+            StateModel stateModel = StateModel.findByShortcode(StateModel.MODEL_SLNP_REQUESTER);
 
             // Create Status with initial state and assign to StateModel
             Status initialStatus = Status.lookup(initialState);
-
             stateModel.initialState = initialStatus
 
             // Set SLNP Requester StateModel and initial state
