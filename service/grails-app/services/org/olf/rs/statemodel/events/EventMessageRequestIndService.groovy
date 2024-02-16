@@ -170,7 +170,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-            pr.isRequester = false;
+            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType);
             pr.stateModel = statusService.getStateModel(pr);
             pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
