@@ -216,7 +216,7 @@ class SLNPStateModelSpec extends TestBase {
         resolved_rota.size() == 2;
     }
 
-    void "Test SLNP StateModel requester state transition by executed action"(
+    void "SLNP Requester/Responder initial state transitions to result state by performed action"(
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -228,7 +228,7 @@ class SLNPStateModelSpec extends TestBase {
             String action,
             String jsonFileName,
             Boolean isRequester) {
-        when: "When initial state transitions to action result state"
+        when: "Performing the action"
 
         Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
             // Define headers
@@ -242,8 +242,8 @@ class SLNPStateModelSpec extends TestBase {
             setHeaders(headers);
 
             // Save the app settings
-            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_REQUESTER);
-            setting.value = StateModel.MODEL_SLNP_REQUESTER;
+            AppSetting setting = AppSetting.findByKey(isRequester ? SettingsData.SETTING_STATE_MODEL_REQUESTER : SettingsData.SETTING_STATE_MODEL_RESPONDER);
+            setting.value = isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER;
             setting.save(flush: true, failOnError: true)
 
             // Create mock SLNP patron request
@@ -252,7 +252,7 @@ class SLNPStateModelSpec extends TestBase {
             // Set isRequester to true
             slnpPatronRequest.isRequester = isRequester;
 
-            StateModel stateModel = StateModel.findByShortcode(StateModel.MODEL_SLNP_REQUESTER);
+            StateModel stateModel = StateModel.findByShortcode(isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER);
 
             // Create Status with initial state and assign to StateModel
             Status initialStatus = Status.lookup(initialState);
@@ -277,8 +277,12 @@ class SLNPStateModelSpec extends TestBase {
             String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
             log.debug("Posting to performAction at $performActionURL");
 
+            Thread.sleep(4000);
+
             // Execute action
             doPost(performActionURL, jsonPayload);
+
+            Thread.sleep(4000);
 
             // Lookup the status of the SLNP patron request after performed action and validate it with expected initial status
             newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);
