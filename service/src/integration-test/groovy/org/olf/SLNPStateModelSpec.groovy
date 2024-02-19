@@ -216,7 +216,7 @@ class SLNPStateModelSpec extends TestBase {
         resolved_rota.size() == 2;
     }
 
-    void "SLNP Requester/Responder initial state transitions to result state by performed action"(
+    void "SLNP StateModel Requester/Responder initial state transitions to result state by performed action"(
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -249,7 +249,7 @@ class SLNPStateModelSpec extends TestBase {
             // Create mock SLNP patron request
             PatronRequest slnpPatronRequest = new PatronRequest();
 
-            // Set isRequester to true
+            // Set is requester to the function argument value
             slnpPatronRequest.isRequester = isRequester;
 
             StateModel stateModel = StateModel.findByShortcode(isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER);
@@ -258,7 +258,7 @@ class SLNPStateModelSpec extends TestBase {
             Status initialStatus = Status.lookup(initialState);
             stateModel.initialState = initialStatus
 
-            // Set SLNP Requester StateModel and initial state
+            // Set SLNP StateModel and initial state
             slnpPatronRequest.stateModel = stateModel
             slnpPatronRequest.state = initialStatus;
 
