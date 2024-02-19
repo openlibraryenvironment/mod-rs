@@ -33,7 +33,7 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
 
 	// SLNP Responder Actions
-	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY =        "slnpAbortSupply";
+	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
 
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
