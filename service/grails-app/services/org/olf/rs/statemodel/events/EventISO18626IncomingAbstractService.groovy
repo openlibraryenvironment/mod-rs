@@ -139,6 +139,12 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
+                        if ((request.supplyingInstitutionSymbol == null || request.getSupplyingInstitutionSymbol().contains("null")) &&
+                                eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                eventData.header?.supplyingAgencyId?.agencyIdValue != null){
+                            request.setSupplyingInstitutionSymbol(
+                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}");
+                        }
                         // We need to determine if this request is for the current rota position
                         if (isForCurrentRotaLocation(eventData, request)) {
                             // We now need to execute the action for the message
