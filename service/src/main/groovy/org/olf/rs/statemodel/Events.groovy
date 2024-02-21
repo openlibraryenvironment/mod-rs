@@ -11,8 +11,10 @@ public class Events {
 	static public final String EVENT_MESSAGE_REQUEST_INDICATION                       = "MESSAGE_REQUEST_ind";
 	static public final String EVENT_NO_IMPLEMENTATION                                = "Event No Implementation";
     static public final String EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION          = "Req_New_Patron_Request_ind";
+	static public final String EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION     = "Req_New_SLNP_Patron_Request_ind";
 	static public final String EVENT_REQUESTING_AGENCY_MESSAGE_INDICATION             = "REQUESTING_AGENCY_MESSAGE_ind";
     static public final String EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION          = "Resp_New_Patron_Request_ind";
+	static public final String EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION     = "Resp_New_SLNP_Patron_Request_ind";
 	static public final String EVENT_STATUS_REQ_AWAITING_RETURN_SHIPPING_INDICATION   = STATUS_EVENT_PREFIX + Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING + STATUS_EVENT_POSTFIX;
 	static public final String EVENT_STATUS_REQ_BORROWER_RETURNED_INDICATION          = STATUS_EVENT_PREFIX + Status.PATRON_REQUEST_BORROWER_RETURNED + STATUS_EVENT_POSTFIX;
 	static public final String EVENT_STATUS_REQ_BORROWING_LIBRARY_RECEIVED_INDICATION = STATUS_EVENT_PREFIX + Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED + STATUS_EVENT_POSTFIX;

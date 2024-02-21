@@ -83,6 +83,7 @@ public class ActionEventData {
 
         // SLNP Responder actions
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_ITEM_RETURNED, 'The responder has received the returned item(s)', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_ITEM_RETURNED.capitalize(), ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED, true);
 
         // Both Requester and Responder actions
         ActionEvent.ensure(Actions.ACTION_INCOMING_ISO18626, 'An incoming ISO 18626 message', true, Actions.ACTION_INCOMING_ISO18626.capitalize(), null);
@@ -122,7 +123,11 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_STATUS_RES_OVERDUE_INDICATION, 'Status has changed to Overdue', false, eventServiceName(Events.EVENT_STATUS_RES_OVERDUE_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION, 'Status has changed to Awaiting Desequestration', false, eventServiceName(Events.EVENT_STATUS_RES_AWAIT_DESEQUESTRATION_INDICATION), ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
-    }
+
+        // SLNP Requester/Responder Events
+        ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the requester has been created', false, eventServiceName(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
+        ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
+}
 
     private String eventServiceName(String eventName) {
         // We only do this for backward compatibility, no need to call this in the future

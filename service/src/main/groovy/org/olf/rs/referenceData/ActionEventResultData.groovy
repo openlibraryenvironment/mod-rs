@@ -1811,6 +1811,15 @@ public class ActionEventResultData {
         ]
     ];
 
+    private static Map slnpResponderPrintPullSlipNoTransitionList = [
+        code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION,
+        description: 'Print pull slip',
+        model: StateModel.MODEL_SLNP_RESPONDER,
+        results: [
+            slnpDefaultNoStatusChangeOK
+        ]
+    ];
+
     private static Map slnpResponderSupplierPrintPullSlipList = [
         code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
         description: 'Print pull slip',
@@ -2014,6 +2023,7 @@ public class ActionEventResultData {
             slnpResponderSupplierUndoLastActionList,
             slnpResponderSupplierMarkShippedList,
             slnpResponderItemReturnedList,
+            slnpResponderPrintPullSlipNoTransitionList,
 
             // ISO18626 lists
             requesterAwaitingReturnShippingISO18626,

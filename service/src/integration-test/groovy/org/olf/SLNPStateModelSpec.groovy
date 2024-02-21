@@ -92,6 +92,7 @@ class SLNPStateModelSpec extends TestBase {
         if (newStatusResult == null) {
             throw new Exception("New status result is null");
         }
+        log.debug("Expected status is: ${expectedState} and actual status is: ${newStatusResult.status.code}");
         assert(newStatusResult.status.code == expectedState);
     }
 
@@ -253,18 +254,16 @@ class SLNPStateModelSpec extends TestBase {
             slnpPatronRequest.author = requestAuthor;
             slnpPatronRequest.patronIdentifier = requestPatronId;
             slnpPatronRequest.systemInstanceIdentifier = requestSystemId;
-
-            // Set is requester to the function argument value
             slnpPatronRequest.isRequester = isRequester;
 
             StateModel stateModel = StateModel.findByShortcode(isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER);
 
             // Create Status with initial state and assign to StateModel
             Status initialStatus = Status.lookup(initialState);
-            stateModel.initialState = initialStatus
+            stateModel.initialState = initialStatus;
 
             // Set SLNP StateModel and initial state
-            slnpPatronRequest.stateModel = stateModel
+            slnpPatronRequest.stateModel = stateModel;
             slnpPatronRequest.state = initialStatus;
 
             // Save the SLNP Patron request
@@ -280,14 +279,10 @@ class SLNPStateModelSpec extends TestBase {
 
             log.debug("jsonPayload: ${jsonPayload}");
             String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
-            log.debug("Posting to performAction at $performActionURL");
-
-            Thread.sleep(4000);
+            log.debug("Posting to performAction at ${performActionURL}");
 
             // Execute action
             doPost(performActionURL, jsonPayload);
-
-            Thread.sleep(4000);
 
             // Lookup the status of the SLNP patron request after performed action and validate it with expected initial status
             newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);

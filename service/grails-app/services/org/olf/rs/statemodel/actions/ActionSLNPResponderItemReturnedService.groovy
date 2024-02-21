@@ -1,25 +1,26 @@
 package org.olf.rs.statemodel.actions
 
-
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
+
 /**
- * This action is performed when the responder responds "Abort Supply"
+ * Action that means the supplier has received the item back from the requester
+ * @author Chas
  *
  */
-public class ActionSLNPRequesterSlnpPrintPullSlipService extends AbstractAction {
+public class ActionSLNPResponderItemReturnedService extends AbstractAction {
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY);
+        return(Actions.ACTION_RESPONDER_ITEM_RETURNED);
     }
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // TODO: Implement this action
-        // Send ISO18626 message with notification type note = "Abort"
+        // Just mark it as successful
+        actionResultDetails.responseResult.status = true;
 
         return(actionResultDetails);
     }
