@@ -736,16 +736,6 @@ public class ActionEventResultData {
         nextActionEvent : null
     ];
 
-    private static Map slnpResponderSupplierUndoLastAction = [
-        code: 'slnpResponderSupplierUndoLastAction',
-        description: 'Item has been checked out from the host ILS and into ReShare',
-        result: true,
-        status: Status.SLNP_RESPONDER_AWAIT_SHIP,
-        qualifier: null,
-        saveRestoreState: null,
-        nextActionEvent : null
-    ];
-
     private static Map slnpResponderItemReturned = [
         code: 'slnpResponderItemReturned',
         description: 'Request is complete',
@@ -1852,7 +1842,7 @@ public class ActionEventResultData {
         description: 'Mark request shipped',
         model: StateModel.MODEL_SLNP_RESPONDER,
         results: [
-            slnpResponderSupplierUndoLastAction
+            slnpDefaultNoStatusChangeOK
         ]
     ];
 
