@@ -502,11 +502,19 @@ public class SLNPStateModelData {
         return(eventNameNormalised);
     }
 
+    /**
+     * Loads all SLNP StateModel related data, order is important.
+     */
 	public static void loadAll() {
-        loadStateModelData();
+        // 1. StatusData
         loadStatusData();
-        loadAvailableActionData();
-        loadActionEventData();
+        // 2. ActionEventResultData
         loadActionEventResultData();
+        // 3. ActionEventData
+        loadActionEventData();
+        // 4. StateModelData
+        loadStateModelData();
+        // 5. AvailableActionData
+        loadAvailableActionData();
 	}
 }
