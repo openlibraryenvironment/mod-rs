@@ -72,18 +72,6 @@ public class StateModelData {
     [ status : Status.REQUESTER_LOANED_DIGITALLY ]
   ];
 
-    // The states available to the default SLNP state model
-    static private final List slnpRequesterStates = [
-            [status: Status.SLNP_REQUESTER_IDLE],
-            [status: Status.SLNP_REQUESTER_CANCELLED, isTerminal: true],
-            [status: Status.SLNP_REQUESTER_ABORTED],
-            [status: Status.SLNP_REQUESTER_SHIPPED],
-            [status: Status.SLNP_REQUESTER_CHECKED_IN],
-            [status: Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING],
-            [status: Status.SLNP_REQUESTER_COMPLETE, isTerminal: true]
-
-    ];
-
     // The states available to the default responder state model
     static private final List responderStates = [
         [ status : Status.RESPONDER_AWAIT_PICKING ],
@@ -120,33 +108,14 @@ public class StateModelData {
             [ status : Status.RESPONDER_UNFILLED, isTerminal : true ]
     ];
 
-    // The states available to the default SLNP responder state model
-    static private final List slnpResponderStates = [
-            [status: Status.SLNP_RESPONDER_IDLE],
-            [status: Status.SLNP_RESPONDER_UNFILLED, isTerminal: true],
-            [status: Status.SLNP_RESPONDER_ABORTED, isTerminal: true],
-            [status: Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP],
-            [status: Status.SLNP_RESPONDER_AWAIT_PICKING],
-            [status: Status.SLNP_RESPONDER_AWAIT_SHIP],
-            [status: Status.SLNP_RESPONDER_ITEM_SHIPPED],
-            [status: Status.SLNP_RESPONDER_COMPLETE, isTerminal: true]
-    ];
-
 	public void load() {
 		log.info("Adding state model records to the database");
 
         // Now update the state models with the initial state
         StateModel.ensure(StateModel.MODEL_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, requesterStates);
         StateModel.ensure(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, digitalReturnableRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 5]]);
-        StateModel.ensure(StateModel.MODEL_SLNP_REQUESTER, null, Status.SLNP_REQUESTER_IDLE, null, null, null, slnpRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 6]]);
         StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, responderStates);
         StateModel.ensure(StateModel.MODEL_CDL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_AWAIT_DESEQUESTRATION, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, cdlResponderStates, [[ stateModel: StateModel.MODEL_RESPONDER, priority: 5 ]]);
-        StateModel.ensure(
-                StateModel.MODEL_SLNP_RESPONDER, null, Status.SLNP_RESPONDER_IDLE,
-                Actions.ACTION_RESPONDER_RESPOND_YES,
-                Status.SLNP_RESPONDER_IDLE,
-                null,
-                slnpResponderStates, [[stateModel: StateModel.MODEL_RESPONDER, priority: 6]]);
     }
 
 	public static void loadAll() {
