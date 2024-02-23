@@ -123,7 +123,7 @@ dependencies {
   implementation 'org.codehaus.janino:janino:3.1.9'
   implementation "org.springframework.boot:spring-boot-starter-undertow" // Replaces spring-boot-starter-tomcat
   implementation "org.hibernate:hibernate-java8:5.4.28.Final"
-  runtimeOnly "com.zaxxer:HikariCP:5.0.1"                             // Replaces Tomcat JDBC pool
+  runtimeOnly "com.zaxxer:HikariCP:5.1.0"
   runtimeOnly "org.postgresql:postgresql:42.5.3"
   implementation ('org.grails.plugins:database-migration:4.2.0') {
     exclude group: 'org.liquibase', module: 'liquibase-core'
