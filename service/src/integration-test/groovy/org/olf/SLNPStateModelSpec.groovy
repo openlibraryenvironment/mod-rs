@@ -286,7 +286,7 @@ class SLNPStateModelSpec extends TestBase {
             setting.save(flush: true, failOnError: true)
 
             // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, action, isRequester);
+            PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, action, isRequester);
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate initial status
@@ -356,7 +356,7 @@ class SLNPStateModelSpec extends TestBase {
             setting.save(flush: true, failOnError: true);
 
             // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, Actions.ACTION_UNDO, false);
+            PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, Actions.ACTION_UNDO, false);
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate initial state
