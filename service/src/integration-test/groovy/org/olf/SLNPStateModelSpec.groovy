@@ -157,10 +157,7 @@ class SLNPStateModelSpec extends TestBase {
 
                 // log.debug("Before save, ${de}, services:${de.services}");
                 try {
-                    if (testctx.bootStrapped == null) {
-                        de.save(flush:true, failOnError:true)
-                        testctx.bootStrapped = true;
-                    }
+                    de.save(flush:true, failOnError:true)
                     log.debug("Result of bind: ${de} ${de.id}");
                 }
                 catch ( Exception e ) {
@@ -204,7 +201,19 @@ class SLNPStateModelSpec extends TestBase {
         'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
         'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
         'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1' ]
+    }
 
+    void "Validate Static Router"() {
+
+        when:"We call the static router"
+        List<RankedSupplier> resolved_rota = null;
+        Tenants.withId('RSInstOne_mod_rs'.toLowerCase()) {
+            resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
+        }
+        log.debug("Static Router resolved to ${resolved_rota}");
+
+        then:"The expecte result is returned"
+        resolved_rota.size() == 2;
     }
 
     private void performAction(String id, String actionFileName) {

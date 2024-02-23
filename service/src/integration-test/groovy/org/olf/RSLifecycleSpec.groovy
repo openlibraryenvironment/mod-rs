@@ -265,10 +265,7 @@ class RSLifecycleSpec extends TestBase {
 
         // log.debug("Before save, ${de}, services:${de.services}");
         try {
-            if (testctx.bootStrapped == null) {
-                de.save(flush:true, failOnError:true)
-                testctx.bootStrapped = true;
-            }
+          de.save(flush:true, failOnError:true)
           log.debug("Result of bind: ${de} ${de.id}");
         }
         catch ( Exception e ) {
