@@ -92,7 +92,7 @@ public class ActionEventResultData {
         description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
         result: true,
         status: Status.PATRON_REQUEST_SHIPPED,
-        qualifier: 'Loaned',
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
         saveRestoreState: null,
         updateRotaLocation: true,
         nextActionEvent: null
@@ -1539,7 +1539,7 @@ public class ActionEventResultData {
       description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
       result: true,
       status: Status.REQUESTER_LOANED_DIGITALLY,
-      qualifier: 'Loaned',
+      qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
       saveRestoreState: null,
       nextActionEvent: null
     ];

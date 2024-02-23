@@ -88,7 +88,7 @@ class SLNPStateModelSpec extends TestBase {
 
     def cleanup() {}
 
-    private void validateStateTransition(NewStatusResult newStatusResult, expectedState) {
+    private static void validateStateTransition(NewStatusResult newStatusResult, expectedState) {
         if (newStatusResult == null) {
             throw new Exception("New status result is null");
         }
@@ -217,7 +217,45 @@ class SLNPStateModelSpec extends TestBase {
         resolved_rota.size() == 2;
     }
 
-    void "SLNP StateModel Requester/Responder initial state transitions to result state by performed action"(
+    private void performAction(String id, String actionFileName) {
+        String jsonPayload = new File('src/integration-test/resources/scenarios/' + actionFileName + '.json').text;
+
+        log.debug("jsonPayload: ${jsonPayload}");
+        String performActionURL = "${baseUrl}/rs/patronrequests/${id}/performAction".toString();
+        log.debug("Posting to performAction at ${performActionURL}");
+
+        // Execute action
+        doPost(performActionURL, jsonPayload);
+    }
+
+    private PatronRequest createPatronRequest(
+            String state,
+            String requestPatronId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSymbol,
+            String requestSystemId,
+            String action,
+            Boolean isRequester) {
+
+        Map request = [
+                patronReference: requestPatronId + action,
+                title: requestTitle,
+                author: requestAuthor,
+                requestingInstitutionSymbol: requestSymbol,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: isRequester
+        ];
+        def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        PatronRequest slnpPatronRequest = PatronRequest.get(resp?.id);
+        Status initialStatus = Status.lookup(state);
+        slnpPatronRequest.state = initialStatus;
+        return slnpPatronRequest.save(flush: true, failOnError: true);
+    }
+
+    void "Test initial state transition to result state by performed action"(
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -247,44 +285,18 @@ class SLNPStateModelSpec extends TestBase {
             setting.value = isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER;
             setting.save(flush: true, failOnError: true)
 
-            // Create mock SLNP patron request
-            PatronRequest slnpPatronRequest = new PatronRequest();
-            slnpPatronRequest.title = requestTitle;
-            slnpPatronRequest.requestingInstitutionSymbol = requestSymbol;
-            slnpPatronRequest.author = requestAuthor;
-            slnpPatronRequest.patronIdentifier = requestPatronId;
-            slnpPatronRequest.systemInstanceIdentifier = requestSystemId;
-            slnpPatronRequest.isRequester = isRequester;
+            // Create PatronRequest
+            PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, action, isRequester);
+            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
-            StateModel stateModel = StateModel.findByShortcode(isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER);
-
-            // Create Status with initial state and assign to StateModel
-            Status initialStatus = Status.lookup(initialState);
-            stateModel.initialState = initialStatus;
-
-            // Set SLNP StateModel and initial state
-            slnpPatronRequest.stateModel = stateModel;
-            slnpPatronRequest.state = initialStatus;
-
-            // Save the SLNP Patron request
-            slnpPatronRequest = slnpPatronRequest.save(flush: true, failOnError: true);
-
-            log.debug("Mocked SNLP Patron Request response: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
-
-            // Lookup the status of the SLNP patron request and validate it with expected initial status
+            // Validate initial status
             NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, false);
             validateStateTransition(newResultStatus, initialState);
 
-            String jsonPayload = new File('src/integration-test/resources/scenarios/' + jsonFileName + '.json').text;
+            // Perform action
+            performAction(slnpPatronRequest?.id, jsonFileName);
 
-            log.debug("jsonPayload: ${jsonPayload}");
-            String performActionURL = "${baseUrl}/rs/patronrequests/${slnpPatronRequest.id}/performAction".toString();
-            log.debug("Posting to performAction at ${performActionURL}");
-
-            // Execute action
-            doPost(performActionURL, jsonPayload);
-
-            // Lookup the status of the SLNP patron request after performed action and validate it with expected initial status
+            // Validate result status after performed action
             newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);
             validateStateTransition(newResultStatus, resultState);
         }
@@ -315,7 +327,63 @@ class SLNPStateModelSpec extends TestBase {
         'RSInstOne' | 'respond19'   | 'test19'      | '1234-5678-9123-1249' | '9876-1249'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP    | 'supplierPrintPullSlip'       | false
         'RSInstOne' | 'respond20'   | 'test20'      | '1234-5678-9123-1250' | '9876-1250'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED       | 'supplierMarkShipped'         | false
         'RSInstOne' | 'respond21'   | 'test21'      | '1234-5678-9123-1251' | '9876-1251'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'   | false
-//        'RSInstOne' | 'respond22'   | 'test22'      | '1234-5678-9123-1252' | '9876-1252'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_UNDO                                  | 'undo'                        | false
-        'RSInstOne' | 'respond23'   | 'test23'      | '1234-5678-9123-1253' | '9876-1253'       | 'ISIL:RST1'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_ITEM_RETURNED               | 'supplierItemReturned'        | false
+        'RSInstOne' | 'respond22'   | 'test22'      | '1234-5678-9123-1252' | '9876-1252'       | 'ISIL:RST1'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_ITEM_RETURNED               | 'supplierItemReturned'        | false
     }
+
+    void "Test undo action"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+        when: "Performing the action"
+
+        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Token': 'dummy',
+                    'X-Okapi-User-Id': 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Save the app settings
+            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_RESPONDER);
+            setting.value = StateModel.MODEL_SLNP_RESPONDER;
+            setting.save(flush: true, failOnError: true);
+
+            // Create PatronRequest
+            PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, Actions.ACTION_UNDO, false);
+            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
+
+            // Validate initial state
+            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, true);
+            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_PICKING);
+
+            // Perform supplierCheckInToReshare action
+            performAction(slnpPatronRequest?.id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
+
+            // Validate status after action - supplierCheckInToReshare
+            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, null, true, true);
+            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_SHIP);
+
+            // Perform undo action
+            performAction(slnpPatronRequest?.id, Actions.ACTION_UNDO);
+
+            // Validate status after action - undo
+            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_UNDO, null, true, true);
+            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_PICKING);
+        }
+
+        then: "Check values"
+        assert true;
+
+        where:
+        tenantId    | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
+        'RSInstOne' | 'respond1'    | 'test1'       | '1234-5678-9123-12599 ' | '9876-1252'       | 'ISIL:RST1'
+    }
+
 }

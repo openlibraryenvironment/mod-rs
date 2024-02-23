@@ -19,7 +19,7 @@ public class ActionResponderFillDigitalLoanService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, 'Loaned', [deliveredFormat: 'URL', *:parameters], actionResultDetails);
+        reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_LOANED, [deliveredFormat: 'URL', *:parameters], actionResultDetails);
         actionResultDetails.auditMessage = 'Loaned digitally';
 
         return(actionResultDetails);

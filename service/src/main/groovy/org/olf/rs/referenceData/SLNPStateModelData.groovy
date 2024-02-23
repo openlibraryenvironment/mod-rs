@@ -3,13 +3,13 @@ package org.olf.rs.referenceData
 import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEvent
 import org.olf.rs.statemodel.ActionEventResultList
+import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.AvailableAction
 import org.olf.rs.statemodel.Events
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusStage
-import org.olf.rs.statemodel.UndoStatus;
 
 /**
  * Loads the SLNP State model data required for the system to process requests
@@ -100,7 +100,7 @@ public class SLNPStateModelData {
             description: 'Request has been updated by the supplier with the shipped status.',
             result: true,
             status: Status.SLNP_REQUESTER_SHIPPED,
-            qualifier: null,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
             saveRestoreState: null,
             nextActionEvent : null
     ];
@@ -352,15 +352,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpResponderSupplierUndoLastActionList = [
-            code: ActionEventResultList.SLNP_RESPONDER_UNDO_LAST_ACTION,
-            description: 'Mark request shipped',
-            model: StateModel.MODEL_SLNP_RESPONDER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpResponderItemReturnedList = [
             code: ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED,
             description: 'Scan request ID to mark request returned',
@@ -386,7 +377,6 @@ public class SLNPStateModelData {
             slnpResponderSupplierPrintPullSlipList,
             slnpResponderConditionalSupplyNoTransitionList,
             slnpResponderSupplierCheckInReshareList,
-            slnpResponderSupplierUndoLastActionList,
             slnpResponderSupplierMarkShippedList,
             slnpResponderItemReturnedList,
             slnpResponderPrintPullSlipNoTransitionList
@@ -416,7 +406,6 @@ public class SLNPStateModelData {
         // SLNP_RES_AWAIT_SHIP OR "Awaiting shipping"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_SHIP, Actions.ACTION_UNDO, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_UNDO_LAST_ACTION);
 
         // SLNP_RES_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_RESPOND_YES);
@@ -469,7 +458,6 @@ public class SLNPStateModelData {
 
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
         ActionEvent.ensure(Actions.ACTION_RESPONDER_ITEM_RETURNED, 'The responder has received the returned item(s)', true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_ITEM_RETURNED.capitalize(), ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED, true);
-        ActionEvent.ensure(Actions.ACTION_UNDO, 'Attempts to undo the last action performed', true, Actions.ACTION_UNDO.capitalize(), ActionEventResultList.SLNP_RESPONDER_UNDO_LAST_ACTION, false, true, UndoStatus.SKIP);
 
         ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the requester has been created', false, eventServiceName(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
         ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
