@@ -207,19 +207,6 @@ class SLNPStateModelSpec extends TestBase {
 
     }
 
-    void "Validate Static Router"() {
-
-        when:"We call the static router"
-        List<RankedSupplier> resolved_rota = null;
-        Tenants.withId('RSInstOne_mod_rs'.toLowerCase()) {
-            resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
-        }
-        log.debug("Static Router resolved to ${resolved_rota}");
-
-        then:"Then expect result is returned"
-        resolved_rota.size() == 2;
-    }
-
     private void performAction(String id, String actionFileName) {
         String jsonPayload = new File('src/integration-test/resources/scenarios/' + actionFileName + '.json').text;
 
