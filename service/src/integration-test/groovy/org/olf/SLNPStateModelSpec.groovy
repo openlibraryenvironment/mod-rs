@@ -18,6 +18,8 @@ import org.olf.rs.statemodel.*
 import spock.lang.Shared
 import spock.lang.Stepwise
 
+import java.util.function.Predicate
+
 @Slf4j
 @Integration
 @Stepwise
@@ -230,6 +232,11 @@ class SLNPStateModelSpec extends TestBase {
         doPost(performActionURL, jsonPayload);
     }
 
+    private Symbol symbolFromString(String symbolString) {
+        def parts = symbolString.tokenize(":");
+        return ReshareApplicationEventHandlerService.resolveSymbol(parts[0], parts[1]);
+    }
+
     private PatronRequest createPatronRequest(
             String state,
             String requestPatronId,
@@ -262,8 +269,8 @@ class SLNPStateModelSpec extends TestBase {
         Status initialStatus = Status.lookup(state);
         slnpPatronRequest.state = initialStatus;
 
-        Symbol reqSymbol = ReshareApplicationEventHandlerService.resolveSymbol("ISIL", "RST1");
-        Symbol suppSymbol = ReshareApplicationEventHandlerService.resolveSymbol("ISIL", "RST2");
+        Symbol reqSymbol = symbolFromString(requestSymbol);
+        Symbol suppSymbol = symbolFromString(supplierSymbol);
 
         slnpPatronRequest.resolvedRequester = reqSymbol;
         slnpPatronRequest.resolvedSupplier = suppSymbol;
@@ -281,46 +288,59 @@ class SLNPStateModelSpec extends TestBase {
     }
 
     void "Test initial state transition to result state by performed action"(
-            String tenantId,
-            String requestTitle,
-            String requestAuthor,
-            String requestSystemId,
-            String requestPatronId,
-            String requestSymbol,
-            String initialState,
-            String resultState,
+            String requesterTenantId,
+            String responderTenantId,
+            String requesterSymbol,
+            String responderSymbol,
+            String requesterInitialState,
+            String responderInitialState,
+            String patronId,
+            String title,
+            String author,
             String action,
             String jsonFileName,
-            Boolean isRequester) {
+            String requesterResultState,
+            String responderResultState
+            ) {
         when: "Performing the action"
 
-        Tenants.withId("RSInstTwo".toLowerCase()+'_mod_rs') {
+        String requesterRequestId = "a5d0465a-9a82-4c6f-9ca6-c532920eaec0";
+        String responderRequestId = "71dbee66-7bed-4795-afc1-0422506642e9";
+
+        String requesterSystemId = "31a75ea1-ce8e-4622-8f68-aa5f9e7cf5b3";
+        String responderSystemId = "24d35adb-223a-4d45-bf04-e8e1927a50b9";
+
+        String hrid = "RSTTEST-1"
+
+        PatronRequest requesterPatronRequest;
+        Tenants.withId(requesterTenantId.toLowerCase()+'_mod_rs') {
             // Define headers
-            def headers = [
-                    'X-Okapi-Tenant': "RSInstTwo",
+            def requesterHeaders = [
+                    'X-Okapi-Tenant': requesterTenantId,
                     'X-Okapi-Token': 'dummy',
                     'X-Okapi-User-Id': 'dummy',
                     'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
             ]
 
-            setHeaders(headers);
+            setHeaders(requesterHeaders);
 
             // Save the app settings
             AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_REQUESTER);
             setting.value = StateModel.MODEL_SLNP_REQUESTER;
-            setting.save(flush: true, failOnError: true)
+            setting.save(flush: true, failOnError: true);
 
             // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(initialState, '9876-1231', requestTitle, requestAuthor, requestSymbol,
-                    'ISIL:RST2', requestSystemId, action, true, "RST1TEST", "56597a0a-e30a-4e56-bd53-28d93f74bb1d", "a9d1af03-7c0a-4f3b-bd83-2d8dd9196f58");
+            requesterPatronRequest = createPatronRequest(requesterInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, requesterSystemId, action, true, hrid, responderRequestId, requesterRequestId);
 
-            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
+            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
         }
 
-        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+        PatronRequest responderPatronRequest;
+        Tenants.withId(responderTenantId.toLowerCase()+'_mod_rs') {
             // Define headers
             def headers = [
-                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Tenant': responderTenantId,
                     'X-Okapi-Token': 'dummy',
                     'X-Okapi-User-Id': 'dummy',
                     'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
@@ -334,27 +354,29 @@ class SLNPStateModelSpec extends TestBase {
             setting.save(flush: true, failOnError: true)
 
             // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(initialState, '9876-1232', requestTitle, requestAuthor, requestSymbol,
-                    'ISIL:RST2', requestSystemId, action, false, "RST1TEST", "a9d1af03-7c0a-4f3b-bd83-2d8dd9196f58", "56597a0a-e30a-4e56-bd53-28d93f74bb1d");
-            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
+            responderPatronRequest = createPatronRequest(responderInitialState, patronId, title, author, responderSymbol,
+                    requesterSymbol, responderSystemId, action, false, hrid, requesterRequestId, responderRequestId);
+            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
             // Validate initial status
-            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, false);
-            validateStateTransition(newResultStatus, initialState);
+            NewStatusResult newResultStatus = statusService.lookupStatus(responderPatronRequest, null, null, true, false);
+            validateStateTransition(newResultStatus, responderInitialState);
 
             // Perform action
-            performAction(slnpPatronRequest?.id, jsonFileName);
+            performAction(responderPatronRequest?.id, jsonFileName);
 
             // Validate result status after performed action
-            newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);
-            validateStateTransition(newResultStatus, resultState);
+            newResultStatus = statusService.lookupStatus(responderPatronRequest, action, null, true, true);
+            validateStateTransition(newResultStatus, responderResultState);
         }
 
         then: "Check values"
         assert true;
 
         where:
-        tenantId    | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                               | jsonFileName                  | isRequester
+        requesterTenantId   | responderTenantId | requesterSymbol   | responderSymbol   | requesterInitialState | responderInitialState     | patronId      | title     | author    | action                                            | jsonFileName          | requesterResultState      | responderResultState
+        'RSInstOne'         | 'RSInstTwo'       | 'ISIL:RST1'       | 'ISIL:RST2'       | 'SLNP_REQ_IDLE'       | 'SLNP_RES_AWAIT_SHIP'     | '9876-1231'   | 'title1'  | 'author1' | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED    | 'supplierMarkShipped' | 'SLNP_REQ_SHIPPED'        | 'SLNP_RES_ITEM_SHIPPED'
+//        tenantId    | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                               | jsonFileName                  | isRequester
 //        'RSInstOne' | 'request1'    | 'test1'       | '1234-5678-9123-1231' | '9876-1231'       | 'ISIL:RST1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_CANCEL_LOCAL                | 'slnpRequesterCancelLocal'    | true
 //        'RSInstOne' | 'request2'    | 'test2'       | '1234-5678-9123-1232' | '9876-1232'       | 'ISIL:RST1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT           | 'slnpRequesterHandleAbort'    | true
 //        'RSInstOne' | 'request3'    | 'test3'       | '1234-5678-9123-1233' | '9876-1233'       | 'ISIL:RST1'   | 'SLNP_REQ_SHIPPED'                  | 'SLNP_REQ_CHECKED_IN'                | Actions.ACTION_REQUESTER_REQUESTER_RECEIVED          | 'requesterReceived'           | true
@@ -374,7 +396,7 @@ class SLNPStateModelSpec extends TestBase {
 //        'RSInstOne' | 'respond17'   | 'test17'      | '1234-5678-9123-1247' | '9876-1247'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'   | false
 //        'RSInstOne' | 'respond18'   | 'test18'      | '1234-5678-9123-1248' | '9876-1248'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY      | 'supplierCannotSupply'        | false
 //        'RSInstOne' | 'respond19'   | 'test19'      | '1234-5678-9123-1249' | '9876-1249'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP    | 'supplierPrintPullSlip'       | false
-        'RSInstOne' | 'respond20'   | 'test20'      | '1234-5678-9123-1250' | '9876-1250'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED       | 'supplierMarkShipped'         | false
+//        'RSInstOne' | 'respond20'   | 'test20'      | '1234-5678-9123-1250' | '9876-1250'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED       | 'supplierMarkShipped'         | false
 //        'RSInstOne' | 'respond21'   | 'test21'      | '1234-5678-9123-1251' | '9876-1251'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'   | false
 //        'RSInstOne' | 'respond22'   | 'test22'      | '1234-5678-9123-1252' | '9876-1252'       | 'ISIL:RST1'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_ITEM_RETURNED               | 'supplierItemReturned'        | false
     }
