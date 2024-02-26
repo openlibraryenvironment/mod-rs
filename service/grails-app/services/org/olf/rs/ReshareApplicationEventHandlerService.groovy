@@ -431,7 +431,7 @@ public class ReshareApplicationEventHandlerService {
     return returnList.join(",");
   }
 
-	public Symbol resolveSymbol(String authorty, String symbol) {
+	public static Symbol resolveSymbol(String authorty, String symbol) {
 		Symbol result = null;
 	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
 	                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
