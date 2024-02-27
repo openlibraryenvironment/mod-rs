@@ -131,6 +131,7 @@ public class AvailableActionData {
         // REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_BORROWER_CHECK, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626)
 
         // REQ_INVALID_PATRON OR "Invalid patron"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)

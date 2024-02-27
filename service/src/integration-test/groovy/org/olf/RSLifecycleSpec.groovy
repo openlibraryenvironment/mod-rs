@@ -172,6 +172,46 @@ class RSLifecycleSpec extends TestBase {
     return request_id;
   }
 
+  // For the given tenant, block up to timeout ms until the given request is found in the given state
+  private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
+    long start_time = System.currentTimeMillis();
+    String request_id = null;
+    String request_state = null;
+    long elapsed = 0;
+    while ( ( required_state != request_state ) &&
+            ( elapsed < timeout ) ) {
+
+      setHeaders([ 'X-Okapi-Tenant': tenant ]);
+      // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+      def resp = doGet("${baseUrl}rs/patronrequests",
+              [
+                      'max':'100',
+                      'offset':'0',
+                      'match':'hrid',
+                      'term':hrid
+              ])
+      if ( resp?.size() == 1 ) {
+        request_id = resp[0].id
+        request_state = resp[0].state?.code
+      } else {
+        log.debug("waitForRequestState: Request with hrid ${hrid} not found");
+      }
+
+      if ( required_state != request_state ) {
+        // Request not found OR not yet in required state
+        log.debug("Not yet found.. sleeping");
+        Thread.sleep(1000);
+      }
+      elapsed = System.currentTimeMillis() - start_time
+    }
+
+    if ( required_state != request_state ) {
+      throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+    }
+
+    return request_id;
+  }
+
   // For the given tenant fetch the specified request
   private Map fetchRequest(String tenant, String requestId) {
 
@@ -472,6 +512,69 @@ class RSLifecycleSpec extends TestBase {
       tenant_id   | peer_tenant   | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | tags
       'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'       | [ 'RS-TESTCASE-2' ]
       'RSInstOne' | 'RSInstThree' | LONG_300_CHAR_TITLE   | 'Author, Some'   | '1234-5678-9123-4579'      | '1234-567a' | 'RS-LIFECYCLE-TEST-00003' | 'ISIL:RST1'       | [ 'RS-TESTCASE-3' ]
+  }
+
+  void "Send ISO request"(String tenant_id,
+                          String peer_tenant,
+                          String agencyIdValue,
+                          String supAgencyId,
+                          String requestId,
+                          String patronId,
+                          String requestFile,
+                          String requesting_symbol,
+                          String messageFile,
+                          String statusChanged,
+                          String finalStatus,
+                          String[] tags) {
+    when:"post new request"
+    log.debug("Create a new request ${tenant_id} ${tags} ${requestId} ${patronId}")
+
+    String requestXml = new File("src/integration-test/resources/isoMessages/${requestFile}").text
+    requestXml = requestXml.replace('agencyIdValue_holder', agencyIdValue)
+            .replace('requestId_holder', requestId)
+            .replace('patronId_holder', patronId)
+
+    setHeaders([
+            'X-Okapi-Tenant': tenant_id,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+    ])
+    def resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
+
+    log.debug("CreateReqTest2 -- Response: RESP:${resp.ISO18626Message} ")
+
+    // Stash the ID
+//    this.testctx.request_data[p_patron_reference] = resp.id
+
+    String req_request = waitForRequestStateByHrid(tenant_id, 10000, requestId, 'REQ_IDLE')
+    log.debug("Created new request for iso test case 1. RESQUESTER ID is : ${req_request}")
+
+    String messageXml = new File("src/integration-test/resources/isoMessages/${messageFile}").text
+    messageXml = messageXml.replace('agencyIdValue_holder', agencyIdValue)
+            .replace('requestId_holder', requestId)
+            .replace('supAgencyIdValue_holder', supAgencyId)
+            .replace('status_holder', statusChanged)
+
+    setHeaders([
+            'X-Okapi-Tenant': tenant_id,
+            'X-Okapi-Token': 'dummy',
+            'X-Okapi-User-Id': 'dummy',
+            'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+    ])
+    resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), messageXml)
+
+    String message_request = waitForRequestStateByHrid(tenant_id, 10000, requestId, finalStatus)
+    log.debug("Updated status. RESQUESTER ID is : ${message_request} with status: ${finalStatus}")
+
+    then:"Check the return value"
+    assert req_request != null
+    assert message_request != null
+
+    where:
+    tenant_id   | peer_tenant   | agencyIdValue | supAgencyId | requestId     | patronId    | requestFile         | requesting_symbol | messageFile                         | statusChanged | finalStatus                    | tags
+    'RSInstOne' | 'RSInstThree' | 'RST1'        | 'RST3'      | '1234-5678-1' | '1234-5679' | 'patronRequest.xml' | 'ISIL:RST1'       | 'supplyingAgencyMessage_loaned.xml' | 'Loaned'      | 'REQ_SHIPPED'                  | [ 'RS-TESTCASE-ISO-1' ]
+    'RSInstOne' | 'RSInstThree' | 'RST1'        | 'RST3'      | '1234-5678-2' | '1234-567a' | 'patronRequest.xml' | 'ISIL:RST1'       | 'supplyingAgencyMessage_loaned.xml' | 'Cancelled'   | 'REQ_CANCELLED_WITH_SUPPLIER'  | [ 'RS-TESTCASE-ISO-2' ]
   }
 
   // For RSInstThree tenant should return the sample data loaded

@@ -989,6 +989,7 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Loaned,
+            requesterISO18626Cancelled,
             defaultNoStatusChangeOK
         ]
     ];

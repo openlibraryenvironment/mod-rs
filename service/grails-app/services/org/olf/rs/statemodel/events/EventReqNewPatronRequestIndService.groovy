@@ -1,4 +1,6 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
+
+import org.olf.rs.statemodel.Status;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +64,16 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         if (request == null) {
             log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
             return(eventResultDetails);
+        }
+
+        log.info("EventReqNewPatronRequestIndService: request ${request.getId()} and state ${request.getState().code}")
+
+        if ("null:null".equals(request.supplyingInstitutionSymbol) || 'REQ_CANCELLED_WITH_SUPPLIER' == request.getState().code ||
+            'REQ_SHIPPED' == request.getState().code){
+            log.info("TODO no need checks if no supplying institution is missing")
+            request.needsAttention = false;
+            eventResultDetails.qualifier = Status.PATRON_REQUEST_IDLE;
+            return eventResultDetails
         }
 
         // Generate a human readable ID to use
@@ -255,6 +267,6 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         if (request.systemInstanceIdentifier != null) {
             return true;
         }
-        return false;
+        return true;
     }
 }

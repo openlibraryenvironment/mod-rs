@@ -58,7 +58,11 @@ public class AppListenerService implements ApplicationListener {
       PatronRequest pr = (PatronRequest)event.entityObject;
       String tenant = Tenants.currentId(event.source);
       if ( pr.stateHasChanged==true && !pr.manuallyClosed) {
-        log.debug("PatronRequest State has changed - issue an indication event so we can react accordingly");
+        log.debug("PatronRequest State has changed - issue an indication event so we can react accordingly ${pr.state.code}");
+        if('REQ_CANCELLED_WITH_SUPPLIER' == pr.state.code || 'REQ_SHIPPED' == pr.state.code) {
+          log.info("Ignore state change to ${pr.state.code}")
+          return;
+        }
         String topic = "${tenant}_PatronRequestEvents".toString()
         eventPublicationService.publishAsJSON(
           topic,

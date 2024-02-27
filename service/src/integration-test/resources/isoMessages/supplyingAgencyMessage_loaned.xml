@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Supplying library back to requesting library that it has shipped the material-->
+<ISO18626Message xmlns="http://illtransactions.org/2013/iso18626" xmlns:ill="http://illtransactions.org/2013/iso18626" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ill:version="1.0" xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd">
+    <supplyingAgencyMessage>
+        <header>
+            <supplyingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>supAgencyIdValue_holder</agencyIdValue>
+            </supplyingAgencyId>
+            <requestingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>agencyIdValue_holder</agencyIdValue>
+            </requestingAgencyId>
+            <timestamp>2023-10-04T15:22:00.543778Z</timestamp>
+            <requestingAgencyRequestId>requestId_holder</requestingAgencyRequestId>
+            <supplyingAgencyRequestId>requestId_holder</supplyingAgencyRequestId>
+        </header>
+        <messageInfo>
+            <reasonForMessage>StatusChange</reasonForMessage>
+            <answerYesNo />
+            <note></note>
+            <reasonUnfilled />
+            <reasonRetry />
+            <offeredCosts />
+            <retryAfter />
+            <retryBefore />
+        </messageInfo>
+        <statusInfo>
+            <status>status_holder</status>
+            <expectedDeliveryDate />
+            <dueDate />
+            <lastChange />
+        </statusInfo>
+        <deliveryInfo>
+            <dateSent />
+            <itemId></itemId>
+            <sentVia />
+            <sentToPatron />
+            <loanCondition />
+            <deliveredFormat />
+            <deliveryCosts />
+            <URL />
+        </deliveryInfo>
+    </supplyingAgencyMessage>
+</ISO18626Message>
