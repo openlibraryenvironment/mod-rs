@@ -59,7 +59,8 @@ public class AppListenerService implements ApplicationListener {
       String tenant = Tenants.currentId(event.source);
       if ( pr.stateHasChanged==true && !pr.manuallyClosed) {
         log.debug("PatronRequest State has changed - issue an indication event so we can react accordingly ${pr.state.code}");
-        if('REQ_CANCELLED_WITH_SUPPLIER' == pr.state.code || 'REQ_SHIPPED' == pr.state.code) {
+        if('REQ_CANCELLED_WITH_SUPPLIER' == pr.state.code) { // || 'REQ_SHIPPED' == pr.state.code
+          // We use state REQ_CANCELLED_WITH_SUPPLIER as example but this is triggering routing to next supplier which we don't need
           log.info("Ignore state change to ${pr.state.code}")
           return;
         }

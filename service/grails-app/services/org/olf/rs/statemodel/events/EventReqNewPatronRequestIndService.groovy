@@ -70,6 +70,8 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
         if ("null:null".equals(request.supplyingInstitutionSymbol) || 'REQ_CANCELLED_WITH_SUPPLIER' == request.getState().code ||
             'REQ_SHIPPED' == request.getState().code){
+            // We don't need to validate our request.
+            // Because unit tests execute next request faster than kafka message is processed I added state check
             log.info("TODO no need checks if no supplying institution is missing")
             request.needsAttention = false;
             eventResultDetails.qualifier = Status.PATRON_REQUEST_IDLE;
@@ -267,6 +269,6 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         if (request.systemInstanceIdentifier != null) {
             return true;
         }
-        return true;
+        return false;
     }
 }
