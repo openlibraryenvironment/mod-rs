@@ -589,6 +589,7 @@ and sa.service.businessFunction.value=:ill
         issue(eventData.bibliographicInfo.issue)
         startPage(eventData.bibliographicInfo.startPage)
         numberOfPages(eventData.bibliographicInfo.numberOfPages)
+        pagesRequested(eventData.bibliographicInfo.pagesRequested)
         edition(eventData.bibliographicInfo.edition)
         issn(eventData.bibliographicInfo.issn)
         isbn(eventData.bibliographicInfo.isbn)
