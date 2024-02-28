@@ -5,6 +5,7 @@ import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
+import org.olf.rs.statemodel.ActionEventResultQualifier
 
 /**
  * Fill a loan digitally
