@@ -9,6 +9,7 @@ import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestRota
 import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.RankedSupplier
@@ -275,6 +276,8 @@ class SLNPStateModelSpec extends TestBase {
             String hrid,
             String peerRequestIdentifier) {
 
+        def rota = [directoryId: supplierSymbol, rotaPosition: "0", 'instanceIdentifier': '001TagFromMarc', 'copyIdentifier':'COPYBarcode from 9xx'];
+
         Map request = [
                 patronReference: requestPatronId + action,
                 title: requestTitle,
@@ -285,7 +288,8 @@ class SLNPStateModelSpec extends TestBase {
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
                 hrid: hrid,
-                peerRequestIdentifier: peerRequestIdentifier
+                peerRequestIdentifier: peerRequestIdentifier,
+                rota: isRequester ? [rota] : null
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
@@ -295,6 +299,13 @@ class SLNPStateModelSpec extends TestBase {
 
         Symbol reqSymbol = symbolFromString(requestSymbol);
         Symbol suppSymbol = symbolFromString(supplierSymbol);
+
+        if (isRequester) {
+            slnpPatronRequest.rotaPosition = 0;
+            PatronRequestRota patronRota = slnpPatronRequest.rota.find({ rotaLocation -> rotaLocation.rotaPosition == slnpPatronRequest.rotaPosition });
+            patronRota.peerSymbol = suppSymbol;
+            patronRota.save(flush: true, failOnError: true);
+        }
 
         slnpPatronRequest.resolvedRequester = reqSymbol;
         slnpPatronRequest.resolvedSupplier = suppSymbol;
@@ -387,7 +398,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Validate REQUESTER result status after performed action
             newResultStatus = statusService.lookupStatus(requesterPatronRequest, action, qualifier, true, true);
-            validateStateTransition(newResultStatus, responderResultState);
+            validateStateTransition(newResultStatus, requesterResultState);
         }
 
         then: "Check values"
