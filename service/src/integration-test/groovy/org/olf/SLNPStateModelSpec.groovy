@@ -5,10 +5,12 @@ import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.PatronRequest
+import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
@@ -256,6 +258,11 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
+    private Symbol symbolFromString(String symbolString) {
+        def parts = symbolString.tokenize(":");
+        return ReshareApplicationEventHandlerService.resolveSymbol(parts[0], parts[1]);
+    }
+
     private PatronRequest createPatronRequest(
             String state,
             String requestPatronId,
@@ -317,8 +324,8 @@ class SLNPStateModelSpec extends TestBase {
         String requesterSystemId = UUID.randomUUID().toString();
         String responderSystemId = UUID.randomUUID().toString();
 
-        String requesterHrid = UUID.randomUUID().toString();
-        String responderHrid = UUID.randomUUID().toString();
+        String requesterHrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+        String responderHrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
 
         // Create Requester PatronRequest
         PatronRequest requesterPatronRequest;
@@ -365,7 +372,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequest(responderInitialState, patronId, title, author, responderSymbol,
-                    requesterSymbol, responderSystemId, action, false, hrid, responderHrid, requesterHrid);
+                    requesterSymbol, responderSystemId, action, false, responderHrid, requesterHrid);
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
             // Validate initial status
