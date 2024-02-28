@@ -6,7 +6,8 @@ import org.olf.rs.referenceData.AvailableActionData;
 import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
-import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SLNPStateModelData;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.referenceData.StateModelData;
 import org.olf.rs.referenceData.StatusData;
@@ -95,6 +96,9 @@ public class HousekeepingService implements EventPublisher {
 
         // The predefined templates
         TemplateData.loadAll();
+
+        // Load SLNP state model data
+        SLNPStateModelData.loadAll();
       }
   }
 

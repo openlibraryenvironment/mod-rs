@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
 
@@ -19,7 +20,7 @@ public class ActionResponderSupplierMarkShippedService extends ActionResponderSe
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Send the message that it is on its way
-        reshareActionService.sendResponse(request, 'Loaned', parameters, actionResultDetails);
+        reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_LOANED, parameters, actionResultDetails);
         actionResultDetails.auditMessage = 'Shipped';
 
         return(actionResultDetails);
