@@ -74,7 +74,8 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             // Because unit tests execute next request faster than kafka message is processed I added state check
             log.info("TODO no need checks if no supplying institution is missing")
             request.needsAttention = false;
-            eventResultDetails.qualifier = Status.PATRON_REQUEST_IDLE;
+//            eventResultDetails.saveData = false;
+            eventResultDetails.qualifier = Status.PATRON_REQUEST_IDLE; // Need to check why it works ?
             return eventResultDetails
         }
 
