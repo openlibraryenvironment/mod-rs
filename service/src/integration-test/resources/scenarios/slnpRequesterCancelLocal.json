@@ -1,0 +1,6 @@
+{
+  "action": "cancelLocal",
+  "actionParams": {
+    "reason": "Cancel"
+  }
+}

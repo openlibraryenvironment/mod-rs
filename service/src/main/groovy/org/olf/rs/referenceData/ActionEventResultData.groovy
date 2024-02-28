@@ -92,7 +92,7 @@ public class ActionEventResultData {
         description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
         result: true,
         status: Status.PATRON_REQUEST_SHIPPED,
-        qualifier: 'Loaned',
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
         saveRestoreState: null,
         updateRotaLocation: true,
         nextActionEvent: null
@@ -1539,7 +1539,7 @@ public class ActionEventResultData {
       description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
       result: true,
       status: Status.REQUESTER_LOANED_DIGITALLY,
-      qualifier: 'Loaned',
+      qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
       saveRestoreState: null,
       nextActionEvent: null
     ];
@@ -1681,13 +1681,13 @@ public class ActionEventResultData {
             responderShippedReturnISO18626
     ];
 
-	public void load() {
+	public static void load(Map[] resultLists) {
 		log.info("Adding action and event result lists to the database");
 
         // We are not a service, so we need to look it up
         ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
 
-        allResultLists.each { resultList ->
+        resultLists.each { resultList ->
             // Process all the possible outcomes for this result list
             List<ActionEventResult> resultItems = new ArrayList<ActionEventResult>();
             resultList.results.each { result ->
@@ -1718,6 +1718,6 @@ public class ActionEventResultData {
 	}
 
 	public static void loadAll() {
-		(new ActionEventResultData()).load();
+		(new ActionEventResultData()).load(allResultLists);
 	}
 }
