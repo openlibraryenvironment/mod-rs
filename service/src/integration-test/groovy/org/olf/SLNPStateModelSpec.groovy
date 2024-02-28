@@ -388,8 +388,8 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState | responderInitialState | patronId    | title    | author    | action                                         | jsonFileName          | requesterResultState | responderResultState    | qualifier
-        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | 'SLNP_REQ_IDLE'       | 'SLNP_RES_AWAIT_SHIP' | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped' | 'SLNP_REQ_SHIPPED'   | 'SLNP_RES_ITEM_SHIPPED' | ActionEventResultQualifier.QUALIFIER_LOANED
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | responderInitialState            | patronId    | title    | author    | action                                         | jsonFileName          | requesterResultState            | responderResultState               | qualifier
+        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_RESPONDER_AWAIT_SHIP | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped' | Status.SLNP_REQUESTER_SHIPPED   | Status.SLNP_RESPONDER_ITEM_SHIPPED | ActionEventResultQualifier.QUALIFIER_LOANED
     }
 
 //    void "Test initial state transition to result state by performed action"(
