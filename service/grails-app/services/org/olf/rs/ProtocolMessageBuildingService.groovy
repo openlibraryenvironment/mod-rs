@@ -53,6 +53,7 @@ class ProtocolMessageBuildingService {
       issue: req.issue,
       startPage: req.startPage,
       numberOfPages: req.numberOfPages,
+      pagesRequested: req.pagesRequested,
       edition: req.edition,
       issn: req.issn,
       isbn: req.isbn,

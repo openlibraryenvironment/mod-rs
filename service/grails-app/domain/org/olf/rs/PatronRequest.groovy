@@ -51,8 +51,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // Bibliographic descriptive fields
   // Title of the item requested
   String title
-  String author
   String subtitle
+  String author
   String sponsoringBody
   String publisher
   String placeOfPublication
@@ -68,6 +68,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String issue
   String startPage
   String numberOfPages
+  String pagesRequested
   String publicationDate
   String publicationDateOfComponent
   String edition
@@ -291,8 +292,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     deliveryMethod (nullable: true)
 
     title (nullable: true, blank : false, maxSize:255)
-    author (nullable: true, blank : false)
     subtitle (nullable: true, blank : false)
+    author (nullable: true, blank : false)
     sponsoringBody (nullable: true, blank : false)
     publisher (nullable: true, blank : false)
     placeOfPublication (nullable: true, blank : false)
@@ -300,6 +301,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     issue (nullable: true, blank : false)
     startPage (nullable: true, blank : false)
     numberOfPages (nullable: true, blank : false)
+    pagesRequested (nullable: true, blank : false)
     publicationDate (nullable: true, blank : false)
     publicationDateOfComponent (nullable: true, blank : false)
     edition (nullable: true, blank : false)
@@ -406,8 +408,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     deliveryMethod column : 'pr_delivery_method_fk'
 
     title column : 'pr_title'
-    author column : 'pr_author'
     subtitle column : 'pr_sub_title'
+    author column : 'pr_author'
     sponsoringBody column : 'pr_sponsoring_body'
     publisher column : 'pr_publisher'
     placeOfPublication column : 'pr_place_of_pub'
@@ -415,6 +417,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     issue column : 'pr_issue'
     startPage column : 'pr_start_page'
     numberOfPages column : 'pr_num_pages'
+    pagesRequested column : 'pr_pages_requested'
     publicationDate column : 'pr_pub_date'
     publicationDateOfComponent column : 'pr_pubdate_of_component'
     edition column : 'pr_edition'
