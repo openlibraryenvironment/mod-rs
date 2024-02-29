@@ -1,0 +1,48 @@
+<ISO18626Message version="">
+    <request>
+        <header>
+            <requestingAgencyId>
+                <agencyIdType scheme="">ISIL</agencyIdType>
+                <agencyIdValue>agencyIdValue_holder</agencyIdValue>
+            </requestingAgencyId>
+            <multipleItemRequestId></multipleItemRequestId>
+            <timestamp>2023-11-16T12:32:11.056Z</timestamp>
+            <requestingAgencyRequestId>requestId_holder</requestingAgencyRequestId>
+        </header>
+        <bibliographicInfo>
+            <supplierUniqueRecordId></supplierUniqueRecordId>
+            <title>Lord of the Rings</title>
+            <author>J.R.R. Tolkien</author>
+            <authorId></authorId>
+            <subtitle></subtitle>
+            <seriesTitle></seriesTitle>
+            <edition></edition>
+            <titleOfComponent></titleOfComponent>
+            <authorOfComponent></authorOfComponent>
+            <issue></issue>
+            <pagesRequested></pagesRequested>
+            <estimatedNoPages></estimatedNoPages>
+            <bibliographicItemId>
+                <bibliographicItemIdentifierCode scheme="">ISBN</bibliographicItemIdentifierCode>
+                <bibliographicItemIdentifier>12321312</bibliographicItemIdentifier>
+            </bibliographicItemId>
+            <sponsor></sponsor>
+            <informationSource></informationSource>
+        </bibliographicInfo>
+        <serviceInfo>
+            <requestType>New</requestType>
+            <requestSubType>PatronRequest</requestSubType>
+            <requestingAgencyPreviousRequestId></requestingAgencyPreviousRequestId>
+            <serviceType>Loan</serviceType>
+            <needBeforeDate></needBeforeDate>
+            <startDate></startDate>
+            <endDate></endDate>
+            <note></note>
+        </serviceInfo>
+        <patronInfo>
+            <patronId>patronId_holder</patronId>
+            <surname></surname>
+            <givenName></givenName>
+        </patronInfo>
+    </request>
+</ISO18626Message>
