@@ -20,7 +20,7 @@ public class ActionSLNPResponderSlnpAbortSupplyService extends AbstractAction {
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_ABORTED, parameters, actionResultDetails);
-        actionResultDetails.auditMessage = 'Aborted from supplier';
+        actionResultDetails.auditMessage = 'Abort Supply';
 
         return(actionResultDetails);
     }

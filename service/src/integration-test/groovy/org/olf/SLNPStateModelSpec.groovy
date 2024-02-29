@@ -405,8 +405,10 @@ class SLNPStateModelSpec extends TestBase {
 //        assert true;
 //
 //        where:
-//        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | responderInitialState            | patronId    | title    | author    | action                                         | jsonFileName          | requesterResultState            | responderResultState               | qualifier
-//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_RESPONDER_AWAIT_SHIP | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped' | Status.SLNP_REQUESTER_SHIPPED   | Status.SLNP_RESPONDER_ITEM_SHIPPED | ActionEventResultQualifier.QUALIFIER_LOANED
+//        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | responderInitialState                        | patronId    | title    | author    | action                                         | jsonFileName               | requesterResultState            | responderResultState               | qualifier
+//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_RESPONDER_AWAIT_SHIP             | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | Status.SLNP_REQUESTER_SHIPPED   | Status.SLNP_RESPONDER_ITEM_SHIPPED | ActionEventResultQualifier.QUALIFIER_LOANED
+//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP    | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | Status.SLNP_REQUESTER_ABORTED   | Status.SLNP_RESPONDER_ABORTED      | ActionEventResultQualifier.QUALIFIER_ABORTED
+//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_RESPONDER_IDLE                   | '9876-1231' | 'title'  | 'Author'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | Status.SLNP_REQUESTER_ABORTED   | Status.SLNP_RESPONDER_ABORTED      | ActionEventResultQualifier.QUALIFIER_ABORTED
 //    }
 
     void "Test initial state transition to result state by performed action"(
