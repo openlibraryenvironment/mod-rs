@@ -1,4 +1,6 @@
-package org.olf.rs;
+package org.olf.rs
+
+import org.olf.rs.statemodel.StateModel;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -397,7 +399,7 @@ public class ReshareActionService {
         String reasonForMessage = ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE;
 
         // Only the first response can be a RequestResponse
-        if (!request.sentISO18626RequestResponse) {
+        if (!request.sentISO18626RequestResponse && request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER) {
             // it has not previously been sent, so send the RequestResponse as the reason for the message
             reasonForMessage = ReasonForMessage.MESSAGE_REASON_REQUEST_RESPONSE;
 
