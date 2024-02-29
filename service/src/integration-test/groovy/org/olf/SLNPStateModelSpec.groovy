@@ -319,14 +319,14 @@ class SLNPStateModelSpec extends TestBase {
 //            String requesterSymbol,
 //            String responderSymbol,
 //            String requesterInitialState,
+//            String requesterResultState,
 //            String responderInitialState,
+//            String responderResultState,
 //            String patronId,
 //            String title,
 //            String author,
 //            String action,
 //            String jsonFileName,
-//            String requesterResultState,
-//            String responderResultState,
 //            String qualifier
 //    ) {
 //        when: "Creating the Requester/Responder Patron Requests"
