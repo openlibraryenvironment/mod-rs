@@ -6,7 +6,8 @@ import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.ActionService
 import org.olf.rs.statemodel.EventFetchRequestMethod;
-import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.statemodel.EventResultDetails
+import org.olf.rs.statemodel.StateModel;
 
 /**
  * Contains the base methods and definitions required to interpret the 18626 protocol
@@ -139,8 +140,14 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
+                        if ((request.supplyingInstitutionSymbol == null || request.getSupplyingInstitutionSymbol().contains("null")) &&
+                                eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                eventData.header?.supplyingAgencyId?.agencyIdValue != null){
+                            request.setSupplyingInstitutionSymbol(
+                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}");
+                        }
                         // We need to determine if this request is for the current rota position
-                        if (isForCurrentRotaLocation(eventData, request)) {
+                        if (isForCurrentRotaLocation(eventData, request) || StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode) {
                             // We now need to execute the action for the message
                             String actionToPerform = getActionToPerform(eventData);
 

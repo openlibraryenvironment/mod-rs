@@ -54,14 +54,12 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String DIGITAL_RETURNABLE_REQUESTER_LOANED_DIGITALLY_ISO18626          = 'digitalReturnableRequesterLoanedDigitallyISO18626';
 
     // SLNP requester event lists
-    static public final String SLNP_REQUESTER_CANCEL              = 'slnpRequesterCancel';
-    static public final String SLNP_REQUESTER_RECEIVED            = 'slnpRequesterReceived';
-    static public final String SLNP_REQUESTER_ABORTED             = 'slnpRequesterAborted';
-    static public final String SLNP_REQUESTER_ISO_18626_ABORTED   = 'slnpRequesterISO18626Aborted';
-    static public final String SLNP_REQUESTER_ISO_18626_SHIPPED   = 'slnpRequesterISO18626Shipped';
-    static public final String SLNP_REQUESTER_PRINT_PULL_SLIP     = 'slnpRequesterPrintPullSlip';
-    static public final String SLNP_REQUESTER_CHECKED_IN          = 'slnpRequesterCheckedIn';
-    static public final String SLNP_REQUESTER_SHIPPED_RETURN      = 'slnpRequesterShippedReturn';
+    static public final String SLNP_REQUESTER_RECEIVED                = 'slnpRequesterReceived';
+    static public final String SLNP_REQUESTER_ABORTED                 = 'slnpRequesterAborted';
+    static public final String SLNP_REQUESTER_ISO_18626_STATUS_CHANGE = 'slnpRequesterISO18626StatusChange';
+    static public final String SLNP_REQUESTER_PRINT_PULL_SLIP         = 'slnpRequesterPrintPullSlip';
+    static public final String SLNP_REQUESTER_CHECKED_IN              = 'slnpRequesterCheckedIn';
+    static public final String SLNP_REQUESTER_SHIPPED_RETURN          = 'slnpRequesterShippedReturn';
 
     // SLNP responder event lists
     static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes';

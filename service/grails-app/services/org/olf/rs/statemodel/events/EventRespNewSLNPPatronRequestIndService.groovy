@@ -28,6 +28,9 @@ public class EventRespNewSLNPPatronRequestIndService extends AbstractEvent {
             log.warn("Unable to locate request for ID ${eventData.payload.id}} isRequester=${request?.isRequester} StateModel=${request.stateModel.shortcode}");
         }
 
+        request.needsAttention = false
+        eventResultDetails.saveData = true
+        eventResultDetails.auditMessage = "Request validation done"
         // TODO: respondYes action - depending on the response from client we will see if it should be automatic or stay manual as currently implemented.
         return(eventResultDetails);
     }

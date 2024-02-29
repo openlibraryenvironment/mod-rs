@@ -107,6 +107,7 @@ class TestBase extends HttpSpec {
                     setting.value = new_value;
                     def update_setting_result = doPut("${baseUrl}rs/settings/appSettings/${setting.id}".toString(), setting);
                     log.debug("Result of settings update: ${update_setting_result}");
+                    changesNeeded.remove(setting.key)
                 }
             }
 
