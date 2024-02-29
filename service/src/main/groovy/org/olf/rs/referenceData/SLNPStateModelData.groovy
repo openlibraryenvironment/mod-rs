@@ -55,6 +55,16 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
+    private static Map slnpRequesterISO18626CancelRequest = [
+            code: 'slnpRequesterISO18626CancelRequest',
+            description: 'The request has been cancelled by the requester staff and is completed. No further actions can be taken including the action Create revised request.',
+            result: true,
+            status: Status.SLNP_REQUESTER_CANCELLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_CANCELLED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
     private static Map slnpRequesterReceived = [
             code: 'slnpRequesterReceived',
             description: 'Mark received',
@@ -90,7 +100,7 @@ public class SLNPStateModelData {
             description: 'Request has been aborted by the supplier and it\'s been added to the abort queue in ZFL. Requester staff must handle the request in ZFL, either close it or restart with updated metadata as a new request.',
             result: true,
             status: Status.SLNP_REQUESTER_ABORTED,
-            qualifier: null,
+            qualifier: ActionEventResultQualifier.QUALIFIER_ABORTED,
             saveRestoreState: null,
             nextActionEvent : null
     ];
@@ -226,12 +236,12 @@ public class SLNPStateModelData {
 
     private static Map slnpRequesterISO18626StatusChangeList = [
             code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE,
-            description: 'Abort patron request (special to SLNP, sent as Notification)',
+            description: 'Perform SLNP state model status change',
             model: StateModel.MODEL_SLNP_REQUESTER,
             results: [
                     slnpRequesterISO18626Aborted,
                     slnpRequesterISO18626Shipped,
-                    slnpRequesterCancelRequest
+                    slnpRequesterISO18626CancelRequest
             ]
     ];
 
