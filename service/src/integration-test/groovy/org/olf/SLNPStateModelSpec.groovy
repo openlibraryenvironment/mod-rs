@@ -314,103 +314,95 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
-//    void "Test end to end actions from supplier to requester"(
-//            String requesterTenantId,
-//            String responderTenantId,
-//            String requesterSymbol,
-//            String responderSymbol,
-//            String requesterInitialState,
-//            String requesterResultState,
-//            String responderInitialState,
-//            String responderResultState,
-//            String patronId,
-//            String title,
-//            String author,
-//            String action,
-//            String jsonFileName,
-//            String qualifier
-//    ) {
-//        when: "Creating the Requester/Responder Patron Requests"
-//
-//        String requesterSystemId = UUID.randomUUID().toString();
-//        String responderSystemId = UUID.randomUUID().toString();
-//
-//        String requesterHrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-//        String responderHrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-//
-//        // Create Requester PatronRequest
-//        PatronRequest requesterPatronRequest;
-//        Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
-//            // Define headers
-//            def requesterHeaders = [
-//                    'X-Okapi-Tenant'     : requesterTenantId,
-//                    'X-Okapi-Token'      : 'dummy',
-//                    'X-Okapi-User-Id'    : 'dummy',
-//                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-//            ]
-//
-//            setHeaders(requesterHeaders);
-//
-//            // Save the app settings
-//            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_REQUESTER);
-//            setting.value = StateModel.MODEL_SLNP_REQUESTER;
-//            setting.save(flush: true, failOnError: true);
-//
-//            // Create PatronRequest
-//            requesterPatronRequest = createPatronRequest(requesterInitialState, patronId, title, author, requesterSymbol,
-//                    responderSymbol, requesterSystemId, action, true, requesterHrid, responderHrid);
-//
-//            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
-//        }
-//
-//        // Create Responder PatronRequest
-//        PatronRequest responderPatronRequest;
-//        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
-//            // Define headers
-//            def headers = [
-//                    'X-Okapi-Tenant'     : responderTenantId,
-//                    'X-Okapi-Token'      : 'dummy',
-//                    'X-Okapi-User-Id'    : 'dummy',
-//                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-//            ]
-//
-//            setHeaders(headers);
-//
-//            // Save the app settings
-//            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_RESPONDER);
-//            setting.value = StateModel.MODEL_SLNP_RESPONDER;
-//            setting.save(flush: true, failOnError: true)
-//
-//            // Create PatronRequest
-//            responderPatronRequest = createPatronRequest(responderInitialState, patronId, title, author, requesterSymbol,
-//                    responderSymbol, responderSystemId, action, false, responderHrid, requesterHrid);
-//            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
-//
-//            // Validate initial status
-//            NewStatusResult newResultStatus = statusService.lookupStatus(responderPatronRequest, null, null, true, true);
-//            validateStateTransition(newResultStatus, responderInitialState);
-//
-//            // Perform action
-//            performAction(responderPatronRequest?.id, jsonFileName);
-//
-//            // Validate RESPONDER result status after performed action
-//            newResultStatus = statusService.lookupStatus(responderPatronRequest, action, null, true, true);
-//            validateStateTransition(newResultStatus, responderResultState);
-//
-//            // Validate REQUESTER result status after performed action
-//            newResultStatus = statusService.lookupStatus(requesterPatronRequest, action, qualifier, true, true);
-//            validateStateTransition(newResultStatus, requesterResultState);
-//        }
-//
-//        then: "Check values"
-//        assert true;
-//
-//        where:
-//        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState             | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier
-//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED    | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  |'9876-1231'  | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED
+    void "Test end to end actions from supplier to requester"(
+            String requesterTenantId,
+            String responderTenantId,
+            String requesterSymbol,
+            String responderSymbol,
+            String requesterInitialState,
+            String requesterResultState,
+            String responderInitialState,
+            String responderResultState,
+            String patronId,
+            String title,
+            String author,
+            String action,
+            String jsonFileName,
+            String qualifier
+    ) {
+        when: "Creating the Requester/Responder Patron Requests"
+
+        String requesterSystemId = UUID.randomUUID().toString();
+        String responderSystemId = UUID.randomUUID().toString();
+
+        String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+
+        // Create Requester PatronRequest
+        PatronRequest requesterPatronRequest;
+        Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def requesterHeaders = [
+                    'X-Okapi-Tenant'     : requesterTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(requesterHeaders);
+
+            // Create PatronRequest
+            requesterPatronRequest = createPatronRequest(requesterInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, requesterSystemId, action, true, hrid, hrid);
+
+            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
+        }
+
+        // Create Responder PatronRequest
+        PatronRequest responderPatronRequest;
+        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant'     : responderTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Create PatronRequest
+            responderPatronRequest = createPatronRequest(responderInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, responderSystemId, action, false, hrid, hrid);
+            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
+
+            // Validate initial status
+            NewStatusResult newResultStatus = statusService.lookupStatus(responderPatronRequest, null, null, true, true);
+            validateStateTransition(newResultStatus, responderInitialState);
+
+            // Perform action
+            performAction(responderPatronRequest?.id, jsonFileName);
+
+            // Validate RESPONDER result status after performed action
+            newResultStatus = statusService.lookupStatus(responderPatronRequest, action, null, true, true);
+            validateStateTransition(newResultStatus, responderResultState);
+        }
+
+        String responderRequest = waitForRequestStateByHrid(responderTenantId, 10000, hrid, responderResultState)
+        String requesterRequest = waitForRequestStateByHrid(requesterTenantId, 10000, hrid, requesterResultState)
+
+        then:"Check the return value"
+        assert responderRequest != null
+        assert requesterRequest != null
+
+        then: "Check values"
+        assert true;
+
+        where:
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState             | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier
+        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED    | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  |'9876-1231'  | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED
 //        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       |'9876-1232'  | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
 //        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       |'9876-1233'  | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
-//    }
+    }
 
     void "Send ISO request"(String tenant_id,
                             String peer_tenant,
@@ -497,11 +489,6 @@ class SLNPStateModelSpec extends TestBase {
 
             setHeaders(headers);
 
-            // Save the app settings
-            AppSetting setting = AppSetting.findByKey(isRequester ? SettingsData.SETTING_STATE_MODEL_REQUESTER : SettingsData.SETTING_STATE_MODEL_RESPONDER);
-            setting.value = isRequester ? StateModel.MODEL_SLNP_REQUESTER : StateModel.MODEL_SLNP_RESPONDER;
-            setting.save(flush: true, failOnError: true)
-
             // Create PatronRequest
             PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, action, isRequester);
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
@@ -566,11 +553,6 @@ class SLNPStateModelSpec extends TestBase {
             ]
 
             setHeaders(headers);
-
-            // Save the app settings
-            AppSetting setting = AppSetting.findByKey(SettingsData.SETTING_STATE_MODEL_RESPONDER);
-            setting.value = StateModel.MODEL_SLNP_RESPONDER;
-            setting.save(flush: true, failOnError: true);
 
             // Create PatronRequest
             PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, Actions.ACTION_UNDO, false);
