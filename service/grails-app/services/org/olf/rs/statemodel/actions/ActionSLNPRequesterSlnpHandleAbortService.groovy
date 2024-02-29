@@ -6,7 +6,7 @@ import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
- * This action is performed when the requester aborts the request
+ * This action is performed when the requester aborts the request.
  *
  */
 public class ActionSLNPRequesterSlnpHandleAbortService extends AbstractAction {
@@ -18,7 +18,7 @@ public class ActionSLNPRequesterSlnpHandleAbortService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // TODO: Implement this action
+        actionResultDetails.auditMessage = 'Request aborted from Requester.';
 
         return(actionResultDetails);
     }
