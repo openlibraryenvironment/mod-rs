@@ -10,7 +10,7 @@ import org.olf.rs.statemodel.Events
 /**
  * This event service takes a new requester SLNP patron request and validates and generates HRID.
  */
-public class EventReqNewSLNPPatronRequestIndService extends AbstractEvent {
+public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
     @Override
     String name() {
@@ -34,6 +34,10 @@ public class EventReqNewSLNPPatronRequestIndService extends AbstractEvent {
             request.hrid = generateHrid();
             log.debug("set request.hrid to ${request.hrid}");
         }
+
+        request.needsAttention = false
+        eventResultDetails.saveData = true
+        eventResultDetails.auditMessage = "Request validation done"
 
         return(eventResultDetails);
     }

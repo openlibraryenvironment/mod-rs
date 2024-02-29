@@ -183,11 +183,11 @@ class ExternalApiController {
   private String getSymbolFor(path) {
 
     String result = null;
-    if ( path.agencyIdType != null && path.agencyIdValue != null ) {
+    if ( path?.agencyIdType != null && path?.agencyIdValue != null ) { // supplyingAgencyId is missing in request so we need it null safe
       result = "${path.agencyIdType.toString()}:${path.agencyIdValue.toString()}".toString()
     }
     else {
-      log.error("Missing agency id type or value");
+      log.warn("Missing agency id type or value");
     }
     log.debug("Returning symbol : ${result}");
     return result;

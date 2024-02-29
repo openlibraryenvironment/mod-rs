@@ -10,7 +10,7 @@ import org.olf.rs.statemodel.Events
 /**
  * This event service takes a new SLNP responder patron request and responds automatically.
  */
-public class EventRespNewSLNPPatronRequestIndService extends AbstractEvent {
+public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
     @Override
     String name() {

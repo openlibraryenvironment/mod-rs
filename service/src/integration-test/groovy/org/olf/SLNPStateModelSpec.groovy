@@ -184,18 +184,19 @@ class SLNPStateModelSpec extends TestBase {
      *  N.B. that the test "Send request using static router" below RELIES upon the static routes assigned to RSInstOne.
      *  changing this data may well break that test.
      */
-    void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
+    void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed, Map changes_needed_hidden) {
         when:"We fetch the existing settings for ${tenant_id}"
         changeSettings(tenant_id, changes_needed);
+        changeSettings(tenant_id, changes_needed_hidden, true)
 
         then:"Tenant is configured"
         1==1
 
         where:
-        tenant_id      | changes_needed
-        'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
-        'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
-        'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1' ]
+        tenant_id      | changes_needed                                                                                                                                    | changes_needed_hidden
+        'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
+        'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
+        'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1']                  | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
 
     }
 
@@ -411,6 +412,66 @@ class SLNPStateModelSpec extends TestBase {
 //        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       |'9876-1233'  | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
 //    }
 
+    void "Send ISO request"(String tenant_id,
+                            String peer_tenant,
+                            String agencyIdValue,
+                            String supAgencyId,
+                            String requestId,
+                            String patronId,
+                            String requestFile,
+                            String requesting_symbol,
+                            String messageFile,
+                            String statusChanged,
+                            String finalStatus,
+                            String[] tags) {
+        when:"post new request"
+        log.debug("Create a new request ${tenant_id} ${tags} ${requestId} ${patronId}")
+
+        String requestXml = new File("src/integration-test/resources/isoMessages/${requestFile}").text
+        requestXml = requestXml.replace('agencyIdValue_holder', agencyIdValue)
+                .replace('requestId_holder', requestId)
+                .replace('patronId_holder', patronId)
+
+        setHeaders([
+                'X-Okapi-Tenant': tenant_id,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ])
+        def resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
+
+        log.debug("CreateReqTest2 -- Response: RESP:${resp.ISO18626Message} ")
+
+        String req_request = waitForRequestStateByHrid(tenant_id, 10000, requestId, Status.SLNP_REQUESTER_IDLE)
+        log.debug("Created new request for iso test case 1. RESQUESTER ID is : ${req_request}")
+
+        String messageXml = new File("src/integration-test/resources/isoMessages/${messageFile}").text
+        messageXml = messageXml.replace('agencyIdValue_holder', agencyIdValue)
+                .replace('requestId_holder', requestId)
+                .replace('supAgencyIdValue_holder', supAgencyId)
+                .replace('status_holder', statusChanged)
+
+        setHeaders([
+                'X-Okapi-Tenant': tenant_id,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ])
+        resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), messageXml)
+
+        String message_request = waitForRequestStateByHrid(tenant_id, 10000, requestId, finalStatus)
+        log.debug("Updated status. RESQUESTER ID is : ${message_request} with status: ${finalStatus}")
+
+        then:"Check the return value"
+        assert req_request != null
+        assert message_request != null
+
+        where:
+        tenant_id   | peer_tenant   | agencyIdValue | supAgencyId | requestId     | patronId    | requestFile         | requesting_symbol | messageFile                               | statusChanged                                  | finalStatus                     | tags
+        'RSInstOne' | 'RSInstThree' | 'RST1'        | 'RST3'      | '1234-5678-1' | '1234-5679' | 'patronRequest.xml' | 'ISIL:RST1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_LOANED    | Status.SLNP_REQUESTER_SHIPPED   | [ 'RS-TESTCASE-ISO-1' ]
+        'RSInstOne' | 'RSInstThree' | 'RST1'        | 'RST3'      | '1234-5678-2' | '1234-567a' | 'patronRequest.xml' | 'ISIL:RST1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_CANCELLED | Status.SLNP_REQUESTER_CANCELLED | [ 'RS-TESTCASE-ISO-2' ]
+    }
+
     void "Test initial state transition to result state by performed action"(
             String tenantId,
             String requestTitle,
@@ -540,5 +601,45 @@ class SLNPStateModelSpec extends TestBase {
         where:
         tenantId    | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
         'RSInstOne' | 'respond1'    | 'test1'       | '1234-5678-9123-12599 ' | '9876-1252'       | 'ISIL:RST1'
+    }
+
+    // For the given tenant, block up to timeout ms until the given request is found in the given state
+    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
+        long start_time = System.currentTimeMillis();
+        String request_id = null;
+        String request_state = null;
+        long elapsed = 0;
+        while ( ( required_state != request_state ) &&
+                ( elapsed < timeout ) ) {
+
+            setHeaders([ 'X-Okapi-Tenant': tenant ]);
+            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+            def resp = doGet("${baseUrl}rs/patronrequests",
+                    [
+                            'max':'100',
+                            'offset':'0',
+                            'match':'hrid',
+                            'term':hrid
+                    ])
+            if ( resp?.size() == 1 ) {
+                request_id = resp[0].id
+                request_state = resp[0].state?.code
+            } else {
+                log.debug("waitForRequestState: Request with hrid ${hrid} not found");
+            }
+
+            if ( required_state != request_state ) {
+                // Request not found OR not yet in required state
+                log.debug("Not yet found.. sleeping");
+                Thread.sleep(1000);
+            }
+            elapsed = System.currentTimeMillis() - start_time
+        }
+
+        if ( required_state != request_state ) {
+            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+        }
+
+        return request_id;
     }
 }
