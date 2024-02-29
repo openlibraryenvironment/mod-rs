@@ -37,7 +37,7 @@ public class PickupLocationService {
                 }
 
                 // Set the descriptive part of the pickup location on the request
-                request.pickupLocation = pickupSymbols.size > 0 ? "${pickupLoc.name} --> ${pickupSymbols [0]}" : pickupLoc.name;
+                request.pickupLocation = pickupSymbols.size() > 0 ? "${pickupLoc.name} --> ${pickupSymbols [0]}" : pickupLoc.name;
             }
         } else {
             log.warn("No request passed into PickupLocationService.check");
