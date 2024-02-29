@@ -105,11 +105,9 @@ class ProtocolMessageBuildingService {
        * Note
       */
 
-      //ToDo the below line currently does nothing since we never actually set serviceType rn
-      //serviceType: req.serviceType?.value,
+      serviceType: req.serviceType?.value,
 
       // ToDo wire in some proper information here instead of this hardcoded stuff
-      serviceType: 'Loan',
       serviceLevel: 'Loan',
       anyEdition: 'Y',
 

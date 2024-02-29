@@ -128,9 +128,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Set rota = []
 
-  // serviceType - added here as an example refdata item - more to show how than
-  // arising from analysis and design
-  @Defaults(['Loan', 'Copy-non-returnable'])
+  @Defaults(['Loan', 'Copy', 'CopyOrLoan'])
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE)
   ProtocolReferenceDataValue serviceType
 
