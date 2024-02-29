@@ -1,6 +1,6 @@
 package org.olf
 
-import com.k_int.web.toolkit.settings.AppSetting
+
 import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -11,7 +11,6 @@ import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.PatronRequest
 import org.olf.rs.PatronRequestRota
 import org.olf.rs.ReshareApplicationEventHandlerService
-import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.*
@@ -240,7 +239,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSymbol,
             String requestSystemId,
             String action,
-            Boolean isRequester) {
+            Boolean isRequester,
+            String hrid) {
 
         Map request = [
                 patronReference: requestPatronId + action,
@@ -249,7 +249,8 @@ class SLNPStateModelSpec extends TestBase {
                 requestingInstitutionSymbol: requestSymbol,
                 systemInstanceIdentifier: requestSystemId,
                 patronIdentifier: requestPatronId,
-                isRequester: isRequester
+                isRequester: isRequester,
+                hrid: hrid
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
@@ -259,7 +260,7 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
-    private Symbol symbolFromString(String symbolString) {
+    private static Symbol symbolFromString(String symbolString) {
         def parts = symbolString.tokenize(":");
         return ReshareApplicationEventHandlerService.resolveSymbol(parts[0], parts[1]);
     }
@@ -314,7 +315,47 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
-    void "Test end to end actions from supplier to requester"(
+    // For the given tenant, block up to timeout ms until the given request is found in the given state
+    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
+        long start_time = System.currentTimeMillis();
+        String request_id = null;
+        String request_state = null;
+        long elapsed = 0;
+        while ( ( required_state != request_state ) &&
+                ( elapsed < timeout ) ) {
+
+            setHeaders([ 'X-Okapi-Tenant': tenant ]);
+            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+            def resp = doGet("${baseUrl}rs/patronrequests",
+                    [
+                            'max':'100',
+                            'offset':'0',
+                            'match':'hrid',
+                            'term':hrid
+                    ])
+            if ( resp?.size() == 1 ) {
+                request_id = resp[0].id
+                request_state = resp[0].state?.code
+            } else {
+                log.debug("waitForRequestState: Request with hrid ${hrid} not found");
+            }
+
+            if ( required_state != request_state ) {
+                // Request not found OR not yet in required state
+                log.debug("Not yet found.. sleeping");
+                Thread.sleep(1000);
+            }
+            elapsed = System.currentTimeMillis() - start_time
+        }
+
+        if ( required_state != request_state ) {
+            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+        }
+
+        return request_id;
+    }
+
+    void "Test end to end actions and events from supplier to requester"(
             String requesterTenantId,
             String responderTenantId,
             String requesterSymbol,
@@ -336,6 +377,8 @@ class SLNPStateModelSpec extends TestBase {
         String responderSystemId = UUID.randomUUID().toString();
 
         String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+        String requesterRequest;
+        String responderRequest;
 
         // Create Requester PatronRequest
         PatronRequest requesterPatronRequest;
@@ -355,6 +398,12 @@ class SLNPStateModelSpec extends TestBase {
                     responderSymbol, requesterSystemId, action, true, hrid, hrid);
 
             log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
+
+            // Validate Requester initial status
+            requesterRequest = waitForRequestStateByHrid(requesterTenantId, 10000, hrid, requesterInitialState)
+
+            and: "Check requester initial status"
+            assert requesterRequest != null
         }
 
         // Create Responder PatronRequest
@@ -375,22 +424,21 @@ class SLNPStateModelSpec extends TestBase {
                     responderSymbol, responderSystemId, action, false, hrid, hrid);
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
-            // Validate initial status
-            NewStatusResult newResultStatus = statusService.lookupStatus(responderPatronRequest, null, null, true, true);
-            validateStateTransition(newResultStatus, responderInitialState);
+            // Validate Responder initial status
+            responderRequest = waitForRequestStateByHrid(responderTenantId, 10000, hrid, responderInitialState)
+
+            and: "Check responder initial status"
+            assert responderRequest != null
 
             // Perform action
             performAction(responderPatronRequest?.id, jsonFileName);
-
-            // Validate RESPONDER result status after performed action
-            newResultStatus = statusService.lookupStatus(responderPatronRequest, action, null, true, true);
-            validateStateTransition(newResultStatus, responderResultState);
         }
 
-        String responderRequest = waitForRequestStateByHrid(responderTenantId, 10000, hrid, responderResultState)
-        String requesterRequest = waitForRequestStateByHrid(requesterTenantId, 10000, hrid, requesterResultState)
+        // Validate Requester/Responder states after performed actions/events
+        responderRequest = waitForRequestStateByHrid(responderTenantId, 10000, hrid, responderResultState)
+        requesterRequest = waitForRequestStateByHrid(requesterTenantId, 10000, hrid, requesterResultState)
 
-        then:"Check the return value"
+        and: "Check the return value"
         assert responderRequest != null
         assert requesterRequest != null
 
@@ -399,9 +447,67 @@ class SLNPStateModelSpec extends TestBase {
 
         where:
         requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState             | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier
-        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED    | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  |'9876-1231'  | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED
-//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       |'9876-1232'  | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
-//        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       |'9876-1233'  | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
+        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED    | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4367' | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED
+        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4364' | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
+        'RSInstOne'       | 'RSInstTwo'       | 'ISIL:RST1'     | 'ISIL:RST2'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED    | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       | '7732-4362' | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
+    }
+
+    void "Test undo action"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+        when: "Performing the action"
+
+        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Token': 'dummy',
+                    'X-Okapi-User-Id': 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Create PatronRequest
+            String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+            PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, Actions.ACTION_UNDO, false, hrid);
+            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
+
+            // Validate Responder initial state
+            String responderRequest = waitForRequestStateByHrid(tenantId, 10000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
+
+            and: "Check initial state"
+            assert responderRequest != null
+
+            // Perform supplierCheckInToReshare action
+            performAction(slnpPatronRequest?.id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
+
+            // Validate status after action - supplierCheckInToReshare
+            responderRequest = waitForRequestStateByHrid(tenantId, 10000, hrid, Status.SLNP_RESPONDER_AWAIT_SHIP)
+
+            and: "Check state after supplierCheckInToReshare action"
+            assert responderRequest != null
+
+            // Perform undo action
+            performAction(slnpPatronRequest?.id, Actions.ACTION_UNDO);
+
+            // Validate status after action - undo
+            responderRequest = waitForRequestStateByHrid(tenantId, 10000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
+
+            and: "Check state after undo action"
+            assert responderRequest != null
+        }
+
+        then: "Check values"
+        assert true;
+
+        where:
+        tenantId    | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
+        'RSInstOne' | 'respond1'    | 'testundo1'   | '1234-5678-9123-12599'  | '7765-6999'       | 'ISIL:RST1'
     }
 
     void "Send ISO request"(String tenant_id,
@@ -449,7 +555,7 @@ class SLNPStateModelSpec extends TestBase {
                 'X-Okapi-User-Id': 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ])
-        resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), messageXml)
+        doPost("${baseUrl}/rs/externalApi/iso18626".toString(), messageXml)
 
         String message_request = waitForRequestStateByHrid(tenant_id, 10000, requestId, finalStatus)
         log.debug("Updated status. RESQUESTER ID is : ${message_request} with status: ${finalStatus}")
@@ -490,18 +596,21 @@ class SLNPStateModelSpec extends TestBase {
             setHeaders(headers);
 
             // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, action, isRequester);
+            String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+            PatronRequest slnpPatronRequest = createPatronRequest(initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, action, isRequester, hrid);
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate initial status
-            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, false);
-            validateStateTransition(newResultStatus, initialState);
+            String request = waitForRequestStateByHrid(tenantId, 20000, hrid, initialState)
+
+            and: "Check initial state"
+            assert request != null
 
             // Perform action
             performAction(slnpPatronRequest?.id, jsonFileName);
 
             // Validate result status after performed action
-            newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);
+            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true);
             validateStateTransition(newResultStatus, resultState);
         }
 
@@ -532,96 +641,5 @@ class SLNPStateModelSpec extends TestBase {
         'RSInstOne' | 'respond20'   | 'test20'      | '1234-5678-9123-1250' | '9876-1250'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED       | 'supplierMarkShipped'         | false
         'RSInstOne' | 'respond21'   | 'test21'      | '1234-5678-9123-1251' | '9876-1251'       | 'ISIL:RST1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'   | false
         'RSInstOne' | 'respond22'   | 'test22'      | '1234-5678-9123-1252' | '9876-1252'       | 'ISIL:RST1'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_ITEM_RETURNED               | 'supplierItemReturned'        | false
-    }
-
-    void "Test undo action"(
-            String tenantId,
-            String requestTitle,
-            String requestAuthor,
-            String requestSystemId,
-            String requestPatronId,
-            String requestSymbol) {
-        when: "Performing the action"
-
-        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
-            // Define headers
-            def headers = [
-                    'X-Okapi-Tenant': tenantId,
-                    'X-Okapi-Token': 'dummy',
-                    'X-Okapi-User-Id': 'dummy',
-                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-            ]
-
-            setHeaders(headers);
-
-            // Create PatronRequest
-            PatronRequest slnpPatronRequest = createPatronRequest(Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, Actions.ACTION_UNDO, false);
-            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
-
-            // Validate initial state
-            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, null, null, true, true);
-            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_PICKING);
-
-            // Perform supplierCheckInToReshare action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
-
-            // Validate status after action - supplierCheckInToReshare
-            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, null, true, true);
-            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_SHIP);
-
-            // Perform undo action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_UNDO);
-
-            // Validate status after action - undo
-            newResultStatus = statusService.lookupStatus(slnpPatronRequest, Actions.ACTION_UNDO, null, true, true);
-            validateStateTransition(newResultStatus, Status.SLNP_RESPONDER_AWAIT_PICKING);
-        }
-
-        then: "Check values"
-        assert true;
-
-        where:
-        tenantId    | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
-        'RSInstOne' | 'respond1'    | 'test1'       | '1234-5678-9123-12599 ' | '9876-1252'       | 'ISIL:RST1'
-    }
-
-    // For the given tenant, block up to timeout ms until the given request is found in the given state
-    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
-        long start_time = System.currentTimeMillis();
-        String request_id = null;
-        String request_state = null;
-        long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders([ 'X-Okapi-Tenant': tenant ]);
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    [
-                            'max':'100',
-                            'offset':'0',
-                            'match':'hrid',
-                            'term':hrid
-                    ])
-            if ( resp?.size() == 1 ) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with hrid ${hrid} not found");
-            }
-
-            if ( required_state != request_state ) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping");
-                Thread.sleep(1000);
-            }
-            elapsed = System.currentTimeMillis() - start_time
-        }
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-        }
-
-        return request_id;
     }
 }

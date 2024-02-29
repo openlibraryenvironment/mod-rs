@@ -209,11 +209,11 @@ class ProtocolMessageBuildingService {
       status:status
     ]
 
-    if ( messageParams.reason ) {
+    if ( messageParams?.reason ) {
       message.messageInfo.reasonUnfilled = messageParams?.reason
     }
 
-    if ( messageParams.cancelResponse ) {
+    if ( messageParams?.cancelResponse ) {
       if (messageParams.cancelResponse == "yes") {
         message.messageInfo.answerYesNo = "Y"
       } else {
@@ -224,7 +224,7 @@ class ProtocolMessageBuildingService {
     // We need to check in a couple of places whether the note is null/whether to add a note
     String note = messageParams?.note
     message.deliveryInfo = [:]
-    if ( messageParams.loanCondition ) {
+    if ( messageParams?.loanCondition ) {
       message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
       reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
     }
@@ -245,7 +245,7 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
-    if (messageParams.deliveredFormat) {
+    if (messageParams?.deliveredFormat) {
       message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
       if (messageParams.url) {
         message.deliveryInfo['url'] = messageParams.url;
