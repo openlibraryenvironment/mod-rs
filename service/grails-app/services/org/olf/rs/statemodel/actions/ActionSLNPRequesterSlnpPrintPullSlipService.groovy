@@ -6,20 +6,19 @@ import org.olf.rs.statemodel.AbstractAction
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 /**
- * This action is performed when the responder responds "Abort Supply"
+ * This action is performed when the requester initiates print pull slip
  *
  */
 public class ActionSLNPRequesterSlnpPrintPullSlipService extends AbstractAction {
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY);
+        return(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP);
     }
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // TODO: Implement this action
-        // Send ISO18626 message with notification type note = "Abort"
+        // TODO: Implement this action to print pull slip
 
         return(actionResultDetails);
     }
