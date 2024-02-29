@@ -224,21 +224,14 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpRequesterISO18626AbortedList = [
-            code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_ABORTED,
+    private static Map slnpRequesterISO18626StatusChangeList = [
+            code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE,
             description: 'Abort patron request (special to SLNP, sent as Notification)',
             model: StateModel.MODEL_SLNP_REQUESTER,
             results: [
-                    slnpRequesterISO18626Aborted
-            ]
-    ];
-
-    private static Map slnpRequesterISO18626ShippedList = [
-            code: ActionEventResultList.SLNP_REQUESTER_ISO_18626_SHIPPED,
-            description: 'Patron request is shipped',
-            model: StateModel.MODEL_SLNP_REQUESTER,
-            results: [
-                    slnpRequesterISO18626Shipped
+                    slnpRequesterISO18626Aborted,
+                    slnpRequesterISO18626Shipped,
+                    slnpRequesterCancelRequest
             ]
     ];
 
@@ -368,8 +361,7 @@ public class SLNPStateModelData {
             slnpRequesterPrintPullSlipList,
             slnpRequesterCheckedInList,
             slnpRequesterShippedReturnList,
-            slnpRequesterISO18626AbortedList,
-            slnpRequesterISO18626ShippedList,
+            slnpRequesterISO18626StatusChangeList,
             slnpResponderRespondYesList,
             slnpResponderRespondCannotSupplyList,
             slnpResponderAbortSupplyList,
@@ -430,6 +422,7 @@ public class SLNPStateModelData {
 
         // SLNP_REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE)
 
         // SLNP_REQ_SHIPPED OR "Shipped"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_RECEIVED);
