@@ -1,4 +1,6 @@
-package org.olf.rs;
+package org.olf.rs
+
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -197,7 +199,7 @@ class ProtocolMessageBuildingService {
                                          String reason_for_message,
                                          String status,
                                          Map messageParams,
-                                         boolean appendSequence = true) {
+                                         boolean appendSequence) {
 
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
