@@ -18,7 +18,7 @@ public class ActionSLNPRequesterSlnpHandleAbortService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        actionResultDetails.auditMessage = 'Request aborted from Requester.';
+        actionResultDetails.auditMessage = 'Abort handled';
 
         return(actionResultDetails);
     }

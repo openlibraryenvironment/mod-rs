@@ -18,7 +18,8 @@ public class ActionSLNPRequesterSlnpPrintPullSlipService extends AbstractAction 
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // TODO: Implement this action to print pull slip
+        actionResultDetails.auditMessage = 'Pull slip printed';
+        actionResultDetails.responseResult.status = true;
 
         return(actionResultDetails);
     }
