@@ -416,14 +416,15 @@ public class ReshareActionService {
         PatronRequest pr,
         String status,
         EventResultDetails eventResultDetails,
-        String note = null
+        String note = null,
+        boolean appendSequence = true
     ) {
         Map params = [:]
         if (note) {
             params = [note: note]
         }
 
-        sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, status, params, eventResultDetails);
+        sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, status, params, eventResultDetails, null, appendSequence);
     }
 
     // see
@@ -438,7 +439,8 @@ public class ReshareActionService {
         String status,
         Map messageParams,
         EventResultDetails eventResultDetails,
-        Map retryEventData = null
+        Map retryEventData = null,
+        boolean appendSequence = true
     ) {
 
         log.debug('sendResponse(....)');
@@ -452,7 +454,7 @@ public class ReshareActionService {
 
             // If it is not a retry we need to generate the message
             if (supplyingMessageRequest == null) {
-                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
+                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams, appendSequence);
                 eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
             }
 
