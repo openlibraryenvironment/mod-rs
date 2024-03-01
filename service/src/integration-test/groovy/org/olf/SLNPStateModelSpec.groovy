@@ -194,6 +194,39 @@ class SLNPStateModelSpec extends TestBase {
         resolved_rota.size() == 2;
     }
 
+    void "Init state model DB "(String tenant_id,
+                                String agencyIdValue,
+                                String requestId,
+                                String patronId,
+                                String requestFile) {
+        when:"post request"
+
+        String requestXml = new File("src/integration-test/resources/isoMessages/${requestFile}").text
+        requestXml = requestXml.replace('agencyIdValue_holder', agencyIdValue)
+                .replace('requestId_holder', requestId)
+                .replace('patronId_holder', patronId)
+
+        setHeaders([
+                'X-Okapi-Tenant': tenant_id,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ])
+        doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
+
+        String reqId = waitForRequestStateByHrid(tenant_id, 20000, requestId, Status.SLNP_REQUESTER_IDLE)
+        waitForNewEventProcessed(tenant_id, 10000, reqId)
+
+        then:"Check the return value"
+        assert reqId != null
+
+        where:
+        tenant_id     | agencyIdValue | requestId     | patronId    | requestFile
+        'RSSlnpOne'   | 'RSS1'        | '1234-5679-1' | '1234-5689' | 'patronRequest.xml'
+        'RSSlnpTwo'   | 'RSS2'        | '1234-5679-2' | '1234-568a' | 'patronRequest.xml'
+        'RSSlnpThree' | 'RSS3'        | '1234-5679-3' | '1234-5681' | 'patronRequest.xml'
+    }
+
     private static void validateStateTransition(NewStatusResult newStatusResult, expectedState) {
         if (newStatusResult == null) {
             throw new Exception("New status result is null");
@@ -504,7 +537,8 @@ class SLNPStateModelSpec extends TestBase {
         messageXml = messageXml.replace('agencyIdValue_holder', agencyIdValue)
                 .replace('requestId_holder', requestId)
                 .replace('supAgencyIdValue_holder', supAgencyId)
-                .replace('status_holder', statusChanged)
+                .replace('status_holder',  statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? ActionEventResultQualifier.QUALIFIER_CANCELLED : statusChanged)
+                .replace('note_holder', statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? 'ABORT' : '')
 
         setHeaders([
                 'X-Okapi-Tenant': tenant_id,
@@ -525,6 +559,7 @@ class SLNPStateModelSpec extends TestBase {
         tenant_id   | peer_tenant   | agencyIdValue | supAgencyId | requestId     | patronId    | requestFile         | requesting_symbol | messageFile                               | statusChanged                                  | finalStatus                     | tags
         'RSSlnpOne' | 'RSSlnpThree' | 'RSS1'        | 'RSS3'      | '1234-5678-1' | '1234-5679' | 'patronRequest.xml' | 'ISIL:RSS1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_LOANED    | Status.SLNP_REQUESTER_SHIPPED   | [ 'RS-TESTCASE-ISO-1' ]
         'RSSlnpOne' | 'RSSlnpThree' | 'RSS1'        | 'RSS3'      | '1234-5678-2' | '1234-567a' | 'patronRequest.xml' | 'ISIL:RSS1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_CANCELLED | Status.SLNP_REQUESTER_CANCELLED | [ 'RS-TESTCASE-ISO-2' ]
+        'RSSlnpOne' | 'RSSlnpThree' | 'RSS1'        | 'RSS3'      | '1234-5678-3' | '1234-5671' | 'patronRequest.xml' | 'ISIL:RSS1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_ABORTED   | Status.SLNP_REQUESTER_ABORTED   | [ 'RS-TESTCASE-ISO-3' ]
     }
 
     void "Test initial state transition to result state by performed action"(
