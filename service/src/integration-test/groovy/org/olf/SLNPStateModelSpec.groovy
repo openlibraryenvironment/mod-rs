@@ -73,7 +73,7 @@ class SLNPStateModelSpec extends TestBase {
     def setupSpec() {}
 
     def setup() {
-        if ( testctx.initialised == null ) {
+        if ( testctx.slnpInitialised == null ) {
             log.debug("Inject actual runtime port number (${serverPort}) into directory entries (${baseUrl}) ");
             for ( Map entry: DIRECTORY_INFO ) {
                 if ( entry.services != null ) {
@@ -83,7 +83,7 @@ class SLNPStateModelSpec extends TestBase {
                     }
                 }
             }
-            testctx.initialised = true
+            testctx.slnpInitialised = true
         }
     }
 
@@ -192,39 +192,6 @@ class SLNPStateModelSpec extends TestBase {
 
         then:"Then expect result is returned"
         resolved_rota.size() == 2;
-    }
-
-    void "Init state model DB "(String tenant_id,
-                                String agencyIdValue,
-                                String requestId,
-                                String patronId,
-                                String requestFile) {
-        when:"post request"
-
-        String requestXml = new File("src/integration-test/resources/isoMessages/${requestFile}").text
-        requestXml = requestXml.replace('agencyIdValue_holder', agencyIdValue)
-                .replace('requestId_holder', requestId)
-                .replace('patronId_holder', patronId)
-
-        setHeaders([
-                'X-Okapi-Tenant': tenant_id,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
-                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-        ])
-        doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
-
-        String reqId = waitForRequestStateByHrid(tenant_id, 20000, requestId, Status.SLNP_REQUESTER_IDLE)
-        waitForNewEventProcessed(tenant_id, 10000, reqId)
-
-        then:"Check the return value"
-        assert reqId != null
-
-        where:
-        tenant_id     | agencyIdValue | requestId     | patronId    | requestFile
-        'RSSlnpOne'   | 'RSS1'        | '1234-5679-1' | '1234-5689' | 'patronRequest.xml'
-        'RSSlnpTwo'   | 'RSS2'        | '1234-5679-2' | '1234-568a' | 'patronRequest.xml'
-        'RSSlnpThree' | 'RSS3'        | '1234-5679-3' | '1234-5681' | 'patronRequest.xml'
     }
 
     private static void validateStateTransition(NewStatusResult newStatusResult, expectedState) {
