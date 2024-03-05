@@ -91,7 +91,6 @@ jobs:
           retention-days: 1
 
       - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
@@ -99,33 +98,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
  
-      # master and main
+      # slnp
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || github.ref == 'refs/heads/SLNP_integration' }}
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: 'ghcr.io/openlibraryenvironment/mod-rs:slnp-latest'
-
-      # extra tags for release branch
-      - name: Build and push Docker image
-        if: ${{ contains(github.ref, 'release') }}
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:rc
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Publish Descriptor
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
-        run: |
-          echo Post to public registry
-          curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
