@@ -1,0 +1,122 @@
+version: "2.1"
+
+volumes:
+  lsp_pgdata:
+    driver: local
+  minio_data:
+    driver: local
+
+services:
+  postgres:
+    container_name: testing_pg
+    hostname: docker.for.mac.localhost
+    image: postgres:12
+    restart: "no"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pa55w0rd
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5432:5432
+      - 54321:5432
+
+  # See https://github.com/simplesteph/kafka-stack-docker-compose
+  zoo1:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: docker.for.mac.localhost
+    container_name: zoo1
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo1:2888:3888
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: docker.for.mac.localhost
+    container_name: kafka1
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9999:9999"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://docker.for.mac.localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_JMX_PORT: 9001
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+    depends_on:
+      - zoo1
+
+  minio:
+    container_name: minio_tests
+    hostname: docker.for.mac.localhost
+    image:  docker.io/bitnami/minio:2023.3.24
+    environment:
+      - MINIO_ROOT_USER=DEVDEVDEV001
+      - MINIO_ROOT_PASSWORD=DEVDEVDEV001
+      - MINIO_DEFAULT_BUCKETS=
+      - MINIO_CONFIG_DIR=/minio_config
+      # - BITNAMI_DEBUG=true
+    volumes:
+      - ./minio_data:/data
+      - ./minio_config:/minio_config
+    ports:
+      - 9001:9001
+      - 9010:9000
+
+  setup:
+    container_name: minio_setup
+    image: docker.io/bitnami/minio:2023.3.24
+    depends_on:
+      - minio
+    volumes:
+      - ./minio_config:/minio_config
+    entrypoint: >
+      /bin/sh -c "
+      echo sleeping;
+      sleep 20;
+      /opt/bitnami/minio-client/bin/mc --version > /tmp/minioSetup.txt 2>&1;
+      ls >> /tmp/minioSetup.txt 2>&1;
+      pwd >> /tmp/minioSetup.txt 2>&1;
+      echo This command adds an alias to the mc config file so we can refer to the server as minio;
+      /opt/bitnami/minio-client/bin/mc alias set minio http://minio:9000 DEVDEVDEV001 DEVDEVDEV001 >> /tmp/minioSetup.txt 2>&1;
+      echo Added host http://minio:9000 >> /tmp/minioSetup.txt;
+      /opt/bitnami/minio-client/bin/mc admin policy create minio/ reshare-readwrite /minio_config/reshare-readwrite-policy.json >> /tmp/minioSetup.txt 2>&1;
+      echo Added policy reshare-readwrite >> /tmp/minioSetup.txt 2>&1;
+      /opt/bitnami/minio-client/bin/mc admin user add minio RESHARE_AGG_ACCESS_KEY RESHARE_AGG_SECRET_KEY >> /tmp/minioSetup.txt 2>&1;
+      echo Added user RESHARE_AGG_ACCESS_KEY >> /tmp/minioSetup.txt 2>&1;
+      /opt/bitnami/minio-client/bin/mc admin policy attach minio reshare-readwrite --user RESHARE_AGG_ACCESS_KEY >> /tmp/minioSetup.txt 2>&1;
+      echo Associated user RESHARE_AGG_ACCESS_KEY with policy reshare-readwrite >> /tmp/minioSetup.txt 2>&1;
+      /opt/bitnami/minio-client/bin/mc mb minio/reshare-general >> /tmp/minioSetup.txt 2>&1;
+      echo Mounted / created bucket minio/reshare-general >> /tmp/minioSetup.txt 2>&1;
+      echo output from mc commands;
+      cat /tmp/minioSetup.txt;
+      echo List policies known;
+      /opt/bitnami/minio-client/bin/mc admin policy list minio/;
+      echo List users using json;
+      /opt/bitnami/minio-client/bin/mc admin user list --json minio/;
+      # /usr/bin/mc rm -r --force tn-reshare/somebucketname;
+      # /usr/bin/mc mb tn-reshare/somebucketname;
+      # /usr/bin/mc policy download tn-reshare/somebucketname;
+      # /usr/bin/mc admin config export
+      # echo Minio user creation: https://docs.min.io/docs/minio-multi-user-quickstart-guide.html
+      # echo https://github.com/minio/minio/issues/6811 - policy example
+      echo Completed setup;
+      exit 0;
+      "
+
+networks:
+  kafka_net:
+    driver: "bridge"
