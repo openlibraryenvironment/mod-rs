@@ -107,7 +107,7 @@ jobs:
  
       # master and main
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || github.ref = 'refs/heads/SLNP_integration' }}
         uses: docker/build-push-action@v4
         with:
           context: .
