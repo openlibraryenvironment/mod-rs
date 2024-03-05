@@ -107,25 +107,10 @@ jobs:
  
       # master and main
       - name: Build and push Docker image
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || github.ref == 'refs/heads/SLNP_integration' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || github.ref == 'refs/heads/fix-slnp-actions' }}
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: 'ghcr.io/openlibraryenvironment/mod-rs:slnp-latest'
-
-      # extra tags for release branch
-      - name: Build and push Docker image
-        if: ${{ contains(github.ref, 'release') }}
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:rc
+          tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:slnp-latest
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Publish Descriptor
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
-        run: |
-          echo Post to public registry
-          curl -i -XPOST https://registry.reshare-dev.indexdata.com/_/proxy/modules -d @service/build/resources/main/okapi/ModuleDescriptor.json
