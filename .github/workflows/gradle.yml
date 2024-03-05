@@ -91,7 +91,7 @@ jobs:
           retention-days: 1
 
       - name: Log in to the Container registry
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release' || github.ref == 'refs/heads/fix-slnp-actions') }}
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
@@ -99,11 +99,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release' || github.ref == 'refs/heads/fix-slnp-actions') }}
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
  
       # master and main
       - name: Build and push Docker image
@@ -112,5 +114,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:slnp-latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
