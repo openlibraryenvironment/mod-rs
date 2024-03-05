@@ -112,7 +112,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: 'slnp'
+          tags: 'ghcr.io/openlibraryenvironment/mod-rs:slnp-latest'
 
       # extra tags for release branch
       - name: Build and push Docker image
