@@ -1,0 +1,974 @@
+{
+	"item": [
+		{
+			"name": "Delete tenant req",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 204 (that's good!)\"] = (responseCode.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/_/tenant",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"_",
+						"tenant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete tenant resp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 204 (that's good!)\"] = (responseCode.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/_/tenant",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"_",
+						"tenant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create tenant req",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"parameters\": [\n        {\n            \"key\": \"loadSample\",\n            \"value\": \"true\"\n        },\n        {\n            \"key\": \"loadReference\",\n            \"value\": \"true\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/_/tenant",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"_",
+						"tenant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get req app settings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"function sendRequest(retryCount, waitTime) {",
+							"    pm.sendRequest(pm.request, function (err, response) {",
+							"        if (err) {",
+							"            console.error(\"Error:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        // Check if the response is an empty array",
+							"        if (response.json().length < 15 && retryCount > 0) {",
+							"            console.log(\"Empty response, retrying...\");",
+							"            setTimeout(function() {",
+							"                sendRequest(retryCount - 1, waitTime);",
+							"            }, waitTime);",
+							"        } else if (retryCount === 0) {",
+							"            console.log(\"Max retry limit reached.\");",
+							"        } else {",
+							"            var responseBody = response.json();",
+							"            console.log(\"Non-empty response received!\");",
+							"            tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"            ",
+							"            pm.environment.set(\"reqSettings\", JSON.stringify(responseBody));",
+							"        }",
+							"    });",
+							"}",
+							"",
+							"// Start the process with 3 retries and a wait time of 2 seconds",
+							"sendRequest(30, 2000); // Adjust retry count and wait time as needed",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings?filters=hidden=false&offset=0&max=200",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings"
+					],
+					"query": [
+						{
+							"key": "filters",
+							"value": "hidden=false"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						},
+						{
+							"key": "max",
+							"value": "200"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get req app settings hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var responseBody = pm.response.json();",
+							"pm.environment.set(\"reqSettingsHidden\", JSON.stringify(responseBody));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings?filters=hidden=true",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings"
+					],
+					"query": [
+						{
+							"key": "filters",
+							"value": "hidden=true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update req app settings",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"var map = pm.environment.get(\"reqSettingsUpdate\"); ",
+							"var dataMap = JSON.parse(map);",
+							"",
+							"var settings = pm.environment.get(\"reqSettings\");",
+							"var settingsArray = JSON.parse(settings);",
+							"var filteredSettings = settingsArray.filter(s => dataMap.hasOwnProperty(s.key));",
+							"",
+							"console.log(\"List to send \" + filteredSettings.length);",
+							"",
+							"var update = filteredSettings.pop();",
+							"",
+							"pm.environment.set(\"reqSettings\", JSON.stringify(filteredSettings));",
+							"pm.environment.set(\"settingId\", update.id);",
+							"pm.environment.set(\"settingKey\", update.key);",
+							"pm.environment.set(\"settingValue\", dataMap[update.key]);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var settingsArray = JSON.parse(environment.reqSettings);",
+							"if (settingsArray.length > 0) {",
+							"    postman.setNextRequest(\"Update req app settings\");",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\" : \"{{settingKey}}\",\n    \"id\" : \"{{settingId}}\",\n    \"value\" : \"{{settingValue}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings/{{settingId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings",
+						"{{settingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update req app settings hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var settingsArray = JSON.parse(environment.reqSettingsHidden);",
+							"if (settingsArray.length > 0) {",
+							"    postman.setNextRequest(\"Update req app settings hidden\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var map = pm.environment.get(\"reqSettingsHiddenUpdate\"); ",
+							"var dataMap = JSON.parse(map);",
+							"",
+							"var settings = pm.environment.get(\"reqSettingsHidden\");",
+							"var settingsArray = JSON.parse(settings);",
+							"var filteredSettings = settingsArray.filter(s => dataMap.hasOwnProperty(s.key));",
+							"",
+							"console.log(\"List to send hidden \" + filteredSettings.length);",
+							"",
+							"var update = filteredSettings.pop();",
+							"",
+							"pm.environment.set(\"reqSettingsHidden\", JSON.stringify(filteredSettings));",
+							"pm.environment.set(\"settingId\", update.id);",
+							"pm.environment.set(\"settingKey\", update.key);",
+							"pm.environment.set(\"settingValue\", dataMap[update.key]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\" : \"{{settingKey}}\",\n    \"id\" : \"{{settingId}}\",\n    \"value\" : \"{{settingValue}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings/{{settingId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings",
+						"{{settingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create req dir req",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"SLNP-1\",\n    \"name\": \"{{tenantReq}}\",\n    \"slug\": \"SLNP_REQ\",\n    \"symbols\": [\n        {\n            \"authority\": \"ISIL\",\n            \"symbol\": \"REQ\",\n            \"priority\": \"a\"\n        }\n    ],\n    \"services\": [\n        {\n            \"slug\": \"SlnpReq_ISO18626\",\n            \"service\": {\n                \"name\": \"ReShare ISO18626 Service\",\n                \"address\": \"{{serviceAddress}}\",\n                \"type\": \"ISO18626\",\n                \"businessFunction\": \"ILL\"\n            },\n            \"customProperties\": [\n                {\n                    \"ILLPreferredNamespaces\": [\n                        \"ISIL\",\n                        \"RESHARE\",\n                        \"PALCI\",\n                        \"IDS\"\n                    ]\n                },\n                {\n                    \"AdditionalHeaders\": [\n                        \"X-Okapi-Tenant:{{tenantReq}}\"\n                    ]\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create req dir resp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"SLNP-2\",\n    \"name\": \"{{tenantResp}}\",\n    \"slug\": \"SLNP_RESP\",\n    \"symbols\": [\n        {\n            \"authority\": \"ISIL\",\n            \"symbol\": \"RESP\",\n            \"priority\": \"a\"\n        }\n    ],\n    \"services\": [\n        {\n            \"slug\": \"SlnpResp_ISO18626\",\n            \"service\": {\n                \"name\": \"ReShare ISO18626 Service resp\",\n                \"address\": \"{{serviceAddress}}\",\n                \"type\": \"ISO18626\",\n                \"businessFunction\": \"ILL\"\n            },\n            \"customProperties\": [\n                {\n                    \"ILLPreferredNamespaces\": [\n                        \"ISIL\",\n                        \"RESHARE\",\n                        \"PALCI\",\n                        \"IDS\"\n                    ]\n                },\n                {\n                    \"AdditionalHeaders\": [\n                        \"X-Okapi-Tenant:{{tenantResp}}\"\n                    ]\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check req directories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"pm.test(\"Records with IDs SLNP-1 and SLNP-2 are returned\", function () {",
+							"    // Parse the response body as JSON",
+							"    var responseBody = pm.response.json();",
+							"",
+							"  ",
+							"    pm.expect(responseBody).to.be.an('array');",
+							"",
+							"    // Check if records with ID 1 and 2 exist",
+							"    pm.expect(responseBody.some(dir => dir.id === \"SLNP-1\")).to.be.true;",
+							"    pm.expect(responseBody.some(dir => dir.id === \"SLNP-2\")).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantReq}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create tenant resp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"parameters\": [\n        {\n            \"key\": \"loadSample\",\n            \"value\": \"true\"\n        },\n        {\n            \"key\": \"loadReference\",\n            \"value\": \"true\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/_/tenant",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"_",
+						"tenant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get resp app settings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"function sendRequest(retryCount, waitTime) {",
+							"    pm.sendRequest(pm.request, function (err, response) {",
+							"        if (err) {",
+							"            console.error(\"Error:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        // Check if the response is an empty array",
+							"        if (response.json().length < 15 && retryCount > 0) {",
+							"            console.log(\"Empty response, retrying...\");",
+							"            setTimeout(function() {",
+							"                sendRequest(retryCount - 1, waitTime);",
+							"            }, waitTime);",
+							"        } else if (retryCount === 0) {",
+							"            console.log(\"Max retry limit reached.\");",
+							"        } else {",
+							"            var responseBody = response.json();",
+							"            console.log(\"Non-empty response received!\");",
+							"            tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"            ",
+							"            pm.environment.set(\"respSettings\", JSON.stringify(responseBody));",
+							"        }",
+							"    });",
+							"}",
+							"",
+							"// Start the process with 3 retries and a wait time of 2 seconds",
+							"sendRequest(30, 2000); // Adjust retry count and wait time as needed",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings?filters=hidden=false&offset=0&max=200",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings"
+					],
+					"query": [
+						{
+							"key": "filters",
+							"value": "hidden=false"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						},
+						{
+							"key": "max",
+							"value": "200"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get req app settings hidden Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var responseBody = pm.response.json();",
+							"pm.environment.set(\"respSettingsHidden\", JSON.stringify(responseBody));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings?filters=hidden=true",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings"
+					],
+					"query": [
+						{
+							"key": "filters",
+							"value": "hidden=true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update resp app settings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var settingsArray = JSON.parse(environment.respSettings);",
+							"if (settingsArray.length > 0) {",
+							"    postman.setNextRequest(\"Update resp app settings\");",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"var map = pm.environment.get(\"respSettingsUpdate\"); ",
+							"var dataMap = JSON.parse(map);",
+							"",
+							"var settings = pm.environment.get(\"respSettings\");",
+							"var settingsArray = JSON.parse(settings);",
+							"var filteredSettings = settingsArray.filter(s => dataMap.hasOwnProperty(s.key));",
+							"",
+							"console.log(\"List to send \" + filteredSettings.length);",
+							"",
+							"var update = filteredSettings.pop();",
+							"",
+							"pm.environment.set(\"respSettings\", JSON.stringify(filteredSettings));",
+							"pm.environment.set(\"settingId\", update.id);",
+							"pm.environment.set(\"settingKey\", update.key);",
+							"pm.environment.set(\"settingValue\", dataMap[update.key]);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings/{{settingId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings",
+						"{{settingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update resp app settings hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"var settingsArray = JSON.parse(environment.respSettingsHidden);",
+							"if (settingsArray.length > 0) {",
+							"    postman.setNextRequest(\"Update resp app settings hidden\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var map = pm.environment.get(\"respSettingsHiddenUpdate\"); ",
+							"var dataMap = JSON.parse(map);",
+							"",
+							"var settings = pm.environment.get(\"respSettingsHidden\");",
+							"var settingsArray = JSON.parse(settings);",
+							"var filteredSettings = settingsArray.filter(s => dataMap.hasOwnProperty(s.key));",
+							"",
+							"console.log(\"List to send hidden \" + filteredSettings.length);",
+							"",
+							"var update = filteredSettings.pop();",
+							"",
+							"pm.environment.set(\"respSettingsHidden\", JSON.stringify(filteredSettings));",
+							"pm.environment.set(\"settingId\", update.id);",
+							"pm.environment.set(\"settingKey\", update.key);",
+							"pm.environment.set(\"settingValue\", dataMap[update.key]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/settings/appSettings/{{settingId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"settings",
+						"appSettings",
+						"{{settingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create resp dir req",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"SLNP-1\",\n    \"name\": \"{{tenantReq}}\",\n    \"slug\": \"SLNP_REQ\",\n    \"symbols\": [\n        {\n            \"authority\": \"ISIL\",\n            \"symbol\": \"REQ\",\n            \"priority\": \"a\"\n        }\n    ],\n    \"services\": [\n        {\n            \"slug\": \"SlnpReq_ISO18626\",\n            \"service\": {\n                \"name\": \"ReShare ISO18626 Service\",\n                \"address\": \"{{serviceAddress}}\",\n                \"type\": \"ISO18626\",\n                \"businessFunction\": \"ILL\"\n            },\n            \"customProperties\": [\n                {\n                    \"ILLPreferredNamespaces\": [\n                        \"ISIL\",\n                        \"RESHARE\",\n                        \"PALCI\",\n                        \"IDS\"\n                    ]\n                },\n                {\n                    \"AdditionalHeaders\": [\n                        \"X-Okapi-Tenant:{{tenantReq}}\"\n                    ]\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create resp dir resp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 201 (that's good!)\"] = (responseCode.code === 201);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"SLNP-2\",\n    \"name\": \"{{tenantResp}}\",\n    \"slug\": \"SLNP_RESP\",\n    \"symbols\": [\n        {\n            \"authority\": \"ISIL\",\n            \"symbol\": \"RESP\",\n            \"priority\": \"a\"\n        }\n    ],\n    \"services\": [\n        {\n            \"slug\": \"SlnpResp_ISO18626\",\n            \"service\": {\n                \"name\": \"ReShare ISO18626 Service resp\",\n                \"address\": \"{{serviceAddress}}\",\n                \"type\": \"ISO18626\",\n                \"businessFunction\": \"ILL\"\n            },\n            \"customProperties\": [\n                {\n                    \"ILLPreferredNamespaces\": [\n                        \"ISIL\",\n                        \"RESHARE\",\n                        \"PALCI\",\n                        \"IDS\"\n                    ]\n                },\n                {\n                    \"AdditionalHeaders\": [\n                        \"X-Okapi-Tenant:{{tenantResp}}\"\n                    ]\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check resp directories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Status code is 200 (that's good!)\"] = (responseCode.code === 200);",
+							"pm.test(\"Records with IDs SLNP-1 and SLNP-2 are returned\", function () {",
+							"    // Parse the response body as JSON",
+							"    var responseBody = pm.response.json();",
+							"",
+							"  ",
+							"    pm.expect(responseBody).to.be.an('array');",
+							"",
+							"    // Check if records with ID 1 and 2 exist",
+							"    pm.expect(responseBody.some(dir => dir.id === \"SLNP-1\")).to.be.true;",
+							"    pm.expect(responseBody.some(dir => dir.id === \"SLNP-2\")).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Okapi-Tenant",
+						"value": "{{tenantResp}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/rs/directoryEntry",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rs",
+						"directoryEntry"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

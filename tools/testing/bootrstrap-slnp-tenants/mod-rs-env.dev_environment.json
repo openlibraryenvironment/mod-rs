@@ -1,0 +1,99 @@
+{
+	"id": "eb4523b7-9715-4fc6-854a-898c95870d13",
+	"name": "mod-rs-env",
+	"values": [
+		{
+			"key": "tenantReq",
+			"value": "slnpReq",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "tenantResp",
+			"value": "slnpResp",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "host",
+			"value": "http://localhost:9177",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "serviceAddress",
+			"value": "http://localhost:9177/rs/externalApi/iso18626",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "reqSettingsUpdate",
+			"value": "{\"auto_responder_status\":\"off\", \"auto_responder_cancel\": \"off\", \"routing_adapter\":\"static\", \"static_routes\":\"SYMBOL:ISIL:RESP\"}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "respSettingsUpdate",
+			"value": "{\"auto_responder_status\":\"off\", \"auto_responder_cancel\": \"off\", \"routing_adapter\":\"static\", \"static_routes\":\"SYMBOL:ISIL:REQ\"}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "reqSettingsHiddenUpdate",
+			"value": "{\"state_model_requester\":\"SLNPRequester\", \"state_model_responder\":\"SLNPResponder\"}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "respSettingsHiddenUpdate",
+			"value": "{\"state_model_requester\":\"SLNPRequester\", \"state_model_responder\":\"SLNPResponder\"}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "reqSettings",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "reqSettingsHidden",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "settingId",
+			"value": "changeIt",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "respSettings",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "respSettingsHidden",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "settingKey",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "settingValue",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2024-03-08T12:50:04.941Z",
+	"_postman_exported_using": "Postman/10.23.11"
+}
