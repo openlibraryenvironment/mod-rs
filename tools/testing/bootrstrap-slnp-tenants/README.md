@@ -1,42 +1,22 @@
 # Postman newman CLI script - bootrstrap SLNP tenants
 * Newman version: 6.1.1
-
 * Ensure you're using Node.js v16 or later.
 
 # Install Newman from npm globally on your system, enabling you to run it from anywhere:
 
     npm install -g newman
 
-# Running Newman:
+# You can run collection and pass environment file:
 
-    newman run mycollection.json
+    newman run mod-rs-setup.collection.json -e mod-rs-env.dev_environment.json
 
-# You can also pass a collection as a URL by sharing it:
+# Start application with test data
+To start up application you need to do these steps:
+* Start docker-compose file
+* Set up environment variables
+* Start mod-rs service
+* Insert test data
 
-    newman run https://www.postman.com/collections/cb208e7e64056f5294e5
+If you have installed `newman` then all these actions are added in script `up-all.sh` and it will start `mod-rs` service on port `9177` with all test data
 
-# You can also pass environment file:
-
-    newman run mycollection.json -e dev_environment.json
-
-# Example collection with failing tests:
-
-Status Code Test
-GET https://postman-echo.com/status/404 [404 Not Found, 534B, 1551ms]
-1\. response code is 200
-
-|                                       | executed | failed |
-|---------------------------------------|----------|--------|
-| iterations                            | 1        | 0      |
-| requests                              | 1        | 0      |
-| test-scripts                          | 1        | 0      |
-| prerequest-scripts                    | 0        | 0      |
-| assertions                            | 1        | 1      |
-
-
-#  Failure details
-
-1\.  AssertionFai…  response code is 200
-at assertion:1 in test-script
-inside "Status Code Test" of "Example Collection with
-Failing Tests"
+To shut down running application you can use script `down-all.sh`
