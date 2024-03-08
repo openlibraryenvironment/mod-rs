@@ -28,6 +28,7 @@ public class SettingsData {
     private static final String SECTION_HOST_LMS_INTEGRATION   = 'hostLMSIntegration';
     private static final String SECTION_LOCAL_NCIP             = 'localNCIP';
     private static final String SECTION_LOGGING                = 'logging';
+    private static final String SECTION_OTHER                  = 'other';
     private static final String SECTION_NETWORK                = 'network';
     private static final String SECTION_PATRON_STORE           = 'patronStore';
     private static final String SECTION_PULLSLIP_CONFIGURATION = 'pullslipConfiguration';
@@ -123,6 +124,9 @@ public class SettingsData {
     // Settings for the Routing section
     public static final String SETTING_ROUTING_ADAPTER = 'routing_adapter';
     public static final String SETTING_STATIC_ROUTES   = 'static_routes';
+
+    // Settings for the Other section
+    public static final String SETTING_DEFAULT_COPYRIGHT_TYPE = 'default_copyright_type';
 
     // State/Action configuration settings
     public static final String SETTING_COMBINE_FILL_AND_SHIP                      = 'combine_fill_and_ship';
@@ -297,6 +301,8 @@ public class SettingsData {
             ensureAppSetting(SETTING_LOGGING_Z3950_REQUESTER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
+
+            ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
