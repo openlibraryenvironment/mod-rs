@@ -1,4 +1,5 @@
 # Postman newman CLI script - bootrstrap SLNP tenants
+Newman version: 6.1.1
 
 # Install Newman from npm globally on your system, enabling you to run it from anywhere:
 
