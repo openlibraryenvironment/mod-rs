@@ -37,6 +37,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_CHECK_IN_METHOD                  = 'CheckInMethod';
     public static final String VOCABULARY_CHECK_OUT_METHOD                 = 'CheckOutMethod';
     public static final String VOCABULARY_CHECK_IN_ON_RETURN               = 'CheckInOnReturn';
+    public static final String VOCABULARY_COPYRIGHT_TYPE                   = "copyrightType";
     public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER     = 'HostLMSIntegrationAdapter';
     public static final String VOCABULARY_LOAN_CONDITIONS                  = 'loanConditions';
     public static final String VOCABULARY_LOAN_POLICY                      = 'LoanPolicy';
@@ -51,7 +52,6 @@ public class RefdataValueData {
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
     public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
     public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
-    public static final String VOCABULARY_COPYRIGHT_TYPE                   = "copyrightType";
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -305,7 +305,6 @@ public class RefdataValueData {
                 RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCG (US)', 'US-CCG');
                 RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCL (US)', 'US-CCL');
             }
-            lookupOrCreateCategory(VOCABULARY_COPYRIGHT_TYPE);
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
