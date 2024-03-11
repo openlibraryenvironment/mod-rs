@@ -30,7 +30,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
             if (actionResultDetails.result == ActionResult.SUCCESS) {
                 // Add an audit entry
                 actionResultDetails.auditMessage = 'Status Change message received'
-                if (actionResultDetails.qualifier == ActionEventResultQualifier.QUALIFIER_CANCELLED &&
+                if (actionResultDetails.qualifier.equalsIgnoreCase(ActionEventResultQualifier.QUALIFIER_CANCELLED) &&
                         'ABORT'.equalsIgnoreCase(parameters.messageInfo?.note)) {
                     actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_ABORTED
                 }
