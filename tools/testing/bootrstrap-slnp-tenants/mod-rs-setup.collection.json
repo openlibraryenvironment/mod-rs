@@ -741,7 +741,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\n    \"key\" : \"{{settingKey}}\",\n    \"id\" : \"{{settingId}}\",\n    \"value\" : \"{{settingValue}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -814,7 +814,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\n    \"key\" : \"{{settingKey}}\",\n    \"id\" : \"{{settingId}}\",\n    \"value\" : \"{{settingValue}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
