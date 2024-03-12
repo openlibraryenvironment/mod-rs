@@ -230,14 +230,15 @@ public class ReshareActionService {
         Map retryEventData = null
     ) {
         boolean result = false;
+        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode);
 
         Long rotaPosition = pr.rotaPosition;
         // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
-        if (pr.rota.isEmpty()) {
+        if (!isSlnpModel && pr.rota.isEmpty()) {
             log.error('sendRequestingAgencyMessage has been given an empty rota');
-        } else if (rotaPosition == null) {
+        } else if (!isSlnpModel && rotaPosition == null) {
             log.error('sendRequestingAgencyMessage could not find current rota postition');
-        } else if (pr.rota.empty()) {
+        } else if (!isSlnpModel && pr.rota.empty()) {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
 
