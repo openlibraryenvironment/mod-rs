@@ -243,7 +243,8 @@ public class ReshareActionService {
         } else {
 
             Map eventData = retryEventData;
-            Map symbols = requestingAgencyMessageSymbol(pr);
+            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.supplyingInstitutionSymbol] :
+                    requestingAgencyMessageSymbol(pr);
 
             // If we have not been supplied with the event data, we need to generate it
             if (eventData == null) {

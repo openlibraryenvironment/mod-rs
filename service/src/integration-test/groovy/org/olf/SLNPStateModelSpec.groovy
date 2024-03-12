@@ -229,10 +229,14 @@ class SLNPStateModelSpec extends TestBase {
                 title: requestTitle,
                 author: requestAuthor,
                 requestingInstitutionSymbol: requestSymbol,
+                supplyingInstitutionSymbol: 'ISIL:RSS3',
+                resolvedRequester:[ authority:'ISIL', symbol:'RSS1', priority:'a'],
+                resolvedSupplier:[ authority:'ISIL', symbol:'RSS3', priority:'a'],
                 systemInstanceIdentifier: requestSystemId,
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
                 hrid: hrid
+
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
