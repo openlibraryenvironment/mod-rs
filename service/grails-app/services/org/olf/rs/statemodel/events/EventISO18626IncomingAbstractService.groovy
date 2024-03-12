@@ -1,5 +1,6 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionResult;
@@ -142,9 +143,11 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                     } else {
                         if ((request.supplyingInstitutionSymbol == null || request.getSupplyingInstitutionSymbol().contains("null")) &&
                                 eventData.header?.supplyingAgencyId?.agencyIdType != null &&
-                                eventData.header?.supplyingAgencyId?.agencyIdValue != null){
+                                eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                            request.resolvedSupplier = resolvedSupplyingAgency
                             request.setSupplyingInstitutionSymbol(
-                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}");
+                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}")
                         }
                         // We need to determine if this request is for the current rota position
                         if (isForCurrentRotaLocation(eventData, request) || StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode) {
