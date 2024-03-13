@@ -70,7 +70,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 if (publicationInfo.publisher) {
                     pr.publisher = publicationInfo.publisher;
                 }
-                pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
                 if (publicationInfo.publicationType) {
                     pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
                 }
