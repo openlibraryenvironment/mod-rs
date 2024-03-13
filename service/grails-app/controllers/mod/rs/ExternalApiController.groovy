@@ -119,7 +119,6 @@ class ExternalApiController {
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
 
@@ -138,7 +137,6 @@ class ExternalApiController {
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
 
@@ -157,7 +155,6 @@ class ExternalApiController {
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else {
           render(status: 400, text: 'The sent request is not valid')

@@ -72,17 +72,17 @@ class ConfirmationMessageService {
         requestingAgencyRequestId(req_result.reqId)
         timestampReceived(req_result.timeRec)
         messageStatus(req_result.status)
-        if (req_result.errorType != null) {
-          errorData {
-            errorType(req_result.errorType)
-            errorValue(req_result.errorValue)
-          }
-        }
-        if (req_result.messageType == "SUPPLYING_AGENCY_MESSAGE") {
-          reasonForMessage(req_result.reasonForMessage)
-        }
-        if (req_result.messageType == "REQUESTING_AGENCY_MESSAGE") {
-          action(req_result.action)
+      }
+      if (req_result.messageType == "SUPPLYING_AGENCY_MESSAGE") {
+        reasonForMessage(req_result.reasonForMessage)
+      }
+      if (req_result.messageType == "REQUESTING_AGENCY_MESSAGE") {
+        action(req_result.action)
+      }
+      if (req_result.errorType != null) {
+        errorData {
+          errorType(req_result.errorType)
+          errorValue(req_result.errorValue)
         }
       }
     }
