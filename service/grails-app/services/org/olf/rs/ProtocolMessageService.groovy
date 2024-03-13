@@ -417,7 +417,7 @@ and sa.service.businessFunction.value=:ill
           receiverSymbol: receiverSymbol,
           messageType: eventData.messageType,
           action: ((eventData.messageInfo?.reasonForMessage == null) ?
-                      ((eventData.activeSection?.action == null) ? '' : eventData.activeSection.action) :
+                      ((eventData?.action == null) ? '' : eventData.action) :
                       eventData.messageInfo.reasonForMessage)
       ]);
   }
@@ -545,11 +545,11 @@ and sa.service.businessFunction.value=:ill
       requestingAgencyMessage {
         makeHeader(delegate, eventData)
 
-        log.debug("This is a requesting agency message, so we need ActiveSection")
-        if (eventData.activeSection != null) {
-          makeActiveSection(delegate, eventData)
+        log.debug("This is a requesting agency message, so we need to add action and note")
+        if (eventData.action != null) {
+          makeActionAndNote(delegate, eventData)
         } else {
-          log.warn("No activeSection found")
+          log.warn("No action found")
         }
       }
     }
@@ -678,12 +678,10 @@ and sa.service.businessFunction.value=:ill
     }
   }
 
-  void makeActiveSection(def del, eventData) {
+  void makeActionAndNote(def del, eventData) {
     exec(del) {
-      activeSection {
-        action(eventData.activeSection.action)
-        note(eventData.activeSection.note)
-      }
+      action(eventData.action)
+      note(eventData.note)
     }
   }
 

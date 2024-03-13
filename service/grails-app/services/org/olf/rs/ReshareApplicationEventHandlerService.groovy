@@ -375,7 +375,7 @@ public class ReshareApplicationEventHandlerService {
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
-      inboundMessage.setAttachedAction(eventData.activeSection.action)
+      inboundMessage.setAttachedAction(eventData.action)
       inboundMessage.setMessageContent(note)
     }
 

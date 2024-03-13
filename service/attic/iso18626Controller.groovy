@@ -208,7 +208,7 @@ class iso18626Controller {
       req_result.reasonForMessage = incomingRequest?.messageInfo?.reasonForMessage
     }
     if (messageType == "REQUESTING_AGENCY_MESSAGE") {
-      req_result.action = incomingRequest?.activeSection?.action
+      req_result.action = incomingRequest?.action
     }
     
     return req_result;

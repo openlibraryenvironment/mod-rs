@@ -38,11 +38,9 @@ public class TimerRequestNetworkTimeoutService extends AbstractTimerRequestNetwo
             // Set the message type
             message.messageType = 'REQUESTING_AGENCY_MESSAGE';
 
-            // Need to populate active section of the message
-            message.activeSection = [
-                action: EventISO18626IncomingAbstractService.ACTION_STATUS_REQUEST,
-                note: note
-            ];
+            // Need to populate action and note of the message
+            message.action = EventISO18626IncomingAbstractService.ACTION_STATUS_REQUEST
+            message.note = note
 
             // Fetch the symbols
             symbols = reshareActionService.requestingAgencyMessageSymbol(request);

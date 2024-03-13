@@ -19,7 +19,7 @@ public class ActionResponderISO18626StatusRequestService extends ActionISO18626R
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // We have a hack where we use this  message to verify that the last one sent was actually received or not
-        if (!checkForLastSequence(request, parameters?.activeSection?.note, actionResultDetails)) {
+        if (!checkForLastSequence(request, parameters?.note, actionResultDetails)) {
             // Not implemented yet, placeholder for when it is, rather oddly we need to send another message, which shouldn't be a problem
         }
 

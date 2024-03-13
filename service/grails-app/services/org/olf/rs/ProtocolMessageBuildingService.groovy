@@ -282,10 +282,8 @@ class ProtocolMessageBuildingService {
     Symbol peer_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(peer)
 
     message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
-    message.activeSection = [
-      action: action,
-      note: buildNote(pr, note, appendSequence)
-    ]
+    message.action = action
+    message.note = buildNote(pr, note, appendSequence)
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
