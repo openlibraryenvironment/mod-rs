@@ -494,9 +494,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     try {
       ncipLogDetails.result(
               response.protocolInformation.request.endPoint,
-              unescapeJson(response.protocolInformation.request.requestbody),
-              response.protocolInformation.response.responseStatus,
-              unescapeJson(response.protocolInformation.response.responseBody)
+              unescapeJson(response.protocolInformation.request.optString("requestbody")),
+              response.protocolInformation.response.optString("responseStatus"),
+              unescapeJson(response.protocolInformation.response.optString("responseBody"))
       );
     } catch(Exception e) {
       log.error("Unable to extract protocolInformation from NCIP response: ${e}");
