@@ -207,6 +207,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Boolean overdue
 
   RefdataValue cancellationReason
+  RefdataValue copyrightType;
 
   /** The current status of any network messaging */
   NetworkStatus networkStatus;
@@ -318,6 +319,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum (nullable: true, blank : false)
     ssn (nullable: true, blank : false)
     quarter (nullable: true, blank : false)
+    copyrightType (nullable: true, blank : false)
     systemInstanceIdentifier (nullable: true, blank : false)
     selectedItemBarcode (nullable: true, blank : false)
     bibliographicRecordId( nullable: true, blank : false)
@@ -434,6 +436,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum column : 'pr_artnum'
     ssn column : 'pr_ssn'
     quarter column : 'pr_quarter'
+    copyrightType column: 'pr_copyright_type_fk'
     bibliographicRecordId column : 'pr_bib_record_id'
     supplierUniqueRecordId column : 'pr_supplier_unique_record_id'
 
