@@ -43,7 +43,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
 
-        if (parameters?.itemBarcodes?.size() != 0) {
+        if (parameters?.itemBarcodes?.size() > 0) {
             // TODO For now we still use this, so just set to first item in array for now. Should be removed though
             request.selectedItemBarcode = parameters?.itemBarcodes[0]?.itemId;
 
