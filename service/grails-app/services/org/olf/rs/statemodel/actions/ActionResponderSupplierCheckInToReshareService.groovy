@@ -43,13 +43,13 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
 
-        if (parameters?.itemBarcodes.size() != 0) {
+        if (parameters?.itemBarcodes?.size() != 0) {
             // TODO For now we still use this, so just set to first item in array for now. Should be removed though
             request.selectedItemBarcode = parameters?.itemBarcodes[0]?.itemId;
 
             // We now want to update the patron request's "volumes" field to reflect the incoming params
             // In order to then use the updated list later, we mimic those actions on a dummy list,
-            parameters?.itemBarcodes?.each { ib ->
+            parameters?.itemBarcodes.each { ib ->
                 RequestVolume rv = request.volumes.find { rv -> rv.itemId == ib.itemId };
 
                 // If there's no rv and the delete is true then just skip creation
