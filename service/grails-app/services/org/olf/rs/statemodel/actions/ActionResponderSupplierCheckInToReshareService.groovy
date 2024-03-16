@@ -49,7 +49,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
 
             // We now want to update the patron request's "volumes" field to reflect the incoming params
             // In order to then use the updated list later, we mimic those actions on a dummy list,
-            parameters?.itemBarcodes.each { ib ->
+            parameters?.itemBarcodes?.each { ib ->
                 RequestVolume rv = request.volumes.find { rv -> rv.itemId == ib.itemId };
 
                 // If there's no rv and the delete is true then just skip creation
