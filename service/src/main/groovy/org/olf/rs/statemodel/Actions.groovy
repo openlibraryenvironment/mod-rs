@@ -66,8 +66,9 @@ public class Actions {
 	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn"
 
 	// SLNP Requester Actions
-	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT      = "slnpHandleAbort";
-	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP   = "slnpPrintPullSlip";
+	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";
+	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP     = "slnpPrintPullSlip";
+	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED  = "slnpRequesterReceived";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";
