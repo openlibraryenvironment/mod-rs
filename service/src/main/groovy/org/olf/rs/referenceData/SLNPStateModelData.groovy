@@ -165,11 +165,21 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderSupplierCheckInReshare = [
-            code: 'slnpResponderSupplierCheckInReshare',
-            description: 'Item has been checked out from the host ILS and into ReShare',
+    private static Map slnpResponderSupplierCheckInReshareOK = [
+            code: 'slnpResponderSupplierCheckInReshareOK',
+            description: 'SLNP Responder has successfully checked the items out of the LMS into reshare',
             result: true,
             status: Status.SLNP_RESPONDER_AWAIT_SHIP,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpResponderSupplierCheckInReshareFailure = [
+            code: 'slnpResponderSupplierCheckInReshare',
+            description: 'SLNP Responder has failed to check out 1 or more items out of the LMS into reshare',
+            result: false,
+            status: Status.SLNP_RESPONDER_AWAIT_PICKING,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent : null
@@ -342,7 +352,8 @@ public class SLNPStateModelData {
             description: 'Scan item barcode to fill this request',
             model: StateModel.MODEL_SLNP_RESPONDER,
             results: [
-                    slnpResponderSupplierCheckInReshare
+                    slnpResponderSupplierCheckInReshareOK,
+                    slnpResponderSupplierCheckInReshareFailure
             ]
     ];
 
