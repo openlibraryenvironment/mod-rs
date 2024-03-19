@@ -385,6 +385,24 @@ public class SLNPStateModelData {
     ];
 
     public static void loadStatusData() {
+        // To delete an unwanted status add Status code and Stage to this array
+        [
+                [ Status.SLNP_REQUESTER_CANCELLED, StatusStage.PREPARING ],
+                [ Status.SLNP_REQUESTER_COMPLETE, StatusStage.PREPARING ],
+                [ Status.SLNP_RESPONDER_UNFILLED, StatusStage.PREPARING ],
+                [ Status.SLNP_RESPONDER_ABORTED, StatusStage.PREPARING ],
+                [ Status.SLNP_RESPONDER_COMPLETE, StatusStage.PREPARING ],
+        ].each { statusToRemove ->
+            log.info("Remove status ${statusToRemove}");
+            try {
+                AvailableAction.executeUpdate('''delete from Status
+                                                     where id in ( select s.id from Status as s where s.code=:code and s.stage=:stage )''',
+                        [code:statusToRemove[0], stage:statusToRemove[1]]);
+            } catch (Exception e) {
+                log.error("Unable to delete status ${statusToRemove} - ${e.message}", e);
+            }
+        }
+
         Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_REQUESTER_CANCELLED, StatusStage.COMPLETED, '9996', true, false, true, null);
         Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
