@@ -34,6 +34,7 @@ public class Actions {
 
 	// SLNP Responder Actions
 	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
+	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
 
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
