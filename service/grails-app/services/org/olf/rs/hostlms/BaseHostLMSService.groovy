@@ -789,6 +789,18 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return "SYSNUMBER";
   }
 
+  public String getRequestItemGetRequestScopeType() {
+    return "Bibliographic Item";
+  }
+
+  public String getRequestItemPickupLocation() {
+    return null;
+  }
+
+  public String filterRequestItemItemId(String itemId) {
+    return itemId;
+  }
+
   /**
    * @param settings - the settings object
    * @param requestId - The id associated with this request
@@ -809,17 +821,21 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ];
 
     String bibliographicIdCode = getRequestItemBibIdCode();
+    String requestScopeType = getRequestItemGetRequestScopeType();
+    String bibliographicRecordId = filterRequestItemItemId(itemId);
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
     RequestItem requestItem = new RequestItem()
       .setUserId(borrowerBarcode)
       .setRequestId(requestId)
-      .setBibliographicRecordId(itemId)
+      .setBibliographicRecordId(bibliographicRecordId)
       .setBibliographicRecordIdCode(bibliographicIdCode)
+      .setRequestScopeType(requestScopeType)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-      .setRegistryId(ncipConnectionDetails.registryId);
+      .setRegistryId(ncipConnectionDetails.registryId)
+      .setPickupLocation(getRequestItemPickupLocation());
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);
