@@ -789,7 +789,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return "SYSNUMBER";
   }
 
-  public String getRequestItemGetRequestScopeType() {
+  public String getRequestItemRequestScopeType() {
     return "Bibliographic Item";
   }
 
@@ -821,7 +821,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ];
 
     String bibliographicIdCode = getRequestItemBibIdCode();
-    String requestScopeType = getRequestItemGetRequestScopeType();
+    String requestScopeType = getRequestItemRequestScopeType();
     String bibliographicRecordId = filterRequestItemItemId(itemId);
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
