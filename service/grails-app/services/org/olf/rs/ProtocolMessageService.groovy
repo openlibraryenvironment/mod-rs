@@ -581,48 +581,22 @@ and sa.service.businessFunction.value=:ill
   void makeBibliographicInfo(def del, eventData) {
     exec(del) {
       bibliographicInfo {
+        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
         title(eventData.bibliographicInfo.title)
-        subtitle(eventData.bibliographicInfo.subtitle)
         author(eventData.bibliographicInfo.author)
-        sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
-        volume(eventData.bibliographicInfo.volume)
-        issue(eventData.bibliographicInfo.issue)
-        startPage(eventData.bibliographicInfo.startPage)
-        numberOfPages(eventData.bibliographicInfo.numberOfPages)
-        pagesRequested(eventData.bibliographicInfo.pagesRequested)
+        subtitle(eventData.bibliographicInfo.subtitle)
         edition(eventData.bibliographicInfo.edition)
-        issn(eventData.bibliographicInfo.issn)
-        isbn(eventData.bibliographicInfo.isbn)
-        doi(eventData.bibliographicInfo.doi)
-        coden(eventData.bibliographicInfo.coden)
-        sici(eventData.bibliographicInfo.sici)
-        bici(eventData.bibliographicInfo.bici)
-        eissn(eventData.bibliographicInfo.eissn)
-        stitle(eventData.bibliographicInfo.stitle)
-        part(eventData.bibliographicInfo.part)
-        artnum(eventData.bibliographicInfo.artnum)
-        ssn(eventData.bibliographicInfo.ssn)
-        quarter(eventData.bibliographicInfo.quarter)
         titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
         authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
+        volume(eventData.bibliographicInfo.volume)
+        issue(eventData.bibliographicInfo.issue)
+        pagesRequested(eventData.bibliographicInfo.pagesRequested)
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
-
-        //
-        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
-        bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
-
-
-        // Pretty sure this shouldn't be here
-        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
-        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
-        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
-
-        // Should this be here?
-        patronNote(eventData.bibliographicInfo.patronNote)
-
-        oclcNumber(eventData.bibliographicInfo.oclcNumber)
+        bibliographicRecordId {
+          bibliographicRecordIdentifierCode('OCLC')
+          bibliographicRecordIdentifierCode(eventData.bibliographicInfo.bibliographicRecordId)
+        }
       }
     }
   }

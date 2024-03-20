@@ -47,29 +47,15 @@ class ProtocolMessageBuildingService {
 
     message.bibliographicInfo = [
       title: req.title,
-      requestingInstitutionSymbol: req.requestingInstitutionSymbol,
       author: req.author,
       subtitle: req.subtitle,
-      sponsoringBody: req.sponsoringBody,
       volume: req.volume,
       issue: req.issue,
-      startPage: req.startPage,
-      numberOfPages: req.numberOfPages,
       pagesRequested: req.pagesRequested,
       edition: req.edition,
-      issn: req.issn,
-      isbn: req.isbn,
-      doi: req.doi,
-      coden: req.coden,
-      sici: req.sici,
-      bici: req.bici,
-      eissn: req.eissn,
-      stitle : req.stitle ,
-      part: req.part,
-      artnum: req.artnum,
-      ssn: req.ssn,
-      quarter: req.quarter,
-      bibliographicRecordId: req.bibliographicRecordId ?: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
+      bibliographicRecordId:[
+              [ bibliographicRecordIdentifierCode:'OCLC', bibliographicRecordIdentifier: req.bibliographicRecordId ?: req.systemInstanceIdentifier ]
+      ],  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
@@ -77,12 +63,7 @@ class ProtocolMessageBuildingService {
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
       bibliographicItemId:[
         [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
-      ],
-      // These should be removed - they have no business being here as they are not part of the protocol
-      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
-      systemInstanceIdentifier: req.systemInstanceIdentifier,
-      oclcNumber: req.oclcNumber,
-
+      ]
     ]
     message.publicationInfo = [
       publisher: req.publisher,
