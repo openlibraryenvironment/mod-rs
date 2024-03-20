@@ -1,4 +1,4 @@
-package org.olf.rs;
+package org.olf.rs
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -39,6 +39,8 @@ import groovy.util.logging.Slf4j
 public class ReshareApplicationEventHandlerService {
 
   private static final int MAX_RETRIES = 10;
+
+    static List<String> preserveFields = ['supplierUniqueRecordId','title','author','subtitle','seriesTitle','edition','titleOfComponent','authorOfComponent','volume','issue','pagesRequested','estimatedNoPages','sponsor','informationSource']
 
   	EventNoImplementationService eventNoImplementationService;
     EventISO18626IncomingRequesterService eventISO18626IncomingRequesterService;
@@ -102,7 +104,9 @@ public class ReshareApplicationEventHandlerService {
 							// Get hold of the request
 							switch (eventBean.fetchRequestMethod()) {
 								case EventFetchRequestMethod.NEW:
-									request = new PatronRequest(eventData.bibliographicInfo);
+                                    def newParams = eventData.bibliographicInfo.subMap(preserveFields)
+									request = new PatronRequest(newParams)
+                                    request.bibliographicRecordId = eventData.bibliographicInfo?.bibliographicRecordId?.bibliographicRecordIdentifier
 									break;
 
 								case EventFetchRequestMethod.PAYLOAD_ID:

@@ -128,7 +128,6 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                         } else {
                             log.debug("No instanceIdentifier present for PatronRequestRota ${prr}");
                         }
-                        requestMessageRequest.bibliographicInfo.supplyingInstitutionSymbol = nextResponder;
 
                         // No longer need to look at next responder
                         lookAtNextResponder = false;
