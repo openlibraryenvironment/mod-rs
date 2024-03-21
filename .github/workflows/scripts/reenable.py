@@ -8,10 +8,10 @@ import time
 import urllib.request
 
 # module names without version
-MODULES = ['mod-rs']
+MODULES = ['mod-rs-2.16.0-SLNP.001']
 
 # names of tenants to operate on
-TENANTS = ['zfl']
+TENANTS = ['slnptest_one', 'slnptest_two']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
@@ -66,16 +66,6 @@ def disable(args, token):
         )
         print(r)
 
-    # delete old deployment descriptors
-    #print("deleting deployment descriptors...")
-    #for module in disable_versions:
-    #    r = okapi_delete(okapi_url + '/_/discovery/modules/{}'.format(module['id']),
-    #                     tenant='supertenant',
-    #                     token=token,
-    #                     return_headers=False)
-
-    ## return true on success
-    #return True
 
 def enable(args, token):
     action = args.action
@@ -84,35 +74,7 @@ def enable(args, token):
     password = args.password
     registry = args.registry
     port = PORT
-    # get new versions from registry
-    latest_versions = []
-
-    # sync mds
-    print("syncing module descriptors from registry...")
-    r = okapi_post(okapi_url + '/_/proxy/pull/modules',
-        payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
-        tenant='supertenant',
-        token=token
-    )
-
-    for module in MODULES:
-        r = okapi_get(REGISTRY +
-                      '/_/proxy/modules?filter={}&latest=1'.format(module),
-                      tenant='supertenant')
-        latest_versions.append(json.loads(r)[0]['id'])
-
-    # post new deployment descriptors
-    for module in latest_versions:
-        payload = json.dumps({
-            "instId": "{}-cluster".format(module),
-            "srvcId": module,
-            "url": "http://{}-latest:{}".format('-'.join(module.split('-', 2)[:2]), port)
-        }).encode('UTF-8')
-        try:
-            print("posting new deployment descriptors...")
-            r = okapi_post(okapi_url + '/_/discovery/modules', payload=payload, tenant='supertenant', token=token)
-        except:
-            print("deployment descriptor exists, moving on")
+    latest_versions = ['mod-rs-2.16.0-SLNP.001']
 
     # re-enable modules
     print("re-enabling pods on tenants...")
