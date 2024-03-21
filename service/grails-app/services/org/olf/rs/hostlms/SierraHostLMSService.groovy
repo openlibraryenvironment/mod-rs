@@ -56,4 +56,25 @@ public class SierraHostLMSService extends BaseHostLMSService {
 
     return availability_summary;
   }
+
+  @Override
+  public String getRequestItemRequestScopeType() {
+    return "Title";
+  }
+
+  @Override
+  public String getRequestItemPickupLocation() {
+    return "ill";
+  }
+
+  @Override
+  public String filterRequestItemItemId(String itemId) {
+    if (itemId?.startsWith(".b")) {
+      itemId = itemId.split(".b", 2)[1];
+    }
+    if (itemId?.endsWith("1")) {
+      itemId = itemId.substring(0, itemId.length() - 1);
+    }
+    return itemId;
+  }
 }
