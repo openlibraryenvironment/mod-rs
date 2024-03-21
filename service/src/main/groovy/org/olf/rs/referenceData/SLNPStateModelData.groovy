@@ -414,22 +414,22 @@ public class SLNPStateModelData {
             }
         }
 
-        Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_IDLE, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_REQUESTER_CANCELLED, StatusStage.COMPLETED, '9996', true, false, true, null);
-        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_REQUESTER_SHIPPED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_REQUESTER_CHECKED_IN, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_SHIPPED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_CHECKED_IN, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_REQUESTER_COMPLETE, StatusStage.COMPLETED, '9996', true, false, true, null);
-        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
 
-        Status.ensure(Status.SLNP_RESPONDER_IDLE, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_IDLE, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_UNFILLED, StatusStage.COMPLETED, '9996', true, false, true, null);
         Status.ensure(Status.SLNP_RESPONDER_ABORTED, StatusStage.COMPLETED, '9996', true, false, true, null);
-        Status.ensure(Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_RESPONDER_AWAIT_PICKING, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_RESPONDER_AWAIT_SHIP, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_RESPONDER_ITEM_SHIPPED, StatusStage.PREPARING, '9996', true, true, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_AWAIT_PICKING, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_AWAIT_SHIP, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_RESPONDER_ITEM_SHIPPED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_COMPLETE, StatusStage.COMPLETED, '9996', true, false, true, null, [ tags.ACTIVE_PATRON ]);
     }
 
