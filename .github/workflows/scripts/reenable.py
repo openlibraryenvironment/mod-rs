@@ -11,7 +11,7 @@ import urllib.request
 MODULES = ['mod-rs-2.16.0-SLNP.001']
 
 # names of tenants to operate on
-TENANTS = ['slnp_one', 'slnp_two']
+TENANTS = ['slnptest_one', 'slnptest_two']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
