@@ -211,7 +211,17 @@ dependencies {
   implementation 'org.olf.rs:lib-ncip-client:0.23.6'
   implementation 'com.github.jknack:handlebars:4.2.0'
   implementation 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
-
+  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation 'org.jsoup:jsoup:1.10.2'
+  implementation 'org.json:json:20190722'
+  implementation 'org.extensiblecatalog.ncip.v2:service:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:common:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0_bc:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-wclv1_0:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
   
 
   // Domain model for directory
