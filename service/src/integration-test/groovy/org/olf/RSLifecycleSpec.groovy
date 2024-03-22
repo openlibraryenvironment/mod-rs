@@ -5,7 +5,6 @@ import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
-import org.grails.orm.hibernate.HibernateDatastore
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.*
 import org.olf.rs.dynamic.DynamicGroovyService
@@ -20,7 +19,6 @@ import org.olf.rs.statemodel.Status
 import spock.lang.Shared
 import spock.lang.Stepwise
 
-import javax.sql.DataSource
 import java.text.SimpleDateFormat
 
 @Slf4j
