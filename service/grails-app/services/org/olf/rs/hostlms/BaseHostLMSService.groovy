@@ -797,6 +797,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return null;
   }
 
+  public String getRequestItemRequestType() {
+    return "Loan";
+  }
+
   public String filterRequestItemItemId(String itemId) {
     return itemId;
   }
@@ -822,6 +826,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
     String bibliographicIdCode = getRequestItemBibIdCode();
     String requestScopeType = getRequestItemRequestScopeType();
+    String requestTypeString = getRequestItemRequestType();
     String bibliographicRecordId = filterRequestItemItemId(itemId);
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
@@ -831,6 +836,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setRequestId(requestId)
       .setBibliographicRecordId(bibliographicRecordId)
       .setBibliographicRecordIdCode(bibliographicIdCode)
+      .setRequestType(requestTypeString)
       .setRequestScopeType(requestScopeType)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)

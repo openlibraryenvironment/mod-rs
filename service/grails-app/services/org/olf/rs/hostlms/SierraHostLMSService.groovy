@@ -68,6 +68,11 @@ public class SierraHostLMSService extends BaseHostLMSService {
   }
 
   @Override
+  public String getRequestItemRequestType() {
+    return "Hold";
+  }
+
+  @Override
   public String filterRequestItemItemId(String itemId) {
     if (itemId?.startsWith(".b")) {
       itemId = itemId.split(".b", 2)[1];
