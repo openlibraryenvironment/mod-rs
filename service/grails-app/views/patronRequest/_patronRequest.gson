@@ -24,7 +24,8 @@ final def toExpand = fullRecord ? [
   'resolvedPatron',
   'resolvedSupplier',
   'resolvedPickupLocation',
-  'requestIdentifiers'
+  'requestIdentifiers',
+  'validActions'
 ] : [
   // brief record view..
   'pickShelvingLocation',
@@ -63,8 +64,9 @@ final def toExclude = fullRecord ? [
 
 json g.render(patronRequest, [expand: toExpand,
                               excludes: toExclude]) {
+
   if (fullRecord) {
-    validActions patronRequest.validActions
+    validActions g.render(patronRequest.validActions, [excludes: ['actionEvent', 'resultList']])
   }
 
   // Required for list display  

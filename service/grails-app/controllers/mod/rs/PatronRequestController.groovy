@@ -295,7 +295,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
 
 			if (  patronRequest != null ) {
                 ContextLogging.setValue(ContextLogging.FIELD_HRID, patronRequest.hrid);
-				result.actions = actionService.getValidActions(patronRequest);
+				result.actions = actionService.getValidActions(patronRequest).collect { it.actionCode };
 			} else {
 				result.actions=[];
 				result.message="Unable to locate request";

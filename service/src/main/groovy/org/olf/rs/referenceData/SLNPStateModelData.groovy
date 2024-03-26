@@ -460,7 +460,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_ITEM_RETURNED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED);
 
         // SLNP_REQ_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE)
 
         // SLNP_REQ_SHIPPED OR "Shipped"
