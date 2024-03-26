@@ -75,7 +75,9 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         }
 
         // If we were supplied a pickup location, attempt to resolve it
-        if (!request.resolvedPickupLocation) pickupLocationService.check(request);
+        if (!request.resolvedPickupLocation) {
+            pickupLocationService.check(request)
+        }
 
         if (request.requestingInstitutionSymbol != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol

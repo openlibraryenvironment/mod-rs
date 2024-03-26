@@ -1,4 +1,6 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
+
+import org.olf.rs.ReshareApplicationEventHandlerService
 
 import java.time.LocalDate;
 
@@ -61,8 +63,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
-            log.debug('*** Create new request***');
-            PatronRequest pr = new PatronRequest(eventData.bibliographicInfo);
+            log.debug('*** Create new request***')
+            def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
+            for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
+                newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
+            }
+            PatronRequest pr = new PatronRequest(newParams)
 
             // Add publisher information to Patron Request
             Map publicationInfo = eventData.publicationInfo;

@@ -220,11 +220,11 @@ class iso18626Controller {
     def currentTime = dateFormatter.format(new Date())
     return {
       exec(del) {
-        ISO18626Message( 'ill:version':'1.0',
+        ISO18626Message( 'ill:version':'2021-2',
                         'xmlns':'http://illtransactions.org/2013/iso18626',
                         'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
                         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
+                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-2021-2.xsd' ) {
           
           switch (req_result.messageType) {
             case "REQUEST":

@@ -285,11 +285,11 @@ and sa.service.businessFunction.value=:ill
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
     return{
-      ISO18626Message( 'ill:version':'1.0',
-                       'xmlns':'http://illtransactions.org/2013/iso18626',
-                       'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
-                       'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                       'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
+      ISO18626Message( 'ill:version' :"2021-2",
+                       'xmlns':"http://illtransactions.org/2013/iso18626",
+                       'xmlns:ill': "http://illtransactions.org/2013/iso18626",
+                       'xmlns:xsi': "http://www.w3.org/2001/XMLSchema-instance",
+                       'xsi:schemaLocation': "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-2021-2.xsd" ) {
         switch (eventData.messageType) {
           case "REQUEST":
             makeRequestBody(delegate, eventData)
@@ -313,7 +313,7 @@ and sa.service.businessFunction.value=:ill
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ];
     StringWriter sw = new StringWriter();
-    sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
+    sw << new StreamingMarkupBuilder().bind(makeISO18626Message(eventData))
     String message = sw.toString();
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 //    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
@@ -483,7 +483,7 @@ and sa.service.businessFunction.value=:ill
                 locality(eventData.requestedDeliveryInfo.address.physicalAddress.locality)
                 postalCode(eventData.requestedDeliveryInfo.address.physicalAddress.postalCode)
                 region(eventData.requestedDeliveryInfo.address.physicalAddress.region)
-                county(eventData.requestedDeliveryInfo.address.physicalAddress.county)
+                country(eventData.requestedDeliveryInfo.address.physicalAddress.county)
               }
             }
             if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
@@ -525,6 +525,11 @@ and sa.service.businessFunction.value=:ill
           makeStatusInfo(delegate, eventData)
         } else {
           log.warn("No statusInfo found")
+        }
+        if (eventData.messageInfo != null) {
+          makeRetryInfo(delegate, eventData)
+        } else {
+          log.warn("No messageInfo found")
         }
         if (eventData.deliveryInfo != null) {
           makeDeliveryInfo(delegate, eventData)
@@ -581,48 +586,26 @@ and sa.service.businessFunction.value=:ill
   void makeBibliographicInfo(def del, eventData) {
     exec(del) {
       bibliographicInfo {
+        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
         title(eventData.bibliographicInfo.title)
-        subtitle(eventData.bibliographicInfo.subtitle)
         author(eventData.bibliographicInfo.author)
-        sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
-        volume(eventData.bibliographicInfo.volume)
-        issue(eventData.bibliographicInfo.issue)
-        startPage(eventData.bibliographicInfo.startPage)
-        numberOfPages(eventData.bibliographicInfo.numberOfPages)
-        pagesRequested(eventData.bibliographicInfo.pagesRequested)
+        subtitle(eventData.bibliographicInfo.subtitle)
         edition(eventData.bibliographicInfo.edition)
-        issn(eventData.bibliographicInfo.issn)
-        isbn(eventData.bibliographicInfo.isbn)
-        doi(eventData.bibliographicInfo.doi)
-        coden(eventData.bibliographicInfo.coden)
-        sici(eventData.bibliographicInfo.sici)
-        bici(eventData.bibliographicInfo.bici)
-        eissn(eventData.bibliographicInfo.eissn)
-        stitle(eventData.bibliographicInfo.stitle)
-        part(eventData.bibliographicInfo.part)
-        artnum(eventData.bibliographicInfo.artnum)
-        ssn(eventData.bibliographicInfo.ssn)
-        quarter(eventData.bibliographicInfo.quarter)
         titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
         authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
+        volume(eventData.bibliographicInfo.volume)
+        issue(eventData.bibliographicInfo.issue)
+        pagesRequested(eventData.bibliographicInfo.pagesRequested)
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
-
-        //
-        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
-        bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
-
-
-        // Pretty sure this shouldn't be here
-        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
-        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
-        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
-
-        // Should this be here?
-        patronNote(eventData.bibliographicInfo.patronNote)
-
-        oclcNumber(eventData.bibliographicInfo.oclcNumber)
+        for (final def map in eventData.bibliographicInfo.bibliographicRecordId) {
+          if (map.bibliographicRecordIdentifier) {
+            bibliographicRecordId {
+              bibliographicRecordIdentifierCode(map.bibliographicRecordIdentifierCode)
+              bibliographicRecordIdentifier(map.bibliographicRecordIdentifier)
+            }
+          }
+        }
       }
     }
   }
@@ -631,9 +614,8 @@ and sa.service.businessFunction.value=:ill
     exec(del) {
       publicationInfo {
         publisher(eventData.publicationInfo.publisher)
-        publicationDate(eventData.publicationInfo.publicationDate)
-        publicationDateOfComponent(eventData.publicationInfo.publicationDateOfComponent)
         publicationType(eventData.publicationInfo.publicationType)
+        publicationDate(eventData.publicationInfo.publicationDate)
         placeOfPublication(eventData.publicationInfo.placeOfPublication)
       }
     }
@@ -642,12 +624,27 @@ and sa.service.businessFunction.value=:ill
     void makeServiceInfo(def del, eventData) {
     exec(del) {
       serviceInfo {
-        serviceType(eventData.serviceInfo.serviceType)
-        needBeforeDate(eventData.serviceInfo.needBeforeDate)
+        serviceType(getServiceType(eventData.serviceInfo.serviceType))
+        if (eventData.serviceInfo.needBeforeDate) {
+          needBeforeDate(eventData.serviceInfo.needBeforeDate)
+        }
         serviceLevel(eventData.serviceInfo.serviceLevel)
         anyEdition(eventData.serviceInfo.anyEdition)
         note(eventData.serviceInfo.note)
       }
+    }
+  }
+
+  String getServiceType(String input) {
+    if ("Loan".equalsIgnoreCase(input)) {
+      return "Loan"
+    } else if ("Copy".equalsIgnoreCase(input)) {
+      return "Copy"
+    } else if ("CopyOrLoan".equalsIgnoreCase(input)) {
+      return "CopyOrLoan"
+    } else {
+      log.warn("Invalid service type ${input}")
+      return null;
     }
   }
 
@@ -658,7 +655,6 @@ and sa.service.businessFunction.value=:ill
         surname(eventData.patronInfo.surname)
         givenName(eventData.patronInfo.givenName)
         patronType(eventData.patronInfo.patronType)
-        patronReference(eventData.patronInfo.patronReference)
       }
     }
   }
@@ -667,13 +663,31 @@ and sa.service.businessFunction.value=:ill
     exec(del) {
       messageInfo {
         reasonForMessage(eventData.messageInfo.reasonForMessage)
-        answerYesNo(eventData.messageInfo.answerYesNo)
+        if (eventData.messageInfo.answerYesNo) {
+          answerYesNo(eventData.messageInfo.answerYesNo)
+        }
         note(eventData.messageInfo.note)
         reasonUnfilled(eventData.messageInfo.reasonUnfilled)
         reasonRetry(eventData.messageInfo.reasonRetry)
-        offeredCosts(eventData.messageInfo.offeredCosts)
-        retryAfter(eventData.messageInfo.retryAfter)
-        retryBefore(eventData.messageInfo.retryBefore)
+      }
+    }
+  }
+
+  void makeRetryInfo(def del, eventData) {
+    exec(del) {
+      retryInfo {
+        if (eventData.messageInfo.offeredCosts) {
+          offeredCosts{
+            currencyCode("EUR")
+            monetaryValue(eventData.messageInfo.offeredCosts)
+          }
+        }
+        if (eventData.messageInfo.retryAfter) {
+          retryAfter(eventData.messageInfo.retryAfter)
+        }
+        if (eventData.messageInfo.retryBefore) {
+          retryBefore(eventData.messageInfo.retryBefore)
+        }
       }
     }
   }
@@ -689,9 +703,17 @@ and sa.service.businessFunction.value=:ill
     exec(del) {
       statusInfo {
         status(eventData.statusInfo.status)
-        expectedDeliveryDate(eventData.statusInfo.expectedDeliverydate)
-        dueDate(eventData.statusInfo.dueDate)
-        lastChange(eventData.statusInfo.lastChange)
+        if (eventData.statusInfo.expectedDeliverydate) {
+          expectedDeliveryDate(eventData.statusInfo.expectedDeliverydate)
+        }
+        if (eventData.statusInfo.dueDate) {
+          dueDate(eventData.statusInfo.dueDate)
+        }
+        if (eventData.statusInfo.lastChange) {
+          lastChange(eventData.statusInfo.lastChange)
+        } else {
+          lastChange(Instant.now())
+        }
       }
     }
   }
@@ -699,7 +721,11 @@ and sa.service.businessFunction.value=:ill
   void makeDeliveryInfo(def del, eventData) {
     exec(del) {
       deliveryInfo {
-        dateSent(eventData.deliveryInfo.dateSent)
+        if (eventData.deliveryInfo.dateSent) {
+          dateSent(eventData.deliveryInfo.dateSent)
+        } else {
+          dateSent(Instant.now())
+        }
         if (eventData.deliveryInfo.itemId instanceof Collection) {
           // Build multiple ItemIds
           eventData.deliveryInfo.itemId.collect {iid ->
@@ -709,12 +735,17 @@ and sa.service.businessFunction.value=:ill
           // Build single ItemId
           itemId(eventData.deliveryInfo.itemId)
         }
-        sentVia(eventData.deliveryInfo.sentVia)
-        sentToPatron(eventData.deliveryInfo.sentToPatron)
-        loanCondition(eventData.deliveryInfo.loanCondition)
-        deliveredFormat(eventData.deliveryInfo.deliveredFormat)
-        deliveryCosts(eventData.deliveryInfo.deliveryCosts)
         URL(eventData.deliveryInfo.url)
+        deliveryMethod(eventData.deliveryInfo.sentVia)
+        sentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
+        loanCondition(eventData.deliveryInfo.loanCondition)
+        itemFormat(eventData.deliveryInfo.deliveredFormat)
+        if (eventData.deliveryInfo.deliveryCosts) {
+          deliveryCosts{
+            currencyCode("EUR")
+            monetaryValue(eventData.deliveryInfo.deliveryCosts)
+          }
+        }
       }
     }
   }
