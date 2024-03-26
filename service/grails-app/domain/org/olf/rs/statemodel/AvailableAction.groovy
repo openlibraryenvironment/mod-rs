@@ -53,8 +53,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                actionBody (nullable: true, blank:false)
                resultList (nullable: true)
         isAvailableGroovy (nullable: true, blank: false)
-                isPrimary (nullable:true, blank: true)
-                primaryOnly (nullable:true, blank: true)
+                isPrimary (nullable: true, blank: true)
+              primaryOnly (nullable: true, blank: true)
     }
 
     static mapping = {
@@ -79,16 +79,16 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
-        String isAvailableGroovy = null,
         Boolean isPrimary = null,
-        Boolean primaryOnly = null
+        Boolean primaryOnly = null,
+        String isAvailableGroovy = null
     ) {
 
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
             // Excellent we have found the state model
-            result = ensure(sm, state, action, triggerType, resultListCode, isAvailableGroovy, isPrimary, primaryOnly);
+            result = ensure(sm, state, action, triggerType, resultListCode, isPrimary, primaryOnly, isAvailableGroovy);
         }
         return(result);
     }
@@ -99,9 +99,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
-        String isAvailableGroovy = null,
         Boolean isPrimary = null,
-        Boolean primaryOnly = null
+        Boolean primaryOnly = null,
+        String isAvailableGroovy = null
     ) {
         AvailableAction result = null;
         if (sm) {
@@ -121,11 +121,11 @@ class AvailableAction implements MultiTenant<AvailableAction> {
 
                 // Update the other fields in case they have changed
                 result.actionEvent = ActionEvent.lookup(action);
-                result.isPrimary = isPrimary;
-                result.primaryOnly = primaryOnly;
                 result.triggerType = triggerType;
                 result.resultList = ActionEventResultList.lookup(resultListCode);
                 result.isAvailableGroovy = isAvailableGroovy;
+                result.isPrimary = isPrimary;
+                result.primaryOnly = primaryOnly;
                 result.save(flush:true, failOnError:true);
             }
         }
