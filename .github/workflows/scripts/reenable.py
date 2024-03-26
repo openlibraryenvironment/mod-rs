@@ -64,7 +64,12 @@ def disable(args, token):
             tenant='supertenant',
             token=token
         )
-        print(r)
+        if r.status_code == 400:
+            return True
+        try:
+            response.raise_for_status()  
+        except:
+            return "Error: " + str(e)
 
     # delete old deployment descriptors
     #print("deleting deployment descriptors...")
