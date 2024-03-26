@@ -122,7 +122,7 @@ public class ActionService {
         // Can only continue if we have been supplied the values
         if (action && request?.state) {
             // Get hold of the valid actions
-            List validActions = getValidActions(request, true);
+            List validActions = getValidActions(request, true).collect { it.actionCode }
 
             // Only if the passed in action is in the list of valid actions, is the action being performed valid
             isValid = validActions.contains(action);
@@ -295,7 +295,9 @@ public class ActionService {
             // Is the undo action action valid
             if (isUndoValid(request)) {
                 // Add the undo action to the list of valid actions
-                actions.add(Actions.ACTION_UNDO);
+                AvailableAction availableAction = new AvailableAction();
+                availableAction.setActionCode(Actions.ACTION_UNDO);
+                actions.add(availableAction)
             }
         } else {
             // Just return an empty list

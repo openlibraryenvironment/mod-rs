@@ -90,7 +90,7 @@ class StateModelController extends OkapiTenantAwareController<StateModel>  {
                     result.message = "No state model with code \"" + params.status + "\" exists";
                 } else {
                     Boolean includeSystemActions = (params.includeSystemActions == null) ? false : params.includeSystemActions.toBoolean();
-                    result.validActions = stateModelService.getValidActions(stateModel, status, null, includeSystemActions, null);
+                    result.validActions = stateModelService.getValidActions(stateModel, status, null, includeSystemActions, null).collect { it.actionCode };
                 }
             }
         } else {
