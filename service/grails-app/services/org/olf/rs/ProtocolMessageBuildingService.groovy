@@ -54,16 +54,32 @@ class ProtocolMessageBuildingService {
       pagesRequested: req.pagesRequested,
       edition: req.edition,
       bibliographicRecordId:[
-              [ bibliographicRecordIdentifierCode:'OCLC', bibliographicRecordIdentifier: req.bibliographicRecordId ?: req.systemInstanceIdentifier ]
+              [ bibliographicRecordIdentifierCode:'bibliographicRecordId', bibliographicRecordIdentifier: req.bibliographicRecordId ?: req.systemInstanceIdentifier ],
+              [ bibliographicRecordIdentifierCode:'requestingInstitutionSymbol', bibliographicRecordIdentifier: req.requestingInstitutionSymbol ],
+              [ bibliographicRecordIdentifierCode:'sponsoringBody', bibliographicRecordIdentifier: req.sponsoringBody ],
+              [ bibliographicRecordIdentifierCode:'startPage', bibliographicRecordIdentifier: req.startPage ],
+              [ bibliographicRecordIdentifierCode:'numberOfPages', bibliographicRecordIdentifier: req.numberOfPages ],
+              [ bibliographicRecordIdentifierCode:'issn', bibliographicRecordIdentifier: req.issn ],
+              [ bibliographicRecordIdentifierCode:'isbn', bibliographicRecordIdentifier: req.isbn ],
+              [ bibliographicRecordIdentifierCode:'doi', bibliographicRecordIdentifier: req.doi ],
+              [ bibliographicRecordIdentifierCode:'coden', bibliographicRecordIdentifier: req.coden ],
+              [ bibliographicRecordIdentifierCode:'sici', bibliographicRecordIdentifier: req.sici ],
+              [ bibliographicRecordIdentifierCode:'bici', bibliographicRecordIdentifier: req.bici ],
+              [ bibliographicRecordIdentifierCode:'eissn', bibliographicRecordIdentifier: req.eissn ],
+              [ bibliographicRecordIdentifierCode:'stitle', bibliographicRecordIdentifier: req.stitle ],
+              [ bibliographicRecordIdentifierCode:'part', bibliographicRecordIdentifier: req.part ],
+              [ bibliographicRecordIdentifierCode:'artnum', bibliographicRecordIdentifier: req.artnum ],
+              [ bibliographicRecordIdentifierCode:'ssn', bibliographicRecordIdentifier: req.ssn ],
+              [ bibliographicRecordIdentifierCode:'quarter', bibliographicRecordIdentifier: req.quarter ],
+              [ bibliographicRecordIdentifierCode:'systemInstanceIdentifier', bibliographicRecordIdentifier: req.systemInstanceIdentifier ],
+              [ bibliographicRecordIdentifierCode:'oclcNumber', bibliographicRecordIdentifier: req.oclcNumber ],
+              [ bibliographicRecordIdentifierCode:'patronReference', bibliographicRecordIdentifier: req.patronReference ]
       ],  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
-      bibliographicItemId:[
-        [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
-      ]
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -153,8 +169,6 @@ class ProtocolMessageBuildingService {
       givenName: req.patronGivenName,
 
       patronType: req.patronType,
-      //TODO what is this field: patronReference?
-      patronReference: req.patronReference,
       /* Also permitted:
        * SendToPatron
        * Address
