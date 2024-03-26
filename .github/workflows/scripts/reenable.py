@@ -59,17 +59,14 @@ def disable(args, token):
     # disable for all
     print("Disable current module")
     for tenant in TENANTS:
-        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install'.format(tenant),
-            payload=json.dumps(disable_versions).encode('UTF-8'),
-            tenant='supertenant',
-            token=token
-        )
-        if r.status_code == 400:
-            return True
         try:
-            response.raise_for_status()  
+             r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install'.format(tenant),
+                 payload=json.dumps(disable_versions).encode('UTF-8'),
+                 tenant='supertenant',
+                 token=token
+             )
         except:
-            return "Error: " + str(e)
+            print("could not disable for {}, continuing".format(tenant))
 
     # delete old deployment descriptors
     #print("deleting deployment descriptors...")
