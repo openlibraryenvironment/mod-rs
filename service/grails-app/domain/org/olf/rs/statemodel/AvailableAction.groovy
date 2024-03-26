@@ -79,16 +79,16 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
+        String isAvailableGroovy = null,
         Boolean isPrimary = null,
-        Boolean primaryOnly = null,
-        String isAvailableGroovy = null
+        Boolean primaryOnly = null
     ) {
 
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
             // Excellent we have found the state model
-            result = ensure(sm, state, action, triggerType, resultListCode, isPrimary, primaryOnly, isAvailableGroovy);
+            result = ensure(sm, state, action, triggerType, resultListCode, isAvailableGroovy, isPrimary, primaryOnly);
         }
         return(result);
     }
@@ -99,9 +99,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
+        String isAvailableGroovy = null,
         Boolean isPrimary = null,
-        Boolean primaryOnly = null,
-        String isAvailableGroovy = null
+        Boolean primaryOnly = null
     ) {
         AvailableAction result = null;
         if (sm) {
