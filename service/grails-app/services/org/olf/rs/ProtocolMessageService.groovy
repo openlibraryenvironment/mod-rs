@@ -598,9 +598,13 @@ and sa.service.businessFunction.value=:ill
         pagesRequested(eventData.bibliographicInfo.pagesRequested)
         sponsor(eventData.bibliographicInfo.sponsor)
         informationSource(eventData.bibliographicInfo.informationSource)
-        bibliographicRecordId {
-          bibliographicRecordIdentifierCode(eventData.bibliographicInfo.bibliographicRecordId?.bibliographicRecordIdentifierCode)
-          bibliographicRecordIdentifier(eventData.bibliographicInfo.bibliographicRecordId?.bibliographicRecordIdentifier)
+        for (final def map in eventData.bibliographicInfo.bibliographicRecordId) {
+          if (map.bibliographicRecordIdentifier) {
+            bibliographicRecordId {
+              bibliographicRecordIdentifierCode(map.bibliographicRecordIdentifierCode)
+              bibliographicRecordIdentifier(map.bibliographicRecordIdentifier)
+            }
+          }
         }
       }
     }

@@ -65,8 +65,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug('*** Create new request***')
             def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
+            for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
+                newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
+            }
             PatronRequest pr = new PatronRequest(newParams)
-            pr.bibliographicRecordId = eventData.bibliographicInfo?.bibliographicRecordId?.bibliographicRecordIdentifier
 
             // Add publisher information to Patron Request
             Map publicationInfo = eventData.publicationInfo;

@@ -105,8 +105,10 @@ public class ReshareApplicationEventHandlerService {
 							switch (eventBean.fetchRequestMethod()) {
 								case EventFetchRequestMethod.NEW:
                                     def newParams = eventData.bibliographicInfo.subMap(preserveFields)
+                                    for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
+                                        newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
+                                    }
 									request = new PatronRequest(newParams)
-                                    request.bibliographicRecordId = eventData.bibliographicInfo?.bibliographicRecordId?.bibliographicRecordIdentifier
 									break;
 
 								case EventFetchRequestMethod.PAYLOAD_ID:
