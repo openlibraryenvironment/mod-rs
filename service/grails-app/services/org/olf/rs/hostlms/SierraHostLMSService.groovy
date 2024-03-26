@@ -77,8 +77,11 @@ public class SierraHostLMSService extends BaseHostLMSService {
     if (itemId?.startsWith(".b")) {
       itemId = itemId.split(".b", 2)[1];
     }
-    if (itemId?.endsWith("1")) {
-      itemId = itemId.substring(0, itemId.length() - 1);
+    if (itemId.length() > 1) {
+      String lastChar = itemId.substring(itemId.length() - 1);
+      if (lastChar.matches("\\d")) {
+        itemId = itemId.substring(0, itemId.length() - 1);
+      }
     }
     return itemId;
   }
