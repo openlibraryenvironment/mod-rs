@@ -32,7 +32,7 @@ jobs:
             -n ${{ env.K8S_NAMESPACE }} rollout restart deployment ${{ env.K8S_DEPLOYMENT }}
 
       - name: Wait for new image to come up
-        run: sleep 300
+        run: sleep 180
         shell: bash
 
       - name: Reactivate mod-rs
