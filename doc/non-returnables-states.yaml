@@ -1,0 +1,207 @@
+# yaml-language-server: $schema=state-model.json
+
+type: StateModel
+name: Non returnables state model
+desc: Models MVP non returnables workflow
+version: 0.1.0
+states:
+
+########################### REQUESTER STATES ###########################
+
+  - name: REQ_IDLE
+    display: New
+    desc: >
+      Initial state for the patron request created on the requester side. No system actions happen
+      when in this state and the request remains idle until a number of system checks are done including
+      is the patron over their active request limit, is the patron valid, and  has the request come in fro
+      a blank request form
+    actions:
+      - name: requesterOverLimit
+        desc: Is request over limit
+        trigger: SYSTEM
+        transitions:
+          - REQ_OVER_LIMIT
+      - name: requesterValid
+        desc: Is the patron valid
+        trigger: SYSTEM
+        transitions:
+          - REQ_INVALID_PATRON
+      - name: requesterBlankFormReview
+        desc: Is the request from a blank request form
+        trigger: SYSTEM
+        transitions:
+          - REQ_BLANK_FORM_REVIEW
+          
+  - name: REQ_OVER_LIMIT
+    display: Request over limit
+    terminal: true
+    desc: >
+      The request has exceeded the number of active requests that patron can have at a given time.
+      No further actions can be taken including the action Create revised request.
+
+  - name: REQ_INVALID_PATRON
+    display: Invalid patron
+    desc: >
+      The patron validation via NCIP failed. The staff have three actions they can take.
+    actions:
+      - name: approveRequestAsIs
+        desc: Approve request as is
+        transitions:
+          - REQ_VALIDATED
+      - name: cancelRequest
+        desc: Cancel request
+        transitions:
+          - REQ_CANCELLED         
+      - name: updateResubmit
+        desc: Update and resubmit request
+        transitions:
+          - REQ_VALIDATED
+
+  - name: REQ_CANCELLED
+    display: Cancelled
+    terminal: true
+    desc: >
+      The request has been cancelled by the requester staff and is completed. No further actions can be taken including the action Create revised request.
+
+  - name: REQ_VALIDATED
+    display: Validated
+    desc: >
+      The patron has been validated and the system now looks to see if it can find a supplier.
+    actions:
+      - name: identifySupplier
+        desc: Supplier Identified
+        transitions:
+          - REQ_SUPPLIER_IDENTIFIED
+  
+  - name: REQ_SUPPLIER_IDENTIFIED
+    display: Supplier Identified
+    desc: >
+      The system has found a lender either based on the rota associated with the request OR using the lender of last resort configured for the tenant.
+    actions:
+      - name: supplierIdentified
+        desc: Supplier Identified
+        transitions:
+        - REQ_REQUEST_SENT_TO_SUPPLIER
+
+  - name: REQ_REQUEST_SENT_TO_SUPPLIER
+    display: Request Sent
+    desc: > 
+      A supplier has been found and is added to the rota.
+    actions:
+      - name: supplierValidated
+        desc: Request sent to supplier
+        transitions:
+          - REQ_EXPECTS_TO_SUPPLY
+      - name: cancelRequest
+        desc: Cancel request
+        transitions:
+          - REQ_CANCELLED
+
+  - name: REQ_EXPECTS_TO_SUPPLY
+    display: Expects to supply
+    desc: >
+      The autoresponder has found a loanable copy in the lenders catalog.
+    actions:
+      - name: cancelRequest
+        desc: Cancel request
+        transitions:
+          - REQ_CANCELLED
+
+  - name: REQ_DOCUMENT_DELIVERED
+    display: Document delivered
+    desc: >
+      The request has been filled by the lender and the requesting library has received a URL for the material in the pickup_location_url
+      field in the patron request record. Note: consider using dueDate to indicate the expiry date.
+    actions:
+      - name: completeRequest
+        desc: Complete
+        transitions:
+          - REQ_COMPLETE
+
+  - name: REQ_REQUEST_COMPLETE
+    display: Request has been completed successfully.
+    desc: >
+      Request has been marked completed by the requesting staff. Question - do we need to add a setting to auto complete after x number of days?
+    terminal: true
+
+  - name: REQ_END_OF_ROTA
+    display: End of Rota
+    desc: >
+      The rota has been exhausted and there are no other lenders left to send the request on to. Requests are moved into this state when the last lender
+      in the rota marks the request Cannot Supply on their end.
+    actions:
+      - name: markReviewed
+        desc: Mark Reviewed
+        transitions:
+          - REQ_END_OF_ROTA_REVIEWED
+      - name: createRevisedRequest
+        desc: Create revised request. This last action creates a new request in ReShare. The older request number is added to the new request and vice versa.
+        transitions:
+          - REQ_IDLE
+  
+  - name: REQ_END_OF_ROTA_REVIEWED
+    display: End of rota, reviewed
+    terminal: true
+    desc: >
+      The request has been marked reviewed when it was at end of rota and is now considered completed.
+
+########################### SUPPLIER STATES ###########################
+
+  - name: RES_IDLE
+    display: New
+    desc: >
+      Initial state for the patron request created on the supplier side. The initial state can be changed either by manual staff actions or by auto responder.
+    actions:
+      - name: responderISO18626Created # this actually happens before the request exist
+        desc: Create patron request
+        trigger: PROTOCOL
+      - name: respondYes
+        desc: Respond "Will Supply"
+        transitions:
+          - RES_NEW_AWAIT_PULL_SLIP
+      - name: cannotSupply
+        desc: Respond "Cannot Supply"
+        transitions:
+        - RES_UNFILLED
+      - name: conditionalSupply
+        desc: Respond "Conditional Supply". Not sure if this is really needed and will double check.
+        transitions: 
+        - RES_NEW_AWAIT_PULL_SLIP
+  
+  - name: RES_UNFILLED
+    display: Not supplied
+    desc: >
+      Request cannot be filled and is marked complete on the lenders side
+    terminal: true
+
+  - name: RES_NEW_AWAIT_PULL_SLIP
+    display: Awaiting pull slip printing
+    desc: >
+      Item has been located and we expect to supply, staff is awaiting printing pull slip
+    actions:
+      - name: supplierPrintPullSlip
+        desc: Print pull slip
+        transitions:
+          - RES_AWAIT_PICKING
+      - name: cannotSupply
+        desc: Respond "Cannot Supply"
+        transitions:
+          - RES_UNFILLED
+      - name: conditionalSupply
+        desc: Add loan condition. Not sure if this is really needed and will double check. 
+
+  - name: RES_COPY_AWAIT_PICKING
+    display: Searching
+    desc: >
+      Pull slip has been printed and document is being scanned or is already scanned and needs to be attached to request to fill it.
+    actions:
+      - name: supplierAddURLtoDocument
+        desc: Enter URL to fill this request
+        transitions:
+          - RES_DOCUMENT_DELIVERED
+  
+  - name: RES_DOCUMENT_DELIVERED
+    display: Document delivered
+    desc: >
+      Request has been completed
+    terminal: true
