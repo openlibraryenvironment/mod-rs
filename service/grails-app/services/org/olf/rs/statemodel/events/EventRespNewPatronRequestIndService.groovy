@@ -94,11 +94,13 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     log.debug("Attempt hold with RequestItem");
                     Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
                             request.supplierUniqueRecordId, institutionalPatronIdValue);
+                    log.debug("Got RequestItem result: ${requestItemResult}");
                     if (requestItemResult.result == true) {
                         log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
                         reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
                         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
                     } else {
+                        log.debug("Request Item Hold Failed: ${requestItemResult?.problems}")
                         unfilled = true;
                         eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid '
                                 + request.supplierUniqueRecordId;

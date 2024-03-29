@@ -494,9 +494,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     try {
       ncipLogDetails.result(
               response.protocolInformation.request.endPoint,
-              unescapeJson(response.protocolInformation.request.requestbody),
-              response.protocolInformation.response.responseStatus,
-              unescapeJson(response.protocolInformation.response.responseBody)
+              unescapeJson(response.protocolInformation.request.optString("requestbody")),
+              response.protocolInformation.response.optString("responseStatus"),
+              unescapeJson(response.protocolInformation.response.optString("responseBody"))
       );
     } catch(Exception e) {
       log.error("Unable to extract protocolInformation from NCIP response: ${e}");
@@ -789,6 +789,22 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return "SYSNUMBER";
   }
 
+  public String getRequestItemRequestScopeType() {
+    return "Bibliographic Item";
+  }
+
+  public String getRequestItemPickupLocation() {
+    return null;
+  }
+
+  public String getRequestItemRequestType() {
+    return "Loan";
+  }
+
+  public String filterRequestItemItemId(String itemId) {
+    return itemId;
+  }
+
   /**
    * @param settings - the settings object
    * @param requestId - The id associated with this request
@@ -809,24 +825,30 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ];
 
     String bibliographicIdCode = getRequestItemBibIdCode();
+    String requestScopeType = getRequestItemRequestScopeType();
+    String requestTypeString = getRequestItemRequestType();
+    String bibliographicRecordId = filterRequestItemItemId(itemId);
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
     RequestItem requestItem = new RequestItem()
       .setUserId(borrowerBarcode)
       .setRequestId(requestId)
-      .setBibliographicRecordId(itemId)
+      .setBibliographicRecordId(bibliographicRecordId)
       .setBibliographicRecordIdCode(bibliographicIdCode)
+      .setRequestType(requestTypeString)
+      .setRequestScopeType(requestScopeType)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-      .setRegistryId(ncipConnectionDetails.registryId);
+      .setRegistryId(ncipConnectionDetails.registryId)
+      .setPickupLocation(getRequestItemPickupLocation());
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);
-    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem respnse ${response}")
+    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem response ${response}")
     protocolInformationToResult(response, ncipLogDetails);
 
-    if ( response.has('problems') ) {
+    if (response.has('problems') ) {
       result.result = false;
       result.problems = response.get('problems');
     } else {
