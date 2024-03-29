@@ -99,7 +99,31 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
-    private static Map nrRequesterExpect
+    private static Map nrRequesterSentToSupplierISO18626 = [
+            code: ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626,
+            description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterISO18626ExpectToSupply,
+                    nrRequesterISO18626Unfilled,
+                    nrDefaultNoStatusChangeOK
+            ]
+    ];
+
+
+    private static Map nrRequesterExpectToSupplyISO18626 = [
+            code: ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626,
+            description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_REQUEST_EXPECTS_TO_SUPPLY,
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterISO18626Delivered,
+                    nrRequesterISO18626Unfilled,
+                    nrDefaultNoStatusChangeOK
+            ]
+
+    ]
+
+
 
 
 }
