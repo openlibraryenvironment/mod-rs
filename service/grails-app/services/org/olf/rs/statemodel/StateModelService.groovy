@@ -16,8 +16,7 @@ public class StateModelService {
     ReferenceDataService referenceDataService;
 
     private static final String POSSIBLE_ACTIONS_QUERY = '''
-select distinct aa.actionEvent.code, aa.actionEvent.isAvailableGroovy, aa.isAvailableGroovy
-from AvailableAction as aa
+select aa from AvailableAction as aa
 where aa.model = :stateModel and
       aa.fromState = :fromstate and
       aa.triggerType in ( :triggerTypes )
@@ -91,32 +90,32 @@ where aa.model = :stateModel and
         // Was nice and simple lookup the available actions getting the distinct actions
         AvailableAction.executeQuery(query, parameters).each { availableAction ->
             // To try and make it more obvious as to what is selected, we extract them into variables here
-            String code = availableAction[0];
+            String code = availableAction.actionCode;
 
             // If we do not have a request then we cannot execute the dynamic groovy
             if (request == null) {
                 // No request so just add the action
-                actions.add(code);
+                actions.add(availableAction);
             } else {
-                String actionGroovy = availableAction[1];
-                String availableActionGroovy = availableAction[2];
+                String actionGroovy = availableAction.actionEvent.isAvailableGroovy;
+                String availableActionGroovy = availableAction.isAvailableGroovy;
 
                 // Do we have some groovy to execute on the available action
                 if (availableActionGroovy) {
                     // We do for the available action, if it returns true then we add it to the available actions list
                     if (dynamicGroovyService.executeScript("availableAction:isAvailable:" + code, availableActionGroovy, [ patronRequest : request ])) {
                         // Script says yes
-                        actions.add(code);
+                        actions.add(availableAction);
                     }
                 } else if (actionGroovy) {
                     // We do for the action, if it returns true then we add it to the available actions list
                     if (dynamicGroovyService.executeScript("actionEvent:isAvailable:" + code, actionGroovy, [ patronRequest : request ])) {
                         // Script says yes
-                        actions.add(code);
+                        actions.add(availableAction);
                     }
                 } else {
                     // We do not have any groovy so just add the action
-                    actions.add(code);
+                    actions.add(availableAction);
                 }
             }
         }
