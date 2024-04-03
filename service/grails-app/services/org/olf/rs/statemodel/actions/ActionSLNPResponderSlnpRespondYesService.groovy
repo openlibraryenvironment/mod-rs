@@ -13,7 +13,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES);
+        return(Actions.ACTION_RESPONDER_RESPOND_YES);
     }
 
     @Override

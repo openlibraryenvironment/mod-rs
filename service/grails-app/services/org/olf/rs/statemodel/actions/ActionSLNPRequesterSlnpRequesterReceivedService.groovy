@@ -24,7 +24,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED);
+        return(Actions.ACTION_REQUESTER_REQUESTER_RECEIVED);
     }
 
     @Override
