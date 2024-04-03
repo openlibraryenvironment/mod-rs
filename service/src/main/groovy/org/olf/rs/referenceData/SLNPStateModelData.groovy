@@ -439,7 +439,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
 
         // SLNP_RES_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY);
@@ -464,7 +464,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE)
 
         // SLNP_REQ_SHIPPED OR "Shipped"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_RECEIVED, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_RECEIVED, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP);
 
         // SLNP_REQ_ABORTED OR "Aborted"
@@ -482,10 +482,10 @@ public class SLNPStateModelData {
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, 'The requester has canceled the request', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT.capitalize(), ActionEventResultList.SLNP_REQUESTER_ABORTED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP, true);
-        ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_RECEIVED, 'The requester has received the item(s) from the responder', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_REQUESTER_RECEIVED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'The requester has received the item(s) from the responder', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_REQUESTER_RECEIVED, true);
 
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
-        ActionEvent.ensure(Actions.ACTION_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, true);
 
         ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the requester has been created', false, eventServiceName(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
         ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
