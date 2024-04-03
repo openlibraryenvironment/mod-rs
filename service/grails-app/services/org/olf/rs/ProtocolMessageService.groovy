@@ -285,11 +285,11 @@ and sa.service.businessFunction.value=:ill
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
     return{
-      ISO18626Message( 'ill:version' :"2021-2",
+      ISO18626Message( 'ill:version' :"1.2",
                        'xmlns':"http://illtransactions.org/2013/iso18626",
                        'xmlns:ill': "http://illtransactions.org/2013/iso18626",
                        'xmlns:xsi': "http://www.w3.org/2001/XMLSchema-instance",
-                       'xsi:schemaLocation': "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-2021-2.xsd" ) {
+                       'xsi:schemaLocation': "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd" ) {
         switch (eventData.messageType) {
           case "REQUEST":
             makeRequestBody(delegate, eventData)
@@ -526,11 +526,6 @@ and sa.service.businessFunction.value=:ill
         } else {
           log.warn("No statusInfo found")
         }
-        if (eventData.messageInfo != null) {
-          makeRetryInfo(delegate, eventData)
-        } else {
-          log.warn("No messageInfo found")
-        }
         if (eventData.deliveryInfo != null) {
           makeDeliveryInfo(delegate, eventData)
         } else {
@@ -571,6 +566,7 @@ and sa.service.businessFunction.value=:ill
           agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
           agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
         }
+        multipleItemRequestId()
         timestamp(Instant.now()) // Current time
         requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
         if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
@@ -669,13 +665,6 @@ and sa.service.businessFunction.value=:ill
         note(eventData.messageInfo.note)
         reasonUnfilled(eventData.messageInfo.reasonUnfilled)
         reasonRetry(eventData.messageInfo.reasonRetry)
-      }
-    }
-  }
-
-  void makeRetryInfo(def del, eventData) {
-    exec(del) {
-      retryInfo {
         if (eventData.messageInfo.offeredCosts) {
           offeredCosts{
             currencyCode("EUR")
@@ -702,7 +691,7 @@ and sa.service.businessFunction.value=:ill
   void makeStatusInfo(def del, eventData) {
     exec(del) {
       statusInfo {
-        status(eventData.statusInfo.status)
+        status(eventData.statusInfo.status ? eventData.statusInfo.status : 'RequestReceived')
         if (eventData.statusInfo.expectedDeliverydate) {
           expectedDeliveryDate(eventData.statusInfo.expectedDeliverydate)
         }
@@ -735,11 +724,13 @@ and sa.service.businessFunction.value=:ill
           // Build single ItemId
           itemId(eventData.deliveryInfo.itemId)
         }
-        URL(eventData.deliveryInfo.url)
-        deliveryMethod(eventData.deliveryInfo.sentVia)
+        if(eventData.deliveryInfo.url) {
+          sentVia('ill:scheme':'URL', eventData.deliveryInfo.url)
+        }
+        sentVia(eventData.deliveryInfo.sentVia)
         sentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
         loanCondition(eventData.deliveryInfo.loanCondition)
-        itemFormat(eventData.deliveryInfo.deliveredFormat)
+        deliveredFormat(eventData.deliveryInfo.deliveredFormat)
         if (eventData.deliveryInfo.deliveryCosts) {
           deliveryCosts{
             currencyCode("EUR")

@@ -24,11 +24,11 @@ class ConfirmationMessageService {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     def currentTime = dateFormatter.format(new Date())
     return {
-        ISO18626Message( 'ill:version':'1.0',
+        ISO18626Message( 'ill:version':'1.2',
                         'xmlns':'http://illtransactions.org/2013/iso18626',
                         'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
                         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
+                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd' ) {
 
           switch (req_result.messageType) {
             // The main difference is which heading the confirmation body comes under
