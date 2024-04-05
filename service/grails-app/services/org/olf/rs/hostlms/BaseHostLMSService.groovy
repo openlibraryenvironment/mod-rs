@@ -468,25 +468,27 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
   //  "userId":"M00069192"}
   protected void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
-    if ( ( response ) && ( ! response.has('problems') ) ) {
-      JSONArray priv = response.getJSONArray('privileges')
-      // Return a status of BLOCKED if the user is blocked, else OK for now
-      result.status=(priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
-      result.userProfile=(priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
-      result.result=true
-      result.userid=response.opt('userId') ?: response.opt('userid')
-      result.givenName=response.opt('firstName')
-      result.surname=response.opt('lastName')
+    if (response) {
       protocolInformationToResult(response, ncipLogDetails);
-      }
-      if ( response.has('electronicAddresses') ) {
-        JSONArray ea = response.getJSONArray('electronicAddresses')
-        // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
-        result.email=(ea.find { it.key=='emailAddress' })?.value ?: (ea.find { it.key=='mailTo' })?.value
-        result.tel=(ea.find { it.key=='tel' })?.value
+      if (!response.has('problems')) {
+        JSONArray priv = response.getJSONArray('privileges')
+        // Return a status of BLOCKED if the user is blocked, else OK for now
+        result.status = (priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+        result.userProfile = (priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
+        result.result = true
+        result.userid = response.opt('userId') ?: response.opt('userid')
+        result.givenName = response.opt('firstName')
+        result.surname = response.opt('lastName')
+        if (response.has('electronicAddresses')) {
+          JSONArray ea = response.getJSONArray('electronicAddresses')
+          // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
+          result.email = (ea.find { it.key == 'emailAddress' })?.value ?: (ea.find { it.key == 'mailTo' })?.value
+          result.tel = (ea.find { it.key == 'tel' })?.value
+        }
       } else {
-      result.problems=response.get('problems')
-      result.result=false
+        result.problems = response.get('problems')
+        result.result = false
+      }
     }
   }
 
