@@ -1,6 +1,14 @@
 package org.olf.rs.referenceData
 
-import org.olf.rs.statemodel.Status;
+import org.olf.rs.statemodel.ActionEvent
+import org.olf.rs.statemodel.ActionEventResultList;
+import org.olf.rs.statemodel.ActionEventResultQualifier
+import org.olf.rs.statemodel.Actions
+import org.olf.rs.statemodel.AvailableAction
+import org.olf.rs.statemodel.Events;
+import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.Status
+import org.olf.rs.statemodel.StatusStage;
 
 public class NonreturnablesStateModelData {
 
@@ -37,7 +45,7 @@ public class NonreturnablesStateModelData {
         description: 'New non-returnables patron request has passed initial checks',
         result: true,
         status: Status.PATRON_REQUEST_VALIDATED,
-        qualifier, null,
+        qualifier: null,
         saveRestoreState: null,
         nextActionEvent: null
     ];
@@ -361,7 +369,43 @@ public class NonreturnablesStateModelData {
     }
 
     public static void loadActionEventData() {
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER)
+        ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT,
+                'Attach a URL to fulfill a nonreturnable request', true,
+                StateModel.MODEL_NR_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
+                null);
+
+        ActionEvent.ensure(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
+                "A new Non-Returnable patron request for the requester has been created", false,
+                ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION),
+                null);
+
+        ActionEvent.ensure(Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION,
+                "A new Non-Returnable patron request for the responder has been created", false,
+                ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION),
+                null);
+
+    }
+
+    public static void loadStateModelData() {
+        StateModel.ensure(StateModel.MODEL_NR_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, nrRequesterStates);
+        StateModel.ensure(StateModel.MODEL_NR_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY,
+                null, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, nrResponderStates);
+    }
+
+    public static void loadAvailableActionData() {
+        //RES_IDLE
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //RES_NEW_AWAIT_PULL_SLIP
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //RES_AWAIT_PICKING
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+
+
     }
 
     public static void loadAll() {
