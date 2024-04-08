@@ -653,7 +653,7 @@ class RSLifecycleSpec extends TestBase {
         log.debug("Action json: ${jsonAction}");
         setHeaders([ 'X-Okapi-Tenant': actionTenant ]);
 
-        String actionUrl = "${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString();
+        String actionUrl = "${baseUrl}rs/patronrequests/${actionRequestId}/performAction".toString();
         log.debug("Posting to action url at $actionUrl");
         // Execute the action
         def actionResponse = doPost(actionUrl, jsonAction);

@@ -115,7 +115,7 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
@@ -133,7 +133,7 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
@@ -151,7 +151,7 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")

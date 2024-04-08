@@ -1,91 +1,114 @@
-package org.olf.rs;
+package org.olf.rs
 
-import java.text.SimpleDateFormat
+import org.olf.rs.iso18626.ErrorData
+import org.olf.rs.iso18626.ISO18626Message
+import org.olf.rs.iso18626.ConfirmationHeader
+import org.olf.rs.iso18626.ObjectFactory
+import org.olf.rs.iso18626.RequestConfirmation
+import org.olf.rs.iso18626.RequestingAgencyMessageConfirmation
+import org.olf.rs.iso18626.SupplyingAgencyMessageConfirmation
+import org.olf.rs.iso18626.TypeAction
+import org.olf.rs.iso18626.TypeAgencyId
+import org.olf.rs.iso18626.TypeErrorType
+import org.olf.rs.iso18626.TypeMessageStatus
+import org.olf.rs.iso18626.TypeReasonForMessage
+import org.olf.rs.iso18626.TypeSchemeValuePair
 
-import groovy.xml.StreamingMarkupBuilder
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Marshaller
 
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class ConfirmationMessageService {
 
-  public def confirmationMessageReadable(def confirmationMessage, boolean add_prolog = false) {
-    StringWriter sw = new StringWriter();
+  JAXBContext context = JAXBContext.newInstance(ObjectFactory.class)
+  Marshaller marshaller = context.createMarshaller()
 
-    if ( add_prolog )
-      sw << '<?xml version="1.0" encoding="utf-8"?>'
+  def confirmationMessageReadable(def confirmationMessage) {
+    StringWriter sw = new StringWriter()
 
-    sw << new StreamingMarkupBuilder().bind (confirmationMessage)
-    String message = sw.toString();
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd")
 
-    return message
+    marshaller.marshal(confirmationMessage, sw)
+    return sw.toString()
   }
 
   // This method creates a confirmation message
-  public def makeConfirmationMessage(def req_result) {
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    def currentTime = dateFormatter.format(new Date())
-    return {
-        ISO18626Message( 'ill:version':'1.2',
-                        'xmlns':'http://illtransactions.org/2013/iso18626',
-                        'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
-                        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                        'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd' ) {
-
-          switch (req_result.messageType) {
-            // The main difference is which heading the confirmation body comes under
-            case "REQUEST":
-              requestConfirmation {
-                makeConfirmationMessageBody(delegate, req_result);
-              }
-              break;
-            case "SUPPLYING_AGENCY_MESSAGE":
-              supplyingAgencyMessageConfirmation {
-                makeConfirmationMessageBody(delegate, req_result);
-              }
-              break;
-            case "REQUESTING_AGENCY_MESSAGE":
-              requestingAgencyMessageConfirmation {
-                makeConfirmationMessageBody(delegate, req_result);
-              }
-              break;
-            default:
-              throw new Exception ("makeConfirmationMessage expects passed req_result to contain a valid messageType")
+  def makeConfirmationMessage(def req_result) {
+    ISO18626Message iso18626Message = new ISO18626Message()
+    iso18626Message.setVersion('1.2')
+    switch (req_result.messageType) {
+      case "REQUEST":
+          RequestConfirmation confirmation = new RequestConfirmation()
+          confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
+          confirmation.setErrorData(makeErrorData(req_result))
+          iso18626Message.setRequestConfirmation(confirmation)
+        break
+      case "SUPPLYING_AGENCY_MESSAGE":
+          SupplyingAgencyMessageConfirmation confirmation = new SupplyingAgencyMessageConfirmation()
+          confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
+          if (req_result.reasonForMessage) {
+            confirmation.setReasonForMessage(TypeReasonForMessage.fromValue(req_result.reasonForMessage))
           }
-        }
+          confirmation.setErrorData(makeErrorData(req_result))
+          iso18626Message.setSupplyingAgencyMessageConfirmation(confirmation)
+        break
+      case "REQUESTING_AGENCY_MESSAGE":
+          RequestingAgencyMessageConfirmation confirmation = new RequestingAgencyMessageConfirmation()
+          confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
+          if (req_result.action) {
+            confirmation.setAction(TypeAction.fromValue(req_result.action))
+          }
+          confirmation.setErrorData(makeErrorData(req_result))
+          iso18626Message.setRequestingAgencyMessageConfirmation(confirmation)
+        break
+      default:
+          log.error("UNHANDLED req_result.messageType : ${req_result.messageType}")
+          throw new RuntimeException("UNHANDLED req_result.messageType : ${req_result.messageType}")
     }
+
+    return iso18626Message
   }
 
-  // This method creates the body of the confirmation message--mostly uniform between the confirmation message types
-  void makeConfirmationMessageBody(def del, def req_result) {
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    def currentTime = dateFormatter.format(new Date())
-    exec(del) {
-      confirmationHeader {
-        supplyingAgencyId {
-          agencyIdType(req_result.supIdType)
-          agencyIdValue(req_result.supId)
-        }
-        requestingAgencyId {
-          agencyIdType(req_result.reqAgencyIdType)
-          agencyIdValue(req_result.reqAgencyId)
-        }
-        timestamp(currentTime)
-        requestingAgencyRequestId(req_result.reqId)
-        timestampReceived(req_result.timeRec)
-        messageStatus(req_result.status)
-      }
-      if (req_result.messageType == "SUPPLYING_AGENCY_MESSAGE") {
-        reasonForMessage(req_result.reasonForMessage)
-      }
-      if (req_result.messageType == "REQUESTING_AGENCY_MESSAGE") {
-        action(req_result.action)
-      }
-      if (req_result.errorType != null) {
-        errorData {
-          errorType(req_result.errorType)
-          errorValue(req_result.errorValue)
-        }
-      }
+  ConfirmationHeader makeConfirmationHeader(def req_result) {
+    ConfirmationHeader confirmationHeader = new ConfirmationHeader()
+    TypeAgencyId supplyingAgencyId = new TypeAgencyId()
+    supplyingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.supIdType))
+    supplyingAgencyId.setAgencyIdValue(req_result.supId)
+    confirmationHeader.setSupplyingAgencyId(supplyingAgencyId)
+
+    TypeAgencyId requestingAgencyId = new TypeAgencyId()
+    requestingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.reqAgencyIdType))
+    requestingAgencyId.setAgencyIdValue(req_result.reqAgencyId)
+    confirmationHeader.setRequestingAgencyId(requestingAgencyId)
+
+    confirmationHeader.setTimestamp(ZonedDateTime.now())
+    confirmationHeader.setRequestingAgencyRequestId(req_result.reqId)
+    confirmationHeader.setTimestampReceived(toZonedDateTime(req_result.timeRec))
+    confirmationHeader.setMessageStatus(req_result.status == "OK" ? TypeMessageStatus.OK : TypeMessageStatus.ERROR)
+    return confirmationHeader
+  }
+
+  TypeSchemeValuePair toTypeSchemeValuePair(def text){
+    TypeSchemeValuePair valuePair = new TypeSchemeValuePair()
+    valuePair.setValue(text)
+    return valuePair
+  }
+
+    ZonedDateTime toZonedDateTime(String dateString) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+    return ZonedDateTime.parse(dateString, formatter)
+  }
+
+  ErrorData makeErrorData(def req_result) {
+    ErrorData errorData = null
+    if(req_result.errorType){
+      errorData = new ErrorData()
+      errorData.setErrorType(TypeErrorType.UNRECOGNISED_DATA_VALUE)
+      errorData.setErrorValue("$req_result.errorType: " + (req_result.errorValue ? req_result.errorValue : ""))
     }
+    return errorData
   }
 
   // Clever bit of wizardry to allow us to inject the calling class into the builder

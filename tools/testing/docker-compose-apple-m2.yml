@@ -78,7 +78,7 @@ services:
 
   setup:
     container_name: minio_setup
-    image: docker.io/bitnami/minio:2023.3.24
+    image: docker.io/bitnami/minio:2024.3.30
     depends_on:
       - minio
     volumes:
