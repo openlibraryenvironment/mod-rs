@@ -134,7 +134,8 @@ class ProtocolMessageBuildingService {
       message.requestedDeliveryInfo = [
         address: [
           electronicAddress: [
-            electronicAddressType: req.deliveryMethod?.value
+            electronicAddressType: req.deliveryMethod?.value,
+            electronicAddressData: req.pickupURL
           ]
         ]
       ]

@@ -619,7 +619,8 @@ class RSLifecycleSpec extends TestBase {
             patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
             isRequester: true
         ];
-        deliveryMethod && (request.deliveryMethod = deliveryMethod);
+        deliveryMethod && (request.deliveryMethod = deliveryMethod)
+        deliveryMethod && (request.pickupURL = "https://www.url.com")
 
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 

@@ -113,21 +113,23 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
-            if (eventData.requestedDeliveryInfo?.address instanceof Map) {
-                if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
-                    log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-                    // We join all the lines of physical address and stuff them into pickup location for now.
-                    String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(' ');
+            if (eventData.requestedDeliveryInfo instanceof Map) {
+                if (eventData.requestedDeliveryInfo?.address instanceof Map) {
+                    if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
+                        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+                        // We join all the lines of physical address and stuff them into pickup location for now.
+                        String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(' ');
 
-                    // If we've not been given any address information, don't translate that into a pickup location
-                    if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                        pr.pickupLocation = stringifiedPickupLocation.trim();
+                        // If we've not been given any address information, don't translate that into a pickup location
+                        if (stringifiedPickupLocation?.trim()?.length() > 0) {
+                            pr.pickupLocation = stringifiedPickupLocation.trim();
+                        }
                     }
-                }
 
-                // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-                if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
-                    pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
+                    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                    if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
+                        pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
+                    }
                 }
             }
 

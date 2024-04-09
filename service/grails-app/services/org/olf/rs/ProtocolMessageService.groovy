@@ -486,8 +486,12 @@ and sa.service.businessFunction.value=:ill
     }
 
     //TODO Wire in supplierInfo here
-
-    request.getRequestedDeliveryInfo().add(makeRequestedDeliveryInfo(eventData))
+    RequestedDeliveryInfo requestedDeliveryInfo = makeRequestedDeliveryInfo(eventData)
+    if (requestedDeliveryInfo) {
+      request.getRequestedDeliveryInfo().add(requestedDeliveryInfo)
+    } else {
+      log.info("No requestedDeliveryInfo")
+    }
 
     //TODO Wire in requestingAgencyInfo here
 
@@ -518,7 +522,7 @@ and sa.service.businessFunction.value=:ill
       address.setPhysicalAddress(physicalAddress)
     }
     if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
-            ( eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressData != null ) ) {
+            ( eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType != null ) ) {
       ElectronicAddress electronicAddress = new ElectronicAddress()
       electronicAddress.setElectronicAddressType(toTypeSchemeValuePair(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressType))
       electronicAddress.setElectronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData)
@@ -591,7 +595,7 @@ and sa.service.businessFunction.value=:ill
     header.setTimestamp(ZonedDateTime.now(ZoneId.of("UTC")))
     header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
     if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
-      header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
+      header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId ? eventData.header.supplyingAgencyRequestId : '')
     }
     if (eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
       header.setRequestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
@@ -658,9 +662,9 @@ and sa.service.businessFunction.value=:ill
   }
 
   TypeYesNo toYesNo(def input){
-    if("yes".equalsIgnoreCase(input)){
+    if("yes".equalsIgnoreCase(input) || "y".equalsIgnoreCase(input)){
       return TypeYesNo.Y
-    } else if("no".equalsIgnoreCase(input)){
+    } else if("no".equalsIgnoreCase(input) || "n".equalsIgnoreCase(input)){
       return TypeYesNo.N
     } else {
       log.warn("Invalid TypeYesNo ${input}")
