@@ -5,6 +5,6 @@
                jaxb:version="1.0">
 
     <jaxb:globalBindings>
-        <xjc:javaType name="java.time.ZonedDateTime" xmlType="xs:dateTime" adapter="io.github.threetenjaxb.core.ZonedDateTimeXmlAdapter"/>
+        <xjc:javaType name="java.time.ZonedDateTime" xmlType="xs:dateTime" adapter="org.olf.rs.adapter.ZonedDateTimeIsoXmlAdapter"/>
     </jaxb:globalBindings>
 </jaxb:bindings>

@@ -381,7 +381,13 @@ xjc {
   useJakarta.set(false) // TODO investigate jakarta
 }
 
+task copyAdapter(type: Copy) {
+  from 'src/main/resources/xsd/ZonedDateTimeIsoXmlAdapter.java'
+  into 'build/generated-iso/org/olf/rs/adapter/'
+}
+
 task compileIsoJava(type: JavaCompile) {
+  dependsOn copyAdapter
   source = fileTree("${project.buildDir}/generated-iso").matching {
     include '**/*.java'
   }
@@ -396,5 +402,6 @@ task packageIsoClasses(type: Jar) {
   // You can configure additional settings like manifest, etc. as needed
 }
 
+compileJava.dependsOn compileIsoJava
 compileGroovy.dependsOn packageIsoClasses
 

@@ -96,9 +96,8 @@ class ConfirmationMessageService {
     return valuePair
   }
 
-    ZonedDateTime toZonedDateTime(String dateString) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
-    return ZonedDateTime.parse(dateString, formatter)
+  ZonedDateTime toZonedDateTime(String dateString) {
+    return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
   }
 
   ErrorData makeErrorData(def req_result) {

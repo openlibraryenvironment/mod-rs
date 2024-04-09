@@ -30,6 +30,7 @@ import org.olf.rs.iso18626.TypeYesNo
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -587,7 +588,7 @@ and sa.service.businessFunction.value=:ill
     header.setRequestingAgencyId(requestingAgencyId)
 
     header.setMultipleItemRequestId('')
-    header.setTimestamp(ZonedDateTime.now())
+    header.setTimestamp(ZonedDateTime.now(ZoneId.of("UTC")))
     header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
     if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
       header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
@@ -653,8 +654,7 @@ and sa.service.businessFunction.value=:ill
   }
 
   ZonedDateTime toZonedDateTime(String dateString) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
-    return ZonedDateTime.parse(dateString, formatter)
+    return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
   }
 
   TypeYesNo toYesNo(def input){
@@ -730,7 +730,7 @@ and sa.service.businessFunction.value=:ill
     if (eventData.statusInfo.lastChange) {
       statusInfo.setLastChange(toZonedDateTime(eventData.statusInfo.lastChange))
     } else {
-      statusInfo.setLastChange(ZonedDateTime.now())
+      statusInfo.setLastChange(ZonedDateTime.now(ZoneId.of("UTC")))
     }
     return statusInfo
   }
@@ -748,7 +748,7 @@ and sa.service.businessFunction.value=:ill
     if (eventData.deliveryInfo.dateSent) {
       deliveryInfo.setDateSent(toZonedDateTime(eventData.deliveryInfo.dateSent))
     } else {
-      deliveryInfo.setDateSent(ZonedDateTime.now())
+      deliveryInfo.setDateSent(ZonedDateTime.now(ZoneId.of("UTC")))
     }
     if (eventData.deliveryInfo.itemId instanceof Collection) {
       // Build multiple ItemIds
