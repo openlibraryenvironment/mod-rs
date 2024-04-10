@@ -141,9 +141,11 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
-                        if ((request.supplyingInstitutionSymbol == null || request.getSupplyingInstitutionSymbol().contains("null")) &&
-                                eventData.header?.supplyingAgencyId?.agencyIdType != null &&
-                                eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                        if ((request.supplyingInstitutionSymbol == null ||
+                                request.getSupplyingInstitutionSymbol().contains("null") ||
+                                    request.getSupplyingInstitutionSymbol() == ":") &&
+                                        eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
                             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
                             request.resolvedSupplier = resolvedSupplyingAgency
                             request.setSupplyingInstitutionSymbol(
