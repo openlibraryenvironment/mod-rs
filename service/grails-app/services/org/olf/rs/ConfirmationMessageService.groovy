@@ -13,6 +13,7 @@ import org.olf.rs.iso18626.TypeErrorType
 import org.olf.rs.iso18626.TypeMessageStatus
 import org.olf.rs.iso18626.TypeReasonForMessage
 import org.olf.rs.iso18626.TypeSchemeValuePair
+import static org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService.*
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
@@ -104,10 +105,31 @@ class ConfirmationMessageService {
     ErrorData errorData = null
     if(req_result.errorType){
       errorData = new ErrorData()
-      errorData.setErrorType(TypeErrorType.UNRECOGNISED_DATA_VALUE)
+      errorData.setErrorType(toErrorType(req_result.errorType))
       errorData.setErrorValue("$req_result.errorType: " + (req_result.errorValue ? req_result.errorValue : ""))
     }
     return errorData
+  }
+
+  TypeErrorType toErrorType(error){
+      switch (error) {
+          case ERROR_TYPE_BADLY_FORMED_MESSAGE :
+          case ERROR_TYPE_NO_XML_SUPPLIED:
+              return TypeErrorType.BADLY_FORMED_MESSAGE
+          case ERROR_TYPE_NO_ACTIVE_REQUEST:
+          case ERROR_TYPE_NO_CANCEL_VALUE:
+          case ERROR_TYPE_NO_ERROR:
+          case ERROR_TYPE_INVALID_CANCEL_VALUE:
+          case ERROR_TYPE_UNABLE_TO_FIND_REQUEST:
+          case ERROR_TYPE_UNABLE_TO_PROCESS:
+              return TypeErrorType.UNRECOGNISED_DATA_VALUE
+          case ERROR_TYPE_NO_ACTION:
+          case ERROR_TYPE_NO_REASON_FOR_MESSAGE:
+              return TypeErrorType.UNSUPPORTED_ACTION_TYPE
+          case ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE:
+              return TypeErrorType.UNRECOGNISED_DATA_ELEMENT
+          default: return TypeErrorType.UNRECOGNISED_DATA_VALUE
+      }
   }
 
   // Clever bit of wizardry to allow us to inject the calling class into the builder

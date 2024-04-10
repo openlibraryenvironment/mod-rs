@@ -58,7 +58,6 @@ class ProtocolMessageService {
   EventPublicationService eventPublicationService;
   ProtocolAuditService protocolAuditService;
   SettingsService settingsService;
-  XsdValidationService xsdValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
   Marshaller marshaller = context.createMarshaller();
   def grailsApplication
@@ -330,7 +329,6 @@ and sa.service.businessFunction.value=:ill
     marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd")
     marshaller.marshal(makeISO18626Message(eventData), sw)
     String message = sw.toString();
-    xsdValidationService.validateXmlAgainstXsd(message)
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 //    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
 
