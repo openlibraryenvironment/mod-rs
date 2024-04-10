@@ -13,6 +13,7 @@ import org.olf.rs.iso18626.TypeErrorType
 import org.olf.rs.iso18626.TypeMessageStatus
 import org.olf.rs.iso18626.TypeReasonForMessage
 import org.olf.rs.iso18626.TypeSchemeValuePair
+
 import static org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService.*
 
 import javax.xml.bind.JAXBContext
@@ -29,7 +30,7 @@ class ConfirmationMessageService {
   def confirmationMessageReadable(def confirmationMessage) {
     StringWriter sw = new StringWriter()
 
-    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd")
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
 
     marshaller.marshal(confirmationMessage, sw)
     return sw.toString()
@@ -38,15 +39,15 @@ class ConfirmationMessageService {
   // This method creates a confirmation message
   def makeConfirmationMessage(def req_result) {
     ISO18626Message iso18626Message = new ISO18626Message()
-    iso18626Message.setVersion('1.2')
+    iso18626Message.setVersion(Iso18626Constants.VERSION)
     switch (req_result.messageType) {
-      case "REQUEST":
+      case Iso18626Constants.REQUEST:
           RequestConfirmation confirmation = new RequestConfirmation()
           confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
           confirmation.setErrorData(makeErrorData(req_result))
           iso18626Message.setRequestConfirmation(confirmation)
         break
-      case "SUPPLYING_AGENCY_MESSAGE":
+      case Iso18626Constants.SUPPLYING_AGENCY_MESSAGE:
           SupplyingAgencyMessageConfirmation confirmation = new SupplyingAgencyMessageConfirmation()
           confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
           if (req_result.reasonForMessage) {
@@ -55,7 +56,7 @@ class ConfirmationMessageService {
           confirmation.setErrorData(makeErrorData(req_result))
           iso18626Message.setSupplyingAgencyMessageConfirmation(confirmation)
         break
-      case "REQUESTING_AGENCY_MESSAGE":
+      case Iso18626Constants.REQUESTING_AGENCY_MESSAGE:
           RequestingAgencyMessageConfirmation confirmation = new RequestingAgencyMessageConfirmation()
           confirmation.setConfirmationHeader(makeConfirmationHeader(req_result))
           if (req_result.action) {
@@ -87,7 +88,7 @@ class ConfirmationMessageService {
     confirmationHeader.setTimestamp(ZonedDateTime.now())
     confirmationHeader.setRequestingAgencyRequestId(req_result.reqId)
     confirmationHeader.setTimestampReceived(toZonedDateTime(req_result.timeRec))
-    confirmationHeader.setMessageStatus(req_result.status == "OK" ? TypeMessageStatus.OK : TypeMessageStatus.ERROR)
+    confirmationHeader.setMessageStatus(req_result.status == STATUS_OK ? TypeMessageStatus.OK : TypeMessageStatus.ERROR)
     return confirmationHeader
   }
 

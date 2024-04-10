@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events
 
+import org.olf.rs.Iso18626Constants
 import org.olf.rs.ReshareApplicationEventHandlerService
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ import groovy.util.logging.Slf4j
  */
 @Slf4j
 public class EventMessageRequestIndService extends AbstractEvent {
+    static final String ADDRESS_SEPARATOR = ' '
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
@@ -118,7 +120,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
                         log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
                         // We join all the lines of physical address and stuff them into pickup location for now.
-                        String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(' ');
+                        String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
 
                         // If we've not been given any address information, don't translate that into a pickup location
                         if (stringifiedPickupLocation?.trim()?.length() > 0) {
@@ -185,7 +187,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
             pr.save(flush:true, failOnError:true)
 
-            result.messageType = 'REQUEST';
+            result.messageType = Iso18626Constants.REQUEST
             result.supIdType = header.supplyingAgencyId?.agencyIdType;// supplyingAgencyId can be null
             result.supId = header.supplyingAgencyId?.agencyIdValue;// supplyingAgencyId can be null
             result.reqAgencyIdType = header.requestingAgencyId.agencyIdType;
@@ -193,7 +195,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.reqId = header.requestingAgencyRequestId;
             result.timeRec = header.timestamp;
 
-            result.status = 'OK';
+            result.status = EventISO18626IncomingAbstractService.STATUS_OK
             result.newRequestId = pr.id;
         } else {
             log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");

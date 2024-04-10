@@ -303,15 +303,15 @@ and sa.service.businessFunction.value=:ill
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
     ISO18626Message message = new ISO18626Message()
-    message.setVersion('1.2')
+    message.setVersion(Iso18626Constants.VERSION)
     switch (eventData.messageType) {
-      case "REQUEST":
+      case Iso18626Constants.REQUEST:
         message.setRequest(makeRequest(eventData))
         break
-      case "SUPPLYING_AGENCY_MESSAGE":
+      case Iso18626Constants.SUPPLYING_AGENCY_MESSAGE:
         message.setSupplyingAgencyMessage(makeSupplyingAgencyMessageBody(eventData))
         break
-      case "REQUESTING_AGENCY_MESSAGE":
+      case Iso18626Constants.REQUESTING_AGENCY_MESSAGE:
         message.setRequestingAgencyMessage(makeRequestingAgencyMessageBody(eventData))
         break
       default:
@@ -326,7 +326,7 @@ and sa.service.businessFunction.value=:ill
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
     StringWriter sw = new StringWriter()
-    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd")
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
     marshaller.marshal(makeISO18626Message(eventData), sw)
     String message = sw.toString();
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
@@ -590,12 +590,12 @@ and sa.service.businessFunction.value=:ill
     header.setRequestingAgencyId(requestingAgencyId)
 
     header.setMultipleItemRequestId('')
-    header.setTimestamp(ZonedDateTime.now(ZoneId.of("UTC")))
+    header.setTimestamp(currentZonedDateTime())
     header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-    if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
+    if (eventData.messageType == Iso18626Constants.SUPPLYING_AGENCY_MESSAGE || eventData.messageType == Iso18626Constants.REQUESTING_AGENCY_MESSAGE) {
       header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId ? eventData.header.supplyingAgencyRequestId : '')
     }
-    if (eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
+    if (eventData.messageType == Iso18626Constants.REQUESTING_AGENCY_MESSAGE) {
       header.setRequestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
     }
     return header
@@ -659,10 +659,14 @@ and sa.service.businessFunction.value=:ill
     return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
   }
 
+  ZonedDateTime currentZonedDateTime(){
+    return ZonedDateTime.now(ZoneId.of("UTC"))
+  }
+
   TypeYesNo toYesNo(def input){
-    if("yes".equalsIgnoreCase(input) || "y".equalsIgnoreCase(input)){
+    if("yes".equalsIgnoreCase(input) || TypeYesNo.Y.value().equalsIgnoreCase(input)){
       return TypeYesNo.Y
-    } else if("no".equalsIgnoreCase(input) || "n".equalsIgnoreCase(input)){
+    } else if("no".equalsIgnoreCase(input) || TypeYesNo.N.value().equalsIgnoreCase(input)){
       return TypeYesNo.N
     } else {
       log.warn("Invalid TypeYesNo ${input}")
@@ -671,11 +675,11 @@ and sa.service.businessFunction.value=:ill
   }
 
   TypeServiceType toServiceType(String input) {
-    if ("Loan".equalsIgnoreCase(input)) {
+    if (TypeServiceType.LOAN.value().equalsIgnoreCase(input)) {
       return TypeServiceType.LOAN
-    } else if ("Copy".equalsIgnoreCase(input)) {
+    } else if (TypeServiceType.COPY.value().equalsIgnoreCase(input)) {
       return TypeServiceType.COPY
-    } else if ("CopyOrLoan".equalsIgnoreCase(input)) {
+    } else if (TypeServiceType.COPY_OR_LOAN.value().equalsIgnoreCase(input)) {
       return TypeServiceType.COPY_OR_LOAN
     } else {
       log.warn("Invalid service type ${input}")
@@ -732,7 +736,7 @@ and sa.service.businessFunction.value=:ill
     if (eventData.statusInfo.lastChange) {
       statusInfo.setLastChange(toZonedDateTime(eventData.statusInfo.lastChange))
     } else {
-      statusInfo.setLastChange(ZonedDateTime.now(ZoneId.of("UTC")))
+      statusInfo.setLastChange(currentZonedDateTime())
     }
     return statusInfo
   }
@@ -750,7 +754,7 @@ and sa.service.businessFunction.value=:ill
     if (eventData.deliveryInfo.dateSent) {
       deliveryInfo.setDateSent(toZonedDateTime(eventData.deliveryInfo.dateSent))
     } else {
-      deliveryInfo.setDateSent(ZonedDateTime.now(ZoneId.of("UTC")))
+      deliveryInfo.setDateSent(currentZonedDateTime())
     }
     if (eventData.deliveryInfo.itemId instanceof Collection) {
       // Build multiple ItemIds
