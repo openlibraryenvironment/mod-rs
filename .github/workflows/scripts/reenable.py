@@ -15,7 +15,7 @@ TENANTS = ['reshare_north', 'reshare_south']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
-RELEASE_VERSION = ["mod-rs-2.14.0"]
+RELEASE_VERSION = ["mod-rs-2.15.3"]
 # for now hard code 8080
 PORT = "8080"
 
