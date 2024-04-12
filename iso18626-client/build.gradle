@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'com.github.bjornvester.xjc' version '1.8.2'
+    id 'idea'
+    id 'maven-publish'
+}
+
+group = 'org.olf.rs.iso18626'
+version = '1.2'
+
+
+repositories {
+    mavenCentral()
+    maven {
+        name "reposiliteRepositoryReleases"
+        url "https://reposilite.reshare.indexdata.com/releases"
+    }
+}
+
+configurations {
+    jaxb2
+}
+dependencies {
+    implementation "javax.xml.bind:jaxb-api:2.3.1"
+    implementation "io.github.threeten-jaxb:threeten-jaxb-core:1.2"
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "src/main/java"
+            srcDir "${project.buildDir}/generated-iso"
+        }
+    }
+}
+
+xjc {
+    xsdDir.set(layout.projectDirectory.dir("src/main/resources/xsd"))
+    outputJavaDir.set(layout.projectDirectory.dir("$buildDir/generated-iso"))
+    outputResourcesDir.set(layout.projectDirectory.dir("$buildDir/generated-iso"))
+    defaultPackage.set("org.olf.rs.iso18626")
+    useJakarta.set(false)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri('https://reposilite.reshare.indexdata.com/releases')
+            credentials {
+                username = "$reposiliteUser"
+                password = "$reposilitePassword"
+            }
+        }
+    }
+}
+
+
+
+

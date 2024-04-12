@@ -1,5 +1,7 @@
 package org.olf.rs
 
+import org.apache.http.HttpStatus
+import org.apache.http.client.HttpResponseException
 import org.olf.rs.iso18626.ErrorData
 import org.olf.rs.iso18626.ISO18626Message
 import org.olf.rs.iso18626.ConfirmationHeader
@@ -13,6 +15,7 @@ import org.olf.rs.iso18626.TypeErrorType
 import org.olf.rs.iso18626.TypeMessageStatus
 import org.olf.rs.iso18626.TypeReasonForMessage
 import org.olf.rs.iso18626.TypeSchemeValuePair
+import org.xml.sax.SAXException
 
 import static org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService.*
 
@@ -24,6 +27,7 @@ import java.time.format.DateTimeFormatter
 
 class ConfirmationMessageService {
 
+  Iso18626MessageValidationService iso18626MessageValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class)
   Marshaller marshaller = context.createMarshaller()
 
@@ -33,7 +37,9 @@ class ConfirmationMessageService {
     marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
 
     marshaller.marshal(confirmationMessage, sw)
-    return sw.toString()
+    String message = sw.toString()
+    iso18626MessageValidationService.validateAgainstXSD(message)
+    return message
   }
 
   // This method creates a confirmation message
@@ -75,15 +81,19 @@ class ConfirmationMessageService {
 
   ConfirmationHeader makeConfirmationHeader(def req_result) {
     ConfirmationHeader confirmationHeader = new ConfirmationHeader()
-    TypeAgencyId supplyingAgencyId = new TypeAgencyId()
-    supplyingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.supIdType))
-    supplyingAgencyId.setAgencyIdValue(req_result.supId)
-    confirmationHeader.setSupplyingAgencyId(supplyingAgencyId)
+    if(req_result.supIdType || req_result.supId) {
+        TypeAgencyId supplyingAgencyId = new TypeAgencyId()
+        supplyingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.supIdType))
+        supplyingAgencyId.setAgencyIdValue(req_result.supId)
+        confirmationHeader.setSupplyingAgencyId(supplyingAgencyId)
+    }
 
-    TypeAgencyId requestingAgencyId = new TypeAgencyId()
-    requestingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.reqAgencyIdType))
-    requestingAgencyId.setAgencyIdValue(req_result.reqAgencyId)
-    confirmationHeader.setRequestingAgencyId(requestingAgencyId)
+    if(req_result.reqAgencyIdType || req_result.reqAgencyId) {
+        TypeAgencyId requestingAgencyId = new TypeAgencyId()
+        requestingAgencyId.setAgencyIdType(toTypeSchemeValuePair(req_result.reqAgencyIdType))
+        requestingAgencyId.setAgencyIdValue(req_result.reqAgencyId)
+        confirmationHeader.setRequestingAgencyId(requestingAgencyId)
+    }
 
     confirmationHeader.setTimestamp(ZonedDateTime.now())
     confirmationHeader.setRequestingAgencyRequestId(req_result.reqId)

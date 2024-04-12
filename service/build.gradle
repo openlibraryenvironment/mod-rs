@@ -1,5 +1,5 @@
 repositories {
-  //mavenLocal()
+  mavenLocal()
   mavenCentral()
   maven { url 'https://maven.indexdata.com/' }
   maven { url "https://repo.grails.org/grails/core" }
@@ -28,7 +28,6 @@ buildscript {
     classpath "org.grails.plugins:hibernate5:7.3.0"
     classpath 'org.grails.plugins:database-migration:4.2.0'
     classpath 'com.bmuschko:gradle-docker-plugin:6.6.1'
-    classpath 'com.github.bjornvester:xjc-gradle-plugin:1.8.2'
   }
 }
 
@@ -52,7 +51,6 @@ apply plugin: 'idea'
 apply plugin: 'org.grails.grails-web'
 apply plugin: 'org.grails.plugins.views-json'
 apply plugin: 'com.bmuschko.docker-remote-api'
-apply plugin: 'com.github.bjornvester.xjc'
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
@@ -105,8 +103,7 @@ dependencies {
   //runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
   //runtimeOnly "com.h2database:h2"
   //runtimeOnly "org.apache.tomcat:tomcat-jdbc"
-  implementation "javax.xml.bind:jaxb-api:2.3.1"
-  implementation "io.github.threeten-jaxb:threeten-jaxb-core:1.2"
+  runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
 
 
   // Testing
@@ -218,7 +215,7 @@ dependencies {
   implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 
   // Iso java classes
-  implementation files("${project.buildDir}/libs/iso18626.jar")
+  implementation 'org.olf.rs.iso18626:iso18626-client:1.2'
 }
 
 bootRun {
@@ -372,36 +369,4 @@ tasks.withType(Test) {
 springBoot {
   mainClass = 'mod.rs.Application'
 }
-
-xjc {
-  xsdDir.set(layout.projectDirectory.dir("src/main/resources/xsd"))
-  outputJavaDir.set(layout.projectDirectory.dir("$buildDir/generated-iso"))
-//  outputResourcesDir.set(layout.projectDirectory.dir("$buildDir/generated-iso"))
-  defaultPackage.set("org.olf.rs.iso18626")
-  useJakarta.set(false) // TODO investigate jakarta
-}
-
-task copyAdapter(type: Copy) {
-  from 'src/main/resources/xsd/ZonedDateTimeIsoXmlAdapter.java'
-  into 'build/generated-iso/org/olf/rs/adapter/'
-}
-
-task compileIsoJava(type: JavaCompile) {
-  dependsOn copyAdapter
-  source = fileTree("${project.buildDir}/generated-iso").matching {
-    include '**/*.java'
-  }
-  destinationDir = file("${project.buildDir}/classes/iso")
-  classpath = sourceSets.main.compileClasspath
-}
-
-task packageIsoClasses(type: Jar) {
-  dependsOn compileIsoJava
-  from "${project.buildDir}/classes/iso"
-  archiveFileName = 'iso18626.jar'
-  // You can configure additional settings like manifest, etc. as needed
-}
-
-compileJava.dependsOn compileIsoJava
-compileGroovy.dependsOn packageIsoClasses
 

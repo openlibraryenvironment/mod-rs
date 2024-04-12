@@ -16,7 +16,8 @@ import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
+import org.xml.sax.SAXException;
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
@@ -164,6 +165,8 @@ class ExternalApiController {
         log.error("NO XML Supplied in request. Unable to proceed");
         render(status: 400, text: 'The sent request is not valid')
       }
+    } catch (SAXException e){
+      return render(status: 400, text: "Response validation failed: ${e.message}")
     }
     catch ( Exception e ) {
       log.error("Exception receiving ISO message",e);

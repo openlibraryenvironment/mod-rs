@@ -27,6 +27,7 @@ import org.olf.rs.iso18626.TypeSchemeValuePair
 import org.olf.rs.iso18626.TypeServiceType
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.iso18626.TypeYesNo
+import org.xml.sax.SAXException
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
@@ -58,6 +59,7 @@ class ProtocolMessageService {
   EventPublicationService eventPublicationService;
   ProtocolAuditService protocolAuditService;
   SettingsService settingsService;
+  Iso18626MessageValidationService iso18626MessageValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
   Marshaller marshaller = context.createMarshaller();
   def grailsApplication
@@ -200,6 +202,9 @@ class ProtocolMessageService {
       result.response = sendISO18626Message(eventData, serviceAddress, additional_headers, auditMap, iso18626LogDetails);
       result.status = (result.response.messageStatus == EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR) ? ProtocolResultStatus.ProtocolError : ProtocolResultStatus.Sent;
       log.debug("ISO18626 message sent")
+    } catch (SAXException e){
+      result.status = ProtocolResultStatus.ValidationError
+      result.response = "Request validation failed: ${e.message}"
     } catch(Exception e) {
         if ((e.cause != null) && (e.cause instanceof java.net.SocketTimeoutException)) {
             // We have hit a timeout
@@ -329,6 +334,7 @@ and sa.service.businessFunction.value=:ill
     marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
     marshaller.marshal(makeISO18626Message(eventData), sw)
     String message = sw.toString();
+    iso18626MessageValidationService.validateAgainstXSD(message)
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 //    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
 
@@ -591,7 +597,7 @@ and sa.service.businessFunction.value=:ill
 
     header.setMultipleItemRequestId('')
     header.setTimestamp(currentZonedDateTime())
-    header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
+    header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId ? eventData.header.requestingAgencyRequestId : '')
     if (eventData.messageType == Iso18626Constants.SUPPLYING_AGENCY_MESSAGE || eventData.messageType == Iso18626Constants.REQUESTING_AGENCY_MESSAGE) {
       header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId ? eventData.header.supplyingAgencyRequestId : '')
     }
