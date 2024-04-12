@@ -36,6 +36,10 @@ jobs:
           (( length++ ))
         done
         echo "Username length: $length"
+        secret_value=${{ secrets.REPOSOLITE_USERNAME }}
+        echo "First 5 characters of secret: ${secret_value:0:5}"
+        cd iso18626-client
+        ./gradlew publish
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
