@@ -30,7 +30,7 @@ jobs:
     - name: Publish to reposolite
       run: |
           cd iso18626-client
-          echo "User ${REPOSOLITE_USERNAME:0:5}"
+          echo "UserP ${REPOSOLITE_PASSWORD:0:5}"
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
