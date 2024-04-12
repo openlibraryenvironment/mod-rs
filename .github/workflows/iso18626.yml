@@ -35,7 +35,7 @@ jobs:
           secret="${secret#?}"
           (( length++ ))
         done
-        echo "::set-output name=secret_length::$length"
+        echo "Username length: $length"
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
