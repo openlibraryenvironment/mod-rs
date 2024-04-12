@@ -29,15 +29,6 @@ jobs:
       
     - name: Publish to reposolite
       run: |
-        secret="${{ secrets.REPOSOLITE_USERNAME }}"
-        length=0
-        while [ -n "$secret" ]; do
-          secret="${secret#?}"
-          (( length++ ))
-        done
-        echo "Username length: $length"
-        secret_value=${{ secrets.REPOSOLITE_USERNAME }}
-        echo "First 5 characters of secret: ${secret_value:0:5}"
         cd iso18626-client
         ./gradlew publish
       env:
