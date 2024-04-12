@@ -60,8 +60,8 @@ publishing {
         maven {
             url = uri('https://reposilite.reshare.indexdata.com/releases')
             credentials {
-                username = "$reposiliteUser"
-                password = "$reposilitePassword"
+                username = System.getenv("REPOSOLITE_USERNAME")
+                password = System.getenv("REPOSOLITE_PASSWORD")
             }
         }
     }
