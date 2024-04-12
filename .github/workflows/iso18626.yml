@@ -30,7 +30,7 @@ jobs:
     - name: Publish to reposolite
       run: |
           cd iso18626-client
-          ./gradlew publish
+          ./gradlew publish -PreposiliteUser=$REPOSOLITE_USERNAME -PreposilitePassword=$REPOSOLITE_PASSWORD
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME  }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
