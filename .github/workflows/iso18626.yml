@@ -31,7 +31,6 @@ jobs:
       run: |
           cd iso18626-client
           echo "User $REPOSOLITE_USERNAME"
-          ./gradlew publish -PreposiliteUser=$REPOSOLITE_USERNAME -PreposilitePassword=$REPOSOLITE_PASSWORD
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME  }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
