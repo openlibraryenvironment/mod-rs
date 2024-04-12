@@ -1,7 +1,7 @@
 name: Publish ISO18626 client
 
 on:
-  workflow_dispatch:
+  push:
 
 jobs:
   build:
