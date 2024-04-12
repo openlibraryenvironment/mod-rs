@@ -29,10 +29,13 @@ jobs:
       
     - name: Publish to reposolite
       run: |
-          secret_value=${{ secrets.REPOSOLITE_USERNAME }}
-          echo "First 5 characters of secret: ${secret_value:0:5}"
-          cd iso18626-client
-          echo "User1 ${{ secrets.REPOSOLITE_USERNAME }}"
+        secret="${{ secrets.REPOSOLITE_USERNAME }}"
+        length=0
+        while [ -n "$secret" ]; do
+          secret="${secret#?}"
+          (( length++ ))
+        done
+        echo "::set-output name=secret_length::$length"
       env:
         REPOSOLITE_USERNAME: ${{ secrets.REPOSOLITE_USERNAME }}
         REPOSOLITE_PASSWORD: ${{ secrets.REPOSOLITE_PASSWORD }}
