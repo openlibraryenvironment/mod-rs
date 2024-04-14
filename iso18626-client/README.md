@@ -7,3 +7,5 @@ Java classes are generated from schema and added in JAR file.
 JAR file can be published to ReShare reposilite repository using gradle task 
 `./gradlew publish`. Before running this task you need to specify credentials in env var `REPOSOLITE_USERNAME` and `REPOSOLITE_PASSWORD`. 
 
+There is Github action `Publish ISO18626 client` to publish this artifact.
+
