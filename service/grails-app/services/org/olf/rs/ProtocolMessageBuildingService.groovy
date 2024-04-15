@@ -47,42 +47,39 @@ class ProtocolMessageBuildingService {
 
     message.bibliographicInfo = [
       title: req.title,
-      requestingInstitutionSymbol: req.requestingInstitutionSymbol,
       author: req.author,
       subtitle: req.subtitle,
-      sponsoringBody: req.sponsoringBody,
       volume: req.volume,
       issue: req.issue,
-      startPage: req.startPage,
-      numberOfPages: req.numberOfPages,
       pagesRequested: req.pagesRequested,
       edition: req.edition,
-      issn: req.issn,
-      isbn: req.isbn,
-      doi: req.doi,
-      coden: req.coden,
-      sici: req.sici,
-      bici: req.bici,
-      eissn: req.eissn,
-      stitle : req.stitle ,
-      part: req.part,
-      artnum: req.artnum,
-      ssn: req.ssn,
-      quarter: req.quarter,
-      bibliographicRecordId: req.bibliographicRecordId ?: req.systemInstanceIdentifier,  // Shared index bib record ID (Instance identifier)
+      bibliographicRecordId:[
+              [ bibliographicRecordIdentifierCode:'bibliographicRecordId', bibliographicRecordIdentifier: req.bibliographicRecordId ?: req.systemInstanceIdentifier ],
+              [ bibliographicRecordIdentifierCode:'requestingInstitutionSymbol', bibliographicRecordIdentifier: req.requestingInstitutionSymbol ],
+              [ bibliographicRecordIdentifierCode:'sponsoringBody', bibliographicRecordIdentifier: req.sponsoringBody ],
+              [ bibliographicRecordIdentifierCode:'startPage', bibliographicRecordIdentifier: req.startPage ],
+              [ bibliographicRecordIdentifierCode:'numberOfPages', bibliographicRecordIdentifier: req.numberOfPages ],
+              [ bibliographicRecordIdentifierCode:'issn', bibliographicRecordIdentifier: req.issn ],
+              [ bibliographicRecordIdentifierCode:'isbn', bibliographicRecordIdentifier: req.isbn ],
+              [ bibliographicRecordIdentifierCode:'doi', bibliographicRecordIdentifier: req.doi ],
+              [ bibliographicRecordIdentifierCode:'coden', bibliographicRecordIdentifier: req.coden ],
+              [ bibliographicRecordIdentifierCode:'sici', bibliographicRecordIdentifier: req.sici ],
+              [ bibliographicRecordIdentifierCode:'bici', bibliographicRecordIdentifier: req.bici ],
+              [ bibliographicRecordIdentifierCode:'eissn', bibliographicRecordIdentifier: req.eissn ],
+              [ bibliographicRecordIdentifierCode:'stitle', bibliographicRecordIdentifier: req.stitle ],
+              [ bibliographicRecordIdentifierCode:'part', bibliographicRecordIdentifier: req.part ],
+              [ bibliographicRecordIdentifierCode:'artnum', bibliographicRecordIdentifier: req.artnum ],
+              [ bibliographicRecordIdentifierCode:'ssn', bibliographicRecordIdentifier: req.ssn ],
+              [ bibliographicRecordIdentifierCode:'quarter', bibliographicRecordIdentifier: req.quarter ],
+              [ bibliographicRecordIdentifierCode:'systemInstanceIdentifier', bibliographicRecordIdentifier: req.systemInstanceIdentifier ],
+              [ bibliographicRecordIdentifierCode:'oclcNumber', bibliographicRecordIdentifier: req.oclcNumber ],
+              [ bibliographicRecordIdentifierCode:'patronReference', bibliographicRecordIdentifier: req.patronReference ]
+      ],  // Shared index bib record ID (Instance identifier)
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
-      bibliographicItemId:[
-        [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
-      ],
-      // These should be removed - they have no business being here as they are not part of the protocol
-      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
-      systemInstanceIdentifier: req.systemInstanceIdentifier,
-      oclcNumber: req.oclcNumber,
-
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -137,7 +134,8 @@ class ProtocolMessageBuildingService {
       message.requestedDeliveryInfo = [
         address: [
           electronicAddress: [
-            electronicAddressType: req.deliveryMethod?.value
+            electronicAddressType: req.deliveryMethod?.value,
+            electronicAddressData: req.pickupURL
           ]
         ]
       ]
@@ -172,8 +170,6 @@ class ProtocolMessageBuildingService {
       givenName: req.patronGivenName,
 
       patronType: req.patronType,
-      //TODO what is this field: patronReference?
-      patronReference: req.patronReference,
       /* Also permitted:
        * SendToPatron
        * Address

@@ -5,7 +5,6 @@ import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
-import org.grails.orm.hibernate.HibernateDatastore
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.*
 import org.olf.rs.dynamic.DynamicGroovyService
@@ -20,7 +19,6 @@ import org.olf.rs.statemodel.Status
 import spock.lang.Shared
 import spock.lang.Stepwise
 
-import javax.sql.DataSource
 import java.text.SimpleDateFormat
 
 @Slf4j
@@ -32,6 +30,7 @@ class RSLifecycleSpec extends TestBase {
     private static final String SCENARIO_PATRON_REFERENCE = "scenario-patronReference";
     private static final String SCENARIO_REQUESTER_ID = "scenario-requesterId";
     private static final String SCENARIO_RESPONDER_ID = "scenario-responderId";
+    private static final String RANDOM_URL = 'https://www.url.com'
 
   private static String LONG_300_CHAR_TITLE = '123456789A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I123456789J123456789k123456789l123456789m123456789n123456789o123456789p123456789q123456789r123456789s123456789t123456789U123456789V123456789W123456789Y123456789Y12345XXXXX'
   private SimpleDateFormat scenarioDateFormatter = new SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS");
@@ -621,7 +620,8 @@ class RSLifecycleSpec extends TestBase {
             patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
             isRequester: true
         ];
-        deliveryMethod && (request.deliveryMethod = deliveryMethod);
+        deliveryMethod && (request.deliveryMethod = deliveryMethod)
+        deliveryMethod && (request.pickupURL = RANDOM_URL)
 
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 
@@ -655,7 +655,7 @@ class RSLifecycleSpec extends TestBase {
         log.debug("Action json: ${jsonAction}");
         setHeaders([ 'X-Okapi-Tenant': actionTenant ]);
 
-        String actionUrl = "${baseUrl}/rs/patronrequests/${actionRequestId}/performAction".toString();
+        String actionUrl = "${baseUrl}rs/patronrequests/${actionRequestId}/performAction".toString();
         log.debug("Posting to action url at $actionUrl");
         // Execute the action
         def actionResponse = doPost(actionUrl, jsonAction);

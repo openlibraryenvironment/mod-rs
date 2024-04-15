@@ -1,5 +1,5 @@
 repositories {
-  //mavenLocal()
+  mavenLocal()
   mavenCentral()
   maven { url 'https://maven.indexdata.com/' }
   maven { url "https://repo.grails.org/grails/core" }
@@ -213,6 +213,9 @@ dependencies {
 
   // For the uri builder
   implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+
+  // Iso java classes
+  implementation 'org.olf.rs.iso18626:iso18626-client:1.2'
 }
 
 bootRun {
@@ -366,3 +369,4 @@ tasks.withType(Test) {
 springBoot {
   mainClass = 'mod.rs.Application'
 }
+

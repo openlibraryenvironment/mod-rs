@@ -317,6 +317,12 @@ public class ReshareActionService {
                 auditEntry(request, request.state, request.state, 'Protocol error interpreting response', sendResult.response);
                 // Should we set the status to error as it now requires manual intervention ?
                 break;
+
+            case ProtocolResultStatus.ValidationError:
+                log.error('Encountered a protocol error for request: ' + request.id)
+                setNetworkStatus(request, NetworkStatus.Error, eventData, false)
+                auditEntry(request, request.state, request.state, sendResult.response, null)
+                break
         }
 
         return(result);

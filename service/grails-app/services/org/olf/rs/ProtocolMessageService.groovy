@@ -1,8 +1,41 @@
 package org.olf.rs
 
-import static groovyx.net.http.ContentTypes.XML;
+import org.olf.rs.iso18626.Address
+import org.olf.rs.iso18626.BibliographicInfo
+import org.olf.rs.iso18626.BibliographicRecordId
+import org.olf.rs.iso18626.DeliveryInfo
+import org.olf.rs.iso18626.ElectronicAddress
+import org.olf.rs.iso18626.Header
+import org.olf.rs.iso18626.ISO18626Message
+import org.olf.rs.iso18626.MessageInfo
+import org.olf.rs.iso18626.ObjectFactory
+import org.olf.rs.iso18626.PatronInfo
+import org.olf.rs.iso18626.PhysicalAddress
+import org.olf.rs.iso18626.PublicationInfo
+import org.olf.rs.iso18626.Request
+import org.olf.rs.iso18626.RequestedDeliveryInfo
+import org.olf.rs.iso18626.RequestingAgencyMessage
+import org.olf.rs.iso18626.ReturnInfo
+import org.olf.rs.iso18626.ServiceInfo
+import org.olf.rs.iso18626.StatusInfo
+import org.olf.rs.iso18626.SupplyingAgencyMessage
+import org.olf.rs.iso18626.TypeAction
+import org.olf.rs.iso18626.TypeAgencyId
+import org.olf.rs.iso18626.TypeCosts
+import org.olf.rs.iso18626.TypeReasonForMessage
+import org.olf.rs.iso18626.TypeSchemeValuePair
+import org.olf.rs.iso18626.TypeServiceType
+import org.olf.rs.iso18626.TypeStatus
+import org.olf.rs.iso18626.TypeYesNo
+import org.xml.sax.SAXException
 
-import java.time.Instant;
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Marshaller
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+import static groovyx.net.http.ContentTypes.XML
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -11,9 +44,7 @@ import org.olf.okapi.modules.directory.ServiceAccount;
 import org.olf.rs.logging.IIso18626LogDetails;
 import org.olf.rs.logging.ProtocolAuditService;
 import org.olf.rs.referenceData.SettingsData;
-import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
-
-import groovy.xml.StreamingMarkupBuilder;
+import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
 import groovyx.net.http.*;
 
 /**
@@ -28,6 +59,9 @@ class ProtocolMessageService {
   EventPublicationService eventPublicationService;
   ProtocolAuditService protocolAuditService;
   SettingsService settingsService;
+  Iso18626MessageValidationService iso18626MessageValidationService
+  JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
+  Marshaller marshaller = context.createMarshaller();
   def grailsApplication
 
   // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
@@ -168,6 +202,9 @@ class ProtocolMessageService {
       result.response = sendISO18626Message(eventData, serviceAddress, additional_headers, auditMap, iso18626LogDetails);
       result.status = (result.response.messageStatus == EventISO18626IncomingAbstractService.STATUS_PROTOCOL_ERROR) ? ProtocolResultStatus.ProtocolError : ProtocolResultStatus.Sent;
       log.debug("ISO18626 message sent")
+    } catch (SAXException e){
+      result.status = ProtocolResultStatus.ValidationError
+      result.response = "Request validation failed: ${e.message}"
     } catch(Exception e) {
         if ((e.cause != null) && (e.cause instanceof java.net.SocketTimeoutException)) {
             // We have hit a timeout
@@ -268,53 +305,36 @@ and sa.service.businessFunction.value=:ill
 
   def makeISO18626Message(Map eventData) {
 
-    // eventData is expected to have a header with structure:
-    /*@param header:[
-              supplyingAgencyId: [
-                agencyIdType:RESHARE,
-                agencyIdValue:VLA
-              ],
-              requestingAgencyId:[
-                agencyIdType:OCLC,
-                agencyIdValue:ZMU
-              ],
-              requestingAgencyRequestId:16,
-              supplyingAgencyRequestId:8f41a3a4-daa5-4734-9f4f-32578838ff66]
-    */
-
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
-    return{
-      ISO18626Message( 'ill:version':'1.0',
-                       'xmlns':'http://illtransactions.org/2013/iso18626',
-                       'xmlns:ill': 'http://illtransactions.org/2013/iso18626',
-                       'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                       'xsi:schemaLocation': 'http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_1.xsd' ) {
-        switch (eventData.messageType) {
-          case "REQUEST":
-            makeRequestBody(delegate, eventData)
-            break;
-          case "SUPPLYING_AGENCY_MESSAGE":
-            makeSupplyingAgencyMessageBody(delegate, eventData)
-            break;
-          case "REQUESTING_AGENCY_MESSAGE":
-            makeRequestingAgencyMessageBody(delegate, eventData)
-            break;
-          default:
-            log.error("UNHANDLED eventData.messageType : ${eventData.messageType}");
-            throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}");
-        }
-      log.debug("ISO18626 message created")
-      }
+    ISO18626Message message = new ISO18626Message()
+    message.setVersion(Iso18626Constants.VERSION)
+    switch (eventData.messageType) {
+      case Iso18626Constants.REQUEST:
+        message.setRequest(makeRequest(eventData))
+        break
+      case Iso18626Constants.SUPPLYING_AGENCY_MESSAGE:
+        message.setSupplyingAgencyMessage(makeSupplyingAgencyMessageBody(eventData))
+        break
+      case Iso18626Constants.REQUESTING_AGENCY_MESSAGE:
+        message.setRequestingAgencyMessage(makeRequestingAgencyMessageBody(eventData))
+        break
+      default:
+        log.error("UNHANDLED eventData.messageType : ${eventData.messageType}")
+        throw new RuntimeException("UNHANDLED eventData.messageType : ${eventData.messageType}")
     }
+    log.debug("ISO18626 message created")
+    return message
   }
 
   private Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
 
-    Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ];
-    StringWriter sw = new StringWriter();
-    sw << new StreamingMarkupBuilder().bind (makeISO18626Message(eventData))
+    Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
+    StringWriter sw = new StringWriter()
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
+    marshaller.marshal(makeISO18626Message(eventData), sw)
     String message = sw.toString();
+    iso18626MessageValidationService.validateAgainstXSD(message)
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
 //    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
 
@@ -443,289 +463,349 @@ and sa.service.businessFunction.value=:ill
     c.rehydrate(del, c.owner, c.thisObject)()
   }
 
-  void makeRequestBody(def del, eventData) {
-    exec(del) {
-      request {
-        makeHeader(delegate, eventData)
+  Request makeRequest(def eventData){
+    Request request = new Request()
+    request.setHeader(makeHeader(eventData))
 
-        // Bib info and Service Info only apply to REQUESTS
-        log.debug("This is a request message, so needs BibliographicInfo")
-        if (eventData.bibliographicInfo != null) {
-          makeBibliographicInfo(delegate, eventData)
-        } else {
-          log.warn("No bibliographicInfo found")
-        }
+    // Bib info and Service Info only apply to REQUESTS
+    log.debug("This is a request message, so needs BibliographicInfo")
+    if (eventData.bibliographicInfo != null) {
+      request.setBibliographicInfo(makeBibliographicInfo(eventData))
+    } else {
+      log.warn("No bibliographicInfo found")
+    }
 
-        log.debug("This is a request message, so needs PublicationInfo")
-        if (eventData.publicationInfo != null) {
-          makePublicationInfo(delegate, eventData)
-        } else {
-          log.warn("No publicationInfo found")
-        }
+    log.debug("This is a request message, so needs PublicationInfo")
+    if (eventData.publicationInfo != null) {
+      request.setPublicationInfo(makePublicationInfo(eventData))
+    } else {
+      log.warn("No publicationInfo found")
+    }
 
-        log.debug("This is a request message, so needs ServiceInfo")
-        if (eventData.serviceInfo != null) {
-          makeServiceInfo(delegate, eventData)
-        } else {
-          log.warn("No serviceInfo found")
-        }
+    log.debug("This is a request message, so needs ServiceInfo")
+    if (eventData.serviceInfo != null) {
+      request.setServiceInfo(makeServiceInfo(eventData))
+    } else {
+      log.warn("No serviceInfo found")
+    }
 
-        //TODO Wire in supplierInfo here
+    //TODO Wire in supplierInfo here
+    RequestedDeliveryInfo requestedDeliveryInfo = makeRequestedDeliveryInfo(eventData)
+    if (requestedDeliveryInfo) {
+      request.getRequestedDeliveryInfo().add(requestedDeliveryInfo)
+    } else {
+      log.info("No requestedDeliveryInfo")
+    }
 
-        //TODO Put this logic into a maker method like the others
-        requestedDeliveryInfo {
-          address {
-            if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
-                 ( eventData.requestedDeliveryInfo?.address?.physicalAddress != null ) ) {
-              physicalAddress {
-                line1(eventData.requestedDeliveryInfo.address.physicalAddress.line1)
-                line2(eventData.requestedDeliveryInfo.address.physicalAddress.line2)
-                locality(eventData.requestedDeliveryInfo.address.physicalAddress.locality)
-                postalCode(eventData.requestedDeliveryInfo.address.physicalAddress.postalCode)
-                region(eventData.requestedDeliveryInfo.address.physicalAddress.region)
-                county(eventData.requestedDeliveryInfo.address.physicalAddress.county)
-              }
-            }
-            if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
-                    ( eventData.requestedDeliveryInfo?.address?.electronicAddress != null ) ) {
-              electronicAddress {
-                electronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData)
-                electronicAddressType(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressType)
-              }
-            }
-          }
-        }
+    //TODO Wire in requestingAgencyInfo here
 
-        //TODO Wire in requestingAgencyInfo here
+    log.debug("This is a requesting message, so needs PatronInfo")
+    if (eventData.patronInfo != null) {
+      request.setPatronInfo(makePatronInfo(eventData))
+    } else {
+      log.warn("No patronInfo found")
+    }
 
-        log.debug("This is a requesting message, so needs PatronInfo")
-        if (eventData.patronInfo != null) {
-          makePatronInfo(delegate, eventData)
-        } else {
-          log.warn("No patronInfo found")
-        }
+    //TODO Wire in billingInfo here
 
-        //TODO Wire in billingInfo here
+    return request
+  }
+
+  RequestedDeliveryInfo makeRequestedDeliveryInfo(eventData) {
+    RequestedDeliveryInfo requestedDeliveryInfo = new  RequestedDeliveryInfo()
+    Address address = new Address()
+    if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
+            ( eventData.requestedDeliveryInfo?.address?.physicalAddress != null ) ) {
+      PhysicalAddress physicalAddress = new PhysicalAddress()
+      physicalAddress.setLine1(eventData.requestedDeliveryInfo.address.physicalAddress.line1)
+      physicalAddress.setLine2(eventData.requestedDeliveryInfo.address.physicalAddress.line2)
+      physicalAddress.setLocality(eventData.requestedDeliveryInfo.address.physicalAddress.locality)
+      physicalAddress.setPostalCode(eventData.requestedDeliveryInfo.address.physicalAddress.postalCode)
+      physicalAddress.setRegion(toTypeSchemeValuePair(eventData.requestedDeliveryInfo.address.physicalAddress.region))
+      physicalAddress.setCountry(toTypeSchemeValuePair(eventData.requestedDeliveryInfo.address.physicalAddress.county))
+      address.setPhysicalAddress(physicalAddress)
+    }
+    if ( ( eventData.requestedDeliveryInfo?.address != null ) &&
+            ( eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType != null ) ) {
+      ElectronicAddress electronicAddress = new ElectronicAddress()
+      electronicAddress.setElectronicAddressType(toTypeSchemeValuePair(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressType))
+      electronicAddress.setElectronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData)
+      address.setElectronicAddress(electronicAddress)
+    }
+    requestedDeliveryInfo.setAddress(address)
+    return requestedDeliveryInfo.address.electronicAddress || requestedDeliveryInfo.address.physicalAddress ? requestedDeliveryInfo : null
+  }
+
+
+
+  SupplyingAgencyMessage makeSupplyingAgencyMessageBody(eventData) {
+    SupplyingAgencyMessage supplyingAgencyMessage = new SupplyingAgencyMessage()
+    supplyingAgencyMessage.setHeader(makeHeader(eventData))
+
+    log.debug("This is a supplying agency message, so we need MessageInfo, StatusInfo, DeliveryInfo")
+    if (eventData.messageInfo != null) {
+      supplyingAgencyMessage.setMessageInfo(makeMessageInfo(eventData))
+    } else {
+      log.warn("No messageInfo found")
+    }
+
+    if (eventData.statusInfo != null) {
+      supplyingAgencyMessage.setStatusInfo(makeStatusInfo(eventData))
+    } else {
+      log.warn("No statusInfo found")
+    }
+
+    if (eventData.deliveryInfo != null) {
+      supplyingAgencyMessage.setDeliveryInfo(makeDeliveryInfo(eventData))
+    } else {
+      log.warn("No deliveryInfo found")
+    }
+
+    if (eventData.returnInfo != null) {
+      supplyingAgencyMessage.setReturnInfo(makeReturnInfo(eventData))
+    } else {
+      log.warn("No returnInfo found")
+    }
+
+    return supplyingAgencyMessage
+  }
+
+  RequestingAgencyMessage makeRequestingAgencyMessageBody(eventData) {
+    RequestingAgencyMessage requestingAgencyMessage = new RequestingAgencyMessage()
+    requestingAgencyMessage.setHeader(makeHeader(eventData))
+    log.debug("This is a requesting agency message, so we need to add action and note")
+    if (eventData.action != null) {
+      requestingAgencyMessage.setAction(TypeAction.fromValue(eventData.action))
+      requestingAgencyMessage.setNote(eventData.note)
+    } else {
+      log.warn("No action found")
+    }
+    return requestingAgencyMessage
+  }
+
+  Header makeHeader(eventData) {
+    Header header = new Header()
+    TypeAgencyId supplyingAgencyId = new TypeAgencyId()
+    supplyingAgencyId.setAgencyIdType(toTypeSchemeValuePair(eventData.header.supplyingAgencyId.agencyIdType))
+    supplyingAgencyId.setAgencyIdValue(eventData.header.supplyingAgencyId.agencyIdValue)
+    header.setSupplyingAgencyId(supplyingAgencyId)
+
+    TypeAgencyId requestingAgencyId = new TypeAgencyId()
+    requestingAgencyId.setAgencyIdType(toTypeSchemeValuePair(eventData.header.requestingAgencyId.agencyIdType))
+    requestingAgencyId.setAgencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
+    header.setRequestingAgencyId(requestingAgencyId)
+
+    header.setMultipleItemRequestId('')
+    header.setTimestamp(currentZonedDateTime())
+    header.setRequestingAgencyRequestId(eventData.header.requestingAgencyRequestId ? eventData.header.requestingAgencyRequestId : '')
+    if (eventData.messageType == Iso18626Constants.SUPPLYING_AGENCY_MESSAGE || eventData.messageType == Iso18626Constants.REQUESTING_AGENCY_MESSAGE) {
+      header.setSupplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId ? eventData.header.supplyingAgencyRequestId : '')
+    }
+    if (eventData.messageType == Iso18626Constants.REQUESTING_AGENCY_MESSAGE) {
+      header.setRequestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
+    }
+    return header
+  }
+
+
+  BibliographicInfo makeBibliographicInfo(eventData) {
+    BibliographicInfo bibliographicInfo = new BibliographicInfo()
+    bibliographicInfo.setSupplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
+    bibliographicInfo.setTitle(eventData.bibliographicInfo.title)
+    bibliographicInfo.setAuthor(eventData.bibliographicInfo.author)
+    bibliographicInfo.setSubtitle(eventData.bibliographicInfo.subtitle)
+    bibliographicInfo.setEdition(eventData.bibliographicInfo.edition)
+    bibliographicInfo.setTitleOfComponent(eventData.bibliographicInfo.titleOfComponent)
+    bibliographicInfo.setAuthorOfComponent(eventData.bibliographicInfo.authorOfComponent)
+    bibliographicInfo.setVolume(eventData.bibliographicInfo.volume)
+    bibliographicInfo.setIssue(eventData.bibliographicInfo.issue)
+    bibliographicInfo.setPagesRequested(eventData.bibliographicInfo.pagesRequested)
+    bibliographicInfo.setSponsor(eventData.bibliographicInfo.sponsor)
+    bibliographicInfo.setInformationSource(eventData.bibliographicInfo.informationSource)
+    for (final def map in eventData.bibliographicInfo.bibliographicRecordId) {
+      if (map.bibliographicRecordIdentifier) {
+        BibliographicRecordId recordId = new BibliographicRecordId()
+        recordId.setBibliographicRecordIdentifierCode(toTypeSchemeValuePair(map.bibliographicRecordIdentifierCode))
+        recordId.setBibliographicRecordIdentifier(map.bibliographicRecordIdentifier)
+        bibliographicInfo.getBibliographicRecordId().add(recordId)
       }
+    }
+
+    return bibliographicInfo
+  }
+
+  TypeSchemeValuePair toTypeSchemeValuePair(def text){
+    TypeSchemeValuePair valuePair = new TypeSchemeValuePair()
+    valuePair.setValue(text)
+    return valuePair
+  }
+
+  PublicationInfo makePublicationInfo(eventData) {
+    PublicationInfo publicationInfo = new PublicationInfo()
+    publicationInfo.setPublisher(eventData.publicationInfo.publisher)
+    publicationInfo.setPublicationType(toTypeSchemeValuePair(eventData.publicationInfo.publicationType))
+    publicationInfo.setPublicationDate(eventData.publicationInfo.publicationDate)
+    publicationInfo.setPlaceOfPublication(eventData.publicationInfo.placeOfPublication)
+    return publicationInfo
+  }
+
+  ServiceInfo makeServiceInfo(eventData) {
+    ServiceInfo serviceInfo = new ServiceInfo()
+    serviceInfo.setServiceType(toServiceType(eventData.serviceInfo.serviceType))
+    if (eventData.serviceInfo.needBeforeDate) {
+      serviceInfo.setNeedBeforeDate(toZonedDateTime(eventData.serviceInfo.needBeforeDate))
+    }
+    serviceInfo.setServiceLevel(toTypeSchemeValuePair(eventData.serviceInfo.serviceLevel))
+    serviceInfo.setAnyEdition(toYesNo(eventData.serviceInfo.anyEdition))
+    serviceInfo.setNote(eventData.serviceInfo.note)
+    return serviceInfo
+  }
+
+  ZonedDateTime toZonedDateTime(String dateString) {
+    return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+  }
+
+  ZonedDateTime currentZonedDateTime(){
+    return ZonedDateTime.now(ZoneId.of("UTC"))
+  }
+
+  TypeYesNo toYesNo(def input){
+    if("yes".equalsIgnoreCase(input) || TypeYesNo.Y.value().equalsIgnoreCase(input)){
+      return TypeYesNo.Y
+    } else if("no".equalsIgnoreCase(input) || TypeYesNo.N.value().equalsIgnoreCase(input)){
+      return TypeYesNo.N
+    } else {
+      log.warn("Invalid TypeYesNo ${input}")
+      return null;
     }
   }
 
-  void makeSupplyingAgencyMessageBody(def del, eventData) {
-    exec(del) {
-      supplyingAgencyMessage {
-        makeHeader(delegate, eventData)
-
-        log.debug("This is a supplying agency message, so we need MessageInfo, StatusInfo, DeliveryInfo")
-        if (eventData.messageInfo != null) {
-          makeMessageInfo(delegate, eventData)
-        } else {
-          log.warn("No messageInfo found")
-        }
-        if (eventData.statusInfo != null) {
-          makeStatusInfo(delegate, eventData)
-        } else {
-          log.warn("No statusInfo found")
-        }
-        if (eventData.deliveryInfo != null) {
-          makeDeliveryInfo(delegate, eventData)
-        } else {
-          log.warn("No deliveryInfo found")
-        }
-        if (eventData.returnInfo != null) {
-          makeReturnInfo(delegate, eventData)
-        } else {
-          log.warn("No returnInfo found")
-        }
-      }
+  TypeServiceType toServiceType(String input) {
+    if (TypeServiceType.LOAN.value().equalsIgnoreCase(input)) {
+      return TypeServiceType.LOAN
+    } else if (TypeServiceType.COPY.value().equalsIgnoreCase(input)) {
+      return TypeServiceType.COPY
+    } else if (TypeServiceType.COPY_OR_LOAN.value().equalsIgnoreCase(input)) {
+      return TypeServiceType.COPY_OR_LOAN
+    } else {
+      log.warn("Invalid service type ${input}")
+      return null;
     }
   }
 
-  void makeRequestingAgencyMessageBody(def del, eventData) {
-    exec(del) {
-      requestingAgencyMessage {
-        makeHeader(delegate, eventData)
+  PatronInfo makePatronInfo(eventData) {
+    PatronInfo patronInfo = new PatronInfo()
+    patronInfo.setPatronId(eventData.patronInfo.patronId)
+    patronInfo.setSurname(eventData.patronInfo.surname)
+    patronInfo.setGivenName(eventData.patronInfo.givenName)
+    patronInfo.setPatronType(toTypeSchemeValuePair(eventData.patronInfo.patronType))
+    return patronInfo
+  }
 
-        log.debug("This is a requesting agency message, so we need to add action and note")
-        if (eventData.action != null) {
-          makeActionAndNote(delegate, eventData)
-        } else {
-          log.warn("No action found")
-        }
-      }
+  MessageInfo makeMessageInfo(eventData) {
+    MessageInfo messageInfo = new MessageInfo()
+    messageInfo.setReasonForMessage(toReasonForMessage(eventData.messageInfo.reasonForMessage))
+    if (eventData.messageInfo.answerYesNo) {
+      messageInfo.setAnswerYesNo(toYesNo(eventData.messageInfo.answerYesNo))
+    }
+    messageInfo.setNote(eventData.messageInfo.note)
+    messageInfo.setReasonUnfilled(toTypeSchemeValuePair(eventData.messageInfo.reasonUnfilled))
+    messageInfo.setReasonRetry(toTypeSchemeValuePair(eventData.messageInfo.reasonRetry))
+    if (eventData.messageInfo.offeredCosts) {
+      TypeCosts offeredCosts = new TypeCosts()
+      offeredCosts.setCurrencyCode()
+      offeredCosts.setMonetaryValue(eventData.messageInfo.offeredCosts)
+      messageInfo.setOfferedCosts(offeredCosts)
+    }
+    if (eventData.messageInfo.retryAfter) {
+      messageInfo.setRetryAfter(toZonedDateTime(eventData.messageInfo.retryAfter))
+    }
+    if (eventData.messageInfo.retryBefore) {
+      messageInfo.setRetryBefore(toZonedDateTime(eventData.messageInfo.retryBefore))
+    }
+    return messageInfo
+  }
+
+  TypeReasonForMessage toReasonForMessage(def input){
+    return TypeReasonForMessage.fromValue(input)
+  }
+
+  StatusInfo makeStatusInfo(eventData) {
+    StatusInfo statusInfo = new StatusInfo()
+    statusInfo.setStatus(toStatus(eventData.statusInfo.status))
+    if (eventData.statusInfo.expectedDeliverydate) {
+      statusInfo.setExpectedDeliveryDate(toZonedDateTime(eventData.statusInfo.expectedDeliverydate))
+    }
+    if (eventData.statusInfo.dueDate) {
+      statusInfo.setDueDate(toZonedDateTime(eventData.statusInfo.dueDate))
+    }
+    if (eventData.statusInfo.lastChange) {
+      statusInfo.setLastChange(toZonedDateTime(eventData.statusInfo.lastChange))
+    } else {
+      statusInfo.setLastChange(currentZonedDateTime())
+    }
+    return statusInfo
+  }
+
+  TypeStatus toStatus(def input) {
+    if(input) {
+      return TypeStatus.fromValue(input)
+    } else {
+      return TypeStatus.REQUEST_RECEIVED
     }
   }
 
-  void makeHeader(def del, eventData) {
-    exec(del) {
-      header {
-        supplyingAgencyId {
-          agencyIdType(eventData.header.supplyingAgencyId.agencyIdType)
-          agencyIdValue(eventData.header.supplyingAgencyId.agencyIdValue)
-        }
-        requestingAgencyId {
-          agencyIdType(eventData.header.requestingAgencyId.agencyIdType)
-          agencyIdValue(eventData.header.requestingAgencyId.agencyIdValue)
-        }
-        timestamp(Instant.now()) // Current time
-        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        if (eventData.messageType == "SUPPLYING_AGENCY_MESSAGE" || eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
-          supplyingAgencyRequestId(eventData.header.supplyingAgencyRequestId)
-        }
-        if (eventData.messageType == "REQUESTING_AGENCY_MESSAGE") {
-          requestingAgencyAuthentication(eventData.header.requestingAgencyAuthentication)
-        }
-      }
+  DeliveryInfo makeDeliveryInfo(eventData) {
+    DeliveryInfo deliveryInfo = new DeliveryInfo()
+    if (eventData.deliveryInfo.dateSent) {
+      deliveryInfo.setDateSent(toZonedDateTime(eventData.deliveryInfo.dateSent))
+    } else {
+      deliveryInfo.setDateSent(currentZonedDateTime())
     }
+    if (eventData.deliveryInfo.itemId instanceof Collection) {
+      // Build multiple ItemIds
+      // TODO How to handle
+      deliveryInfo.setItemId(eventData.deliveryInfo.itemId.join(","))
+    } else {
+      // Build single ItemId
+      deliveryInfo.setItemId(eventData.deliveryInfo.itemId)
+    }
+    if(eventData.deliveryInfo.sentVia) {
+      deliveryInfo.setSentVia(toTypeSchemeValuePair(eventData.deliveryInfo.sentVia))
+    }
+    if(!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
+      TypeSchemeValuePair pair = new TypeSchemeValuePair()
+      pair.setScheme('URL')
+      pair.setValue(eventData.deliveryInfo.url)
+      deliveryInfo.setSentVia(pair)
+    }
+    deliveryInfo.setSentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
+    deliveryInfo.setLoanCondition(toTypeSchemeValuePair(eventData.deliveryInfo.loanCondition))
+    deliveryInfo.setDeliveredFormat(toTypeSchemeValuePair(eventData.deliveryInfo.deliveredFormat))
+    if (eventData.deliveryInfo.deliveryCosts) {
+      TypeCosts costs = new TypeCosts()
+      costs.setCurrencyCode(null)
+      costs.setMonetaryValue(eventData.deliveryInfo.deliveryCosts)
+      deliveryInfo.setDeliveryCosts(costs)
+    }
+    return deliveryInfo
   }
 
-  void makeBibliographicInfo(def del, eventData) {
-    exec(del) {
-      bibliographicInfo {
-        title(eventData.bibliographicInfo.title)
-        subtitle(eventData.bibliographicInfo.subtitle)
-        author(eventData.bibliographicInfo.author)
-        sponsoringBody(eventData.bibliographicInfo.sponsoringBody)
-        volume(eventData.bibliographicInfo.volume)
-        issue(eventData.bibliographicInfo.issue)
-        startPage(eventData.bibliographicInfo.startPage)
-        numberOfPages(eventData.bibliographicInfo.numberOfPages)
-        pagesRequested(eventData.bibliographicInfo.pagesRequested)
-        edition(eventData.bibliographicInfo.edition)
-        issn(eventData.bibliographicInfo.issn)
-        isbn(eventData.bibliographicInfo.isbn)
-        doi(eventData.bibliographicInfo.doi)
-        coden(eventData.bibliographicInfo.coden)
-        sici(eventData.bibliographicInfo.sici)
-        bici(eventData.bibliographicInfo.bici)
-        eissn(eventData.bibliographicInfo.eissn)
-        stitle(eventData.bibliographicInfo.stitle)
-        part(eventData.bibliographicInfo.part)
-        artnum(eventData.bibliographicInfo.artnum)
-        ssn(eventData.bibliographicInfo.ssn)
-        quarter(eventData.bibliographicInfo.quarter)
-        titleOfComponent(eventData.bibliographicInfo.titleOfComponent)
-        authorOfComponent(eventData.bibliographicInfo.authorOfComponent)
-        sponsor(eventData.bibliographicInfo.sponsor)
-        informationSource(eventData.bibliographicInfo.informationSource)
-
-        //
-        supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
-        bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
-
-
-        // Pretty sure this shouldn't be here
-        systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)
-        requestingAgencyRequestId(eventData.header.requestingAgencyRequestId)
-        supplier(eventData.bibliographicInfo.supplyingInstitutionSymbol)
-        requester(eventData.bibliographicInfo.requestingInstitutionSymbol)
-
-        // Should this be here?
-        patronNote(eventData.bibliographicInfo.patronNote)
-
-        oclcNumber(eventData.bibliographicInfo.oclcNumber)
-      }
+  ReturnInfo makeReturnInfo(eventData) {
+    ReturnInfo returnInfo = new ReturnInfo()
+    if(eventData.returnInfo.returnAgencyId) {
+      def values = eventData.returnInfo.returnAgencyId.split(':')
+      TypeAgencyId returnAgencyId = new TypeAgencyId()
+      returnAgencyId.setAgencyIdType(toTypeSchemeValuePair(values[0]))
+      returnAgencyId.setAgencyIdValue(values[1])
+      returnInfo.setReturnAgencyId(returnAgencyId)
     }
-  }
-
-  void makePublicationInfo(def del, eventData) {
-    exec(del) {
-      publicationInfo {
-        publisher(eventData.publicationInfo.publisher)
-        publicationDate(eventData.publicationInfo.publicationDate)
-        publicationDateOfComponent(eventData.publicationInfo.publicationDateOfComponent)
-        publicationType(eventData.publicationInfo.publicationType)
-        placeOfPublication(eventData.publicationInfo.placeOfPublication)
-      }
+    returnInfo.setName(eventData.returnInfo.name)
+    if (eventData.returnInfo.physicalAddress) {
+      PhysicalAddress physicalAddress = new PhysicalAddress()
+      physicalAddress.setLine1(eventData.returnInfo.physicalAddress)
+      returnInfo.setPhysicalAddress(physicalAddress)
     }
-  }
-
-    void makeServiceInfo(def del, eventData) {
-    exec(del) {
-      serviceInfo {
-        serviceType(eventData.serviceInfo.serviceType)
-        needBeforeDate(eventData.serviceInfo.needBeforeDate)
-        serviceLevel(eventData.serviceInfo.serviceLevel)
-        anyEdition(eventData.serviceInfo.anyEdition)
-        note(eventData.serviceInfo.note)
-      }
-    }
-  }
-
-  void makePatronInfo(def del, eventData) {
-    exec(del) {
-      patronInfo {
-        patronId(eventData.patronInfo.patronId)
-        surname(eventData.patronInfo.surname)
-        givenName(eventData.patronInfo.givenName)
-        patronType(eventData.patronInfo.patronType)
-        patronReference(eventData.patronInfo.patronReference)
-      }
-    }
-  }
-
-  void makeMessageInfo(def del, eventData) {
-    exec(del) {
-      messageInfo {
-        reasonForMessage(eventData.messageInfo.reasonForMessage)
-        answerYesNo(eventData.messageInfo.answerYesNo)
-        note(eventData.messageInfo.note)
-        reasonUnfilled(eventData.messageInfo.reasonUnfilled)
-        reasonRetry(eventData.messageInfo.reasonRetry)
-        offeredCosts(eventData.messageInfo.offeredCosts)
-        retryAfter(eventData.messageInfo.retryAfter)
-        retryBefore(eventData.messageInfo.retryBefore)
-      }
-    }
-  }
-
-  void makeActionAndNote(def del, eventData) {
-    exec(del) {
-      action(eventData.action)
-      note(eventData.note)
-    }
-  }
-
-  void makeStatusInfo(def del, eventData) {
-    exec(del) {
-      statusInfo {
-        status(eventData.statusInfo.status)
-        expectedDeliveryDate(eventData.statusInfo.expectedDeliverydate)
-        dueDate(eventData.statusInfo.dueDate)
-        lastChange(eventData.statusInfo.lastChange)
-      }
-    }
-  }
-
-  void makeDeliveryInfo(def del, eventData) {
-    exec(del) {
-      deliveryInfo {
-        dateSent(eventData.deliveryInfo.dateSent)
-        if (eventData.deliveryInfo.itemId instanceof Collection) {
-          // Build multiple ItemIds
-          eventData.deliveryInfo.itemId.collect {iid ->
-            itemId(iid)
-          }
-        } else {
-          // Build single ItemId
-          itemId(eventData.deliveryInfo.itemId)
-        }
-        sentVia(eventData.deliveryInfo.sentVia)
-        sentToPatron(eventData.deliveryInfo.sentToPatron)
-        loanCondition(eventData.deliveryInfo.loanCondition)
-        deliveredFormat(eventData.deliveryInfo.deliveredFormat)
-        deliveryCosts(eventData.deliveryInfo.deliveryCosts)
-        URL(eventData.deliveryInfo.url)
-      }
-    }
-  }
-
-  void makeReturnInfo(def del, eventData) {
-    exec(del) {
-      returnInfo {
-        returnAgencyId(eventData.returnInfo.returnAgencyId)
-        name(eventData.returnInfo.name)
-        physicalAddress(eventData.returnInfo.physicalAddress)
-      }
-    }
+    return returnInfo
   }
 }
