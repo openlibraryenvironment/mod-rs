@@ -24,5 +24,6 @@ class BaseHostLMSServiceSpec extends Specification implements ServiceUnitTest<De
         adapter       | responseJson
         'WMS'         | '{"firstName":"TEST ACCOUNT","lastName":"OCLC","privileges":[{"key":"STATUS","value":"OK"}, {"key":"PROFILE","value":"A Profile"}],"electronicAddresses":[{"value":"rebecca.gerber1@umassmed.edu","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"222 Maple Ave","region":"MA"},"key":"unknown-type"}],"userId":"D760463647"}'
         'Evergreen'   | '{"firstName":"Firstly","Lastly":"","privileges":[{"key":"Some Profile","value":"Active"}],"electronicAddresses":[{"value":"rebecca.gerber1@umassmed.edu","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"222 Maple Ave","region":"MA"},"key":"unknown-type"}],"userId":"D760463647"}'
+        'Symphony'    | '{"firstName":"Firstly","Lastly":"","privileges":[{"key":"Another Profile","value":""}],"electronicAddresses":[{"value":"rebecca.gerber1@umassmed.edu","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"222 Maple Ave","region":"MA"},"key":"unknown-type"}],"userId":"D760463647"}'
     }
 }
