@@ -474,10 +474,31 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         JSONArray priv = response.getJSONArray('privileges')
         // Return a status of BLOCKED if the user is blocked, else OK for now
         result.status = (priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+
+        // lib-ncip-client constructs the privileges array from UserPrivilege elements
+        // mapping AgencyUserPrivilegeType to the 'key' property and UserPrivilegeStatusType
+        // to 'value'. Unfortunately, usage of these elements varies between implementations,
+        // sometimes even of the same ILS.
+        //
+        // Some implementations fit this key/value pattern and store the user profile name as
+        // UserPrivilegeStatusType where AgencyUserPrivilegeType is 'PROFILE'
         result.userProfile = (priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
+
+        // However others have the profile name in AgencyUserPrivilegeType instead and
+        // indicate whether that membership is active in UserPrivilegeStatusType
         if (!result?.userProfile) {
           result.userProfile = (priv.find { it.value.equalsIgnoreCase('active') })?.key
         }
+
+        // Others don't return a status type at all when doing so, which lib-ncip-client
+        // currently maps as an empty string
+        if (!result?.userProfile && priv.size() == 1) {
+          def onlyPriv = priv.get(0)
+          if (onlyPriv?.key && !onlyPriv?.value) {
+            result.userProfile = onlyPriv.key
+          }
+        }
+
         result.result = true
         result.userid = response.opt('userId') ?: response.opt('userid')
         result.givenName = response.opt('firstName')
