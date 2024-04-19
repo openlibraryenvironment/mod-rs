@@ -8,14 +8,14 @@ public class GetPatronRequestParameter {
     List<String> match;
     List<String> filters;
     List<String> sort;
-    Object max;
-    Object perPage;
-    Object offset;
-    Object page;
+    Integer max;
+    Integer perPage;
+    Integer offset;
+    Integer page;
     Boolean stats;
     String xOkapiToke;
 
-    public GetPatronRequestParameter(String xOkapiTenant, String term, List<String> match, List<String> filters, List<String> sort, Object max, Object perPage, Object offset, Object page, Boolean stats, String xOkapiToke) {
+    public GetPatronRequestParameter(String xOkapiTenant, String term, List<String> match, List<String> filters, List<String> sort, Integer max, Integer perPage, Integer offset, Integer page, Boolean stats, String xOkapiToke) {
         this.xOkapiTenant = xOkapiTenant;
         this.term = term;
         this.match = match;
@@ -49,19 +49,19 @@ public class GetPatronRequestParameter {
         return sort;
     }
 
-    public Object getMax() {
+    public Integer getMax() {
         return max;
     }
 
-    public Object getPerPage() {
+    public Integer getPerPage() {
         return perPage;
     }
 
-    public Object getOffset() {
+    public Integer getOffset() {
         return offset;
     }
 
-    public Object getPage() {
+    public Integer getPage() {
         return page;
     }
 

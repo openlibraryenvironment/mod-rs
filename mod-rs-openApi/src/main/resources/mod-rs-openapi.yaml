@@ -5,7 +5,7 @@ info:
 servers:
   - url: /
 paths:
-  /rs/patronrequests:
+  /rs/spring/patronrequests:
     get:
       tags:
         - Patron Request Controller
@@ -47,20 +47,24 @@ paths:
         - name: max
           in: query
           description: Maximum number of items to return
-          schema: {}
+          schema:
+            type: integer
         - name: perPage
           in: query
           description: Number of items per page
-          schema: {}
+          schema:
+            type: integer
         - name: offset
           in: query
           description: Offset from the becoming of the result set to start returning
             results
-          schema: {}
+          schema:
+            type: integer
         - name: page
           in: query
           description: The page you wnat the results being returned from
-          schema: {}
+          schema:
+            type: integer
         - name: stats
           in: query
           description: Do we return statistics about the search

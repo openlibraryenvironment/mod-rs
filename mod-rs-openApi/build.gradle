@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id "org.openapi.generator" version "6.6.0"
+    id 'idea'
+    id 'maven-publish'
+}
+
+group = 'mod.rs'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.8'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.14'
+//    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.4'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.8'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
+
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${project.buildDir}/generated/src/main/java"
+        }
+    }
+}
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set("$rootDir/src/main/resources/mod-rs-openapi.yaml")
+    outputDir.set("$buildDir/generated")
+    apiPackage.set("mod.rs.spring.api")
+    invokerPackage.set("mod.rs.spring.invoker")
+    modelPackage.set("mod.rs.spring.model")
+    configOptions.set([
+            dateLibrary: "java8",
+            java8: "true",
+            interfaceOnly: "true",
+            useSpringBoot3: "false"
+    ])
+}
+
+compileJava.dependsOn 'openApiGenerate'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri('https://reposilite.reshare.indexdata.com/releases')
+            credentials {
+                username = System.getenv("REPOSOLITE_USERNAME")
+                password = System.getenv("REPOSOLITE_PASSWORD")
+            }
+        }
+    }
+}

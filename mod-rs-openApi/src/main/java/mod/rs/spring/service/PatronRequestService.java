@@ -8,4 +8,6 @@ import java.util.List;
 public interface PatronRequestService {
 
     List<PatronRequest> findRequests(GetPatronRequestParameter parameters);
+
+    PatronRequest createRequests(String xOkapiTenant, String xOkapiToken, PatronRequest patronRequest);
 }
