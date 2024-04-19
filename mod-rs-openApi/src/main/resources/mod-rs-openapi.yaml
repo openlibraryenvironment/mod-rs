@@ -1,0 +1,147 @@
+openapi: 3.0.1
+info:
+  title: MOD RS spring boot endpoint
+  version: "1.0"
+servers:
+  - url: /
+paths:
+  /rs/patronrequests:
+    get:
+      tags:
+        - Patron Request Controller
+      summary: Search with the supplied criteria
+      operationId: getPatronRequests
+      parameters:
+        - name: term
+          in: query
+          description: The term to be searched for
+          schema:
+            type: string
+        - name: match
+          in: query
+          description: The properties the match is to be applied to
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filters
+          in: query
+          description: The filters to be applied
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: sort
+          in: query
+          description: The properties to sort the items by
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: max
+          in: query
+          description: Maximum number of items to return
+          schema: {}
+        - name: perPage
+          in: query
+          description: Number of items per page
+          schema: {}
+        - name: offset
+          in: query
+          description: Offset from the becoming of the result set to start returning
+            results
+          schema: {}
+        - name: page
+          in: query
+          description: The page you wnat the results being returned from
+          schema: {}
+        - name: stats
+          in: query
+          description: Do we return statistics about the search
+          schema:
+            type: boolean
+        - name: X-Okapi-Tenant
+          in: header
+          description: The tenant the request is for
+          required: true
+          schema:
+            type: string
+            default: diku
+        - name: X-Okapi-Token
+          in: header
+          description: The authentication token to use with this request
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/patronRequest'
+    post:
+      tags:
+        - Patron Request Controller
+      summary: Creates a new record with the supplied data
+      operationId: createPatronRequest
+      parameters:
+        - name: X-Okapi-Tenant
+          in: header
+          description: The tenant the request is for
+          required: true
+          schema:
+            type: string
+            default: diku
+        - name: X-Okapi-Token
+          in: header
+          description: The authentication token to use with this request
+          schema:
+            type: string
+      requestBody:
+        description: The json record that is going to be used for creation
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/patronRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/patronRequest'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    patronRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        patronReference:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        requestingInstitutionSymbol:
+          type: string
+        supplyingInstitutionSymbol:
+          type: string
+        systemInstanceIdentifier:
+          type: string
+        patronIdentifier:
+          type: string
+        isRequester:
+          type: boolean
+        hrid:
+          type: string

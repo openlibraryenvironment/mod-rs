@@ -1,5 +1,6 @@
 // Place your Spring DSL code here
 import grails.util.Environment
+import mod.rs.spring.controller.PatronRequestSpringController
 import org.olf.rs.*;
 import org.olf.rs.sharedindex.*;
 import org.olf.rs.sharedindex.jiscdiscover.*;
@@ -16,4 +17,6 @@ beans = {
       jiscDiscoverApiConnection(JiscDiscoverApiConnectionImpl)
       break
   }
+  patronRequestSpring(PatronRequestSpringController)
+  patronRequestService(PatronRequestService)
 }

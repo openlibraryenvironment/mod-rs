@@ -216,6 +216,7 @@ dependencies {
 
   // Iso java classes
   implementation 'org.olf.rs.iso18626:iso18626-client:1.2'
+  implementation 'mod.rs:mod-rs-openApi:1.0'
 }
 
 bootRun {

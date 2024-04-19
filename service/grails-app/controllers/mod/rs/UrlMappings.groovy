@@ -12,6 +12,7 @@ class UrlMappings {
     "/rs/externalApi/iso18626" (controller: 'externalApi', action:'iso18626' )
     "/rs/externalApi/statusReport" (controller: 'externalApi', action:'statusReport' )
 
+//    "/rs/spring3/patronrequests" (controller:'patronRequestSpring', action: 'getPatronRequests')
     "/rs/patronrequests" (resources:'patronRequest') {
       '/validActions' (controller: 'patronRequest', action: 'validActions')
       '/performAction'  (controller: 'patronRequest', action: 'performAction')
