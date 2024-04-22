@@ -17,4 +17,10 @@ databaseChangeLog = {
             where("rdv_value='copy-non-returnable'")
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20240422-1300-001") {
+        delete(tableName: 'refdata_value') {
+            where("rdv_owner in (select rdc_id from refdata_category where rdc_description='request.publicationType') AND rdv_value='other'")
+        }
+    }
 }
