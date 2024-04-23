@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -206,7 +207,10 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Boolean overdue
 
+  @CategoryId(RefdataValueData.VOCABULARY_CANCELLATION_REASONS)
   RefdataValue cancellationReason
+
+  @CategoryId(RefdataValueData.VOCABULARY_COPYRIGHT_TYPE)
   RefdataValue copyrightType;
 
   /** The current status of any network messaging */
