@@ -26,7 +26,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // internal ID of the patron request
   String id
 
-  @Defaults(['Book', 'Journal', 'Other'])
+  @Defaults(['ArchiveMaterial', 'Article', 'AudioBook', 'Book', 'Chapter', 'ConferenceProc', 'Game', 'GovernmentPubl', 'Image', 'Journal', 'Manuscript', 'Map', 'Movie', 'MusicRecording', 'MusicScore', 'Newspaper', 'Patent', 'Report', 'SoundRecording', 'Thesis'])
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
