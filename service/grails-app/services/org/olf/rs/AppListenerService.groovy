@@ -5,7 +5,8 @@ import org.grails.datastore.mapping.engine.event.PostInsertEvent
 import org.grails.datastore.mapping.engine.event.PostUpdateEvent
 import org.grails.datastore.mapping.engine.event.PreInsertEvent
 import org.grails.datastore.mapping.engine.event.SaveOrUpdateEvent
-import org.olf.rs.statemodel.Events;
+import org.olf.rs.statemodel.Events
+import org.olf.rs.statemodel.StateModel;
 import org.springframework.context.ApplicationListener
 
 import grails.gorm.multitenancy.Tenants;
@@ -34,7 +35,9 @@ public class AppListenerService implements ApplicationListener {
       String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
-      String eventName = (pr.isRequester ? Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION : Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION);
+      //String eventName = (pr.isRequester ? Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION : Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION);
+      String eventName = getPatronRequestEventName(pr.stateModel.shortcode, pr.isRequester);
+      log.debug("For statemodel ${pr.stateModel.shortcode} and isRequester ${pr.isRequester}, publishing event ${eventName}");
       eventPublicationService.publishAsJSON(
           topic,
           null,             // key
@@ -120,5 +123,26 @@ public class AppListenerService implements ApplicationListener {
     else {
       // log.debug("Event is not a persistence event: ${event}");
     }
+  }
+
+
+  private static String getPatronRequestEventName(String stateModelName, boolean isRequester) {
+    String eventName;
+
+    if (stateModelName == StateModel.MODEL_REQUESTER || stateModelName == StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER ) {
+      eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+    } else if (stateModelName == StateModel.MODEL_RESPONDER || stateModelName == StateModel.MODEL_CDL_RESPONDER) {
+      eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+    } else if (stateModelName == StateModel.MODEL_NR_REQUESTER) {
+      eventName = Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+    } else if (stateModelName == StateModel.MODEL_NR_RESPONDER) {
+      eventName = Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+    } else if (isRequester) {
+      eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+    } else {
+      eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+    }
+
+    return eventName;
   }
 }

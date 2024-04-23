@@ -1,5 +1,6 @@
 package org.olf.rs.referenceData
 
+import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEvent
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.ActionEventResultQualifier
@@ -10,6 +11,7 @@ import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StatusStage;
 
+@Slf4j
 public class NonreturnablesStateModelData {
 
     // STATEMODEL STATE LISTING
@@ -35,7 +37,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP ],
         [ status : Status.RESPONDER_UNFILLED ],
         [ status : Status.RESPONDER_AWAIT_PICKING ],
-        [ status : Status.RESPONDER_DOCUMENT_DELIVERED, isTerminal: true ],
+        [ status : Status.RESPONDER_DOCUMENT_DELIVERED, isTerminal: true ]
     ];
 
     //NR REQUEST ACTIONEVENT RESULTS
@@ -127,7 +129,7 @@ public class NonreturnablesStateModelData {
             description: 'Incoming ISO18686 message from the responder has said that the status is ExpectToSupply',
             result: true,
             status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
-            qualifier: ActionEventResultQualifier.QUALIFIER_EXPECTS_TO_SUPPLY,
+            qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -157,10 +159,10 @@ public class NonreturnablesStateModelData {
 
     private static Map nrRequesterISO18626Delivered = [
             code: 'requesterISO18626Delivered',
-            description: 'Incoming ISO18626 message fromt he responder has said the status is Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
             result: true,
-            status: Status.PATRON_REQUEST_DELIVERED,
-            qualifier: ActionEventResultQualifier.QUALIFIER_DELIVERED,
+            status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
+            qualifier: null,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -176,7 +178,7 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
-    //NR REQUEST ACTIONEVENT RESULT LISTS
+    //NR REQUESTER ACTIONEVENT RESULT LISTS
     private static Map nrRequesterNewPatronRequestList = [
             code: ActionEventResultList.NR_REQUESTER_EVENT_NEW_PATRON_REQUEST,
             description: 'Event for a new Non-Returnable Request entering the system',
@@ -224,7 +226,7 @@ public class NonreturnablesStateModelData {
 
     private static Map nrRequesterExpectToSupplyISO18626List = [
             code: ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626,
-            description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_REQUEST_EXPECTS_TO_SUPPLY,
+            description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626Delivered,
@@ -289,7 +291,17 @@ public class NonreturnablesStateModelData {
             code: 'nrResponderAddURLOK',
             description: 'URL has been added to document',
             result: true,
-            status: Status.RES_DOCUMENT_DELIVERED,
+            status: Status.RESPONDER_DOCUMENT_DELIVERED,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderISO18626Cancel = [
+            code: 'nrResponderISO18626Cancel',
+            description: 'Requester has sent cancel message',
+            result: true,
+            status: Status.RESPONDER_CANCELLED,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
@@ -298,7 +310,7 @@ public class NonreturnablesStateModelData {
     //NR RESPONSE ACTIONEVENT RESULT LISTS
 
     private static Map nrResponderNewPatronRequestList = [
-            code: ActionEventResultList.NR_RESPONDER_NEW_PATRON_REQUEST,
+            code: ActionEventResultList.NR_RESPONDER_EVENT_NEW_PATRON_REQUEST,
             description: 'Event for a new incoming request on the responder side',
             model: StateModel.MODEL_NR_RESPONDER,
             results: [
@@ -340,7 +352,17 @@ public class NonreturnablesStateModelData {
             results: [
                     nrResponderAddURLOK
             ]
-    ]
+    ];
+
+    private static Map nrResponderCancelRecievedISO18626 = [
+            code: ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626,
+            description: 'An incoming ISO18626 Cancel has been received by the supplier',
+            model: StateModel.MODEL_NR_RESPONDER,
+            results: [
+                    nrResponderISO18626Cancel
+            ]
+    ];
+
 
     private static Map[] resultLists = [
             nrRequesterNewPatronRequestList,
@@ -353,7 +375,8 @@ public class NonreturnablesStateModelData {
             nrResponderAnswerYesList,
             nrResponderCannotSupplyList,
             nrResponderPrintPullslipList,
-            nrResponderAddURLToDocumentList
+            nrResponderAddURLToDocumentList,
+            nrResponderCancelRecievedISO18626
     ];
 
 
@@ -371,18 +394,18 @@ public class NonreturnablesStateModelData {
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT,
                 'Attach a URL to fulfill a nonreturnable request', true,
-                StateModel.MODEL_NR_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
-                null);
+                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
+                ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
 
         ActionEvent.ensure(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
                 "A new Non-Returnable patron request for the requester has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION),
-                null);
+                ActionEventResultList.NR_REQUESTER_EVENT_NEW_PATRON_REQUEST);
 
         ActionEvent.ensure(Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION,
                 "A new Non-Returnable patron request for the responder has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION),
-                null);
+                ActionEventResultList.NR_RESPONDER_EVENT_NEW_PATRON_REQUEST);
 
     }
 
@@ -393,16 +416,45 @@ public class NonreturnablesStateModelData {
     }
 
     public static void loadAvailableActionData() {
+        //REQ_IDLE
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //REQ_VALIDATED
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //REQ_SENT_TO_SUPPLIER
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
+
+        //REQ_EXPECTS_TO_SUPPLY
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
+
+        //REQ_DOCUMENT_DELIVERED
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_DOCUMENT_DELIVERED, Actions.ACTION_REQUESTER_COMPLETE_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //REQ_END_OF_ROTA
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL);
+
         //RES_IDLE
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //RES_NEW_AWAIT_PULL_SLIP
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL);
 
         //RES_AWAIT_PICKING
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
 
 

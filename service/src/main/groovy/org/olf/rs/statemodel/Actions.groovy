@@ -62,7 +62,8 @@ public class Actions {
 	static public final String ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS  	 = "requesterRejectConditions";
 	static public final String ACTION_REQUESTER_REREQUEST                        = "rerequest";
 	static public final String ACTION_REQUESTER_SHIPPED_RETURN               	 = "shippedReturn";
-	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn"
+	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn";
+	static public final String ACTION_REQUESTER_COMPLETE_REQUEST				 = "requesterCompleteRequest";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";

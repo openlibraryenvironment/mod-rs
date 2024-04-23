@@ -1,14 +1,78 @@
 package org.olf.rs.statemodel.events
 
+import com.k_int.web.toolkit.refdata.RefdataValue
+import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
+import org.olf.rs.ReshareActionService
+import org.olf.rs.patronRequest.PickupLocationService
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.AbstractEvent
+import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.Events
 
 public class EventNonreturnableRequesterNewPatronRequestIndService extends AbstractEvent {
+
+    ReshareActionService reshareActionService;
+    NewRequestService newRequestService;
+
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+        if (request == null) {
+            log.warn("Unable to locate request for ID ${eventData.payload.id} isRequester=${request?.isRequester}");
+            return eventResultDetails;
+        }
+
+        if (!request.hrid) {
+            request.hrid = newRequestService.generateHrid();
+        }
+
+        if (request.requestingInstitutionSymbol != null) {
+            Symbol requestingSymbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+            if (requestingSymbol != null) {
+                request.resolvedRequester = requestingSymbol;
+            }
+
+            Map lookupPatron = reshareActionService.lookupPatron(request, null);
+            if (lookupPatron.callSuccess) {
+                boolean patronValid = lookupPatron.patronValid;
+                if (requestingSymbol == null) {
+                    request.needsAttention = true;
+                    log.warn("Unknown requesting institution symbol : ${request.requestingInstitutionSymbol}");
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
+                    eventResultDetails.auditMessage = 'Unknown Requesting Institution Symbol: ' + request.requestingInstitutionSymbol;
+                } else if (!patronValid) {
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_INVALID_PATRON;
+                    String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')');
+                    String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')');
+                    eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString();
+                    request.needsAttention = true;
+                } else if (newRequestService.isOverLimit(request)) {
+                    log.debug("Request is over limit");
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_OVER_LIMIT;
+                    patronNoticeService.triggerNotices(request,
+                            RefdataValue.lookupOrCreate('noticeTriggers', RefdataValueData.NOTICE_TRIGGER_OVER_LIMIT));
+                } else if (!newRequestService.hasClusterID(request)) {
+                    request.needsAttention = true;
+                    log.warn("No cluster id set for request ${request.id}");
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_BLANK_FORM_REVIEW;
+                    eventResultDetails.auditMessage = 'Blank Request Form, needs review';
+                } else {
+                    log.debug("Got request ${request}");
+                }
+            } else {
+                request.needsAttention = true;
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED;
+                eventResultDetails.auditMessage = 'Host LMS integration: lookupPatron call failed. Review configuration and try again or deconfigure host LMS integration in settings. ' + lookupPatron?.problems;
+            }
+        } else {
+            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
+            request.needsAttention = true;
+            eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
+        }
+
         return eventResultDetails;
     }
 
