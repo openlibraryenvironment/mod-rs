@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events
 
+import org.apache.commons.lang3.ObjectUtils
 import org.olf.rs.Iso18626Constants
 import org.olf.rs.ReshareApplicationEventHandlerService
 
@@ -70,7 +71,17 @@ public class EventMessageRequestIndService extends AbstractEvent {
             for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
                 newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
             }
-            PatronRequest pr = new PatronRequest(newParams)
+            String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
+            PatronRequest pr = lookupPatronRequest(id, true)
+            if (pr) {
+                newParams.each { key, value ->
+                    if (pr.hasProperty(key) && ObjectUtils.isNotEmpty(value)) {
+                        pr."$key" = value
+                    }
+                }
+            } else {
+                pr = new PatronRequest(newParams)
+            }
 
             // Add publisher information to Patron Request
             Map publicationInfo = eventData.publicationInfo;
@@ -179,8 +190,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType); // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
-            pr.stateModel = statusService.getStateModel(pr);
+            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType) // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
+            pr.stateModel = statusService.getStateModel(pr)
             pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
 
@@ -206,5 +217,23 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
         log.debug('EventMessageRequestIndService::processEvent complete');
         return(eventResultDetails);
+    }
+
+    PatronRequest lookupPatronRequest(String id, boolean withLock = false) {
+        log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${withLock})")
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                or {
+                    eq('id', id)
+                    eq('hrid', id)
+                    eq('peerRequestIdentifier', id)
+                }
+            }
+            lock withLock
+        }
+
+        log.debug("LOCKING EventMessageRequestIndService::lookupPatronRequest located ${result?.id}/${result?.hrid}");
+
+        return result;
     }
 }
