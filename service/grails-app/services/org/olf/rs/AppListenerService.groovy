@@ -36,7 +36,7 @@ public class AppListenerService implements ApplicationListener {
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
       //String eventName = (pr.isRequester ? Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION : Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION);
-      String eventName = getPatronRequestEventName(pr.stateModel.shortcode, pr.isRequester);
+      String eventName = getPatronRequestEventName(pr?.stateModel?.shortcode, pr?.isRequester);
       log.debug("For statemodel ${pr.stateModel.shortcode} and isRequester ${pr.isRequester}, publishing event ${eventName}");
       eventPublicationService.publishAsJSON(
           topic,
@@ -126,7 +126,7 @@ public class AppListenerService implements ApplicationListener {
   }
 
 
-  private static String getPatronRequestEventName(String stateModelName, boolean isRequester) {
+  private static String getPatronRequestEventName(String stateModelName, Boolean isRequester) {
     String eventName;
 
     if (stateModelName == StateModel.MODEL_REQUESTER || stateModelName == StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER ) {
