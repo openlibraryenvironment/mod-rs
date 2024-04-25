@@ -424,9 +424,9 @@ public class StatusService {
                     newStatusResult.updateRotaLocation = actionEventResult.updateRotaLocation;
                 }
             } else {
-                String error = 'The status is null on the found actionEventResult, so status is staying the same for, From Status: ' + request.state.code +
+                String error = "The status is null on the found actionEventResult ${actionEventResult?.code}, so status is staying the same for, From Status: " + request.state.code +
                                ', Action: ' + action +
-                               ', Qualifer: ' + ((qualifier == null) ? '' : qualifier);
+                               ', Qualifier: ' + ((qualifier == null) ? '' : qualifier);
                 log.warn(error);
             }
         } else {

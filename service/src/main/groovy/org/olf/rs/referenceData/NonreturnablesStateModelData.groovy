@@ -162,7 +162,7 @@ public class NonreturnablesStateModelData {
             description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
-            qualifier: null,
+            qualifier: ActionEventResultQualifier.QUALIFIER_DELIVERED,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
