@@ -282,4 +282,12 @@ public class HostLMSService {
         }
         return cancelRequestItemResult;
     }
+
+    public boolean isManualCancelRequestItem() {
+        HostLMSActions hostLMSActions = getHostLMSActions();
+        if (hostLMSActions) {
+            return hostLMSActions.isManualCancelRequestItem();
+        }
+        return false;
+    }
 }

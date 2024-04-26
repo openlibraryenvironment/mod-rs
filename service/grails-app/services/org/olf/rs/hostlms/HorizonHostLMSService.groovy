@@ -15,6 +15,11 @@ public class HorizonHostLMSService extends BaseHostLMSService {
   }
 
   @Override
+  public boolean isManualCancelRequestItem() {
+    return true;
+  }
+
+  @Override
   //We need to also eliminate any holdings of type "Internet"
   protected List<ItemLocation> extractAvailableItemsFrom(z_response, String reason, IHoldingLogDetails holdingLogDetails) {
     List<ItemLocation> availability_summary = [];
