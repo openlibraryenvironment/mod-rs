@@ -1,6 +1,9 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.HostLMSService;
+import org.olf.rs.PatronRequest
+import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -12,6 +15,11 @@ import org.olf.rs.statemodel.Actions;
  */
 public class ActionResponderSupplierRespondToCancelService extends ActionResponderService {
 
+    private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
+
+    HostLMSService hostLMSService;
+    SettingsService settingsService;
+
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL);
@@ -22,7 +30,17 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
         // Send the response to the requester
         reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
 
-        // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
+        //Are we using request item? If so, we need to instruct the host lms to send a cancel request item if necessary
+        if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
+            if (hostLMSService.isManualCancelRequestItem()) {
+                log.debug("Sending CancelRequestItem");
+                Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.hrid);
+                log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
+            }
+        }
+
+
+            // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
         if (parameters?.cancelResponse == 'no') {
             // Set the audit message and qualifier
             actionResultDetails.auditMessage = 'Cancellation denied';

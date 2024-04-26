@@ -30,7 +30,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     DirectoryEntryService directoryEntryService;
     HostLMSService hostLMSService;
     ReshareActionService reshareActionService;
-    SettingsService settingsService;
+
     SharedIndexService sharedIndexService;
 
     @Override
