@@ -30,15 +30,6 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
         // Send the response to the requester
         reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
 
-        //Are we using request item? If so, we need to instruct the host lms to send a cancel request item if necessary
-        if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
-            if (hostLMSService.isManualCancelRequestItem()) {
-                log.debug("Sending CancelRequestItem");
-                Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.hrid);
-                log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
-            }
-        }
-
 
             // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
         if (parameters?.cancelResponse == 'no') {
@@ -47,6 +38,15 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
             actionResultDetails.auditMessage = 'Cancellation accepted';
+
+            //Are we using request item? If so, we need to instruct the host lms to send a cancel request item if necessary
+            if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
+                if (hostLMSService.isManualCancelRequestItem()) {
+                    log.debug("Sending CancelRequestItem");
+                    Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.hrid);
+                    log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
+                }
+            }
         }
 
         return(actionResultDetails);
