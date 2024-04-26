@@ -487,7 +487,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         // However others have the profile name in AgencyUserPrivilegeType instead and
         // indicate whether that membership is active in UserPrivilegeStatusType
         if (!result?.userProfile) {
-          result.userProfile = (priv.find { it.value.equalsIgnoreCase('active') })?.key
+          result.userProfile = (priv.find { it.value instanceof String && ['active', 'ok'].contains(it.value.toLowerCase())})?.key
         }
 
         // Others don't return a status type at all when doing so, which lib-ncip-client
