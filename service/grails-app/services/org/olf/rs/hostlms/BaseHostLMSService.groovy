@@ -77,6 +77,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return false;
   }
 
+  public boolean isManualCancelRequestItem() {
+    return false;
+  }
+
   /**
    *
    *

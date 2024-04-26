@@ -31,7 +31,6 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     HostLMSService hostLMSService;
     ReshareActionService reshareActionService;
     SettingsService settingsService;
-    SharedIndexService sharedIndexService;
 
     @Override
     String name() {
