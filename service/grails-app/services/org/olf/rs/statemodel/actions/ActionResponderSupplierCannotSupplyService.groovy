@@ -1,8 +1,8 @@
-package org.olf.rs.statemodel.actions
+package org.olf.rs.statemodel.actions;
 
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
-import org.olf.rs.SettingsService
+import org.olf.rs.SettingsService;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
