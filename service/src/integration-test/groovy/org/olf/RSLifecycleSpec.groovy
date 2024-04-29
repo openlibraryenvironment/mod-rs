@@ -812,7 +812,7 @@ class RSLifecycleSpec extends TestBase {
             "RSInstOne"       | null              | 6        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null
             "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"
             "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "URL"          | "Copy"      | "{status=true}"
-            "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierAddURLToDocument.json"     | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
+            "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierAddURLToDocument.json"     | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
 
     }
 

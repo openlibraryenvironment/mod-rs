@@ -87,6 +87,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final NR_REQUESTER_EVENT_SUPPLIER_IDENTIFIED          = 'nrRequesterEventSupplierIdentified';
     static public final NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626          = 'nrRequesterSentToSupplierISO18626';
     static public final NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626          = 'nrRequesterExpectToSupplyISO18626';
+    static public final NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
     static public final NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
 
     static public final NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';

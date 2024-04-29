@@ -168,11 +168,21 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterDeliveredOK = [
+            code: 'nrRequesterDeliveredOK',
+            description: 'The request is successfully delivered',
+            result: true,
+            status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterCompleteOK = [
             code: 'requesterCompleteOK',
             description: 'The request is completed',
             result: true,
-            status: Status.PATRON_REQUEST_COMPLETE,
+            status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
@@ -233,6 +243,16 @@ public class NonreturnablesStateModelData {
                     nrRequesterISO18626Unfilled,
                     nrDefaultNoStatusChangeOK
             ]
+    ];
+
+    private static Map nrRequesterDeliveredList = [
+            code: ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED,
+            description: 'Requester has had the document delivered',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterDeliveredOK
+            ]
+
     ];
 
     private static Map nrRequesterCompletedList = [
@@ -370,6 +390,7 @@ public class NonreturnablesStateModelData {
             nrRequesterSendToNextLocationList,
             nrRequesterSentToSupplierISO18626List,
             nrRequesterExpectToSupplyISO18626List,
+            nrRequesterDeliveredList,
             nrRequesterCompletedList,
             nrResponderNewPatronRequestList,
             nrResponderAnswerYesList,
@@ -406,6 +427,11 @@ public class NonreturnablesStateModelData {
                 "A new Non-Returnable patron request for the responder has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION),
                 ActionEventResultList.NR_RESPONDER_EVENT_NEW_PATRON_REQUEST);
+
+        ActionEvent.ensure(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION,
+                "A non-returnable request has had the document delivered", false,
+                ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
+                ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
 
     }
 
