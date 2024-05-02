@@ -242,7 +242,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Request created from this request */
   PatronRequest succeededBy;
 
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed'];
+  /** If we create an external hold for this request, store the request id returned */
+  String externalHoldRequestId;
+
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
   static hasMany = [
@@ -383,6 +387,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     precededBy (nullable: true)
     succeededBy (nullable: true)
+
+    externalHoldRequestId (nullable: true)
   }
 
   static mapping = {
@@ -499,6 +505,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     precededBy column: 'pr_preceded_by_fk'
     succeededBy column: 'pr_succeeded_by_fk'
+
+    externalHoldRequestId column: 'pr_external_hold_request_id'
 
     audit(sort:'dateCreated', order:'desc')
     protocolAudit(sort:'dateCreated', order:'desc')
