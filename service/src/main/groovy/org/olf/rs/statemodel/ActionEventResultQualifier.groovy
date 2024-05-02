@@ -35,4 +35,5 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_SHIPPED               = 'shipped';
     static public final String QUALIFIER_SOURCING              = 'sourcing';
     static public final String QUALIFIER_UNFILLED              = 'unfilled';
+    static public final String QUALIFIER_DELIVERED             = 'delivered';
 }

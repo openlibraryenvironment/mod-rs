@@ -99,8 +99,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
 
                     // Fill out the directory entry reference if it's not currently set, and try to send.
                     if ((nextResponder != null) &&
-                        (s != null) &&
-                        (prr.peerSymbol == null)) {
+                            (s != null) &&
+                            (prr.peerSymbol == null)) {
                         // Determine the message we will be sending, the id includes the rota position, so needs to be dtermined after the rota position has been calculated
                         Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
                         log.debug("Built request message request: ${requestMessageRequest }");

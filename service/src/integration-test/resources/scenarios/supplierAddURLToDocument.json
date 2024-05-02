@@ -1,0 +1,6 @@
+{
+  "action": "supplierAddURLToDocument",
+  "actionParams": {
+    "url": "https://some.domain?param=value"
+  }
+}

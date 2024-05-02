@@ -12,6 +12,7 @@ import org.olf.rs.referenceData.StateModelData;
 import org.olf.rs.referenceData.StatusData;
 import org.olf.rs.referenceData.TemplateData;
 import org.olf.rs.referenceData.TimerData;
+import org.olf.rs.referenceData.NonreturnablesStateModelData;
 import org.olf.rs.statemodel.Status;
 
 import com.k_int.okapi.OkapiTenantAdminService
@@ -95,6 +96,9 @@ public class HousekeepingService implements EventPublisher {
 
         // The predefined templates
         TemplateData.loadAll();
+
+        //Non-Returnable Statemodel
+        NonreturnablesStateModelData.loadAll();
       }
   }
 

@@ -15,6 +15,7 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_CANCELLED_WITH_SUPPLIER     = "REQ_CANCELLED_WITH_SUPPLIER";
   public static final String PATRON_REQUEST_CHECKED_IN                  = "REQ_CHECKED_IN";
   public static final String PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED = "REQ_CONDITIONAL_ANSWER_RECEIVED";
+  public static final String PATRON_REQUEST_DOCUMENT_DELIVERED          = "REQ_DOCUMENT_DELIVERED";
   public static final String PATRON_REQUEST_DUPLICATE_REVIEW            = "REQ_DUPLICATE_REVIEW";
   public static final String PATRON_REQUEST_END_OF_ROTA                 = "REQ_END_OF_ROTA";
   public static final String PATRON_REQUEST_END_OF_ROTA_REVIEWED        = "REQ_END_OF_ROTA_REVIEWED";
@@ -38,6 +39,8 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_UNFILLED                    = "REQ_UNFILLED";
   public static final String PATRON_REQUEST_VALIDATED                   = "REQ_VALIDATED";
   public static final String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
+  public static final String PATRON_REQUEST_DELIVERED                   = "REQ_DELIVERED";
+  public static final String PATRON_REQUEST_COMPLETE                    = "REQ_COMPLETE";
 
   public static final String REQUESTER_LOANED_DIGITALLY                 = "REQ_LOANED_DIGITALLY";
 
@@ -47,6 +50,7 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
   public static final String RESPONDER_CANCELLED                  = "RES_CANCELLED";
   public static final String RESPONDER_COMPLETE                   = "RES_COMPLETE";
+  public static final String RESPONDER_DOCUMENT_DELIVERED         = "RES_DOCUMENT_DELIVERED";
   public static final String RESPONDER_IDLE                       = "RES_IDLE";
   public static final String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
   public static final String RESPONDER_ITEM_SHIPPED               = "RES_ITEM_SHIPPED";
