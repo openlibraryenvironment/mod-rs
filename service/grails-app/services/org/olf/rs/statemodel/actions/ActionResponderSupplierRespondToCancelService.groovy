@@ -46,7 +46,7 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
             if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
                 if (hostLMSService.isManualCancelRequestItem()) {
                     log.debug("Sending CancelRequestItem");
-                    Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.hrid);
+                    Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.externalHoldRequestId);
                     log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
                 }
             }
