@@ -47,6 +47,15 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
         return(eventResultDetails)
     }
 
+    /**
+     * Auto responder which makes the host LMS service call for request item and if the call is successful, we create audit message 'WillSupply' and change the status to 'SLNP_RES_AWAIT_PICKING'.
+     * Following the successful result we next verify that the auto-loan setting is turned ON and if yes we send 'Loaned' status change message which triggers state change to 'SLNP_RES_ITEM_SHIPPED'.
+     * In case of unsuccessful call to host LMS and auto-loan turned ON we send 'Unfilled' status change message which triggers state change to 'SLNP_RES_UNFILLED'.
+     *
+     * @param request - Responder Patron request object
+     * @param autoRespondVariant - Setting type, for example, auto-loan
+     * @param eventResultDetails - Object containing results for the event such as audit, qualifier, result etc...
+     */
     private void autoRespond(PatronRequest request, String autoRespondVariant, EventResultDetails eventResultDetails) {
         log.debug('autoRespond....')
 
@@ -59,16 +68,16 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             eventResultDetails.auditMessage = 'Will Supply'
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
 
-            // Respond 'Loaned' depending on setting
-            checkSettingAndSendResponse(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_LOANED, 'Loaned', request, eventResultDetails)
+            // Send 'Loaned' message
+            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_LOANED, 'Loaned', request, eventResultDetails)
         } else {
-            // Respond 'Unfilled' depending on setting
+            // Send 'Unfilled' message
             eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid ' + request.supplierUniqueRecordId
-            checkSettingAndSendResponse(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_UNFILLED, 'Unfilled', request, eventResultDetails)
+            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_UNFILLED, 'Unfilled', request, eventResultDetails)
         }
     }
 
-    private void checkSettingAndSendResponse(String autoRespondVariant, ActionEventResultQualifier qualifier, String status, PatronRequest request, EventResultDetails eventResultDetails) {
+    private void checkSettingAndSendStatusChangeMessage(String autoRespondVariant, ActionEventResultQualifier qualifier, String status, PatronRequest request, EventResultDetails eventResultDetails) {
         if (autoRespondVariant == 'on:_auto_loan') {
             log.debug("Send status ${status} change to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendStatusChange(request, eventResultDetails, status)
