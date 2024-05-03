@@ -61,7 +61,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
         log.debug("Attempt hold with RequestItem")
         Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
-                request.supplierUniqueRecordId, institutionalPatronIdValue)
+                request.supplierUniqueRecordId, request.patronIdentifier)
 
         if (requestItemResult.result == true) {
             log.debug("Send WillSupply response to ${request.requestingInstitutionSymbol}")
@@ -69,22 +69,25 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
 
             // Send 'Loaned' message
-            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_LOANED, 'Loaned', request, eventResultDetails)
+            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_LOANED, 'Loaned', request, eventResultDetails, 'Shipped')
         } else {
             // Send 'Unfilled' message
             eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid ' + request.supplierUniqueRecordId
-            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_UNFILLED, 'Unfilled', request, eventResultDetails)
+            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_UNFILLED, 'Unfilled', request, eventResultDetails, 'Cannot Supply')
         }
     }
 
-    private void checkSettingAndSendStatusChangeMessage(String autoRespondVariant, ActionEventResultQualifier qualifier, String status, PatronRequest request, EventResultDetails eventResultDetails) {
+    private void checkSettingAndSendStatusChangeMessage(String autoRespondVariant, String qualifier, String status, PatronRequest request,
+                                                            EventResultDetails eventResultDetails, String auditMessage) {
         if (autoRespondVariant == 'on:_auto_loan') {
-            log.debug("Send status ${status} change to ${request.requestingInstitutionSymbol}")
-            reshareActionService.sendStatusChange(request, eventResultDetails, status)
+            log.debug("Send response ${status} to ${request.requestingInstitutionSymbol}")
+            reshareActionService.sendResponse(request, status, [:], eventResultDetails)
+            eventResultDetails.auditMessage = auditMessage;
             eventResultDetails.qualifier = qualifier
         } else {
-            eventResultDetails.auditMessage = "Auto responder is ${autoRespondSetting} - manual checking needed"
-            request.needsAttention = true
+            eventResultDetails.auditMessage = "Auto responder is ${autoRespondVariant} - manual checking needed"
+//            Does customer wants records to be automatically marked with attention needed flag for SLNP?
+//            request.needsAttention = true
         }
     }
 }

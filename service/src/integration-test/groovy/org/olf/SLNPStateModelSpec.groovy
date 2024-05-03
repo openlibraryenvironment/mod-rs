@@ -247,6 +247,44 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
+    private PatronRequest createPatronRequestWithoutInitialState(
+            String tenant,
+            String requestPatronId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSymbol,
+            String supplierSymbol,
+            String requestSystemId,
+            Boolean isRequester,
+            String hrid,
+            String peerRequestIdentifier) {
+
+        Map request = [
+                patronReference: requestPatronId + "_test",
+                title: requestTitle,
+                author: requestAuthor,
+                requestingInstitutionSymbol: requestSymbol,
+                supplyingInstitutionSymbol: supplierSymbol,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: isRequester,
+                hrid: hrid,
+                peerRequestIdentifier: peerRequestIdentifier
+        ];
+        def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+        log.info("new Request created: ${resp.id}")
+        waitForNewEventProcessed(tenant, 10000L, resp?.id)
+        PatronRequest slnpPatronRequest = PatronRequest.get(resp?.id);
+
+        Symbol reqSymbol = symbolFromString(requestSymbol);
+        Symbol suppSymbol = symbolFromString(supplierSymbol);
+
+        slnpPatronRequest.resolvedRequester = reqSymbol;
+        slnpPatronRequest.resolvedSupplier = suppSymbol;
+
+        return slnpPatronRequest.save(flush: true, failOnError: true);
+    }
+
     private static Symbol symbolFromString(String symbolString) {
         def parts = symbolString.tokenize(":");
         return ReshareApplicationEventHandlerService.resolveSymbol(parts[0], parts[1]);
@@ -370,6 +408,96 @@ class SLNPStateModelSpec extends TestBase {
         }
 
         return request_id;
+    }
+
+    void "Test event responder new SLNP patron request inidication service"(
+            String requesterTenantId,
+            String responderTenantId,
+            String requesterSymbol,
+            String responderSymbol,
+            String requesterInitialState,
+            String requesterResultState,
+            String responderInitialState,
+            String responderResultState,
+            String patronId,
+            String title,
+            String author,
+            boolean autoLoanEnabled
+    ) {
+        when: "Creating the Requester/Responder Patron Requests"
+
+        String requesterSystemId = UUID.randomUUID().toString();
+        String responderSystemId = UUID.randomUUID().toString();
+
+        String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+
+        String requesterRequest;
+        String responderRequest;
+
+        // Create Requester PatronRequest
+        PatronRequest requesterPatronRequest;
+        Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def requesterHeaders = [
+                    'X-Okapi-Tenant'     : requesterTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(requesterHeaders);
+
+            // Create PatronRequest
+            requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, requesterSystemId, true, hrid, hrid);
+
+            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
+
+            // Validate Requester initial status
+            requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterInitialState)
+
+            and: "Check requester initial status"
+            assert requesterRequest != null
+        }
+
+        // Create Responder PatronRequest
+        PatronRequest responderPatronRequest;
+        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant'     : responderTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Set auto-loan setting
+            changeSettings(responderTenantId, [ 'auto_responder_status': (autoLoanEnabled ? 'on:_auto_loan' : 'off') ]);
+
+            // Create PatronRequest
+            responderPatronRequest = createPatronRequestWithoutInitialState(responderTenantId, patronId, title, author, requesterSymbol,
+                    responderSymbol, responderSystemId, false, hrid, hrid);
+            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
+        }
+
+        // Validate Requester/Responder states after performed actions/events
+        responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderResultState)
+        requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterResultState)
+
+        and: "Check the return value"
+        assert responderRequest != null
+        assert requesterRequest != null
+
+        then: "Check values"
+        assert true;
+
+        where:
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState        | responderResultState                | patronId        | title       | author       | autoLoanEnabled
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE         | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4367-333' | 'title123'  | 'Author123'  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE         | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4362-331' | 'title234'  | 'Author234'  | true
+//        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
     }
 
     void "Test end to end actions and events from supplier to requester"(
