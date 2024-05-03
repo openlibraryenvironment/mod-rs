@@ -86,8 +86,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             eventResultDetails.qualifier = qualifier
         } else {
             eventResultDetails.auditMessage = "Auto responder is ${autoRespondVariant} - manual checking needed"
-//            Does customer wants records to be automatically marked with attention needed flag for SLNP?
-//            request.needsAttention = true
+            request.needsAttention = true
         }
     }
 }

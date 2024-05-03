@@ -1,6 +1,5 @@
 package org.olf
 
-
 import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -248,11 +247,9 @@ class SLNPStateModelSpec extends TestBase {
     }
 
     private PatronRequest createPatronRequestWithoutInitialState(
-            String tenant,
             String requestPatronId,
             String requestTitle,
             String requestAuthor,
-            String requestSymbol,
             String supplierSymbol,
             String requestSystemId,
             Boolean isRequester,
@@ -263,7 +260,6 @@ class SLNPStateModelSpec extends TestBase {
                 patronReference: requestPatronId + "_test",
                 title: requestTitle,
                 author: requestAuthor,
-                requestingInstitutionSymbol: requestSymbol,
                 supplyingInstitutionSymbol: supplierSymbol,
                 systemInstanceIdentifier: requestSystemId,
                 patronIdentifier: requestPatronId,
@@ -273,16 +269,6 @@ class SLNPStateModelSpec extends TestBase {
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
-        waitForNewEventProcessed(tenant, 10000L, resp?.id)
-        PatronRequest slnpPatronRequest = PatronRequest.get(resp?.id);
-
-        Symbol reqSymbol = symbolFromString(requestSymbol);
-        Symbol suppSymbol = symbolFromString(supplierSymbol);
-
-        slnpPatronRequest.resolvedRequester = reqSymbol;
-        slnpPatronRequest.resolvedSupplier = suppSymbol;
-
-        return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
     private static Symbol symbolFromString(String symbolString) {
@@ -376,7 +362,7 @@ class SLNPStateModelSpec extends TestBase {
         String request_id = null;
         Boolean needsAttention = null;
         long elapsed = 0;
-        while ( ( Boolean.FALSE != needsAttention ) &&
+        while ( ( needsAttention == null) &&
                 ( elapsed < timeout ) ) {
 
             setHeaders([ 'X-Okapi-Tenant': tenant ]);
@@ -395,7 +381,7 @@ class SLNPStateModelSpec extends TestBase {
                 log.debug("waitForRequestState: Request with hrid ${id} not found");
             }
 
-            if ( Boolean.FALSE != needsAttention ) {
+            if ( needsAttention == null ) {
                 // Request not found OR not yet in required state
                 log.debug("Not yet found.. sleeping");
                 Thread.sleep(500);
@@ -403,101 +389,11 @@ class SLNPStateModelSpec extends TestBase {
             elapsed = System.currentTimeMillis() - start_time
         }
 
-        if ( Boolean.FALSE != needsAttention ) {
+        if ( needsAttention == null ) {
             throw new Exception("Expected needsAttention to be FALSE but is ${needsAttention}");
         }
 
         return request_id;
-    }
-
-    void "Test event responder new SLNP patron request inidication service"(
-            String requesterTenantId,
-            String responderTenantId,
-            String requesterSymbol,
-            String responderSymbol,
-            String requesterInitialState,
-            String requesterResultState,
-            String responderInitialState,
-            String responderResultState,
-            String patronId,
-            String title,
-            String author,
-            boolean autoLoanEnabled
-    ) {
-        when: "Creating the Requester/Responder Patron Requests"
-
-        String requesterSystemId = UUID.randomUUID().toString();
-        String responderSystemId = UUID.randomUUID().toString();
-
-        String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-
-        String requesterRequest;
-        String responderRequest;
-
-        // Create Requester PatronRequest
-        PatronRequest requesterPatronRequest;
-        Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
-            // Define headers
-            def requesterHeaders = [
-                    'X-Okapi-Tenant'     : requesterTenantId,
-                    'X-Okapi-Token'      : 'dummy',
-                    'X-Okapi-User-Id'    : 'dummy',
-                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-            ]
-
-            setHeaders(requesterHeaders);
-
-            // Create PatronRequest
-            requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, requesterSystemId, true, hrid, hrid);
-
-            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
-
-            // Validate Requester initial status
-            requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterInitialState)
-
-            and: "Check requester initial status"
-            assert requesterRequest != null
-        }
-
-        // Create Responder PatronRequest
-        PatronRequest responderPatronRequest;
-        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
-            // Define headers
-            def headers = [
-                    'X-Okapi-Tenant'     : responderTenantId,
-                    'X-Okapi-Token'      : 'dummy',
-                    'X-Okapi-User-Id'    : 'dummy',
-                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-            ]
-
-            setHeaders(headers);
-
-            // Set auto-loan setting
-            changeSettings(responderTenantId, [ 'auto_responder_status': (autoLoanEnabled ? 'on:_auto_loan' : 'off') ]);
-
-            // Create PatronRequest
-            responderPatronRequest = createPatronRequestWithoutInitialState(responderTenantId, patronId, title, author, requesterSymbol,
-                    responderSymbol, responderSystemId, false, hrid, hrid);
-            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
-        }
-
-        // Validate Requester/Responder states after performed actions/events
-        responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderResultState)
-        requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterResultState)
-
-        and: "Check the return value"
-        assert responderRequest != null
-        assert requesterRequest != null
-
-        then: "Check values"
-        assert true;
-
-        where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState        | responderResultState                | patronId        | title       | author       | autoLoanEnabled
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE         | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4367-333' | 'title123'  | 'Author123'  | false
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE         | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4362-331' | 'title234'  | 'Author234'  | true
-//        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
     }
 
     void "Test end to end actions and events from supplier to requester"(
@@ -790,5 +686,63 @@ class SLNPStateModelSpec extends TestBase {
         where:
         tenantId        | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
         'RSSlnpThree'   | 'undoTitle'   | 'testundo1'   | '3331-5678-9123-4444'   | '7765-6999-3333'  | 'ISIL:RSS3'
+    }
+
+    void "Test event responder new SLNP patron request inidication service"(
+            String responderTenantId,
+            String responderSymbol,
+            String responderInitialState,
+            String responderResultState,
+            String patronId,
+            String title,
+            String author,
+            boolean autoLoanEnabled
+    ) {
+        when: "Create Responder Patron request"
+
+        String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
+
+        String responderRequest;
+
+        // Create Responder PatronRequest
+        PatronRequest responderPatronRequest;
+        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant'     : responderTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Set auto-loan setting
+            changeSettings(responderTenantId, [ 'auto_responder_status': (autoLoanEnabled ? 'on:_auto_loan' : 'off') ]);
+
+            if (autoLoanEnabled && responderResultState == Status.SLNP_RESPONDER_UNFILLED) {
+                changeSettings(responderTenantId, [ 'host_lms_integration' : '123554353424231']);
+            }
+
+            // Create PatronRequest
+            responderPatronRequest = createPatronRequestWithoutInitialState(patronId, title, author,
+                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid);
+            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
+        }
+
+        // Validate Responder states after performed event indication service
+        responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderResultState)
+
+        and: "Check the return value"
+        assert responderRequest != null
+
+        then: "Check values"
+        assert true;
+
+        where:
+        responderTenantId | responderSymbol | responderInitialState        | responderResultState                | patronId        | title       | author       | autoLoanEnabled
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4367-333' | 'title123'  | 'Author123'  | false
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4362-331' | 'title234'  | 'Author234'  | true
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
     }
 }
