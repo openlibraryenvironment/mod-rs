@@ -188,6 +188,37 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterCancelOK = [
+            code: 'requesteCancelOK',
+            description: 'request is cancelled',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
+            qualifier: null,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterCancelOKNoSupplier = [
+            code: 'requesterCancelOKNoSupplier',
+            description: 'Requester has said they want to cancel the request, but there is no supplier',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCELLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_NO_SUPPLIER,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterNewPatronRequestRetry = [
+            code: 'requesterNewPatronRequestRetry',
+            description: 'Retry a patron request as if new',
+            result: true,
+            status: Status.PATRON_REQUEST_IDLE,
+            qualifer: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
+
+
     //NR REQUESTER ACTIONEVENT RESULT LISTS
     private static Map nrRequesterNewPatronRequestList = [
             code: ActionEventResultList.NR_REQUESTER_EVENT_NEW_PATRON_REQUEST,
@@ -261,6 +292,35 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterCompleteOK
+            ]
+    ];
+
+    private static Map nrRequesterCancelList = [
+            code: ActionEventResultList.NR_REQUESTER_CANCEL,
+            description: 'Requester has cancelled',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterCancelOK,
+                    nrRequesterCancelOKNoSupplier
+            ]
+
+    ];
+
+    private static Map nrRequesterBypassedValidationList = [
+            code: ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION,
+            description: 'Requester has bypassed the validation step',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterNewPatronRequestOK
+            ]
+    ];
+
+    private static Map nrRequesterRetriedValidationList = [
+            code: ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION,
+            description: 'Requester has requested to re-try the validation step',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterNewPatronRequestRetry
             ]
     ];
 
@@ -384,6 +444,7 @@ public class NonreturnablesStateModelData {
     ];
 
 
+
     private static Map[] resultLists = [
             nrRequesterNewPatronRequestList,
             nrRequesterPatronRequestValidatedList,
@@ -392,6 +453,9 @@ public class NonreturnablesStateModelData {
             nrRequesterExpectToSupplyISO18626List,
             nrRequesterDeliveredList,
             nrRequesterCompletedList,
+            nrRequesterCancelList,
+            nrRequesterBypassedValidationList,
+            nrRequesterRetriedValidationList,
             nrResponderNewPatronRequestList,
             nrResponderAnswerYesList,
             nrResponderCannotSupplyList,
@@ -433,6 +497,19 @@ public class NonreturnablesStateModelData {
                 ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
                 ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
 
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
+                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
+                ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
+
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_RETRY_VALIDATION, 'Retry validation on a request',
+                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(),
+                ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
+
+        ActionEvent.ensure(Actions.ACTION_REQUESTER_REQUESTER_CANCEL, 'The requester is asking the responder to cancel the request',
+                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REQUESTER_CANCEL.capitalize(),
+                ActionEventResultList.NR_REQUESTER_CANCEL);
+
+
     }
 
     public static void loadStateModelData() {
@@ -447,6 +524,16 @@ public class NonreturnablesStateModelData {
 
         //REQ_VALIDATED
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //REQ_BLANK_FORM_REVIEW
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        //REQ_INVALID_PATRON
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         //REQ_SENT_TO_SUPPLIER
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);

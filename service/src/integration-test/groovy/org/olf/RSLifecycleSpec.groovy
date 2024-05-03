@@ -1777,5 +1777,78 @@ class DosomethingSimple {
 
     }
 
+    void "Try to submit and fix a blank request on the nonreturnables statemodel"(
+
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+
+        when: "Post new blank form requests"
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ];
+
+        def request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                serviceType: "Copy",
+                tags: [ 'RS-BLANK-FORM-TEST-2']
+        ];
+
+        setHeaders(headers);
+
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request_json);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
+
+        def updated_request_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                systemInstanceIdentifier: requestSystemId,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                serviceType: "Copy",
+                tags: [ 'RS-BLANK-FORM-TEST-3']
+
+        ];
+
+        def put_response = doPut("${baseUrl}/rs/patronrequests/${response?.id}".toString(), updated_request_json);
+        log.debug("got response from put request ${put_response}");
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterRetryRequest.json").text;
+        log.debug("retryRequest payload: ${jsonPayload}");
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
+        log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
+
+        def actionResponse = doPost(performActionUrl, jsonPayload);
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                Status.PATRON_REQUEST_IDLE);
+
+
+        then: "Whatever"
+        assert true;
+
+        where:
+
+        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
+
+
+    }
+
 
 }
