@@ -63,6 +63,7 @@ public class StatusData {
         // Digital Returnable Requester
         Status.ensure(Status.REQUESTER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
 
+
         // Responder / Lender State Model
         Status responderIdle = Status.ensure(Status.RESPONDER_IDLE, StatusStage.ACTIVE, '0005', true);
         Status.ensure(Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, StatusStage.ACTIVE_PENDING_CONDITIONAL_ANSWER, '0006', true);
@@ -84,6 +85,8 @@ public class StatusData {
         Status.ensure(Status.RESPONDER_SEQUESTERED, StatusStage.ACTIVE, '0020', true, null, false, null, [ tags.ACTIVE_LOAN ]);
         Status.ensure(Status.RESPONDER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0040', true, null, false, null, [ tags.ACTIVE_LOAN ]);
         Status.ensure(Status.RESPONDER_AWAIT_DESEQUESTRATION, StatusStage.ACTIVE_SHIPPED, '0040', true, null, false, null, [ tags.ACTIVE_LOAN ]);
+
+
 
 	}
 

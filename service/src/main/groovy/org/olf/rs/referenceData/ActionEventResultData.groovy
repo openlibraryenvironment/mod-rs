@@ -1681,13 +1681,17 @@ public class ActionEventResultData {
             responderShippedReturnISO18626
     ];
 
-	public void load() {
+    public static void load() {
+        load(allResultLists);
+    }
+
+	public static void load(Map[] resultLists) {
 		log.info("Adding action and event result lists to the database");
 
         // We are not a service, so we need to look it up
         ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
 
-        allResultLists.each { resultList ->
+        resultLists.each { resultList ->
             // Process all the possible outcomes for this result list
             List<ActionEventResult> resultItems = new ArrayList<ActionEventResult>();
             resultList.results.each { result ->

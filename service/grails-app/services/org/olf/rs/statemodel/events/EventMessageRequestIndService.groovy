@@ -61,6 +61,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
+            log.debug("got resolvedSupplyingAgency: ${resolvedSupplyingAgency}, resolvedRequestingAgency: ${resolvedRequestingAgency}");
             log.debug('*** Create new request***');
             PatronRequest pr = new PatronRequest(eventData.bibliographicInfo);
 
