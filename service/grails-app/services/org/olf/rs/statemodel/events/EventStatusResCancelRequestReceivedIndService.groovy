@@ -20,6 +20,9 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
 
     ReshareActionService reshareActionService;
 
+    private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
+
+
     @Override
     String name() {
         return(Events.EVENT_STATUS_RES_CANCEL_REQUEST_RECEIVED_INDICATION);
