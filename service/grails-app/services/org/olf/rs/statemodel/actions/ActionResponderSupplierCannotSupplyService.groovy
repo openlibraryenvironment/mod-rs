@@ -1,4 +1,4 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;

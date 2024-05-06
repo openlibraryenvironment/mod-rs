@@ -113,7 +113,7 @@ public class ActionEventData {
         ActionEvent.ensure(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION, 'Fill in description for this event', false, eventServiceName(Events.EVENT_SUPPLYING_AGENCY_MESSAGE_INDICATION), null);
 	}
 
-    private String eventServiceName(String eventName) {
+    public static String eventServiceName(String eventName) {
         // We only do this for backward compatibility, no need to call this in the future
         // We split the event name on the underscores then capitalize each word and then join it back together
         String[] eventNameWords = eventName.replace(' ', '_').toLowerCase().split("_");

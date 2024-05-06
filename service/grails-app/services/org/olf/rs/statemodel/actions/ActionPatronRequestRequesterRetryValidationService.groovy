@@ -10,7 +10,8 @@ import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.patronRequest.PickupLocationService;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions
-import org.olf.rs.statemodel.Events;
+import org.olf.rs.statemodel.Events
+import org.olf.rs.statemodel.StateModel;
 
 
 /**
@@ -57,12 +58,20 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
 
         String tenant = Tenants.currentId();
 
+
+        String newPatronEvent;
+        if (request.stateModel.shortcode == StateModel.MODEL_NR_REQUESTER) {
+            newPatronEvent = Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+        } else {
+            newPatronEvent = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+        }
+        log.debug("For Patron statemodel ${request.stateModel.shortcode}, sending event ${newPatronEvent} ");
         //Send a new patron request event
         eventPublicationService.publishAsJSON(
                 "${tenant}_PatronRequestEvents",
                 null,
                 [
-                        event: Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
+                        event: newPatronEvent,
                         tenant: tenant,
                         oid: 'org.olf.rs.PatronRequest:' + request.id,
                         payload: [
