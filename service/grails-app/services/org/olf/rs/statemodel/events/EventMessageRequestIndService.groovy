@@ -56,6 +56,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
             for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
                 newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
             }
+
+            mapBibliographicItemId(eventData, newParams)
+
             String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
             PatronRequest pr = lookupPatronRequest(id, true)
             if (pr) {
@@ -228,5 +231,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
         log.debug("LOCKING EventMessageRequestIndService::lookupPatronRequest located ${result?.id}/${result?.hrid}");
 
         return result;
+    }
+
+    public static void mapBibliographicItemId(Map eventData, Map newParams) {
+        if (eventData.bibliographicInfo.bibliographicItemId) {
+            def bibliographicItemId = eventData.bibliographicInfo.bibliographicItemId
+            if (bibliographicItemId instanceof ArrayList) {
+                for (def item in bibliographicItemId) {
+                    newParams.put((item.bibliographicItemIdentifierCode).toLowerCase(), item.bibliographicItemIdentifier)
+                }
+            } else {
+                newParams.put((bibliographicItemId.bibliographicItemIdentifierCode).toLowerCase(), bibliographicItemId.bibliographicItemIdentifier)
+            }
+        }
     }
 }
