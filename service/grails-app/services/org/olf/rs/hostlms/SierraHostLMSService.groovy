@@ -67,7 +67,9 @@ public class SierraHostLMSService extends BaseHostLMSService {
 
   @Override
   public String getRequestItemPickupLocation() {
-    String pickupLocation = settingsService.getSettingValue(SettingsData.SETTING_ACCEPT_ITEM);
+
+    String pickupLocation = settingsService.getSettingValue(SettingsData.SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION);
+
     if (pickupLocation != null && !pickupLocation.isEmpty()) {
       return pickupLocation;
     }
