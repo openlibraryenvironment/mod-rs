@@ -1,8 +1,10 @@
-package org.olf.rs.hostlms;
+package org.olf.rs.hostlms
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.circ.client.CirculationClient;
 import org.olf.rs.circ.client.NCIPClientWrapper;
-import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.lms.ItemLocation
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -11,6 +13,7 @@ import org.olf.rs.settings.ISettings;
  */
 public class SierraHostLMSService extends BaseHostLMSService {
 
+  SettingsService settingsService;
   List<String> NOTES_CONSIDERED_AVAILABLE = ['AVAILABLE', 'CHECK SHELVES', 'CHECK SHELF'];
 
   public CirculationClient getCirculationClient(ISettings settings, String address) {
@@ -64,7 +67,11 @@ public class SierraHostLMSService extends BaseHostLMSService {
 
   @Override
   public String getRequestItemPickupLocation() {
-    return "ill";
+    String pickupLocation = settingsService.getSettingValue(SettingsData.SETTING_ACCEPT_ITEM);
+    if (pickupLocation != null && !pickupLocation.isEmpty()) {
+      return pickupLocation;
+    }
+    return null;
   }
 
   @Override
