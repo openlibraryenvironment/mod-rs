@@ -46,7 +46,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
         // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
         if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
-            Map header = eventData.header as Map;
+            Map header = eventData.header
 
             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
@@ -70,7 +70,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             // Add publisher information to Patron Request
             if (eventData.publicationInfo) {
-                Map publicationInfo = eventData.publicationInfo as Map
+                Map publicationInfo = eventData.publicationInfo
                 if (publicationInfo != null) {
                     if (publicationInfo.publisher) {
                         pr.publisher = publicationInfo.publisher;
@@ -92,7 +92,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             // Add service information to Patron Request
             if (eventData && eventData.serviceInfo) {
-                Map serviceInfo = eventData.serviceInfo as Map;
+                Map serviceInfo = eventData.serviceInfo
 
                 if (serviceInfo != null) {
                     if (serviceInfo.serviceType) {
