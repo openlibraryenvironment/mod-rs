@@ -1,25 +1,12 @@
 package org.olf.rs.statemodel.events
 
-import org.apache.commons.lang3.ObjectUtils
-import org.olf.rs.Iso18626Constants
-import org.olf.rs.ReshareApplicationEventHandlerService
-
-import java.time.LocalDate;
-
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.PatronRequest;
-import org.olf.rs.ProtocolMessageBuildingService;
-import org.olf.rs.ProtocolMessageService;
-import org.olf.rs.ReshareActionService;
-import org.olf.rs.SharedIndexService
-import org.olf.rs.statemodel.AbstractEvent;
-import org.olf.rs.statemodel.EventFetchRequestMethod;
-import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.Events;
-import org.olf.rs.statemodel.StatusService;
-
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.ObjectUtils
+import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.*
+import org.olf.rs.statemodel.*
 
+import java.time.LocalDate
 /**
  * Service that processes the Request-ind event
  * @author Chas
@@ -30,7 +17,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
-    ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
 
@@ -59,18 +45,20 @@ public class EventMessageRequestIndService extends AbstractEvent {
         Map result = [:];
 
         // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
-        if ((eventData.bibliographicInfo != null) &&
-            (eventData.header != null)) {
-            Map header = eventData.header;
+        if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
+            Map header = eventData.header
 
             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
-            log.debug('*** Create new request***')
+            log.debug('*** Create new request ***')
             def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
             for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
                 newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
             }
+
+            mapBibliographicItemId(eventData, newParams)
+
             String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
             PatronRequest pr = lookupPatronRequest(id, true)
             if (pr) {
@@ -84,44 +72,49 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add publisher information to Patron Request
-            Map publicationInfo = eventData.publicationInfo;
-            if (publicationInfo != null) {
-                if (publicationInfo.publisher) {
-                    pr.publisher = publicationInfo.publisher;
-                }
-                if (publicationInfo.publicationType) {
-                    pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
-                }
-                if (publicationInfo.publicationDate) {
-                    pr.publicationDate = publicationInfo.publicationDate;
-                }
-                if (publicationInfo.publicationDateOfComponent) {
-                    pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
-                }
-                if (publicationInfo.placeOfPublication) {
-                    pr.placeOfPublication = publicationInfo.placeOfPublication;
+            if (eventData.publicationInfo != null) {
+                Map publicationInfo = eventData.publicationInfo
+                if (publicationInfo != null) {
+                    if (publicationInfo.publisher) {
+                        pr.publisher = publicationInfo.publisher;
+                    }
+                    if (publicationInfo.publicationType) {
+                        pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
+                    }
+                    if (publicationInfo.publicationDate) {
+                        pr.publicationDate = publicationInfo.publicationDate;
+                    }
+                    if (publicationInfo.publicationDateOfComponent) {
+                        pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
+                    }
+                    if (publicationInfo.placeOfPublication) {
+                        pr.placeOfPublication = publicationInfo.placeOfPublication;
+                    }
                 }
             }
 
             // Add service information to Patron Request
-            Map serviceInfo = eventData.serviceInfo;
-            if (serviceInfo != null) {
-                if (serviceInfo.serviceType) {
-                    pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
-                }
-                if (serviceInfo.needBeforeDate) {
-                    // This will come in as a string, will need parsing
-                    try {
-                        pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
-                    } catch (Exception e) {
-                        log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+            if (eventData.serviceInfo != null) {
+                Map serviceInfo = eventData.serviceInfo
+
+                if (serviceInfo != null) {
+                    if (serviceInfo.serviceType) {
+                        pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
                     }
-                }
-                if (serviceInfo.note) {
-                    // We mave have a sequence number that needs to be extracted
-                    Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
-                    pr.patronNote = sequenceResult.note;
-                    pr.lastSequenceReceived = sequenceResult.sequence;
+                    if (serviceInfo.needBeforeDate) {
+                        // This will come in as a string, will need parsing
+                        try {
+                            pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
+                        } catch (Exception e) {
+                            log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+                        }
+                    }
+                    if (serviceInfo.note) {
+                        // We mave have a sequence number that needs to be extracted
+                        Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
+                        pr.patronNote = sequenceResult.note;
+                        pr.lastSequenceReceived = sequenceResult.sequence;
+                    }
                 }
             }
 
@@ -147,22 +140,24 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add patron information to Patron Request
-            Map patronInfo = eventData.patronInfo;
-            if (patronInfo != null) {
-                if (patronInfo.patronId) {
-                    pr.patronIdentifier = patronInfo.patronId;
-                }
-                if (patronInfo.surname) {
-                    pr.patronSurname = patronInfo.surname;
-                }
-                if (patronInfo.givenName) {
-                    pr.patronGivenName = patronInfo.givenName;
-                }
-                if (patronInfo.patronType) {
-                    pr.patronType = patronInfo.patronType;
-                }
-                if (patronInfo.patronReference) {
-                    pr.patronReference = patronInfo.patronReference;
+            if (eventData.patronInfo != null) {
+                Map patronInfo = eventData.patronInfo
+                if (patronInfo != null) {
+                    if (patronInfo.patronId) {
+                        pr.patronIdentifier = patronInfo.patronId;
+                    }
+                    if (patronInfo.surname) {
+                        pr.patronSurname = patronInfo.surname;
+                    }
+                    if (patronInfo.givenName) {
+                        pr.patronGivenName = patronInfo.givenName;
+                    }
+                    if (patronInfo.patronType) {
+                        pr.patronType = patronInfo.patronType;
+                    }
+                    if (patronInfo.patronReference) {
+                        pr.patronReference = patronInfo.patronReference;
+                    }
                 }
             }
 
@@ -190,7 +185,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-            pr.isRequester = "PatronRequest".equals(serviceInfo?.requestSubType) // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
+            // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
+            pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
             pr.stateModel = statusService.getStateModel(pr)
             pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
@@ -235,5 +231,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
         log.debug("LOCKING EventMessageRequestIndService::lookupPatronRequest located ${result?.id}/${result?.hrid}");
 
         return result;
+    }
+
+    public static void mapBibliographicItemId(Map eventData, Map newParams) {
+        if (eventData.bibliographicInfo.bibliographicItemId) {
+            def bibliographicItemId = eventData.bibliographicInfo.bibliographicItemId
+            if (bibliographicItemId instanceof ArrayList) {
+                for (def item in bibliographicItemId) {
+                    newParams.put((item.bibliographicItemIdentifierCode).toLowerCase(), item.bibliographicItemIdentifier)
+                }
+            } else {
+                newParams.put((bibliographicItemId.bibliographicItemIdentifierCode).toLowerCase(), bibliographicItemId.bibliographicItemIdentifier)
+            }
+        }
     }
 }

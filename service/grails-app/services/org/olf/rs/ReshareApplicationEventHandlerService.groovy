@@ -108,6 +108,9 @@ public class ReshareApplicationEventHandlerService {
                                     for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
                                         newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
                                     }
+
+                                    EventMessageRequestIndService.mapBibliographicItemId(eventData, newParams)
+
 									request = new PatronRequest(newParams)
 									break;
 
