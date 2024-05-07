@@ -112,11 +112,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         pr.patronNote = sequenceResult.note;
                         pr.lastSequenceReceived = sequenceResult.sequence;
                     }
-
-                    // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
-                    if (serviceInfo.requestSubType) {
-                        pr.isRequester = "PatronRequest" == serviceInfo.requestSubType
-                    }
                 }
             }
 
@@ -187,6 +182,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
+            // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
+            pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
             pr.stateModel = statusService.getStateModel(pr)
             pr.state = pr.stateModel.initialState;
             reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
