@@ -69,7 +69,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add publisher information to Patron Request
-            if (eventData.publicationInfo) {
+            if (eventData.publicationInfo != null) {
                 Map publicationInfo = eventData.publicationInfo
                 if (publicationInfo != null) {
                     if (publicationInfo.publisher) {
@@ -91,7 +91,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add service information to Patron Request
-            if (eventData.serviceInfo) {
+            if (eventData.serviceInfo != null) {
                 Map serviceInfo = eventData.serviceInfo
 
                 if (serviceInfo != null) {
@@ -137,8 +137,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add patron information to Patron Request
-            if (eventData.patronInfo) {
-                Map patronInfo = eventData.patronInfo as Map
+            if (eventData.patronInfo != null) {
+                Map patronInfo = eventData.patronInfo
                 if (patronInfo != null) {
                     if (patronInfo.patronId) {
                         pr.patronIdentifier = patronInfo.patronId;
