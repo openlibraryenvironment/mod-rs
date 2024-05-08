@@ -109,7 +109,7 @@ public class ReshareApplicationEventHandlerService {
 								case EventFetchRequestMethod.NEW:
                                     def newParams = eventData.bibliographicInfo.subMap(preserveFields)
                                     def customIdentifiersBody = [:]
-                                    EventMessageRequestIndService.mapBibliographicRecordId(eventData, null, newParams)
+                                    EventMessageRequestIndService.mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
                                     EventMessageRequestIndService.mapBibliographicItemId(eventData, newParams)
 
                                     if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
