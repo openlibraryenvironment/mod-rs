@@ -1,5 +1,8 @@
 package org.olf.rs
 
+import groovy.json.JsonBuilder
+import org.apache.commons.lang3.ObjectUtils
+
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
@@ -105,11 +108,13 @@ public class ReshareApplicationEventHandlerService {
 							switch (eventBean.fetchRequestMethod()) {
 								case EventFetchRequestMethod.NEW:
                                     def newParams = eventData.bibliographicInfo.subMap(preserveFields)
-                                    for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
-                                        newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
-                                    }
-
+                                    def customIdentifiersBody = [:]
+                                    EventMessageRequestIndService.mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
                                     EventMessageRequestIndService.mapBibliographicItemId(eventData, newParams)
+
+                                    if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
+                                        request.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
+                                    }
 
 									request = new PatronRequest(newParams)
 									break;

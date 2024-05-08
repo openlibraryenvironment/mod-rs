@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events
 
+import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
@@ -53,10 +54,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug('*** Create new request ***')
             def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
-            for (final def record in eventData.bibliographicInfo.bibliographicRecordId) {
-                newParams.put(record.bibliographicRecordIdentifierCode, record.bibliographicRecordIdentifier)
-            }
-
+            def customIdentifiersBody = [:]
+            mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
             mapBibliographicItemId(eventData, newParams)
 
             String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
@@ -71,8 +70,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr = new PatronRequest(newParams)
             }
 
+            if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
+                pr.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
+            }
+
             // Add publisher information to Patron Request
-            if (eventData.publicationInfo != null) {
+            if (eventData.publicationInfo) {
                 Map publicationInfo = eventData.publicationInfo
                 if (publicationInfo != null) {
                     if (publicationInfo.publisher) {
@@ -94,7 +97,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add service information to Patron Request
-            if (eventData.serviceInfo != null) {
+            if (eventData.serviceInfo) {
                 Map serviceInfo = eventData.serviceInfo
 
                 if (serviceInfo != null) {
@@ -140,7 +143,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             // Add patron information to Patron Request
-            if (eventData.patronInfo != null) {
+            if (eventData.patronInfo) {
                 Map patronInfo = eventData.patronInfo
                 if (patronInfo != null) {
                     if (patronInfo.patronId) {
@@ -233,7 +236,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
         return result;
     }
 
-    public static void mapBibliographicItemId(Map eventData, Map newParams) {
+    static void mapBibliographicItemId(Map eventData, Map newParams) {
         if (eventData.bibliographicInfo.bibliographicItemId) {
             def bibliographicItemId = eventData.bibliographicInfo.bibliographicItemId
             if (bibliographicItemId instanceof ArrayList) {
@@ -243,6 +246,23 @@ public class EventMessageRequestIndService extends AbstractEvent {
             } else {
                 newParams.put((bibliographicItemId.bibliographicItemIdentifierCode).toLowerCase(), bibliographicItemId.bibliographicItemIdentifier)
             }
+        }
+    }
+
+    static void mapBibliographicRecordId(Map eventData, Map body, Map newParams) {
+        if (eventData.bibliographicInfo.bibliographicRecordId) {
+            def customIdentifiers = []
+            def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
+            if (bibliographicRecordId instanceof ArrayList) {
+                for (def record in bibliographicRecordId) {
+                    newParams.put((record.bibliographicRecordIdentifierCode), record.bibliographicRecordIdentifier)
+                    customIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
+                }
+            } else {
+                newParams.put((bibliographicRecordId.bibliographicRecordIdentifierCode), bibliographicRecordId.bibliographicRecordIdentifier)
+                customIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
+            }
+            body.put('customIdentifiers', customIdentifiers)
         }
     }
 }
