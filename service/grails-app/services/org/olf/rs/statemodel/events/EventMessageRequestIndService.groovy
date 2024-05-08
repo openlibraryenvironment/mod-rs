@@ -257,11 +257,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
             def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
             if (bibliographicRecordId instanceof ArrayList) {
                 for (def record in bibliographicRecordId) {
-                    newParams.put((record.bibliographicRecordIdentifierCode).toLowerCase(), record.bibliographicRecordIdentifier)
+                    newParams.put((record.bibliographicRecordIdentifierCode), record.bibliographicRecordIdentifier)
                     customIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
                 }
             } else {
-                newParams.put((bibliographicRecordId.bibliographicRecordIdentifierCode).toLowerCase(), bibliographicRecordId.bibliographicRecordIdentifier)
+                newParams.put((bibliographicRecordId.bibliographicRecordIdentifierCode), bibliographicRecordId.bibliographicRecordIdentifier)
                 customIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
             }
             body.put('customIdentifiers', customIdentifiers)
