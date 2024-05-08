@@ -56,8 +56,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug('*** Create new request ***')
             def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
-            def zflIdentifiersBody = [:]
-            mapBibliographicRecordId(eventData, zflIdentifiersBody, newParams)
+            def customIdentifiersBody = [:]
+            mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
             mapBibliographicItemId(eventData, newParams)
 
             String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
@@ -72,8 +72,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr = new PatronRequest(newParams)
             }
 
-            if (ObjectUtils.isNotEmpty(zflIdentifiersBody)) {
-                pr.zflIdentifiers = new JsonBuilder(zflIdentifiersBody).toPrettyString()
+            if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
+                pr.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
             }
 
             // Add publisher information to Patron Request
@@ -253,18 +253,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
     static void mapBibliographicRecordId(Map eventData, Map body, Map newParams) {
         if (eventData.bibliographicInfo.bibliographicRecordId) {
-            def zflIdentifiers = []
+            def customIdentifiers = []
             def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
             if (bibliographicRecordId instanceof ArrayList) {
                 for (def record in bibliographicRecordId) {
                     newParams.put((record.bibliographicRecordIdentifierCode).toLowerCase(), record.bibliographicRecordIdentifier)
-                    zflIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
+                    customIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
                 }
             } else {
                 newParams.put((bibliographicRecordId.bibliographicRecordIdentifierCode).toLowerCase(), bibliographicRecordId.bibliographicRecordIdentifier)
-                zflIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
+                customIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
             }
-            body.put('zflIdentifiers', zflIdentifiers)
+            body.put('customIdentifiers', customIdentifiers)
         }
     }
 }

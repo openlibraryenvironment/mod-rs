@@ -241,8 +241,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** Request created from this request */
   PatronRequest succeededBy;
 
-  /** JSON object containing ZFL scheme identifiers */
-  String zflIdentifiers
+  /** JSON object containing custom identifiers */
+  String customIdentifiers
 
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed', 'validActions'];
 
@@ -386,7 +386,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     precededBy (nullable: true)
     succeededBy (nullable: true)
-    zflIdentifiers (nullable: true)
+    customIdentifiers (nullable: true)
   }
 
   static mapping = {
@@ -513,7 +513,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     batches column : 'bpr_patron_request_id', joinTable : 'batch_patron_request'
 
-    zflIdentifiers column : 'pr_zfl_identifiers'
+    customIdentifiers column : 'pr_custom_identifiers'
   }
 
   /**
