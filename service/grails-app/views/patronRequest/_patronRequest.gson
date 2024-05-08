@@ -25,7 +25,8 @@ final def toExpand = fullRecord ? [
   'resolvedSupplier',
   'resolvedPickupLocation',
   'requestIdentifiers',
-  'validActions'
+  'validActions',
+  'customIdentifiers'
 ] : [
   // brief record view..
   'pickShelvingLocation',
