@@ -58,7 +58,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
             def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
             def zflIdentifiersBody = [:]
             mapBibliographicRecordId(eventData, zflIdentifiersBody, newParams)
-            String zflIdentifiers = new JsonBuilder(zflIdentifiersBody).toPrettyString()
             mapBibliographicItemId(eventData, newParams)
 
             String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
@@ -73,8 +72,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr = new PatronRequest(newParams)
             }
 
-            if (StringUtils.isNotEmpty(zflIdentifiers) && ObjectUtils.isNotEmpty(zflIdentifiersBody)) {
-                pr.zflIdentifiers = zflIdentifiers
+            if (ObjectUtils.isNotEmpty(zflIdentifiersBody)) {
+                pr.zflIdentifiers = new JsonBuilder(zflIdentifiersBody).toPrettyString()
             }
 
             // Add publisher information to Patron Request
