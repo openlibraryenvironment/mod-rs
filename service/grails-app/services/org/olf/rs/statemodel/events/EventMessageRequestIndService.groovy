@@ -15,6 +15,7 @@ import java.time.LocalDate
 @Slf4j
 public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
+    private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
@@ -58,155 +59,149 @@ public class EventMessageRequestIndService extends AbstractEvent {
             mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
             mapBibliographicItemId(eventData, newParams)
 
-            String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
-            PatronRequest pr = lookupPatronRequest(id, true)
+            PatronRequest pr = findOrCreatePatronRequest(eventData, newParams, result)
+
             if (pr) {
-                newParams.each { key, value ->
-                    if (pr.hasProperty(key) && ObjectUtils.isNotEmpty(value)) {
-                        pr."$key" = value
-                    }
+
+                if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
+                    pr.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
                 }
-            } else {
-                pr = new PatronRequest(newParams)
-            }
 
-            if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
-                pr.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
-            }
-
-            // Add publisher information to Patron Request
-            if (eventData.publicationInfo) {
-                Map publicationInfo = eventData.publicationInfo
-                if (publicationInfo != null) {
-                    if (publicationInfo.publisher) {
-                        pr.publisher = publicationInfo.publisher;
-                    }
-                    if (publicationInfo.publicationType) {
-                        pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
-                    }
-                    if (publicationInfo.publicationDate) {
-                        pr.publicationDate = publicationInfo.publicationDate;
-                    }
-                    if (publicationInfo.publicationDateOfComponent) {
-                        pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
-                    }
-                    if (publicationInfo.placeOfPublication) {
-                        pr.placeOfPublication = publicationInfo.placeOfPublication;
-                    }
-                }
-            }
-
-            // Add service information to Patron Request
-            if (eventData.serviceInfo) {
-                Map serviceInfo = eventData.serviceInfo
-
-                if (serviceInfo != null) {
-                    if (serviceInfo.serviceType) {
-                        pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
-                    }
-                    if (serviceInfo.needBeforeDate) {
-                        // This will come in as a string, will need parsing
-                        try {
-                            pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
-                        } catch (Exception e) {
-                            log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+                // Add publisher information to Patron Request
+                if (eventData.publicationInfo != null) {
+                    Map publicationInfo = eventData.publicationInfo
+                    if (publicationInfo != null) {
+                        if (publicationInfo.publisher) {
+                            pr.publisher = publicationInfo.publisher;
+                        }
+                        if (publicationInfo.publicationType) {
+                            pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
+                        }
+                        if (publicationInfo.publicationDate) {
+                            pr.publicationDate = publicationInfo.publicationDate;
+                        }
+                        if (publicationInfo.publicationDateOfComponent) {
+                            pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
+                        }
+                        if (publicationInfo.placeOfPublication) {
+                            pr.placeOfPublication = publicationInfo.placeOfPublication;
                         }
                     }
-                    if (serviceInfo.note) {
-                        // We mave have a sequence number that needs to be extracted
-                        Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
-                        pr.patronNote = sequenceResult.note;
-                        pr.lastSequenceReceived = sequenceResult.sequence;
-                    }
                 }
-            }
 
-            // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
-            if (eventData.requestedDeliveryInfo instanceof Map) {
-                if (eventData.requestedDeliveryInfo?.address instanceof Map) {
-                    if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
-                        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-                        // We join all the lines of physical address and stuff them into pickup location for now.
-                        String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
+                // Add service information to Patron Request
+                if (eventData.serviceInfo != null) {
+                    Map serviceInfo = eventData.serviceInfo
 
-                        // If we've not been given any address information, don't translate that into a pickup location
-                        if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                            pr.pickupLocation = stringifiedPickupLocation.trim();
+                    if (serviceInfo != null) {
+                        if (serviceInfo.serviceType) {
+                            pr.serviceType = pr.lookupServiceType(serviceInfo.serviceType);
+                        }
+                        if (serviceInfo.needBeforeDate) {
+                            // This will come in as a string, will need parsing
+                            try {
+                                pr.neededBy = LocalDate.parse(serviceInfo.needBeforeDate);
+                            } catch (Exception e) {
+                                log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
+                            }
+                        }
+                        if (serviceInfo.note) {
+                            // We mave have a sequence number that needs to be extracted
+                            Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
+                            pr.patronNote = sequenceResult.note;
+                            pr.lastSequenceReceived = sequenceResult.sequence;
                         }
                     }
+                }
 
-                    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-                    if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
-                        pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
+                // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
+                if (eventData.requestedDeliveryInfo instanceof Map) {
+                    if (eventData.requestedDeliveryInfo?.address instanceof Map) {
+                        if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
+                            log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+                            // We join all the lines of physical address and stuff them into pickup location for now.
+                            String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
+
+                            // If we've not been given any address information, don't translate that into a pickup location
+                            if (stringifiedPickupLocation?.trim()?.length() > 0) {
+                                pr.pickupLocation = stringifiedPickupLocation.trim();
+                            }
+                        }
+
+                        // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                        if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
+                            pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
+                        }
                     }
                 }
-            }
 
-            // Add patron information to Patron Request
-            if (eventData.patronInfo) {
-                Map patronInfo = eventData.patronInfo
-                if (patronInfo != null) {
-                    if (patronInfo.patronId) {
-                        pr.patronIdentifier = patronInfo.patronId;
-                    }
-                    if (patronInfo.surname) {
-                        pr.patronSurname = patronInfo.surname;
-                    }
-                    if (patronInfo.givenName) {
-                        pr.patronGivenName = patronInfo.givenName;
-                    }
-                    if (patronInfo.patronType) {
-                        pr.patronType = patronInfo.patronType;
-                    }
-                    if (patronInfo.patronReference) {
-                        pr.patronReference = patronInfo.patronReference;
-                    }
-                }
-            }
-
-            pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
-            pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
-
-            pr.resolvedRequester = resolvedRequestingAgency;
-            pr.resolvedSupplier = resolvedSupplyingAgency;
-            pr.peerRequestIdentifier = header.requestingAgencyRequestId;
-
-            // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
-            // able to use that for our request.
-            pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
-
-            if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {
-                log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
-                List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
-                if (bibRecords?.size() > 0) {
-                    pr.bibRecord = bibRecords[0];
-                    if (bibRecords?.size() > 1) {
-                        reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, "WARNING: shared index ID ${pr.bibliographicRecordId} matched multiple records", null);
+                // Add patron information to Patron Request
+                if (eventData.patronInfo != null) {
+                    Map patronInfo = eventData.patronInfo
+                    if (patronInfo != null) {
+                        if (patronInfo.patronId) {
+                            pr.patronIdentifier = patronInfo.patronId;
+                        }
+                        if (patronInfo.surname) {
+                            pr.patronSurname = patronInfo.surname;
+                        }
+                        if (patronInfo.givenName) {
+                            pr.patronGivenName = patronInfo.givenName;
+                        }
+                        if (patronInfo.patronType) {
+                            pr.patronType = patronInfo.patronType;
+                        }
+                        if (patronInfo.patronReference) {
+                            pr.patronReference = patronInfo.patronReference;
+                        }
                     }
                 }
+
+                pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
+                pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+
+                pr.resolvedRequester = resolvedRequestingAgency;
+                pr.resolvedSupplier = resolvedSupplyingAgency;
+                pr.peerRequestIdentifier = header.requestingAgencyRequestId;
+
+                // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
+                // able to use that for our request.
+                pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
+
+                if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {
+                    log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
+                    List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
+                    if (bibRecords?.size() > 0) {
+                        pr.bibRecord = bibRecords[0];
+                        if (bibRecords?.size() > 1) {
+                            reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, "WARNING: shared index ID ${pr.bibliographicRecordId} matched multiple records", null);
+                        }
+                    }
+                }
+
+                log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
+
+                // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
+                pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
+                pr.stateModel = statusService.getStateModel(pr)
+                pr.state = pr.stateModel.initialState;
+                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
+
+                log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
+                pr.save(flush: true, failOnError: true)
+
+                result.status = EventISO18626IncomingAbstractService.STATUS_OK
+                result.newRequestId = pr.id
             }
-
-            log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
-
-            // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
-            pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
-            pr.stateModel = statusService.getStateModel(pr)
-            pr.state = pr.stateModel.initialState;
-            reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
-
-            log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
-            pr.save(flush:true, failOnError:true)
 
             result.messageType = Iso18626Constants.REQUEST
-            result.supIdType = header.supplyingAgencyId?.agencyIdType;// supplyingAgencyId can be null
-            result.supId = header.supplyingAgencyId?.agencyIdValue;// supplyingAgencyId can be null
-            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType;
-            result.reqAgencyId = header.requestingAgencyId.agencyIdValue;
-            result.reqId = header.requestingAgencyRequestId;
-            result.timeRec = header.timestamp;
+            result.supIdType = header.supplyingAgencyId?.agencyIdType // supplyingAgencyId can be null
+            result.supId = header.supplyingAgencyId?.agencyIdValue // supplyingAgencyId can be null
+            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
+            result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            result.reqId = header.requestingAgencyRequestId
+            result.timeRec = header.timestamp
 
-            result.status = EventISO18626IncomingAbstractService.STATUS_OK
-            result.newRequestId = pr.id;
         } else {
             log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");
         }
@@ -218,9 +213,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
         return(eventResultDetails);
     }
 
-    PatronRequest lookupPatronRequest(String id, boolean withLock = false) {
+    List<PatronRequest> lookupPatronRequests(String id, boolean withLock = false) {
         log.debug("LOCKING ReshareApplicationEventHandlerService::lookupPatronRequestWithRole(${id},${withLock})")
-        PatronRequest result = PatronRequest.createCriteria().get {
+        List<PatronRequest> results = PatronRequest.createCriteria().list {
             and {
                 or {
                     eq('id', id)
@@ -231,9 +226,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
             lock withLock
         }
 
-        log.debug("LOCKING EventMessageRequestIndService::lookupPatronRequest located ${result?.id}/${result?.hrid}");
+        log.debug("LOCKING EventMessageRequestIndService::lookupPatronRequest located results ${results?.size()}")
 
-        return result;
+        return results;
     }
 
     static void mapBibliographicItemId(Map eventData, Map newParams) {
@@ -241,10 +236,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
             def bibliographicItemId = eventData.bibliographicInfo.bibliographicItemId
             if (bibliographicItemId instanceof ArrayList) {
                 for (def item in bibliographicItemId) {
-                    newParams.put((item.bibliographicItemIdentifierCode).toLowerCase(), item.bibliographicItemIdentifier)
+                    newParams.put(getPatronRequestPropertyNames().get(item.bibliographicItemIdentifierCode?.toLowerCase()),
+                            item.bibliographicItemIdentifier)
                 }
             } else {
-                newParams.put((bibliographicItemId.bibliographicItemIdentifierCode).toLowerCase(), bibliographicItemId.bibliographicItemIdentifier)
+                newParams.put(getPatronRequestPropertyNames().get(bibliographicItemId.bibliographicItemIdentifierCode?.toLowerCase()),
+                        bibliographicItemId.bibliographicItemIdentifier)
             }
         }
     }
@@ -255,14 +252,49 @@ public class EventMessageRequestIndService extends AbstractEvent {
             def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
             if (bibliographicRecordId instanceof ArrayList) {
                 for (def record in bibliographicRecordId) {
-                    newParams.put((record.bibliographicRecordIdentifierCode), record.bibliographicRecordIdentifier)
+                    newParams.put(getPatronRequestPropertyNames().get(record.bibliographicRecordIdentifierCode?.toLowerCase()), record.bibliographicRecordIdentifier)
                     customIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
                 }
             } else {
-                newParams.put((bibliographicRecordId.bibliographicRecordIdentifierCode), bibliographicRecordId.bibliographicRecordIdentifier)
+                newParams.put(getPatronRequestPropertyNames().get(bibliographicRecordId.bibliographicRecordIdentifierCode?.toLowerCase()), bibliographicRecordId.bibliographicRecordIdentifier)
                 customIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
             }
             body.put('customIdentifiers', customIdentifiers)
         }
+    }
+
+    PatronRequest findOrCreatePatronRequest(Map eventData, Map newParams, Map result){
+        PatronRequest pr = null
+        String id = eventData.header.requestingAgencyRequestId ?  eventData.header.requestingAgencyRequestId : eventData.header.supplyingAgencyRequestId
+        List<PatronRequest> prs = lookupPatronRequests(id, true)
+        boolean retry = eventData?.serviceInfo?.requestType == EventISO18626IncomingAbstractService.SERVICE_REQUEST_TYPE_RETRY
+        if (prs.size() == 1 && retry) {
+            pr = prs.get(0)
+            newParams.each { key, value ->
+                if (pr.hasProperty(key) && ObjectUtils.isNotEmpty(value)) {
+                    pr."$key" = value
+                }
+            }
+        } else if (prs.isEmpty() && !retry) {
+            pr = new PatronRequest(newParams)
+        } else {
+            result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
+            result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_REQUEST_ID_ALREADY_EXISTS
+            result.errorValue = retry ? "Request update failed because found ${prs.size()} records" :
+                    "Failed to create new request because in DB there already is record with such id"
+        }
+        return pr
+    }
+
+    static Map<String, String> getPatronRequestPropertyNames(){
+        if (PATRON_REQUEST_PROPERTY_NAMES.isEmpty()) {
+            def propertyNames = PatronRequest.metaClass.properties.collect { it.name }
+            // Convert the list to a map with lowercase keys
+            Map<String, String> propertyMap = propertyNames.collectEntries { propertyName ->
+                [(propertyName.toLowerCase()): propertyName]
+            }
+            PATRON_REQUEST_PROPERTY_NAMES.putAll(propertyMap)
+        }
+        return PATRON_REQUEST_PROPERTY_NAMES
     }
 }

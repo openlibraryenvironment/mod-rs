@@ -132,6 +132,7 @@ class ConfirmationMessageService {
       switch (error) {
           case ERROR_TYPE_BADLY_FORMED_MESSAGE :
           case ERROR_TYPE_NO_XML_SUPPLIED:
+          case ERROR_TYPE_REQUEST_ID_ALREADY_EXISTS:
               return TypeErrorType.BADLY_FORMED_MESSAGE
           case ERROR_TYPE_NO_ACTIVE_REQUEST:
           case ERROR_TYPE_NO_CANCEL_VALUE:
