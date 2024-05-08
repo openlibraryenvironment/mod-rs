@@ -810,9 +810,9 @@ class RSLifecycleSpec extends TestBase {
             "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_SEQUESTERED                | null               | null                  | "URL"          | null        | "{}"
             "RSInstOne"       | "RSInstThree"     | 5        | false             | "supplierFillDigitalLoan.json"      | Status.REQUESTER_LOANED_DIGITALLY                 | Status.RESPONDER_LOANED_DIGITALLY           | null               | null                  | "URL"          | null        | "{}"
             "RSInstOne"       | null              | 6        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null
-            "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"
-            "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierPrintPullSlip.json"        | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_AWAIT_PICKING              | null               | null                  | "URL"          | "Copy"      | "{status=true}"
-            "RSInstOne"       | "RSInstThree"     | 6        | false             | "supplierAddURLToDocument.json"     | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
+            "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAnswerYes.json"          | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"
+            "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierPrintPullSlip.json"      | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_COPY_AWAIT_PICKING         | null               | null                  | "URL"          | "Copy"      | "{status=true}"
+            "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
 
     }
 
@@ -1828,7 +1828,7 @@ class DosomethingSimple {
         def put_response = doPut("${baseUrl}/rs/patronrequests/${response?.id}".toString(), updated_request_json);
         log.debug("got response from put request ${put_response}");
 
-        String jsonPayload = new File("src/integration-test/resources/scenarios/requesterRetryRequest.json").text;
+        String jsonPayload = new File("src/integration-test/resources/scenarios/nrRequesterRetryRequest.json").text;
         log.debug("retryRequest payload: ${jsonPayload}");
         String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
         log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");

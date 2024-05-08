@@ -50,6 +50,7 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_CANCEL_REQUEST_RECEIVED    = "RES_CANCEL_REQUEST_RECEIVED";
   public static final String RESPONDER_CANCELLED                  = "RES_CANCELLED";
   public static final String RESPONDER_COMPLETE                   = "RES_COMPLETE";
+  public static final String RESPONDER_COPY_AWAIT_PICKING         = "RES_COPY_AWAIT_PICKING";
   public static final String RESPONDER_DOCUMENT_DELIVERED         = "RES_DOCUMENT_DELIVERED";
   public static final String RESPONDER_IDLE                       = "RES_IDLE";
   public static final String RESPONDER_ITEM_RETURNED              = "RES_ITEM_RETURNED";
