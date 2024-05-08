@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.events
 
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
+import liquibase.util.ObjectUtil
 import org.apache.commons.lang3.ObjectUtils
 import org.apache.commons.lang3.StringUtils
 import org.olf.okapi.modules.directory.Symbol
@@ -72,7 +73,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr = new PatronRequest(newParams)
             }
 
-            if (StringUtils.isNotEmpty(zflIdentifiers)) {
+            if (StringUtils.isNotEmpty(zflIdentifiers) && ObjectUtils.isNotEmpty(zflIdentifiersBody)) {
                 pr.zflIdentifiers = zflIdentifiers
             }
 
@@ -252,8 +253,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
     }
 
     static void mapBibliographicRecordId(Map eventData, Map body, Map newParams) {
-        def zflIdentifiers = []
         if (eventData.bibliographicInfo.bibliographicRecordId) {
+            def zflIdentifiers = []
             def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
             if (bibliographicRecordId instanceof ArrayList) {
                 for (def record in bibliographicRecordId) {
