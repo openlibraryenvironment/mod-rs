@@ -2,9 +2,7 @@ package org.olf.rs.statemodel.events
 
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
-import liquibase.util.ObjectUtil
 import org.apache.commons.lang3.ObjectUtils
-import org.apache.commons.lang3.StringUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.statemodel.*
