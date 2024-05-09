@@ -403,7 +403,7 @@ class ProtocolMessageBuildingService {
 
       // Set the requestingAgencyId and the requestingAgencyRequestId
       requestingAgencyId = buildHeaderRequestingAgencyId(message_sender_symbol)
-      requestingAgencyRequestId = protocolMessageService.buildProtocolId(pr);
+      requestingAgencyRequestId = protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode);
 
       if (messageType == 'REQUEST') {
         // If this message is a request then the supplying Agency details get filled out later and the supplying request id is null

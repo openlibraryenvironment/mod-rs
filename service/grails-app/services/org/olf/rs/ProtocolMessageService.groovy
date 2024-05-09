@@ -27,6 +27,7 @@ import org.olf.rs.iso18626.TypeSchemeValuePair
 import org.olf.rs.iso18626.TypeServiceType
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.iso18626.TypeYesNo
+import org.olf.rs.statemodel.StateModel
 import org.xml.sax.SAXException
 
 import javax.xml.bind.JAXBContext
@@ -121,8 +122,13 @@ class ProtocolMessageService {
      * @param request The request we want to build the protocol id from
      * @return The protocol id
      */
-    public String buildProtocolId(PatronRequest request) {
-        return((request.hrid ?: request.id) + REQUESTER_ID_SEPARATOR + request.rotaPosition.toString());
+    public String buildProtocolId(PatronRequest request, String stateModel) {
+        String id = (request.hrid ?: request.id)
+        String suffix = (stateModel == StateModel.MODEL_SLNP_REQUESTER ||
+                stateModel == StateModel.MODEL_SLNP_RESPONDER) ? "" :
+                (REQUESTER_ID_SEPARATOR + request.rotaPosition.toString())
+        return id + suffix
+
     }
 
     /**
