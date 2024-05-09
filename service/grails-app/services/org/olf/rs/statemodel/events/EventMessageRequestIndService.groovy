@@ -54,10 +54,13 @@ public class EventMessageRequestIndService extends AbstractEvent {
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
             log.debug('*** Create new request ***')
-            def newParams = eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
+            def newParams = [:]
             def customIdentifiersBody = [:]
-            mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
-            mapBibliographicItemId(eventData, newParams)
+            if (eventData.bibliographicInfo instanceof Map) {
+                eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
+                mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
+                mapBibliographicItemId(eventData, newParams)
+            }
 
             PatronRequest pr = findOrCreatePatronRequest(eventData, newParams, result)
 
@@ -68,7 +71,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 // Add publisher information to Patron Request
-                if (eventData.publicationInfo != null) {
+                if (eventData.publicationInfo instanceof Map) {
                     Map publicationInfo = eventData.publicationInfo
                     if (publicationInfo != null) {
                         if (publicationInfo.publisher) {
@@ -90,7 +93,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 // Add service information to Patron Request
-                if (eventData.serviceInfo != null) {
+                if (eventData.serviceInfo instanceof Map) {
                     Map serviceInfo = eventData.serviceInfo
 
                     if (serviceInfo != null) {
@@ -136,7 +139,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 // Add patron information to Patron Request
-                if (eventData.patronInfo != null) {
+                if (eventData.patronInfo instanceof Map) {
                     Map patronInfo = eventData.patronInfo
                     if (patronInfo != null) {
                         if (patronInfo.patronId) {
