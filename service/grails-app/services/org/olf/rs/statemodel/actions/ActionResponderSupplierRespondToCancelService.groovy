@@ -1,6 +1,6 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -12,6 +12,8 @@ import org.olf.rs.statemodel.Actions;
  */
 public class ActionResponderSupplierRespondToCancelService extends ActionResponderService {
 
+    private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
+
     @Override
     String name() {
         return(Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL);
@@ -22,13 +24,15 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
         // Send the response to the requester
         reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
 
-        // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
+
+            // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
         if (parameters?.cancelResponse == 'no') {
             // Set the audit message and qualifier
             actionResultDetails.auditMessage = 'Cancellation denied';
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
             actionResultDetails.auditMessage = 'Cancellation accepted';
+
         }
 
         return(actionResultDetails);

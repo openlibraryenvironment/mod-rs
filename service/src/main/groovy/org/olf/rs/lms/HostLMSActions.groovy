@@ -74,4 +74,10 @@ public interface HostLMSActions {
   );
 
   public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails);
+
+  /*
+  If the Host LMS is not smart enough to clean up items held with Request Item after the request is cancelled,
+  we have to return true here
+   */
+  public boolean isManualCancelRequestItem();
 }

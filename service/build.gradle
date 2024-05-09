@@ -207,6 +207,7 @@ dependencies {
   }
 
   // NCIP deps
+
   compile 'org.olf.rs:lib-ncip-client:0.23.7'
   compile 'com.github.jknack:handlebars:4.2.0'
   compile 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
@@ -221,7 +222,6 @@ dependencies {
   compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
   compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
   compile 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
-  
 
   // Domain model for directory
   compile 'org.scala-saddle:google-rfc-2445:20110304'

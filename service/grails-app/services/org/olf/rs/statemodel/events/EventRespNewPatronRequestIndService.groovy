@@ -31,7 +31,6 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     HostLMSService hostLMSService;
     ReshareActionService reshareActionService;
     SettingsService settingsService;
-    SharedIndexService sharedIndexService;
 
     @Override
     String name() {
@@ -98,6 +97,8 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     if (requestItemResult.result == true) {
                         log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
                         reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
+                        log.debug("Set externalHoldRequestId of PatronRequest to ${requestItemResult.requestId}");
+                        request.externalHoldRequestId = requestItemResult.requestId;
                         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
                     } else {
                         log.debug("Request Item Hold Failed: ${requestItemResult?.problems}")

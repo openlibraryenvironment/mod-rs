@@ -12,6 +12,7 @@ databaseChangeLog = {
   include file: 'update-mod-rs-2-12.groovy'
   include file: 'update-mod-rs-2-13.groovy'
   include file: 'update-mod-rs-2-14.groovy'
+  include file: 'update-mod-rs-2-15.groovy'
 
   // Pulled in from web-toolkit-ce
   include file: 'wtk/additional_CustomPropertyDefinitions.feat.groovy'
