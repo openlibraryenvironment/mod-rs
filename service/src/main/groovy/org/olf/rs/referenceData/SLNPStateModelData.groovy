@@ -215,6 +215,36 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
+    private static Map slnpResponderNewPatronRequestIndRequestItemLocated = [
+            code: 'slnpResponderNewPatronRequestIndRequestItemLocated',
+            description: 'Event triggered by a new incoming request, the item has been located and we are configured to use request item',
+            result: true,
+            status: Status.SLNP_RESPONDER_AWAIT_PICKING,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map slnpResponderNewPatronRequestIndRequestItemLoaned = [
+            code: 'slnpResponderNewPatronRequestIndRequestItemLoaned',
+            description: 'Event triggered by incoming request, respond with message Loaned',
+            result: true,
+            status: Status.SLNP_RESPONDER_ITEM_SHIPPED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map slnpResponderNewPatronRequestIndRequestItemUnfilled = [
+            code: 'slnpResponderNewPatronRequestIndRequestItemUnfilled',
+            description: 'Event triggered by incoming request, respond with message Unfilled',
+            result: true,
+            status: Status.SLNP_RESPONDER_UNFILLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
     // SLNP Requester lists
 
     private static Map slnpRequesterCancelList = [
@@ -375,6 +405,17 @@ public class SLNPStateModelData {
             ]
     ];
 
+    private static Map slnpResponderNewPatronRequestIndList = [
+            code: ActionEventResultList.SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST,
+            description: 'Event for new incoming request indication',
+            model: StateModel.MODEL_SLNP_RESPONDER,
+            results: [
+                    slnpResponderNewPatronRequestIndRequestItemLocated,
+                    slnpResponderNewPatronRequestIndRequestItemLoaned,
+                    slnpResponderNewPatronRequestIndRequestItemUnfilled
+            ]
+    ];
+
     private static Map[] resultLists = [
             slnpRequesterCancelList,
             slnpRequesterReceivedList,
@@ -392,7 +433,8 @@ public class SLNPStateModelData {
             slnpResponderSupplierCheckInReshareList,
             slnpResponderSupplierMarkShippedList,
             slnpResponderItemReturnedList,
-            slnpResponderPrintPullSlipNoTransitionList
+            slnpResponderPrintPullSlipNoTransitionList,
+            slnpResponderNewPatronRequestIndList
     ];
 
     public static void loadStatusData() {
@@ -488,7 +530,7 @@ public class SLNPStateModelData {
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, true);
 
         ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the requester has been created', false, eventServiceName(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
-        ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
+        ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), ActionEventResultList.SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST);
     }
 
 	public static void loadStateModelData() {

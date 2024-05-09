@@ -60,6 +60,7 @@ public class RefdataValueData {
     public static final String AUTO_RESPONDER_OFF                          = OFF;
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY = 'On: will supply and cannot supply';
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY          = 'On: will supply only';
+    public static final String AUTO_RESPONDER_ON_LOANED                    = 'On: auto loan';
 
     // Auto Responder Cancel
     public static final String AUTO_RESPONDER_CANCEL_OFF = OFF;
@@ -228,6 +229,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_LOANED);
 
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_ON);

@@ -63,16 +63,17 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_REQUESTER_SHIPPED_RETURN            = 'slnpRequesterShippedReturn';
 
     // SLNP responder event lists
-    static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes';
-    static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply';
-    static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply';
+    static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
+    static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
+    static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
     static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY                      = 'slnpResponderConditionalSupply';
-    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION        = 'slnpResponderConditionalSupplyNoTransition';
+    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION        = 'slnpResponderConditionalSupplyNoTransition'
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION  = "slnpResponderSupplierPrintPullSlipNoTransition"
     static public final String SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE               = "slnpResponderSupplierCheckInReshare"
     static public final String SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED                   = "slnpResponderSupplierMarkShipped"
     static public final String SLNP_RESPONDER_ITEM_RETURNED                           = "slnpResponderItemReturned"
+    static public final String SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST                = 'slnpResponderNewPatronRequestIndList'
 
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
