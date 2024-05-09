@@ -30,8 +30,8 @@ public class SLNPStateModelData {
             [status: Status.SLNP_REQUESTER_SHIPPED],
             [status: Status.SLNP_REQUESTER_CHECKED_IN],
             [status: Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING],
-            [status: Status.SLNP_REQUESTER_COMPLETE, isTerminal: true]
-
+            [status: Status.SLNP_REQUESTER_COMPLETE, isTerminal: true],
+            [status: Status.SLNP_REQUESTER_ITEM_LOST, isTerminal: true]
     ];
 
     static private final List slnpResponderStates = [
@@ -90,6 +90,16 @@ public class SLNPStateModelData {
             description: 'Mark return shipped',
             result: true,
             status: Status.SLNP_REQUESTER_COMPLETE,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpRequesterMarkItemLost = [
+            code: 'slnpRequesterMarkItemLost',
+            description: 'Item has been lost and the request is complete',
+            result: true,
+            status: Status.SLNP_REQUESTER_ITEM_LOST,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent : null
@@ -312,6 +322,15 @@ public class SLNPStateModelData {
             ]
     ];
 
+    private static Map slnpRequesterMarkItemLostList = [
+            code: ActionEventResultList.SLNP_REQUESTER_MARK_ITEM_LOST,
+            description: 'Mark item lost',
+            model: StateModel.MODEL_SLNP_REQUESTER,
+            results: [
+                    slnpRequesterMarkItemLost
+            ]
+    ];
+
     // SLNP responder lists
 
     private static Map slnpResponderRespondYesList = [
@@ -434,7 +453,8 @@ public class SLNPStateModelData {
             slnpResponderSupplierMarkShippedList,
             slnpResponderItemReturnedList,
             slnpResponderPrintPullSlipNoTransitionList,
-            slnpResponderNewPatronRequestIndList
+            slnpResponderNewPatronRequestIndList,
+            slnpRequesterMarkItemLostList
     ];
 
     public static void loadStatusData() {
@@ -464,6 +484,7 @@ public class SLNPStateModelData {
         Status.ensure(Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_REQUESTER_COMPLETE, StatusStage.COMPLETED, '9996', true, false, true, null);
         Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.SLNP_REQUESTER_ITEM_LOST, StatusStage.COMPLETED, '9996', true, false, true, null);
 
         Status.ensure(Status.SLNP_RESPONDER_IDLE, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_UNFILLED, StatusStage.COMPLETED, '9996', true, false, true, null);
@@ -515,6 +536,7 @@ public class SLNPStateModelData {
         // SLNP_REQ_CHECKED_IN OR "In local circulation process"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CHECKED_IN, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_MARK_ITEM_LOST);
 
         // SLNP_REQ_AWAITING_RETURN_SHIPPING OR "Awaiting return shipping"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_SHIPPED_RETURN, null, Boolean.TRUE, Boolean.FALSE);
@@ -525,6 +547,7 @@ public class SLNPStateModelData {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, 'The requester has canceled the request', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT.capitalize(), ActionEventResultList.SLNP_REQUESTER_ABORTED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'The requester has received the item(s) from the responder', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_REQUESTER_RECEIVED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST, 'The requester has marked item lost', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST.capitalize(), ActionEventResultList.SLNP_REQUESTER_MARK_ITEM_LOST, true);
 
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, true);

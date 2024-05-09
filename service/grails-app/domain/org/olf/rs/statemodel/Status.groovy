@@ -68,6 +68,7 @@ class Status implements MultiTenant<Status> {
   public static final String SLNP_REQUESTER_CHECKED_IN                = "SLNP_REQ_CHECKED_IN";
   public static final String SLNP_REQUESTER_AWAITING_RETURN_SHIPPING  = "SLNP_REQ_AWAITING_RETURN_SHIPPING";
   public static final String SLNP_REQUESTER_COMPLETE                  = "SLNP_REQ_COMPLETE";
+  public static final String SLNP_REQUESTER_ITEM_LOST                 = "SLNP_REQ_ITEM_LOST";
 
   // SLNP Responder states
   public static final String SLNP_RESPONDER_IDLE                 = "SLNP_RES_IDLE";
