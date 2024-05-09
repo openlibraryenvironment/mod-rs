@@ -222,7 +222,7 @@ dependencies {
   compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
   compile 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
   compile 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
-  
+
   // Domain model for directory
   compile 'org.scala-saddle:google-rfc-2445:20110304'
   // For RRule processing
