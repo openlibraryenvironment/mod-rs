@@ -174,6 +174,12 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                 } else {
                     actionResultDetails.auditMessage = 'One or more items failed to be checked into ReShare. Review configuration and try again or deconfigure host LMS integration in settings.';
                     request.needsAttention = true;
+
+                    // If we have exactly one volume we should remove it so that the request doesn't surprise
+                    // the user by becoming multi-volume if they try again with a different item
+                    if (request.volumes.size() == 1) {
+                        request.volumes.clear();
+                    }
                 }
             } else {
                 // If we have deleted all failing requests, we can move to next state
