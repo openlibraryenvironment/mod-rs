@@ -59,8 +59,6 @@ class ProtocolMessageBuildingService {
               [ bibliographicRecordIdentifierCode:'sponsoringBody', bibliographicRecordIdentifier: req.sponsoringBody ],
               [ bibliographicRecordIdentifierCode:'startPage', bibliographicRecordIdentifier: req.startPage ],
               [ bibliographicRecordIdentifierCode:'numberOfPages', bibliographicRecordIdentifier: req.numberOfPages ],
-              [ bibliographicRecordIdentifierCode:'issn', bibliographicRecordIdentifier: req.issn ],
-              [ bibliographicRecordIdentifierCode:'isbn', bibliographicRecordIdentifier: req.isbn ],
               [ bibliographicRecordIdentifierCode:'doi', bibliographicRecordIdentifier: req.doi ],
               [ bibliographicRecordIdentifierCode:'coden', bibliographicRecordIdentifier: req.coden ],
               [ bibliographicRecordIdentifierCode:'sici', bibliographicRecordIdentifier: req.sici ],
@@ -75,6 +73,8 @@ class ProtocolMessageBuildingService {
               [ bibliographicRecordIdentifierCode:'oclcNumber', bibliographicRecordIdentifier: req.oclcNumber ],
               [ bibliographicRecordIdentifierCode:'patronReference', bibliographicRecordIdentifier: req.patronReference ]
       ],  // Shared index bib record ID (Instance identifier)
+      bibliographicItemId: [[ bibliographicItemIdentifierCode:'issn', bibliographicItemIdentifier: req.issn ],
+                            [ bibliographicItemIdentifierCode:'isbn', bibliographicItemIdentifier: req.isbn ]],
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
