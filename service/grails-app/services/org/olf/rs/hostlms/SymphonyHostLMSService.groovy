@@ -140,4 +140,14 @@ public class SymphonyHostLMSService extends BaseHostLMSService {
     log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
   }
+
+  @Override
+  public String filterRequestItemItemId(String itemId) {
+    def pattern = ~/(\D+)?(\d.*)/; //Strip any leading non-digit content
+    def matcher = itemId =~ pattern;
+    if (matcher.matches()) {
+      return matcher.group(2);
+    }
+    return itemId;
+  }
 }
