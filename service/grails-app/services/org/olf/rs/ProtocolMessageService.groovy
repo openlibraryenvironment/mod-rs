@@ -2,6 +2,7 @@ package org.olf.rs
 
 import org.olf.rs.iso18626.Address
 import org.olf.rs.iso18626.BibliographicInfo
+import org.olf.rs.iso18626.BibliographicItemId
 import org.olf.rs.iso18626.BibliographicRecordId
 import org.olf.rs.iso18626.DeliveryInfo
 import org.olf.rs.iso18626.ElectronicAddress
@@ -55,6 +56,7 @@ import groovyx.net.http.*;
  *
  */
 class ProtocolMessageService {
+  private static final Set<String> RECORD_ID_CODES = new HashSet<>(['amicus', 'bl', 'faust', 'jnb', 'la', 'lccn', 'medline', 'ncid', 'oclc', 'pid', 'pmid', 'tp'])
 
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
   EventPublicationService eventPublicationService;
@@ -639,18 +641,31 @@ and sa.service.businessFunction.value=:ill
     for (final def map in eventData.bibliographicInfo.bibliographicRecordId) {
       if (map.bibliographicRecordIdentifier) {
         BibliographicRecordId recordId = new BibliographicRecordId()
-        recordId.setBibliographicRecordIdentifierCode(toTypeSchemeValuePair(map.bibliographicRecordIdentifierCode))
+        String code = map.bibliographicRecordIdentifierCode
+        recordId.setBibliographicRecordIdentifierCode(toTypeSchemeValuePair(code,
+                RECORD_ID_CODES.contains(code.toLowerCase()) ? null : 'RESHARE'))
         recordId.setBibliographicRecordIdentifier(map.bibliographicRecordIdentifier)
         bibliographicInfo.getBibliographicRecordId().add(recordId)
+      }
+    }
+    for (final def map in eventData.bibliographicInfo.bibliographicItemId) {
+      if (map.bibliographicItemIdentifier) {
+        BibliographicItemId itemId = new BibliographicItemId()
+        itemId.setBibliographicItemIdentifierCode(toTypeSchemeValuePair(map.bibliographicItemIdentifierCode))
+        itemId.setBibliographicItemIdentifier(map.bibliographicItemIdentifier)
+        bibliographicInfo.getBibliographicItemId().add(itemId)
       }
     }
 
     return bibliographicInfo
   }
 
-  TypeSchemeValuePair toTypeSchemeValuePair(def text){
+  TypeSchemeValuePair toTypeSchemeValuePair(def text, def scheme = null){
     TypeSchemeValuePair valuePair = new TypeSchemeValuePair()
     valuePair.setValue(text)
+    if (scheme) {
+      valuePair.setScheme(scheme)
+    }
     return valuePair
   }
 
