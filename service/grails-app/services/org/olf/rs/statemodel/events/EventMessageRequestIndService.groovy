@@ -69,8 +69,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
             PatronRequest pr = findOrCreatePatronRequest(eventData, newParams, result)
             if (pr) {
 
-                if (ObjectUtils.isNotEmpty(eventData.identifiers) && eventData.scheme) {
-                    Map customIdentifiersMap = [scheme : eventData.scheme]
+                if (ObjectUtils.isNotEmpty(eventData.identifiers) && eventData.schemeValue) {
+                    Map customIdentifiersMap = [schemeValue : eventData.schemeValue]
                     customIdentifiersMap.put('identifiers', eventData.identifiers)
                     pr.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }
@@ -336,7 +336,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
         }
 
         if (customIdentifiers && customIdentifiers.size() > 0) {
-            newMap.put("scheme", settingValue)
+            newMap.put("schemeValue", settingValue)
             newMap.put("identifiers", customIdentifiers)
         }
 
