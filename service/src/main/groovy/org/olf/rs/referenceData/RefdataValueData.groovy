@@ -1,5 +1,6 @@
-package org.olf.rs.referenceData;
+package org.olf.rs.referenceData
 
+import org.olf.rs.constants.CustomIdentifiersScheme;
 import org.olf.rs.constants.Directory;
 
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
@@ -51,6 +52,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
     public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
     public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
+    public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME        = 'customIdentifiersScheme';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -289,6 +291,9 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
+
+            // ISO18626 Custom options for - Custom identifiers schemes
+            RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
 
             // This looks slightly odd, but rather than litter this file with an ever growing list of
             // random delete statements, if you wish to delete
