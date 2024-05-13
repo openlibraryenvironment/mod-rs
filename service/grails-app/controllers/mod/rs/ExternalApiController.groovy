@@ -1,7 +1,5 @@
 package mod.rs
 
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.xml.Namespace
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
