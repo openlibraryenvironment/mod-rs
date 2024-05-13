@@ -1,12 +1,17 @@
 package org.olf.rs.statemodel.events
 
+import com.k_int.web.toolkit.refdata.RefdataCategory
+import com.k_int.web.toolkit.refdata.RefdataValue
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
+import org.olf.rs.constants.CustomIdentifiersScheme
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.*
 
+import javax.servlet.http.HttpServletRequest
 import java.time.LocalDate
 /**
  * Service that processes the Request-ind event
@@ -55,19 +60,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
             log.debug('*** Create new request ***')
             def newParams = [:]
-            def customIdentifiersBody = [:]
             if (eventData.bibliographicInfo instanceof Map) {
                 eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
-                mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
+                mapBibliographicRecordId(eventData, newParams)
                 mapBibliographicItemId(eventData, newParams)
             }
 
             PatronRequest pr = findOrCreatePatronRequest(eventData, newParams, result)
-
             if (pr) {
 
-                if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
-                    pr.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
+                if (ObjectUtils.isNotEmpty(eventData.customIdentifiers)) {
+                    Map customIdentifiersMap = [customIdentifiers : eventData.customIdentifiers]
+                    pr.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }
 
                 // Add publisher information to Patron Request
@@ -246,23 +250,20 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 newParams.put(getPatronRequestPropertyNames().get(bibliographicItemId.bibliographicItemIdentifierCode?.toLowerCase()),
                         bibliographicItemId.bibliographicItemIdentifier)
             }
+            newParams.remove(null)
         }
     }
 
-    static void mapBibliographicRecordId(Map eventData, Map body, Map newParams) {
+    static void mapBibliographicRecordId(Map eventData, Map newParams) {
         if (eventData.bibliographicInfo.bibliographicRecordId) {
-            def customIdentifiers = []
             def bibliographicRecordId = eventData.bibliographicInfo.bibliographicRecordId
             if (bibliographicRecordId instanceof ArrayList) {
                 for (def record in bibliographicRecordId) {
-                    newParams.put(getPatronRequestPropertyNames().get(record.bibliographicRecordIdentifierCode?.toLowerCase()), record.bibliographicRecordIdentifier)
-                    customIdentifiers.add([key: record.bibliographicRecordIdentifierCode, value: record.bibliographicRecordIdentifier])
-                }
+                    newParams.put(getPatronRequestPropertyNames().get(record.bibliographicRecordIdentifierCode?.toLowerCase()), record.bibliographicRecordIdentifier)}
             } else {
                 newParams.put(getPatronRequestPropertyNames().get(bibliographicRecordId.bibliographicRecordIdentifierCode?.toLowerCase()), bibliographicRecordId.bibliographicRecordIdentifier)
-                customIdentifiers.add([key: bibliographicRecordId.bibliographicRecordIdentifierCode, value: bibliographicRecordId.bibliographicRecordIdentifier])
             }
-            body.put('customIdentifiers', customIdentifiers)
+            newParams.remove(null)
         }
     }
 
@@ -299,5 +300,44 @@ public class EventMessageRequestIndService extends AbstractEvent {
             PATRON_REQUEST_PROPERTY_NAMES.putAll(propertyMap)
         }
         return PATRON_REQUEST_PROPERTY_NAMES
+    }
+
+    static Map createNewCustomIdentifiers(HttpServletRequest request, Map mr) {
+        Map newMap = new HashMap(mr)
+        String settingValue = null
+
+        RefdataCategory customIdentifiersScheme = RefdataCategory.findByDesc(RefdataValueData.VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME)
+        if (customIdentifiersScheme) {
+            List<RefdataValue> values = RefdataValue.findAllByOwner(customIdentifiersScheme)
+            if (values && values.size() == 1) {
+                settingValue = values.get(0).label
+            } else {
+                log.debug("Multiple values found for customIdentifiers scheme, only one is acceptable.")
+                return newMap
+            }
+        }
+
+        if (!settingValue) {
+            return newMap
+        }
+
+        def slurper = new groovy.xml.XmlSlurper().parseText(groovy.xml.XmlUtil.serialize(request.XML))
+
+        def codesBySchemaValue = slurper.'**'.findAll { node ->
+            node.attributes().find { it.key == '{http://illtransactions.org/2013/iso18626}scheme' && it.value == settingValue }
+        }
+
+        def customIdentifiers = []
+        slurper.request.bibliographicInfo.bibliographicRecordId.each { bri ->
+            if (bri.bibliographicRecordIdentifierCode in codesBySchemaValue) {
+                customIdentifiers.add([key: bri.bibliographicRecordIdentifierCode.text(), value: bri.bibliographicRecordIdentifier.text()])
+            }
+        }
+
+        if (customIdentifiers && customIdentifiers.size() > 0) {
+            newMap.put("customIdentifiers", customIdentifiers)
+        }
+
+        return newMap
     }
 }

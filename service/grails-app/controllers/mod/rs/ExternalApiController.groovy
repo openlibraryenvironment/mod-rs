@@ -1,5 +1,7 @@
 package mod.rs
 
+import com.k_int.web.toolkit.settings.AppSetting
+import groovy.xml.Namespace
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
@@ -17,6 +19,7 @@ import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses
+import org.olf.rs.statemodel.events.EventMessageRequestIndService
 import org.xml.sax.SAXException;
 
 /**
@@ -112,7 +115,9 @@ class ExternalApiController {
           recipient = getSymbolFor(mr.header.supplyingAgencyId)
           log.debug("incoming request message for ${recipient}");
 
-          def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+          Map newMap = EventMessageRequestIndService.createNewCustomIdentifiers(request, mr)
+
+          def req_result = reshareApplicationEventHandlerService.handleRequestMessage(newMap);
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
