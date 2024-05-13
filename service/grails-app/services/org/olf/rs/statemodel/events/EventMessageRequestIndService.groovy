@@ -69,8 +69,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
             PatronRequest pr = findOrCreatePatronRequest(eventData, newParams, result)
             if (pr) {
 
-                if (ObjectUtils.isNotEmpty(eventData.customIdentifiers)) {
-                    Map customIdentifiersMap = [customIdentifiers : eventData.customIdentifiers]
+                if (ObjectUtils.isNotEmpty(eventData.identifiers) && eventData.scheme) {
+                    Map customIdentifiersMap = [scheme : eventData.scheme]
+                    customIdentifiersMap.put('identifiers', eventData.identifiers)
                     pr.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }
 
@@ -310,7 +311,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
         if (customIdentifiersScheme) {
             List<RefdataValue> values = RefdataValue.findAllByOwner(customIdentifiersScheme)
             if (values && values.size() == 1) {
-                settingValue = values.get(0).label
+                settingValue = values.get(0).value.toUpperCase()
             } else {
                 log.debug("Multiple values found for customIdentifiers scheme, only one is acceptable.")
                 return newMap
@@ -335,7 +336,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
         }
 
         if (customIdentifiers && customIdentifiers.size() > 0) {
-            newMap.put("customIdentifiers", customIdentifiers)
+            newMap.put("scheme", settingValue)
+            newMap.put("identifiers", customIdentifiers)
         }
 
         return newMap
