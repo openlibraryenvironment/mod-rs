@@ -38,10 +38,13 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
         // Auto Responder
         try {
+            log.debug('autoRespond....')
             String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
             autoRespond(request, autoLoanSetting.toLowerCase(), eventResultDetails)
         } catch (Exception e) {
-            log.error("Problem in auto respond: ${e.getMessage()}", e)
+            log.error("Problem in NCIP Request Item call: ${e.getMessage()}", e)
+            eventResultDetails.auditMessage = "NCIP Request Item call failure"
+            request.needsAttention = true
         }
 
         return(eventResultDetails)
@@ -57,9 +60,8 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
      * @param eventResultDetails - Object containing results for the event such as audit, qualifier, result etc...
      */
     private void autoRespond(PatronRequest request, String autoRespondVariant, EventResultDetails eventResultDetails) {
-        log.debug('autoRespond....')
-
         log.debug("Attempt hold with RequestItem")
+
         Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
                 request.supplierUniqueRecordId, request.patronIdentifier)
 
@@ -68,25 +70,17 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             eventResultDetails.auditMessage = 'Will Supply'
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
 
-            // Send 'Loaned' message
-            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_LOANED, 'Loaned', request, eventResultDetails, 'Shipped')
+            if (autoRespondVariant == 'on:_auto_loan') {
+                log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
+                reshareActionService.sendResponse(request, 'Loaned', [:], eventResultDetails)
+                eventResultDetails.auditMessage = 'Shipped'
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOANED
+            }
         } else {
-            // Send 'Unfilled' message
-            eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid ' + request.supplierUniqueRecordId
-            checkSettingAndSendStatusChangeMessage(autoRespondVariant, ActionEventResultQualifier.QUALIFIER_UNFILLED, 'Unfilled', request, eventResultDetails, 'Cannot Supply')
-        }
-    }
-
-    private void checkSettingAndSendStatusChangeMessage(String autoRespondVariant, String qualifier, String status, PatronRequest request,
-                                                            EventResultDetails eventResultDetails, String auditMessage) {
-        if (autoRespondVariant == 'on:_auto_loan') {
-            log.debug("Send response ${status} to ${request.requestingInstitutionSymbol}")
-            reshareActionService.sendResponse(request, status, [:], eventResultDetails)
-            eventResultDetails.auditMessage = auditMessage;
-            eventResultDetails.qualifier = qualifier
-        } else {
-            eventResultDetails.auditMessage = "Auto responder is ${autoRespondVariant} - manual checking needed"
-            request.needsAttention = true
+            log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
+            reshareActionService.sendResponse(request, 'Unfilled', [:], eventResultDetails)
+            eventResultDetails.auditMessage = 'Cannot Supply'
+            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
 }
