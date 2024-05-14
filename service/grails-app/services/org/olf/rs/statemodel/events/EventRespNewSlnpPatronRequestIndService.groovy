@@ -69,6 +69,15 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             log.debug("Will supply")
             eventResultDetails.auditMessage = "Will Supply"
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
+            if (requestItemResult.location) {
+                request.pickupLocation = requestItemResult.location
+            }
+            if (requestItemResult.barcode) {
+                request.selectedItemBarcode = requestItemResult.barcode
+            }
+            if (requestItemResult.callNumber) {
+                request.localCallNumber = requestItemResult.callNumber
+            }
 
             if (autoRespondVariant == "on:_auto_loan") {
                 log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
