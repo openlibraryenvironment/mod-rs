@@ -43,7 +43,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             autoRespond(request, autoLoanSetting.toLowerCase(), eventResultDetails)
         } catch (Exception e) {
             log.error("Problem in NCIP Request Item call: ${e.getMessage()}", e)
-            eventResultDetails.auditMessage = "NCIP Request Item call failure"
+            eventResultDetails.auditMessage = String.format("NCIP Request Item call failure: %s", e.getMessage())
             request.needsAttention = true
         }
 
@@ -52,7 +52,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
     /**
      * Auto responder which makes the host LMS service call for request item and if the call is successful, we create audit message 'WillSupply' and change the status to 'SLNP_RES_AWAIT_PICKING'.
-     * Following the successful result we next verify that the auto-loan setting is turned ON and if yes we send 'Loaned' status change message which triggers state change to 'SLNP_RES_ITEM_SHIPPED'.
+     * Following the successful result we next verify that the auto-loan setting is turned ON and if yes we send 'Loaned' status change message which triggers state change to 'SLNP_RES_AWAIT_PICKING'.
      * In case of unsuccessful call to host LMS and auto-loan turned ON we send 'Unfilled' status change message which triggers state change to 'SLNP_RES_UNFILLED'.
      *
      * @param request - Responder Patron request object
@@ -66,20 +66,20 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                 request.supplierUniqueRecordId, request.patronIdentifier)
 
         if (requestItemResult.result == true) {
-            log.debug("Send WillSupply response to ${request.requestingInstitutionSymbol}")
-            eventResultDetails.auditMessage = 'Will Supply'
+            log.debug("Will supply")
+            eventResultDetails.auditMessage = "Will Supply"
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
 
-            if (autoRespondVariant == 'on:_auto_loan') {
+            if (autoRespondVariant == "on:_auto_loan") {
                 log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
-                reshareActionService.sendResponse(request, 'Loaned', [:], eventResultDetails)
-                eventResultDetails.auditMessage = 'Shipped'
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOANED
+                reshareActionService.sendResponse(request, "Loaned", [:], eventResultDetails)
+                eventResultDetails.auditMessage = "Shipped"
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
             }
         } else {
             log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
-            reshareActionService.sendResponse(request, 'Unfilled', [:], eventResultDetails)
-            eventResultDetails.auditMessage = 'Cannot Supply'
+            reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
+            eventResultDetails.auditMessage = "Cannot Supply"
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
