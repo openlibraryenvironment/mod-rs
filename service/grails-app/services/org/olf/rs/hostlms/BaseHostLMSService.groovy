@@ -832,6 +832,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     } else {
       result.itemId = response.opt("itemId");
       result.requestId = response.opt("requestId");
+      result.barcode = response.opt("barcode")
+      result.callNumber = response.opt("callNumber")
+      result.location = response.opt("location")
     }
 
     return result;

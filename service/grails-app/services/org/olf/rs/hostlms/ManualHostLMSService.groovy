@@ -74,7 +74,10 @@ public class ManualHostLMSService implements HostLMSActions {
       INcipLogDetails ncipLogDetails) {
     return [
       result: true,
-      reason: 'spoofed'
+      reason: 'spoofed',
+      location: 'Main library',
+      barcode: 'b-123',
+      callNumber: 'A58 2004 FT MEADE'
     ];
   }
 
