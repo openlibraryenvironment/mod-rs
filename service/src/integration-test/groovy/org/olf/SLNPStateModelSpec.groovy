@@ -743,7 +743,7 @@ class SLNPStateModelSpec extends TestBase {
         where:
         responderTenantId | responderSymbol | responderInitialState        | responderResultState                | patronId        | title       | author       | autoLoanEnabled
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4367-333' | 'title123'  | 'Author123'  | false
-        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4362-331' | 'title234'  | 'Author234'  | true
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4362-331' | 'title234'  | 'Author234'  | true
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
     }
 }
