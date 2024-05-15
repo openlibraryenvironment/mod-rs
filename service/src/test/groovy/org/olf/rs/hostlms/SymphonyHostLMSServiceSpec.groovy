@@ -38,5 +38,21 @@ class SymphonyHostLMSServiceSpec extends Specification implements ServiceUnitTes
 
 
     }
+
+    def 'checkFilterRequestItemItemId'() {
+        when:
+        def result = service.filterRequestItemItemId(rawId);
+
+        then:
+        result == filteredId;
+
+        where:
+        rawId | filteredId
+        '12345' | '12345'
+        'boogaboogabooga' | 'boogaboogabooga'
+        '.b13088889' | '13088889'
+        'cowcow4949'  | '4949'
+        'cow4949cow'  | '4949cow'
+    }
 }
 
