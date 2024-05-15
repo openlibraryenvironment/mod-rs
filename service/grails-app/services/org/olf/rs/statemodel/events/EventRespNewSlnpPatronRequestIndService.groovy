@@ -52,7 +52,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
     /**
      * Auto responder which makes the host LMS service call for request item and if the call is successful, we create audit message 'WillSupply' and change the status to 'SLNP_RES_AWAIT_PICKING'.
-     * Following the successful result we next verify that the auto-loan setting is turned ON and if yes we send 'Loaned' status change message which triggers state change to 'SLNP_RES_ITEM_SHIPPED'.
+     * Following the successful result we next verify that the auto-loan setting is turned ON and if yes we send 'Loaned' status change message which triggers state change to 'SLNP_RES_AWAIT_PICKING'.
      * In case of unsuccessful call to host LMS and auto-loan turned ON we send 'Unfilled' status change message which triggers state change to 'SLNP_RES_UNFILLED'.
      *
      * @param request - Responder Patron request object
