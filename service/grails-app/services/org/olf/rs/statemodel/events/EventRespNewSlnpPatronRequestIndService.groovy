@@ -66,7 +66,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                 request.supplierUniqueRecordId, request.patronIdentifier)
 
         if (requestItemResult.result == true) {
-            log.debug("Will supply")
+            log.debug("Will supply: ${requestItemResult}")
             eventResultDetails.auditMessage = "Will Supply"
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
             if (requestItemResult.location) {
