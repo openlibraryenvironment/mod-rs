@@ -51,6 +51,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_YES_NO                           = 'YesNo';
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
     public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
+    public static final String VOCABULARY_NCIP_TITLE                       = "NCIPRequestItemUseTitle"
     public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
     public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME        = 'customIdentifiersScheme';
 
@@ -183,6 +184,9 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_NO);
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_YES);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_NO);
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_YES);
 
 
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
