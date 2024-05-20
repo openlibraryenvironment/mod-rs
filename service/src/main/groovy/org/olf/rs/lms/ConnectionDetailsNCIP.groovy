@@ -10,6 +10,7 @@ public class ConnectionDetailsNCIP {
     public String ncipToAgency;
     public String ncipAppProfile;
     public String registryId;
+    public boolean useTitle
 
     ConnectionDetailsNCIP(ISettings settings) {
         // Get hold of the basic ncip connection details
@@ -18,6 +19,8 @@ public class ConnectionDetailsNCIP {
         ncipToAgency = settings.getSettingValue(SettingsData.SETTING_NCIP_TO_AGENCY) ?: ncipFromAgency;
         ncipAppProfile = settings.getSettingValue(SettingsData.SETTING_NCIP_APP_PROFILE);
         registryId = settings.getSettingValue(SettingsData.SETTING_WMS_REGISTRY_ID);
+        String useTitleString = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_TITLE)
+        useTitle = "Yes".equalsIgnoreCase(useTitleString ? useTitleString : "No")
 
         // Do we have the basic configuration we can get away with
         if ((ncipServerAddress == null) ||

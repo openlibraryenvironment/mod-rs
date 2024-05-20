@@ -61,7 +61,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
             log.debug('*** Create new request ***')
             def newParams = [:]
             if (eventData.bibliographicInfo instanceof Map) {
-                eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields)
+                newParams.putAll(eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields))
                 mapBibliographicRecordId(eventData, newParams)
                 mapBibliographicItemId(eventData, newParams)
             }

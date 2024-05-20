@@ -10,7 +10,7 @@
             <requestingAgencyRequestId>requestId_holder</requestingAgencyRequestId>
         </header>
         <bibliographicInfo>
-            <supplierUniqueRecordId></supplierUniqueRecordId>
+            <supplierUniqueRecordId>54321</supplierUniqueRecordId>
             <title>Lord of the Rings</title>
             <author>J.R.R. Tolkien</author>
             <authorId></authorId>

@@ -819,7 +819,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setBibliographicRecordIdCode(bibliographicIdCode)
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-      .setRegistryId(ncipConnectionDetails.registryId);
+      .setRegistryId(ncipConnectionDetails.registryId)
+      .setRequestType("Page")
+      .setRequestScopeType(ncipConnectionDetails.useTitle ? "Title" : "Item")
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);

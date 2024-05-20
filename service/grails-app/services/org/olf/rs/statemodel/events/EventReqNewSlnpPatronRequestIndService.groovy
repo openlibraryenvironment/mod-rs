@@ -43,6 +43,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
             Map lookupPatron = reshareActionService.lookupPatron(request, null)
 
             if (lookupPatron.callSuccess) {
+                log.debug("Patron lookup success: ${lookupPatron}")
                 boolean patronValid = lookupPatron.patronValid
                 if (!patronValid) {
                     needsAttention(request, lookupPatron, eventResultDetails)
