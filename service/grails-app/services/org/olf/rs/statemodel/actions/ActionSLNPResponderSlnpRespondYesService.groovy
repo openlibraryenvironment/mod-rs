@@ -13,16 +13,16 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES);
+        return(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES)
     }
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Check the pickup location and route
         if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
-            actionResultDetails.auditMessage = 'Will Supply';
+            actionResultDetails.auditMessage = 'Available'
         }
 
-        return(actionResultDetails);
+        return(actionResultDetails)
     }
 }
