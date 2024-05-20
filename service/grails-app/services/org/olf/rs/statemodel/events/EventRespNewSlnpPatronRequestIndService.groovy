@@ -88,7 +88,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
         } else {
             log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
-            eventResultDetails.auditMessage = "Cannot Supply"
+            eventResultDetails.auditMessage = "Not Available"
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
