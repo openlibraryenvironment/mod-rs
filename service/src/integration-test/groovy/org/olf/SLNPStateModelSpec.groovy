@@ -719,7 +719,7 @@ class SLNPStateModelSpec extends TestBase {
             setHeaders(headers);
 
             // Set auto-loan setting
-            changeSettings(responderTenantId, [ 'auto_responder_status': (autoLoanEnabled ? 'on:_auto_loan' : 'off') ]);
+            changeSettings(responderTenantId, [ 'auto_responder_status': (autoLoanEnabled ? 'on:_loaned_and_cannot_supply' : 'off') ]);
 
             if (autoLoanEnabled && responderResultState == Status.SLNP_RESPONDER_UNFILLED) {
                 changeSettings(responderTenantId, [ 'host_lms_integration' : '123554353424231']);
