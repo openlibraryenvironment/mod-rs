@@ -387,7 +387,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr.state.code == Status.SLNP_REQUESTER_PATRON_INVALID) {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
             result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
-            result.errorValue = "NCIP lookup patron call failure for patron identifier: ${request.patronIdentifier}"
+            result.errorValue = "NCIP lookup patron call failure for patron identifier: ${pr.patronIdentifier}"
         } else {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }
