@@ -79,7 +79,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                 request.localCallNumber = requestItemResult.callNumber
             }
 
-            if (autoRespondVariant == "on:_auto_loan") {
+            if (autoRespondVariant == "on: loaned and cannot supply") {
                 log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
                 reshareActionService.sendResponse(request, "Loaned", [:], eventResultDetails)
                 eventResultDetails.auditMessage = "Shipped"
