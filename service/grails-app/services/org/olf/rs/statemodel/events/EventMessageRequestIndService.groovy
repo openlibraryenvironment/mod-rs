@@ -211,6 +211,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         Status updatedStatus = pr.stateModel.initialState
                         updatedStatus.code = Status.SLNP_REQUESTER_PATRON_INVALID
                         pr.state = updatedStatus
+                    } else {
+                        pr.state = pr.stateModel.initialState;
+                        reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, String.format('NCIP call successful for patron identifier %s', request.patronIdentifier), null);
                     }
                 } else {
                     pr.state = pr.stateModel.initialState;
