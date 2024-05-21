@@ -187,55 +187,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     }
                 }
 
-                log.debug("new request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
+                log.debug("New request from ${pr.requestingInstitutionSymbol} to ${pr.supplyingInstitutionSymbol}");
 
-                if (pr.stateModel.shortcode == StateModel.MODEL_SLNP_REQUESTER) {
-                    String errorAuditMessage = null
-                    try {
-                        Map lookupPatron = reshareActionService.lookupPatron(request, null)
-                        if (lookupPatron.callSuccess) {
-                            log.debug("Patron lookup success: ${lookupPatron}")
-                            boolean patronValid = lookupPatron.patronValid
-                            if (!patronValid) {
-                                errorAuditMessage = buildErrorAuditMessage(request, lookupPatron)
-                            }
-                        } else {
-                            errorAuditMessage = buildErrorAuditMessage(request, lookupPatron)
-                        }
-                    } catch (Exception e) {
-                        errorAuditMessage = String.format("NCIP lookup patron call failure: %s", e.getMessage())
-                    }
-
-                    if (errorAuditMessage) {
-                        reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, errorAuditMessage, null)
-                        Status updatedStatus = pr.stateModel.initialState
-                        updatedStatus.code = Status.SLNP_REQUESTER_PATRON_INVALID
-                        pr.state = updatedStatus
-                    } else {
-                        pr.state = pr.stateModel.initialState;
-                        reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, String.format('NCIP call successful for patron identifier %s', request.patronIdentifier), null);
-                    }
-                } else {
-                    pr.state = pr.stateModel.initialState;
-                    reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
-                }
-
-                // Status change message is assign to service EventISO18626IncomingRequesterService and it is processing only request with isRequester=true
-                pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
-                pr.stateModel = statusService.getStateModel(pr)
+                // Set State, StateModel specific data, call NCIP lookup patron for SLNP Requester
+                setStateModelData(pr, eventData)
 
                 log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
                 pr.save(flush: true, failOnError: true)
 
-                if (pr.stateModel.shortcode == StateModel.MODEL_SLNP_REQUESTER && pr.state.code == Status.SLNP_REQUESTER_PATRON_INVALID) {
-                    result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
-                    result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
-                    result.errorValue = "NCIP lookup patron call failure for patron identifier: ${request.patronIdentifier}"
-                } else {
-                    result.status = EventISO18626IncomingAbstractService.STATUS_OK
-                }
-
-                result.newRequestId = pr.id
+                // In case of SLNP Requester and NCIP call failure set Error message, otherwise OK
+                buildResponseMessage(pr, eventResultDetails)
             }
 
             result.messageType = Iso18626Constants.REQUEST
@@ -383,5 +344,53 @@ public class EventMessageRequestIndService extends AbstractEvent {
         String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')')
         String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')')
         return "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString()
+    }
+
+    private void setStateModelData(PatronRequest pr, Map eventData) {
+        StateModel stateModel = statusService.getStateModel(pr)
+        pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
+
+        if (stateModel?.shortcode == StateModel.MODEL_SLNP_REQUESTER) {
+            String errorAuditMessage = null
+            try {
+                Map lookupPatron = reshareActionService.lookupPatron(pr, null)
+                if (lookupPatron.callSuccess) {
+                    log.debug("Patron lookup success: ${lookupPatron}")
+                    boolean patronValid = lookupPatron.patronValid
+                    if (!patronValid) {
+                        errorAuditMessage = buildErrorAuditMessage(pr, lookupPatron)
+                    }
+                } else {
+                    errorAuditMessage = buildErrorAuditMessage(pr, lookupPatron)
+                }
+            } catch (Exception e) {
+                errorAuditMessage = String.format("NCIP lookup patron call failure: %s", e.getMessage())
+            }
+
+            if (errorAuditMessage) {
+                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, errorAuditMessage, null)
+                Status updatedStatus = pr.stateModel.initialState
+                updatedStatus.code = Status.SLNP_REQUESTER_PATRON_INVALID
+                pr.state = updatedStatus
+            } else {
+                pr.state = pr.stateModel.initialState;
+                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, String.format('NCIP call successful for patron identifier %s', request.patronIdentifier), null);
+            }
+        } else {
+            pr.state = pr.stateModel.initialState;
+            reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
+        }
+    }
+
+    static buildResponseMessage(PatronRequest pr, EventResultDetails result) {
+        if (pr.stateModel.shortcode == StateModel.MODEL_SLNP_REQUESTER &&
+                pr.state.code == Status.SLNP_REQUESTER_PATRON_INVALID) {
+            result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
+            result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
+            result.errorValue = "NCIP lookup patron call failure for patron identifier: ${request.patronIdentifier}"
+        } else {
+            result.status = EventISO18626IncomingAbstractService.STATUS_OK
+        }
+        result.newRequestId = pr.id
     }
 }
