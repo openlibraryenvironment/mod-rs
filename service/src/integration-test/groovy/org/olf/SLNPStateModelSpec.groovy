@@ -410,7 +410,8 @@ class SLNPStateModelSpec extends TestBase {
             String author,
             String action,
             String jsonFileName,
-            String qualifier
+            String qualifier,
+            boolean isAutoResponder
     ) {
         when: "Creating the Requester/Responder Patron Requests"
 
@@ -466,8 +467,8 @@ class SLNPStateModelSpec extends TestBase {
                     responderSymbol, responderSystemId, false, hrid, hrid);
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
-            // Set auto-loan setting
-            changeSettings(responderTenantId, [ 'auto_responder_status' : 'on:_loaned_and_cannot_supply' ]);
+            // Set Auto Responder
+            changeSettings(responderTenantId, [ 'auto_responder_status' : isAutoResponder ? 'on:_loaned_and_cannot_supply' : 'off' ]);
 
             // Validate Responder initial status
             responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderInitialState)
@@ -491,10 +492,10 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED      | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4367' | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4364' | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       | '7732-4362' | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier                                     | isAutoResponder
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED      | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4367' | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED   | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4364' | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       | '7732-4362' | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
     }
 
     void "Send ISO request"(String tenant_id,
@@ -523,6 +524,10 @@ class SLNPStateModelSpec extends TestBase {
                 'X-Okapi-User-Id': 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ])
+
+        // Set Auto Responder
+        changeSettings(tenant_id, [ 'auto_responder_status' : 'off' ]);
+
         def resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
 
         log.debug("CreateReqTest2 -- Response: RESP:${resp.ISO18626Message} ")

@@ -196,7 +196,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr.save(flush: true, failOnError: true)
 
                 // In case of SLNP Requester and NCIP call failure set Error message, otherwise OK
-                buildResponseMessage(pr, eventResultDetails)
+                buildResponseMessage(pr, result)
             }
 
             result.messageType = Iso18626Constants.REQUEST
@@ -348,6 +348,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
     private void setStateModelData(PatronRequest pr, Map eventData) {
         StateModel stateModel = statusService.getStateModel(pr)
+        pr.stateModel = stateModel
         pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
 
         if (stateModel?.shortcode == StateModel.MODEL_SLNP_REQUESTER) {
@@ -382,7 +383,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
         }
     }
 
-    static buildResponseMessage(PatronRequest pr, EventResultDetails result) {
+    static buildResponseMessage(PatronRequest pr, Map result) {
         if (pr.stateModel.shortcode == StateModel.MODEL_SLNP_REQUESTER &&
                 pr.state.code == Status.SLNP_REQUESTER_PATRON_INVALID) {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
