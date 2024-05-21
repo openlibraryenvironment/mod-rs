@@ -72,8 +72,8 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             if (requestItemResult.location) {
                 request.pickupLocation = requestItemResult.location
             }
-            if (requestItemResult.barcode) {
-                request.selectedItemBarcode = requestItemResult.barcode
+            if (requestItemResult.itemId) {
+                request.selectedItemBarcode = requestItemResult.itemId
             }
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
