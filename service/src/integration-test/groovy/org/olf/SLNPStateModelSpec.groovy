@@ -466,6 +466,9 @@ class SLNPStateModelSpec extends TestBase {
                     responderSymbol, responderSystemId, false, hrid, hrid);
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
+            // Set auto-loan setting
+            changeSettings(responderTenantId, [ 'auto_responder_status' : 'on:_loaned_and_cannot_supply' ]);
+
             // Validate Responder initial status
             responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderInitialState)
 
