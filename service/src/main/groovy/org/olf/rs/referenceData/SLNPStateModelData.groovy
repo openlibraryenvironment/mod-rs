@@ -31,7 +31,8 @@ public class SLNPStateModelData {
             [status: Status.SLNP_REQUESTER_CHECKED_IN],
             [status: Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING],
             [status: Status.SLNP_REQUESTER_COMPLETE, isTerminal: true],
-            [status: Status.SLNP_REQUESTER_ITEM_LOST, isTerminal: true]
+            [status: Status.SLNP_REQUESTER_ITEM_LOST, isTerminal: true],
+            [status: Status.SLNP_REQUESTER_PATRON_INVALID, isTerminal: true]
     ];
 
     static private final List slnpResponderStates = [
@@ -485,6 +486,7 @@ public class SLNPStateModelData {
         Status.ensure(Status.SLNP_REQUESTER_COMPLETE, StatusStage.COMPLETED, '9996', true, false, true, null);
         Status.ensure(Status.SLNP_REQUESTER_ABORTED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_REQUESTER_ITEM_LOST, StatusStage.COMPLETED, '9996', true, false, true, null);
+        Status.ensure(Status.SLNP_REQUESTER_PATRON_INVALID, StatusStage.COMPLETED, '9996', true, true, true, null);
 
         Status.ensure(Status.SLNP_RESPONDER_IDLE, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_UNFILLED, StatusStage.COMPLETED, '9996', true, false, true, null);

@@ -1,29 +1,14 @@
 package org.olf.rs
 
-import org.apache.http.HttpStatus
-import org.apache.http.client.HttpResponseException
-import org.olf.rs.iso18626.ErrorData
-import org.olf.rs.iso18626.ISO18626Message
-import org.olf.rs.iso18626.ConfirmationHeader
-import org.olf.rs.iso18626.ObjectFactory
-import org.olf.rs.iso18626.RequestConfirmation
-import org.olf.rs.iso18626.RequestingAgencyMessageConfirmation
-import org.olf.rs.iso18626.SupplyingAgencyMessageConfirmation
-import org.olf.rs.iso18626.TypeAction
-import org.olf.rs.iso18626.TypeAgencyId
-import org.olf.rs.iso18626.TypeErrorType
-import org.olf.rs.iso18626.TypeMessageStatus
-import org.olf.rs.iso18626.TypeReasonForMessage
-import org.olf.rs.iso18626.TypeSchemeValuePair
-import org.xml.sax.SAXException
 
-import static org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService.*
+import org.olf.rs.iso18626.*
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
-
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
+import static org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService.*
 
 class ConfirmationMessageService {
 
@@ -146,6 +131,8 @@ class ConfirmationMessageService {
               return TypeErrorType.UNSUPPORTED_ACTION_TYPE
           case ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE:
               return TypeErrorType.UNRECOGNISED_DATA_ELEMENT
+          case ERROR_TYPE_INVALID_PATRON_REQUEST:
+              return TypeErrorType.UNRECOGNISED_DATA_VALUE
           default: return TypeErrorType.UNRECOGNISED_DATA_VALUE
       }
   }

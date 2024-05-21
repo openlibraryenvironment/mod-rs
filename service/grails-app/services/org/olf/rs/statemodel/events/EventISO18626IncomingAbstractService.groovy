@@ -38,7 +38,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST              = 'UnableToFindRequest';
     public static final String ERROR_TYPE_UNABLE_TO_PROCESS                   = 'UnableToProcess';
     public static final String ERROR_TYPE_REQUEST_ID_ALREADY_EXISTS           = 'RequestIdAlreadyExists';
-
+    public static final String ERROR_TYPE_INVALID_PATRON_REQUEST              = 'InvalidPatronRequest';
 
     // The actions, I assume these are only applicable for receiving by the responder
     public static final String ACTION_CANCEL          = 'Cancel';
