@@ -1,0 +1,6 @@
+{
+  "action": "nonreturnableSupplierRespondYes",
+  "actionParams": {
+    "note": "Notes"
+  }
+}

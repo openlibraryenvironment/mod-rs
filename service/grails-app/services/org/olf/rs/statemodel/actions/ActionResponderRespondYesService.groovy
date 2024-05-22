@@ -19,8 +19,16 @@ public class ActionResponderRespondYesService extends ActionResponderService {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        boolean validPickupLocationAndRoute;
+        //If this is a copy service type, we don't need to worry about valid route/pickup location
+        if (request.serviceType?.value == 'copy') {
+            validPickupLocationAndRoute = true;
+        } else {
+            validPickupLocationAndRoute
+                    = (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS)
+        }
         // Check the pickup location and route
-        if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
+        if (validPickupLocationAndRoute) {
             // Status is set to Status.RESPONDER_NEW_AWAIT_PULL_SLIP in validatePickupLocationAndRoute
             reshareActionService.sendResponse(request, 'ExpectToSupply', parameters, actionResultDetails);
         }
