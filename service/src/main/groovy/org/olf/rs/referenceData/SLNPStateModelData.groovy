@@ -206,11 +206,21 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderItemReturned = [
-            code: 'slnpResponderItemReturned',
+    private static Map slnpResponderCheckoutOfReshareOK = [
+            code: 'slnpResponderCheckoutOfReshareOK',
             description: 'Request is complete',
             result: true,
             status: Status.SLNP_RESPONDER_COMPLETE,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpResponderCheckoutOfReshareFailure = [
+            code: 'slnpResponderCheckoutOfReshareFailure',
+            description: 'Failure in accept item call',
+            result: false,
+            status: Status.SLNP_RESPONDER_ITEM_SHIPPED,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent : null
@@ -416,12 +426,13 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpResponderItemReturnedList = [
-            code: ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED,
+    private static Map slnpResponderCheckoutOfReshareList = [
+            code: ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE,
             description: 'Scan request ID to mark request returned',
             model: StateModel.MODEL_SLNP_RESPONDER,
             results: [
-                    slnpResponderItemReturned
+                    slnpResponderCheckoutOfReshareOK,
+                    slnpResponderCheckoutOfReshareFailure
             ]
     ];
 
@@ -452,7 +463,7 @@ public class SLNPStateModelData {
             slnpResponderConditionalSupplyNoTransitionList,
             slnpResponderSupplierCheckInReshareList,
             slnpResponderSupplierMarkShippedList,
-            slnpResponderItemReturnedList,
+            slnpResponderCheckoutOfReshareList,
             slnpResponderPrintPullSlipNoTransitionList,
             slnpResponderNewPatronRequestIndList,
             slnpRequesterMarkItemLostList
@@ -522,7 +533,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION);
 
         // SLNP_RES_ITEM_SHIPPED OR "Shipped"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_ITEM_RETURNED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ITEM_RETURNED, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
 
         // SLNP_REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL, null, Boolean.TRUE, Boolean.TRUE)

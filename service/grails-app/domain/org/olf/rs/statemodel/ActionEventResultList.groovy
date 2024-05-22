@@ -73,7 +73,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION  = "slnpResponderSupplierPrintPullSlipNoTransition"
     static public final String SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE               = "slnpResponderSupplierCheckInReshare"
     static public final String SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED                   = "slnpResponderSupplierMarkShipped"
-    static public final String SLNP_RESPONDER_ITEM_RETURNED                           = "slnpResponderItemReturned"
+    static public final String SLNP_RESPONDER_CHECK_OUT_OF_RESHARE                    = "slnpResponderCheckOutOfReshare"
     static public final String SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST                = 'slnpResponderNewPatronRequestIndList'
 
     // The responder lists
