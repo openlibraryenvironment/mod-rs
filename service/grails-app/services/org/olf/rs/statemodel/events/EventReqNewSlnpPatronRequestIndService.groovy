@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.events
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.sql.Sql
 import org.olf.rs.PatronRequest
-import org.olf.rs.ReshareActionService
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
@@ -12,8 +11,6 @@ import org.olf.rs.statemodel.Events
  * This event service takes a new requester SLNP patron request and validates and generates HRID.
  */
 public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
-
-    ReshareActionService reshareActionService
 
     @Override
     String name() {
@@ -39,34 +36,10 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         }
 
         request.needsAttention = false
-        try {
-            Map lookupPatron = reshareActionService.lookupPatron(request, null)
-
-            if (lookupPatron.callSuccess) {
-                log.debug("Patron lookup success: ${lookupPatron}")
-                boolean patronValid = lookupPatron.patronValid
-                if (!patronValid) {
-                    needsAttention(request, lookupPatron, eventResultDetails)
-                    return(eventResultDetails)
-                }
-                eventResultDetails.auditMessage = "Request validation done"
-                eventResultDetails.saveData = true
-            } else {
-                needsAttention(request, lookupPatron, eventResultDetails)
-            }
-        } catch (Exception e) {
-            eventResultDetails.auditMessage = String.format("NCIP lookup patron call failure: %s", e.getMessage())
-            request.needsAttention = true
-        }
+        eventResultDetails.auditMessage = "Request validation done"
+        eventResultDetails.saveData = true
 
         return(eventResultDetails)
-    }
-    
-    private static void needsAttention(PatronRequest request, Map lookupPatron, EventResultDetails eventResultDetails) {
-        String errors = (lookupPatron?.problems == null) ? '' : (' (Errors: ' + lookupPatron.problems + ')')
-        String status = lookupPatron?.status == null ? '' : (' (Patron state = ' + lookupPatron.status + ')')
-        eventResultDetails.auditMessage = "Failed to validate patron with id: \"${request.patronIdentifier}\".${status}${errors}".toString()
-        request.needsAttention = true
     }
 
     private String generateHrid() {

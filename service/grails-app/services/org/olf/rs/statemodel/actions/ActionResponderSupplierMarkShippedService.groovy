@@ -26,7 +26,7 @@ public class ActionResponderSupplierMarkShippedService extends ActionResponderSe
 
         if (request.stateModel.shortcode == StateModel.MODEL_SLNP_RESPONDER) {
             String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
-            if (autoLoanSetting != null && autoLoanSetting.equalsIgnoreCase("off")) {
+            if (autoLoanSetting != null && autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
                 shouldSendResponse = false
             }
         }
