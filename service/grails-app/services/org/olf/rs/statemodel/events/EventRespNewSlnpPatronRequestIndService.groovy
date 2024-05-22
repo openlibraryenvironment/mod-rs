@@ -1,10 +1,13 @@
 package org.olf.rs.statemodel.events
 
-
+import com.k_int.web.toolkit.custprops.CustomProperty
 import com.k_int.web.toolkit.settings.AppSetting
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 import org.olf.rs.ReshareActionService
+import org.olf.rs.constants.Directory
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 /**
  * This event service takes a new SLNP responder patron request
@@ -14,6 +17,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
 
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
+    DirectoryEntryService directoryEntryService
 
     @Override
     String name() {
@@ -62,8 +66,16 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
     private void autoRespond(PatronRequest request, String autoRespondVariant, EventResultDetails eventResultDetails) {
         log.debug("Attempt hold with RequestItem")
 
+        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
+        String institutionalPatronIdValue = institutionalPatronId?.value
+        if (!institutionalPatronIdValue) {
+            // If nothing on the Directory Entry then fallback to the default in settings
+            AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SettingsData.SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID)
+            institutionalPatronIdValue = defaultInstitutionalPatronId?.value
+        }
+
         Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
-                request.supplierUniqueRecordId, request.patronIdentifier)
+                request.supplierUniqueRecordId, institutionalPatronIdValue)
 
         if (requestItemResult.result == true) {
             log.debug("Will supply: ${requestItemResult}")
