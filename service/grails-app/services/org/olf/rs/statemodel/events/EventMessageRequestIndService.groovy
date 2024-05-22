@@ -347,9 +347,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
     }
 
     private void setStateModelData(PatronRequest pr, Map eventData) {
+        pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
         StateModel stateModel = statusService.getStateModel(pr)
         pr.stateModel = stateModel
-        pr.isRequester = "PatronRequest" == (eventData.serviceInfo?.requestSubType)
 
         if (stateModel?.shortcode == StateModel.MODEL_SLNP_REQUESTER) {
             String errorAuditMessage = null
@@ -369,17 +369,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
             }
 
             if (errorAuditMessage) {
-                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, errorAuditMessage, null)
-                Status updatedStatus = pr.stateModel.initialState
-                updatedStatus.code = Status.SLNP_REQUESTER_PATRON_INVALID
+                Status updatedStatus = Status.lookup(Status.SLNP_REQUESTER_PATRON_INVALID)
                 pr.state = updatedStatus
+                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, errorAuditMessage, null)
             } else {
-                pr.state = pr.stateModel.initialState;
-                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, String.format('NCIP call successful for patron identifier %s', request.patronIdentifier), null);
+                pr.state = pr.stateModel.initialState
+                reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, "NCIP call successful for patron identifier: ${pr.patronIdentifier}", null)
             }
         } else {
-            pr.state = pr.stateModel.initialState;
-            reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, 'New request (Lender role) created as a result of protocol interaction', null);
+            pr.state = pr.stateModel.initialState
+            reshareApplicationEventHandlerService.auditEntry(pr, null, pr.state, "New request (Lender role) created as a result of protocol interaction", null)
         }
     }
 

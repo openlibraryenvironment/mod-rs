@@ -526,7 +526,7 @@ class SLNPStateModelSpec extends TestBase {
         ])
 
         // Set Auto Responder
-        changeSettings(tenant_id, [ 'auto_responder_status' : 'off' ]);
+        changeSettings(tenant_id, [ 'auto_responder_status' : 'off' ])
 
         def resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
 
