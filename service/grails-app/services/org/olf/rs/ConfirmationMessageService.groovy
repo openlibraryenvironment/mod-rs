@@ -113,9 +113,9 @@ class ConfirmationMessageService {
     return errorData
   }
 
-  TypeErrorType toErrorType(error){
+  TypeErrorType toErrorType(error) {
       switch (error) {
-          case ERROR_TYPE_BADLY_FORMED_MESSAGE :
+          case ERROR_TYPE_BADLY_FORMED_MESSAGE:
           case ERROR_TYPE_NO_XML_SUPPLIED:
           case ERROR_TYPE_REQUEST_ID_ALREADY_EXISTS:
               return TypeErrorType.BADLY_FORMED_MESSAGE
@@ -125,14 +125,13 @@ class ConfirmationMessageService {
           case ERROR_TYPE_INVALID_CANCEL_VALUE:
           case ERROR_TYPE_UNABLE_TO_FIND_REQUEST:
           case ERROR_TYPE_UNABLE_TO_PROCESS:
+          case ERROR_TYPE_INVALID_PATRON_REQUEST:
               return TypeErrorType.UNRECOGNISED_DATA_VALUE
           case ERROR_TYPE_NO_ACTION:
           case ERROR_TYPE_NO_REASON_FOR_MESSAGE:
               return TypeErrorType.UNSUPPORTED_ACTION_TYPE
           case ERROR_TYPE_NO_CONFIRMATION_ELEMENT_IN_RESPONSE:
               return TypeErrorType.UNRECOGNISED_DATA_ELEMENT
-          case ERROR_TYPE_INVALID_PATRON_REQUEST:
-              return TypeErrorType.UNRECOGNISED_DATA_VALUE
           default: return TypeErrorType.UNRECOGNISED_DATA_VALUE
       }
   }
