@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.events
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.sql.Sql
 import org.olf.rs.PatronRequest
-import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
@@ -12,8 +11,6 @@ import org.olf.rs.statemodel.Events
  * This event service takes a new requester SLNP patron request and validates and generates HRID.
  */
 public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
-
-    PickupLocationService pickupLocationService
 
     @Override
     String name() {
@@ -36,11 +33,6 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         if (!request.hrid) {
             request.hrid = generateHrid()
             log.debug("set request.hrid to ${request.hrid}")
-        }
-
-        // If we were supplied a pickup location, attempt to resolve it
-        if (!request.resolvedPickupLocation) {
-            pickupLocationService.check(request)
         }
 
         request.needsAttention = false
