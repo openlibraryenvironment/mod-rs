@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.sql.Sql
+import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
@@ -33,6 +34,18 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         if (!request.hrid) {
             request.hrid = generateHrid()
             log.debug("set request.hrid to ${request.hrid}")
+        }
+
+        if (request.requestingInstitutionSymbol != null) {
+            // We need to validate the requesting location - and check that we can act as requester for that symbol
+            Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
+            if (s != null) {
+                // We do this separately so that an invalid patron does not stop information being appended to the request
+                request.resolvedRequester = s
+                request.resolvedPickupLocation = s.owner
+                request.pickupLocation = s.owner?.name
+                request.pickupLocationSlug = s.owner.slug
+            }
         }
 
         request.needsAttention = false
