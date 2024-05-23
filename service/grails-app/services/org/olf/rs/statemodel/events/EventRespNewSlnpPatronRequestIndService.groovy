@@ -5,6 +5,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
+import org.olf.rs.RequestVolume
 import org.olf.rs.ReshareActionService
 import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
@@ -14,6 +15,7 @@ import org.olf.rs.statemodel.*
  * to perform validation and respond automatically depending on configured settings.
  */
 public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
+    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out'
 
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
@@ -86,6 +88,16 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             }
             if (requestItemResult.itemId) {
                 request.selectedItemBarcode = requestItemResult.itemId
+                RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
+                // If there's no rv
+                if (!rv) {
+                    rv = new RequestVolume(
+                            name: request.volume ?: requestItemResult.itemId,
+                            itemId: requestItemResult.itemId,
+                            status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
+                    );
+                    request.addToVolumes(rv);
+                }
             }
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
