@@ -4,6 +4,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import groovy.sql.Sql
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.PatronRequest
+import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
@@ -12,6 +13,9 @@ import org.olf.rs.statemodel.Events
  * This event service takes a new requester SLNP patron request and validates and generates HRID.
  */
 public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
+
+
+    PickupLocationService pickupLocationService
 
     @Override
     String name() {
@@ -37,15 +41,14 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         }
 
         if (request.requestingInstitutionSymbol != null) {
-            // We need to validate the requesting location - and check that we can act as requester for that symbol
             Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
             if (s != null) {
-                // We do this separately so that an invalid patron does not stop information being appended to the request
                 request.resolvedRequester = s
-                request.resolvedPickupLocation = s.owner
-                request.pickupLocation = s.owner?.name
-                request.pickupLocationSlug = s.owner.slug
             }
+        }
+
+        if (!request.resolvedPickupLocation) {
+            pickupLocationService.checkByName(request)
         }
 
         request.needsAttention = false

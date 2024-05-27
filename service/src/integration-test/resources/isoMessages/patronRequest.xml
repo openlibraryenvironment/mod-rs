@@ -44,5 +44,12 @@
             <surname></surname>
             <givenName></givenName>
         </patronInfo>
+        <requestedDeliveryInfo>
+            <address>
+                <physicalAddress>
+                    <line1>RSSlnpOne</line1>
+                </physicalAddress>
+            </address>
+        </requestedDeliveryInfo>
     </request>
 </ISO18626Message>
