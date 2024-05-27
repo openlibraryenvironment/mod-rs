@@ -801,6 +801,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           String requestId,
           String itemId,
           String borrowerBarcode,
+          String pickupLocation,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -822,6 +823,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setRegistryId(ncipConnectionDetails.registryId)
       .setRequestType("Page")
       .setRequestScopeType(ncipConnectionDetails.useTitle ? "Title" : "Item")
+      .setPickupLocation(pickupLocation)
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);

@@ -70,7 +70,7 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode,
+  public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode, String pickupLocation,
       INcipLogDetails ncipLogDetails) {
     return [
       result: true,

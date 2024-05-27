@@ -257,6 +257,7 @@ public class HostLMSService {
                 request.hrid,
                 bibliographicId,
                 patronId,
+                request.resolvedSupplier?.owner?.lmsLocationCode,
                 ncipLogDetails);
             protocolAuditService.save(request, ncipLogDetails);
         } else {
