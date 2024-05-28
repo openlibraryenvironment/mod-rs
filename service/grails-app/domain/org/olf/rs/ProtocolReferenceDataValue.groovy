@@ -13,6 +13,7 @@ class ProtocolReferenceDataValue extends RefdataValue implements MultiTenant<Pro
 	static public final String CATEGORY_SERVICE_TYPE     = "request.serviceType";
 
     static public final String SERVICE_TYPE_LOAN = "Loan";
+    static public final String SERVICE_TYPE_COPY = "Copy";
 
 	static hasMany = [protocolConversions : ProtocolConversion];
 

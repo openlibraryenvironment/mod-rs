@@ -84,4 +84,8 @@ public class ManualHostLMSService implements HostLMSActions {
       reason: 'spoofed'
     ];
   }
+
+  boolean isManualCancelRequestItem() {
+    return false
+  }
 }

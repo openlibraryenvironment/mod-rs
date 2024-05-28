@@ -12,6 +12,7 @@ import org.olf.rs.statemodel.*
 
 import javax.servlet.http.HttpServletRequest
 import java.time.LocalDate
+
 /**
  * Service that processes the Request-ind event
  * @author Chas
@@ -20,12 +21,11 @@ import java.time.LocalDate
 public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
-
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
-    ReshareActionService reshareActionService
+    ReshareActionService reshareActionService;
 
     @Override
     String name() {
@@ -80,19 +80,19 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     Map publicationInfo = eventData.publicationInfo
                     if (publicationInfo != null) {
                         if (publicationInfo.publisher) {
-                            pr.publisher = publicationInfo.publisher;
+                            pr.publisher = publicationInfo.publisher
                         }
                         if (publicationInfo.publicationType) {
-                            pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType);
+                            pr.publicationType = pr.lookupPublicationType(publicationInfo.publicationType)
                         }
                         if (publicationInfo.publicationDate) {
-                            pr.publicationDate = publicationInfo.publicationDate;
+                            pr.publicationDate = publicationInfo.publicationDate
                         }
                         if (publicationInfo.publicationDateOfComponent) {
-                            pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent;
+                            pr.publicationDateOfComponent = publicationInfo.publicationDateOfComponent
                         }
                         if (publicationInfo.placeOfPublication) {
-                            pr.placeOfPublication = publicationInfo.placeOfPublication;
+                            pr.placeOfPublication = publicationInfo.placeOfPublication
                         }
                     }
                 }
@@ -206,7 +206,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.reqAgencyId = header.requestingAgencyId.agencyIdValue
             result.reqId = header.requestingAgencyRequestId
             result.timeRec = header.timestamp
-
         } else {
             log.error("A REQUEST indication must contain a request key with properties defining the sought item - eg request.title - GOT ${eventData}");
         }

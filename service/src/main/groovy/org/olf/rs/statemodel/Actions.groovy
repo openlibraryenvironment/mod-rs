@@ -18,6 +18,7 @@ public class Actions {
 	static public final String ACTION_RESPONDER_ITEM_RETURNED                   			 = "itemReturned";
 	static public final String ACTION_RESPONDER_RESPOND_YES                     			 = "respondYes";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_CONDITION          			 = "supplierAddCondition";
+	static public final String ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT				 = "supplierAddURLToDocument";
 	static public final String ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY          			 = "supplierCannotSupply";
 	static public final String ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE     			 = "supplierCheckInToReshare";
 	static public final String ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE    			 = "supplierCheckOutOfReshare";
@@ -28,6 +29,12 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP        			 = "supplierPrintPullSlip";
 	static public final String ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL      			 = "supplierRespondToCancel";
 	static public final String ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED = "supplierCheckInToReshareAndSupplierMarkShipped"
+
+	// Non-Returnable Responder Actions
+	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT	 = "nonreturnableSupplierAddURLToDocument";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "nonreturnableSupplierPrintPullSlip";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "nonreturnableSupplierRespondYes";
+	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "nonreturnableSupplierRespondCannotSupply";
 
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
@@ -63,7 +70,15 @@ public class Actions {
 	static public final String ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS  	 = "requesterRejectConditions";
 	static public final String ACTION_REQUESTER_REREQUEST                        = "rerequest";
 	static public final String ACTION_REQUESTER_SHIPPED_RETURN               	 = "shippedReturn";
-	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn"
+	static public final String ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED = "patronReturnedItemAndShippedReturn";
+	static public final String ACTION_REQUESTER_COMPLETE_REQUEST				 = "requesterCompleteRequest";
+
+	// Nonreturnable Requester Actions
+	static public final String ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION  = "nonreturnableRequesterBypassValidation";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION   = "nonreturnableRequesterRetryValidation";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "nonreturnableRequesterCancel";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "nonreturnableRequesterCompleteRequest";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
 
 	// SLNP Requester Actions
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";

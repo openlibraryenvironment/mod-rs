@@ -257,8 +257,12 @@ public class ActionService {
                         } else {
                             // If it is an action and the undo status is YES then we can perform an undo
                             if (audit.actionEvent.undoStatus == UndoStatus.YES) {
-                                // Add to the list of audits that need undoing
-                                undoAudits.add(audit);
+                                if (!audit.fromStatus.id.equals(audit.toStatus.id)) {
+                                    // Add to the list of audits that need undoing
+                                    // ...provided a state change actually happened as the result is not
+                                    // stored so for now we use this to determine if the action succeeded
+                                    undoAudits.add(audit);
+                                }
 
                                 // If this represents an action we need to look no further
                                 if (audit.actionEvent.isAction) {

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 
@@ -26,7 +27,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   // internal ID of the patron request
   String id
 
-  @Defaults(['Book', 'Journal', 'Other'])
+  @Defaults(['ArchiveMaterial', 'Article', 'AudioBook', 'Book', 'Chapter', 'ConferenceProc', 'Game', 'GovernmentPubl', 'Image', 'Journal', 'Manuscript', 'Map', 'Movie', 'MusicRecording', 'MusicScore', 'Newspaper', 'Patent', 'Report', 'SoundRecording', 'Thesis'])
   @CategoryId(ProtocolReferenceDataValue.CATEGORY_PUBLICATION_TYPE)
   ProtocolReferenceDataValue publicationType
 
@@ -206,7 +207,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   Boolean overdue
 
+  @CategoryId(RefdataValueData.VOCABULARY_CANCELLATION_REASONS)
   RefdataValue cancellationReason
+
+  @CategoryId(RefdataValueData.VOCABULARY_COPYRIGHT_TYPE)
+  RefdataValue copyrightType;
 
   /** The current status of any network messaging */
   NetworkStatus networkStatus;
@@ -240,6 +245,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   /** Request created from this request */
   PatronRequest succeededBy;
+
+  /** If we create an external hold for this request, store the request id returned */
+  String externalHoldRequestId;
 
   /** JSON object containing custom identifiers */
   String customIdentifiers
@@ -321,6 +329,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum (nullable: true, blank : false)
     ssn (nullable: true, blank : false)
     quarter (nullable: true, blank : false)
+    copyrightType (nullable: true, blank : false)
     systemInstanceIdentifier (nullable: true, blank : false)
     selectedItemBarcode (nullable: true, blank : false)
     bibliographicRecordId( nullable: true, blank : false)
@@ -386,6 +395,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     precededBy (nullable: true)
     succeededBy (nullable: true)
+
+    externalHoldRequestId (nullable: true)
     customIdentifiers (nullable: true)
   }
 
@@ -438,6 +449,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     artnum column : 'pr_artnum'
     ssn column : 'pr_ssn'
     quarter column : 'pr_quarter'
+    copyrightType column: 'pr_copyright_type_fk'
     bibliographicRecordId column : 'pr_bib_record_id'
     supplierUniqueRecordId column : 'pr_supplier_unique_record_id'
 
@@ -504,6 +516,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     precededBy column: 'pr_preceded_by_fk'
     succeededBy column: 'pr_succeeded_by_fk'
+
+    externalHoldRequestId column: 'pr_external_hold_request_id'
 
     audit(sort:'dateCreated', order:'desc')
     protocolAudit(sort:'dateCreated', order:'desc')

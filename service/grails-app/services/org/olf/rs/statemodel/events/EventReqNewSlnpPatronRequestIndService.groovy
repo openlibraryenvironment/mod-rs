@@ -1,8 +1,8 @@
 package org.olf.rs.statemodel.events
 
-import com.k_int.web.toolkit.settings.AppSetting
-import groovy.sql.Sql
+
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.statemodel.AbstractEvent
@@ -16,6 +16,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
 
     PickupLocationService pickupLocationService
+    NewRequestService newRequestService
 
     @Override
     String name() {
@@ -36,7 +37,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
         // Generate a human readable ID to use
         if (!request.hrid) {
-            request.hrid = generateHrid()
+            request.hrid = newRequestService.generateHrid()
             log.debug("set request.hrid to ${request.hrid}")
         }
 
@@ -56,24 +57,5 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         eventResultDetails.saveData = true
 
         return(eventResultDetails)
-    }
-
-    private String generateHrid() {
-        String result = null
-
-        AppSetting prefixSetting = AppSetting.findByKey('request_id_prefix')
-        log.debug("Got app setting ${prefixSetting} ${prefixSetting?.value} ${prefixSetting?.defValue}")
-
-        String hridPrefix = prefixSetting.value ?: prefixSetting.defValue ?: ''
-
-        // Use this to make sessionFactory.currentSession work as expected
-        PatronRequest.withSession { session ->
-            log.debug('Generate hrid')
-            Sql sql = new Sql(session.connection())
-            List queryResult  = sql.rows("select nextval('pr_hrid_seq')")
-            log.debug("Query result: ${queryResult }")
-            result = hridPrefix + queryResult [0].get('nextval')?.toString()
-        }
-        return(result)
     }
 }

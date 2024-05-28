@@ -777,7 +777,7 @@ and sa.service.businessFunction.value=:ill
   }
 
   TypeStatus toStatus(def input) {
-    if(input) {
+    if (input) {
       return TypeStatus.fromValue(input)
     } else {
       return TypeStatus.REQUEST_RECEIVED

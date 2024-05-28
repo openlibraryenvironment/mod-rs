@@ -28,6 +28,7 @@ public class SettingsData {
     private static final String SECTION_HOST_LMS_INTEGRATION   = 'hostLMSIntegration';
     private static final String SECTION_LOCAL_NCIP             = 'localNCIP';
     private static final String SECTION_LOGGING                = 'logging';
+    private static final String SECTION_OTHER                  = 'other';
     private static final String SECTION_NETWORK                = 'network';
     private static final String SECTION_PATRON_STORE           = 'patronStore';
     private static final String SECTION_PULLSLIP_CONFIGURATION = 'pullslipConfiguration';
@@ -55,6 +56,7 @@ public class SettingsData {
     public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
     public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
     public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
+    public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location';
 
 
     // Settings for the wmsSettings section
@@ -124,6 +126,9 @@ public class SettingsData {
     // Settings for the Routing section
     public static final String SETTING_ROUTING_ADAPTER = 'routing_adapter';
     public static final String SETTING_STATIC_ROUTES   = 'static_routes';
+
+    // Settings for the Other section
+    public static final String SETTING_DEFAULT_COPYRIGHT_TYPE = 'default_copyright_type';
 
     // State/Action configuration settings
     public static final String SETTING_COMBINE_FILL_AND_SHIP                      = 'combine_fill_and_ship';
@@ -208,6 +213,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_DUE_DATE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_DUE_DATE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_DUE_DATE, RefdataValueData.NCIP_DUE_DATE_ON).value);
             ensureAppSetting(SETTING_NCIP_DUE_DATE_FORMAT, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, ReshareActionService.DEFAULT_DATE_FORMAT);
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
+            ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
@@ -300,6 +306,8 @@ public class SettingsData {
             ensureAppSetting(SETTING_LOGGING_Z3950_REQUESTER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER, SECTION_LOGGING, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
+
+            ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);

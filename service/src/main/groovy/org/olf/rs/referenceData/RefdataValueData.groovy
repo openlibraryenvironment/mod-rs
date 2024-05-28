@@ -38,6 +38,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_CHECK_IN_METHOD                  = 'CheckInMethod';
     public static final String VOCABULARY_CHECK_OUT_METHOD                 = 'CheckOutMethod';
     public static final String VOCABULARY_CHECK_IN_ON_RETURN               = 'CheckInOnReturn';
+    public static final String VOCABULARY_COPYRIGHT_TYPE                   = "copyrightType";
     public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER     = 'HostLMSIntegrationAdapter';
     public static final String VOCABULARY_LOAN_CONDITIONS                  = 'loanConditions';
     public static final String VOCABULARY_LOAN_POLICY                      = 'LoanPolicy';
@@ -293,6 +294,26 @@ public class RefdataValueData {
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
+            // We only want to populate the copyright type vocabulary if it does not already exist
+            RefdataCategory copyrightTypeCategory = RefdataCategory.findByDesc(VOCABULARY_COPYRIGHT_TYPE);
+            if (!copyrightTypeCategory) {
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cat S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]A (Australia)', 'AU-CopyrightActS50-7A');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]B (Australia)', 'AU-CopyrightActS50-7B');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cleared (Australia)', 'AU-CopyrightCleared');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'General Business (Australia)', 'AU-GenBus');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S54 (New Zealand)', 'NZ-CopyrightActS54');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S55 (New Zealand)', 'NZ-CopyrightActS55');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Other types of copyright compliance', 'Other');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Fee Paid (UK)', 'UK-CopyRFeePaid');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Fair Dealing (UK)', 'UK-FairDealing');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCG (US)', 'US-CCG');
+                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCL (US)', 'US-CCL');
+            }
+
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
 
@@ -330,5 +351,17 @@ public class RefdataValueData {
                 valueRefData.save(flush:true, failOnError:true);
             }
         }
+    }
+
+    // To create an empty vocabulary (RefdataCategory doesn't provide this)
+    private static RefdataCategory lookupOrCreateCategory(String categoryName) {
+        RefdataCategory cat = RefdataCategory.findByDesc(categoryName);
+        if (!cat) {
+            cat = new RefdataCategory();
+            cat.desc = categoryName;
+            cat.internal = false;
+            cat.save(flush:true, failOnError:true);
+        }
+        return cat;
     }
 }

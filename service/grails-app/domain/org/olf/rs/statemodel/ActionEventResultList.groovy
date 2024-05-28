@@ -105,6 +105,28 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     // Responder event lists
     static public final String RESPONDER_EVENT_NEW_PATRON_REQUEST = 'responderNewPatronRequestIndList';
 
+    static public final String NR_REQUESTER_CANCEL                             = 'nrRequesterCancel';
+    static public final String NR_REQUESTER_BYPASSED_VALIDATION                = 'nrRequesterBypassedValidation';
+    static public final String NR_REQUESTER_RETRIED_VALIDATION                 = 'nrRequesterRetriedValidaton';
+    static public final String NR_REQUESTER_EVENT_NEW_PATRON_REQUEST           = 'nrRequesterEventNewPatronRequest';
+    static public final String NR_REQUESTER_EVENT_PATRON_REQUEST_VALIDATED     = 'nrRequesterEventPatronRequestValidated';
+    static public final String NR_REQUESTER_EVENT_SUPPLIER_IDENTIFIED          = 'nrRequesterEventSupplierIdentified';
+    static public final String NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626          = 'nrRequesterSentToSupplierISO18626';
+    static public final String NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626          = 'nrRequesterExpectToSupplyISO18626';
+    static public final String NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
+    static public final String NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
+    public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = "nrRequesterMarkEndOfRotaReviewed";
+
+    static public final String NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';
+    static public final String NR_RESPONDER_EVENT_NEW_PATRON_REQUEST           = 'nrResponderEventNewPatronRequest';
+    static public final String NR_RESPONDER_CANNOT_SUPPLY                      = 'nrResponderCannotSupply';
+    static public final String NR_RESPONDER_PRINT_PULL_SLIP                    = 'nrResponderPrintPullSlip';
+    static public final String NR_RESPONDER_ADD_URL_TO_DOCUMENT                = 'nrResponderAddURLToDocument';
+
+    public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
+
+
+
     // Query to find all the result lists that save the status before setting the status
     private static final String SAVE_RESULT_LISTS_QUERY = 'from ActionEventResultList aerl where exists (from aerl.results r where r.saveRestoreState.value = :saveRestoreStateValue and r.status = :status)';
 

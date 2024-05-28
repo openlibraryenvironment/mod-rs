@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel;
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
+import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.SettingsService;
@@ -280,7 +281,7 @@ public class StatusService {
      */
     private ActionEventResult findResult(StateModel model, Status fromStatus, String actionCode, boolean successful, String qualifier, boolean availableActionMustExist) {
         // We return null if we could not find a status
-        log.debug("Calling StatusService.findResult with model ${model}, fromStatus ${fromStatus}, actionCode ${actionCode}" +
+        log.debug("Calling StatusService.findResult with model ${model.shortcode}, fromStatus ${fromStatus.code}, actionCode ${actionCode}" +
             " successful ${successful}, qualifier ${qualifier}, availableActionMustExist ${availableActionMustExist}");
         ActionEventResult actionEventResult = null;
 
@@ -293,6 +294,7 @@ public class StatusService {
                 if (availableActionMustExist) {
                     // Get hold of the AvailableAction
                     AvailableAction availableAction = lookupAvailableAction(model, fromStatus, actionEvent);
+                    log.debug("Found AvailableAction ${availableAction} with resultList ${availableAction?.resultList?.code}");
                     if (availableAction != null) {
                         // Now do we have a resultList on the availableAction
                         if (availableAction.resultList != null) {
@@ -311,8 +313,10 @@ public class StatusService {
                     // Did we find a result
                     if (actionEventResult == null) {
                         // We didn't find one on the availableAction, so look at the actionEvent
+                        log.debug("No actionEventResult from availableAction, checking actionEvent")
                         if (actionEvent.resultList != null) {
                             // We have a second bite of the cherry
+                            log.debug("Looking up actionEventResult with result ${successful}, qualifier ${qualifier} and fromStatus ${fromStatus}");
                             actionEventResult = actionEvent.resultList.lookupResult(successful, qualifier, fromStatus);
                         }
 
@@ -420,9 +424,9 @@ public class StatusService {
                     newStatusResult.updateRotaLocation = actionEventResult.updateRotaLocation;
                 }
             } else {
-                String error = 'The status is null on the found actionEventResult, so status is staying the same for, From Status: ' + request.state.code +
+                String error = "The status is null on the found actionEventResult '${actionEventResult?.code}', so status is staying the same, From Status: " + request.state.code +
                                ', Action: ' + action +
-                               ', Qualifer: ' + ((qualifier == null) ? '' : qualifier);
+                               ', Qualifier: ' + ((qualifier == null) ? '' : qualifier);
                 log.warn(error);
             }
         } else {
@@ -505,13 +509,17 @@ public class StatusService {
         String settingsKey;
         String stateModelCode;
         if (request.isRequester) {
-            if (request?.deliveryMethod?.value == 'url') {
+            if (request.serviceType?.value == 'copy') {
+                stateModelCode = StateModel.MODEL_NR_REQUESTER;
+            } else if (request?.deliveryMethod?.value == 'url') {
                 stateModelCode = StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER;
             } else {
                 settingsKey = SettingsData.SETTING_STATE_MODEL_REQUESTER;
             }
         } else {
-            if (request?.deliveryMethod?.value == 'url') {
+            if (request.serviceType?.value == 'copy') {
+                stateModelCode = StateModel.MODEL_NR_RESPONDER;
+            } else if (request?.deliveryMethod?.value == 'url') {
                 stateModelCode = StateModel.MODEL_CDL_RESPONDER;
             } else {
                 settingsKey = SettingsData.SETTING_STATE_MODEL_RESPONDER;

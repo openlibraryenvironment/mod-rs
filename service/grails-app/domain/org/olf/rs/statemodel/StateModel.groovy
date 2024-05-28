@@ -15,6 +15,8 @@ class StateModel implements MultiTenant<StateModel> {
     public static final String MODEL_RESPONDER = 'Responder';
     public static final String MODEL_CDL_RESPONDER = 'CDLResponder';
     public static final String MODEL_SLNP_RESPONDER = 'SLNPResponder';
+    public static final String MODEL_NR_REQUESTER = 'NonreturnableRequester';
+    public static final String MODEL_NR_RESPONDER = 'NonreturnableResponder';
 
     /** The query to find the states that are for a particular stage for a state model */
     private static final String STATES_FOR_STAGES_QUERY = """

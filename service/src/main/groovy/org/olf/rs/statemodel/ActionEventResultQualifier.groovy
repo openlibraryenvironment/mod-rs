@@ -37,4 +37,5 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_UNFILLED              = 'unfilled';
     static public final String QUALIFIER_LOANED                = 'Loaned';
     static public final String QUALIFIER_ABORTED               = 'ABORT';
+    static public final String QUALIFIER_DELIVERED             = 'delivered';
 }

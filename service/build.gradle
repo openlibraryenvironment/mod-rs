@@ -1,5 +1,5 @@
 repositories {
-  mavenLocal()
+  //mavenLocal()
   mavenCentral()
   maven { url 'https://maven.indexdata.com/' }
   maven { url "https://repo.grails.org/grails/core" }

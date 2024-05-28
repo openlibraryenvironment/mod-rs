@@ -1,8 +1,11 @@
-package org.olf.rs.hostlms;
+package org.olf.rs.hostlms
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.circ.client.CirculationClient;
-import org.olf.rs.circ.client.NCIPClientWrapper;
-import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.circ.client.NCIPClientWrapper
+import org.olf.rs.lms.ConnectionDetailsNCIP;
+import org.olf.rs.lms.ItemLocation
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
 
 /**
@@ -11,6 +14,7 @@ import org.olf.rs.settings.ISettings;
  */
 public class SierraHostLMSService extends BaseHostLMSService {
 
+  SettingsService settingsService;
   List<String> NOTES_CONSIDERED_AVAILABLE = ['AVAILABLE', 'CHECK SHELVES', 'CHECK SHELF'];
 
   public CirculationClient getCirculationClient(ISettings settings, String address) {
@@ -55,5 +59,40 @@ public class SierraHostLMSService extends BaseHostLMSService {
     }
 
     return availability_summary;
+  }
+
+  @Override
+  public String getRequestItemRequestScopeType(ConnectionDetailsNCIP ncipConnectionDetails) {
+    return "Title";
+  }
+
+  @Override
+  public String getRequestItemPickupLocation(String defaultPickupLocation) {
+
+    String pickupLocation = settingsService.getSettingValue(SettingsData.SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION);
+
+    if (pickupLocation != null && !pickupLocation.isEmpty()) {
+      return pickupLocation;
+    }
+    return null;
+  }
+
+  @Override
+  public String getRequestItemRequestType() {
+    return "Hold";
+  }
+
+  @Override
+  public String filterRequestItemItemId(String itemId) {
+    if (itemId?.startsWith(".b")) {
+      itemId = itemId.split(".b", 2)[1];
+    }
+    if (itemId.length() > 1) {
+      String lastChar = itemId.substring(itemId.length() - 1);
+      if (lastChar.matches("\\d")) {
+        itemId = itemId.substring(0, itemId.length() - 1);
+      }
+    }
+    return itemId;
   }
 }

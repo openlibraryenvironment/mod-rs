@@ -1,0 +1,6 @@
+{
+  "action": "nonreturnableSupplierAddURLToDocument",
+  "actionParams": {
+    "url": "https://some.domain?param=value"
+  }
+}

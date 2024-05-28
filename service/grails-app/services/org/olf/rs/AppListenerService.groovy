@@ -1,10 +1,16 @@
 package org.olf.rs
 
-import grails.gorm.multitenancy.Tenants
-import org.grails.datastore.mapping.engine.event.*
-import org.olf.rs.statemodel.Events
-import org.olf.rs.statemodel.StateModel
+import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
+import org.grails.datastore.mapping.engine.event.PostInsertEvent
+import org.grails.datastore.mapping.engine.event.PostUpdateEvent
+import org.grails.datastore.mapping.engine.event.PreInsertEvent
+import org.grails.datastore.mapping.engine.event.SaveOrUpdateEvent
+import org.olf.rs.statemodel.Events;
+import org.olf.rs.statemodel.StateModel;
 import org.springframework.context.ApplicationListener
+
+import grails.gorm.multitenancy.Tenants;
+
 
 /**
  * This class listens for asynchronous domain class events and fires of any needed indications
@@ -29,9 +35,8 @@ public class AppListenerService implements ApplicationListener {
       String topic = "${tenant}_PatronRequestEvents".toString()
       log.debug("afterInsert ${event} ${event?.entityObject?.class?.name} (${pr.class.name}:${pr.id})");
       log.debug("Publish NewPatronRequest_ind event on topic ${topic}");
-
-      String eventName = getPatronRequestEventName(pr.isRequester, pr.stateModel.shortcode);
-
+      String eventName = getPatronRequestEventName(pr?.stateModel?.shortcode, pr?.isRequester)
+      log.debug("For statemodel ${pr.stateModel.shortcode} and isRequester ${pr.isRequester}, publishing event ${eventName}");
       eventPublicationService.publishAsJSON(
           topic,
           null, // key
@@ -93,7 +98,7 @@ public class AppListenerService implements ApplicationListener {
     // I don't think we need this method as afterUpdate is triggered
   }
 
-  public void onApplicationEvent(org.springframework.context.ApplicationEvent event){
+  public void onApplicationEvent(org.springframework.context.ApplicationEvent event) {
     // log.debug("--> ${event?.class.name} ${event}");
     if ( event instanceof AbstractPersistenceEvent ) {
       if ( event instanceof PostUpdateEvent ) {
@@ -119,23 +124,33 @@ public class AppListenerService implements ApplicationListener {
     }
   }
 
-  private static String getPatronRequestEventName(Boolean isRequester, String stateModelName) {
-    String eventName;
+    private static String getPatronRequestEventName(String stateModelName, Boolean isRequester) {
+        String eventName;
 
-    if (isRequester) {
-      if (stateModelName == StateModel.MODEL_SLNP_REQUESTER) {
-        eventName = Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION;
-      } else {
-        eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
-      }
-    } else {
-      if (stateModelName == StateModel.MODEL_SLNP_RESPONDER) {
-        eventName = Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION;
-      } else {
-        eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
-      }
+        if (isRequester) {
+            if (stateModelName == StateModel.MODEL_SLNP_REQUESTER) {
+                eventName = Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION;
+            } else if (stateModelName == StateModel.MODEL_REQUESTER ||
+                    stateModelName == StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER) {
+                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+            } else if (stateModelName == StateModel.MODEL_NR_REQUESTER) {
+                eventName = Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+            } else {
+                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+            }
+        } else {
+            if (stateModelName == StateModel.MODEL_SLNP_RESPONDER) {
+                eventName = Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION;
+            } else if (stateModelName == StateModel.MODEL_RESPONDER ||
+                    stateModelName == StateModel.MODEL_CDL_RESPONDER) {
+                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+            } else if (stateModelName == StateModel.MODEL_NR_RESPONDER) {
+                eventName = Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+            } else {
+                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+            }
+        }
+
+        return eventName;
     }
-
-    return eventName;
-  }
 }

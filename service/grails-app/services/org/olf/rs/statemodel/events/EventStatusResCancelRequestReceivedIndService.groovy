@@ -1,7 +1,10 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
-import org.olf.rs.ReshareActionService;
+import org.olf.rs.ReshareActionService
+import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -19,6 +22,11 @@ import com.k_int.web.toolkit.settings.AppSetting;
 public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent {
 
     ReshareActionService reshareActionService;
+    SettingsService settingsService;
+    HostLMSService hostLMSService;
+
+    private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
+
 
     @Override
     String name() {
@@ -47,6 +55,18 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_CANCELLED;
                 eventResultDetails.auditMessage =  'AutoResponder:Cancel is ON - responding YES to cancel request';
                 reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'yes'], eventResultDetails);
+
+                //Are we using request item? If so, we need to instruct the host lms to send a cancel request item if necessary
+
+                log.debug("Checking to see if we need to send a CancelRequestItem");
+
+                if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
+                    if (hostLMSService.isManualCancelRequestItem()) {
+                        log.debug("Sending CancelRequestItem");
+                        Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.externalHoldRequestId);
+                        log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
+                    }
+                }
             }
         } else {
             // Set needs attention=true

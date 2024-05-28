@@ -124,7 +124,7 @@ public class ReshareApplicationEventHandlerService {
 									request = delayedGet(requestId, true);
 
                                     // Add the hrid to the logging context
-                                    ContextLogging.setValue(ContextLogging.FIELD_HRID, request.hrid);
+                                    ContextLogging.setValue(ContextLogging.FIELD_HRID, request?.hrid);
 									break;
 							}
 
@@ -445,15 +445,15 @@ public class ReshareApplicationEventHandlerService {
     return returnList.join(",");
   }
 
-	public static Symbol resolveSymbol(String authorty, String symbol) {
+	public static Symbol resolveSymbol(String authority, String symbol) {
 		Symbol result = null;
 	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-	                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
+	                                                   [authority:authority?.toUpperCase(), symbol:symbol?.toUpperCase()]);
 	    if ( symbol_list.size() == 1 ) {
 			result = symbol_list.get(0);
 	    }
             else {
-              log.warn("Missing or multiple symbol match for : ${authorty}:${symbol} (${symbol_list?.size()})");
+              log.warn("Missing or multiple symbol match for : ${authority}:${symbol} (${symbol_list?.size()})");
             }
 
 	    return result;

@@ -6,6 +6,7 @@ final boolean fullRecord = (params.get('_view', (actionName == 'index' ? 'brief'
 
 final def toExpand = fullRecord ? [
   // Full expanded set...
+  'copyrightType',
   'state',
   'stateModel',
   'serviceType',
@@ -46,6 +47,7 @@ final def toExclude = fullRecord ? [
   'batches',
   'cancellationReason',
   'conditions',
+  'copyrightType',
   'customProperties',
   'networkStatus',
   'notifications',
