@@ -796,8 +796,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | null              | 6        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null
         "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAnswerYesNoPick.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"
         "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierPrintPullSlip.json"      | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_COPY_AWAIT_PICKING         | null               | null                  | "URL"          | "Copy"      | "{status=true}"
-//        TODO: Not a valid type_status value - delivered in XSD scheme
-//        "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
+        "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"
     }
 
     void "test Dynamic Groovy"() {

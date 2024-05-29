@@ -799,10 +799,10 @@ and sa.service.businessFunction.value=:ill
       // Build single ItemId
       deliveryInfo.setItemId(eventData.deliveryInfo.itemId)
     }
-    if(eventData.deliveryInfo.sentVia) {
+    if (eventData.deliveryInfo.sentVia) {
       deliveryInfo.setSentVia(toTypeSchemeValuePair(eventData.deliveryInfo.sentVia))
     }
-    if(!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
+    if (!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
       TypeSchemeValuePair pair = new TypeSchemeValuePair()
       pair.setScheme('URL')
       pair.setValue(eventData.deliveryInfo.url)
@@ -822,7 +822,7 @@ and sa.service.businessFunction.value=:ill
 
   ReturnInfo makeReturnInfo(eventData) {
     ReturnInfo returnInfo = new ReturnInfo()
-    if(eventData.returnInfo.returnAgencyId) {
+    if (eventData.returnInfo.returnAgencyId) {
       def values = eventData.returnInfo.returnAgencyId.split(':')
       TypeAgencyId returnAgencyId = new TypeAgencyId()
       returnAgencyId.setAgencyIdType(toTypeSchemeValuePair(values[0]))

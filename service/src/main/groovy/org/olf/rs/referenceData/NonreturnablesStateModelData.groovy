@@ -159,10 +159,10 @@ public class NonreturnablesStateModelData {
 
     private static Map nrRequesterISO18626Delivered = [
             code: 'requesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is Loaned',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
-            qualifier: ActionEventResultQualifier.QUALIFIER_DELIVERED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
