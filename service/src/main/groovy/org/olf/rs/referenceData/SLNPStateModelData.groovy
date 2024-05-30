@@ -306,15 +306,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpRequesterPrintPullSlipList = [
-            code: ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP,
-            description: 'Requester has triggered print pull slip action',
-            model: StateModel.MODEL_SLNP_REQUESTER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpRequesterCheckedInList = [
             code: ActionEventResultList.SLNP_REQUESTER_CHECKED_IN,
             description: 'Request has been checked-in to the local ILS',
@@ -451,7 +442,6 @@ public class SLNPStateModelData {
             slnpRequesterCancelList,
             slnpRequesterReceivedList,
             slnpRequesterAbortedList,
-            slnpRequesterPrintPullSlipList,
             slnpRequesterCheckedInList,
             slnpRequesterShippedReturnList,
             slnpRequesterISO18626StatusChangeList,
