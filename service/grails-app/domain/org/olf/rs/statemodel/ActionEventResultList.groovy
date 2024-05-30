@@ -58,7 +58,6 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_REQUESTER_RECEIVED                  = 'slnpRequesterReceived';
     static public final String SLNP_REQUESTER_ABORTED                   = 'slnpRequesterAborted';
     static public final String SLNP_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpRequesterISO18626StatusChange';
-    static public final String SLNP_REQUESTER_PRINT_PULL_SLIP           = 'slnpRequesterPrintPullSlip';
     static public final String SLNP_REQUESTER_CHECKED_IN                = 'slnpRequesterCheckedIn';
     static public final String SLNP_REQUESTER_SHIPPED_RETURN            = 'slnpRequesterShippedReturn';
     static public final String SLNP_REQUESTER_MARK_ITEM_LOST            = 'slnpRequesterMarkItemLost';
