@@ -172,7 +172,7 @@ public class NonreturnablesStateModelData {
             code: 'nrRequesterDeliveredOK',
             description: 'The request is successfully delivered',
             result: true,
-            status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
+            status: null, //Don't change status here
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
