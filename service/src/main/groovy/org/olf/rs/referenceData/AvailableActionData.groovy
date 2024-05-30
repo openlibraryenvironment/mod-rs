@@ -44,7 +44,10 @@ public class AvailableActionData {
             [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_RETRY_REQUEST],
             [ StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_FORCE_VALIDATE],
             [ StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES],
-            [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED]
+            [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_REQUESTER_REQUESTER_RECEIVED],
+            [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, 'slnpPrintPullSlip'],
+            [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, 'slnpPrintPullSlip'],
+            [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, 'slnpPrintPullSlip'],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
