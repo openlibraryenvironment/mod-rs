@@ -533,7 +533,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_RECEIVED, null, Boolean.TRUE, Boolean.TRUE);
 
         // SLNP_REQ_ABORTED OR "Aborted"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED);
 
         // SLNP_REQ_CHECKED_IN OR "In local circulation process"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CHECKED_IN, null, Boolean.TRUE, Boolean.TRUE);
