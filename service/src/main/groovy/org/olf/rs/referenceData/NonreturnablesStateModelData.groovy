@@ -141,7 +141,8 @@ public class NonreturnablesStateModelData {
             description: 'Incoming ISO18626 message from the responder has said the status is Unfilled',
             result: true,
             status: Status.PATRON_REQUEST_UNFILLED,
-            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            //qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            qualifier: 'Unfilled', //it wants to be uppercase
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -172,7 +173,7 @@ public class NonreturnablesStateModelData {
             code: 'nrRequesterDeliveredOK',
             description: 'The request is successfully delivered',
             result: true,
-            status: Status.PATRON_REQUEST_REQUEST_COMPLETE,
+            status: null, //Don't change status here
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
@@ -192,7 +193,7 @@ public class NonreturnablesStateModelData {
             code: 'requesteCancelOK',
             description: 'request is cancelled',
             result: true,
-            status: Status.PATRON_REQUEST_CANCEL_PENDING,
+            status: Status.PATRON_REQUEST_CANCELLED,
             qualifier: null,
             saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
