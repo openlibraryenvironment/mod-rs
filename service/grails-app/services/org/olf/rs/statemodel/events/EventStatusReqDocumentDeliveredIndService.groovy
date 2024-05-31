@@ -1,6 +1,8 @@
 package org.olf.rs.statemodel.events
 
 import org.olf.rs.PatronRequest
+import com.k_int.web.toolkit.refdata.RefdataValue
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
@@ -9,11 +11,13 @@ import org.olf.rs.statemodel.Events;
 /**
  * Event triggered when the requester status becomes "document delivered"
  */
-public class EventStatusReqDocumentDeliveredIndService extends AbstractEvent {
+public class EventStatusReqDocumentDeliveredIndService extends EventTriggerNoticesService {
 
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Request status is 'Document Delivered'");
+        //trigger the notice
+        triggerNotice(request, RefdataValueData.NOTICE_TRIGGER_DOCUMENT_DELIVERED);
         return eventResultDetails;
     }
 
