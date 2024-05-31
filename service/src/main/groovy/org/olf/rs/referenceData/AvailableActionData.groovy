@@ -48,6 +48,7 @@ public class AvailableActionData {
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, 'slnpPrintPullSlip'],
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, 'slnpPrintPullSlip'],
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, 'slnpPrintPullSlip'],
+            [ StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {

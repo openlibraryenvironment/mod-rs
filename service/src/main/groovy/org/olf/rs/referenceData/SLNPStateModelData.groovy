@@ -380,15 +380,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpResponderPrintPullSlipNoTransitionList = [
-            code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION,
-            description: 'Print pull slip',
-            model: StateModel.MODEL_SLNP_RESPONDER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpResponderSupplierPrintPullSlipList = [
             code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
             description: 'Print pull slip',
@@ -454,7 +445,6 @@ public class SLNPStateModelData {
             slnpResponderSupplierCheckInReshareList,
             slnpResponderSupplierMarkShippedList,
             slnpResponderCheckoutOfReshareList,
-            slnpResponderPrintPullSlipNoTransitionList,
             slnpResponderNewPatronRequestIndList,
             slnpRequesterMarkItemLostList
     ];
@@ -520,7 +510,6 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION);
 
         // SLNP_RES_ITEM_SHIPPED OR "Shipped"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
