@@ -15,7 +15,7 @@ import org.olf.rs.statemodel.*
  * to perform validation and respond automatically depending on configured settings.
  */
 public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
-    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out'
+    public static final String VOLUME_STATUS_REQUESTED_FROM_THE_ILS = 'requested_from_the_ils'
 
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
@@ -98,7 +98,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     rv = new RequestVolume(
                             name: request.volume ?: requestItemResult.itemId,
                             itemId: requestItemResult.itemId,
-                            status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
+                            status: RequestVolume.lookupStatus(VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
                     );
                     request.addToVolumes(rv);
                 }
