@@ -1,5 +1,7 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper;
 import org.olf.rs.Counter;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
@@ -126,6 +128,14 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                             vol.status = volStatus;
                         }
                         vol.save(failOnError: true);
+                        if (checkoutResult.loanUuid) {
+                            Map customIdentifiersMap = [:]
+                            if (request.customIdentifiers) {
+                                customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                            }
+                            customIdentifiersMap.put("loanUuid", checkoutResult.loanUuid)
+                            request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                        }
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkoutResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
 
                         // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored

@@ -2,6 +2,8 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.custprops.CustomProperty
 import com.k_int.web.toolkit.settings.AppSetting
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
@@ -105,6 +107,19 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             }
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
+            }
+            if (requestItemResult.userUuid || requestItemResult.requestId) {
+                Map customIdentifiersMap = [:]
+                if (request.customIdentifiers) {
+                    customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                }
+                if (requestItemResult.userUuid) {
+                    customIdentifiersMap.put("patronUuid", requestItemResult.userUuid)
+                }
+                if (requestItemResult.requestId) {
+                    customIdentifiersMap.put("requestUuid", requestItemResult.requestId)
+                }
+                request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
             }
 
             if (autoRespondVariant == "on:_loaned_and_cannot_supply") {

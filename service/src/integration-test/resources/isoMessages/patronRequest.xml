@@ -1,4 +1,4 @@
-<ISO18626Message version="">
+<ISO18626Message xmlns="http://illtransactions.org/2013/iso18626" ill:version="1.2" xmlns:ill="http://illtransactions.org/2013/iso18626" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_2.xsd">
     <request>
         <header>
             <requestingAgencyId>
@@ -26,6 +26,18 @@
                 <bibliographicItemIdentifierCode scheme="">ISBN</bibliographicItemIdentifierCode>
                 <bibliographicItemIdentifier>12321312</bibliographicItemIdentifier>
             </bibliographicItemId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">TitelId</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>in00000000002</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">BsTyp2</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>L</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">MedTyp</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>ml</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
             <sponsor></sponsor>
             <informationSource></informationSource>
         </bibliographicInfo>
