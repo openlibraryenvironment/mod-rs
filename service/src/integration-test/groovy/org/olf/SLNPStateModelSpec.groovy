@@ -265,7 +265,8 @@ class SLNPStateModelSpec extends TestBase {
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
                 hrid: hrid,
-                peerRequestIdentifier: peerRequestIdentifier
+                peerRequestIdentifier: peerRequestIdentifier,
+                customIdentifiers: '{"schemeValue": "ZFL","identifiers": [{"key": "TitelId","value": "in00000000002"},{"key": "BsTyp2","value": "L"},{"key": "MedTyp","value": "ml"}]}'
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
@@ -732,7 +733,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequestWithoutInitialState(patronId, title, author,
-                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid);
+                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid)
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
         }
 
