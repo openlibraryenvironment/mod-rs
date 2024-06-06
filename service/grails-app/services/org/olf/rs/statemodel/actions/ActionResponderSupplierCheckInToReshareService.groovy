@@ -18,7 +18,8 @@ import org.olf.rs.statemodel.Actions;
 
 import com.k_int.web.toolkit.custprops.CustomProperty;
 import com.k_int.web.toolkit.refdata.RefdataValue;
-import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.settings.AppSetting
+import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService;
 
 /**
  * Action that occurs when the responder checjs the item into reshare from the LMS
@@ -71,6 +72,9 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     } else if (ib.name && rv.name != ib.name) {
                         // Allow changing of label up to shipping
                         rv.name = ib.name;
+                    }
+                    if (rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS) {
+                        rv.status = RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
                     }
                 }
 
