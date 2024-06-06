@@ -637,6 +637,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.dueDate = response.opt('dueDate');
         result.userId = response.opt('userId')
         result.itemId = response.opt('itemId')
+        result.loanUuid = response.opt('loanUuid')
       }
     } else {
       result.problems = 'No institutional patron ID available'
@@ -839,6 +840,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.barcode = response.opt("barcode")
       result.callNumber = response.opt("callNumber")
       result.location = response.opt("location")
+      result.userUuid = response.opt("userUuid")
     }
 
     return result;
