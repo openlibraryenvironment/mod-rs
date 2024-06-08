@@ -47,7 +47,7 @@ public class StatusData {
         // model, code, presSeq, visible, needsAttention, terminal, tags
         Status.ensure(Status.PATRON_REQUEST_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_CHECKED_IN, StatusStage.ACTIVE_SHIPPED, '0077', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.PATRON_REQUEST_LOCAL_REVIEW, StatusStage.LOCAL, '0079', true, null, false, null, [ tags.ACTIVE_PATRON ]);
+        Status.ensure(Status.PATRON_REQUEST_LOCAL_REVIEW, StatusStage.LOCAL, '0079', true, true, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_FILLED_LOCALLY, StatusStage.COMPLETED, '0081', true, null, true, 2);
         Status.ensure(Status.PATRON_REQUEST_DUPLICATE_REVIEW, StatusStage.PREPARING, '0082', true, true, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_BLANK_FORM_REVIEW, StatusStage.PREPARING, '0083', true, true, false, null, [ tags.ACTIVE_PATRON ]);
