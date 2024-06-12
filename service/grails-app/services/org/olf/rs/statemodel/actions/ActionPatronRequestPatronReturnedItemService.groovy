@@ -42,7 +42,7 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
                         customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                     }
                     customIdentifiersMap.put("loanUuid", resultMap.loanUuid)
-                    customIdentifiersMap.put("userUuid", resultMap.userUuid)
+                    customIdentifiersMap.put("patronUuid", resultMap.userUuid)
                     request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }
 
