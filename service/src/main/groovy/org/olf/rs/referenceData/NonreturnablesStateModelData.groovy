@@ -489,7 +489,7 @@ public class NonreturnablesStateModelData {
     // Initialization methods
 
     public static void loadStatusData() {
-        Status.ensure(Status.PATRON_REQUEST_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10001', true, false, true, null);
+        Status.ensure(Status.PATRON_REQUEST_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10001', true, false, false, null);
         Status.ensure(Status.RESPONDER_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10002', true, false, true, null);
         Status.ensure(Status.RESPONDER_COPY_AWAIT_PICKING, StatusStage.ACTIVE, '10003', true, false, false, null);
     }
