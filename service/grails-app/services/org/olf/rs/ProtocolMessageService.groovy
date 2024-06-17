@@ -545,7 +545,7 @@ and sa.service.businessFunction.value=:ill
             ( eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType != null ) ) {
       ElectronicAddress electronicAddress = new ElectronicAddress()
       electronicAddress.setElectronicAddressType(toTypeSchemeValuePair(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressType))
-      electronicAddress.setElectronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData)
+      electronicAddress.setElectronicAddressData(eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData ? eventData.requestedDeliveryInfo.address.electronicAddress.electronicAddressData : "")
       address.setElectronicAddress(electronicAddress)
     }
     requestedDeliveryInfo.setAddress(address)
