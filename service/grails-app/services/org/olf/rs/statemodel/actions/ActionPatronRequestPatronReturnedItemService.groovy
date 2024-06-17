@@ -1,5 +1,7 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
@@ -34,6 +36,16 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
             Map resultMap = [:];
             try {
                 resultMap = hostLMSService.checkInRequestVolumes(request);
+                if (resultMap.loanUuid || resultMap.userUuid) {
+                    Map customIdentifiersMap = [:]
+                    if (request.customIdentifiers) {
+                        customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                    }
+                    customIdentifiersMap.put("loanUuid", resultMap.loanUuid)
+                    customIdentifiersMap.put("patronUuid", resultMap.userUuid)
+                    request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                }
+
             } catch (Exception e) {
                 log.error("Error attempting NCIP CheckinItem for request {$request.id}: {$e}");
                 resultMap.result = false;

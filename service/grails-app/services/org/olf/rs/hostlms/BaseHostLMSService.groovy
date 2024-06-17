@@ -667,6 +667,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.dueDate = response.opt('dueDate');
         result.userId = response.opt('userId')
         result.itemId = response.opt('itemId')
+        result.loanUuid = response.opt('loanUuid')
       }
     } else {
       result.problems = 'No institutional patron ID available'
@@ -730,6 +731,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( response.has('problems') ) {
             result.result = false;
             result.problems = response.get('problems')
+          } else {
+            result.requestUuid = response.opt("requestId")
           }
           break;
 
@@ -802,6 +805,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
               log.debug("[${CurrentTenant.get()}] Error getting problem type: ${e.getLocalizedMessage()}")
             }
             result.problems = response.get('problems')
+          } else {
+            result.userUuid = response.opt("userUuid")
+            result.loanUuid = response.opt("loanUuid")
           }
           break
 
@@ -888,6 +894,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.barcode = response.opt("barcode")
       result.callNumber = response.opt("callNumber")
       result.location = response.opt("location")
+      result.userUuid = response.opt("userUuid")
     }
 
     return result;

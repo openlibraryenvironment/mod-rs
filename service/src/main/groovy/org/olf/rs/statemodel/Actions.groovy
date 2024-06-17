@@ -82,7 +82,6 @@ public class Actions {
 
 	// SLNP Requester Actions
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";
-	static public final String ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP     = "slnpPrintPullSlip";
 	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED  = "slnpRequesterReceived";
 	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST      = "slnpMarkItemLost";
 

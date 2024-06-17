@@ -306,15 +306,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpRequesterPrintPullSlipList = [
-            code: ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP,
-            description: 'Requester has triggered print pull slip action',
-            model: StateModel.MODEL_SLNP_REQUESTER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpRequesterCheckedInList = [
             code: ActionEventResultList.SLNP_REQUESTER_CHECKED_IN,
             description: 'Request has been checked-in to the local ILS',
@@ -389,15 +380,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpResponderPrintPullSlipNoTransitionList = [
-            code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION,
-            description: 'Print pull slip',
-            model: StateModel.MODEL_SLNP_RESPONDER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpResponderSupplierPrintPullSlipList = [
             code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
             description: 'Print pull slip',
@@ -451,7 +433,6 @@ public class SLNPStateModelData {
             slnpRequesterCancelList,
             slnpRequesterReceivedList,
             slnpRequesterAbortedList,
-            slnpRequesterPrintPullSlipList,
             slnpRequesterCheckedInList,
             slnpRequesterShippedReturnList,
             slnpRequesterISO18626StatusChangeList,
@@ -464,7 +445,6 @@ public class SLNPStateModelData {
             slnpResponderSupplierCheckInReshareList,
             slnpResponderSupplierMarkShippedList,
             slnpResponderCheckoutOfReshareList,
-            slnpResponderPrintPullSlipNoTransitionList,
             slnpResponderNewPatronRequestIndList,
             slnpRequesterMarkItemLostList
     ];
@@ -521,44 +501,39 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY);
 
         // SLNP_RES_NEW_AWAIT_PULL_SLIP OR "Awaiting pull slip printing"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, null, Boolean.TRUE, Boolean.FALSE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
 
         // SLNP_RES_AWAIT_PICKING OR "Searching"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE, null, Boolean.TRUE, Boolean.FALSE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP_NO_TRANSITION);
 
         // SLNP_RES_ITEM_SHIPPED OR "Shipped"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
 
         // SLNP_REQ_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_REQUESTER_ISO_18626_STATUS_CHANGE)
 
         // SLNP_REQ_SHIPPED OR "Shipped"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_RECEIVED, null, Boolean.TRUE, Boolean.TRUE);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_SHIPPED, Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP);
 
         // SLNP_REQ_ABORTED OR "Aborted"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED);
 
         // SLNP_REQ_CHECKED_IN OR "In local circulation process"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CHECKED_IN, null, Boolean.TRUE, Boolean.TRUE);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP);
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_MARK_ITEM_LOST);
 
         // SLNP_REQ_AWAITING_RETURN_SHIPPING OR "Awaiting return shipping"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_SHIPPED_RETURN, null, Boolean.TRUE, Boolean.FALSE);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP);
     }
 
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, 'The requester has canceled the request', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT.capitalize(), ActionEventResultList.SLNP_REQUESTER_ABORTED, true);
-        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP, 'The requester has initiated print pull slip', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_PRINT_PULL_SLIP.capitalize(), ActionEventResultList.SLNP_REQUESTER_PRINT_PULL_SLIP, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'The requester has received the item(s) from the responder', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_REQUESTER_RECEIVED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST, 'The requester has marked item lost', true, StateModel.MODEL_SLNP_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST.capitalize(), ActionEventResultList.SLNP_REQUESTER_MARK_ITEM_LOST, true);
 

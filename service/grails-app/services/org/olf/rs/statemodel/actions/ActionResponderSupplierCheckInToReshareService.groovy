@@ -1,5 +1,7 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper;
 import org.olf.rs.Counter;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
@@ -16,7 +18,8 @@ import org.olf.rs.statemodel.Actions;
 
 import com.k_int.web.toolkit.custprops.CustomProperty;
 import com.k_int.web.toolkit.refdata.RefdataValue;
-import com.k_int.web.toolkit.settings.AppSetting;
+import com.k_int.web.toolkit.settings.AppSetting
+import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService;
 
 /**
  * Action that occurs when the responder checjs the item into reshare from the LMS
@@ -69,6 +72,9 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     } else if (ib.name && rv.name != ib.name) {
                         // Allow changing of label up to shipping
                         rv.name = ib.name;
+                    }
+                    if (rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS) {
+                        rv.status = RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
                     }
                 }
 
@@ -126,6 +132,14 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                             vol.status = volStatus;
                         }
                         vol.save(failOnError: true);
+                        if (checkoutResult.loanUuid) {
+                            Map customIdentifiersMap = [:]
+                            if (request.customIdentifiers) {
+                                customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                            }
+                            customIdentifiersMap.put("loanUuid", checkoutResult.loanUuid)
+                            request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                        }
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Check in to ReShare completed for itemId: ${vol.itemId}. ${checkoutResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for check out item call)' : 'Host LMS integration: CheckoutItem call succeeded.'}", null);
 
                         // Attempt to store any dueDate coming in from LMS iff it is earlier than what we have stored

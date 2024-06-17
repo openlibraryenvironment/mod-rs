@@ -2,6 +2,8 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.custprops.CustomProperty
 import com.k_int.web.toolkit.settings.AppSetting
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
@@ -15,7 +17,7 @@ import org.olf.rs.statemodel.*
  * to perform validation and respond automatically depending on configured settings.
  */
 public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
-    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out'
+    public static final String VOLUME_STATUS_REQUESTED_FROM_THE_ILS = 'requested_from_the_ils'
 
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
@@ -66,8 +68,12 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
      * @param eventResultDetails - Object containing results for the event such as audit, qualifier, result etc...
      */
     private void autoRespond(PatronRequest request, String autoRespondVariant, EventResultDetails eventResultDetails) {
-        log.debug("Attempt hold with RequestItem")
+        if (autoRespondVariant == "off") {
+            log.debug("Auto responder is off, manual checking is required!")
+            return
+        }
 
+        log.debug("Attempt hold with RequestItem")
         CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
@@ -94,13 +100,26 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     rv = new RequestVolume(
                             name: request.volume ?: requestItemResult.itemId,
                             itemId: requestItemResult.itemId,
-                            status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
+                            status: RequestVolume.lookupStatus(VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
                     );
                     request.addToVolumes(rv);
                 }
             }
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
+            }
+            if (requestItemResult.userUuid || requestItemResult.requestId) {
+                Map customIdentifiersMap = [:]
+                if (request.customIdentifiers) {
+                    customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                }
+                if (requestItemResult.userUuid) {
+                    customIdentifiersMap.put("patronUuid", requestItemResult.userUuid)
+                }
+                if (requestItemResult.requestId) {
+                    customIdentifiersMap.put("requestUuid", requestItemResult.requestId)
+                }
+                request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
             }
 
             if (autoRespondVariant == "on:_loaned_and_cannot_supply") {
