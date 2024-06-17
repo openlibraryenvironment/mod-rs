@@ -61,7 +61,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                             customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                         }
                         if (acceptResult.requestId) {
-                            customIdentifiersMap.put("requestUuid", acceptResult.requestId)
+                            customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
                         }
                         request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                     }
