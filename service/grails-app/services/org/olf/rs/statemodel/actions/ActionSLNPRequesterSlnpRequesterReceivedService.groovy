@@ -1,6 +1,8 @@
 package org.olf.rs.statemodel.actions
 
 import com.k_int.web.toolkit.refdata.RefdataValue
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.olf.rs.Counter
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
@@ -52,6 +54,17 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                     // Let the user know if the success came from a real call or a spoofed one
                     String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${vol.temporaryItemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
                     RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
+
+                    if (acceptResult.requestId) {
+                        Map customIdentifiersMap = [:]
+                        if (request.customIdentifiers) {
+                            customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                        }
+                        if (acceptResult.requestId) {
+                            customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                        }
+                        request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                    }
 
                     reshareApplicationEventHandlerService.auditEntry(request,
                         request.state,

@@ -701,6 +701,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( response.has('problems') ) {
             result.result = false;
             result.problems = response.get('problems')
+          } else {
+            result.requestUuid = response.opt("requestId")
           }
           break;
 
@@ -773,6 +775,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
               log.debug("[${CurrentTenant.get()}] Error getting problem type: ${e.getLocalizedMessage()}")
             }
             result.problems = response.get('problems')
+          } else {
+            result.userUuid = response.opt("userUuid")
+            result.loanUuid = response.opt("loanUuid")
           }
           break
 
