@@ -23,11 +23,13 @@ public class ActionPatronRequestEditService extends AbstractAction {
 
     protected static final List updateableFields = [
         [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
+        [ field: "authorOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_OF_COMPONENT_PREFIX, isDate: false ],
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
         [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
         [ field: "issn", notePrefix: NoteSpecials.UPDATED_FIELD_ISSN_PREFIX, isDate: false ],
         [ field: "neededBy", notePrefix: NoteSpecials.UPDATED_FIELD_NEEDED_BY_PREFIX, isDate: true ],
         [ field: "oclcNumber", notePrefix: NoteSpecials.UPDATED_FIELD_OCLC_NUMBER_PREFIX, isDate: false ],
+        [ field: "pagesRequested", notePrefix: NoteSpecials.UPDATED_FIELD_PAGES_REQUESTED_PREFIX, isDate: false ],
         [ field: "patronNote", notePrefix: NoteSpecials.UPDATED_FIELD_PATRON_NOTE_PREFIX, isDate: false ],
         // TODO temporary fix pending PR-1530
         [ field: "patronIdentifier", notePrefix: '', isDate: false ],
@@ -37,6 +39,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
         [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
         [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
+        [ field: "titleOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX, isDate: false ],
         [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ]
     ];
 
