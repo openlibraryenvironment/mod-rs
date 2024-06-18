@@ -29,6 +29,7 @@ import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService;
 public class ActionResponderSupplierCheckInToReshareService extends AbstractAction {
 
     private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out';
+    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
 
     private static final String REASON_SPOOFED = 'spoofed';
 
@@ -123,7 +124,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                      * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
                      * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block
                      */
-                    Map checkoutResult = hostLMSService.checkoutItem(request, vol.itemId, institutionalPatronIdValue);
+                    Map checkoutResult = hostLMSService.checkoutItem(request, vol.itemId, institutionalPatronIdValue)
 
                     // Otherwise, if the checkout succeeded or failed, set appropriately
                     if (checkoutResult.result == true) {
@@ -158,10 +159,29 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     }
                 }
 
+                // Cancel all not checked out requests
+                RequestVolume[] volumesToCancel = request.volumes.findAll { rv ->
+                    rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
+                }
+                if(volumesToCancel.size() > 0) {
+                    if (request.customIdentifiers) {
+                        Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                        if (customIdentifiersMap.requestUuid) {
+                            hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
+                        }
+                    }
+                    for (def vol : volumesToCancel) {
+                        vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
+                        vol.save(failOnError: true);
+                    }
+                }
+
                 // Save the earliest Date we found as the dueDate
                 request.dueDateFromLMS = stringDate;
                 request.parsedDueDateFromLMS = parsedDate;
                 request.save(flush:true, failOnError:true);
+
+
 
                 // At this point we should have all volumes checked out. Check that again
                 volumesNotCheckedIn = request.volumes.findAll { rv ->

@@ -854,6 +854,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   public Map cancelRequestItem(
           ISettings settings,
           String requestId,
+          String userId,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -868,7 +869,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             .setRequestId(requestId)
             .setToAgency(ncipConnectionDetails.ncipToAgency)
             .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-            .setRegistryId(ncipConnectionDetails.registryId);
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setUserId(userId)
 
     log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem request ${cancelRequestItem}");
     JSONObject response = client.send(requestItem);
