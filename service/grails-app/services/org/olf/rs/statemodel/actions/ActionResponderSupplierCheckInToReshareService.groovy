@@ -164,15 +164,18 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
                 }
                 if(volumesToCancel.size() > 0) {
+                    Map cancelResult = [result: true]
                     if (request.customIdentifiers) {
                         Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                         if (customIdentifiersMap.requestUuid) {
-                            hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
+                            cancelResult = hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
                         }
                     }
-                    for (def vol : volumesToCancel) {
-                        vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
-                        vol.save(failOnError: true);
+                    if (cancelResult.result == true) {
+                        for (def vol : volumesToCancel) {
+                            vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
+                            vol.save(failOnError: true);
+                        }
                     }
                 }
 
@@ -180,8 +183,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                 request.dueDateFromLMS = stringDate;
                 request.parsedDueDateFromLMS = parsedDate;
                 request.save(flush:true, failOnError:true);
-
-
 
                 // At this point we should have all volumes checked out. Check that again
                 volumesNotCheckedIn = request.volumes.findAll { rv ->
