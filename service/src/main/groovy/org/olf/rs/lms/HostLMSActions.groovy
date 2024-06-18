@@ -74,5 +74,5 @@ public interface HostLMSActions {
           INcipLogDetails ncipLogDetails
   );
 
-  public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails);
+  public Map cancelRequestItem(ISettings settings, String requestId, String userId, INcipLogDetails ncipLogDetails);
 }
