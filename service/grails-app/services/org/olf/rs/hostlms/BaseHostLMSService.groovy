@@ -865,7 +865,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
-    CancelRequestItem cancelRequestItem = new RequestItem()
+    CancelRequestItem cancelRequestItem = new CancelRequestItem()
             .setRequestId(requestId)
             .setToAgency(ncipConnectionDetails.ncipToAgency)
             .setFromAgency(ncipConnectionDetails.ncipFromAgency)
@@ -873,7 +873,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             .setUserId(userId)
 
     log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem request ${cancelRequestItem}");
-    JSONObject response = client.send(requestItem);
+    JSONObject response = client.send(cancelRequestItem);
     log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem response ${response}");
     protocolInformationToResult(response, ncipLogDetails);
 
