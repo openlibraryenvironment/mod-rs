@@ -164,7 +164,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
                 }
                 if(volumesToCancel.size() > 0) {
-                    Map cancelResult = [result: true]
+                    Map cancelResult = [result: false]
                     if (request.customIdentifiers) {
                         Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                         if (customIdentifiersMap.requestUuid) {
@@ -173,8 +173,11 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                     }
                     if (cancelResult.result == true) {
                         for (def vol : volumesToCancel) {
-                            vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
-                            vol.save(failOnError: true);
+                            if (vol.itemId == cancelResult.itemId) {
+                                vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
+                                vol.save(failOnError: true)
+                                break
+                            }
                         }
                     }
                 }

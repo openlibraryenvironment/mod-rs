@@ -880,6 +880,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if ( response.has('problems') ) {
       result.result = false;
       result.problems = response.get('problems');
+    } else {
+      result.itemId = response.opt("itemId")
     }
 
     return result;
