@@ -36,18 +36,6 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
             Map resultMap = [:]
             try {
                 resultMap = hostLMSService.checkInRequestVolumes(request)
-                if (resultMap.checkInList) {
-                    Map singleCheckInMap = resultMap.checkInList[0]
-                    if (singleCheckInMap.result && (singleCheckInMap.result.userUuid && singleCheckInMap.result.loanUuid)) {
-                        Map customIdentifiersMap = [:]
-                        if (request.customIdentifiers) {
-                            customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
-                        }
-                        customIdentifiersMap.put("loanUuid", singleCheckInMap.result.loanUuid)
-                        customIdentifiersMap.put("patronUuid", singleCheckInMap.result.userUuid)
-                        request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
-                    }
-                }
             } catch (Exception e) {
                 log.error("Error attempting NCIP CheckinItem for request {$request.id}: {$e}");
                 resultMap.result = false;
