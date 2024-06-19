@@ -33,9 +33,9 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 
         if (checkInOnReturn?.value != 'off') {
             log.debug("Attempting NCIP CheckInItem after setting item returned for volumes for request {$request?.id}");
-            Map resultMap = [:];
+            Map resultMap = [:]
             try {
-                resultMap = hostLMSService.checkInRequestVolumes(request);
+                resultMap = hostLMSService.checkInRequestVolumes(request)
                 if (resultMap.checkInList) {
                     Map singleCheckInMap = resultMap.checkInList[0]
                     if (singleCheckInMap.result && (singleCheckInMap.result.userUuid && singleCheckInMap.result.loanUuid)) {
