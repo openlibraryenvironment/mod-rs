@@ -29,6 +29,7 @@ import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService;
 public class ActionResponderSupplierCheckInToReshareService extends AbstractAction {
 
     private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out';
+    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
 
     private static final String REASON_SPOOFED = 'spoofed';
 
@@ -123,7 +124,7 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                      * In the case that host_lms == ManualHostLMSService we don't care, we're just spoofing a positive result,
                      * so we delegate responsibility for checking this to the hostLMSService itself, with errors arising in the 'problems' block
                      */
-                    Map checkoutResult = hostLMSService.checkoutItem(request, vol.itemId, institutionalPatronIdValue);
+                    Map checkoutResult = hostLMSService.checkoutItem(request, vol.itemId, institutionalPatronIdValue)
 
                     // Otherwise, if the checkout succeeded or failed, set appropriately
                     if (checkoutResult.result == true) {
@@ -155,6 +156,29 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractActi
                         }
                     } else {
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);
+                    }
+                }
+
+                // Cancel all not checked out requests
+                RequestVolume[] volumesToCancel = request.volumes.findAll { rv ->
+                    rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
+                }
+                if(volumesToCancel.size() > 0) {
+                    Map cancelResult = [result: false]
+                    if (request.customIdentifiers) {
+                        Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                        if (customIdentifiersMap.requestUuid) {
+                            cancelResult = hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
+                        }
+                    }
+                    if (cancelResult.result == true) {
+                        for (def vol : volumesToCancel) {
+                            if (vol.itemId == cancelResult.itemId) {
+                                vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
+                                vol.save(failOnError: true)
+                                break
+                            }
+                        }
                     }
                 }
 

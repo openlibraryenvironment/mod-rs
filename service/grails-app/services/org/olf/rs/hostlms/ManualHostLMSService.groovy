@@ -78,7 +78,7 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails) {
+  public Map cancelRequestItem(ISettings settings, String requestId, String userId, INcipLogDetails ncipLogDetails) {
     return [
       result: true,
       reason: 'spoofed'
