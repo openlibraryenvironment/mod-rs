@@ -116,7 +116,7 @@ public class StateModelData {
         StateModel.ensure(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, Status.PATRON_REQUEST_IDLE, null, null, null, digitalReturnableRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 5]]);
         StateModel.ensure(StateModel.MODEL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_OVERDUE, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, responderStates);
         StateModel.ensure(StateModel.MODEL_CDL_RESPONDER, null, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, Status.RESPONDER_AWAIT_DESEQUESTRATION, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, cdlResponderStates, [[ stateModel: StateModel.MODEL_RESPONDER, priority: 5 ]]);
-	}
+    }
 
 	public static void loadAll() {
 		(new StateModelData()).load();

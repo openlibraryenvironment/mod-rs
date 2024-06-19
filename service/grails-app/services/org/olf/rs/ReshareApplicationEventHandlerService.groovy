@@ -1,4 +1,7 @@
-package org.olf.rs;
+package org.olf.rs
+
+import groovy.json.JsonBuilder
+import org.apache.commons.lang3.ObjectUtils
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -39,6 +42,8 @@ import groovy.util.logging.Slf4j
 public class ReshareApplicationEventHandlerService {
 
   private static final int MAX_RETRIES = 10;
+
+    static List<String> preserveFields = ['supplierUniqueRecordId','title','author','subtitle','seriesTitle','edition','titleOfComponent','authorOfComponent','volume','issue','pagesRequested','estimatedNoPages','sponsor','informationSource']
 
   	EventNoImplementationService eventNoImplementationService;
     EventISO18626IncomingRequesterService eventISO18626IncomingRequesterService;
@@ -102,7 +107,16 @@ public class ReshareApplicationEventHandlerService {
 							// Get hold of the request
 							switch (eventBean.fetchRequestMethod()) {
 								case EventFetchRequestMethod.NEW:
-									request = new PatronRequest(eventData.bibliographicInfo);
+                                    def newParams = eventData.bibliographicInfo.subMap(preserveFields)
+                                    def customIdentifiersBody = [:]
+                                    EventMessageRequestIndService.mapBibliographicRecordId(eventData, customIdentifiersBody, newParams)
+                                    EventMessageRequestIndService.mapBibliographicItemId(eventData, newParams)
+
+                                    if (ObjectUtils.isNotEmpty(customIdentifiersBody)) {
+                                        request.customIdentifiers = new JsonBuilder(customIdentifiersBody).toPrettyString()
+                                    }
+
+									request = new PatronRequest(newParams)
 									break;
 
 								case EventFetchRequestMethod.PAYLOAD_ID:
@@ -197,7 +211,7 @@ public class ReshareApplicationEventHandlerService {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_REQUEST_MESSAGE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
-        log.debug("ReshareApplicationEventHandlerService::handleRequestMessage(${eventData})");
+        log.debug(ContextLogging.MESSAGE_ENTERING);
 
         // Just call event handler directly
         EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
@@ -375,7 +389,7 @@ public class ReshareApplicationEventHandlerService {
     } else {
       inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
-      inboundMessage.setAttachedAction(eventData.activeSection.action)
+      inboundMessage.setAttachedAction(eventData.action)
       inboundMessage.setMessageContent(note)
     }
 
@@ -431,7 +445,7 @@ public class ReshareApplicationEventHandlerService {
     return returnList.join(",");
   }
 
-	public Symbol resolveSymbol(String authority, String symbol) {
+	public static Symbol resolveSymbol(String authority, String symbol) {
 		Symbol result = null;
 	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
 	                                                   [authority:authority?.toUpperCase(), symbol:symbol?.toUpperCase()]);

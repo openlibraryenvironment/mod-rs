@@ -160,10 +160,10 @@ public class NonreturnablesStateModelData {
 
     private static Map nrRequesterISO18626Delivered = [
             code: 'requesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is Loaned',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
-            qualifier: ActionEventResultQualifier.QUALIFIER_DELIVERED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -463,8 +463,6 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
-
-
     private static Map[] resultLists = [
             nrRequesterNewPatronRequestList,
             nrRequesterPatronRequestValidatedList,
@@ -485,9 +483,7 @@ public class NonreturnablesStateModelData {
             nrRequesterMarkEndOfRotaReviewedList
     ];
 
-
     // Initialization methods
-
     public static void loadStatusData() {
         Status.ensure(Status.PATRON_REQUEST_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10001', true, false, false, null);
         Status.ensure(Status.RESPONDER_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10002', true, false, true, null);
@@ -550,10 +546,6 @@ public class NonreturnablesStateModelData {
         ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
                 StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED.capitalize(),
                 ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
-
-
-
-
     }
 
     public static void loadStateModelData() {
@@ -612,9 +604,6 @@ public class NonreturnablesStateModelData {
         //RES_COPY_AWAIT_PICKING
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
-
-
-
     }
 
     public static void loadAll() {
@@ -623,12 +612,5 @@ public class NonreturnablesStateModelData {
         loadActionEventData();
         loadStateModelData();
         loadAvailableActionData();
-
     }
-
-
-
-
-
-
 }

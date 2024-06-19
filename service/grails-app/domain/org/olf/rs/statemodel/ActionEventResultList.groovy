@@ -53,6 +53,27 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String DIGITAL_RETURNABLE_REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'digitalReturnableRequesterExpectsToSupplyISO18626';
     static public final String DIGITAL_RETURNABLE_REQUESTER_LOANED_DIGITALLY_ISO18626          = 'digitalReturnableRequesterLoanedDigitallyISO18626';
 
+    // SLNP requester event lists
+    static public final String SLNP_REQUESTER_CANCEL                    = 'slnpRequesterCancel';
+    static public final String SLNP_REQUESTER_RECEIVED                  = 'slnpRequesterReceived';
+    static public final String SLNP_REQUESTER_ABORTED                   = 'slnpRequesterAborted';
+    static public final String SLNP_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpRequesterISO18626StatusChange';
+    static public final String SLNP_REQUESTER_CHECKED_IN                = 'slnpRequesterCheckedIn';
+    static public final String SLNP_REQUESTER_SHIPPED_RETURN            = 'slnpRequesterShippedReturn';
+    static public final String SLNP_REQUESTER_MARK_ITEM_LOST            = 'slnpRequesterMarkItemLost';
+
+    // SLNP responder event lists
+    static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
+    static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
+    static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
+    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY                      = 'slnpResponderConditionalSupply';
+    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION        = 'slnpResponderConditionalSupplyNoTransition'
+    static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
+    static public final String SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE               = "slnpResponderSupplierCheckInReshare"
+    static public final String SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED                   = "slnpResponderSupplierMarkShipped"
+    static public final String SLNP_RESPONDER_CHECK_OUT_OF_RESHARE                    = "slnpResponderCheckOutOfReshare"
+    static public final String SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST                = 'slnpResponderNewPatronRequestIndList'
+
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
     static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';

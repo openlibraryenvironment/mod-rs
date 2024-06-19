@@ -39,6 +39,10 @@ public class Actions {
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
 
+	// SLNP Responder Actions
+	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
+	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
+
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
 	static public final String ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE      	 = "borrowerCheckOverride";
@@ -75,6 +79,11 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "nonreturnableRequesterCancel";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "nonreturnableRequesterCompleteRequest";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
+
+	// SLNP Requester Actions
+	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";
+	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED  = "slnpRequesterReceived";
+	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST      = "slnpMarkItemLost";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";

@@ -32,6 +32,7 @@ public class NamingAuthority {
 			ensureNamingAuthority("EXL");
 			ensureNamingAuthority("PALCI");
 			ensureNamingAuthority("CARDINAL");
+			ensureNamingAuthority("ZFL");
 		  
 		} catch ( Exception e ) {
 			log.error("Exception thrown while loading naming authorities", e);

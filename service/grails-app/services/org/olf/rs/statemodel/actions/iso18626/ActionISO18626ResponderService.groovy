@@ -13,7 +13,7 @@ public abstract class ActionISO18626ResponderService extends ActionISO18626Servi
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // All we do is deal with the note
-        processNote(request, parameters, parameters?.activeSection?.note, actionResultDetails);
+        processNote(request, parameters, parameters?.note, actionResultDetails);
 
         // return the action result details to the caller
         return(actionResultDetails);

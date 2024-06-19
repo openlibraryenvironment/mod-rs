@@ -1,7 +1,8 @@
 package org.olf.rs.hostlms;
 
 import org.olf.rs.circ.client.CirculationClient;
-import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.circ.client.NCIPClientWrapper
+import org.olf.rs.lms.ConnectionDetailsNCIP;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.settings.ISettings;
 
@@ -19,6 +20,21 @@ public class FolioHostLMSService extends BaseHostLMSService {
   @Override
   public boolean isNCIP2() {
     return true;
+  }
+
+  @Override
+  public String getRequestItemRequestType() {
+    return "Page";
+  }
+
+  @Override
+  public String getRequestItemRequestScopeType(ConnectionDetailsNCIP ncipConnectionDetails) {
+    return ncipConnectionDetails.useTitle ? "Title" : "Item"
+  }
+
+  @Override
+  public String getRequestItemPickupLocation(String pickupLocation) {
+    return pickupLocation;
   }
 
   /*

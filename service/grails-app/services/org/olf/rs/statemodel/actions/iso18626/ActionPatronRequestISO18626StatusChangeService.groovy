@@ -1,7 +1,8 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
-import org.olf.rs.iso18626.ReasonForMessage;
+import org.olf.rs.iso18626.ReasonForMessage
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 
@@ -28,7 +29,11 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
             // Only continue if successful
             if (actionResultDetails.result == ActionResult.SUCCESS) {
                 // Add an audit entry
-                actionResultDetails.auditMessage = 'Status Change message received';
+                actionResultDetails.auditMessage = 'Status Change message received'
+                if (actionResultDetails.qualifier.equalsIgnoreCase(ActionEventResultQualifier.QUALIFIER_CANCELLED) &&
+                        'ABORT'.equalsIgnoreCase(parameters.messageInfo?.note)) {
+                    actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_ABORTED
+                }
             }
         }
 

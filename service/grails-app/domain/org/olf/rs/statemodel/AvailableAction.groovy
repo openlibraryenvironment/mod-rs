@@ -37,6 +37,10 @@ class AvailableAction implements MultiTenant<AvailableAction> {
     /** Groovy script that decides if this action is available or not, the request can be referenced in the script as arguments.patronRequest */
     String isAvailableGroovy;
 
+    Boolean isPrimary;
+
+    Boolean primaryOnly;
+
     static belongsTo = [ model: StateModel ];
 
     static constraints = {
@@ -49,6 +53,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                actionBody (nullable: true, blank:false)
                resultList (nullable: true)
         isAvailableGroovy (nullable: true, blank: false)
+                isPrimary (nullable: true, blank: true)
+              primaryOnly (nullable: true, blank: true)
     }
 
     static mapping = {
@@ -63,6 +69,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                actionBody column : 'aa_action_body'
                resultList column : 'aa_result_list'
         isAvailableGroovy column : 'aa_is_available_groovy', length: 512
+                isPrimary column : "aa_is_primary"
+              primaryOnly column : "aa_primary_only"
     }
 
     public static AvailableAction ensure(
@@ -71,14 +79,16 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
-        String isAvailableGroovy = null
+        String isAvailableGroovy = null,
+        Boolean isPrimary = null,
+        Boolean primaryOnly = null
     ) {
 
         AvailableAction result = null;
         StateModel sm = StateModel.findByShortcode(model);
         if (sm) {
             // Excellent we have found the state model
-            result = ensure(sm, state, action, triggerType, resultListCode, isAvailableGroovy);
+            result = ensure(sm, state, action, triggerType, resultListCode, isAvailableGroovy, isPrimary, primaryOnly);
         }
         return(result);
     }
@@ -89,7 +99,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
         String action,
         String triggerType,
         String resultListCode = null,
-        String isAvailableGroovy = null
+        String isAvailableGroovy = null,
+        Boolean isPrimary = null,
+        Boolean primaryOnly = null
     ) {
         AvailableAction result = null;
         if (sm) {
@@ -101,7 +113,9 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                     result = new AvailableAction(
                         model: sm,
                         fromState: s,
-                        actionCode: action
+                        actionCode: action,
+                        isPrimary: isPrimary,
+                        primaryOnly: primaryOnly
                     );
                 }
 
@@ -110,6 +124,8 @@ class AvailableAction implements MultiTenant<AvailableAction> {
                 result.triggerType = triggerType;
                 result.resultList = ActionEventResultList.lookup(resultListCode);
                 result.isAvailableGroovy = isAvailableGroovy;
+                result.isPrimary = isPrimary;
+                result.primaryOnly = primaryOnly;
                 result.save(flush:true, failOnError:true);
             }
         }

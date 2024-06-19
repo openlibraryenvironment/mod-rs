@@ -1,5 +1,6 @@
-package org.olf.rs.referenceData;
+package org.olf.rs.referenceData
 
+import org.olf.rs.constants.CustomIdentifiersScheme;
 import org.olf.rs.constants.Directory;
 
 import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
@@ -51,7 +52,9 @@ public class RefdataValueData {
     public static final String VOCABULARY_YES_NO                           = 'YesNo';
     public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
     public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
+    public static final String VOCABULARY_NCIP_TITLE                       = "NCIPRequestItemUseTitle"
     public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
+    public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME        = 'customIdentifiersScheme';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -61,6 +64,7 @@ public class RefdataValueData {
     public static final String AUTO_RESPONDER_OFF                          = OFF;
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY = 'On: will supply and cannot supply';
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY          = 'On: will supply only';
+    public static final String AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY      = 'On: loaned and cannot supply';
 
     // Auto Responder Cancel
     public static final String AUTO_RESPONDER_CANCEL_OFF = OFF;
@@ -183,6 +187,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_NO);
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_BARCODE, NCIP_BARCODE_YES);
 
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_NO);
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_YES);
+
 
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');
@@ -230,6 +237,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY);
 
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_ON);
@@ -311,11 +319,15 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
 
+            // ISO18626 Custom options for - Custom identifiers schemes
+            RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
+
             // This looks slightly odd, but rather than litter this file with an ever growing list of
             // random delete statements, if you wish to delete
             // deprecated refdata values, add a new line to the array here consisting of [ "VALUE", "CATEGORY" ]
             [
-                [ 'sirsi', 'HostLMSIntegrationAdapter' ]
+                [ 'sirsi', 'HostLMSIntegrationAdapter' ],
+                [ 'on:_auto_loan', 'AutoResponder']
             ].each { r ->
                 log.warn("Remove refdata value : ${r}");
                 try {

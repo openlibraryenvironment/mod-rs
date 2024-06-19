@@ -508,7 +508,6 @@ public class StatusService {
     public StateModel getStateModel(PatronRequest request) {
         String settingsKey;
         String stateModelCode;
-
         if (request.isRequester) {
             if (request.serviceType?.value == 'copy') {
                 stateModelCode = StateModel.MODEL_NR_REQUESTER;

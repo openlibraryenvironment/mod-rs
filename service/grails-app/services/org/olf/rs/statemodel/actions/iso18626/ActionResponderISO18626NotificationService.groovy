@@ -45,8 +45,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
         /* If the message is preceded by #ReShareLoanConditionAgreeResponse#
          * then we'll need to check whether or not we need to change state.
          */
-        Map messageData = parameters.activeSection;
-        String note = messageData?.note;
+        String note = parameters?.note;
         if (note != null) {
             // Check for the reshare special of loan conditions agreed
             if (note.startsWith(NoteSpecials.AGREE_LOAN_CONDITION)) {
@@ -111,7 +110,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
         // If we were successful, call the base class
         if (actionResultDetails.result == ActionResult.SUCCESS) {
             // We call process note now as we may have manipulated the note
-            // Unfortunately we cannot just replace the note field on parameters.activeSection
+            // Unfortunately we cannot just replace the note field on parameters
             actionResultDetails = processNote(request, parameters, note, actionResultDetails);
         }
 

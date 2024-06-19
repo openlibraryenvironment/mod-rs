@@ -162,10 +162,9 @@ dependencies {
   }
 
   // NCIP deps
-  implementation 'org.olf.rs:lib-ncip-client:0.23.8'
+  implementation 'org.olf.rs:lib-ncip-client:0.23.15'
   implementation 'com.github.jknack:handlebars:4.2.0'
   implementation 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
-
   implementation 'org.apache.commons:commons-collections4:4.4'
   implementation 'org.jsoup:jsoup:1.10.2'
   implementation 'org.json:json:20190722'
@@ -177,7 +176,6 @@ dependencies {
   implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
   implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
   implementation 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
-
 
   // Domain model for directory
   implementation 'org.scala-saddle:google-rfc-2445:20110304'
@@ -215,6 +213,9 @@ dependencies {
 
   // For the uri builder
   implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+
+  // Iso java classes
+  implementation 'org.olf.rs.iso18626:iso18626-client:1.2'
 }
 
 bootRun {
@@ -364,3 +365,8 @@ tasks.withType(Test) {
   systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
   systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
 }
+
+springBoot {
+  mainClass = 'mod.rs.Application'
+}
+

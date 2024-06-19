@@ -92,7 +92,7 @@ public class ActionEventResultData {
         description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
         result: true,
         status: Status.PATRON_REQUEST_SHIPPED,
-        qualifier: 'Loaned',
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
         saveRestoreState: null,
         updateRotaLocation: true,
         nextActionEvent: null
@@ -1681,10 +1681,6 @@ public class ActionEventResultData {
             responderShippedReturnISO18626
     ];
 
-    public static void load() {
-        load(allResultLists);
-    }
-
 	public static void load(Map[] resultLists) {
 		log.info("Adding action and event result lists to the database");
 
@@ -1722,6 +1718,6 @@ public class ActionEventResultData {
 	}
 
 	public static void loadAll() {
-		(new ActionEventResultData()).load();
+		(new ActionEventResultData()).load(allResultLists);
 	}
 }

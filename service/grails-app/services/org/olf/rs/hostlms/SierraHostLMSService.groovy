@@ -2,7 +2,8 @@ package org.olf.rs.hostlms
 
 import org.olf.rs.SettingsService;
 import org.olf.rs.circ.client.CirculationClient;
-import org.olf.rs.circ.client.NCIPClientWrapper;
+import org.olf.rs.circ.client.NCIPClientWrapper
+import org.olf.rs.lms.ConnectionDetailsNCIP;
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.settings.ISettings;
@@ -61,12 +62,12 @@ public class SierraHostLMSService extends BaseHostLMSService {
   }
 
   @Override
-  public String getRequestItemRequestScopeType() {
+  public String getRequestItemRequestScopeType(ConnectionDetailsNCIP ncipConnectionDetails) {
     return "Title";
   }
 
   @Override
-  public String getRequestItemPickupLocation() {
+  public String getRequestItemPickupLocation(String defaultPickupLocation) {
 
     String pickupLocation = settingsService.getSettingValue(SettingsData.SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION);
 

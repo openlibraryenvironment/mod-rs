@@ -1,4 +1,6 @@
-package org.olf.rs;
+package org.olf.rs
+
+import org.olf.rs.statemodel.StateModel;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -228,19 +230,21 @@ public class ReshareActionService {
         Map retryEventData = null
     ) {
         boolean result = false;
+        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode);
 
         Long rotaPosition = pr.rotaPosition;
         // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
-        if (pr.rota.isEmpty()) {
+        if (!isSlnpModel && pr.rota.isEmpty()) {
             log.error('sendRequestingAgencyMessage has been given an empty rota');
-        } else if (rotaPosition == null) {
+        } else if (!isSlnpModel && rotaPosition == null) {
             log.error('sendRequestingAgencyMessage could not find current rota postition');
-        } else if (pr.rota.empty()) {
+        } else if (!isSlnpModel && pr.rota.empty()) {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
 
             Map eventData = retryEventData;
-            Map symbols = requestingAgencyMessageSymbol(pr);
+            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.supplyingInstitutionSymbol] :
+                    requestingAgencyMessageSymbol(pr);
 
             // If we have not been supplied with the event data, we need to generate it
             if (eventData == null) {
@@ -313,6 +317,12 @@ public class ReshareActionService {
                 auditEntry(request, request.state, request.state, 'Protocol error interpreting response', sendResult.response);
                 // Should we set the status to error as it now requires manual intervention ?
                 break;
+
+            case ProtocolResultStatus.ValidationError:
+                log.error('Encountered a protocol error for request: ' + request.id)
+                setNetworkStatus(request, NetworkStatus.Error, eventData, false)
+                auditEntry(request, request.state, request.state, sendResult.response, null)
+                break
         }
 
         return(result);
@@ -397,7 +407,7 @@ public class ReshareActionService {
         String reasonForMessage = ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE;
 
         // Only the first response can be a RequestResponse
-        if (!request.sentISO18626RequestResponse) {
+        if (!request.sentISO18626RequestResponse && request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER) {
             // it has not previously been sent, so send the RequestResponse as the reason for the message
             reasonForMessage = ReasonForMessage.MESSAGE_REASON_REQUEST_RESPONSE;
 
@@ -414,14 +424,15 @@ public class ReshareActionService {
         PatronRequest pr,
         String status,
         EventResultDetails eventResultDetails,
-        String note = null
+        String note = null,
+        boolean appendSequence = true
     ) {
         Map params = [:]
         if (note) {
             params = [note: note]
         }
 
-        sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, status, params, eventResultDetails);
+        sendSupplyingAgencyMessage(pr, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, status, params, eventResultDetails, null, appendSequence);
     }
 
     // see
@@ -436,7 +447,8 @@ public class ReshareActionService {
         String status,
         Map messageParams,
         EventResultDetails eventResultDetails,
-        Map retryEventData = null
+        Map retryEventData = null,
+        boolean appendSequence = true
     ) {
 
         log.debug('sendResponse(....)');
@@ -450,7 +462,7 @@ public class ReshareActionService {
 
             // If it is not a retry we need to generate the message
             if (supplyingMessageRequest == null) {
-                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams);
+                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams, appendSequence);
                 eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
             }
 

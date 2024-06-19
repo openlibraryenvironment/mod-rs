@@ -70,7 +70,7 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode,
+  public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode, String pickupLocation,
       INcipLogDetails ncipLogDetails) {
     return [
       result: true,
@@ -78,7 +78,7 @@ public class ManualHostLMSService implements HostLMSActions {
     ];
   }
 
-  public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails) {
+  public Map cancelRequestItem(ISettings settings, String requestId, String userId, INcipLogDetails ncipLogDetails) {
     return [
       result: true,
       reason: 'spoofed'

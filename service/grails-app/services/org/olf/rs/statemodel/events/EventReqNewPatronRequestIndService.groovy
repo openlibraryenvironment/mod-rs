@@ -1,28 +1,12 @@
 package org.olf.rs.statemodel.events
 
-import org.olf.rs.NewRequestService;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.PatronNoticeService;
-import org.olf.rs.PatronRequest;
-import org.olf.rs.ProtocolReferenceDataValue;
-import org.olf.rs.ReshareActionService;
-import org.olf.rs.SettingsService;
-import org.olf.rs.SharedIndexService;
-import org.olf.rs.patronRequest.PickupLocationService;
-import org.olf.rs.statemodel.AbstractEvent;
-import org.olf.rs.statemodel.ActionEventResultQualifier;
-import org.olf.rs.statemodel.EventFetchRequestMethod;
-import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.Events;
-import org.olf.rs.referenceData.RefdataValueData;
-import com.k_int.web.toolkit.refdata.RefdataValue;
-
-import groovy.json.JsonSlurper;
-
+import com.k_int.web.toolkit.refdata.RefdataValue
+import groovy.json.JsonSlurper
+import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.*
+import org.olf.rs.patronRequest.PickupLocationService
+import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.statemodel.*
 /**
  * This event service takes a new requester patron request and validates it and tries to determine the rota
  * @author Chas
@@ -33,7 +17,6 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
-    SettingsService settingsService;
     NewRequestService newRequestService;
 
     @Override
@@ -69,7 +52,9 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         }
 
         // If we were supplied a pickup location, attempt to resolve it
-        if (!request.resolvedPickupLocation) pickupLocationService.check(request);
+        if (!request.resolvedPickupLocation) {
+            pickupLocationService.check(request)
+        }
 
         if (request.requestingInstitutionSymbol != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol

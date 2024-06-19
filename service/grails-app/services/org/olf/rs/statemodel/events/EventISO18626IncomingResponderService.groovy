@@ -33,7 +33,7 @@ public class EventISO18626IncomingResponderService extends EventISO18626Incoming
 
     @Override
     public String getActionToPerform(Map eventData) {
-        return(eventData.activeSection?.action);
+        return(eventData?.action);
     }
 
     @Override

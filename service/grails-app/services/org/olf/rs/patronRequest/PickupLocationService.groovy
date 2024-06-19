@@ -43,4 +43,14 @@ public class PickupLocationService {
             log.warn("No request passed into PickupLocationService.check");
         }
     }
+
+    void checkByName(PatronRequest request) {
+        if (request.pickupLocation) {
+            DirectoryEntry pickupLoc = DirectoryEntry.find("from DirectoryEntry de where de.name=:name and de.status.value='managed'", [name: request.pickupLocation])
+            if (pickupLoc) {
+                request.resolvedPickupLocation = pickupLoc
+                request.pickupLocationSlug = pickupLoc.slug
+            }
+        }
+    }
 }

@@ -1,5 +1,7 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
@@ -31,9 +33,9 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
 
         if (checkInOnReturn?.value != 'off') {
             log.debug("Attempting NCIP CheckInItem after setting item returned for volumes for request {$request?.id}");
-            Map resultMap = [:];
+            Map resultMap = [:]
             try {
-                resultMap = hostLMSService.checkInRequestVolumes(request);
+                resultMap = hostLMSService.checkInRequestVolumes(request)
             } catch (Exception e) {
                 log.error("Error attempting NCIP CheckinItem for request {$request.id}: {$e}");
                 resultMap.result = false;

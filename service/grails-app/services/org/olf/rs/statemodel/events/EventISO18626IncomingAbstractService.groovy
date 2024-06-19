@@ -1,12 +1,14 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.ActionService
 import org.olf.rs.statemodel.EventFetchRequestMethod;
-import org.olf.rs.statemodel.EventResultDetails;
+import org.olf.rs.statemodel.EventResultDetails
+import org.olf.rs.statemodel.StateModel;
 
 /**
  * Contains the base methods and definitions required to interpret the 18626 protocol
@@ -17,6 +19,8 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
 
     public static final String STATUS_ERROR = 'ERROR';
     public static final String STATUS_OK    = 'OK';
+
+    public static final String SERVICE_REQUEST_TYPE_RETRY = 'Retry'
 
     // A couple of additional status we use internally when we get an HTTP OK response
     public static final String STATUS_PROTOCOL_ERROR = 'PROTOCOL_ERROR';
@@ -33,7 +37,8 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
     public static final String ERROR_TYPE_NO_XML_SUPPLIED                     = 'NoXMLSupplied';
     public static final String ERROR_TYPE_UNABLE_TO_FIND_REQUEST              = 'UnableToFindRequest';
     public static final String ERROR_TYPE_UNABLE_TO_PROCESS                   = 'UnableToProcess';
-
+    public static final String ERROR_TYPE_REQUEST_ID_ALREADY_EXISTS           = 'RequestIdAlreadyExists';
+    public static final String ERROR_TYPE_INVALID_PATRON_REQUEST              = 'InvalidPatronRequest';
 
     // The actions, I assume these are only applicable for receiving by the responder
     public static final String ACTION_CANCEL          = 'Cancel';
@@ -139,8 +144,18 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
+                        if ((request.supplyingInstitutionSymbol == null ||
+                                request.getSupplyingInstitutionSymbol().contains("null") ||
+                                    request.getSupplyingInstitutionSymbol() == ":") &&
+                                        eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                            request.resolvedSupplier = resolvedSupplyingAgency
+                            request.setSupplyingInstitutionSymbol(
+                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}")
+                        }
                         // We need to determine if this request is for the current rota position
-                        if (isForCurrentRotaLocation(eventData, request)) {
+                        if (isForCurrentRotaLocation(eventData, request) || StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode) {
                             // We now need to execute the action for the message
                             String actionToPerform = getActionToPerform(eventData);
 

@@ -471,54 +471,54 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   //  "privileges":[{"value":"ACTIVE","key":"STATUS"},{"value":"STA","key":"PROFILE"}],
   //  "electronicAddresses":[{"value":"Stacey.Conrad@millersville.edu","key":"mailto"},{"value":"7178715869","key":"tel"}],
   //  "userId":"M00069192"}
-  protected void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
-    if (response) {
-      protocolInformationToResult(response, ncipLogDetails);
-      if (!response.has('problems')) {
-        JSONArray priv = response.getJSONArray('privileges')
-        // Return a status of BLOCKED if the user is blocked, else OK for now
-        result.status = (priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
+    protected void processLookupUserResponse(Map result, JSONObject response, INcipLogDetails ncipLogDetails) {
+      if (response) {
+        protocolInformationToResult(response, ncipLogDetails);
+        if (!response.has('problems')) {
+          JSONArray priv = response.getJSONArray('privileges')
+          // Return a status of BLOCKED if the user is blocked, else OK for now
+          result.status = (priv.find { it.key.equalsIgnoreCase('STATUS') })?.value?.equalsIgnoreCase('BLOCKED') ? 'BLOCKED' : 'OK'
 
-        // lib-ncip-client constructs the privileges array from UserPrivilege elements
-        // mapping AgencyUserPrivilegeType to the 'key' property and UserPrivilegeStatusType
-        // to 'value'. Unfortunately, usage of these elements varies between implementations,
-        // sometimes even of the same ILS.
-        //
-        // Some implementations fit this key/value pattern and store the user profile name as
-        // UserPrivilegeStatusType where AgencyUserPrivilegeType is 'PROFILE'
-        result.userProfile = (priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
+          // lib-ncip-client constructs the privileges array from UserPrivilege elements
+          // mapping AgencyUserPrivilegeType to the 'key' property and UserPrivilegeStatusType
+          // to 'value'. Unfortunately, usage of these elements varies between implementations,
+          // sometimes even of the same ILS.
+          //
+          // Some implementations fit this key/value pattern and store the user profile name as
+          // UserPrivilegeStatusType where AgencyUserPrivilegeType is 'PROFILE'
+          result.userProfile = (priv.find { it.key.equalsIgnoreCase('PROFILE') })?.value
 
-        // However others have the profile name in AgencyUserPrivilegeType instead and
-        // indicate whether that membership is active in UserPrivilegeStatusType
-        if (!result?.userProfile) {
-          result.userProfile = (priv.find { it.value instanceof String && ['active', 'ok'].contains(it.value.toLowerCase())})?.key
-        }
-
-        // Others don't return a status type at all when doing so, which lib-ncip-client
-        // currently maps as an empty string
-        if (!result?.userProfile && priv.size() == 1) {
-          def onlyPriv = priv.get(0)
-          if (onlyPriv?.key && !onlyPriv?.value) {
-            result.userProfile = onlyPriv.key
+          // However others have the profile name in AgencyUserPrivilegeType instead and
+          // indicate whether that membership is active in UserPrivilegeStatusType
+          if (!result?.userProfile) {
+              result.userProfile = (priv.find { it.value instanceof String && ['active', 'ok'].contains(it.value.toLowerCase())})?.key
           }
-        }
 
-        result.result = true
-        result.userid = response.opt('userId') ?: response.opt('userid')
-        result.givenName = response.opt('firstName')
-        result.surname = response.opt('lastName')
-        if (response.has('electronicAddresses')) {
-          JSONArray ea = response.getJSONArray('electronicAddresses')
-          // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
-          result.email = (ea.find { it.key == 'emailAddress' })?.value ?: (ea.find { it.key == 'mailTo' })?.value
-          result.tel = (ea.find { it.key == 'tel' })?.value
-        }
+          // Others don't return a status type at all when doing so, which lib-ncip-client
+          // currently maps as an empty string
+          if (!result?.userProfile && priv.size() == 1) {
+              def onlyPriv = priv.get(0)
+              if (onlyPriv?.key && !onlyPriv?.value) {
+                  result.userProfile = onlyPriv.key
+              }
+          }
+
+          result.result = true
+          result.userid = response.opt('userId') ?: response.opt('userid')
+          result.givenName = response.opt('firstName')
+          result.surname = response.opt('lastName')
+          if (response.has('electronicAddresses')) {
+              JSONArray ea = response.getJSONArray('electronicAddresses')
+              // We've had emails come from a key "emailAddress" AND "mailTo" in the past, check in emailAddress first and then mailTo as backup
+              result.email = (ea.find { it.key == 'emailAddress' })?.value ?: (ea.find { it.key == 'mailTo' })?.value
+              result.tel = (ea.find { it.key == 'tel' })?.value
+          }
       } else {
-        result.problems = response.get('problems')
-        result.result = false
+          result.problems = response.get('problems')
+          result.result = false
       }
+        }
     }
-  }
 
   private void protocolInformationToResult(JSONObject response, INcipLogDetails ncipLogDetails) {
     try {
@@ -667,6 +667,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.dueDate = response.opt('dueDate');
         result.userId = response.opt('userId')
         result.itemId = response.opt('itemId')
+        result.loanUuid = response.opt('loanUuid')
       }
     } else {
       result.problems = 'No institutional patron ID available'
@@ -730,6 +731,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           if ( response.has('problems') ) {
             result.result = false;
             result.problems = response.get('problems')
+          } else {
+            result.requestUuid = response.opt("requestId")
           }
           break;
 
@@ -816,23 +819,23 @@ public abstract class BaseHostLMSService implements HostLMSActions {
 
   //The code for the bibliographic id for request item (if used). Override for specific LMS requirements
   public String getRequestItemBibIdCode() {
-    return "SYSNUMBER";
+    return "SYSNUMBER"
   }
 
-  public String getRequestItemRequestScopeType() {
-    return "Bibliographic Item";
+  public String getRequestItemRequestScopeType(ConnectionDetailsNCIP ncipConnectionDetails) {
+    return "Bibliographic Item"
   }
 
-  public String getRequestItemPickupLocation() {
-    return null;
+  public String getRequestItemPickupLocation(String pickupLocation) {
+    return null
   }
 
   public String getRequestItemRequestType() {
-    return "Loan";
+    return "Loan"
   }
 
   public String filterRequestItemItemId(String itemId) {
-    return itemId;
+    return itemId
   }
 
   /**
@@ -847,6 +850,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           String requestId,
           String itemId,
           String borrowerBarcode,
+          String pickupLocation,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -854,11 +858,11 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         reason: 'ncip'
     ];
 
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     String bibliographicIdCode = getRequestItemBibIdCode();
-    String requestScopeType = getRequestItemRequestScopeType();
+    String requestScopeType = getRequestItemRequestScopeType(ncipConnectionDetails);
     String requestTypeString = getRequestItemRequestType();
     String bibliographicRecordId = filterRequestItemItemId(itemId);
-    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
     CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
 
     RequestItem requestItem = new RequestItem()
@@ -871,19 +875,23 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
       .setRegistryId(ncipConnectionDetails.registryId)
-      .setPickupLocation(getRequestItemPickupLocation());
+      .setPickupLocation(getRequestItemPickupLocation(pickupLocation))
 
-    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
-    JSONObject response = client.send(requestItem);
+    log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}")
+    JSONObject response = client.send(requestItem)
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem response ${response}")
-    protocolInformationToResult(response, ncipLogDetails);
+    protocolInformationToResult(response, ncipLogDetails)
 
-    if (response.has('problems') ) {
+    if (response.has('problems')) {
       result.result = false;
-      result.problems = response.get('problems');
+      result.problems = response.get('problems')
     } else {
-      result.itemId = response.opt("itemId");
-      result.requestId = response.opt("requestId");
+      result.itemId = response.opt("itemId")
+      result.requestId = response.opt("requestId")
+      result.barcode = response.opt("barcode")
+      result.callNumber = response.opt("callNumber")
+      result.location = response.opt("location")
+      result.userUuid = response.opt("userUuid")
     }
 
     return result;
@@ -892,6 +900,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
   public Map cancelRequestItem(
           ISettings settings,
           String requestId,
+          String userId,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -906,7 +915,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             .setRequestId(requestId)
             .setToAgency(ncipConnectionDetails.ncipToAgency)
             .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-            .setRegistryId(ncipConnectionDetails.registryId);
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setUserId(userId)
 
     log.debug("[${CurrentTenant.get()}] NCIP2 CancelRequestItem request ${cancelRequestItem}");
     JSONObject response = client.send(cancelRequestItem);
@@ -916,6 +926,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if ( response.has('problems') ) {
       result.result = false;
       result.problems = response.get('problems');
+    } else {
+      result.itemId = response.opt("itemId")
     }
 
     return result;

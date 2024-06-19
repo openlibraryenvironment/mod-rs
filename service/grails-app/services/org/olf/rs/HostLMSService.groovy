@@ -257,6 +257,7 @@ public class HostLMSService {
                 request.hrid,
                 bibliographicId,
                 patronId,
+                request.resolvedSupplier?.owner?.lmsLocationCode,
                 ncipLogDetails);
             protocolAuditService.save(request, ncipLogDetails);
         } else {
@@ -266,7 +267,7 @@ public class HostLMSService {
         return requestItemResult;
     }
 
-    public Map cancelRequestItem(PatronRequest request, String requestId) {
+    public Map cancelRequestItem(PatronRequest request, String requestId, String userId) {
         Map cancelRequestItemResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
@@ -274,6 +275,7 @@ public class HostLMSService {
             cancelRequestItemResult = getHostLMSActions().cancelRequestItem(
                     settingsService,
                     requestId,
+                    userId,
                     ncipLogDetails);
             protocolAuditService.save(request, ncipLogDetails);
         } else {

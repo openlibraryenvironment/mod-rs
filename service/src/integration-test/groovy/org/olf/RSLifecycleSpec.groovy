@@ -819,8 +819,6 @@ class RSLifecycleSpec extends TestBase {
             "RSInstOne"       | "RSInstThree"     | 7        | false             | "nrSupplierCannotSupply.json"       | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | "URL"          | "Copy"      | "{}"
             "RSInstOne"       | null              | 8        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null
             "RSInstOne"       | "RSInstThree"     | 8        | true              | "nrRequesterCancel.json"            | Status.PATRON_REQUEST_CANCELLED                   | Status.RESPONDER_CANCELLED                  | null               | null                  | null           | null        | "{}"
-
-
     }
 
     void "test Dynamic Groovy"() {

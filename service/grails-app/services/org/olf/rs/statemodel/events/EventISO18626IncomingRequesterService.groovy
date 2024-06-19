@@ -44,7 +44,7 @@ public class EventISO18626IncomingRequesterService extends EventISO18626Incoming
 
     @Override
     public Map createResponseData(Map eventData, boolean success, String errorType, Object errorValue) {
-        Map data = responseData(eventData, 'REQUESTING_AGENCY_MESSAGE', success, errorType, errorValue);
+        Map data = responseData(eventData, 'SUPPLYING_AGENCY_MESSAGE', success, errorType, errorValue);
         data.reasonForMessage = getActionToPerform(eventData);
         return(data);
     }

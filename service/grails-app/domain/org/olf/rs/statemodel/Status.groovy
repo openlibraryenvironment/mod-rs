@@ -65,6 +65,27 @@ class Status implements MultiTenant<Status> {
   public static final String RESPONDER_LOANED_DIGITALLY         = "RES_LOANED_DIGITALLY";
   public static final String RESPONDER_AWAIT_DESEQUESTRATION    = "RES_AWAIT_DESEQUESTRATION";
 
+  // SLNP Requester states
+  public static final String SLNP_REQUESTER_IDLE                      = "SLNP_REQ_IDLE";
+  public static final String SLNP_REQUESTER_CANCELLED                 = "SLNP_REQ_CANCELLED";
+  public static final String SLNP_REQUESTER_ABORTED                   = "SLNP_REQ_ABORTED";
+  public static final String SLNP_REQUESTER_SHIPPED                   = "SLNP_REQ_SHIPPED";
+  public static final String SLNP_REQUESTER_CHECKED_IN                = "SLNP_REQ_CHECKED_IN";
+  public static final String SLNP_REQUESTER_AWAITING_RETURN_SHIPPING  = "SLNP_REQ_AWAITING_RETURN_SHIPPING";
+  public static final String SLNP_REQUESTER_COMPLETE                  = "SLNP_REQ_COMPLETE";
+  public static final String SLNP_REQUESTER_ITEM_LOST                 = "SLNP_REQ_ITEM_LOST";
+  public static final String SLNP_REQUESTER_PATRON_INVALID            = "SLNP_REQ_PATRON_INVALID";
+
+  // SLNP Responder states
+  public static final String SLNP_RESPONDER_IDLE                 = "SLNP_RES_IDLE";
+  public static final String SLNP_RESPONDER_UNFILLED             = "SLNP_RES_UNFILLED";
+  public static final String SLNP_RESPONDER_ABORTED              = "SLNP_RES_ABORTED";
+  public static final String SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  = "SLNP_RES_NEW_AWAIT_PULL_SLIP";
+  public static final String SLNP_RESPONDER_AWAIT_PICKING        = "SLNP_RES_AWAIT_PICKING";
+  public static final String SLNP_RESPONDER_AWAIT_SHIP           = "SLNP_RES_AWAIT_SHIP";
+  public static final String SLNP_RESPONDER_ITEM_SHIPPED         = "SLNP_RES_ITEM_SHIPPED";
+  public static final String SLNP_RESPONDER_COMPLETE             = "SLNP_RES_COMPLETE";
+
   // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database
   public static final String RESPONDER_AWAIT_PROXY_BORROWER       = "RES_AWAIT_PROXY_BORROWER";

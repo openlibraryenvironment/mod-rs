@@ -249,6 +249,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** If we create an external hold for this request, store the request id returned */
   String externalHoldRequestId;
 
+  /** JSON object containing custom identifiers */
+  String customIdentifiers
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed', 'validActions'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -394,6 +397,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     succeededBy (nullable: true)
 
     externalHoldRequestId (nullable: true)
+    customIdentifiers (nullable: true)
   }
 
   static mapping = {
@@ -522,6 +526,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     volumes cascade: 'all-delete-orphan'
 
     batches column : 'bpr_patron_request_id', joinTable : 'batch_patron_request'
+
+    customIdentifiers column : 'pr_custom_identifiers'
   }
 
   /**

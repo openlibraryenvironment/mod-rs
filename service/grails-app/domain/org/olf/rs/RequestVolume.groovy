@@ -41,7 +41,10 @@ class RequestVolume implements MultiTenant<RequestVolume> {
 
     'Awaiting temporary item creation', // Automatic
     'Temporary item created in host LMS', // Requires NCIP call
-    'Temporary item creation (no integration)' // NCIP off -- deal with manually
+    'Temporary item creation (no integration)', // NCIP off -- deal with manually
+
+    'Requested from the ILS', // Volumes added after NCIP RequestItem call
+    'ILS request cancelled' // Checkout different item and this volume is cancelled
   ])
   RefdataValue status
 

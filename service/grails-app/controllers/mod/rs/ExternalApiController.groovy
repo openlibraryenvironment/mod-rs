@@ -16,7 +16,9 @@ import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
+import org.olf.rs.statemodel.events.EventMessageRequestIndService
+import org.xml.sax.SAXException;
 
 /**
  * External Read-Only APIs for resource sharing network connectivity
@@ -111,15 +113,16 @@ class ExternalApiController {
           recipient = getSymbolFor(mr.header.supplyingAgencyId)
           log.debug("incoming request message for ${recipient}");
 
-          def req_result = reshareApplicationEventHandlerService.handleRequestMessage(mr);
+          Map newMap = EventMessageRequestIndService.createNewCustomIdentifiers(request, mr)
+
+          def req_result = reshareApplicationEventHandlerService.handleRequestMessage(newMap);
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.supplyingAgencyMessage != null ) {
 
@@ -134,11 +137,10 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else if ( iso18626_msg.requestingAgencyMessage != null ) {
 
@@ -153,11 +155,10 @@ class ExternalApiController {
           log.debug("result of req_request ${req_result}");
 
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
-          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage, false)
+          String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-          // render( contentType:"text/xml" ) { confirmationMessage }
         }
         else {
           render(status: 400, text: 'The sent request is not valid')
@@ -167,6 +168,8 @@ class ExternalApiController {
         log.error("NO XML Supplied in request. Unable to proceed");
         render(status: 400, text: 'The sent request is not valid')
       }
+    } catch (SAXException e){
+      return render(status: 400, text: "Response validation failed: ${e.message}")
     }
     catch ( Exception e ) {
       log.error("Exception receiving ISO message",e);
@@ -183,11 +186,11 @@ class ExternalApiController {
   private String getSymbolFor(path) {
 
     String result = null;
-    if ( path.agencyIdType != null && path.agencyIdValue != null ) {
+    if ( path?.agencyIdType != null && path?.agencyIdValue != null ) { // supplyingAgencyId is missing in request so we need it null safe
       result = "${path.agencyIdType.toString()}:${path.agencyIdValue.toString()}".toString()
     }
     else {
-      log.error("Missing agency id type or value");
+      log.warn("Missing agency id type or value");
     }
     log.debug("Returning symbol : ${result}");
     return result;

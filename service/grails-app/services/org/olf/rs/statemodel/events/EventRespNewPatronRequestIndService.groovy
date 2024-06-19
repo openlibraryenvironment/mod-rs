@@ -1,24 +1,12 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
-import org.olf.rs.constants.Directory;
-import org.olf.rs.DirectoryEntryService;
-import org.olf.rs.HostLMSService;
-import org.olf.rs.PatronRequest;
-import org.olf.rs.ProtocolType;
-import org.olf.rs.ReshareActionService;
-import org.olf.rs.SettingsService;
-import org.olf.rs.SharedIndexService;
-import org.olf.rs.lms.ItemLocation;
-import org.olf.rs.referenceData.SettingsData;
-import org.olf.rs.statemodel.AbstractEvent;
-import org.olf.rs.statemodel.ActionEventResultQualifier;
-import org.olf.rs.statemodel.EventFetchRequestMethod;
-import org.olf.rs.statemodel.EventResultDetails;
-import org.olf.rs.statemodel.Events;
-
-import com.k_int.web.toolkit.settings.AppSetting;
-import com.k_int.web.toolkit.custprops.CustomProperty;
-
+import com.k_int.web.toolkit.custprops.CustomProperty
+import com.k_int.web.toolkit.settings.AppSetting
+import org.olf.rs.*
+import org.olf.rs.constants.Directory
+import org.olf.rs.lms.ItemLocation
+import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.*
 /**
  * This event service takes a new responder patron request and attempts to locate the item if enabled
  * @author Chas

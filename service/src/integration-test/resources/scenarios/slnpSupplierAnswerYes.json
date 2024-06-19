@@ -1,0 +1,9 @@
+{
+    "action": "slnpRespondYes",
+    "actionParams": {
+        "callnumber": "call number",
+        "pickLocation": "location",
+        "pickShelvingLocation": "shelving location",
+        "note": "Notes"
+    }
+}
