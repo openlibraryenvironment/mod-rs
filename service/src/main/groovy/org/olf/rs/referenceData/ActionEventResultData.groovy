@@ -901,7 +901,7 @@ public class ActionEventResultData {
         code: 'responderNewPatronRequestIndOKRequestItem',
         description: 'Event triggered by a new incoming request, the item has been located and we are configured to use request item',
         result: true,
-        status: Status.RESPONDER_AWAIT_PICKING,
+        status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
         qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM,
         saveRestoreState: null,
         nextActionEvent: null
