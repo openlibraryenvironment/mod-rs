@@ -3,7 +3,8 @@ package org.olf.rs.statemodel.actions
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper;
 import org.olf.rs.HostLMSService;
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
+import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -44,6 +45,18 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
                 log.debug("Successfully checked in volumes for request {$request.id}");
             } else {
                 log.debug("Failed to check in volumes for request {$request.id}");
+            }
+            try {
+                for(RequestVolume vol : request.volumes.findAll()) {
+                    resultMap = hostLMSService.deleteItem(request, vol.itemId)
+                    if (resultMap.result) {
+                        log.debug("Successfully delete request item {$vol.itemId}")
+                    } else {
+                        log.debug("Failed to delete request item {$vol.itemId}")
+                    }
+                }
+            } catch (Exception e){
+                log.error("Failed to delete volumes items for request {$request.id}: {$e}")
             }
         } else {
             log.debug("NOT Attempting NCIP CheckInItem after setting item returned for volumes for request {$request?.id}");

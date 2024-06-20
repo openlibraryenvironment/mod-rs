@@ -75,4 +75,6 @@ public interface HostLMSActions {
   );
 
   public Map cancelRequestItem(ISettings settings, String requestId, String userId, INcipLogDetails ncipLogDetails);
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails)
 }
