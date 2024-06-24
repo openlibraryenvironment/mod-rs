@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mod-authtoken-signing-key
+  namespace: reshare
+type: Opaque
+stringData:
+  SIGNING_KEY: "892bner32o89cf89n"
+

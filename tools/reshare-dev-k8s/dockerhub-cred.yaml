@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: ***REMOVED***
+kind: Secret
+metadata:
+  name: dockerhub-cred
+  namespace: reshare
+type: kubernetes.io/dockerconfigjson

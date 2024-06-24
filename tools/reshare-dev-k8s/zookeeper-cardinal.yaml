@@ -1,0 +1,99 @@
+---
+# zookeeper pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reshare-zookeeper-cardinal-pv-claim
+  namespace: reshare
+  labels:
+    app: reshare-zookeeper-cardinal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# zookeeper log
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reshare-zookeeper-cardinal-pv-logs
+  namespace: reshare
+  labels:
+    app: reshare-zookeeper-cardinal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# zookeeper deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reshare-zookeeper-cardinal
+  namespace: reshare
+spec:
+  selector:
+    matchLabels:
+      app: reshare-zookeeper-cardinal
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: reshare-zookeeper-cardinal
+    spec:
+      # allow non root user access to volume
+      securityContext:
+        fsGroup: 1001
+      containers:
+      - image: debezium/zookeeper:1.7
+        name: reshare-zookeeper-cardinal
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: election
+        - containerPort: 3888
+          name: server
+        volumeMounts:
+        - name: reshare-zookeeper-cardinal-persistent-storage
+          mountPath: /zookeeper/data
+        - name: reshare-zookeeper-cardinal-persistent-logs
+          mountPath: /zookeeper/txns
+      volumes:
+      - name: reshare-zookeeper-cardinal-persistent-storage
+        persistentVolumeClaim:
+          claimName: reshare-zookeeper-cardinal-pv-claim
+      - name: reshare-zookeeper-cardinal-persistent-logs
+        persistentVolumeClaim:
+          claimName: reshare-zookeeper-cardinal-pv-logs
+      imagePullSecrets:
+        - name: "dockerhub-cred"
+---
+# zookeeper service
+apiVersion: v1
+kind: Service
+metadata:
+  name: reshare-zookeeper-cardinal
+  namespace: reshare
+spec:
+  type: "NodePort"
+  ports:
+  - port: 2181
+    nodePort: 32181
+    protocol: TCP
+    name: client
+  - port: 2888
+    targetPort: 2888
+    protocol: TCP
+    name: election
+  - port: 3888
+    targetPort: 3888
+    protocol: TCP
+    name: server
+  selector:
+    app: reshare-zookeeper-cardinal
