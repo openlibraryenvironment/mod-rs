@@ -125,4 +125,14 @@ public class EvergreenHostLMSService extends BaseHostLMSService {
     log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
   }
+
+  @Override
+  public String getRequestItemBibIdCode() {
+    return "BibID";
+  }
+
+  @Override
+  public boolean isManualCancelRequestItem() {
+    return true;
+  }
 }
