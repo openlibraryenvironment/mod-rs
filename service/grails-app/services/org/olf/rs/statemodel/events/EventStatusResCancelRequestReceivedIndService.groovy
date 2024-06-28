@@ -1,9 +1,12 @@
 package org.olf.rs.statemodel.events
 
+import com.k_int.web.toolkit.custprops.CustomProperty
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService
 import org.olf.rs.SettingsService
+import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
@@ -24,8 +27,10 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
     ReshareActionService reshareActionService;
     SettingsService settingsService;
     HostLMSService hostLMSService;
+    DirectoryEntryService directoryEntryService;
 
     private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
+    private static final String SETTING_INSTITUTIONAL_ID = 'default_institutional_patron_id';
 
 
     @Override
@@ -62,8 +67,16 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
 
                 if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
                     if (hostLMSService.isManualCancelRequestItem()) {
+                        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
+                                request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
+                        String institutionalPatronIdValue = institutionalPatronId?.value;
+                        if (!institutionalPatronIdValue) {
+                            // If nothing on the Directory Entry then fallback to the default in settings
+                            AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SETTING_INSTITUTIONAL_ID);
+                            institutionalPatronIdValue = defaultInstitutionalPatronId?.value;
+                        }
                         log.debug("Sending CancelRequestItem");
-                        Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.externalHoldRequestId);
+                        Map cancelRequestItemResult = hostLMSService.cancelRequestItem(request, request.externalHoldRequestId, institutionalPatronIdValue);
                         log.debug("Result of CancelRequestItem is ${cancelRequestItemResult}");
                     }
                 }
