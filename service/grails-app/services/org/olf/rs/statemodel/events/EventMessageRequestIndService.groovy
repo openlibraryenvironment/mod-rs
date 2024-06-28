@@ -119,6 +119,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.patronNote = sequenceResult.note;
                             pr.lastSequenceReceived = sequenceResult.sequence;
                         }
+
+                        if (serviceInfo.copyrightCompliance) {
+                            pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
+                        }
                     }
                 }
 
@@ -285,6 +289,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     "Failed to create new request because in DB there already is record with such id"
         }
         return pr
+    }
+
+    RefdataValue findCopyrightType(String label) {
+        RefdataCategory cat = RefdataCategory.findByDesc(RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
+        RefdataValue copyrightType = RefdataValue.findByOwnerAndValue(cat, label);
+        return copyrightType;
     }
 
     static Map<String, String> getPatronRequestPropertyNames(){
