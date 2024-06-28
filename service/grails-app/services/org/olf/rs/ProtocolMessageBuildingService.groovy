@@ -83,7 +83,6 @@ class ProtocolMessageBuildingService {
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
     ]
-    log.debug("req.publicationType is ${req.publicationType}");
     message.publicationInfo = [
       publisher: req.publisher,
       publicationType: req.publicationType?.value,
@@ -93,7 +92,6 @@ class ProtocolMessageBuildingService {
       publicationDateOfComponent: req.publicationDateOfComponent,
       placeOfPublication: req.placeOfPublication
     ]
-      log.debug("req.copyrightType is ${req.copyrightType}");
     message.serviceInfo = [
       //TODO the following fields are permitted here but not currently included:
       /*
