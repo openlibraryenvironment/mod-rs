@@ -1,4 +1,7 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
+
+import com.k_int.web.toolkit.refdata.RefdataCategory
+import com.k_int.web.toolkit.refdata.RefdataValue;
 
 import java.time.LocalDate;
 
@@ -100,11 +103,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         log.debug("Failed to parse neededBy date (${serviceInfo.needBeforeDate}): ${e.message}");
                     }
                 }
+
                 if (serviceInfo.note) {
                     // We mave have a sequence number that needs to be extracted
                     Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(serviceInfo.note);
                     pr.patronNote = sequenceResult.note;
                     pr.lastSequenceReceived = sequenceResult.sequence;
+                }
+
+                if (serviceInfo.copyrightCompliance) {
+                    pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
+
+
                 }
             }
 
@@ -198,5 +208,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
         log.debug('EventMessageRequestIndService::processEvent complete');
         return(eventResultDetails);
+    }
+
+    RefdataValue findCopyrightType(String label) {
+        RefdataCategory cat = RefdataCategory.findByDesc(RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
+        RefdataValue copyrightType = RefdataValue.findByOwnerAndValue(cat, label);
+        return copyrightType;
     }
 }

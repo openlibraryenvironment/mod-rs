@@ -1,4 +1,7 @@
-package org.olf.rs;
+package org.olf.rs
+
+import groovy.util.logging.Slf4j
+import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,6 +9,7 @@ import java.util.regex.Pattern;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.iso18626.NoteSpecials;
 
+@Slf4j
 class ProtocolMessageBuildingService {
 
     private static final String ALL_REGEX           = '(.*)';
@@ -105,6 +109,8 @@ class ProtocolMessageBuildingService {
        * EndDate
        * Note
       */
+            
+      copyrightCompliance: req.copyrightType?.value,
 
       serviceType: req.serviceType?.value,
 

@@ -1857,5 +1857,52 @@ class DosomethingSimple {
 
     }
 
+    void "Test transmission of copyright and publication type to supplier"(String copyrightType, String publicationType, String patronIdentifier) {
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String RESPONDER_DATA = 'ref-' + patronIdentifier + "_DATA";
+        String patronReference = 'ref-' + patronIdentifier + randomCrap(6);
+        when: "We create a requester request with copyright and pub info"
+            Map request = [
+                    patronReference: patronReference,
+                    title: 'Copyright Publication Type Test',
+                    author: 'UR MOM',
+                    requestingInstitutionSymbol: 'ISIL:RST1',
+                    systemInstanceIdentifier: '123-321',
+                    patronIdentifier: patronIdentifier,
+                    isRequester: true,
+                    serviceType: "Copy",
+                    deliveryMethod: "URL",
+                    publicationType: publicationType,
+                    copyrightType: copyrightType
+            ];
+
+            setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+            def requestResponse = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+            //requester request sent to supplier?
+            waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+
+            //responder request created?
+            String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+            def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
+        then: "meh"
+            assert(responderRequestData.patronReference == patronReference);
+            assert(responderRequestData.publicationType?.value == publicationType);
+            assert(responderRequestData.copyrightType?.value == copyrightType);
+            assert(true);
+
+        where:
+            copyrightType | publicationType | patronIdentifier
+            'us-ccg'      | "book"          | "COPY-PUB-TYPE-0001"
+        //Create request on first tenant w/ copyright and pub info
+        //Look for request to get to 'sent to supplier'
+        //Look for responder request w/ patron reference
+        //check for copyright and publication type in responder request
+
+    }
+
 
 }
