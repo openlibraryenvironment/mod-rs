@@ -106,6 +106,7 @@ class ProtocolMessageBuildingService {
        * EndDate
        * Note
       */
+            
       copyrightCompliance: req.copyrightType?.value,
 
       serviceType: req.serviceType?.value,
