@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.iso18626.NoteSpecials;
 
+@Slf4j
 class ProtocolMessageBuildingService {
 
     private static final String ALL_REGEX           = '(.*)';
@@ -81,6 +83,7 @@ class ProtocolMessageBuildingService {
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
     ]
+    log.debug("req.publicationType is ${req.publicationType}");
     message.publicationInfo = [
       publisher: req.publisher,
       publicationType: req.publicationType?.value,
@@ -90,6 +93,7 @@ class ProtocolMessageBuildingService {
       publicationDateOfComponent: req.publicationDateOfComponent,
       placeOfPublication: req.placeOfPublication
     ]
+      log.debug("req.copyrightType is ${req.copyrightType}");
     message.serviceInfo = [
       //TODO the following fields are permitted here but not currently included:
       /*
@@ -104,6 +108,7 @@ class ProtocolMessageBuildingService {
        * EndDate
        * Note
       */
+      copyrightCompliance: req.copyrightType?.value,
 
       serviceType: req.serviceType?.value,
 

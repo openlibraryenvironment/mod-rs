@@ -680,6 +680,7 @@ and sa.service.businessFunction.value=:ill
 
   ServiceInfo makeServiceInfo(eventData) {
     ServiceInfo serviceInfo = new ServiceInfo()
+    serviceInfo.setCopyrightCompliance(toTypeSchemeValuePair(eventData.serviceInfo.copyrightCompliance))
     serviceInfo.setServiceType(toServiceType(eventData.serviceInfo.serviceType))
     if (eventData.serviceInfo.needBeforeDate) {
       serviceInfo.setNeedBeforeDate(toZonedDateTime(eventData.serviceInfo.needBeforeDate))
