@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.refdata.RefdataCategory
 import com.k_int.web.toolkit.refdata.RefdataValue;
+import org.olf.rs.referenceData.RefdataValueData
 
 import java.time.LocalDate;
 
