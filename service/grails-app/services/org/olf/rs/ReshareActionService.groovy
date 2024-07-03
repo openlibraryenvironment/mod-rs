@@ -131,6 +131,7 @@ public class ReshareActionService {
 
         if (result.patronDetails != null) {
             if (result.patronDetails.userid != null) {
+
                 pr.resolvedPatron = lookupOrCreatePatronProxy(result.patronDetails);
                 if (pr.patronSurname == null) {
                     pr.patronSurname = result.patronDetails.surname;
