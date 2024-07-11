@@ -46,7 +46,7 @@ public class SLNPStateModelData {
             [status: Status.SLNP_RESPONDER_COMPLETE, isTerminal: true]
     ];
 
-    private static Map slnpRequesterCancelRequest = [
+    public static Map slnpRequesterCancelRequest = [
             code: 'slnpRequesterCancelRequest',
             description: 'The request has been cancelled by the requester staff and is completed. No further actions can be taken including the action Create revised request.',
             result: true,
@@ -56,7 +56,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpRequesterISO18626CancelRequest = [
+    public static Map slnpRequesterISO18626CancelRequest = [
             code: 'slnpRequesterISO18626CancelRequest',
             description: 'The request has been cancelled by the requester staff and is completed. No further actions can be taken including the action Create revised request.',
             result: true,
@@ -106,7 +106,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpRequesterISO18626Aborted = [
+    public static Map slnpRequesterISO18626Aborted = [
             code: 'slnpRequesterISO18626Aborted',
             description: 'Request has been aborted by the supplier and it\'s been added to the abort queue in ZFL. Requester staff must handle the request in ZFL, either close it or restart with updated metadata as a new request.',
             result: true,
@@ -126,7 +126,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderRespondYes = [
+    public static Map slnpResponderRespondYes = [
             code: 'slnpResponderRespondYes',
             description: 'Item has been located and we expect to supply, staff is awaiting printing pull slip',
             result: true,
@@ -136,7 +136,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderCannotSupply = [
+    public static Map slnpResponderCannotSupply = [
             code: 'slnpResponderCannotSupply',
             description: 'Request cannot be filled and is complete',
             result: true,
@@ -146,7 +146,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderAbortSupply = [
+    public static Map slnpResponderAbortSupply = [
             code: 'slnpResponderAbortSupply',
             description: 'Request has been aborted due to missing metadata and is complete',
             result: true,
@@ -166,7 +166,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderSupplierPrintPullSlip = [
+    public static Map slnpResponderSupplierPrintPullSlip = [
             code: 'slnpResponderSupplierPrintPullSlip',
             description: 'Pull slip has been printed and item is being pulled from the shelves',
             result: true,
@@ -226,7 +226,7 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpDefaultNoStatusChangeOK = [
+    public static Map slnpDefaultNoStatusChangeOK = [
             code: 'slnpDefaultNoStatusChangeOK',
             description: 'Default scenario, status is not changing',
             result: true,
@@ -556,11 +556,7 @@ public class SLNPStateModelData {
                 slnpResponderStates, [[stateModel: StateModel.MODEL_RESPONDER, priority: 6]]);
     }
 
-    public static void loadActionEventResultData() {
-        ActionEventResultData.load(resultLists);
-    }
-
-    private static String eventServiceName(String eventName) {
+    public static String eventServiceName(String eventName) {
         // We only do this for backward compatibility, no need to call this in the future
         // We split the event name on the underscores then capitalize each word and then join it back together
         String[] eventNameWords = eventName.replace(' ', '_').toLowerCase().split("_");
@@ -578,7 +574,7 @@ public class SLNPStateModelData {
         // 1. StatusData
         loadStatusData();
         // 2. ActionEventResultData
-        loadActionEventResultData();
+        ActionEventResultData.load(resultLists);
         // 3. ActionEventData
         loadActionEventData();
         // 4. StateModelData

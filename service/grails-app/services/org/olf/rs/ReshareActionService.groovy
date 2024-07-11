@@ -408,7 +408,8 @@ public class ReshareActionService {
         String reasonForMessage = ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE;
 
         // Only the first response can be a RequestResponse
-        if (!request.sentISO18626RequestResponse && request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER) {
+        if (!request.sentISO18626RequestResponse && (request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER &&
+                request.stateModel.shortcode != StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER)) {
             // it has not previously been sent, so send the RequestResponse as the reason for the message
             reasonForMessage = ReasonForMessage.MESSAGE_REASON_REQUEST_RESPONSE;
 

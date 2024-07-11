@@ -29,6 +29,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_ACCEPT_ITEM_METHOD               = 'AcceptItemMethod';
     public static final String VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE = 'ActopnEventResultSaveRestore';
     public static final String VOCABULARY_AUTO_RESPONDER                   = 'AutoResponder';
+    public static final String VOCABULARY_AUTO_RESPONDER_COPY              = 'AutoResponder_Service_type_copy';
     public static final String VOCABULARY_AUTO_RESPONDER_CANCEL            = 'AutoResponder_Cancel';
     public static final String VOCABULARY_AUTO_RESPONDER_LOCAL             = 'AutoResponder_Local';
     public static final String VOCABULARY_BORROWER_CHECK_METHOD            = 'BorrowerCheckMethod';
@@ -60,11 +61,15 @@ public class RefdataValueData {
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE    = 'Save';
 
-    // Auto Responder
+    // Service type - Loan Auto Responder
     public static final String AUTO_RESPONDER_OFF                          = OFF;
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY = 'On: will supply and cannot supply';
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY          = 'On: will supply only';
     public static final String AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY      = 'On: loaned and cannot supply';
+
+    // Service type - Copy Auto Responder
+    public static final String COPY_AUTO_RESPONDER_OFF                     = OFF;
+    public static final String COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY = 'On: loaned and cannot supply';
 
     // Auto Responder Cancel
     public static final String AUTO_RESPONDER_CANCEL_OFF = OFF;
@@ -238,6 +243,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_COPY, COPY_AUTO_RESPONDER_OFF);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_COPY, COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY);
 
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_ON);

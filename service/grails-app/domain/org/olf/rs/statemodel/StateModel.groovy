@@ -12,9 +12,11 @@ class StateModel implements MultiTenant<StateModel> {
     public static final String MODEL_REQUESTER = 'PatronRequest';
     public static final String MODEL_DIGITAL_RETURNABLE_REQUESTER = 'DigitalReturnableRequester';
     public static final String MODEL_SLNP_REQUESTER = 'SLNPRequester';
+    public static final String MODEL_SLNP_NON_RETURNABLE_REQUESTER = 'SLNPNonReturnableRequester';
     public static final String MODEL_RESPONDER = 'Responder';
     public static final String MODEL_CDL_RESPONDER = 'CDLResponder';
     public static final String MODEL_SLNP_RESPONDER = 'SLNPResponder';
+    public static final String MODEL_SLNP_NON_RETURNABLE_RESPONDER = 'SLNPNonReturnableResponder';
     public static final String MODEL_NR_REQUESTER = 'NonreturnableRequester';
     public static final String MODEL_NR_RESPONDER = 'NonreturnableResponder';
 

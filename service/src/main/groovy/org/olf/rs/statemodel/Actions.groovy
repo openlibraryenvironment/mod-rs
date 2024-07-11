@@ -43,6 +43,9 @@ public class Actions {
 	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
 	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
 
+	// SLNP non returnable responder actions
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT  = "slnpSupplierSuppliesDocument";
+
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
 	static public final String ACTION_REQUESTER_BORROWER_CHECK_OVERRIDE      	 = "borrowerCheckOverride";
