@@ -44,4 +44,31 @@ public class HorizonHostLMSService extends BaseHostLMSService {
     }
     return availability_summary;
   }
+
+  @Override
+  public List<ItemLocation> extractAvailableItemsFromOpacRecord(opacRecord, String reason=null) {
+
+    List<ItemLocation> availability_summary = [];
+
+    opacRecord?.holdings?.holding?.each { hld ->
+      log.debug("HorizonHostLMSService holdings record:: ${hld}");
+      hld.circulations?.circulation?.each { circ ->
+        def loc = hld?.localLocation?.text()?.trim();
+        if (loc && circ?.availableNow?.@value == '1') {
+          log.debug("Horizon extractAvailableItemsFromOpacRecord Available now");
+          ItemLocation il = new ItemLocation(
+                  reason: reason,
+                  location: loc,
+                  shelvingLocation: hld?.shelvingLocation?.text()?.trim() ?: null,
+                  itemLoanPolicy: circ?.availableThru?.text()?.trim() ?: null,
+                  itemId: circ?.itemId?.text()?.trim() ?: null,
+                  callNumber: hld?.callNumber?.text()?.trim() ?: null)
+          availability_summary << il;
+        }
+      }
+    }
+
+    return availability_summary;
+  }
+
 }
