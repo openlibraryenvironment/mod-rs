@@ -261,13 +261,16 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
               // Remove any custom properties from the payload - currently the custprops
               // processing is additive - which means we get lots of values. Need a longer term solition for this
-              def custprops = payload.remove('customProperties')
+              def custprops = payload.get('customProperties')
+              payload.remove('customProperties')
 
               // Bind all the data execep the custprops
-              bindData(de, data.payload)
+              log.debug("Binding data except custom props")
+              bindData(de, payload)
 
               // Do special handling of the custprops
               payload.customProperties = custprops
+              log.debug("Binding custom properties")
               bindCustomProperties(de, payload)
               expireRemovedSymbols(de, payload)
 
