@@ -18,16 +18,16 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'adopt'
 
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
+        uses: gradle/wrapper-validation-action@v1
 
       - name: Start containers
         run: |
@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: integration-test-results
           path: service/build/test-results/integrationTest/
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: container-logs
           path: tools/testing/*.log
@@ -81,7 +81,7 @@ jobs:
           sleep 10
 
       - name: Upload Test Results Files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: testLogfiles
@@ -92,7 +92,7 @@ jobs:
 
       - name: Log in to the Container registry
         if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -101,14 +101,14 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
  
       # master and main
       - name: Build and push Docker image
         if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
@@ -118,7 +118,7 @@ jobs:
       # extra tags for release branch
       - name: Build and push Docker image
         if: ${{ contains(github.ref, 'release') }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
