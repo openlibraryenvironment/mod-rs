@@ -27,7 +27,7 @@ a few terminals running these:
 ```
 kubectl port-forward -n reshare svc/postgres 54321:5432
 kubectl port-forward -n reshare svc/okapi 9130:9130
-kubectl port-forward -n reshare svc/reshare-kafka-dbz 29092:29092
+kubectl port-forward -n reshare svc/reshare-kafka-cardinal 29092:29092
 ```
 
 Once everything is up and forwarded you can create a tenant and enable the
