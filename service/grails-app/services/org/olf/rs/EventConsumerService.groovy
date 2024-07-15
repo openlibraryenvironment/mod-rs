@@ -235,6 +235,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
             final Map<String,?> payload = data.payload as Map
 
+            log.debug("Payload for directory update is ${payload}")
+
             log.debug("Process directory entry inside ${data.tenant}_mod_rs")
             if ( payload.slug ) {
               ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug);
