@@ -266,7 +266,7 @@ public class HostLMSService {
         return requestItemResult;
     }
 
-    public Map cancelRequestItem(PatronRequest request, String requestId) {
+    public Map cancelRequestItem(PatronRequest request, String requestId, String patronId) {
         Map cancelRequestItemResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
