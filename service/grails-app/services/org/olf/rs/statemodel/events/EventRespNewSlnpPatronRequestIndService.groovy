@@ -13,8 +13,6 @@ import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
-import javax.swing.plaf.nimbus.State
-
 /**
  * This event service takes a new SLNP responder patron request
  * to perform validation and respond automatically depending on configured settings.
