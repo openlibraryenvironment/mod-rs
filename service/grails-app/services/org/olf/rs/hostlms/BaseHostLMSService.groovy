@@ -830,7 +830,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return "Bibliographic Item";
   }
 
-  public String getRequestItemPickupLocation() {
+  public String getRequestItemPickupLocation(String pickupLocation) {
     return null;
   }
 
@@ -854,6 +854,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           String requestId,
           String itemId,
           String borrowerBarcode,
+          String pickupLocation,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -878,7 +879,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
       .setRegistryId(ncipConnectionDetails.registryId)
-      .setPickupLocation(getRequestItemPickupLocation());
+      .setPickupLocation(getRequestItemPickupLocation(pickupLocation));
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}");
     JSONObject response = client.send(requestItem);
