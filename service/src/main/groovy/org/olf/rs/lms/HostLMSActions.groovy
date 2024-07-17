@@ -70,10 +70,11 @@ public interface HostLMSActions {
           String requestId,
           String itemId,
           String borrowerBarcode,
+          String pickupLocation,
           INcipLogDetails ncipLogDetails
   );
 
-  public Map cancelRequestItem(ISettings settings, String requestId, INcipLogDetails ncipLogDetails);
+  public Map cancelRequestItem(ISettings settings, String requestId, String userId, INcipLogDetails ncipLogDetails);
 
   /*
   If the Host LMS is not smart enough to clean up items held with Request Item after the request is cancelled,
