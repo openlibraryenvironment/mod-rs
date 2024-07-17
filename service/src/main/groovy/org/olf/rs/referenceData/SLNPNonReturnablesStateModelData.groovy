@@ -113,7 +113,7 @@ public class SLNPNonReturnablesStateModelData {
     private static Map slnpNonReturnableResponderRespondYesList = [
             code: ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES,
             description: 'The responder has said that they will supply the item(s)',
-            model: StateModel.MODEL_SLNP_RESPONDER,
+            model: StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER,
             results: [
                     SLNPStateModelData.slnpResponderRespondYes
             ]
