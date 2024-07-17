@@ -223,7 +223,7 @@ public class SLNPNonReturnablesStateModelData {
                 slnpNonReturnablesRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 6]]);
         StateModel.ensure(
                 StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, null, Status.SLNP_RESPONDER_IDLE,
-                Actions.ACTION_SLNP_RESPONDER_RESPOND_YES,
+                Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES,
                 Status.SLNP_RESPONDER_IDLE,
                 null,
                 slnpNonReturnablesResponderStates, [[stateModel: StateModel.MODEL_RESPONDER, priority: 6]]);
