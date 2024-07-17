@@ -17,7 +17,7 @@ public class ActionSLNPNonReturnableResponderSlnpSupplierSuppliesDocumentService
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        actionResultDetails.auditMessage = 'Document supplied from supplied successfully'
+        actionResultDetails.auditMessage = 'Document supplied from supplier successfully'
 
         return (actionResultDetails)
     }
