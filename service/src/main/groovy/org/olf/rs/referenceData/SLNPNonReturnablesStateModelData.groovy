@@ -186,6 +186,23 @@ public class SLNPNonReturnablesStateModelData {
     }
 
     public static void loadAvailableActionData() {
+        // To delete an unwanted available action add Model id and action code to this array
+        [
+          [ StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER).id, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES ]
+        ].each { availableActionToRemove ->
+            log.info("Remove available action ${availableActionToRemove}");
+            try {
+                AvailableAction.executeUpdate(
+                                        '''
+                                                        delete from AvailableAction
+                                                        where aa_model = :model and aa_action_code = :code
+                                                     ''',
+                        [model:availableActionToRemove[0], code:availableActionToRemove[1]]);
+            } catch (Exception e) {
+                log.error("Unable to delete available action ${availableActionToRemove} - ${e.message}", e);
+            }
+        }
+
         /// SLNP_REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE)
