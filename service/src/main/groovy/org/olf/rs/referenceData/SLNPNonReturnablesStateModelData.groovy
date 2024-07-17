@@ -197,7 +197,7 @@ public class SLNPNonReturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED);
 
         // SLNP_RES_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES);
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_ABORT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY);
 
@@ -214,6 +214,7 @@ public class SLNPNonReturnablesStateModelData {
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, true);
     }
 
 	public static void loadStateModelData() {
