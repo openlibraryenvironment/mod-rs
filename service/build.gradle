@@ -162,7 +162,7 @@ dependencies {
   }
 
   // NCIP deps
-  implementation 'org.olf.rs:lib-ncip-client:0.23.8'
+  implementation 'org.olf.rs:lib-ncip-client:0.23.15'
   implementation 'com.github.jknack:handlebars:4.2.0'
   implementation 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
 
