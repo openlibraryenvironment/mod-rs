@@ -73,6 +73,16 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterLMSCallFailed = [
+            code: 'nrRequesterLMSCallFailed',
+            description: 'Failed to talk to the host LMS to validate the patron',
+            status: Status.PATRON_REQUEST_INVALID_PATRON,
+            qualifier: ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED,
+            result: true,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterBlankForm = [
             code: 'nrRequesterBlankForm',
             description: "New non-returnables request flagged as not having cluster ID, needs review",
@@ -239,6 +249,7 @@ public class NonreturnablesStateModelData {
                     nrRequesterNewPatronRequestOK,
                     nrRequesterOverLimit,
                     nrRequesterInvalidPatron,
+                    nrRequesterLMSCallFailed,
                     nrRequesterBlankForm
             ]
 
