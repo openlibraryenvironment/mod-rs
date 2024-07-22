@@ -15,6 +15,7 @@ public class StateModelData {
     // The states available to the default requester state model
     static private final List requesterStates = [
         [ status : Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING ],
+        [ status : Status.PATRON_REQUEST_BLANK_FORM_REVIEW ],
         [ status : Status.PATRON_REQUEST_BORROWER_RETURNED ],
         [ status : Status.PATRON_REQUEST_BORROWING_LIBRARY_RECEIVED ],
         [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
@@ -22,7 +23,9 @@ public class StateModelData {
         [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_CHECKED_IN ],
         [ status : Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED ],
+        [ status : Status.PATRON_REQUEST_DUPLICATE_REVIEW ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
+        [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_ERROR ],
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_FILLED_LOCALLY, isTerminal : true ],
@@ -47,11 +50,14 @@ public class StateModelData {
 
   // The states available to the default digital returnable requester state model
   static private final List digitalReturnableRequesterStates = [
+    [ status : Status.PATRON_REQUEST_BLANK_FORM_REVIEW ],
     [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
     [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
     [ status : Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED ],
+    [ status : Status.PATRON_REQUEST_DUPLICATE_REVIEW ],
     [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
+    [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_ERROR ],
     [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
     [ status : Status.PATRON_REQUEST_FILLED_LOCALLY, isTerminal : true ],
