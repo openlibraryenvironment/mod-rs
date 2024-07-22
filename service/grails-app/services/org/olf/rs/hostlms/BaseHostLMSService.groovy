@@ -725,7 +725,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setFromAgency(ncipConnectionDetails.ncipFromAgency)
                         .setRegistryId(ncipConnectionDetails.registryId)
                         .setRequestedActionTypeString(requested_action)
-                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
+                        .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile)
+                        .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
 
           if(getNCIPTemplatePrefix() != null) {
             log.debug("[${CurrentTenant.get()}] setting NCIP template prefix to ${getNCIPTemplatePrefix()}");

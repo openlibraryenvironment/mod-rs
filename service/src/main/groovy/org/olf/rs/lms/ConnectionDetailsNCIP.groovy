@@ -11,6 +11,7 @@ public class ConnectionDetailsNCIP {
     public String ncipAppProfile;
     public String registryId;
     public boolean useTitle
+    public boolean useDefaultPatronFee
 
     ConnectionDetailsNCIP(ISettings settings) {
         // Get hold of the basic ncip connection details
@@ -21,6 +22,8 @@ public class ConnectionDetailsNCIP {
         registryId = settings.getSettingValue(SettingsData.SETTING_WMS_REGISTRY_ID);
         String useTitleString = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_TITLE)
         useTitle = "Yes".equalsIgnoreCase(useTitleString ? useTitleString : "No")
+        String useDefaultPatronFeeString = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_DEFAULT_PATRON_FEE)
+        useDefaultPatronFee = "Yes".equalsIgnoreCase(useDefaultPatronFeeString ? useDefaultPatronFeeString : "No")
 
         // Do we have the basic configuration we can get away with
         if ((ncipServerAddress == null) ||
