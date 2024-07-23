@@ -8,7 +8,7 @@ import time
 import urllib.request
 
 # module names without version
-MODULES = ['mod-rs-2.17.0-SLNP.001']
+MODULES = ['mod-rs']
 
 # names of tenants to operate on
 TENANTS = ['slnptest_one', 'slnptest_two']
@@ -74,7 +74,7 @@ def enable(args, token):
     password = args.password
     registry = args.registry
     port = PORT
-    latest_versions = ['mod-rs-2.16.0-SLNP.001']
+    latest_versions = ['mod-rs-2.17.0-SLNP.001']
 
     # re-enable modules
     print("re-enabling pods on tenants...")
@@ -87,7 +87,7 @@ def enable(args, token):
             })
     for tenant in TENANTS:
         print("enabling on {}".format(tenant))
-        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?loadSample%3Dtrue&loadReference%3Dtrue'.format(tenant),
+        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?loadReference%3Dtrue'.format(tenant),
             payload=json.dumps(enable_payload).encode('UTF-8'),
             tenant='supertenant',
             token=token
