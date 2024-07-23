@@ -350,7 +350,7 @@ public class ReshareActionService {
             }
 
             // Have we reached the maximum number of retries
-            int maxSendAttempts = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, 0, false);
+            int maxSendAttempts = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS, 3, false);
 
             // Have we reached our maximum number
             if ((maxSendAttempts > 0) && (request.numberOfSendAttempts > maxSendAttempts)) {
