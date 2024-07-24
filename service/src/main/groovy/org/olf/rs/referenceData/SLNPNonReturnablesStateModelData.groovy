@@ -19,11 +19,9 @@ public class SLNPNonReturnablesStateModelData {
     ];
 
     static private final List slnpNonReturnablesResponderStates = [
-            [status: Status.SLNP_RESPONDER_IDLE],
-            [status: Status.SLNP_RESPONDER_UNFILLED, isTerminal: true],
-            [status: Status.SLNP_RESPONDER_ABORTED, isTerminal: true],
             [status: Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP],
             [status: Status.SLNP_RESPONDER_AWAIT_PICKING],
+            [status: Status.SLNP_RESPONDER_UNFILLED, isTerminal: true],
             [status: Status.SLNP_RESPONDER_DOCUMENT_SUPPLIED, isTerminal: true]
     ];
 
@@ -108,25 +106,16 @@ public class SLNPNonReturnablesStateModelData {
             ]
     ];
 
+    private static Map slnpNonReturnableRequesterManuallyMarkSuppliedList = [
+            code: ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED,
+            description: 'Request is manually marked as supplied.',
+            model: StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER,
+            results: [
+                    slnpNonReturnableRequesterReceived
+            ]
+    ];
+
     // Responder Event lists
-
-    private static Map slnpNonReturnableResponderRespondYesList = [
-            code: ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES,
-            description: 'The responder has said that they will supply the item(s)',
-            model: StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER,
-            results: [
-                    SLNPStateModelData.slnpResponderRespondYes
-            ]
-    ];
-
-    private static Map slnpNonReturnableResponderAbortSupplyList = [
-            code: ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_ABORT_SUPPLY,
-            description: 'The responder has said that they will abort the supply of the item(s)',
-            model: StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER,
-            results: [
-                    SLNPStateModelData.slnpResponderAbortSupply
-            ]
-    ];
 
     private static Map slnpNonReturnableResponderRespondCannotSupplyList = [
             code: ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY,
@@ -160,9 +149,8 @@ public class SLNPNonReturnablesStateModelData {
             slnpNonReturnableRequesterISO18626StatusChangeList,
             slnpNonReturnableRequesterAbortedList,
             slnpNonReturnableRequesterReceivedList,
+            slnpNonReturnableRequesterManuallyMarkSuppliedList,
 
-            slnpNonReturnableResponderRespondYesList,
-            slnpNonReturnableResponderAbortSupplyList,
             slnpNonReturnableResponderRespondCannotSupplyList,
             slnpNonReturnableResponderSupplierPrintPullSlipList,
             slnpNonReturnableResponderSupplierSuppliesDocumentList
@@ -187,9 +175,7 @@ public class SLNPNonReturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         // To delete an unwanted available action add Model id and action code to this array
-        [
-          [ StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER).id, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES ]
-        ].each { availableActionToRemove ->
+        [].each { availableActionToRemove ->
             log.info("Remove available action ${availableActionToRemove}");
             try {
                 AvailableAction.executeUpdate(
@@ -206,6 +192,7 @@ public class SLNPNonReturnablesStateModelData {
         /// SLNP_REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED)
 
         // SLNP_REQ_ABORTED OR "Aborted"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED);
@@ -213,15 +200,9 @@ public class SLNPNonReturnablesStateModelData {
         // SLNP_REQ_DOCUMENT_AVAILABLE OR "Document available"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED);
 
-        // SLNP_RES_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_ABORT_SUPPLY);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY);
-
         // SLNP_RES_NEW_AWAIT_PULL_SLIP OR "Awaiting pull slip printing"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP);
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_ABORT_SUPPLY);
 
         // SLNP_RES_AWAIT_PICKING OR "Searching"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT);
@@ -231,7 +212,7 @@ public class SLNPNonReturnablesStateModelData {
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, true);
-        ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, 'Request is manually marked as supplied. This action is needed when no data-change event ("Loaned") from ZFL is available.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, true);
     }
 
 	public static void loadStateModelData() {
@@ -239,9 +220,9 @@ public class SLNPNonReturnablesStateModelData {
         StateModel.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, null, Status.SLNP_REQUESTER_IDLE, null, null, null,
                 slnpNonReturnablesRequesterStates, [[stateModel: StateModel.MODEL_REQUESTER, priority: 6]]);
         StateModel.ensure(
-                StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, null, Status.SLNP_RESPONDER_IDLE,
-                Actions.ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES,
-                Status.SLNP_RESPONDER_IDLE,
+                StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, null, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP,
+                Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
+                Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP,
                 null,
                 slnpNonReturnablesResponderStates, [[stateModel: StateModel.MODEL_RESPONDER, priority: 6]]);
     }

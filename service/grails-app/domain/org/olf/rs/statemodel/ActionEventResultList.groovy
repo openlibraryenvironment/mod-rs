@@ -78,10 +78,9 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_NON_RETURNABLE_REQUESTER_CANCEL                    = 'slnpNonReturnableRequesterCancel';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpNonReturnableRequesterISO18626StatusChange';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_RECEIVED                  = 'slnpNonReturnableRequesterReceived';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED    = 'slnpNonReturnableRequesterManuallyMarkSupplied';
 
     // SLNP responder non returnable event lists
-    static public final String SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES                   = 'slnpNonReturnableResponderRespondYes'
-    static public final String SLNP_NON_RETURNABLE_RESPONDER_ABORT_SUPPLY                  = 'slnpNonReturnableResponderAbortSupply'
     static public final String SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY                 = 'slnpNonReturnableResponderCannotSupply'
     static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP      = "slnpNonReturnableResponderSupplierPrintPullSlip"
     static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT    = "slnpNonReturnableResponderSupplierSuppliesDocument"

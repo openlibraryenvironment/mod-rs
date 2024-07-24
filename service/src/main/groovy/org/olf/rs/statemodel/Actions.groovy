@@ -44,8 +44,8 @@ public class Actions {
 	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
 
 	// SLNP non returnable responder actions
-	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT  = "slnpSupplierSuppliesDocument";
-	static public final String ACTION_SLNP_NON_RETURNABLE_RESPONDER_RESPOND_YES  = "slnpNonreturnableRespondYes";
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED = "manuallyMarkSupplied";
 
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
