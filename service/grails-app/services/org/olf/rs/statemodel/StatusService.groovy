@@ -506,27 +506,28 @@ public class StatusService {
      * @return The state model that is applicable for that request
      */
     public StateModel getStateModel(PatronRequest request) {
-        String settingsKey;
-        String stateModelCode;
-        if (request.isRequester) {
-            if (request.serviceType?.value == 'copy') {
-                stateModelCode = StateModel.MODEL_NR_REQUESTER;
-            } else if (request?.deliveryMethod?.value == 'url') {
-                stateModelCode = StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER;
-            } else {
-                settingsKey = SettingsData.SETTING_STATE_MODEL_REQUESTER;
+        String settingsKey = null
+        String stateModelCode = null
+        if (request.isRequester != null) {
+            Boolean isRequester = request.isRequester;
+
+            if (request.serviceType?.value === 'copy') {
+                settingsKey = isRequester
+                        ? SettingsData.SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE
+                        : SettingsData.SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE
+            } else if (request.serviceType?.value === 'loan') {
+                settingsKey = isRequester
+                        ? SettingsData.SETTING_STATE_MODEL_REQUESTER_RETURNABLE
+                        : SettingsData.SETTING_STATE_MODEL_RESPONDER_RETURNABLE
+            } else if (request.deliveryMethod?.value === 'url') {
+                settingsKey = isRequester
+                        ? SettingsData.SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE
+                        : SettingsData.SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE
             }
-        } else {
-            if (request.serviceType?.value == 'copy') {
-                stateModelCode = StateModel.MODEL_NR_RESPONDER;
-            } else if (request?.deliveryMethod?.value == 'url') {
-                stateModelCode = StateModel.MODEL_CDL_RESPONDER;
-            } else {
-                settingsKey = SettingsData.SETTING_STATE_MODEL_RESPONDER;
+
+            if (settingsKey) {
+                stateModelCode = settingsService.getSettingValue(settingsKey);
             }
-        }
-        if (settingsKey) {
-            stateModelCode = settingsService.getSettingValue(settingsKey);
         }
 
         // Lookup the state model

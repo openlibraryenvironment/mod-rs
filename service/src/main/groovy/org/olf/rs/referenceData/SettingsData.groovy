@@ -142,10 +142,16 @@ public class SettingsData {
     public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
     // State model configuration settings
-    public static final String SETTING_STATE_MODEL_REQUESTER     = 'state_model_requester';
-    public static final String SETTING_STATE_MODEL_REQUESTER_CDL = 'state_model_requester_cdl';
-    public static final String SETTING_STATE_MODEL_RESPONDER     = 'state_model_responder';
-    public static final String SETTING_STATE_MODEL_RESPONDER_CDL = 'state_model_responder_cdl';
+    public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';
+    public static final String SETTING_STATE_MODEL_REQUESTER_RETURNABLE             = 'requester_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE         = 'requester_non_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE     = 'requester_digital_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_RETURNABLE             = 'responder_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE     = 'responder_digital_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_REQUESTER_CDL                    = 'state_model_requester_cdl';
+    public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
+    public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -314,6 +320,14 @@ public class SettingsData {
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
 
             ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
+
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_REQUESTER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, null, null, true);
+
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, null, null, true);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
