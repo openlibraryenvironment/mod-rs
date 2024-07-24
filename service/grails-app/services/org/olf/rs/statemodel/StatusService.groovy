@@ -511,15 +511,15 @@ public class StatusService {
         if (request.isRequester != null) {
             Boolean isRequester = request.isRequester;
 
-            if (request.serviceType?.value === 'copy') {
+            if (request.serviceType?.value == 'copy') {
                 settingsKey = isRequester
                         ? SettingsData.SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE
                         : SettingsData.SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE
-            } else if (request.serviceType?.value === 'loan') {
+            } else if (request.serviceType?.value == 'loan') {
                 settingsKey = isRequester
                         ? SettingsData.SETTING_STATE_MODEL_REQUESTER_RETURNABLE
                         : SettingsData.SETTING_STATE_MODEL_RESPONDER_RETURNABLE
-            } else if (request.deliveryMethod?.value === 'url') {
+            } else if (request.deliveryMethod?.value == 'url') {
                 settingsKey = isRequester
                         ? SettingsData.SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE
                         : SettingsData.SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE
