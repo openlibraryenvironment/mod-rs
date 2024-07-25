@@ -149,9 +149,7 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_RETURNABLE             = 'responder_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE     = 'responder_digital_returnables_state_model';
-    public static final String SETTING_STATE_MODEL_REQUESTER_CDL                    = 'state_model_requester_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
-    public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
