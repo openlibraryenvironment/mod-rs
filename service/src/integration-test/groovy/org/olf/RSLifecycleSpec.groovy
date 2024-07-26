@@ -910,7 +910,7 @@ class DosomethingSimple {
         when:"Progress the request"
             // Ensure we have the correct model for the responder
             log.debug("Setting responder state model to " + stateModel);
-            changeSettings(tenantId, [ state_model_responder : stateModel ], true);
+            changeSettings(tenantId, [ responder_returnables_state_model : stateModel ], true);
 
         then:"If no exception assume it has been set"
             assert(true);
