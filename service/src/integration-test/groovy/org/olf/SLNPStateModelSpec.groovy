@@ -174,10 +174,9 @@ class SLNPStateModelSpec extends TestBase {
 
         where:
         tenant_id      | changes_needed                                                                                                                                    | changes_needed_hidden
-        'RSSlnpOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-        'RSSlnpTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-        'RSSlnpThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-
+        'RSSlnpOne'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpTwo'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpThree'  | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
     }
 
     void "Validate Static Router"() {
@@ -221,7 +220,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSymbol,
             String requestSystemId,
             Boolean isRequester,
-            String hrid) {
+            String hrid,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -234,7 +234,8 @@ class SLNPStateModelSpec extends TestBase {
                 systemInstanceIdentifier: requestSystemId,
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
-                hrid: hrid
+                hrid: hrid,
+                serviceType: serviceType
 
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
@@ -254,7 +255,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSystemId,
             Boolean isRequester,
             String hrid,
-            String peerRequestIdentifier) {
+            String peerRequestIdentifier,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -266,7 +268,8 @@ class SLNPStateModelSpec extends TestBase {
                 isRequester: isRequester,
                 hrid: hrid,
                 peerRequestIdentifier: peerRequestIdentifier,
-                customIdentifiers: '{"schemeValue": "ZFL","identifiers": [{"key": "TitelId","value": "in00000000002"},{"key": "BsTyp2","value": "L"},{"key": "MedTyp","value": "ml"}]}'
+                customIdentifiers: '{"schemeValue": "ZFL","identifiers": [{"key": "TitelId","value": "in00000000002"},{"key": "BsTyp2","value": "L"},{"key": "MedTyp","value": "ml"}]}',
+                serviceType: serviceType
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
@@ -288,7 +291,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSystemId,
             Boolean isRequester,
             String hrid,
-            String peerRequestIdentifier) {
+            String peerRequestIdentifier,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -300,7 +304,8 @@ class SLNPStateModelSpec extends TestBase {
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
                 hrid: hrid,
-                peerRequestIdentifier: peerRequestIdentifier
+                peerRequestIdentifier: peerRequestIdentifier,
+                serviceType: serviceType
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
@@ -439,7 +444,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, requesterSystemId, true, hrid, hrid);
+                    responderSymbol, requesterSystemId, true, hrid, hrid, 'loan');
 
             log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
 
@@ -465,7 +470,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequest(responderTenantId, responderInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, responderSystemId, false, hrid, hrid);
+                    responderSymbol, responderSystemId, false, hrid, hrid, 'loan');
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
             // Set Auto Responder
@@ -593,7 +598,8 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, isRequester, hrid);
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol,
+                    requestSystemId, isRequester, hrid, 'loan');
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate initial status
@@ -659,7 +665,8 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, false, hrid);
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor,
+                    requestSymbol, requestSystemId, false, hrid, 'loan');
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate Responder initial state
@@ -733,7 +740,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequestWithoutInitialState(patronId, title, author,
-                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid)
+                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid, 'loan')
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
         }
 
@@ -751,21 +758,6 @@ class SLNPStateModelSpec extends TestBase {
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_IDLE          | '7732-4367-333' | 'title123'  | 'Author123'  | false
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4362-331' | 'title234'  | 'Author234'  | true
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
-    }
-
-    void "Configure Tenants for SLNP non returnables"(String tenant_id, Map changes_needed, Map changes_needed_hidden) {
-        when:"We fetch the existing settings for ${tenant_id}"
-        changeSettings(tenant_id, changes_needed);
-        changeSettings(tenant_id, changes_needed_hidden, true)
-
-        then:"Tenant is configured"
-        1==1
-
-        where:
-        tenant_id      | changes_needed                                                                                                                                         | changes_needed_hidden
-        'RSSlnpOne'    | [ 'copy_auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['state_model_requester':'SLNPNonReturnableRequester', 'state_model_responder':'SLNPNonReturnableResponder']
-        'RSSlnpTwo'    | [ 'copy_auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['state_model_requester':'SLNPNonReturnableRequester', 'state_model_responder':'SLNPNonReturnableResponder']
-        'RSSlnpThree'  | [ 'copy_auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['state_model_requester':'SLNPNonReturnableRequester', 'state_model_responder':'SLNPNonReturnableResponder']
     }
 
     void "Test initial state transition to result state by performed action for non returnables"(
@@ -795,7 +787,8 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase()
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, isRequester, hrid)
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol,
+                    requestSystemId, isRequester, hrid, 'copy')
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}")
 
             // Validate initial status
@@ -867,7 +860,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, requesterSystemId, true, hrid, hrid);
+                    responderSymbol, requesterSystemId, true, hrid, hrid, 'copy');
 
             log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}")
 
@@ -894,7 +887,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequest(responderTenantId, responderInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, responderSystemId, false, hrid, hrid);
+                    responderSymbol, responderSystemId, false, hrid, hrid, 'copy');
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}")
 
             // Validate Responder initial status
