@@ -79,6 +79,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpNonReturnableRequesterISO18626StatusChange';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_RECEIVED                  = 'slnpNonReturnableRequesterReceived';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED    = 'slnpNonReturnableRequesterManuallyMarkSupplied';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE   = 'slnpNonReturnableRequesterManuallyMarkAvailable';
 
     // SLNP responder non returnable event lists
     static public final String SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY                 = 'slnpNonReturnableResponderCannotSupply'
