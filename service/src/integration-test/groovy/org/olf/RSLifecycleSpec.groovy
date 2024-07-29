@@ -315,18 +315,19 @@ class RSLifecycleSpec extends TestBase {
    *  N.B. that the test "Send request using static router" below RELIES upon the static routes assigned to RSInstOne.
    *  changing this data may well break that test.
    */
-  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
+  void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed, Map changes_needed_hidden) {
     when:"We fetch the existing settings for ${tenant_id}"
         changeSettings(tenant_id, changes_needed);
+        changeSettings(tenant_id, changes_needed_hidden, true)
 
     then:"Tenant is configured"
       1==1
 
     where:
-      tenant_id      | changes_needed
-      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2' ]
-      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
-      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1' ]
+      tenant_id      | changes_needed                                                                                                                                    | changes_needed_hidden
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'responder_digital_returnables_state_model':'CDLResponder']
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'responder_digital_returnables_state_model':'CDLResponder']
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1']                  | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'responder_digital_returnables_state_model':'CDLResponder']
 
   }
 
@@ -909,7 +910,7 @@ class DosomethingSimple {
         when:"Progress the request"
             // Ensure we have the correct model for the responder
             log.debug("Setting responder state model to " + stateModel);
-            changeSettings(tenantId, [ state_model_responder : stateModel ], true);
+            changeSettings(tenantId, [ responder_returnables_state_model : stateModel ], true);
 
         then:"If no exception assume it has been set"
             assert(true);
@@ -1855,7 +1856,8 @@ class DosomethingSimple {
 
     }
 
-    void "Test transmission of copyright and publication type to supplier"(String copyrightType, String publicationType, String patronIdentifier) {
+    void "Test transmission of copyright and publication type to supplier"(
+            String copyrightType, String publicationType, String patronIdentifier) {
         String requesterTenantId = "RSInstOne";
         String responderTenantId = "RSInstThree";
         String patronReference = 'ref-' + patronIdentifier + randomCrap(6);
@@ -1877,15 +1879,15 @@ class DosomethingSimple {
             setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
             doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
-            //requester request sent to supplier?
+            // requester request sent to supplier?
             waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
 
-            //responder request created?
+            // responder request created?
             String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
             def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
 
-        then: "meh"
+        then: "Assert values"
             assert(responderRequestData.patronReference == patronReference);
             assert(responderRequestData.publicationType?.value == publicationType);
             assert(responderRequestData.copyrightType?.value == copyrightType);
@@ -1898,5 +1900,8 @@ class DosomethingSimple {
         // Look for request to get to 'sent to supplier'
         // Look for responder request w/ patron reference
         // check for copyright and publication type in responder request
+
     }
+
+
 }
