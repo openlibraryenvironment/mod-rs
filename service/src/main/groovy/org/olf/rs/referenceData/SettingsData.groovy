@@ -151,7 +151,7 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE     = 'requester_digital_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_RETURNABLE             = 'responder_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
-    public static final String SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE     = 'responder_digital_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
     // SLNP non-returnable client settings
@@ -333,7 +333,7 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_SLNP_RESPONDER, null, true);
-            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, null, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, null, null, true);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);

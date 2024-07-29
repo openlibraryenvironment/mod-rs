@@ -519,7 +519,7 @@ public class StatusService {
                 if (request.deliveryMethod?.value == 'url') {
                     settingsKey = isRequester
                             ? SettingsData.SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE
-                            : SettingsData.SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE
+                            : SettingsData.SETTING_STATE_MODEL_RESPONDER_CDL
                 } else {
                     settingsKey = isRequester
                             ? SettingsData.SETTING_STATE_MODEL_REQUESTER_RETURNABLE
