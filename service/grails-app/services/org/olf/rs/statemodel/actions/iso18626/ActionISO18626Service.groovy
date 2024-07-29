@@ -2,7 +2,8 @@ package org.olf.rs.statemodel.actions.iso18626;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolMessageBuildingService;
-import org.olf.rs.statemodel.AbstractAction;
+import org.olf.rs.statemodel.AbstractAction
+import org.olf.rs.statemodel.AbstractSlnpNonReturnableAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
@@ -12,7 +13,7 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  * @author Chas
  *
  */
-public abstract class ActionISO18626Service extends AbstractAction {
+public abstract class ActionISO18626Service extends AbstractSlnpNonReturnableAction {
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
 

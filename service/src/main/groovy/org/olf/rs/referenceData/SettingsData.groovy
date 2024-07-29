@@ -22,6 +22,9 @@ public class SettingsData {
     private static final String SETTING_TYPE_STRING   = 'String';
     private static final String SETTING_TYPE_TEMPLATE = 'Template';
 
+    public static final String SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB = "BVB"
+    public static final String SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BSZ = "BSZ"
+
     private static final String SECTION_AUTO_RESPONDER         = 'autoResponder';
     private static final String SECTION_CHAT                   = 'chat';
     private static final String SECTION_FILE_STORAGE           = 'fileStorage';
@@ -150,6 +153,9 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_DIGITAL_RETURNABLE     = 'responder_digital_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
+
+    // SLNP non-returnable client settings
+    public static final String SETTING_SLNP_NON_RETURNABLE_ACTIVE_CLIENT = 'slnp_non_returnable_active_client';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -299,6 +305,8 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
+
+            ensureAppSetting(SETTING_SLNP_NON_RETURNABLE_ACTIVE_CLIENT, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, null, null, true);
 
             ensureAppSetting(SETTING_FILE_STORAGE_ENGINE, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, FileUploadService.S3_STORAGE_ENGINE);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_ENDPOINT, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);

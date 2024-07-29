@@ -37,10 +37,20 @@ public class SLNPNonReturnablesStateModelData {
 
     private static Map slnpNonReturnableRequesterISO18626DocumentAvailable = [
             code: 'slnpNonReturnableRequesterISO18626DocumentAvailable',
-            description: 'Request has been updated by the supplier with the document available status.',
+            description: 'Request is manually marked as available.',
             result: true,
             status: Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE,
-            qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_DOCUMENT_AVAILABLE,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableRequesterISO18626DocumentSupplied = [
+            code: 'slnpNonReturnableRequesterISO18626DocumentSupplied',
+            description: 'Request is manually marked as supplied.',
+            result: true,
+            status: Status.SLNP_REQUESTER_DOCUMENT_SUPPLIED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_DOCUMENT_SUPPLIED,
             saveRestoreState: null,
             nextActionEvent : null
     ];
@@ -94,7 +104,8 @@ public class SLNPNonReturnablesStateModelData {
                     SLNPStateModelData.slnpRequesterISO18626Aborted,
                     SLNPStateModelData.slnpRequesterISO18626CancelRequest,
                     slnpNonReturnablesResponderUnfilled,
-                    slnpNonReturnableRequesterISO18626DocumentAvailable
+                    slnpNonReturnableRequesterISO18626DocumentAvailable,
+                    slnpNonReturnableRequesterISO18626DocumentSupplied
             ]
     ];
 
