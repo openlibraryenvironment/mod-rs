@@ -55,6 +55,16 @@ public class SLNPNonReturnablesStateModelData {
             nextActionEvent : null
     ];
 
+    private static Map slnpNonReturnableRequesterMarkedAsAvailable = [
+            code: 'slnpNonReturnableRequesterMarkedAsAvailable',
+            description: 'Request is manually marked as available. This action is needed when no data-change event ("Loaned") from ZFL is available. An automatic fee is created in the ILS for the request via AcceptItem.',
+            result: true,
+            status: Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
     private static Map slnpNonReturnableResponderSupplierSuppliesDocument = [
             code: 'slnpNonReturnableResponderSupplierSuppliesDocument',
             description: 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.',
@@ -115,6 +125,15 @@ public class SLNPNonReturnablesStateModelData {
             ]
     ];
 
+    private static Map slnpNonReturnableRequesterManuallyMarkAvailableList = [
+            code: ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE,
+            description: 'Request is manually marked as available.',
+            model: StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER,
+            results: [
+                    slnpNonReturnableRequesterMarkedAsAvailable
+            ]
+    ];
+
     // Responder Event lists
 
     private static Map slnpNonReturnableResponderRespondCannotSupplyList = [
@@ -150,6 +169,7 @@ public class SLNPNonReturnablesStateModelData {
             slnpNonReturnableRequesterAbortedList,
             slnpNonReturnableRequesterReceivedList,
             slnpNonReturnableRequesterManuallyMarkSuppliedList,
+            slnpNonReturnableRequesterManuallyMarkAvailableList,
 
             slnpNonReturnableResponderRespondCannotSupplyList,
             slnpNonReturnableResponderSupplierPrintPullSlipList,
@@ -193,6 +213,7 @@ public class SLNPNonReturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE)
 
         // SLNP_REQ_ABORTED OR "Aborted"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED);
@@ -213,6 +234,7 @@ public class SLNPNonReturnablesStateModelData {
         ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, 'Request is manually marked as supplied. This action is needed when no data-change event ("Loaned") from ZFL is available.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, 'Request is manually marked as available. This action is needed when no data-change event ("Loaned") from ZFL is available.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, true);
     }
 
 	public static void loadStateModelData() {
