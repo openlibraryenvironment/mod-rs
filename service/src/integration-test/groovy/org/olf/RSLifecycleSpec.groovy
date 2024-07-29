@@ -1882,7 +1882,6 @@ class DosomethingSimple {
             // requester request sent to supplier?
             waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
-
             // responder request created?
             String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
             def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
@@ -1902,6 +1901,4 @@ class DosomethingSimple {
         // check for copyright and publication type in responder request
 
     }
-
-
 }
