@@ -87,7 +87,7 @@ def enable(args, token):
             })
     for tenant in TENANTS:
         print("enabling on {}".format(tenant))
-        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?loadReference%3Dtrue'.format(tenant),
+        r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?tenantParameters=loadReference%3Dtrue'.format(tenant),
             payload=json.dumps(enable_payload).encode('UTF-8'),
             tenant='supertenant',
             token=token
