@@ -38,6 +38,7 @@ public class NoteSpecials {
     public static final String FIELD_TITLE                      = 'Title';
     public static final String FIELD_TITLE_OF_COMPONENT         = 'TitleOfComponent';
     public static final String FIELD_VOLUME                     = 'Volume';
+    public static final String FIELD_COPYRIGHT_TYPE             = 'CopyrightType';
 
     public static final String LAST_SEQUENCE_PREFIX = LAST_SEQUENCE + SPECIAL_SEPARATOR;
     public static final String SEQUENCE_PREFIX      = SEQUENCE + SPECIAL_SEPARATOR;
@@ -59,4 +60,5 @@ public class NoteSpecials {
     public static final String UPDATED_FIELD_TITLE_PREFIX                      = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_TITLE + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX         = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_TITLE_OF_COMPONENT + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_VOLUME_PREFIX                     = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_VOLUME + SPECIAL_SEPARATOR;
+    public static final String UPDATED_FIELD_COPYRUIGHT_TYPE                   = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_COPYRIGHT_TYPE + SPECIAL_SEPARATOR;
 }
