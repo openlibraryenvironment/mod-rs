@@ -180,11 +180,17 @@ public class PatronNoticeService {
                 cancellationReason: pr?.cancellationReason?.label ?: ''
             ],
             item: [
+                author: pr?.author,
+                authorOfComponent: pr?.authorOfComponent,
                 barcode: pr?.selectedItemBarcode ?: '',
-                title: pr.title,
-                materialType: pr?.publicationType?.label ?: '',
+                issue: pr?.issue,
                 location: pr?.pickLocation?.name,
-                shelvingLocation: pr?.pickShelvingLocation?.name
+                materialType: pr?.publicationType?.label ?: '',
+                pages: pr?.pagesRequested,
+                shelvingLocation: pr?.pickShelvingLocation?.name,
+                title: pr?.title,
+                titleOfComponent: pr?.titleOfComponent,
+                volume: pr?.volume
             ]
         ];
         return(values);
