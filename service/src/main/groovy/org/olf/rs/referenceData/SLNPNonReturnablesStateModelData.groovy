@@ -206,7 +206,7 @@ public class SLNPNonReturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         // To delete an unwanted available action add Model id and action code to this array
-        [StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED]
+        [StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER).id, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED]
                 .each { availableActionToRemove ->
             log.info("Remove available action ${availableActionToRemove}");
             try {

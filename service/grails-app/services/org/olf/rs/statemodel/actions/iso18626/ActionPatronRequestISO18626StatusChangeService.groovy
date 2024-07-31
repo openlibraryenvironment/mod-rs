@@ -49,12 +49,15 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
                     String slnpNonRetActiveClientSettingValue = settingsService.getSettingValue(SettingsData.SETTING_SLNP_NON_RETURNABLE_ACTIVE_CLIENT)
 
-                    if (slnpNonRetActiveClientSettingValue != null) {
-                        if (slnpNonRetActiveClientSettingValue.equalsIgnoreCase(SettingsData.SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB)) {
-                            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_SUPPLIED
-                        } else if (slnpNonRetActiveClientSettingValue.equalsIgnoreCase(SettingsData.SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BSZ)) {
-                            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_AVAILABLE
-                        }
+                    // Set default value to BVB if the setting is missing for some reason.
+                    if (slnpNonRetActiveClientSettingValue == null) {
+                        slnpNonRetActiveClientSettingValue = SettingsData.SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB
+                    }
+
+                    if (slnpNonRetActiveClientSettingValue.equalsIgnoreCase(SettingsData.SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB)) {
+                        actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_SUPPLIED
+                    } else if (slnpNonRetActiveClientSettingValue.equalsIgnoreCase(SettingsData.SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BSZ)) {
+                        actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_AVAILABLE
                     }
                 }
             }
