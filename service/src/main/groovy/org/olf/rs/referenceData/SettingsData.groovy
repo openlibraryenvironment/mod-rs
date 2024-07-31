@@ -116,14 +116,15 @@ public class SettingsData {
     public static final String SETTING_PATRON_STORE_USER     = 'patron_store_user';
 
     // Settings for the autoResponder section
-    public static final String SETTING_AUTO_RESPONDER_CANCEL           = 'auto_responder_cancel';
-    public static final String SETTING_AUTO_RESPONDER_LOCAL            = 'auto_responder_local';
-    public static final String SETTING_AUTO_RESPONDER_STATUS           = 'auto_responder_status';
-    public static final String SETTING_COPY_AUTO_RESPONDER_STATUS      = 'copy_auto_responder_status';
-    public static final String SETTING_STALE_REQUEST_2_DAYS            = 'stale_request_2_days';
-    public static final String SETTING_STALE_REQUEST_1_ENABLED         = 'stale_request_1_enabled';
-    public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND = 'stale_request_3_exclude_weekend';
-    public static final String SETTING_CHECK_DUPLICATE_TIME            = 'check_duplicate_time';
+    public static final String SETTING_AUTO_RESPONDER_CANCEL                    = 'auto_responder_cancel';
+    public static final String SETTING_AUTO_RESPONDER_LOCAL                     = 'auto_responder_local';
+    public static final String SETTING_AUTO_RESPONDER_STATUS                    = 'auto_responder_status';
+    public static final String SETTING_COPY_AUTO_RESPONDER_STATUS               = 'copy_auto_responder_status';
+    public static final String SETTING_STALE_REQUEST_2_DAYS                     = 'stale_request_2_days';
+    public static final String SETTING_STALE_REQUEST_1_ENABLED                  = 'stale_request_1_enabled';
+    public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND          = 'stale_request_3_exclude_weekend';
+    public static final String SETTING_CHECK_DUPLICATE_TIME                     = 'check_duplicate_time';
+    public static final String SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE  = 'auto_responder_requester_non_ret';
 
     // Settings for the chat section
     public static final String SETTING_CHAT_AUTO_READ = 'chat_auto_read';
@@ -153,9 +154,6 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
-
-    // SLNP non-returnable client settings
-    public static final String SETTING_SLNP_NON_RETURNABLE_ACTIVE_CLIENT = 'slnp_non_returnable_active_client';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -281,6 +279,10 @@ public class SettingsData {
             ensureAppSetting(SETTING_COPY_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, RefdataValueData.COPY_AUTO_RESPONDER_OFF).value);
             ensureAppSetting(SETTING_COPY_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, RefdataValueData.COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY).value);
 
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_OFF).value);
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_AVAILABLE).value)
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_SUPPLIED).value);
+
             // Setup the Stale request settings (added the numbers so they appear in the order I want them in
             ensureAppSetting(SETTING_STALE_REQUEST_1_ENABLED, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_STALE_REQUEST_2_DAYS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '3');
@@ -305,8 +307,6 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
-
-            ensureAppSetting(SETTING_SLNP_NON_RETURNABLE_ACTIVE_CLIENT, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB, null, true);
 
             ensureAppSetting(SETTING_FILE_STORAGE_ENGINE, SECTION_FILE_STORAGE, SETTING_TYPE_STRING, null, FileUploadService.S3_STORAGE_ENGINE);
             ensureAppSetting(SETTING_FILE_STORAGE_S3_ENDPOINT, SECTION_FILE_STORAGE, SETTING_TYPE_STRING);
