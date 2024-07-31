@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 
@@ -26,6 +28,17 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
 
                 // Set the selected item barcode to the new generated value
                 request.selectedItemBarcode = itemBarcode
+
+                if (acceptResult.requestUuid) {
+                    Map customIdentifiersMap = [:]
+                    if (request.customIdentifiers) {
+                        customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                    }
+                    if (acceptResult.requestUuid) {
+                        customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                    }
+                    request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                }
 
                 reshareApplicationEventHandlerService.auditEntry(request,
                         request.state,
