@@ -12,13 +12,13 @@ import org.olf.rs.statemodel.Actions
  * Document has been successfully supplied
  *
  */
-public class ActionSLNPNonReturnableRequesterSlnpRequesterReceivedService extends AbstractAction {
+public class ActionSLNPNonReturnableRequesterSlnpNonReturnableRequesterReceivedService extends AbstractAction {
     PatronNoticeService patronNoticeService
 
 
     @Override
     String name() {
-        return(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED)
+        return(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED)
     }
 
     @Override

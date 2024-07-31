@@ -86,9 +86,10 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
 
 	// SLNP Requester Actions
-	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";
-	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED  = "slnpRequesterReceived";
-	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST      = "slnpMarkItemLost";
+	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT                       = "slnpHandleAbort";
+	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED                 = "slnpRequesterReceived";
+	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST                     = "slnpMarkItemLost";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED  = "slnpNonReturnableRequesterReceived";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";

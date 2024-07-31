@@ -206,7 +206,8 @@ public class SLNPNonReturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         // To delete an unwanted available action add Model id and action code to this array
-        [].each { availableActionToRemove ->
+        [Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER]
+                .each { availableActionToRemove ->
             log.info("Remove available action ${availableActionToRemove}");
             try {
                 AvailableAction.executeUpdate(
@@ -230,7 +231,7 @@ public class SLNPNonReturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_ABORTED, Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_ABORTED);
 
         // SLNP_REQ_DOCUMENT_AVAILABLE OR "Document available"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_DOCUMENT_AVAILABLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED);
 
         // SLNP_RES_NEW_AWAIT_PULL_SLIP OR "Awaiting pull slip printing"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP);
@@ -242,7 +243,7 @@ public class SLNPNonReturnablesStateModelData {
     }
 
     public static void loadActionEventData() {
-        ActionEvent.ensure(Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, 'Request is manually marked as supplied. This action is needed when no data-change event ("Loaned") from ZFL is available.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, 'Request is manually marked as available. This action is needed when no data-change event ("Loaned") from ZFL is available.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, true);
