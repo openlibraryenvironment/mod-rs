@@ -41,7 +41,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
         [ field: "titleOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX, isDate: false ],
         [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ],
-        [ field: "copyrightType", notePrefix: NoteSpecials.UPDATED_FIELD_COPYRUIGHT_TYPE, isDate: false ]
+        [field: "copyrightType", notePrefix: NoteSpecials.UPDATED_FIELD_COPYRIGHT_TYPE, isDate: false ]
     ];
 
     @Override
