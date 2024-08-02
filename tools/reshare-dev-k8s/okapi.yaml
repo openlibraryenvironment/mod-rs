@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: okapi
-          image: folioorg/okapi:4.14.1
+          image: folioorg/okapi:5.3.0
           args:
             - dev
           env:
