@@ -12,7 +12,8 @@ import org.olf.rs.ShelvingLocationSite;
 import org.olf.rs.Z3950Service;
 import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.CheckinItem;
-import org.olf.rs.circ.client.CheckoutItem;
+import org.olf.rs.circ.client.CheckoutItem
+import org.olf.rs.circ.client.CreateUserFiscalTransaction;
 import org.olf.rs.circ.client.RequestItem;
 import org.olf.rs.circ.client.CancelRequestItem;
 import org.olf.rs.circ.client.CirculationClient;
@@ -726,7 +727,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                         .setRegistryId(ncipConnectionDetails.registryId)
                         .setRequestedActionTypeString(requested_action)
                         .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile)
-                        .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
 
           if(getNCIPTemplatePrefix() != null) {
             log.debug("[${CurrentTenant.get()}] setting NCIP template prefix to ${getNCIPTemplatePrefix()}");
@@ -1033,5 +1033,39 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
     log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
+  }
+
+  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+    Map result = [
+            result: true,
+            reason: 'ncip'
+    ];
+
+
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+    if (ncipConnectionDetails.useDefaultPatronFee) {
+      CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+
+      CreateUserFiscalTransaction createUserFiscalTransaction = new CreateUserFiscalTransaction()
+              .setToAgency(ncipConnectionDetails.ncipToAgency)
+              .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+              .setRegistryId(ncipConnectionDetails.registryId)
+              .setUseridString(userId)
+              .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
+
+      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
+      JSONObject response = client.send(createUserFiscalTransaction);
+      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction response ${response}");
+      protocolInformationToResult(response, ncipLogDetails);
+
+      if (response.has('problems')) {
+        result.result = false;
+        result.problems = response.get('problems');
+      } else {
+        result.userId = response.opt("userId")
+      }
+    }
+
+    return result;
   }
 }
