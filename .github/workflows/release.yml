@@ -33,8 +33,8 @@ jobs:
       - name: Start containers
         run: |
           cd tools/testing
-          docker-compose down -v
-          docker-compose up -d &> dockerOutput.log
+          docker compose down -v
+          docker compose up -d &> dockerOutput.log
           sleep 20
 
       - name: Build with Gradle
@@ -72,7 +72,7 @@ jobs:
         if: always()
         run: |
           cd tools/testing
-          docker-compose down -v
+          docker compose down -v
           sleep 10
 
       - name: Upload Test Results Files
