@@ -88,4 +88,11 @@ public class ManualHostLMSService implements HostLMSActions {
   boolean isManualCancelRequestItem() {
     return false
   }
+
+  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+    return [
+            result: true,
+            reason: 'spoofed'
+    ]
+  }
 }
