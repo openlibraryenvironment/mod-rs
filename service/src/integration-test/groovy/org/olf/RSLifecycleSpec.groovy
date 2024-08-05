@@ -1784,7 +1784,6 @@ class DosomethingSimple {
     }
 
     void "Try to submit and fix a blank request on the nonreturnables statemodel"(
-
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -1839,21 +1838,17 @@ class DosomethingSimple {
         String performActionUrl = "${baseUrl}/rs/patronrequests/${response?.id}/performAction".toString();
         log.debug("Posting requesterRetryRequest payload to ${performActionUrl}");
 
-        def actionResponse = doPost(performActionUrl, jsonPayload);
+        doPost(performActionUrl, jsonPayload);
 
         waitForRequestState(tenantId, 20000, requestPatronId + "_two",
                 Status.PATRON_REQUEST_IDLE);
-
 
         then: "Whatever"
         assert true;
 
         where:
-
         tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
         'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
-
-
     }
 
     void "Test transmission of copyright and publication type to supplier"(
@@ -1899,6 +1894,5 @@ class DosomethingSimple {
         // Look for request to get to 'sent to supplier'
         // Look for responder request w/ patron reference
         // check for copyright and publication type in responder request
-
     }
 }
