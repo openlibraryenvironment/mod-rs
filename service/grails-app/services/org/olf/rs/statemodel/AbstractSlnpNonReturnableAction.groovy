@@ -4,6 +4,7 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
+import org.olf.rs.lms.HostLMSActions
 
 /**
  * Abstract SLNP non-returnables action for common logic - Accept Item NCIP call

@@ -1062,10 +1062,10 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.result = false;
         result.problems = response.get('problems');
       } else {
-        result.userId = response.opt("userId")
+        result.userUuid = response.opt("userUuid")
+        result.feeUuid = response.opt("feeUuid")
       }
     }
-
     return result;
   }
 }
