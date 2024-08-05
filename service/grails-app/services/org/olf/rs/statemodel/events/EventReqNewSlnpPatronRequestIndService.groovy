@@ -71,7 +71,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         if (hostLMSActions) {
             log.debug('Auto Supply....')
             INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
-            String userId = request.externalHoldRequestId
+            String userId = request.patronIdentifier
 
             try {
                 Map userFiscalTransactionResult = hostLMSActions.createUserFiscalTransaction(settingsService, userId, ncipLogDetails)
