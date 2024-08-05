@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel.events
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
@@ -74,6 +76,16 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
                 if (userFiscalTransactionResult?.result == true) {
                     String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"
+
+                    if (userFiscalTransactionResult.userUuid && userFiscalTransactionResult.feeUuid) {
+                        Map customIdentifiersMap = [:]
+                        if (request.customIdentifiers) {
+                            customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                        }
+                        customIdentifiersMap.put("userUuid", checkoutuserFiscalTransactionResultResult.userUuid)
+                        customIdentifiersMap.put("feeUuid", checkoutuserFiscalTransactionResultResult.feeUuid)
+                        request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                    }
 
                     reshareApplicationEventHandlerService.auditEntry(request,
                             request.state,
