@@ -1,6 +1,5 @@
 package org.olf.rs.statemodel.events
 
-import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
@@ -10,13 +9,10 @@ import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.logging.INcipLogDetails
 import org.olf.rs.logging.ProtocolAuditService
 import org.olf.rs.patronRequest.PickupLocationService
-import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.AbstractEvent
-import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.Events
-import org.olf.rs.statemodel.StateModel
 
 /**
  * This event service takes a new requester SLNP patron request and validates and generates HRID.
@@ -78,22 +74,6 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
                 if (userFiscalTransactionResult?.result == true) {
                     String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"
-
-                    // For SLNP non-returnables we need to set the Qualifier depending on the non-returnable setting
-                    // BVB -> SLNP_REQ_DOCUMENT_SUPPLIED, BSZ -> SLNP_REQ_DOCUMENT_AVAILABLE
-                    if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)) {
-                        String autoSupplySetting = AppSetting.findByKey(SettingsData.SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE)?.value
-                        if (autoSupplySetting) {
-                            autoSupplySetting = autoSupplySetting.toLowerCase()
-                            if (autoSupplySetting == "on:_available") {
-                                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_AVAILABLE
-                            } else if (autoSupplySetting == "on:_supplied") {
-                                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_DOCUMENT_SUPPLIED
-                            } else {
-                                log.debug('Auto supply is turned off!')
-                            }
-                        }
-                    }
 
                     reshareApplicationEventHandlerService.auditEntry(request,
                             request.state,
