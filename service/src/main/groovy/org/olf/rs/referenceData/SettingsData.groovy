@@ -22,9 +22,6 @@ public class SettingsData {
     private static final String SETTING_TYPE_STRING   = 'String';
     private static final String SETTING_TYPE_TEMPLATE = 'Template';
 
-    public static final String SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BVB = "BVB"
-    public static final String SETTING_VALUE_SLNP_NON_RETURNABLE_CLIENT_BSZ = "BSZ"
-
     private static final String SECTION_AUTO_RESPONDER         = 'autoResponder';
     private static final String SECTION_CHAT                   = 'chat';
     private static final String SECTION_FILE_STORAGE           = 'fileStorage';

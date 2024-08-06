@@ -46,7 +46,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
                     log.debug('Auto Supply....')
                     performCommonAction(request, parameters, actionResultDetails, auditMessage)
 
-                    String autoSupplySetting = AppSetting.findByKey(SettingsData.SETTING_AUTO_RESPONDETR_REQUESER_NON_RETURNABLE)?.value
+                    String autoSupplySetting = AppSetting.findByKey(SettingsData.SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE)?.value
                     if (autoSupplySetting) {
                         autoSupplySetting = autoSupplySetting.toLowerCase()
                         if (autoSupplySetting == "on:_available") {
