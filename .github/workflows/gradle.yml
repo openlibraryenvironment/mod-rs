@@ -129,7 +129,7 @@ jobs:
         if: always()
         uses: actions/delete-package-versions@v5
         with:
-          package-name: 'mod-directory'
+          package-name: 'mod-rs'
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'true'
