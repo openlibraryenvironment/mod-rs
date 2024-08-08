@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-import argparse import json
+import argparse
+import json
 import re
 import sys
 import time
