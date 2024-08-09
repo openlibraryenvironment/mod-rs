@@ -29,12 +29,15 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
         [ status : Status.PATRON_REQUEST_BLANK_FORM_REVIEW ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
-        [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED ]
+        [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED ],
+        [ status : Status.PATRON_REQUEST_UNFILLED]
     ];
 
     static private final List nrResponderStates = [
         [ status : Status.RESPONDER_IDLE ],
-        [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP ],
+        [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
+        [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
+        [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
         [ status : Status.RESPONDER_UNFILLED ],
         [ status : Status.RESPONDER_COPY_AWAIT_PICKING ],
         [ status : Status.RESPONDER_DOCUMENT_DELIVERED, isTerminal: true ]
@@ -69,6 +72,16 @@ public class NonreturnablesStateModelData {
             result: true,
             status: Status.PATRON_REQUEST_INVALID_PATRON,
             qualifier: ActionEventResultQualifier.QUALIFIER_INVALID_PATRON,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterLMSCallFailed = [
+            code: 'nrRequesterLMSCallFailed',
+            description: 'Failed to talk to the host LMS to validate the patron',
+            status: Status.PATRON_REQUEST_INVALID_PATRON,
+            qualifier: ActionEventResultQualifier.QUALIFIER_HOST_LMS_CALL_FAILED,
+            result: true,
             saveRestoreState: null,
             nextActionEvent: null
     ];
@@ -239,6 +252,7 @@ public class NonreturnablesStateModelData {
                     nrRequesterNewPatronRequestOK,
                     nrRequesterOverLimit,
                     nrRequesterInvalidPatron,
+                    nrRequesterLMSCallFailed,
                     nrRequesterBlankForm
             ]
 

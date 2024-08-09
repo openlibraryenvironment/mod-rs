@@ -138,7 +138,7 @@ public class SettingsData {
     public static final String SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP = 'combine_returned_by_patron_and_return_ship';
 
     // Network configuration settings
-    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS = 'network_maximum_send_attempts';
+    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS = 'network_maximum_send_attempts';
     public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
     public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
@@ -295,7 +295,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_COMBINE_FILL_AND_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP, SECTION_STATE_ACTION_CONFIG, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
-            ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '0');
+            ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '3');
             ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');
             ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
 
