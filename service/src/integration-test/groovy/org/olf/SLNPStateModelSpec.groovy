@@ -173,11 +173,10 @@ class SLNPStateModelSpec extends TestBase {
         1==1
 
         where:
-        tenant_id      | changes_needed                                                                                                                                    | changes_needed_hidden
-        'RSSlnpOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-        'RSSlnpTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-        'RSSlnpThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['state_model_requester':'SLNPRequester', 'state_model_responder':'SLNPResponder']
-
+        tenant_id      | changes_needed                                                                                                                                                                        | changes_needed_hidden
+        'RSSlnpOne'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpTwo'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpThree'  | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
     }
 
     void "Validate Static Router"() {
@@ -221,7 +220,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSymbol,
             String requestSystemId,
             Boolean isRequester,
-            String hrid) {
+            String hrid,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -234,7 +234,8 @@ class SLNPStateModelSpec extends TestBase {
                 systemInstanceIdentifier: requestSystemId,
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
-                hrid: hrid
+                hrid: hrid,
+                serviceType: serviceType
 
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
@@ -254,7 +255,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSystemId,
             Boolean isRequester,
             String hrid,
-            String peerRequestIdentifier) {
+            String peerRequestIdentifier,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -266,7 +268,8 @@ class SLNPStateModelSpec extends TestBase {
                 isRequester: isRequester,
                 hrid: hrid,
                 peerRequestIdentifier: peerRequestIdentifier,
-                customIdentifiers: '{"schemeValue": "ZFL","identifiers": [{"key": "TitelId","value": "in00000000002"},{"key": "BsTyp2","value": "L"},{"key": "MedTyp","value": "ml"}]}'
+                customIdentifiers: '{"schemeValue": "ZFL","identifiers": [{"key": "TitelId","value": "in00000000002"},{"key": "BsTyp2","value": "L"},{"key": "MedTyp","value": "ml"}]}',
+                serviceType: serviceType
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
@@ -288,7 +291,8 @@ class SLNPStateModelSpec extends TestBase {
             String requestSystemId,
             Boolean isRequester,
             String hrid,
-            String peerRequestIdentifier) {
+            String peerRequestIdentifier,
+            String serviceType) {
 
         Map request = [
                 patronReference: requestPatronId + "_test",
@@ -300,7 +304,8 @@ class SLNPStateModelSpec extends TestBase {
                 patronIdentifier: requestPatronId,
                 isRequester: isRequester,
                 hrid: hrid,
-                peerRequestIdentifier: peerRequestIdentifier
+                peerRequestIdentifier: peerRequestIdentifier,
+                serviceType: serviceType
         ];
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         log.info("new Request created: ${resp.id}")
@@ -439,7 +444,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, requesterSystemId, true, hrid, hrid);
+                    responderSymbol, requesterSystemId, true, hrid, hrid, 'loan');
 
             log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}");
 
@@ -465,7 +470,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequest(responderTenantId, responderInitialState, patronId, title, author, requesterSymbol,
-                    responderSymbol, responderSystemId, false, hrid, hrid);
+                    responderSymbol, responderSystemId, false, hrid, hrid, 'loan');
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
 
             // Set Auto Responder
@@ -593,7 +598,8 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, isRequester, hrid);
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol,
+                    requestSystemId, isRequester, hrid, 'loan');
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate initial status
@@ -659,7 +665,8 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor, requestSymbol, requestSystemId, false, hrid);
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor,
+                    requestSymbol, requestSystemId, false, hrid, 'loan');
             log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
 
             // Validate Responder initial state
@@ -733,7 +740,7 @@ class SLNPStateModelSpec extends TestBase {
 
             // Create PatronRequest
             responderPatronRequest = createPatronRequestWithoutInitialState(patronId, title, author,
-                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid)
+                    responderSymbol, UUID.randomUUID().toString(), false, hrid, hrid, 'loan')
             log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}");
         }
 
@@ -751,5 +758,163 @@ class SLNPStateModelSpec extends TestBase {
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_IDLE          | '7732-4367-333' | 'title123'  | 'Author123'  | false
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4362-331' | 'title234'  | 'Author234'  | true
         'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
+    }
+
+    void "Test initial state transition to result state by performed action for non returnables"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol,
+            String initialState,
+            String resultState,
+            String action,
+            String jsonFileName,
+            Boolean isRequester) {
+        when: "Performing the action"
+        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
+
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant': tenantId,
+                    'X-Okapi-Token': 'dummy',
+                    'X-Okapi-User-Id': 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers)
+
+            // Create PatronRequest
+            String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase()
+            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, initialState, requestPatronId, requestTitle, requestAuthor, requestSymbol,
+                    requestSystemId, isRequester, hrid, 'copy')
+            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}")
+
+            // Validate initial status
+            String request = waitForRequestStateByHrid(tenantId, 20000, hrid, initialState)
+
+            and: "Check initial state"
+            assert request != null
+
+            // Perform action
+            performAction(slnpPatronRequest?.id, jsonFileName)
+
+            // Validate result status after performed action
+            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true)
+            validateStateTransition(newResultStatus, resultState)
+        }
+
+        then: "Check values"
+        assert true;
+
+        where:
+        tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                                                     | jsonFileName                                  | isRequester
+        'RSSlnpOne'   | 'request1nrs' | 'test1nrs'    | '1234-5678-9123-2221' | '9876-7771'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_CANCEL_LOCAL                                      | 'slnpRequesterCancelLocal'                    | true
+        'RSSlnpOne'   | 'request2nrs' | 'test2nrs'    | '1234-5678-9123-2222' | '9876-7772'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT                                 | 'slnpRequesterHandleAbort'                    | true
+        'RSSlnpOne'   | 'request3nrs' | 'test3nrs'    | '1234-5678-9123-2223' | '9876-7773'       | 'ISIL:RSS1'   | 'SLNP_REQ_DOCUMENT_AVAILABLE'       | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED            | 'slnpNonReturnableRequesterRequesterReceived' | true
+        'RSSlnpOne'   | 'request4nrs' | 'test4nrs'    | '1234-5678-9123-2224' | '9876-7774'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED        | 'manuallyMarkSupplied'                        | true
+        'RSSlnpOne'   | 'request5nrs' | 'test5nrs'    | '1234-5678-9123-2234' | '9876-7274'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_AVAILABLE'        | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE       | 'manuallyMarkAvailable'                       | true
+        'RSSlnpOne'   | 'supply1nrs'  | 'test5nrs'    | '1234-5678-9123-2225' | '9876-7775'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                          | 'supplierPrintPullSlip'                       | false
+        'RSSlnpOne'   | 'supply2nrs'  | 'test6nrs'    | '1234-5678-9123-2226' | '9876-7776'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                            | 'supplierCannotSupply'                        | false
+        'RSSlnpOne'   | 'supply3nrs'  | 'test7nrs'    | '1234-5678-9123-2217' | '9876-7717'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT                   | 'slnpNonReturnableSupplierSuppliesDocument'   | false
+        'RSSlnpOne'   | 'supply4nrs'  | 'test8nrs'    | '1234-5678-9123-2218' | '9876-7718'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                            | 'supplierCannotSupply'                        | false
+    }
+
+    void "Test end to end actions and events from supplier to requester for nonreturnables"(
+            String requesterTenantId,
+            String responderTenantId,
+            String requesterSymbol,
+            String responderSymbol,
+            String requesterInitialState,
+            String requesterResultState,
+            String responderInitialState,
+            String responderResultState,
+            String patronId,
+            String title,
+            String author,
+            String action,
+            String jsonFileName
+    ) {
+        when: "Creating the Requester/Responder Patron Requests"
+
+        String requesterSystemId = UUID.randomUUID().toString()
+        String responderSystemId = UUID.randomUUID().toString()
+
+        String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase()
+
+        String requesterRequest;
+        String responderRequest;
+
+        // Create Requester PatronRequest
+        PatronRequest requesterPatronRequest;
+        Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
+            // Define headers
+            def requesterHeaders = [
+                    'X-Okapi-Tenant'     : requesterTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(requesterHeaders);
+
+            // Create PatronRequest
+            requesterPatronRequest = createPatronRequest(requesterTenantId, requesterInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, requesterSystemId, true, hrid, hrid, 'copy');
+
+            log.debug("Created patron request: ${requesterPatronRequest} ID: ${requesterPatronRequest?.id}")
+
+            // Validate Requester initial status
+            requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterInitialState)
+
+            and: "Check requester initial status"
+            assert requesterRequest != null
+        }
+
+        // Create Responder PatronRequest
+        PatronRequest responderPatronRequest;
+        Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
+
+            // Define headers
+            def headers = [
+                    'X-Okapi-Tenant'     : responderTenantId,
+                    'X-Okapi-Token'      : 'dummy',
+                    'X-Okapi-User-Id'    : 'dummy',
+                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+            ]
+
+            setHeaders(headers);
+
+            // Create PatronRequest
+            responderPatronRequest = createPatronRequest(responderTenantId, responderInitialState, patronId, title, author, requesterSymbol,
+                    responderSymbol, responderSystemId, false, hrid, hrid, 'copy');
+            log.debug("Created patron request: ${responderPatronRequest} ID: ${responderPatronRequest?.id}")
+
+            // Validate Responder initial status
+            responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderInitialState)
+
+            and: "Check responder initial status"
+            assert responderRequest != null
+
+            // Perform action
+            performAction(responderPatronRequest?.id, jsonFileName)
+        }
+
+        // Validate Requester/Responder states after performed actions/events
+        responderRequest = waitForRequestStateByHrid(responderTenantId, 20000, hrid, responderResultState)
+        requesterRequest = waitForRequestStateByHrid(requesterTenantId, 20000, hrid, requesterResultState)
+
+        and: "Check the return value"
+        assert responderRequest != null
+        assert requesterRequest != null
+
+        then: "Check values"
+        assert true;
+
+        where:
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState         | responderInitialState                      | responderResultState            | patronId    | title             | author     | action                                                     | jsonFileName
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_UNFILLED  | '7657-3543' | 'NonReturnable5'  | 'Rebo5'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_UNFILLED  | '6668-8562' | 'NonReturnable7'  | 'Rebo7'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
     }
 }

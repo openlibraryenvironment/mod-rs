@@ -155,7 +155,9 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                                     "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}")
                         }
                         // We need to determine if this request is for the current rota position
-                        if (isForCurrentRotaLocation(eventData, request) || StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode) {
+                        if (isForCurrentRotaLocation(eventData, request) ||
+                                (StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode ||
+                                        StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER == request.stateModel.shortcode)) {
                             // We now need to execute the action for the message
                             String actionToPerform = getActionToPerform(eventData);
 

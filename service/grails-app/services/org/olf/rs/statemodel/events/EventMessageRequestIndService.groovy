@@ -360,7 +360,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
         StateModel stateModel = statusService.getStateModel(pr)
         pr.stateModel = stateModel
 
-        if (stateModel?.shortcode == StateModel.MODEL_SLNP_REQUESTER) {
+        if (isSlnpRequesterStateModel(pr)) {
             String errorAuditMessage = null
             try {
                 Map lookupPatron = reshareActionService.lookupPatron(pr, null)
@@ -391,9 +391,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
         }
     }
 
-    static buildResponseMessage(PatronRequest pr, Map result) {
-        if (pr.stateModel.shortcode == StateModel.MODEL_SLNP_REQUESTER &&
-                pr.state.code == Status.SLNP_REQUESTER_PATRON_INVALID) {
+    static void buildResponseMessage(PatronRequest pr, Map result) {
+        if (isSlnpRequesterStateModel(pr) && pr.state.code.equalsIgnoreCase(Status.SLNP_REQUESTER_PATRON_INVALID)) {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
             result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
             result.errorValue = "NCIP lookup patron call failure for patron identifier: ${pr.patronIdentifier}"
@@ -401,5 +400,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }
         result.newRequestId = pr.id
+    }
+
+    static boolean isSlnpRequesterStateModel(PatronRequest pr) {
+        String shortcode = pr.stateModel.shortcode
+        return shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_REQUESTER) ||
+                shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)
     }
 }

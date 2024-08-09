@@ -12,6 +12,7 @@ import org.olf.rs.ReshareActionService
 import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
+
 /**
  * This event service takes a new SLNP responder patron request
  * to perform validation and respond automatically depending on configured settings.
@@ -44,15 +45,17 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
         eventResultDetails.saveData = true
         eventResultDetails.auditMessage = "Request validation done"
 
-        // Auto Responder
-        try {
-            log.debug('autoRespond....')
-            String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
-            autoRespond(request, autoLoanSetting.toLowerCase(), eventResultDetails)
-        } catch (Exception e) {
-            log.error("Problem in NCIP Request Item call: ${e.getMessage()}", e)
-            eventResultDetails.auditMessage = String.format("NCIP Request Item call failure: %s", e.getMessage())
-            request.needsAttention = true
+        // Loan Auto Responder
+        if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_RESPONDER)) {
+            try {
+                log.debug('autoRespond....')
+                String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
+                autoRespond(request, autoLoanSetting.toLowerCase(), eventResultDetails)
+            } catch (Exception e) {
+                log.error("Problem in NCIP Request Item call: ${e.getMessage()}", e)
+                eventResultDetails.auditMessage = String.format("NCIP Request Item call failure: %s", e.getMessage())
+                request.needsAttention = true
+            }
         }
 
         return(eventResultDetails)

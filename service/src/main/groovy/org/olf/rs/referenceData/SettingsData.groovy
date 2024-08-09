@@ -56,7 +56,8 @@ public class SettingsData {
     public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
     public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
     public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
-    public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location';
+    public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location'
+    public static final String SETTING_NCIP_USE_DEFAULT_PATRON_FEE     = 'ncip_use_default_patron_fee'
 
 
     // Settings for the wmsSettings section
@@ -112,13 +113,15 @@ public class SettingsData {
     public static final String SETTING_PATRON_STORE_USER     = 'patron_store_user';
 
     // Settings for the autoResponder section
-    public static final String SETTING_AUTO_RESPONDER_CANCEL           = 'auto_responder_cancel';
-    public static final String SETTING_AUTO_RESPONDER_LOCAL            = 'auto_responder_local';
-    public static final String SETTING_AUTO_RESPONDER_STATUS           = 'auto_responder_status';
-    public static final String SETTING_STALE_REQUEST_2_DAYS            = 'stale_request_2_days';
-    public static final String SETTING_STALE_REQUEST_1_ENABLED         = 'stale_request_1_enabled';
-    public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND = 'stale_request_3_exclude_weekend';
-    public static final String SETTING_CHECK_DUPLICATE_TIME            = 'check_duplicate_time';
+    public static final String SETTING_AUTO_RESPONDER_CANCEL                    = 'auto_responder_cancel';
+    public static final String SETTING_AUTO_RESPONDER_LOCAL                     = 'auto_responder_local';
+    public static final String SETTING_AUTO_RESPONDER_STATUS                    = 'auto_responder_status';
+    public static final String SETTING_COPY_AUTO_RESPONDER_STATUS               = 'copy_auto_responder_status';
+    public static final String SETTING_STALE_REQUEST_2_DAYS                     = 'stale_request_2_days';
+    public static final String SETTING_STALE_REQUEST_1_ENABLED                  = 'stale_request_1_enabled';
+    public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND          = 'stale_request_3_exclude_weekend';
+    public static final String SETTING_CHECK_DUPLICATE_TIME                     = 'check_duplicate_time';
+    public static final String SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE  = 'auto_responder_requester_non_ret';
 
     // Settings for the chat section
     public static final String SETTING_CHAT_AUTO_READ = 'chat_auto_read';
@@ -140,10 +143,14 @@ public class SettingsData {
     public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
 
     // State model configuration settings
-    public static final String SETTING_STATE_MODEL_REQUESTER     = 'state_model_requester';
-    public static final String SETTING_STATE_MODEL_REQUESTER_CDL = 'state_model_requester_cdl';
-    public static final String SETTING_STATE_MODEL_RESPONDER     = 'state_model_responder';
-    public static final String SETTING_STATE_MODEL_RESPONDER_CDL = 'state_model_responder_cdl';
+    public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';
+    public static final String SETTING_STATE_MODEL_REQUESTER_RETURNABLE             = 'requester_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE         = 'requester_non_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE     = 'requester_digital_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_RETURNABLE             = 'responder_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
+    public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
+    public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -215,6 +222,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
             ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
+            ensureAppSetting(SETTING_NCIP_USE_DEFAULT_PATRON_FEE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, RefdataValueData.NCIP_BARCODE_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
@@ -265,6 +273,13 @@ public class SettingsData {
             ensureAppSetting(SETTING_AUTO_RESPONDER_LOCAL, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_LOCAL, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_LOCAL, RefdataValueData.AUTO_RESPONDER_LOCAL_OFF).value);
             ensureAppSetting(SETTING_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER, RefdataValueData.AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY).value);
 
+            ensureAppSetting(SETTING_COPY_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, RefdataValueData.COPY_AUTO_RESPONDER_OFF).value);
+            ensureAppSetting(SETTING_COPY_AUTO_RESPONDER_STATUS, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_COPY, RefdataValueData.COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY).value);
+
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_OFF).value);
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_AVAILABLE).value)
+            ensureAppSetting(SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, RefdataValueData.AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_SUPPLIED).value);
+
             // Setup the Stale request settings (added the numbers so they appear in the order I want them in
             ensureAppSetting(SETTING_STALE_REQUEST_1_ENABLED, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_STALE_REQUEST_2_DAYS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '3');
@@ -308,6 +323,14 @@ public class SettingsData {
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
 
             ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
+
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_REQUESTER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, true);
+
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
