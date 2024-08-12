@@ -1,11 +1,13 @@
 package org.olf.rs.statemodel.actions;
 
+import com.k_int.web.toolkit.refdata.RefdataValue;
 import java.time.LocalDate;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.patronRequest.PickupLocationService;
+import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -21,7 +23,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
     PickupLocationService pickupLocationService;
     ReshareActionService reshareActionService;
 
-    protected static final List updateableFields = [
+    public static final List updateableFields = [
         [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
         [ field: "authorOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_OF_COMPONENT_PREFIX, isDate: false ],
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
@@ -32,7 +34,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "pagesRequested", notePrefix: NoteSpecials.UPDATED_FIELD_PAGES_REQUESTED_PREFIX, isDate: false ],
         [ field: "patronNote", notePrefix: NoteSpecials.UPDATED_FIELD_PATRON_NOTE_PREFIX, isDate: false ],
         // TODO temporary fix pending PR-1530
-        [ field: "patronIdentifier", notePrefix: '', isDate: false ],
+        [ field: "patronIdentifier", isDate: false, localOnly: true ],
         [ field: "pickupLocationSlug", notePrefix: NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX, isDate: false, noteField: "pickupLocation", doPickupCheck: true ],
         [ field: "placeOfPublication", notePrefix: NoteSpecials.UPDATED_FIELD_PLACE_OF_PUBLICATION_PREFIX, isDate: false ],
         [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
@@ -40,7 +42,8 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
         [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
         [ field: "titleOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX, isDate: false ],
-        [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ]
+        [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ],
+        [ field: "copyrightType", notePrefix: NoteSpecials.UPDATED_FIELD_COPYRIGHT_TYPE, isDate: false, isRefdata: true, refdataCategory: RefdataValueData.VOCABULARY_COPYRIGHT_TYPE ]
     ];
 
     @Override
@@ -71,17 +74,25 @@ public class ActionPatronRequestEditService extends AbstractAction {
         updateableFields.each() { fieldDetails ->
             log.debug("Updating field ${fieldDetails.field} in request ${request.id}");
             // Update the field
-            if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
+            if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate, fieldDetails.isRefdata == true)) {
                 // It has changed
                 if (fieldDetails.doPickupCheck) {
                     // Perform the appropriate checks on the pickup location
                     pickupLocationService.check(request);
                 }
 
-                // Update the note
+                // Update the note unless the edit is local only
+                if (fieldDetails.localOnly) return;
+
                 String fieldToSend = (fieldDetails.noteField == null ? fieldDetails.field : fieldDetails.noteField);
                 noteToSend.append(fieldDetails.notePrefix);
-                noteToSend.append(request[fieldToSend]);
+
+                if (fieldDetails.isRefdata) {
+                    noteToSend.append(request[fieldToSend].value);
+                } else {
+                    noteToSend.append(request[fieldToSend]);
+                }
+
                 noteToSend.append(NoteSpecials.SPECIAL_WRAPPER);
             }
         }
@@ -131,13 +142,17 @@ public class ActionPatronRequestEditService extends AbstractAction {
      * @param isDate Is this a LocalDate field
      * @return true if the field was updated otherwise false
      */
-    protected boolean updateField(Object originalRecord, Object newRecord, String field, StringBuffer updateMessage, boolean isDate = false) {
+    protected boolean updateField(Object originalRecord, Object newRecord, String field, StringBuffer updateMessage, boolean isDate = false, boolean isRefdata = false) {
         boolean updated = false;
 
         Object newValue = newRecord[field];
         // Do we need to turn a string value into a LocalDate
         if (isDate && (newValue != null)) {
             newValue = LocalDate.parse(newValue);
+        }
+
+        if (isRefdata && (newValue != null)) {
+            newValue = RefdataValue.findById(newValue.id);
         }
 
         // Is the original value null
@@ -150,17 +165,25 @@ public class ActionPatronRequestEditService extends AbstractAction {
         } else if (newValue == null) {
             // Value has been cleared
             updated = true;
-        } else if (newValue != originalRecord[field]) {
+        } else if (!isRefdata && newValue != originalRecord[field]) {
             // Value has changed
+            updated = true;
+        } else if (isRefdata && newValue?.id != originalRecord[field]?.id) {
             updated = true;
         }
 
         // Has the field been updated
         if (updated) {
             // It has so add an appropriate message in the audit log
-            updateMessage.append("\nField " + field +
-                 " has changed from \"" + ((originalRecord[field] == null) ? "" : originalRecord[field]) + "\"" +
-                 " to \"" + ((newRecord[field] == null) ? "" : newRecord[field]) + "\"");
+            if (isRefdata) {
+                updateMessage.append("\nField " + field +
+                    " has changed from \"" + ((originalRecord[field] == null) ? "" : originalRecord[field]?.value) + "\"" +
+                    " to \"" + newValue?.value + "\"");
+            } else {
+                updateMessage.append("\nField " + field +
+                     " has changed from \"" + ((originalRecord[field] == null) ? "" : originalRecord[field]) + "\"" +
+                     " to \"" + ((newRecord[field] == null) ? "" : newRecord[field]) + "\"");
+            }
 
              // Now update the field
              originalRecord[field] = newValue;
