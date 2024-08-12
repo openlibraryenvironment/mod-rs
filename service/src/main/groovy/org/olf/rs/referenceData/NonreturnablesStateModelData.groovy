@@ -545,10 +545,6 @@ public class NonreturnablesStateModelData {
                 true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REQUESTER_CANCEL.capitalize(),
                 ActionEventResultList.NR_REQUESTER_CANCEL);
 
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST, "Complete the request", true,
-                StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_COMPLETE_REQUEST.capitalize(),
-                ActionEventResultList.NR_REQUESTER_COMPLETED);
-
         ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, "Respond yes to supply", true,
                 StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_RESPOND_YES.capitalize(),
                 ActionEventResultList.NR_RESPONDER_ANSWER_YES);
