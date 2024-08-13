@@ -76,7 +76,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
             if (canAddFeeAutomatically) {
                 try {
-                    Map userFiscalTransactionResult = hostLMSActions.createUserFiscalTransaction(settingsService, userId, ncipLogDetails)
+                    Map userFiscalTransactionResult = hostLMSActions.createUserFiscalTransaction(settingsService, userId, request.hrid, ncipLogDetails)
 
                     if (userFiscalTransactionResult?.result == true) {
                         String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"

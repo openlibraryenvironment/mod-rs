@@ -82,5 +82,5 @@ public interface HostLMSActions {
    */
   public boolean isManualCancelRequestItem();
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails)
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails)
 }
