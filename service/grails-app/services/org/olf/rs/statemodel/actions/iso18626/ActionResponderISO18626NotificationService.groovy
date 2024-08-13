@@ -1,5 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
+import com.k_int.web.toolkit.refdata.RefdataCategory;
+import com.k_int.web.toolkit.refdata.RefdataValue;
 import java.time.LocalDate;
 
 import org.olf.rs.PatronRequest;
@@ -7,6 +9,7 @@ import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
+import org.olf.rs.statemodel.actions.ActionPatronRequestEditService;
 import org.olf.rs.statemodel.StatusStage;
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
 
@@ -16,24 +19,6 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  *
  */
 public class ActionResponderISO18626NotificationService extends ActionISO18626ResponderService {
-
-    // These are all the fields that can be updated through the note
-    private static final List updateableFields = [
-        [ field: "author", notePrefix: NoteSpecials.UPDATED_FIELD_AUTHOR_PREFIX, isDate: false ],
-        [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
-        [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
-        [ field: "issn", notePrefix: NoteSpecials.UPDATED_FIELD_ISSN_PREFIX, isDate: false ],
-        [ field: "neededBy", notePrefix: NoteSpecials.UPDATED_FIELD_NEEDED_BY_PREFIX, isDate: true ],
-        [ field: "oclcNumber", notePrefix: NoteSpecials.UPDATED_FIELD_OCLC_NUMBER_PREFIX, isDate: false ],
-        [ field: "patronNote", notePrefix: NoteSpecials.UPDATED_FIELD_PATRON_NOTE_PREFIX, isDate: false ],
-        [ field: "pickupLocation", notePrefix: NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX, isDate: false],
-        [ field: "placeOfPublication", notePrefix: NoteSpecials.UPDATED_FIELD_PLACE_OF_PUBLICATION_PREFIX, isDate: false ],
-        [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
-        [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
-        [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
-        [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
-        [ field: "volume", notePrefix: NoteSpecials.UPDATED_FIELD_VOLUME_PREFIX, isDate: false ]
-    ];
 
     @Override
     String name() {
@@ -67,9 +52,9 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
             } else {
                 // Do we have any fields that need updating
                 StringBuffer auditMessage = new StringBuffer();
-                updateableFields.each() { fieldDetails ->
+                ActionPatronRequestEditService.updateableFields.each() { fieldDetails ->
                     Map extractedFieldResult = extractFieldFromNote(note, fieldDetails.notePrefix);
-                    if (extractedFieldResult.data != null) {
+                    if (extractedFieldResult?.data != null) {
                         boolean validValue = true;
                         Object value = extractedFieldResult.data;
 
@@ -81,6 +66,15 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
                                 value = LocalDate.parse(extractedFieldResult.data);
                             } catch (Exception e) {
                                 log.error("Failed to parse date field ${fieldDetails.field} with value ${extractedFieldResult.data}", e);
+                                validValue = false;
+                            }
+                        }
+
+                        if (fieldDetails.isRefdata) {
+                            try {
+                                value = RefdataValue.findByOwnerAndValue(RefdataCategory.findByDesc(fieldDetails.refdataCategory), extractedFieldResult.data);
+                            } catch (Exception e) {
+                                log.error("Failed to match refdata field ${fieldDetails.field} with value ${extractedFieldResult.data}", e);
                                 validValue = false;
                             }
                         }
@@ -126,6 +120,8 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
      */
     private Map extractFieldFromNote(String note, String fieldPrefix) {
         Map result = [ note : note ];
+
+        if (!fieldPrefix) return null;
 
         // Lets see if we can find this label
         int fieldStart = note.indexOf(fieldPrefix);
