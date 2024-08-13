@@ -1,5 +1,6 @@
-package org.olf.rs.referenceData;
+package org.olf.rs.referenceData
 
+import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.statemodel.StateModel;
@@ -41,6 +42,8 @@ public class SettingsData {
     private static final String SECTION_WMS                    = 'wmsSettings';
     private static final String SECTION_VOYAGER                = 'voyagerSettings';
     private static final String SECTION_Z3950                  = 'z3950';
+    private static final String SECTION_AUTOMATIC_FEES         = 'automaticFees';
+    private static final String SECTION_FEATURE_FLAGS          = 'featureFlags';
 
     // Settings for the z3950 section
     public static final String SETTING_Z3950_SERVER_ADDRESS = 'z3950_server_address';
@@ -151,6 +154,12 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE         = 'responder_non_returnables_state_model';
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
+
+    // Feature flag settings
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES  = 'feature_flag_automatic_fees';
+
+    // Automatic fees settings
+    public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -331,6 +340,12 @@ public class SettingsData {
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
+
+            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN).value)
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
