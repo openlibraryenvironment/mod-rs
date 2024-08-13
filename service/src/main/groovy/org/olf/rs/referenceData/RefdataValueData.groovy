@@ -1,5 +1,6 @@
 package org.olf.rs.referenceData
 
+import org.olf.rs.ProtocolReferenceDataValue
 import org.olf.rs.constants.CustomIdentifiersScheme;
 import org.olf.rs.constants.Directory;
 
@@ -58,6 +59,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_REQUEST_ITEM_METHOD                    = "RequestItemMethod";
     public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME              = 'customIdentifiersScheme';
     public static final String VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY   = 'AutoSupply';
+    public static final String VOCABULARY_FEATURE_FLAG                           = 'featureFlag';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -339,6 +341,10 @@ public class RefdataValueData {
 
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
+
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN)
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY)
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN)
 
             // This looks slightly odd, but rather than litter this file with an ever growing list of
             // random delete statements, if you wish to delete
