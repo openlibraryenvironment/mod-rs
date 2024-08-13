@@ -1035,7 +1035,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return availability_summary;
   }
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {
     Map result = [
             result: true,
             reason: 'ncip'
@@ -1050,8 +1050,9 @@ public abstract class BaseHostLMSService implements HostLMSActions {
               .setToAgency(ncipConnectionDetails.ncipToAgency)
               .setFromAgency(ncipConnectionDetails.ncipFromAgency)
               .setRegistryId(ncipConnectionDetails.registryId)
-              .setUseridString(userId)
+              .setUserId(userId)
               .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
+              .setItemId(itemId)
 
       log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
       JSONObject response = client.send(createUserFiscalTransaction);
@@ -1066,6 +1067,6 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.feeUuid = response.opt("feeUuid")
       }
     }
-    return result;
+    return result
   }
 }

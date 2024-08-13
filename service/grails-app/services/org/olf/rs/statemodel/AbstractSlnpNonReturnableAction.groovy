@@ -16,7 +16,7 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
     private static final String REASON_SPOOFED = 'spoofed'
 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails, String auditMessage) {
-        String itemBarcode = "rs-${request.hrid}-${UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4)}"
+        String itemBarcode = request.hrid
         try {
             Map acceptResult = hostLMSService.acceptItem(
                     request,

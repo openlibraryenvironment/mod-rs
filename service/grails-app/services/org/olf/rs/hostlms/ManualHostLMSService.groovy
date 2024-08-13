@@ -89,7 +89,7 @@ public class ManualHostLMSService implements HostLMSActions {
     return false
   }
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {
     return [
             result: true,
             reason: 'spoofed'
