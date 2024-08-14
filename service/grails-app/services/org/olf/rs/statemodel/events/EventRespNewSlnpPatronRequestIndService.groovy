@@ -101,20 +101,14 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             boolean useCallNumber = "Yes".equalsIgnoreCase(useCallNumberString ? useCallNumberString : "No")
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
-                if (useCallNumber) {
-                    request.selectedItemBarcode = requestItemResult.callNumber
-                }
             }
             if (requestItemResult.itemId) {
-                if (!useCallNumber) {
-                    request.selectedItemBarcode = requestItemResult.itemId
-                }
-                RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
+                RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId || rv.itemId == requestItemResult.callNumber }
                 // If there's no rv
                 if (!rv) {
                     rv = new RequestVolume(
                             name: request.volume ?: requestItemResult.itemId,
-                            itemId: requestItemResult.itemId,
+                            itemId: useCallNumber && requestItemResult.callNumber ? requestItemResult.callNumber : requestItemResult.itemId,
                             status: RequestVolume.lookupStatus(VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
                     );
                     request.addToVolumes(rv);
