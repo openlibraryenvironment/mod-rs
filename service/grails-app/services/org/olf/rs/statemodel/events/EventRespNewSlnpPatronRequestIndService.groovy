@@ -97,7 +97,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             if (requestItemResult.location) {
                 request.pickupLocation = requestItemResult.location
             }
-            String useCallNumberString = settingsService.getSettingValue(SettingsData.SETTING_NCIP_USE_DEFAULT_PATRON_FEE)
+            String useCallNumberString = settingsService.getSettingValue(SettingsData.SETTING_NCIP_USE_RECEIVED_CALL_NUMBER)
             boolean useCallNumber = "Yes".equalsIgnoreCase(useCallNumberString ? useCallNumberString : "No")
             if (requestItemResult.callNumber) {
                 request.localCallNumber = requestItemResult.callNumber
