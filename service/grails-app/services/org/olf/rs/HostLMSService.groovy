@@ -285,6 +285,23 @@ public class HostLMSService {
         return cancelRequestItemResult;
     }
 
+    Map deleteItem(PatronRequest request, String itemId) {
+        Map deleteItemResult
+        HostLMSActions hostLMSActions = getHostLMSActions()
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
+            deleteItemResult = getHostLMSActions().deleteItem(
+                    settingsService,
+                    itemId,
+                    ncipLogDetails)
+            protocolAuditService.save(request, ncipLogDetails)
+        } else {
+            deleteItemResult = resultHostLMSNotConfigured
+            request.needsAttention = true
+        }
+        return deleteItemResult
+    }
+
     public boolean isManualCancelRequestItem() {
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {

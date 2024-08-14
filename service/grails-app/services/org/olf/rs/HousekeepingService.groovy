@@ -106,7 +106,7 @@ public class HousekeepingService implements EventPublisher {
         SLNPStateModelData.loadAll();
 
         // Load SLNP non returnable state model data
-          SLNPNonReturnablesStateModelData.loadAll();
+        SLNPNonReturnablesStateModelData.loadAll();
       }
   }
 

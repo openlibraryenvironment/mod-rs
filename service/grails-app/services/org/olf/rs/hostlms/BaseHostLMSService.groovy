@@ -14,6 +14,7 @@ import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.CheckoutItem
 import org.olf.rs.circ.client.CreateUserFiscalTransaction;
+import org.olf.rs.circ.client.DeleteItem;
 import org.olf.rs.circ.client.RequestItem;
 import org.olf.rs.circ.client.CancelRequestItem;
 import org.olf.rs.circ.client.CirculationClient;
@@ -1033,6 +1034,35 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     }
     log.debug("MARCXML availability: ${availability_summary}");
     return availability_summary;
+  }
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails) {
+    Map result = [
+            result: true,
+            reason: 'ncip'
+    ]
+
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+
+    DeleteItem deleteItem = new DeleteItem()
+            .setToAgency(ncipConnectionDetails.ncipToAgency)
+            .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setItemIdString(itemId)
+
+    log.debug("[${CurrentTenant.get()}] NCIP2 DeleteItem request ${deleteItem}");
+    JSONObject response = client.send(deleteItem);
+    log.debug("[${CurrentTenant.get()}] NCIP2 DeleteItem response ${response}");
+    protocolInformationToResult(response, ncipLogDetails);
+
+    if ( response.has('problems') ) {
+      result.result = false;
+      result.problems = response.get('problems');
+    } else {
+      result.itemId = response.opt("itemId")
+    }
+    return result
   }
 
   Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {

@@ -95,4 +95,11 @@ public class ManualHostLMSService implements HostLMSActions {
             reason: 'spoofed'
     ]
   }
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails) {
+    return [
+            result: true,
+            reason: 'spoofed'
+    ]
+  }
 }

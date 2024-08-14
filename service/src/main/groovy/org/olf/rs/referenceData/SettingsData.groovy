@@ -142,8 +142,8 @@ public class SettingsData {
 
     // Network configuration settings
     public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS = 'network_maximum_send_attempts';
-    public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
-    public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
+    public static final String SETTING_NETWORK_RETRY_PERIOD          = 'network_retry_period';
+    public static final String SETTING_NETWORK_TIMEOUT_PERIOD        = 'network_timeout_period';
 
     // State model configuration settings
     public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';

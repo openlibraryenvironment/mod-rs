@@ -135,8 +135,6 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
     public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
 
-
-
     // Query to find all the result lists that save the status before setting the status
     private static final String SAVE_RESULT_LISTS_QUERY = 'from ActionEventResultList aerl where exists (from aerl.results r where r.saveRestoreState.value = :saveRestoreStateValue and r.status = :status)';
 

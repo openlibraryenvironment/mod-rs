@@ -207,7 +207,6 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_NO)
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_YES)
 
-
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'NCIP');
@@ -338,6 +337,9 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
+
+            // ISO18626 Custom options for - Custom identifiers schemes
+            RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
 
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);

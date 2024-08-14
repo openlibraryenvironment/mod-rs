@@ -104,8 +104,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
- 
-      # master and main
+          flavor: |
+            latest=false
+
+      # slnp
       - name: Build and push Docker image
         if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' }}
         uses: docker/build-push-action@v5
