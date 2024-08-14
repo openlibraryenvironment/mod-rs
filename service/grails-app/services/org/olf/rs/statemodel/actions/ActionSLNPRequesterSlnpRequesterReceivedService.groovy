@@ -44,7 +44,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
         // Iterate over volumes without temp item in for loop so we can break out if we need to
         for (RequestVolume vol : volumesWithoutTemporaryItem) {
             try {
-                String itemBarcode = request.hrid + (counter == 0 ? "" : counter)
+                String itemBarcode = request.hrid + (counter == 0 ? "" : "-" + counter)
                 // Call the host lms to check the item out of the host system and in to reshare
                 Map acceptResult = hostLMSService.acceptItem(
                     request,
