@@ -48,11 +48,11 @@ public class ActionPatronRequestPatronReturnedItemService extends AbstractAction
             }
             try {
                 for(RequestVolume vol : request.volumes.findAll()) {
-                    resultMap = hostLMSService.deleteItem(request, vol.itemId)
+                    resultMap = hostLMSService.deleteItem(request, vol.temporaryItemBarcode)
                     if (resultMap.result) {
-                        log.debug("Successfully delete request item {$vol.itemId}")
+                        log.debug("Successfully delete request item {$vol.temporaryItemBarcode}")
                     } else {
-                        log.debug("Failed to delete request item {$vol.itemId}")
+                        log.debug("Failed to delete request item {$vol.temporaryItemBarcode}")
                     }
                 }
             } catch (Exception e){

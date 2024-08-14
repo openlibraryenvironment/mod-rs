@@ -77,6 +77,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                     log.debug("State for volume ${vol.itemId} set to ${newVolState}");
                     vol.status = newVolState;
                     vol.temporaryItemBarcode = itemBarcode
+                    request.selectedItemBarcode = itemBarcode
                     vol.save(failOnError: true);
                 } else {
                     String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";
