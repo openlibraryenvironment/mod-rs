@@ -387,25 +387,25 @@ public class AvailableActionData {
         );
     }
 
-    private void assignToAllStates(String model, String action, String triggerType, String resultList) {
+    static void assignToAllStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all states
         List<Status> allStates = StateModel.getAllStates(model);
         assignToStates(allStates, model, action, triggerType, resultList);
     }
 
-    private void assignToActiveStates(String model, String action, String triggerType, String resultList) {
+   static void assignToActiveStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all active states
         List<Status> activeStates = StateModel.getActiveStates(model);
         assignToStates(activeStates, model, action, triggerType, resultList);
     }
 
-    private void assignToNonTerminalStates(String model, String action, String triggerType, String resultList) {
+    static void assignToNonTerminalStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all non terminal states
         List<Status> nonTerminalStates = StateModel.getNonTerminalStates(model);
         assignToStates(nonTerminalStates, model, action, triggerType, resultList);
     }
 
-    private void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {
+    static void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {
         // Make the action to all the states in the list
         states.each { status ->
             AvailableAction.ensure(model, status.code, action, triggerType, resultList);
