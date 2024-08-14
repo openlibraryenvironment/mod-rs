@@ -9,6 +9,7 @@ import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 import org.olf.rs.RequestVolume
 import org.olf.rs.ReshareActionService
+import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
@@ -23,6 +24,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
     DirectoryEntryService directoryEntryService
+    SettingsService settingsService
 
     @Override
     String name() {
@@ -95,8 +97,18 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             if (requestItemResult.location) {
                 request.pickupLocation = requestItemResult.location
             }
+            String useCallNumberString = settingsService.getSettingValue(SettingsData.SETTING_NCIP_USE_DEFAULT_PATRON_FEE)
+            boolean useCallNumber = "Yes".equalsIgnoreCase(useCallNumberString ? useCallNumberString : "No")
+            if (requestItemResult.callNumber) {
+                request.localCallNumber = requestItemResult.callNumber
+                if (useCallNumber) {
+                    request.selectedItemBarcode = requestItemResult.callNumber
+                }
+            }
             if (requestItemResult.itemId) {
-                request.selectedItemBarcode = requestItemResult.itemId
+                if (!useCallNumber) {
+                    request.selectedItemBarcode = requestItemResult.itemId
+                }
                 RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
                 // If there's no rv
                 if (!rv) {
@@ -107,9 +119,6 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     );
                     request.addToVolumes(rv);
                 }
-            }
-            if (requestItemResult.callNumber) {
-                request.localCallNumber = requestItemResult.callNumber
             }
             if (requestItemResult.userUuid || requestItemResult.requestId) {
                 Map customIdentifiersMap = [:]
