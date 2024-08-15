@@ -6,10 +6,11 @@ forwards the necessary ports with k3d use something like:
 k3d cluster create rsdev -p "9130:30130@server:0" -p "54321:30543@server:0" -p"29092:30092@server:0" -p"2181:32181@server:0"
 ```
 
-Then you can spin up the necessary containers via the manifests in this directory:
+Then you can spin up the necessary containers via the manifests (choosing FOLIO version as appropriate):
 
 ```
-kubectl apply -R -f .
+kubectl apply -R -f manifests
+kubectl apply -R -f folio-modules-poppy
 ```
 
 You'll need to wait until all the deployments are available, which you can check via:
@@ -34,7 +35,7 @@ Once everything is up and forwarded you can create a tenant and enable the
 modules we have manifests for:
 
 ```
-ls folio-modules | ./enable-modules.sh
+ls folio-modules-poppy | ./enable-modules.sh
 ```
 
 To create a superuser for now we can use an existing Perl script. NB. it needs
