@@ -20,6 +20,7 @@ class RequestVolume implements MultiTenant<RequestVolume> {
   Date lastUpdated
 
   String temporaryItemBarcode
+  String callNumber
 
   /* 
     This allows us to check whether each item in turn has succeeded NCIP call
@@ -52,6 +53,7 @@ class RequestVolume implements MultiTenant<RequestVolume> {
     itemId (blank: false)
     dateCreated (nullable: true, bindable: false)
     lastUpdated (nullable: true, bindable: false)
+    callNumber (nullable: true, bindable: false)
   }
 
 
@@ -100,6 +102,7 @@ class RequestVolume implements MultiTenant<RequestVolume> {
                   itemId column : 'rv_item_id'
            patronRequest column : 'rv_patron_request_fk'
                   status column : 'rv_status_fk'
-    temporaryItemBarcode column: 'rv_temporary_item_barcode'
+    temporaryItemBarcode column : 'rv_temporary_item_barcode'
+              callNumber column : 'rv_call_number'
   }
 }
