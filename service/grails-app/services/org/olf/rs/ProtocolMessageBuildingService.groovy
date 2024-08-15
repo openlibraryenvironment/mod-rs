@@ -259,11 +259,11 @@ class ProtocolMessageBuildingService {
         break;
       case 1:
         // We have a single volume, send as a single itemId string
-        message.deliveryInfo['itemId'] = pr.volumes[0].itemId
+        message.deliveryInfo['itemId'] = "${pr.volumes[0].name},${pr.volumes[0].itemId},${pr.volumes[0].callNumber ? pr.volumes[0].callNumber : ""}"
         break;
       default:
         // We have many volumes, send as an array of multiVol itemIds
-        message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}" }
+        message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId},${vol.callNumber ? vol.callNumber : ""}" }
         break;
     }
 

@@ -56,7 +56,6 @@ public class RefdataValueData {
     public static final String VOCABULARY_NCIP_BARCODE                           = "NCIPAcceptItemUseBarcode";
     public static final String VOCABULARY_NCIP_TITLE                             = "NCIPRequestItemUseTitle"
     public static final String VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE            = "NCIPUseDefaultPatronFee"
-    public static final String VOCABULARY_NCIP_USE_RECEIVED_CALL_NUMBER          = "NCIPUseReceivedCallNumber"
     public static final String VOCABULARY_REQUEST_ITEM_METHOD                    = "RequestItemMethod";
     public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME              = 'customIdentifiersScheme';
     public static final String VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY   = 'AutoSupply';
@@ -207,9 +206,6 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_NO)
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_YES)
-
-            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_RECEIVED_CALL_NUMBER, YES_NO_NO)
-            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_RECEIVED_CALL_NUMBER, YES_NO_YES)
 
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');

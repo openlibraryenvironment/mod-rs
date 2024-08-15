@@ -61,7 +61,6 @@ public class SettingsData {
     public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
     public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location'
     public static final String SETTING_NCIP_USE_DEFAULT_PATRON_FEE     = 'ncip_use_default_patron_fee'
-    public static final String SETTING_NCIP_USE_RECEIVED_CALL_NUMBER   = 'ncip_use_received_call_number'
 
 
     // Settings for the wmsSettings section
@@ -233,7 +232,6 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
             ensureAppSetting(SETTING_NCIP_USE_DEFAULT_PATRON_FEE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, RefdataValueData.NCIP_BARCODE_NO).value)
-            ensureAppSetting(SETTING_NCIP_USE_RECEIVED_CALL_NUMBER, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_RECEIVED_CALL_NUMBER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_RECEIVED_CALL_NUMBER, RefdataValueData.YES_NO_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
