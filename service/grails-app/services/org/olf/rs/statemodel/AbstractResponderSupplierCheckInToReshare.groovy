@@ -7,11 +7,14 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.olf.rs.Counter
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 import org.olf.rs.RequestVolume
+import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.actions.ActionResponderSupplierCheckOutOfReshareService
 import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
 /**
  * Abstract Responder supplier check in to reshare service implementation
@@ -19,9 +22,15 @@ import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
 @Slf4j
 abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction {
 
-    HostLMSService hostLMSService
+    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out';
+    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
 
-    private static final String REASON_SPOOFED = 'spoofed'
+    private static final String REASON_SPOOFED = 'spoofed';
+
+    ActionResponderSupplierCheckOutOfReshareService actionResponderSupplierCheckOutOfReshareService;
+    HostLMSService hostLMSService;
+    DirectoryEntryService directoryEntryService;
+    SettingsService settingsService;
 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
