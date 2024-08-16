@@ -26,7 +26,7 @@ public class ActionSLNPResponderSlnpSupplierFillAndMarkShippedService extends Ab
 
         // Perform action Supplier mark shipped - ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED
         String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
-        if (autoLoanSetting != null && autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
+        if (autoLoanSetting != null && !autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
             reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_LOANED, parameters, actionResultDetails)
         }
         actionResultDetails.auditMessage = 'Shipped'
