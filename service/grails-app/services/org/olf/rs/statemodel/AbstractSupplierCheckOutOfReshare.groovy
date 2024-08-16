@@ -10,9 +10,6 @@ public abstract class AbstractSupplierCheckOutOfReshare extends AbstractAction {
 
     protected HostLMSService hostLMSService;
 
-    @Override
-    abstract String name();
-
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         Map resultMap = [:];
         try {
