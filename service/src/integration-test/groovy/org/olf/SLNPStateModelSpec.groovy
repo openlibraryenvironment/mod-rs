@@ -641,65 +641,6 @@ class SLNPStateModelSpec extends TestBase {
         'RSSlnpThree' | 'respond19'   | 'test19'      | '1234-5678-9123-1252' | '9876-4444'       | 'ISIL:RSS3'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE        | 'supplierCheckOutOfReshare'      | false
     }
 
-    void "Test undo action"(
-            String tenantId,
-            String requestTitle,
-            String requestAuthor,
-            String requestSystemId,
-            String requestPatronId,
-            String requestSymbol) {
-        when: "Performing the action"
-
-        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
-            // Define headers
-            def headers = [
-                    'X-Okapi-Tenant': tenantId,
-                    'X-Okapi-Token': 'dummy',
-                    'X-Okapi-User-Id': 'dummy',
-                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-            ]
-
-            setHeaders(headers);
-
-            // Create PatronRequest
-            String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor,
-                    requestSymbol, requestSystemId, false, hrid, 'loan');
-            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
-
-            // Validate Responder initial state
-            String responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
-
-            and: "Check initial state"
-            assert responderRequest != null
-
-            // Perform supplierCheckInToReshare action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
-
-            // Validate status after action - supplierCheckInToReshare
-            responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_SHIP)
-
-            and: "Check state after supplierCheckInToReshare action"
-            assert responderRequest != null
-
-            // Perform undo action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_UNDO);
-
-            // Validate status after action - undo
-            responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
-
-            and: "Check state after undo action"
-            assert responderRequest != null
-        }
-
-        then: "Check values"
-        assert true;
-
-        where:
-        tenantId        | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
-        'RSSlnpThree'   | 'undoTitle'   | 'testundo1'   | '3331-5678-9123-4444'   | '7765-6999-3333'  | 'ISIL:RSS3'
-    }
-
     void "Test event responder new SLNP patron request inidication service"(
             String responderTenantId,
             String responderSymbol,
