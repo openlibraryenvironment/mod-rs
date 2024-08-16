@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.actions
 
 import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.rs.PatronRequest
+import org.olf.rs.PatronRequestAudit
 import org.olf.rs.statemodel.AbstractResponderSupplierCheckInToReshare
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResultDetails
@@ -29,6 +30,11 @@ public class ActionSLNPResponderSlnpSupplierFillAndMarkShippedService extends Ab
             reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_LOANED, parameters, actionResultDetails)
         }
         actionResultDetails.auditMessage = 'Shipped'
+        return actionResultDetails
+    }
+
+    @Override
+    ActionResultDetails undo(PatronRequest request, PatronRequestAudit audit, ActionResultDetails actionResultDetails) {
         return actionResultDetails
     }
 }
