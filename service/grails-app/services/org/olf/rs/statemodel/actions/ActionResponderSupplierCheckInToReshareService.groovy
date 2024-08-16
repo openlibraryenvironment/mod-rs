@@ -20,11 +20,11 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractResp
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        performCommonAction(request, parameters, actionResultDetails)
+        return performCommonAction(request, parameters, actionResultDetails)
     }
 
     @Override
     ActionResultDetails undo(PatronRequest request, PatronRequestAudit audit, ActionResultDetails actionResultDetails) {
-        performCommonUndoAction()
+        return performCommonUndoAction()
     }
 }
