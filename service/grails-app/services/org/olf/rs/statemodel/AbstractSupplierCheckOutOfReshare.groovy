@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel
 
-
+import com.sun.org.slf4j.internal.Logger
+import com.sun.org.slf4j.internal.LoggerFactory
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 /**
@@ -8,6 +9,7 @@ import org.olf.rs.PatronRequest
  */
 public abstract class AbstractSupplierCheckOutOfReshare extends AbstractAction {
 
+    final static Logger log = LoggerFactory.getLogger(AbstractSupplierCheckOutOfReshare.class);
     protected HostLMSService hostLMSService;
 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
