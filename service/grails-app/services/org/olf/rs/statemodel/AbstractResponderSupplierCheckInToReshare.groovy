@@ -23,7 +23,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
 
     private static final String REASON_SPOOFED = 'spoofed'
 
-    protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails, String auditMessage) {
+    protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
 
         if (parameters?.itemBarcodes?.size() > 0) {
