@@ -41,7 +41,6 @@ public class SLNPStateModelData {
             [status: Status.SLNP_RESPONDER_ABORTED, isTerminal: true],
             [status: Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP],
             [status: Status.SLNP_RESPONDER_AWAIT_PICKING],
-            [status: Status.SLNP_RESPONDER_AWAIT_SHIP],
             [status: Status.SLNP_RESPONDER_ITEM_SHIPPED],
             [status: Status.SLNP_RESPONDER_COMPLETE, isTerminal: true]
     ];
@@ -171,16 +170,6 @@ public class SLNPStateModelData {
             description: 'Pull slip has been printed and item is being pulled from the shelves',
             result: true,
             status: Status.SLNP_RESPONDER_AWAIT_PICKING,
-            qualifier: null,
-            saveRestoreState: null,
-            nextActionEvent : null
-    ];
-
-    private static Map slnpResponderSupplierCheckInReshareOK = [
-            code: 'slnpResponderSupplierCheckInReshareOK',
-            description: 'SLNP Responder has successfully checked the items out of the LMS into reshare',
-            result: true,
-            status: Status.SLNP_RESPONDER_AWAIT_SHIP,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent : null
@@ -447,6 +436,7 @@ public class SLNPStateModelData {
                 [ Status.SLNP_RESPONDER_UNFILLED, StatusStage.PREPARING ],
                 [ Status.SLNP_RESPONDER_ABORTED, StatusStage.PREPARING ],
                 [ Status.SLNP_RESPONDER_COMPLETE, StatusStage.PREPARING ],
+                [ Status.SLNP_RESPONDER_AWAIT_SHIP, StatusStage.PREPARING ],
         ].each { statusToRemove ->
             log.info("Remove status ${statusToRemove}");
             try {
@@ -474,7 +464,6 @@ public class SLNPStateModelData {
         Status.ensure(Status.SLNP_RESPONDER_ABORTED, StatusStage.COMPLETED, '9996', true, false, true, null);
         Status.ensure(Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_AWAIT_PICKING, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
-        Status.ensure(Status.SLNP_RESPONDER_AWAIT_SHIP, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_ITEM_SHIPPED, StatusStage.PREPARING, '9996', true, false, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.SLNP_RESPONDER_COMPLETE, StatusStage.COMPLETED, '9996', true, false, true, null, [ tags.ACTIVE_PATRON ]);
     }
@@ -498,9 +487,6 @@ public class SLNPStateModelData {
                         log.error("Unable to delete available action ${availableActionToRemove} - ${e.message}", e);
                     }
                 }
-
-        // SLNP_RES_AWAIT_SHIP OR "Awaiting shipping"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
 
         // SLNP_RES_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_RESPOND_YES);
