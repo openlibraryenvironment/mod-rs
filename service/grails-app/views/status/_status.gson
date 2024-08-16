@@ -3,4 +3,4 @@ import org.olf.rs.statemodel.Status
 
 @Field Status status
 
-json g.render(status)
+json g.render(status, [expand: ['tags']])
