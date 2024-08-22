@@ -22,8 +22,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED ],
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
-        [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED ],
-        [ status : Status.PATRON_REQUEST_REQUEST_COMPLETE, isTerminal : true ],
+        [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_OVER_LIMIT ],
         [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
@@ -311,6 +310,7 @@ public class NonreturnablesStateModelData {
 
     ];
 
+    /*
     private static Map nrRequesterCompletedList = [
             code: ActionEventResultList.NR_REQUESTER_COMPLETED,
             description: 'Requester has completed the request',
@@ -319,6 +319,8 @@ public class NonreturnablesStateModelData {
                     nrRequesterCompleteOK
             ]
     ];
+    */
+
 
     private static Map nrRequesterCancelList = [
             code: ActionEventResultList.NR_REQUESTER_CANCEL,
@@ -484,7 +486,7 @@ public class NonreturnablesStateModelData {
             nrRequesterSentToSupplierISO18626List,
             nrRequesterExpectToSupplyISO18626List,
             nrRequesterDeliveredList,
-            nrRequesterCompletedList,
+            //nrRequesterCompletedList,
             nrRequesterCancelList,
             nrRequesterBypassedValidationList,
             nrRequesterRetriedValidationList,
@@ -499,7 +501,7 @@ public class NonreturnablesStateModelData {
 
     // Initialization methods
     public static void loadStatusData() {
-        Status.ensure(Status.PATRON_REQUEST_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10001', true, false, false, null);
+        Status.ensure(Status.PATRON_REQUEST_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10001', true, false, true, null);
         Status.ensure(Status.RESPONDER_DOCUMENT_DELIVERED, StatusStage.COMPLETED, '10002', true, false, true, null);
         Status.ensure(Status.RESPONDER_COPY_AWAIT_PICKING, StatusStage.ACTIVE, '10003', true, false, false, null);
     }
