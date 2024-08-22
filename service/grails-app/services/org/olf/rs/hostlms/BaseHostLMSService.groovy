@@ -744,6 +744,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.problems = response.get('problems')
           } else {
             result.requestUuid = response.opt("requestId")
+            result.itemUuid = response.opt("itemUuid")
           }
           break;
 
