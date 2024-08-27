@@ -7,4 +7,10 @@ databaseChangeLog = {
             column(name: "aa_primary_only", type: "BOOLEAN")
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20240821-1200-001") {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_local_note", type: "TEXT")
+        }
+    }
 }

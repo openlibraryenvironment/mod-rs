@@ -108,6 +108,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   Boolean sendToPatron
   String patronEmail
   String patronNote
+  String localNote
   String pickupLocation
   String pickupLocationCode
   String pickupLocationSlug
@@ -361,6 +362,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     patronEmail (nullable: true, blank:false)
     patronNote (nullable: true, blank:false)
+    localNote (nullable: true, blank:false)
     pickupLocation (nullable: true, blank:false)
     pickupLocationCode (nullable: true)
     pickupLocationSlug (nullable: true)
@@ -484,6 +486,7 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     patronEmail column : 'pr_patron_email'
     patronNote column : 'pr_patron_note'
+    localNote column : 'pr_local_note'
     pickupLocation column : 'pr_pref_service_point'
     pickupLocationCode column : 'pr_pref_service_point_code'
     pickupLocationSlug column : 'pr_pickup_location_slug'
