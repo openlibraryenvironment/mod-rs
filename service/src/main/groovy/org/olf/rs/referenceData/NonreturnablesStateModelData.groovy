@@ -817,6 +817,9 @@ public class NonreturnablesStateModelData {
         AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
         AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_NO_STATUS_CHANGE);
 
+        //localNote
+        AvailableActionData.assignToAllStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_RESPONDER_LOCAL_NOTE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+
         //manualClose
         AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CLOSE_MANUAL);
         AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CLOSE_MANUAL);
