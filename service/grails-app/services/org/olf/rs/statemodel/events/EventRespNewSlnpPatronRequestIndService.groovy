@@ -51,13 +51,22 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
         // Loan Auto Responder
         if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_RESPONDER)) {
             try {
-                log.debug('autoRespond....')
+                log.debug('Loan autoRespond....')
                 String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
                 autoRespond(request, autoLoanSetting.toLowerCase(), eventResultDetails)
             } catch (Exception e) {
                 log.error("Problem in NCIP Request Item call: ${e.getMessage()}", e)
                 eventResultDetails.auditMessage = String.format("NCIP Request Item call failure: %s", e.getMessage())
                 request.needsAttention = true
+            }
+        }
+
+        // Copy Auto Responder
+        if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER)) {
+            log.debug('Copy autoRespond....')
+            String autoCopySetting = AppSetting.findByKey('copy_auto_responder_status')?.value
+            if (autoCopySetting == "on:_loaned_and_cannot_supply") {
+                reshareActionService.sendResponse(request,  ActionEventResultQualifier.QUALIFIER_LOANED, [:], eventResultDetails)
             }
         }
 
