@@ -40,9 +40,9 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
 
 	// SLNP Responder Actions
-	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   = "slnpAbortSupply";
-	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES                    = "slnpRespondYes";
-	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE   = "slnpSupplierCheckOutOfReshare";
+	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY                    = "slnpAbortSupply";
+	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES                     = "slnpRespondYes";
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED  = "slnpSupplierFillAndMarkShipped";
 
 	// SLNP non returnable responder actions
 	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";
