@@ -29,6 +29,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "edition", notePrefix: NoteSpecials.UPDATED_FIELD_EDITION_PREFIX, isDate: false ],
         [ field: "isbn", notePrefix: NoteSpecials.UPDATED_FIELD_ISBN_PREFIX, isDate: false ],
         [ field: "issn", notePrefix: NoteSpecials.UPDATED_FIELD_ISSN_PREFIX, isDate: false ],
+        [ field: "localNote", isDate: false, localOnly: true ],
         [ field: "neededBy", notePrefix: NoteSpecials.UPDATED_FIELD_NEEDED_BY_PREFIX, isDate: true ],
         [ field: "oclcNumber", notePrefix: NoteSpecials.UPDATED_FIELD_OCLC_NUMBER_PREFIX, isDate: false ],
         [ field: "pagesRequested", notePrefix: NoteSpecials.UPDATED_FIELD_PAGES_REQUESTED_PREFIX, isDate: false ],

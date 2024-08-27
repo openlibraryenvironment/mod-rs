@@ -16,6 +16,7 @@ public class Actions {
     static public final String ACTION_RESPONDER_ISO18626_SHIPPED_RETURN                      = "ISO18626ShippedReturn";
     static public final String ACTION_RESPONDER_ISO18626_STATUS_REQUEST                      = "ISO18626StatusRequest";
 	static public final String ACTION_RESPONDER_ITEM_RETURNED                   			 = "itemReturned";
+	static public final String ACTION_RESPONDER_LOCAL_NOTE                                   = "localNote";
 	static public final String ACTION_RESPONDER_RESPOND_YES                     			 = "respondYes";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_CONDITION          			 = "supplierAddCondition";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT				 = "supplierAddURLToDocument";
