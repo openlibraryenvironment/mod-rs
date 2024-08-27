@@ -57,13 +57,16 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                     String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${itemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
                     RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
 
-                    if (acceptResult.requestUuid) {
+                    if (acceptResult.requestUuid || acceptResult.itemUuid) {
                         Map customIdentifiersMap = [:]
                         if (request.customIdentifiers) {
                             customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                         }
                         if (acceptResult.requestUuid) {
                             customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                        }
+                        if (acceptResult.itemUuid) {
+                            customIdentifiersMap.put("itemUuid", acceptResult.itemUuid)
                         }
                         request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                     }

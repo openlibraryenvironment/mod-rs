@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.actions
 
+
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.AbstractSupplierCheckOutOfReshare
 import org.olf.rs.statemodel.ActionResultDetails
@@ -9,11 +10,11 @@ import org.olf.rs.statemodel.Actions
  * @author Chas
  *
  */
-public class ActionResponderSupplierCheckOutOfReshareService extends AbstractSupplierCheckOutOfReshare {
+public class ActionSLNPResponderSlnpSupplierCheckOutOfReshareService extends AbstractSupplierCheckOutOfReshare {
 
     @Override
     String name() {
-        return(Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE);
+        return(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE);
     }
 
     @Override

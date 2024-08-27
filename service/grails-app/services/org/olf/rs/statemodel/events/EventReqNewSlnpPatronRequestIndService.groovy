@@ -86,7 +86,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
                             if (request.customIdentifiers) {
                                 customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                             }
-                            customIdentifiersMap.put("userUuid", userFiscalTransactionResult.userUuid)
+                            customIdentifiersMap.put("patronUuid", userFiscalTransactionResult.userUuid)
                             customIdentifiersMap.put("feeUuid", userFiscalTransactionResult.feeUuid)
                             request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                         }

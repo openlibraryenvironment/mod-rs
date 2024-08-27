@@ -30,13 +30,16 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
                 // Set the selected item barcode to the new generated value
                 request.selectedItemBarcode = itemBarcode
 
-                if (acceptResult.requestUuid) {
+                if (acceptResult.requestUuid || acceptResult.itemUuid) {
                     Map customIdentifiersMap = [:]
                     if (request.customIdentifiers) {
                         customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                     }
                     if (acceptResult.requestUuid) {
                         customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                    }
+                    if (acceptResult.itemUuid) {
+                        customIdentifiersMap.put("itemUuid", acceptResult.itemUuid)
                     }
                     request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }

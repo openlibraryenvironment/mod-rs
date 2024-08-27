@@ -9,6 +9,7 @@ import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 import org.olf.rs.RequestVolume
 import org.olf.rs.ReshareActionService
+import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
@@ -19,10 +20,12 @@ import org.olf.rs.statemodel.*
  */
 public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
     public static final String VOLUME_STATUS_REQUESTED_FROM_THE_ILS = 'requested_from_the_ils'
+    private static final String SETTING_REQUEST_ITEM_NCIP = "ncip"
 
     ReshareActionService reshareActionService
     HostLMSService hostLMSService
     DirectoryEntryService directoryEntryService
+    SettingsService settingsService
 
     @Override
     String name() {
@@ -84,57 +87,64 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SettingsData.SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID)
             institutionalPatronIdValue = defaultInstitutionalPatronId?.value
         }
-
-        Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
-                request.supplierUniqueRecordId, institutionalPatronIdValue)
-
-        if (requestItemResult.result == true) {
-            log.debug("Will supply: ${requestItemResult}")
-            eventResultDetails.auditMessage = "Will Supply"
-            eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
-            if (requestItemResult.location) {
-                request.pickupLocation = requestItemResult.location
-            }
-            if (requestItemResult.callNumber) {
-                request.localCallNumber = requestItemResult.callNumber
-            }
-            if (requestItemResult.itemId) {
-                RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
-                // If there's no rv
-                if (!rv) {
-                    rv = new RequestVolume(
-                            name: request.volume ?: requestItemResult.itemId,
-                            itemId: requestItemResult.itemId,
-                            status: RequestVolume.lookupStatus(VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
-                    )
-                    rv.callNumber = requestItemResult.callNumber
-                    request.addToVolumes(rv)
-                }
-            }
-            if (requestItemResult.userUuid || requestItemResult.requestId) {
-                Map customIdentifiersMap = [:]
-                if (request.customIdentifiers) {
-                    customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
-                }
-                if (requestItemResult.userUuid) {
-                    customIdentifiersMap.put("patronUuid", requestItemResult.userUuid)
-                }
-                if (requestItemResult.requestId) {
-                    customIdentifiersMap.put("requestUuid", requestItemResult.requestId)
-                }
-                request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
-            }
-
-            if (autoRespondVariant == "on:_loaned_and_cannot_supply") {
-                log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
-                reshareActionService.sendResponse(request, "Loaned", [:], eventResultDetails)
-                eventResultDetails.auditMessage = "Shipped"
+        if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
+            Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+                    request.supplierUniqueRecordId, institutionalPatronIdValue)
+            //is request item enabled for this responder?
+            if (requestItemResult.result == true) {
+                log.debug("Will supply: ${requestItemResult}")
+                eventResultDetails.auditMessage = "Will Supply"
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
+                if (requestItemResult.location) {
+                    request.pickupLocation = requestItemResult.location
+                }
+                if (requestItemResult.callNumber) {
+                    request.localCallNumber = requestItemResult.callNumber
+                }
+                if (requestItemResult.itemId) {
+                    RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
+                    // If there's no rv
+                    if (!rv) {
+                        rv = new RequestVolume(
+                                name: request.volume ?: requestItemResult.itemId,
+                                itemId: requestItemResult.itemId,
+                                status: RequestVolume.lookupStatus(VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
+                        )
+                        rv.callNumber = requestItemResult.callNumber
+                        request.addToVolumes(rv)
+                    }
+                }
+                if (requestItemResult.userUuid || requestItemResult.requestId) {
+                    Map customIdentifiersMap = [:]
+                    if (request.customIdentifiers) {
+                        customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                    }
+                    if (requestItemResult.userUuid) {
+                        customIdentifiersMap.put("patronUuid", requestItemResult.userUuid)
+                    }
+                    if (requestItemResult.requestId) {
+                        customIdentifiersMap.put("requestUuid", requestItemResult.requestId)
+                        request.externalHoldRequestId = requestItemResult.requestId
+                    }
+                    request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
+                }
+
+                if (autoRespondVariant == "on:_loaned_and_cannot_supply") {
+                    log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
+                    reshareActionService.sendResponse(request, "Loaned", [:], eventResultDetails)
+                    eventResultDetails.auditMessage = "Shipped"
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
+                }
+            } else {
+                log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
+                reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
+                eventResultDetails.auditMessage = "Cannot Supply"
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
             }
         } else {
-            log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
+            log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
-            eventResultDetails.auditMessage = "Cannot Supply"
+            eventResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
