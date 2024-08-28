@@ -6,7 +6,8 @@ import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
 
 import com.k_int.web.toolkit.refdata.RefdataCategory;
-import com.k_int.web.toolkit.refdata.RefdataValue;
+import com.k_int.web.toolkit.refdata.RefdataValue
+import org.olf.rs.statemodel.StateModel
 
 /**
  * Executes the actions action for the requester cancelling a request
@@ -32,7 +33,7 @@ public class ActionPatronRequestRequesterCancelService extends ActionPatronReque
         }
 
         // If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
-        if (request.resolvedSupplier?.id) {
+        if (request.resolvedSupplier?.id || StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode)) {
             sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, parameters, actionResultDetails);
         } else {
             // In this case, set the qualifier to no supplier
