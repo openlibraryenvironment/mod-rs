@@ -320,7 +320,7 @@ public class RefdataValueData {
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cat S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
