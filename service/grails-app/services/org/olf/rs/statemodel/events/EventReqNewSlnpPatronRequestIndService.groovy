@@ -7,6 +7,7 @@ import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
+import org.olf.rs.ProtocolReferenceDataValue
 import org.olf.rs.SettingsService
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.logging.INcipLogDetails
@@ -122,7 +123,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         String requestServiceType = request.serviceType.value.toLowerCase()
         String automaticFeeRequestServiceType = AppSetting.findByKey(SettingsData.SETTING_REQUEST_SERVICE_TYPE)?.value
 
-        if (automaticFeeRequestServiceType == null) {
+        if (automaticFeeRequestServiceType == null != ProtocolReferenceDataValue.SERVICE_TYPE_NO.equalsIgnoreCase(automaticFeeRequestServiceType)) {
             return false
         }
 

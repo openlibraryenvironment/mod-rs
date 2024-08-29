@@ -1073,30 +1073,28 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     ];
 
 
-    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
-    if (ncipConnectionDetails.useDefaultPatronFee) {
-      CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings)
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress)
 
-      CreateUserFiscalTransaction createUserFiscalTransaction = new CreateUserFiscalTransaction()
-              .setToAgency(ncipConnectionDetails.ncipToAgency)
-              .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-              .setRegistryId(ncipConnectionDetails.registryId)
-              .setUserId(userId)
-              .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
-              .setItemId(itemId)
+    CreateUserFiscalTransaction createUserFiscalTransaction = new CreateUserFiscalTransaction()
+            .setToAgency(ncipConnectionDetails.ncipToAgency)
+            .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setUserId(userId)
+            .setChargeDefaultPatronFee(true)
+            .setItemId(itemId)
 
-      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
-      JSONObject response = client.send(createUserFiscalTransaction);
-      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction response ${response}");
-      protocolInformationToResult(response, ncipLogDetails);
+    log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
+    JSONObject response = client.send(createUserFiscalTransaction);
+    log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction response ${response}");
+    protocolInformationToResult(response, ncipLogDetails);
 
-      if (response.has('problems')) {
-        result.result = false;
-        result.problems = response.get('problems');
-      } else {
-        result.userUuid = response.opt("userUuid")
-        result.feeUuid = response.opt("feeUuid")
-      }
+    if (response.has('problems')) {
+      result.result = false;
+      result.problems = response.get('problems');
+    } else {
+      result.userUuid = response.opt("userUuid")
+      result.feeUuid = response.opt("feeUuid")
     }
     return result
   }

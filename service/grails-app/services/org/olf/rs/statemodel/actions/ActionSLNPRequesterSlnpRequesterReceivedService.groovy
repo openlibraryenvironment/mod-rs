@@ -44,17 +44,16 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
         // Iterate over volumes without temp item in for loop so we can break out if we need to
         for (RequestVolume vol : volumesWithoutTemporaryItem) {
             try {
-                String itemBarcode = request.hrid + (counter == 0 ? "" : "-" + counter)
                 // Call the host lms to check the item out of the host system and in to reshare
                 Map acceptResult = hostLMSService.acceptItem(
                     request,
-                    itemBarcode,
+                    vol.temporaryItemBarcode,
                     null
                 );
 
                 if (acceptResult?.result == true) {
                     // Let the user know if the success came from a real call or a spoofed one
-                    String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${itemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
+                    String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${vol.temporaryItemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
                     RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
 
                     if (acceptResult.requestUuid || acceptResult.itemUuid) {
@@ -78,9 +77,8 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                         null);
 
                     log.debug("State for volume ${vol.itemId} set to ${newVolState}");
-                    vol.status = newVolState;
-                    vol.temporaryItemBarcode = itemBarcode
-                    request.selectedItemBarcode = itemBarcode
+                    vol.status = newVolState
+                    request.selectedItemBarcode = vol.temporaryItemBarcode
                     vol.save(failOnError: true);
                 } else {
                     String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";
