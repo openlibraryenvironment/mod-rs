@@ -11,6 +11,7 @@ import org.olf.rs.RequestVolume
 import org.olf.rs.ReshareActionService
 import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
+import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
@@ -105,10 +106,11 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                 eventResultDetails.auditMessage = "Will Supply"
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
                 if (requestItemResult.location) {
-                    request.pickupLocation = requestItemResult.location
-                }
-                if (requestItemResult.callNumber) {
-                    request.localCallNumber = requestItemResult.callNumber
+                    request.pickupLocation = requestItemResult.location + ", " + requestItemResult.library
+                    ItemLocation location = new ItemLocation(location: requestItemResult.library,
+                            shelvingLocation: requestItemResult.location,
+                            callNumber: requestItemResult.callNumber)
+                    reshareApplicationEventHandlerService.routeRequestToLocation(request, location)
                 }
                 if (requestItemResult.itemId) {
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }

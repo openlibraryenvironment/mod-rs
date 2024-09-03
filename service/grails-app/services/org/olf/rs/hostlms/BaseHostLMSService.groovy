@@ -903,6 +903,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.barcode = response.opt("barcode")
       result.callNumber = response.opt("callNumber")
       result.location = response.opt("location")
+      result.library = response.opt("library")
       result.userUuid = response.opt("userUuid")
     }
 
