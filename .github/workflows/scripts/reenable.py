@@ -10,11 +10,11 @@ import urllib.request
 MODULES = ['mod-rs']
 
 # names of tenants to operate on
-TENANTS = ['reshare_north', 'reshare_south']
+TENANTS = ['back', 'forth']
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
-RELEASE_VERSION = ["mod-rs-2.16.0"]
+RELEASE_VERSION = ["mod-rs-2.17.0"]
 # for now hard code 8080
 PORT = "8080"
 
