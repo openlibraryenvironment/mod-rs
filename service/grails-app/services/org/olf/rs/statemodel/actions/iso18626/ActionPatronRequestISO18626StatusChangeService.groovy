@@ -40,6 +40,12 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
                     actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_ABORTED
                 }
 
+                if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
+                    if (actionResultDetails.qualifier == "Unfilled") {
+                        log.debug("Handling Unfilled result");
+                    }
+                }
+
                 // For SLNP non-returnables we need to call AcceptItem and also set the Qualifier depending on the active client
                 // BVB -> SLNP_REQ_DOCUMENT_SUPPLIED, BSZ -> SLNP_REQ_DOCUMENT_AVAILABLE
                 if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)) {

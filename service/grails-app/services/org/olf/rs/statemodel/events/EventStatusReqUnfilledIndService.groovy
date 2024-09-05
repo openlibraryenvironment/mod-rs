@@ -1,5 +1,7 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.rs.PatronRequest
+import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
 /**
@@ -8,6 +10,11 @@ import org.olf.rs.statemodel.Events;
  *
  */
 public class EventStatusReqUnfilledIndService extends EventSendToNextLenderService {
+
+    @Override
+    EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
+        super.processEvent(request, eventData, eventResultDetails);
+    }
 
     @Override
     String name() {

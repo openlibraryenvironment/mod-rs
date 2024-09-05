@@ -58,6 +58,7 @@ public class StateModelData {
     [ status : Status.PATRON_REQUEST_DUPLICATE_REVIEW ],
     [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED, isTerminal : true ],
+    [ status : Status.PATRON_REQUEST_REREQUESTED, isTerminal : true ],
     [ status : Status.PATRON_REQUEST_ERROR ],
     [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
     [ status : Status.PATRON_REQUEST_FILLED_LOCALLY, isTerminal : true ],

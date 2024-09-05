@@ -43,6 +43,7 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, StatusStage.ACTIVE, '0070', true, null, false, null, [ tags.ACTIVE_PATRON ]);
         Status.ensure(Status.PATRON_REQUEST_UNFILLED, StatusStage.COMPLETED, '0075', true);
 
+
         // Add in the ability to tag states with meaningful semantics for reporting
         // model, code, presSeq, visible, needsAttention, terminal, tags
         Status.ensure(Status.PATRON_REQUEST_SHIPPED, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ tags.ACTIVE_PATRON ]);
@@ -59,6 +60,8 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED, StatusStage.COMPLETED, '0080', true, null, true, 3);
         Status.ensure(Status.PATRON_REQUEST_CANCELLED, StatusStage.COMPLETED, '9998', true, null, true, 4);
         Status.ensure(Status.PATRON_REQUEST_ERROR, StatusStage.ACTIVE, '9999', true, true);
+        Status.ensure(Status.PATRON_REQUEST_REREQUESTED, StatusStage.COMPLETED, '10001',  true, null, true, 3);
+
 
         // Digital Returnable Requester
         Status.ensure(Status.REQUESTER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);
