@@ -19,7 +19,7 @@ public class ActionSLNPRequesterSlnpHandleAbortService extends AbstractAction {
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         actionResultDetails.auditMessage = 'Abort handled';
-
+        reshareActionService.sendRequestingAgencyMessage(request, 'Cancel', parameters, actionResultDetails);
         return(actionResultDetails);
     }
 }
