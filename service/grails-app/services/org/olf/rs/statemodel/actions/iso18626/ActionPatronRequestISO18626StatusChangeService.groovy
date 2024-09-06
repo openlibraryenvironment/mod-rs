@@ -1,6 +1,8 @@
 package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.PatronRequest
+import org.olf.rs.RerequestService
+import org.olf.rs.SettingsService
 import org.olf.rs.iso18626.ReasonForMessage
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResult
@@ -15,6 +17,11 @@ import org.olf.rs.statemodel.StateModel
  *
  */
 public class ActionPatronRequestISO18626StatusChangeService extends ActionISO18626RequesterService {
+
+    public static final String SETTING_YES = "yes";
+
+    SettingsService settingsService;
+    RerequestService rerequestService;
 
     @Override
     String name() {
@@ -43,6 +50,24 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
                 if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
                     if (actionResultDetails.qualifier == "Unfilled") {
                         log.debug("Handling Unfilled result");
+                        if (parameters.messageInfo.reasonUnfilled == "transfer") {
+                            String pattern = /transferToCluster:(.+?)(#seq:.+#)?/
+                            String note = parameters.messageInfo.note;
+                            if (note) {
+                                def matcher = note =~ pattern;
+                                if (matcher.matches()) {
+                                    String newCluster = matcher.group(1);
+                                    if (settingsService.hasSettingValue(SettingsData.SETTING_AUTO_REREQUEST, SETTING_YES)) {
+                                        //Trigger Re-Request here
+                                        actionResultDetails.qualifier = "UnfilledTransfer"; //To transition to Rerequested state
+                                        PatronRequest newRequest = rerequestService.createNewRequestFromExisting(request, RerequestService.preserveFields, ["systemInstanceIdentifier":newCluster]);
+                                    }
+                                } else {
+                                    log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
+                                }
+                            }
+
+                        }
                     }
                 }
 
