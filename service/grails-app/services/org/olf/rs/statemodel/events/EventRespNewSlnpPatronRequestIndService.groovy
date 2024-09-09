@@ -104,7 +104,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             if (requestItemResult.result == true) {
                 log.debug("Will supply: ${requestItemResult}")
                 eventResultDetails.auditMessage = "Will Supply"
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOANED
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
                 if (requestItemResult.location) {
                     request.pickupLocation = requestItemResult.location + ", " + requestItemResult.library
                     ItemLocation location = new ItemLocation(location: requestItemResult.library,
@@ -144,7 +144,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     log.debug("Send response Loaned to ${request.requestingInstitutionSymbol}")
                     reshareActionService.sendResponse(request, "Loaned", [:], eventResultDetails)
                     eventResultDetails.auditMessage = "Shipped"
-                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOANED
+                    eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
                 }
             } else {
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
