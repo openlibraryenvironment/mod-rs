@@ -570,8 +570,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   }
 
   boolean isNetworkActivityIdle() {
-      // It is idle with regard to the network, if the network status is Idle, Sent or null
-      return((networkStatus == null) || (networkStatus == NetworkStatus.Idle) || (networkStatus == NetworkStatus.Sent));
+      // We don't want to perform new actions while it's currently attempting a previoús one
+      return((networkStatus != NetworkStatus.Waiting) && (networkStatus != NetworkStatus.Retry));
   }
 
   public Map getDescriptiveMetadata() {
