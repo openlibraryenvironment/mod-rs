@@ -256,7 +256,7 @@ class ProtocolMessageBuildingService {
     }
 
     Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
-          rv.status.value == VOLUME_STATUS_ILS_REQUEST_CANCELLED
+          rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
       }
     switch (filteredVolumes.size()) {
       case 0:
