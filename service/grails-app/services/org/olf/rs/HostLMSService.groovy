@@ -247,7 +247,7 @@ public class HostLMSService {
         return(acceptResult);
     }
 
-    public Map requestItem(PatronRequest request, String requestId, String bibliographicId,
+    public Map requestItem(PatronRequest request, String pickupLocation,  String itemLocation, String bibliographicId,
             String patronId) {
         Map requestItemResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
@@ -258,8 +258,9 @@ public class HostLMSService {
                 request.hrid,
                 bibliographicId,
                 patronId,
-                request.resolvedSupplier?.owner?.lmsLocationCode,
-                ncipLogDetails);
+                pickupLocation,
+                itemLocation,
+                ncipLogDetails)
             protocolAuditService.save(request, ncipLogDetails);
         } else {
             requestItemResult = resultHostLMSNotConfigured;

@@ -71,7 +71,7 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode, String pickupLocation,
-      INcipLogDetails ncipLogDetails) {
+                         String itemLocation, INcipLogDetails ncipLogDetails) {
     return [
       result: true,
       reason: 'spoofed'

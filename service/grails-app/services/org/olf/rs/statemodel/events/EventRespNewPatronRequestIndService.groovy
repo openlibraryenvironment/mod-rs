@@ -79,7 +79,8 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     }
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
-                    Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+                    Map requestItemResult = hostLMSService.requestItem(request,
+                            request.resolvedSupplier?.owner?.lmsLocationCode, null,
                             request.supplierUniqueRecordId, institutionalPatronIdValue);
                     log.debug("Got RequestItem result: ${requestItemResult}");
                     if (requestItemResult.result == true) {

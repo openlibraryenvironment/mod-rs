@@ -98,7 +98,8 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             institutionalPatronIdValue = defaultInstitutionalPatronId?.value
         }
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
-            Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+            Map requestItemResult = hostLMSService.requestItem(request, null,
+                    request.resolvedSupplier?.owner?.lmsLocationCode,
                     request.supplierUniqueRecordId, institutionalPatronIdValue)
             //is request item enabled for this responder?
             if (requestItemResult.result == true) {
