@@ -39,14 +39,10 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // Check the pickup location and route
-        if (validatePickupLocationAndRoute(request, parameters, actionResultDetails).result == ActionResult.SUCCESS) {
-
-            // Loan Auto Responder
-            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_RESPONDER)) {
-                String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
-                autoRespond(request, autoLoanSetting, actionResultDetails)
-            }
+        // Loan Auto Responder
+        if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_RESPONDER)) {
+            String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
+            autoRespond(request, autoLoanSetting, actionResultDetails)
         }
 
         return(actionResultDetails);
