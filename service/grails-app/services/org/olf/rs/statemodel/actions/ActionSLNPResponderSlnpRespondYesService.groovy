@@ -13,7 +13,6 @@ import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
-import org.olf.rs.statemodel.ActionResult
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.StateModel
@@ -49,11 +48,6 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
     }
 
     private void autoRespond(PatronRequest request, String autoRespondVariant, ActionResultDetails actionResultDetails) {
-        if (autoRespondVariant == "off") {
-            log.debug("Auto responder is off, manual checking is required!")
-            return
-        }
-
         log.debug("Attempt hold with RequestItem")
         CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
