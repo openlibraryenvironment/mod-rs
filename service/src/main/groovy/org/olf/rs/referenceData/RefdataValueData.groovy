@@ -126,6 +126,7 @@ public class RefdataValueData {
 
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
+    public static final String NOTICE_TRIGGER_END_OF_ROTA_REVIEWED           = 'End of rota reviewed';
     public static final String NOTICE_TRIGGER_LOANED_DIGITALLY               = 'Loaned digitally';
     public static final String NOTICE_TRIGGER_OVER_LIMIT                     = 'Over limit';
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION          = 'New Host LMS Location';

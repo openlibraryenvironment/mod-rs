@@ -1,4 +1,8 @@
-package org.olf.rs.statemodel.actions.iso18626;
+package org.olf.rs.statemodel.actions.iso18626
+
+import org.olf.rs.RerequestService
+import org.olf.rs.SettingsService
+import org.olf.rs.statemodel.StateModel;
 
 import java.util.regex.Matcher;
 
@@ -18,8 +22,11 @@ import org.olf.rs.referenceData.SettingsData;
 public abstract class ActionISO18626RequesterService extends ActionISO18626Service {
 
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
+    private static final String SETTING_YES = 'yes';
 
     StatusService statusService;
+    SettingsService settingsService;
+    RerequestService rerequestService;
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
@@ -138,19 +145,45 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         }
 
         if (incomingStatus != null) {
-            handleStatusChange(request, incomingStatus, actionResultDetails);
+            handleStatusChange(request, incomingStatus, parameters, actionResultDetails);
         }
 
         return(actionResultDetails);
     }
 
     // ISO18626 states are RequestReceived, ExpectToSupply, WillSupply, Loaned Overdue, Recalled, RetryPossible, Unfilled, CopyCompleted, LoanCompleted, CompletedWithoutReturn and Cancelled
-    private void handleStatusChange(PatronRequest request, Map statusInfo, ActionResultDetails actionResultDetails) {
+    private void handleStatusChange(PatronRequest request, Map statusInfo, Object parameters, ActionResultDetails actionResultDetails) {
         log.debug("handleStatusChange(${request.id},${statusInfo})");
 
         if (statusInfo.status) {
             // Set the qualifier on the result
             actionResultDetails.qualifier = statusInfo.status;
+
+            // Special case for Unfilled
+            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
+                if (statusInfo.status == "Unfilled") {
+                    log.debug("Handling Unfilled status");
+                    if (parameters.messageInfo.reasonUnfilled == "transfer") {
+                        log.debug("Unfilled result with reason 'transfer'");
+                        String pattern = /transferToCluster:(.+?)(#seq:.+#)?/
+                        String note = parameters.messageInfo.note;
+                        if (note) {
+                            def matcher = note =~ pattern;
+                            if (matcher.matches()) {
+                                String newCluster = matcher.group(1);
+                                log.debug("Pattern match for transferring request to new cluster ${newCluster}");
+                                if (settingsService.hasSettingValue(SettingsData.SETTING_AUTO_REREQUEST, SETTING_YES)) {
+                                    //Trigger Re-Request here
+                                    actionResultDetails.qualifier = "UnfilledTransfer"; //To transition to Rerequested state
+                                    PatronRequest newRequest = rerequestService.createNewRequestFromExisting(request, RerequestService.preserveFields, ["systemInstanceIdentifier":newCluster]);
+                                }
+                            } else {
+                                log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
