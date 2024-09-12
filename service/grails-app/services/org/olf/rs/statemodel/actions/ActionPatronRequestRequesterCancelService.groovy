@@ -33,7 +33,8 @@ public class ActionPatronRequestRequesterCancelService extends ActionPatronReque
         }
 
         // If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
-        if (request.resolvedSupplier?.id || StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode)) {
+        if (request.resolvedSupplier?.id || StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode) ||
+                StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode)) {
             sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, parameters, actionResultDetails);
         } else {
             // In this case, set the qualifier to no supplier
