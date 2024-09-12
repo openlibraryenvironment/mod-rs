@@ -18,10 +18,7 @@ import org.olf.rs.statemodel.StateModel
  */
 public class ActionPatronRequestISO18626StatusChangeService extends ActionISO18626RequesterService {
 
-    public static final String SETTING_YES = "yes";
-
     SettingsService settingsService;
-    RerequestService rerequestService;
 
     @Override
     String name() {
@@ -30,6 +27,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        log.debug("ActionPatronRequestISO18626StatusChangeService performAction()");
         // We have a hack where we use this  message to verify that the last one sent was actually received or not
         if (!checkForLastSequence(request, parameters.messageInfo?.note, actionResultDetails)) {
             // A normal message
@@ -44,30 +42,6 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
                 if (actionResultDetails.qualifier.equalsIgnoreCase(ActionEventResultQualifier.QUALIFIER_CANCELLED) &&
                         'ABORT'.equalsIgnoreCase(parameters.messageInfo?.note)) {
                     actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_ABORTED
-                }
-
-                if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
-                    if (actionResultDetails.qualifier == "Unfilled") {
-                        log.debug("Handling Unfilled result");
-                        if (parameters.messageInfo.reasonUnfilled == "transfer") {
-                            String pattern = /transferToCluster:(.+?)(#seq:.+#)?/
-                            String note = parameters.messageInfo.note;
-                            if (note) {
-                                def matcher = note =~ pattern;
-                                if (matcher.matches()) {
-                                    String newCluster = matcher.group(1);
-                                    if (settingsService.hasSettingValue(SettingsData.SETTING_AUTO_REREQUEST, SETTING_YES)) {
-                                        //Trigger Re-Request here
-                                        actionResultDetails.qualifier = "UnfilledTransfer"; //To transition to Rerequested state
-                                        PatronRequest newRequest = rerequestService.createNewRequestFromExisting(request, RerequestService.preserveFields, ["systemInstanceIdentifier":newCluster]);
-                                    }
-                                } else {
-                                    log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
-                                }
-                            }
-
-                        }
-                    }
                 }
 
                 // For SLNP non-returnables we need to call AcceptItem and also set the Qualifier depending on the active client

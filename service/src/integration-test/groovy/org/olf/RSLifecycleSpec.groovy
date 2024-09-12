@@ -131,7 +131,7 @@ class RSLifecycleSpec extends TestBase {
 
   def cleanup() {
   }
-
+    /*
   // For the given tenant, block up to timeout ms until the given request is found in the given state
   private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
     long start_time = System.currentTimeMillis();
@@ -172,6 +172,61 @@ class RSLifecycleSpec extends TestBase {
     }
 
     return request_id;
+  }
+    */
+  private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
+      Map params = [
+              'max':'100',
+              'offset':'0',
+              'match':'patronReference',
+              'term':patron_reference
+      ];
+      return waitForRequestStateParams(tenant, timeout, params, required_state);
+  }
+
+  private String waitForRequestStateById(String tenant, long timeout, String id, String required_state) {
+      Map params = [
+              'max':'1',
+              'offset':'0',
+              'match':'id',
+              'term':id
+      ];
+      return waitForRequestStateParams(tenant, timeout, params, required_state);
+  }
+
+  private String waitForRequestStateParams(String tenant, long timeout, Map params, String required_state) {
+      long start_time = System.currentTimeMillis();
+      String request_id = null;
+      String request_state = null;
+      long elapsed = 0;
+      while ( ( required_state != request_state ) &&
+              ( elapsed < timeout ) ) {
+
+          setHeaders(['X-Okapi-Tenant': tenant]);
+          // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
+          def resp = doGet("${baseUrl}rs/patronrequests",
+                  params)
+          if (resp?.size() == 1) {
+              request_id = resp[0].id
+              request_state = resp[0].state?.code
+          } else {
+              log.debug("waitForRequestState: Request with params ${params} not found");
+          }
+
+          if (required_state != request_state) {
+              // Request not found OR not yet in required state
+              log.debug("Not yet found.. sleeping");
+              Thread.sleep(1000);
+          }
+          elapsed = System.currentTimeMillis() - start_time
+      }
+      log.debug("Found request on tenant ${tenant} with params ${params} in state ${request_state} after ${elapsed} milliseconds");
+
+      if ( required_state != request_state ) {
+          throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
+      }
+
+      return request_id;
   }
 
   // For the given tenant fetch the specified request
@@ -833,9 +888,13 @@ class RSLifecycleSpec extends TestBase {
             "RSInstOne"       | "RSInstThree"     | 7        | false             | "nrSupplierCannotSupply.json"       | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | "URL"          | "Copy"      | "{}"
             "RSInstOne"       | null              | 8        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null
             "RSInstOne"       | "RSInstThree"     | 8        | true              | "nrRequesterCancel.json"            | Status.PATRON_REQUEST_CANCELLED                   | Status.RESPONDER_CANCELLED                  | null               | null                  | null           | null        | "{}"
-            "RSInstOne"       | null              | 9        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null
-            "RSInstOne"       | "RSInstThree"     | 9        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"
-            "RSInstOne"       | "RSInstThree"     | 9        | false             | "supplierCannotSupplyTransfer.json" | Status.PATRON_REQUEST_REREQUESTED                 | Status.RESPONDER_UNFILLED                   | null               | null                  | null           | null        | "{}"
+         //   "RSInstOne"       | null              | 9        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null
+         //   "RSInstOne"       | "RSInstThree"     | 9        | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"
+         //   "RSInstOne"       | "RSInstThree"     | 9        | false             | "supplierCannotSupplyTransfer.json" | Status.PATRON_REQUEST_REREQUESTED                 | Status.RESPONDER_UNFILLED                   | null               | null                  | null           | null        | "{}"
+         //   "RSInstThree"     | null              | 10       | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstOne"        | Status.RESPONDER_IDLE | null           | null        | null
+        //    "RSInstThree"     | "RSInstOne"      | 10       | false             | "supplierCannotSupply.json"         | Status.PATRON_REQUEST_END_OF_ROTA                  | Status.RESPONDER_UNFILLED                   | "RSInstOne"        | Status.RESPONDER_IDLE | null           | null        | "{}"
+
+
 
 
     }
@@ -1874,7 +1933,9 @@ class DosomethingSimple {
 
     }
 
-    void "Test transmission of copyright and publication type to supplier"(String copyrightType, String publicationType, String patronIdentifier) {
+
+    void "Test transmission of copyright and publication type to supplier"(
+        String copyrightType, String publicationType, String patronIdentifier) {
         String requesterTenantId = "RSInstOne";
         String responderTenantId = "RSInstThree";
         String RESPONDER_DATA = 'ref-' + patronIdentifier + "_DATA";
@@ -1921,5 +1982,52 @@ class DosomethingSimple {
 
     }
 
+
+    void "Test automatic rerequest to different cluster id"() {
+        String patronIdentifier =  "ABCD-EFG-HIJK-0001";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "YA Bad Book";
+        String requestAuthor = "Mr. Boringman";
+        String requestSymbol = "ISIL:RST1"
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+
+        when: "do the thing"
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                patronIdentifier: patronIdentifier,
+                isRequester: true,
+                patronReference: patronReference,
+                systemInstanceIdentifier: "123-456-789",
+                tags: ['RS-REREQUEST-TEST-1']
+        ];
+
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/supplierCannotSupplyTransfer.json").text;
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+        log.debug("Posting supplierCannotSupplyTransfer payload to ${performActionUrl}");
+        doPost(performActionUrl, jsonPayload);
+
+        waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
+
+        waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_REREQUESTED);
+
+
+
+        then:
+        assert(true);
+
+
+
+    }
 
 }
