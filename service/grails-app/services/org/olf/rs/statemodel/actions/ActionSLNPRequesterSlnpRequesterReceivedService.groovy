@@ -48,6 +48,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                 Map acceptResult = hostLMSService.acceptItem(
                     request,
                     vol.temporaryItemBarcode,
+                    vol.callNumber ? vol.callNumber : request.localCallNumber,
                     null
                 );
 
