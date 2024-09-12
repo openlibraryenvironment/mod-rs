@@ -17,10 +17,12 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails, String auditMessage) {
         String itemBarcode = request.hrid
+        String callNumber = request.volumes ? request.volumes.iterator().next().callNumber : request.localCallNumber
         try {
             Map acceptResult = hostLMSService.acceptItem(
                     request,
                     itemBarcode,
+                    callNumber,
                     null
             )
 
