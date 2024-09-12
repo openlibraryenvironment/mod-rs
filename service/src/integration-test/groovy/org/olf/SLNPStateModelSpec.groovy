@@ -852,8 +852,8 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState         | responderInitialState                      | responderResultState            | patronId    | title             | author     | action                                                     | jsonFileName
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_UNFILLED  | '7657-3543' | 'NonReturnable5'  | 'Rebo5'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_UNFILLED  | '6668-8562' | 'NonReturnable7'  | 'Rebo7'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState              | responderInitialState                      | responderResultState            | patronId    | title             | author     | action                                                     | jsonFileName
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED   | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_UNFILLED  | '7657-3543' | 'NonReturnable5'  | 'Rebo5'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED   | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_UNFILLED  | '6668-8562' | 'NonReturnable7'  | 'Rebo7'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
     }
 }
