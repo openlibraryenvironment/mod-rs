@@ -131,49 +131,7 @@ class RSLifecycleSpec extends TestBase {
 
   def cleanup() {
   }
-    /*
-  // For the given tenant, block up to timeout ms until the given request is found in the given state
-  private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
-    long start_time = System.currentTimeMillis();
-    String request_id = null;
-    String request_state = null;
-    long elapsed = 0;
-    while ( ( required_state != request_state ) &&
-            ( elapsed < timeout ) ) {
-
-      setHeaders([ 'X-Okapi-Tenant': tenant ]);
-      // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-      def resp = doGet("${baseUrl}rs/patronrequests",
-                       [
-                         'max':'100',
-                         'offset':'0',
-                         'match':'patronReference',
-                         'term':patron_reference
-                       ])
-      if ( resp?.size() == 1 ) {
-        request_id = resp[0].id
-        request_state = resp[0].state?.code
-      } else {
-        log.debug("waitForRequestState: Request with patronReference ${patron_reference} not found");
-      }
-
-      if ( required_state != request_state ) {
-        // Request not found OR not yet in required state
-        log.debug("Not yet found.. sleeping");
-        Thread.sleep(1000);
-      }
-      elapsed = System.currentTimeMillis() - start_time
-    }
-
-    log.debug("Found request on tenant ${tenant} with reference ${patron_reference} in state ${request_state} after ${elapsed} milliseconds");
-
-    if ( required_state != request_state ) {
-      throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-    }
-
-    return request_id;
-  }
-    */
+  
   private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
       Map params = [
               'max':'100',
@@ -379,10 +337,10 @@ class RSLifecycleSpec extends TestBase {
 
     where:
 
-      tenant_id      | changes_needed                                                                                                                                    | changes_needed_hidden
-      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest':'yes'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1']                  | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+      tenant_id      | changes_needed
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest':'yes']
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3']
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1']
 
   }
 
