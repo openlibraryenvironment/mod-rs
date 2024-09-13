@@ -738,8 +738,7 @@ public class NonreturnablesStateModelData {
                 ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         
         ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
-                StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED.capitalize(),
-                ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
+                'GenericDoNothing', ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
     }
 
     public static void loadStateModelData() {
@@ -827,7 +826,6 @@ public class NonreturnablesStateModelData {
         //ISO18626StatusRequest
         AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_RESPONDER_ISO18626_STATUS_REQUEST, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NO_STATUS_CHANGE);
 
-        
     }
 
     public static void loadAll() {
