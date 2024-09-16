@@ -116,6 +116,7 @@ public class SettingsData {
     public static final String SETTING_PATRON_STORE_USER     = 'patron_store_user';
 
     // Settings for the autoResponder section
+
     public static final String SETTING_AUTO_RESPONDER_CANCEL                    = 'auto_responder_cancel';
     public static final String SETTING_AUTO_RESPONDER_LOCAL                     = 'auto_responder_local';
     public static final String SETTING_AUTO_RESPONDER_STATUS                    = 'auto_responder_status';
@@ -125,6 +126,8 @@ public class SettingsData {
     public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND          = 'stale_request_3_exclude_weekend';
     public static final String SETTING_CHECK_DUPLICATE_TIME                     = 'check_duplicate_time';
     public static final String SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE  = 'auto_responder_requester_non_ret';
+
+    public static final String SETTING_AUTO_REREQUEST                           = 'auto_rerequest';
 
     // Settings for the chat section
     public static final String SETTING_CHAT_AUTO_READ = 'chat_auto_read';
@@ -297,6 +300,8 @@ public class SettingsData {
             ensureAppSetting(SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_YES).value);
 
             ensureAppSetting(SETTING_CHECK_DUPLICATE_TIME, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '0');
+
+            ensureAppSetting(SETTING_AUTO_REREQUEST, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
             ensureAppSetting(SETTING_CHAT_AUTO_READ, SECTION_CHAT, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHAT_AUTO_READ, 'on');
 
