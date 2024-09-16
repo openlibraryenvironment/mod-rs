@@ -47,6 +47,15 @@ class ProtocolMessageBuildingService {
 
     message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
 
+    List bibliographicItemIdList = [ [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ] ];
+    if (req.precededBy) {
+        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'preceded-by', identifierValue: req.precededBy.hrid])
+    }
+
+    if (req.succeededBy) {
+        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'succeeded-by', identifierValue: req.succeededBy.hrid])
+    }
+
     message.bibliographicInfo = [
       title: req.title,
       requestingInstitutionSymbol: req.requestingInstitutionSymbol,
@@ -77,9 +86,7 @@ class ProtocolMessageBuildingService {
       sponsor: req.sponsor,
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
-      bibliographicItemId:[
-        [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ]
-      ],
+      bibliographicItemId: bibliographicItemIdList,
       // These should be removed - they have no business being here as they are not part of the protocol
       // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
       systemInstanceIdentifier: req.systemInstanceIdentifier,

@@ -613,6 +613,16 @@ and sa.service.businessFunction.value=:ill
         supplierUniqueRecordId(eventData.bibliographicInfo.supplierUniqueRecordId)
         bibliographicRecordId(eventData.bibliographicInfo.bibliographicRecordId)
 
+        if (eventData.bibliographicInfo.bibliographicItemId instanceof Collection) {
+          // Build multiple ItemIds
+          eventData.bibliographicInfo.bibliographicItemId.collect { biid ->
+            bibliographicItemId {
+              bibliographicItemIdentifierCode(biid.identifierCode)
+              bibliographicItemIdentifier(biid.identifierValue)
+            }
+          }
+        }
+
 
         // Pretty sure this shouldn't be here
         systemInstanceIdentifier(eventData.bibliographicInfo.systemInstanceIdentifier)

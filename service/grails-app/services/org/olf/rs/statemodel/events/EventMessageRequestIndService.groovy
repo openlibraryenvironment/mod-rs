@@ -69,6 +69,21 @@ public class EventMessageRequestIndService extends AbstractEvent {
             log.debug('*** Create new request***');
             PatronRequest pr = new PatronRequest(eventData.bibliographicInfo);
 
+            def biid = eventData.bibliographicInfo?.bibliographicItemId
+            if (biid) {
+                if (biid.bibliographicItemIdentifierCode) { //Not a collection
+                    biid = [ biid ];
+                }
+                biid.each {
+                        if (it.bibliographicItemIdentifierCode == 'preceded-by') {
+                            PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
+                            if (pr) {
+                                pr.precededBy = preceedingPr;
+                            }
+                        }
+                }
+            }
+
             // Add publisher information to Patron Request
             Map publicationInfo = eventData.publicationInfo;
             if (publicationInfo != null) {
@@ -215,5 +230,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
         RefdataCategory cat = RefdataCategory.findByDesc(RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
         RefdataValue copyrightType = RefdataValue.findByOwnerAndValue(cat, label);
         return copyrightType;
+    }
+
+    public PatronRequest getPatronRequestByHrid(String id, boolean isRequester) {
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                 eq('hrid', id)
+                 eq('isRequester', isRequester)
+            }
+            lock false
+        }
+        return result;
     }
 }
