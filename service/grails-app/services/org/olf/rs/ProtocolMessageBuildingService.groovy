@@ -49,6 +49,15 @@ class ProtocolMessageBuildingService {
 
     message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
 
+    List bibliographicItemIdList = [ [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ] ];
+    if (req.precededBy) {
+        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'preceded-by', identifierValue: req.precededBy.hrid])
+    }
+
+    if (req.succeededBy) {
+        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'succeeded-by', identifierValue: req.succeededBy.hrid])
+    }
+
     message.bibliographicInfo = [
       title: req.title,
       author: req.author,
@@ -78,12 +87,18 @@ class ProtocolMessageBuildingService {
               [ bibliographicRecordIdentifierCode:'patronReference', bibliographicRecordIdentifier: req.patronReference ]
       ],  // Shared index bib record ID (Instance identifier)
       bibliographicItemId: [[ bibliographicItemIdentifierCode:'issn', bibliographicItemIdentifier: req.issn ],
-                            [ bibliographicItemIdentifierCode:'isbn', bibliographicItemIdentifier: req.isbn ]],
+                            [ bibliographicItemIdentifierCode:'isbn', bibliographicItemIdentifier: req.isbn ]] + bibliographicItemIdList,
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+
+      // These should be removed - they have no business being here as they are not part of the protocol
+      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
+      systemInstanceIdentifier: req.systemInstanceIdentifier,
+      oclcNumber: req.oclcNumber,
+
     ]
     message.publicationInfo = [
       publisher: req.publisher,

@@ -423,4 +423,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
         return shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_REQUESTER) ||
                 shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)
     }
+
+    public PatronRequest getPatronRequestByHrid(String id, boolean isRequester) {
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                eq('hrid', id)
+                eq('isRequester', isRequester)
+            }
+            lock false
+        }
+        return result;
+    }
 }
