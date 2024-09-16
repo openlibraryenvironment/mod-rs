@@ -1939,6 +1939,8 @@ class DosomethingSimple {
 
         when: "do the thing"
 
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 0 ]);
+
         Map request = [
                 requestingInstitutionSymbol: requestSymbol,
                 title: requestTitle,
@@ -1947,6 +1949,7 @@ class DosomethingSimple {
                 isRequester: true,
                 patronReference: patronReference,
                 systemInstanceIdentifier: "123-456-789",
+                oclcNumber: "1234312",
                 tags: ['RS-REREQUEST-TEST-1']
         ];
 
@@ -1965,6 +1968,11 @@ class DosomethingSimple {
         waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
 
         waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_REREQUESTED);
+
+        //get original request
+        def requesterRequestData = doGet("${baseUrl}rs/patronrequests/${requesterRequestId}");
+
+       // def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
 
 
 

@@ -6,7 +6,7 @@ package org.olf.rs
 
 
 public class RerequestService {
-    public static List<String> preserveFields = ['author','edition','isbn','isRequester','issn','issue','neededBy','numberOfPages','oclcNumber','patronEmail','patronGivenName','patronIdentifier','patronNote','patronReference','patronSurname','patronType','pickLocation','pickupLocationSlug','placeOfPublication','publicationDate','publisher','requestingInstitutionSymbol','sponsoringBody','startPage','stateModel','subtitle','systemInstanceIdentifier','title','volume'];
+    public static List<String> preserveFields = ['author','edition','isbn','isRequester','issn','issue','neededBy','numberOfPages','oclcNumber','patronEmail','patronGivenName','patronIdentifier','patronNote','patronReference','patronSurname','patronType','pickLocation','pickupLocationSlug','placeOfPublication','publicationDate','publisher','requestingInstitutionSymbol','sponsoringBody','startPage','stateModel','subtitle','systemInstanceIdentifier','title','volume', 'serviceType'];
 
     public createNewRequestFromExisting(PatronRequest originalRequest, List<String> copyFields, Map<String, Object> changeSet) {
         PatronRequest newRequest = new PatronRequest();
