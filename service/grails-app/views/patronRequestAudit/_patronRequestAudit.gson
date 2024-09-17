@@ -5,6 +5,8 @@ import org.olf.rs.PatronRequestAudit
 
 json g.render(patronRequestAudit, [expand:['fromStatus', 'toStatus' ], excludes: ['auditData'] ]) {
   if (patronRequestAudit.actionEvent != null) {
-  	showInAuditTrail patronRequestAudit.actionEvent.showInAuditTrail
+    showInAuditTrail patronRequestAudit.actionEvent.showInAuditTrail != false
+  } else {
+    showInAuditTrail true
   }
 }
