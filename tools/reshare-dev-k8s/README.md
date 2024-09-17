@@ -22,8 +22,9 @@ kubectl get deployment -n reshare
 While you're waiting you can get some port forwarding running to make Okapi and
 Postgres available where the ReShare scripts/configs expect it (on localhost
 and ports 9130 and 54321 respectively). Your k8s environment may have some way
-to persist this or set it while creating the cluster (as above) or you can have
-a few terminals running these:
+to persist this or set it while creating the cluster (eg. you won't need this
+step if you've used the k3d command above) or you can have a few terminals
+running these:
 
 ```
 kubectl port-forward -n reshare svc/postgres 54321:5432
