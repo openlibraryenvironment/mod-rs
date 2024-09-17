@@ -11,6 +11,7 @@ public class Directory {
     public static final String CATEGORY_YES_NO      = 'YNO';
 
     public static final String KEY_LOCAL_INSTITUTION_PATRON_ID = 'local_institutionalPatronId';
+    public static final String KEY_FOLIO_LOCATION_FILTER       = 'folio_location_filter'
     public static final String KEY_ILL_POLICY_BORROW_RATIO     = 'policy.ill.InstitutionalLoanToBorrowRatio';
     public static final String KEY_ILL_POLICY_LAST_RESORT      = 'policy.ill.last_resort';
     public static final String KEY_ILL_POLICY_LOAN             = 'policy.ill.loan_policy';
