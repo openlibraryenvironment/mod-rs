@@ -11,6 +11,8 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusStage
 
+import javax.swing.plaf.nimbus.State
+
 /**
  * Loads the SLNP State model data required for the system to process requests
  */
@@ -473,6 +475,7 @@ public class SLNPStateModelData {
         [
                 [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE],
                 [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED],
+                [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE]
         ]
                 .each { availableActionToRemove ->
                     log.info("Remove available action ${availableActionToRemove}");
@@ -506,7 +509,7 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
 
         // SLNP_RES_ITEM_SHIPPED OR "Shipped"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_ITEM_SHIPPED, Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, null, Boolean.TRUE, Boolean.TRUE);
 
         // SLNP_REQ_IDLE OR "New"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
@@ -534,6 +537,7 @@ public class SLNPStateModelData {
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, 'Respond "Abort Supply"', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY.capitalize(), ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, 'The responder has said they will supply the item', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_RESPOND_YES.capitalize(), ActionEventResultList.SLNP_RESPONDER_RESPOND_YES, true);
         ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED, 'The item(s) has been checked out of the responders LMS to Reshare and the responder has shipped the item(s) to the requester', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED.capitalize(), ActionEventResultList.SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED, true);
+        ActionEvent.ensure(Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE, 'The item(s) has been checked backed into the responders LMS from Reshare', true, StateModel.MODEL_SLNP_RESPONDER.capitalize() + Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE.capitalize(), ActionEventResultList.SLNP_RESPONDER_CHECK_OUT_OF_RESHARE, true);
 
         ActionEvent.ensure(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the requester has been created', false, eventServiceName(Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION), null);
         ActionEvent.ensure(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION, 'A new SLNP patron request for the responder has been created', false, eventServiceName(Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION), ActionEventResultList.SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST);
