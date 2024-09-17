@@ -3,8 +3,10 @@ package org.olf.rs.statemodel.events
 import com.k_int.web.toolkit.refdata.RefdataValue
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.NewRequestService
+import org.olf.rs.PatronNoticeService
 import org.olf.rs.PatronRequest
 import org.olf.rs.ReshareActionService
+import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.AbstractEvent
@@ -15,7 +17,9 @@ import org.olf.rs.statemodel.Events
 
 public class EventNonreturnableRequesterNewPatronRequestIndService extends AbstractEvent {
 
+    PatronNoticeService patronNoticeService;
     ReshareActionService reshareActionService;
+    ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     NewRequestService newRequestService;
 
     @Override
