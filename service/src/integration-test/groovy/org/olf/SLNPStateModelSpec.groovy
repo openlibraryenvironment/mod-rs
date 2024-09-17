@@ -638,7 +638,7 @@ class SLNPStateModelSpec extends TestBase {
         'RSSlnpOne'   | 'respond16'   | 'test16'      | '1234-5678-9123-1246' | '9876-1246'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED | 'slnpSupplierFillAndMarkShipped' | false
         'RSSlnpOne'   | 'respond17'   | 'test17'      | '1234-5678-9123-1247' | '9876-1247'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY         | 'supplierConditionalSupply'      | false
         'RSSlnpOne'   | 'respond18'   | 'test18'      | '1234-5678-9123-1248' | '9876-1248'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY              | 'supplierCannotSupply'           | false
-        'RSSlnpThree' | 'respond19'   | 'test19'      | '1234-5678-9123-1252' | '9876-4444'       | 'ISIL:RSS3'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE        | 'supplierCheckOutOfReshare'      | false
+        'RSSlnpThree' | 'respond19'   | 'test19'      | '1234-5678-9123-1252' | '9876-4444'       | 'ISIL:RSS3'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE   | 'slnpSupplierCheckOutOfReshare'  | false
     }
 
     void "Test event responder new SLNP patron request inidication service"(
