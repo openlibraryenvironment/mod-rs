@@ -19,9 +19,12 @@ class BaseHostLMSServiceSpec extends Specification implements ServiceUnitTest<De
         expect:
         result.result == true;
         result.userProfile == profileName;
+        result.givenName == null || !result.givenName.isEmpty()
+        result.surname == null || !result.surname.isEmpty()
 
         where:
         profileName             | responseJson
+        'Blank first name'      | '{"firstName":"","lastName":"OCLC","privileges":[{"key":"STATUS","value":"OK"}, {"key":"PROFILE","value":"Blank first name"}],"electronicAddresses":[{"value":"some@email.tld","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"123 Avenue Rd.","region":"MA"},"key":"unknown-type"}],"userId":"12345"}'
         'Alma, WMS, etc.'       | '{"firstName":"TEST ACCOUNT","lastName":"OCLC","privileges":[{"key":"STATUS","value":"OK"}, {"key":"PROFILE","value":"Alma, WMS, etc."}],"electronicAddresses":[{"value":"some@email.tld","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"123 Avenue Rd.","region":"MA"},"key":"unknown-type"}],"userId":"12345"}'
         'Evergreen'             | '{"firstName":"Firstly","Lastly":"","privileges":[{"key":"Evergreen","value":"Active"}],"electronicAddresses":[{"value":"some@email.tld","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"123 Avenue Rd.","region":"MA"},"key":"unknown-type"}],"userId":"12345"}'
         'Polaris'               | '{"firstName":"Firstly","Lastly":"","privileges":[{"key":"Polaris","value":"01/01/01"}, {"key":"Polaris","value":"OK"}],"electronicAddresses":[{"value":"some@email.tld","key":"emailAddress"}],"physicalAddresses":[{"value":{"postalCode":"01545","locality":"Shrewsbury","lineOne":"123 Avenue Rd.","region":"MA"},"key":"unknown-type"}],"userId":"12345"}'

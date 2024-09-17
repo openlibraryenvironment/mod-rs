@@ -16,6 +16,7 @@ public class Actions {
     static public final String ACTION_RESPONDER_ISO18626_SHIPPED_RETURN                      = "ISO18626ShippedReturn";
     static public final String ACTION_RESPONDER_ISO18626_STATUS_REQUEST                      = "ISO18626StatusRequest";
 	static public final String ACTION_RESPONDER_ITEM_RETURNED                   			 = "itemReturned";
+	static public final String ACTION_RESPONDER_LOCAL_NOTE                                   = "localNote";
 	static public final String ACTION_RESPONDER_RESPOND_YES                     			 = "respondYes";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_CONDITION          			 = "supplierAddCondition";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT				 = "supplierAddURLToDocument";
@@ -42,6 +43,11 @@ public class Actions {
 	// SLNP Responder Actions
 	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
 	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
+
+	// SLNP non returnable responder actions
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED = "manuallyMarkSupplied";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE = "manuallyMarkAvailable";
 
 	// Requester Actions
 	static public final String ACTION_REQUESTER_BORROWER_CHECK               	 = "borrowerCheck";
@@ -81,9 +87,10 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
 
 	// SLNP Requester Actions
-	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT        = "slnpHandleAbort";
-	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED  = "slnpRequesterReceived";
-	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST      = "slnpMarkItemLost";
+	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT                       = "slnpHandleAbort";
+	static public final String ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED                 = "slnpRequesterReceived";
+	static public final String ACTION_SLNP_REQUESTER_MARK_ITEM_LOST                     = "slnpMarkItemLost";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED  = "slnpNonReturnableRequesterReceived";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";

@@ -74,6 +74,18 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_RESPONDER_CHECK_OUT_OF_RESHARE                    = "slnpResponderCheckOutOfReshare"
     static public final String SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST                = 'slnpResponderNewPatronRequestIndList'
 
+    // SLNP requester non returnable event lists
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_CANCEL                    = 'slnpNonReturnableRequesterCancel';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpNonReturnableRequesterISO18626StatusChange';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_RECEIVED                  = 'slnpNonReturnableRequesterReceived';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED    = 'slnpNonReturnableRequesterManuallyMarkSupplied';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE   = 'slnpNonReturnableRequesterManuallyMarkAvailable';
+
+    // SLNP responder non returnable event lists
+    static public final String SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY                 = 'slnpNonReturnableResponderCannotSupply'
+    static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP      = "slnpNonReturnableResponderSupplierPrintPullSlip"
+    static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT    = "slnpNonReturnableResponderSupplierSuppliesDocument"
+
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';
     static public final String RESPONDER_ANWSER_CONDITIONAL             = 'responderAnswerConditional';
@@ -113,7 +125,10 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626          = 'nrRequesterExpectToSupplyISO18626';
     static public final String NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
     static public final String NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
-    public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = "nrRequesterMarkEndOfRotaReviewed";
+    public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = 'nrRequesterMarkEndOfRotaReviewed';
+    public static final String NR_REQUESTER_NO_STATUS_CHANGE                   = 'nrRequesterNoStatusChange';
+    public static final String NR_REQUESTER_CLOSE_MANUAL                       = 'nrRequesterCloseManual';
+    public static final String NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626     = 'nrRequesterNotificationReceivedISO18626';
 
     static public final String NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';
     static public final String NR_RESPONDER_EVENT_NEW_PATRON_REQUEST           = 'nrResponderEventNewPatronRequest';
@@ -122,6 +137,9 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_RESPONDER_ADD_URL_TO_DOCUMENT                = 'nrResponderAddURLToDocument';
 
     public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
+    public static final String NR_RESPONDER_NO_STATUS_CHANGE                   = 'nrResponderNoStatusChange';
+    public static final String NR_RESPONDER_CLOSE_MANUAL                       = 'nrResponderCloseManual';
+    public static final String NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626     = 'nrResponderNotificationReceivedISO18626';
 
 
 

@@ -81,4 +81,6 @@ public interface HostLMSActions {
   we have to return true here
    */
   public boolean isManualCancelRequestItem();
+
+  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails)
 }

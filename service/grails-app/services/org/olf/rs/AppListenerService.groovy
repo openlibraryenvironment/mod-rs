@@ -9,7 +9,7 @@ import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StateModel;
 import org.springframework.context.ApplicationListener
 
-import grails.gorm.multitenancy.Tenants;
+import grails.gorm.multitenancy.Tenants
 
 
 /**
@@ -125,32 +125,33 @@ public class AppListenerService implements ApplicationListener {
   }
 
     private static String getPatronRequestEventName(String stateModelName, Boolean isRequester) {
-        String eventName;
+        String eventName
 
         if (isRequester) {
-            if (stateModelName == StateModel.MODEL_SLNP_REQUESTER) {
-                eventName = Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION;
+            if (stateModelName == StateModel.MODEL_SLNP_REQUESTER ||
+                    stateModelName == StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER) {
+                eventName = Events.EVENT_REQUESTER_NEW_SLNP_PATRON_REQUEST_INDICATION
             } else if (stateModelName == StateModel.MODEL_REQUESTER ||
                     stateModelName == StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER) {
-                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION
             } else if (stateModelName == StateModel.MODEL_NR_REQUESTER) {
-                eventName = Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION
             } else {
-                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_REQUESTER_NEW_PATRON_REQUEST_INDICATION
             }
         } else {
-            if (stateModelName == StateModel.MODEL_SLNP_RESPONDER) {
-                eventName = Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION;
+            if (stateModelName == StateModel.MODEL_SLNP_RESPONDER ||
+                    stateModelName == StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER) {
+                eventName = Events.EVENT_RESPONDER_NEW_SLNP_PATRON_REQUEST_INDICATION
             } else if (stateModelName == StateModel.MODEL_RESPONDER ||
                     stateModelName == StateModel.MODEL_CDL_RESPONDER) {
-                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION
             } else if (stateModelName == StateModel.MODEL_NR_RESPONDER) {
-                eventName = Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_NONRETURNABLE_RESPONDER_NEW_PATRON_REQUEST_INDICATION
             } else {
-                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION;
+                eventName = Events.EVENT_RESPONDER_NEW_PATRON_REQUEST_INDICATION
             }
         }
-
-        return eventName;
+        return eventName
     }
 }

@@ -1,9 +1,7 @@
 package org.olf.rs.statemodel.events
 
 import org.olf.rs.PatronRequest
-import com.k_int.web.toolkit.refdata.RefdataValue
 import org.olf.rs.referenceData.RefdataValueData
-import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.Events;

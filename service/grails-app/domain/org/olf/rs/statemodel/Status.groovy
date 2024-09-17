@@ -75,6 +75,8 @@ class Status implements MultiTenant<Status> {
   public static final String SLNP_REQUESTER_COMPLETE                  = "SLNP_REQ_COMPLETE";
   public static final String SLNP_REQUESTER_ITEM_LOST                 = "SLNP_REQ_ITEM_LOST";
   public static final String SLNP_REQUESTER_PATRON_INVALID            = "SLNP_REQ_PATRON_INVALID";
+  public static final String SLNP_REQUESTER_DOCUMENT_AVAILABLE        = "SLNP_REQ_DOCUMENT_AVAILABLE"
+  public static final String SLNP_REQUESTER_DOCUMENT_SUPPLIED         = "SLNP_REQ_DOCUMENT_SUPPLIED"
 
   // SLNP Responder states
   public static final String SLNP_RESPONDER_IDLE                 = "SLNP_RES_IDLE";
@@ -85,6 +87,7 @@ class Status implements MultiTenant<Status> {
   public static final String SLNP_RESPONDER_AWAIT_SHIP           = "SLNP_RES_AWAIT_SHIP";
   public static final String SLNP_RESPONDER_ITEM_SHIPPED         = "SLNP_RES_ITEM_SHIPPED";
   public static final String SLNP_RESPONDER_COMPLETE             = "SLNP_RES_COMPLETE";
+  public static final String SLNP_RESPONDER_DOCUMENT_SUPPLIED    = "SLNP_RES_DOCUMENT_SUPPLIED";
 
   // These 4 are no longer used but have left here in case they are to be used in the future,
   // as it will hopefully highlight that they may still be hangin arpind on an old system as we have not removed the references to them in the database

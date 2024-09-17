@@ -131,6 +131,7 @@ public class ReshareActionService {
 
         if (result.patronDetails != null) {
             if (result.patronDetails.userid != null) {
+
                 pr.resolvedPatron = lookupOrCreatePatronProxy(result.patronDetails);
                 if (pr.patronSurname == null) {
                     pr.patronSurname = result.patronDetails.surname;
@@ -349,7 +350,7 @@ public class ReshareActionService {
             }
 
             // Have we reached the maximum number of retries
-            int maxSendAttempts = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_MAXIMUM_SEND_ATEMPTS, 0, false);
+            int maxSendAttempts = settingsService.getSettingAsInt(SettingsData.SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS, 3, false);
 
             // Have we reached our maximum number
             if ((maxSendAttempts > 0) && (request.numberOfSendAttempts > maxSendAttempts)) {
@@ -407,7 +408,8 @@ public class ReshareActionService {
         String reasonForMessage = ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE;
 
         // Only the first response can be a RequestResponse
-        if (!request.sentISO18626RequestResponse && request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER) {
+        if (!request.sentISO18626RequestResponse && (request.stateModel.shortcode != StateModel.MODEL_SLNP_RESPONDER &&
+                request.stateModel.shortcode != StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER)) {
             // it has not previously been sent, so send the RequestResponse as the reason for the message
             reasonForMessage = ReasonForMessage.MESSAGE_REASON_REQUEST_RESPONSE;
 

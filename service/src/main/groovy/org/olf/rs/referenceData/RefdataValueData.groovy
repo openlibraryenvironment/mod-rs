@@ -1,5 +1,6 @@
 package org.olf.rs.referenceData
 
+import org.olf.rs.ProtocolReferenceDataValue
 import org.olf.rs.constants.CustomIdentifiersScheme;
 import org.olf.rs.constants.Directory;
 
@@ -26,45 +27,58 @@ public class RefdataValueData {
     public static final String YES_NO_NO  = 'No';
     public static final String YES_NO_YES = 'Yes';
 
-    public static final String VOCABULARY_ACCEPT_ITEM_METHOD               = 'AcceptItemMethod';
-    public static final String VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE = 'ActopnEventResultSaveRestore';
-    public static final String VOCABULARY_AUTO_RESPONDER                   = 'AutoResponder';
-    public static final String VOCABULARY_AUTO_RESPONDER_CANCEL            = 'AutoResponder_Cancel';
-    public static final String VOCABULARY_AUTO_RESPONDER_LOCAL             = 'AutoResponder_Local';
-    public static final String VOCABULARY_BORROWER_CHECK_METHOD            = 'BorrowerCheckMethod';
-    public static final String VOCABULARY_CANCELLATION_REASONS             = 'cancellationReasons';
-    public static final String VOCABULARY_CANNOT_SUPPLY_REASONS            = 'cannotSupplyReasons';
-    public static final String VOCABULARY_CHAT_AUTO_READ                   = 'ChatAutoRead';
-    public static final String VOCABULARY_CHECK_IN_METHOD                  = 'CheckInMethod';
-    public static final String VOCABULARY_CHECK_OUT_METHOD                 = 'CheckOutMethod';
-    public static final String VOCABULARY_CHECK_IN_ON_RETURN               = 'CheckInOnReturn';
-    public static final String VOCABULARY_COPYRIGHT_TYPE                   = "copyrightType";
-    public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER     = 'HostLMSIntegrationAdapter';
-    public static final String VOCABULARY_LOAN_CONDITIONS                  = 'loanConditions';
-    public static final String VOCABULARY_LOAN_POLICY                      = 'LoanPolicy';
-    public static final String VOCABULARY_NCIP_DUE_DATE                    = 'NCIPDueDate';
-    public static final String VOCABULARY_NOTICE_FORMATS                   = 'noticeFormats';
-    public static final String VOCABULARY_NOTICE_TRIGGERS                  = 'noticeTriggers';
-    public static final String VOCABULARY_PATRON_STORE_ADAPTER             = 'PatronStoreAdapter';
-    public static final String VOCABULARY_PULL_SLIP_TEMPLATE               = 'pullslipTemplate';
-    public static final String VOCABULARY_REQUEST_ROUTING_ADAPTER          = 'RequestRoutingAdapter';
-    public static final String VOCABULARY_SHARED_INDEX_ADAPTER             = 'SharedIndexAdapter';
-    public static final String VOCABULARY_YES_NO                           = 'YesNo';
-    public static final String VOCABULARY_YES_NO_OTHER                     = 'YNO';
-    public static final String VOCABULARY_NCIP_BARCODE                     = "NCIPAcceptItemUseBarcode";
-    public static final String VOCABULARY_NCIP_TITLE                       = "NCIPRequestItemUseTitle"
-    public static final String VOCABULARY_REQUEST_ITEM_METHOD              = "RequestItemMethod";
-    public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME        = 'customIdentifiersScheme';
+    public static final String VOCABULARY_ACCEPT_ITEM_METHOD                     = 'AcceptItemMethod';
+    public static final String VOCABULARY_ACTION_EVENT_RESULT_SAVE_RESTORE       = 'ActopnEventResultSaveRestore';
+    public static final String VOCABULARY_AUTO_RESPONDER                         = 'AutoResponder';
+    public static final String VOCABULARY_AUTO_RESPONDER_COPY                    = 'AutoResponder_Service_type_copy';
+    public static final String VOCABULARY_AUTO_RESPONDER_CANCEL                  = 'AutoResponder_Cancel';
+    public static final String VOCABULARY_AUTO_RESPONDER_LOCAL                   = 'AutoResponder_Local';
+    public static final String VOCABULARY_BORROWER_CHECK_METHOD                  = 'BorrowerCheckMethod';
+    public static final String VOCABULARY_CANCELLATION_REASONS                   = 'cancellationReasons';
+    public static final String VOCABULARY_CANNOT_SUPPLY_REASONS                  = 'cannotSupplyReasons';
+    public static final String VOCABULARY_CHAT_AUTO_READ                         = 'ChatAutoRead';
+    public static final String VOCABULARY_CHECK_IN_METHOD                        = 'CheckInMethod';
+    public static final String VOCABULARY_CHECK_OUT_METHOD                       = 'CheckOutMethod';
+    public static final String VOCABULARY_CHECK_IN_ON_RETURN                     = 'CheckInOnReturn';
+    public static final String VOCABULARY_COPYRIGHT_TYPE                         = "copyrightType";
+    public static final String VOCABULARY_HOST_LMS_INTEGRATION_ADAPTER           = 'HostLMSIntegrationAdapter';
+    public static final String VOCABULARY_LOAN_CONDITIONS                        = 'loanConditions';
+    public static final String VOCABULARY_LOAN_POLICY                            = 'LoanPolicy';
+    public static final String VOCABULARY_NCIP_DUE_DATE                          = 'NCIPDueDate';
+    public static final String VOCABULARY_NOTICE_FORMATS                         = 'noticeFormats';
+    public static final String VOCABULARY_NOTICE_TRIGGERS                        = 'noticeTriggers';
+    public static final String VOCABULARY_PATRON_STORE_ADAPTER                   = 'PatronStoreAdapter';
+    public static final String VOCABULARY_PULL_SLIP_TEMPLATE                     = 'pullslipTemplate';
+    public static final String VOCABULARY_REQUEST_ROUTING_ADAPTER                = 'RequestRoutingAdapter';
+    public static final String VOCABULARY_SHARED_INDEX_ADAPTER                   = 'SharedIndexAdapter';
+    public static final String VOCABULARY_YES_NO                                 = 'YesNo';
+    public static final String VOCABULARY_YES_NO_OTHER                           = 'YNO';
+    public static final String VOCABULARY_NCIP_BARCODE                           = "NCIPAcceptItemUseBarcode";
+    public static final String VOCABULARY_NCIP_TITLE                             = "NCIPRequestItemUseTitle"
+    public static final String VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE            = "NCIPUseDefaultPatronFee"
+    public static final String VOCABULARY_REQUEST_ITEM_METHOD                    = "RequestItemMethod";
+    public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME              = 'customIdentifiersScheme';
+    public static final String VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY   = 'AutoSupply';
+    public static final String VOCABULARY_FEATURE_FLAG                           = 'featureFlag';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE    = 'Save';
 
-    // Auto Responder
+    // Service type - Loan Auto Responder
     public static final String AUTO_RESPONDER_OFF                          = OFF;
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY = 'On: will supply and cannot supply';
     public static final String AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY          = 'On: will supply only';
     public static final String AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY      = 'On: loaned and cannot supply';
+
+    // Service type - Copy Auto Responder
+    public static final String COPY_AUTO_RESPONDER_OFF                     = OFF;
+    public static final String COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY = 'On: loaned and cannot supply';
+
+    // Auto Responder Requester Non Returnable
+    public static final String AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_OFF                     = OFF;
+    public static final String AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_AVAILABLE            = 'On: available';
+    public static final String AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_SUPPLIED             = 'On: supplied';
 
     // Auto Responder Cancel
     public static final String AUTO_RESPONDER_CANCEL_OFF = OFF;
@@ -190,6 +204,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_NO);
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_TITLE, NCIP_BARCODE_YES);
 
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_NO)
+            RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_YES)
+
 
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');
@@ -238,6 +255,13 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_ONLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_WILL_SUPPLY_CANNOT_SUPPLY);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER, AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_COPY, COPY_AUTO_RESPONDER_OFF);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_COPY, COPY_AUTO_RESPONDER_ON_LOANED_CANNOT_SUPPLY);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_OFF);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_AVAILABLE);
+            RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY, AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY_ON_SUPPLIED);
 
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_OFF);
             RefdataValue.lookupOrCreate(VOCABULARY_AUTO_RESPONDER_CANCEL, AUTO_RESPONDER_CANCEL_ON);
@@ -296,31 +320,31 @@ public class RefdataValueData {
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
-            // We only want to populate the copyright type vocabulary if it does not already exist
-            RefdataCategory copyrightTypeCategory = RefdataCategory.findByDesc(VOCABULARY_COPYRIGHT_TYPE);
-            if (!copyrightTypeCategory) {
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cat S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]A (Australia)', 'AU-CopyrightActS50-7A');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]B (Australia)', 'AU-CopyrightActS50-7B');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cleared (Australia)', 'AU-CopyrightCleared');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'General Business (Australia)', 'AU-GenBus');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S54 (New Zealand)', 'NZ-CopyrightActS54');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S55 (New Zealand)', 'NZ-CopyrightActS55');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Other types of copyright compliance', 'Other');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Fee Paid (UK)', 'UK-CopyRFeePaid');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Fair Dealing (UK)', 'UK-FairDealing');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCG (US)', 'US-CCG');
-                RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCL (US)', 'US-CCL');
-            }
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]A (Australia)', 'AU-CopyrightActS50-7A');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[7]B (Australia)', 'AU-CopyrightActS50-7B');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cleared (Australia)', 'AU-CopyrightCleared');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'General Business (Australia)', 'AU-GenBus');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S54 (New Zealand)', 'NZ-CopyrightActS54');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S55 (New Zealand)', 'NZ-CopyrightActS55');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Other types of copyright compliance', 'Other');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Fee Paid (UK)', 'UK-CopyRFeePaid');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Fair Dealing (UK)', 'UK-FairDealing');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCG (US) - published within the last 5 years', 'US-CCG');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'CCL (US) - NOT published within the last 5 years', 'US-CCL');
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
 
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
+
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN)
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY)
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN)
 
             // This looks slightly odd, but rather than litter this file with an ever growing list of
             // random delete statements, if you wish to delete
