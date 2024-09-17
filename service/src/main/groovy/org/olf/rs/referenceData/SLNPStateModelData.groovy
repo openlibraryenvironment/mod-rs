@@ -11,8 +11,6 @@ import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusStage
 
-import javax.swing.plaf.nimbus.State
-
 /**
  * Loads the SLNP State model data required for the system to process requests
  */
