@@ -31,6 +31,12 @@ public class ActionSLNPResponderSlnpAbortSupplyService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        String note = parameters?.note ?: ""
+        boolean isCancelWithAbortReason = "true" == (parameters?.reason)
+
+        if (isCancelWithAbortReason) {
+            note += "#ABORT#"
+        }
 
         log.debug("Checking to see if we need to send a CancelRequestItem")
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
@@ -49,7 +55,7 @@ public class ActionSLNPResponderSlnpAbortSupplyService extends AbstractAction {
             }
         }
 
-        reshareActionService.sendStatusChange(request, ActionEventResultQualifier.QUALIFIER_CANCELLED, actionResultDetails, ActionEventResultQualifier.QUALIFIER_ABORTED, false)
+        reshareActionService.sendStatusChange(request, ActionEventResultQualifier.QUALIFIER_CANCELLED, actionResultDetails, note, false)
         actionResultDetails.auditMessage = 'Abort Supply'
 
         return(actionResultDetails)
