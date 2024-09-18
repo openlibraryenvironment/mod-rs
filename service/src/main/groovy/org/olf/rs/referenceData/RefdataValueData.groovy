@@ -36,6 +36,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_BORROWER_CHECK_METHOD                  = 'BorrowerCheckMethod';
     public static final String VOCABULARY_CANCELLATION_REASONS                   = 'cancellationReasons';
     public static final String VOCABULARY_CANNOT_SUPPLY_REASONS                  = 'cannotSupplyReasons';
+    public static final String VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS    = 'slnpCancelOrAbortSupplyReasons';
     public static final String VOCABULARY_CHAT_AUTO_READ                         = 'ChatAutoRead';
     public static final String VOCABULARY_CHECK_IN_METHOD                        = 'CheckInMethod';
     public static final String VOCABULARY_CHECK_OUT_METHOD                       = 'CheckOutMethod';
@@ -279,6 +280,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Missing', 'missing');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'Without abort', 'false');
 
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'Requested item is locally available', 'available_locally');
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'User account is invalid', 'invalid_user');
