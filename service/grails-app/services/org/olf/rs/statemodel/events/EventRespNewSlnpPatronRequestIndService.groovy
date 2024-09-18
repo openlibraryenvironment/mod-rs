@@ -97,9 +97,11 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SettingsData.SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID)
             institutionalPatronIdValue = defaultInstitutionalPatronId?.value
         }
+        String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
+                request.resolvedRequester?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
-            Map requestItemResult = hostLMSService.requestItem(request, null,
-                    request.resolvedSupplier?.owner?.lmsLocationCode,
+            Map requestItemResult = hostLMSService.requestItem(request,
+                    request.resolvedSupplier?.owner?.lmsLocationCode, folioLocationFilter,
                     request.supplierUniqueRecordId, institutionalPatronIdValue)
             //is request item enabled for this responder?
             if (requestItemResult.result == true) {
