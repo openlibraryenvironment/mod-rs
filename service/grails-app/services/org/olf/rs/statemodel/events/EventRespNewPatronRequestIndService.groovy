@@ -78,7 +78,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                         institutionalPatronIdValue = defaultInstitutionalPatronId?.value;
                     }
                     String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                            request.resolvedRequester?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
+                            request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
                     Map requestItemResult = hostLMSService.requestItem(request,
