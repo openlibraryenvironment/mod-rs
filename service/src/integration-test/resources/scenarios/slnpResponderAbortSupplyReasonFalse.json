@@ -1,0 +1,7 @@
+{
+  "action": "slnpAbortSupply",
+  "actionParams": {
+    "reason": "false",
+    "note": "Reason is false"
+  }
+}
