@@ -31,7 +31,7 @@ public class ActionSLNPResponderSlnpAbortSupplyService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        String note = parameters?.note
+        String note = parameters?.note ?: ""
         boolean isCancelWithAbortReason = "true" == (parameters?.reason)
 
         if (isCancelWithAbortReason) {
