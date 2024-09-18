@@ -1,3 +1,7 @@
 {
-  "action": "slnpAbortSupply"
+  "action": "slnpAbortSupply",
+  "actionParams": {
+    "reason": "true",
+    "note": "Better to not abort"
+  }
 }
