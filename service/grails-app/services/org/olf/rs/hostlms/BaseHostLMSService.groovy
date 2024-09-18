@@ -863,6 +863,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           String itemId,
           String borrowerBarcode,
           String pickupLocation,
+          String itemLocation,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -887,6 +888,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
       .setRegistryId(ncipConnectionDetails.registryId)
+      .setItemLocationCode(itemLocation)
       .setPickupLocation(getRequestItemPickupLocation(pickupLocation))
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}")

@@ -71,6 +71,7 @@ public interface HostLMSActions {
           String itemId,
           String borrowerBarcode,
           String pickupLocation,
+          String itemLocation,
           INcipLogDetails ncipLogDetails
   );
 
