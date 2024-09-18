@@ -321,7 +321,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             Directory.KEY_ILL_POLICY_LOAN,
             Directory.KEY_ILL_POLICY_LAST_RESORT,
             Directory.KEY_ILL_POLICY_RETURNS,
-            Directory.KEY_ILL_POLICY_BORROW_RATIO].contains(k) ) {
+            Directory.KEY_ILL_POLICY_BORROW_RATIO,
+            Directory.KEY_FOLIO_LOCATION_FILTER].contains(k) ) {
         log.debug("processing binding for ${k} -> ${v}")
         boolean first = true
 
