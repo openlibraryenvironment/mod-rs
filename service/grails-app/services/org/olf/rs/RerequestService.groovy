@@ -27,8 +27,15 @@ public class RerequestService {
         if (updateBibRecords) {
             List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: newRequest.systemInstanceIdentifier]);
             if (bibRecords.size() == 1) { //Only continue if we've got 1 and only 1 result
-                bibRecord = bibRecords[0];
-
+                def bibRecord = bibRecords[0];
+                def bibObject = parseBibRecordXML(bibRecord);
+                if (bibObject) {
+                    bibObject.each { k, v ->
+                        if (v) {
+                            newRequest."${k}" = v;
+                        }
+                    }
+                }
             }
         }
         newRequest.save();
@@ -120,7 +127,7 @@ Date of publication
                     ],
                     "separator" : " "
             ],
-            "publication" : [
+            "publicationDate" : [
                     "fields" : [
                             [
                                     "field" : "260",
@@ -145,11 +152,11 @@ Date of publication
             for ( field in v.fields ) {
                 List<String> valueList;
                 GPathResult record = metadata.record;
-                //def tagMatch = { node -> node.@tag == field.field }
-                def tagMatch = { node -> true }
-                GPathResult datafield = record.find(tagMatch)
+                def tagMatch = { node -> def tag = node.@tag; tag == field.field }
+                // def tagMatch = { node -> true }
+                GPathResult datafield = record.datafield.find(tagMatch)
                 if (!datafield.isEmpty()) {
-                    valueList = dataField.findAll(node -> node.@code in field.subfields).collect(node -> node.text());
+                    valueList = datafield.subfield.findAll(node -> node.@code in field.subfields).collect(node -> node.text());
                 }
                 if (valueList?.size() > 0) {
                     result.put(k, valueList.join(v.separator))

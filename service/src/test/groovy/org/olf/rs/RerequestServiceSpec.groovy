@@ -11,7 +11,7 @@ class RerequestServiceSpec extends Specification implements ServiceUnitTest<Rere
         then:
             def result = service.parseBibRecordXML(xmlText);
         expect:
-            result.title == "Case study research : design and methods  Robert K. Yin, COSMOS Corporation.";
+            result.title == "Case study research : design and methods /";
     }
 }
 
