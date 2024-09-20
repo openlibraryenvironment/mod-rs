@@ -36,7 +36,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
                 // Add an audit entry
                 actionResultDetails.auditMessage = auditMessage
                 if (actionResultDetails.qualifier.equalsIgnoreCase(ActionEventResultQualifier.QUALIFIER_CANCELLED) &&
-                        parameters.messageInfo?.note?.toUpperCase()?.contains("ABORT")) {
+                        parameters.messageInfo?.note?.toUpperCase()?.contains("#ABORT#")) {
                     actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_ABORTED
                 }
 
