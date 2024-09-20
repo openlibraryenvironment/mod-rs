@@ -217,17 +217,22 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             }
         }
 
+        boolean isSLNPResponder = request.stateModel.shortcode === StateModel.MODEL_SLNP_RESPONDER
         if (result == false) {
             actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
             actionResultDetails.responseResult.code = -3; // NCIP action failed
-            actionResultDetails.responseResult.status = false
+            if (isSLNPResponder) {
+                actionResultDetails.responseResult.status = false
+            }
 
             // Ensure we have a message
             if (actionResultDetails.responseResult.message == null) {
                 actionResultDetails.responseResult.message = 'NCIP CheckoutItem call failed.';
             }
         } else {
-            actionResultDetails.responseResult.status = true
+            if (isSLNPResponder) {
+                actionResultDetails.responseResult.status = true
+            }
         }
 
         return(actionResultDetails);
