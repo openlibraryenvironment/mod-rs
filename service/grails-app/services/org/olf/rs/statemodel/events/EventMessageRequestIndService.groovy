@@ -188,7 +188,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             rv = new RequestVolume(
                                     name: pr.hrid,
                                     itemId: "--",
-                                    status: RequestVolume.lookupStatus('completed')
+                                    status: RequestVolume.lookupStatus(EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
                             )
                             rv.callNumber = supplierInfo.callNumber
                             pr.addToVolumes(rv)

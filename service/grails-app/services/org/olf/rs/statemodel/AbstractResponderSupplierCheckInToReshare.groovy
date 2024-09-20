@@ -22,8 +22,10 @@ import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
 @Slf4j
 abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction {
 
-    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out';
-    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
+    private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out'
+    private static final List<String> COMPLETED_VOLUME_STATUSES = ["lms_check_out_(no_integration)",
+                                                                   "lms_check_out_complete", "completed" ,
+                                                                   "awaiting_lms_check_in"]
 
     private static final String REASON_SPOOFED = 'spoofed';
 
@@ -147,28 +149,8 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                     }
                 }
 
-                // Cancel all not checked out requests
-                RequestVolume[] volumesToCancel = request.volumes.findAll { rv ->
-                    rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
-                }
-                if(volumesToCancel.size() > 0) {
-                    Map cancelResult = [result: false]
-                    if (request.customIdentifiers) {
-                        Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
-                        if (customIdentifiersMap.requestUuid) {
-                            cancelResult = hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
-                        }
-                    }
-                    if (cancelResult.result == true) {
-                        for (def vol : volumesToCancel) {
-                            if (vol.itemId == cancelResult.itemId) {
-                                vol.status = vol.lookupStatus(VOLUME_STATUS_ILS_REQUEST_CANCELLED)
-                                vol.save(failOnError: true)
-                                break
-                            }
-                        }
-                    }
-                }
+                cancelUnneededVolumes(request, institutionalPatronIdValue)
+                deleteUnusedVolumes(request)
 
                 // Save the earliest Date we found as the dueDate
                 request.dueDateFromLMS = stringDate;
@@ -236,6 +218,31 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
         }
 
         return(actionResultDetails);
+    }
+
+    private void cancelUnneededVolumes(PatronRequest request, String institutionalPatronIdValue) {
+        // Cancel all not checked out requests
+        RequestVolume[] volumesToCancel = request.volumes.findAll { rv ->
+            rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS
+        }
+        if(volumesToCancel.size() > 0) {
+            if (request.customIdentifiers) {
+                Map customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                if (customIdentifiersMap.requestUuid) {
+                    hostLMSService.cancelRequestItem(request, customIdentifiersMap.requestUuid, institutionalPatronIdValue)
+                }
+            }
+        }
+    }
+
+    private void deleteUnusedVolumes(PatronRequest request) {
+        RequestVolume[] volumesToDelete = request.volumes.findAll { rv ->
+            !COMPLETED_VOLUME_STATUSES.contains(rv.status.value)
+        }
+        for (def vol : volumesToDelete) {
+            request.volumes.remove(vol)
+            vol.delete()
+        }
     }
 
     protected ActionResultDetails performCommonUndoAction(PatronRequest request, ActionResultDetails actionResultDetails) {

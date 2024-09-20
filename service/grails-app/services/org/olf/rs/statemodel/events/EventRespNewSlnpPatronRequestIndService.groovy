@@ -119,6 +119,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == requestItemResult.itemId }
                     // If there's no rv
                     if (!rv) {
+                        request.volumes?.clear()
                         rv = new RequestVolume(
                                 name: request.volume ?: requestItemResult.itemId,
                                 itemId: requestItemResult.itemId,
@@ -126,6 +127,8 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                         )
                         rv.callNumber = requestItemResult.callNumber
                         request.addToVolumes(rv)
+                    } else {
+                        rv.callNumber = requestItemResult.callNumber
                     }
                 }
                 if (requestItemResult.userUuid || requestItemResult.requestId) {
