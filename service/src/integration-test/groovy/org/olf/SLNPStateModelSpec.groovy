@@ -551,7 +551,7 @@ class SLNPStateModelSpec extends TestBase {
                 .replace('requestId_holder', requestId)
                 .replace('supAgencyIdValue_holder', supAgencyId)
                 .replace('status_holder',  statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? ActionEventResultQualifier.QUALIFIER_CANCELLED : statusChanged)
-                .replace('note_holder', statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? 'ABORT' : '')
+                .replace('note_holder', statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? '#ABORT#' : '')
 
         setHeaders([
                 'X-Okapi-Tenant': tenant_id,
