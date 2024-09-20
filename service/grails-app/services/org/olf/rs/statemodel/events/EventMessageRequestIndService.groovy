@@ -180,6 +180,22 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 // able to use that for our request.
                 pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
 
+                if (eventData.supplierInfo instanceof Map){
+                    Map supplierInfo = eventData.supplierInfo
+                    if (supplierInfo.callNumber) {
+                        RequestVolume rv = pr.volumes.find { rv -> rv.callNumber == supplierInfo.callNumber }
+                        if (!rv) {
+                            rv = new RequestVolume(
+                                    name: pr.hrid,
+                                    itemId: "No barcode",
+                                    status: RequestVolume.lookupStatus('completed')
+                            )
+                            rv.callNumber = supplierInfo.callNumber
+                            pr.addToVolumes(rv)
+                        }
+                    }
+                }
+
                 if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {
                     log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
                     List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: pr.bibliographicRecordId]);
