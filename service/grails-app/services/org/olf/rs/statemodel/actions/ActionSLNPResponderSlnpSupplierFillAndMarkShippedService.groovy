@@ -24,12 +24,17 @@ public class ActionSLNPResponderSlnpSupplierFillAndMarkShippedService extends Ab
         // Perform action Supplier check in to reshare - ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE
         performCommonAction(request, parameters, actionResultDetails)
 
-        // Perform action Supplier mark shipped - ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED
-        String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
-        if (autoLoanSetting != null && !autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
-            reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_LOANED, parameters, actionResultDetails)
+        if (actionResultDetails.responseResult.status = true) {
+            // Perform action Supplier mark shipped - ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED
+            String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
+            if (autoLoanSetting != null && !autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
+                reshareActionService.sendResponse(request, ActionEventResultQualifier.QUALIFIER_LOANED, parameters, actionResultDetails)
+            }
+            actionResultDetails.auditMessage = 'Shipped'
+        } else {
+            actionResultDetails.auditMessage = 'NCIP call failed'
         }
-        actionResultDetails.auditMessage = 'Shipped'
+
         return actionResultDetails
     }
 

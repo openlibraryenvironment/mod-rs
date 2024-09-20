@@ -224,8 +224,10 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             // Ensure we have a message
             if (actionResultDetails.responseResult.message == null) {
                 actionResultDetails.responseResult.message = 'NCIP CheckoutItem call failed.';
+                actionResultDetails.responseResult.status = false
             }
         }
+        actionResultDetails.responseResult.status = true
 
         return(actionResultDetails);
     }
