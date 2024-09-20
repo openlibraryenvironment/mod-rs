@@ -65,7 +65,7 @@ public class AvailableActionData {
         // for a given state from the model OR frontend translation (May drift out of date)
 
         // RES_AWAIT_SHIP OR "Awaiting shipping"
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
 
