@@ -187,7 +187,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         if (!rv) {
                             rv = new RequestVolume(
                                     name: pr.hrid,
-                                    itemId: "No barcode",
+                                    itemId: "--",
                                     status: RequestVolume.lookupStatus('completed')
                             )
                             rv.callNumber = supplierInfo.callNumber
