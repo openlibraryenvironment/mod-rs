@@ -107,6 +107,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     // We have a single string, this is the usual standard case and should be handled as a single request volume
                     // Check if a RequestVolume exists for this itemId, and if not, create one
                     // At this point we have an itemId of the form "<name>,<id>,<callNumber>"
+                    itemId = itemId + " "
                     var iidFields = itemId.split(',')
                     String iidId = itemId
                     String iidName = itemId
@@ -114,7 +115,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     if (iidFields.size() == 3) {
                         iidId = iidFields[1]
                         iidName = iidFields[0]
-                        iidCallNumber = iidFields[2]
+                        iidCallNumber = iidFields[2].trim()
                     }
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId }
                     if (!rv) {
