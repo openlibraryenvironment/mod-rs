@@ -825,8 +825,8 @@ public class NonreturnablesStateModelData {
         AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CLOSE_MANUAL);
 
         //ISO18686Notification
-        AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
-        AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
+        AvailableActionData.assignToCompletedAndActiveStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
+        AvailableActionData.assignToCompletedAndActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
 
         //ISO18626StatusRequest
         AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_RESPONDER_ISO18626_STATUS_REQUEST, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NO_STATUS_CHANGE);

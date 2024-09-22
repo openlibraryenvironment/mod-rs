@@ -160,7 +160,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             actionResultDetails.qualifier = statusInfo.status;
 
             // Special case for Unfilled
-            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
+            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER) ||
+                    request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_NR_REQUESTER)) {
                 if (statusInfo.status == "Unfilled") {
                     log.debug("Handling Unfilled status");
                     if (parameters.messageInfo.reasonUnfilled == "transfer") {
