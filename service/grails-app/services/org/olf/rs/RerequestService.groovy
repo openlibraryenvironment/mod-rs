@@ -25,17 +25,23 @@ public class RerequestService {
         newRequest.precededBy = originalRequest;
 
         if (updateBibRecords) {
-            List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: newRequest.systemInstanceIdentifier]);
-            if (bibRecords.size() == 1) { //Only continue if we've got 1 and only 1 result
-                def bibRecord = bibRecords[0];
-                def bibObject = parseBibRecordXML(bibRecord);
-                if (bibObject) {
-                    bibObject.each { k, v ->
-                        if (v) {
-                            newRequest."${k}" = v;
+            try {
+                List<String> bibRecords = sharedIndexService.getSharedIndexActions().fetchSharedIndexRecords([systemInstanceIdentifier: newRequest.systemInstanceIdentifier]);
+                if (bibRecords.size() == 1) { //Only continue if we've got 1 and only 1 result
+                    def bibRecord = bibRecords[0];
+
+                    def bibObject = parseBibRecordXML(bibRecord);
+                    if (bibObject) {
+                        bibObject.each { k, v ->
+                            if (v) {
+                                newRequest."${k}" = v;
+                            }
                         }
                     }
+
                 }
+            } catch(Exception e) {
+                log.error("Error getting updated bib record: ${e.getLocalizedMessage()}");
             }
         }
         newRequest.save();
@@ -143,10 +149,10 @@ Date of publication
     ]
 
     public Map parseBibRecordXML(String xmlString) {
+        log.debug("Attempting to parse bib record string: ${xmlString}");
         Map result = [:];
         def xml = new XmlSlurper().parseText(xmlString);
         def metadata = xml.GetRecord.record.metadata;
-
 
         bibMap.each{ k, v ->
             for ( field in v.fields ) {

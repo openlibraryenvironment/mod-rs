@@ -1793,14 +1793,17 @@ class DosomethingSimple {
         // check for copyright and publication type in responder request
     }
 
-    void "Test automatic rerequest to different cluster id"() {
+    void "Test automatic rerequest to different cluster id"(
+            String deliveryMethod,
+            String ref
+    ) {
         String patronIdentifier =  "ABCD-EFG-HIJK-0001";
         String requesterTenantId = "RSInstOne";
         String responderTenantId = "RSInstThree";
         String requestTitle = "YA Bad Book";
         String requestAuthor = "Mr. Boringman";
         String requestSymbol = "ISIL:RST1"
-        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String patronReference = "ref-" + patronIdentifier + ref + randomCrap(6);
 
         when: "do the thing"
 
@@ -1815,6 +1818,7 @@ class DosomethingSimple {
                 patronReference: patronReference,
                 systemInstanceIdentifier: "123-456-789",
                 oclcNumber: "1234312",
+                deliveryMethod: deliveryMethod,
                 tags: ['RS-REREQUEST-TEST-1']
         ];
 
@@ -1843,6 +1847,11 @@ class DosomethingSimple {
 
         then:
         assert(true);
+
+        where:
+        deliveryMethod | ref
+        null           | "loan"
+        "Copy"         | "copy"
 
     }
 
