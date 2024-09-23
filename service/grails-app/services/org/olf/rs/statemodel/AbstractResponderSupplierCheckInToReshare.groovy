@@ -146,6 +146,8 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                         }
                     } else {
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);
+                        actionResultDetails.responseResult.ncipSuccess = false
+                        return actionResultDetails
                     }
                 }
 
@@ -204,7 +206,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
             actionResultDetails.responseResult.code = -3; // NCIP action failed
             if (isSLNPResponder) {
-                actionResultDetails.responseResult.status = false
+                actionResultDetails.responseResult.ncipSuccess = false
             }
 
             // Ensure we have a message
@@ -213,7 +215,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             }
         } else {
             if (isSLNPResponder) {
-                actionResultDetails.responseResult.status = true
+                actionResultDetails.responseResult.ncipSuccess = true
             }
         }
 
