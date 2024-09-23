@@ -24,7 +24,7 @@ public class ActionSLNPResponderSlnpSupplierFillAndMarkShippedService extends Ab
         // Perform action Supplier check in to reshare - ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE
         performCommonAction(request, parameters, actionResultDetails)
 
-        if (actionResultDetails.responseResult.status = true) {
+        if (actionResultDetails.responseResult.ncipSuccess = true) {
             // Perform action Supplier mark shipped - ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED
             String autoLoanSetting = AppSetting.findByKey('auto_responder_status')?.value
             if (autoLoanSetting != null && !autoLoanSetting.equalsIgnoreCase("on:_loaned_and_cannot_supply")) {
