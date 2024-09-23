@@ -145,8 +145,10 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                             log.warn("Unable to parse ${checkoutResult?.dueDate} to date with format string ${dateFormatSetting}: ${e.getMessage()}");
                         }
                     } else {
-                        reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString(), null);
-                        actionResultDetails.responseResult.ncipSuccess = false
+                        String message = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString()
+                        reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
+                        actionResultDetails.result = ActionResult.ERROR
+                        actionResultDetails.auditMessage = message
                         return actionResultDetails
                     }
                 }
@@ -201,21 +203,13 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             }
         }
 
-        boolean isSLNPResponder = request.stateModel.shortcode === StateModel.MODEL_SLNP_RESPONDER
-        if (result == false) {
+        if (!result) {
             actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
             actionResultDetails.responseResult.code = -3; // NCIP action failed
-            if (isSLNPResponder) {
-                actionResultDetails.responseResult.ncipSuccess = false
-            }
 
             // Ensure we have a message
             if (actionResultDetails.responseResult.message == null) {
                 actionResultDetails.responseResult.message = 'NCIP CheckoutItem call failed.';
-            }
-        } else {
-            if (isSLNPResponder) {
-                actionResultDetails.responseResult.ncipSuccess = true
             }
         }
 
