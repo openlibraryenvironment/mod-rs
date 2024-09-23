@@ -78,6 +78,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 rv.status.value == VOLUME_STATUS_AWAITING_LMS_CHECK_OUT
             }
 
+            int count = 0
             if (volumesNotCheckedIn.size() > 0) {
                 // Call the host lms to check the item out of the host system and in to reshare
 
@@ -118,6 +119,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
 
                     // Otherwise, if the checkout succeeded or failed, set appropriately
                     if (checkoutResult.result == true) {
+                        count++
                         RefdataValue volStatus = checkoutResult.reason == REASON_SPOOFED ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete');
                         if (volStatus) {
                             vol.status = volStatus;
@@ -147,10 +149,13 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                     } else {
                         String message = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString()
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
-                        actionResultDetails.result = ActionResult.ERROR
-                        actionResultDetails.auditMessage = message
-                        return actionResultDetails
                     }
+                }
+
+                if (count == 0) {
+                    actionResultDetails.result = ActionResult.ERROR
+                    actionResultDetails.auditMessage = "NCIP CheckoutItem call failed"
+                    return actionResultDetails
                 }
 
                 cancelUnneededVolumes(request, institutionalPatronIdValue)
