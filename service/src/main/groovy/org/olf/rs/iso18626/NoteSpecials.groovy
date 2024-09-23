@@ -26,6 +26,7 @@ public class NoteSpecials {
     public static final String FIELD_EDITION                    = 'Edition';
     public static final String FIELD_ISBN                       = 'ISBN';
     public static final String FIELD_ISSN                       = 'ISSN';
+    public static final String FIELD_ISSUE                      = 'Issue';
     public static final String FIELD_NEEDED_BY                  = 'Neededby';
     public static final String FIELD_OCLC_NUMBER                = 'OCLCNumber';
     public static final String FIELD_PAGES_REQUESTED            = 'PagesRequested';
@@ -48,6 +49,7 @@ public class NoteSpecials {
     public static final String UPDATED_FIELD_EDITION_PREFIX                    = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_EDITION + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_ISBN_PREFIX                       = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_ISBN + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_ISSN_PREFIX                       = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_ISSN + SPECIAL_SEPARATOR;
+    public static final String UPDATED_FIELD_ISSUE_PREFIX                      = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_ISSUE + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_NEEDED_BY_PREFIX                  = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_NEEDED_BY + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_OCLC_NUMBER_PREFIX                = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_OCLC_NUMBER + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_PAGES_REQUESTED_PREFIX            = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_PAGES_REQUESTED + SPECIAL_SEPARATOR;
