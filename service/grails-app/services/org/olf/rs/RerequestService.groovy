@@ -8,9 +8,10 @@ import groovy.xml.slurpersupport.GPathResult;
 
 public class RerequestService {
 
+
     SharedIndexService sharedIndexService;
 
-    public static List<String> preserveFields = ['author','edition','isbn','isRequester','issn','issue','neededBy','numberOfPages','oclcNumber','patronEmail','patronGivenName','patronIdentifier','patronNote','patronReference','patronSurname','patronType','pickLocation','pickupLocationSlug','placeOfPublication','publicationDate','publisher','requestingInstitutionSymbol','sponsoringBody','startPage','stateModel','subtitle','systemInstanceIdentifier','title','volume', 'serviceType'];
+    public static List<String> preserveFields = ['author', 'authorOfComponent', 'copyrightType', 'edition', 'isbn', 'isRequester', 'issn', 'issue', 'neededBy', 'numberOfPages', 'oclcNumber', 'pagesRequested', 'patronEmail', 'patronGivenName', 'patronIdentifier', 'patronNote', 'patronReference', 'patronSurname', 'patronType', 'pickLocation', 'pickupLocationSlug', 'placeOfPublication', 'publicationDate', 'publisher', 'requestingInstitutionSymbol', 'serviceType', 'sponsoringBody', 'startPage', 'stateModel', 'subtitle', 'systemInstanceIdentifier', 'title', 'titleOfComponent', 'volume'];
 
     public createNewRequestFromExisting(PatronRequest originalRequest, List<String> copyFields, Map<String, Object> changeSet, Boolean updateBibRecords) {
         PatronRequest newRequest = new PatronRequest();
