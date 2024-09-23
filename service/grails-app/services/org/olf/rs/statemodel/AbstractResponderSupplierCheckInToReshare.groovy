@@ -78,7 +78,6 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 rv.status.value == VOLUME_STATUS_AWAITING_LMS_CHECK_OUT
             }
 
-            int count = 0
             if (volumesNotCheckedIn.size() > 0) {
                 // Call the host lms to check the item out of the host system and in to reshare
 
@@ -109,6 +108,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 String stringDate
 
                 // Iterate over volumes not yet checked in in for loop so we can break out if we need to
+                int count = 0
                 for (def vol : volumesNotCheckedIn) {
                     /*
                      * Be aware that institutionalPatronIdValue here may well be blank or null.
