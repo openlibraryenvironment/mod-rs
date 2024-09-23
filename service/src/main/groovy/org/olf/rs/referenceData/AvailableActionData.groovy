@@ -50,6 +50,7 @@ public class AvailableActionData {
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, 'slnpPrintPullSlip'],
             [ StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP],
             [ StateModel.MODEL_SLNP_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE],
+            [ StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
@@ -94,7 +95,6 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_CDL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.CDL_RESPONDER_CHECK_INTO_RESHARE, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         // RES_ITEM_SHIPPED OR "Shipped"
