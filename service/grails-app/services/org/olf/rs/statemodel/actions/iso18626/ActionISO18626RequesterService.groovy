@@ -160,7 +160,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             actionResultDetails.qualifier = statusInfo.status;
 
             // Special case for Unfilled
-            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER)) {
+            if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER) ||
+                    request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_NR_REQUESTER)) {
                 if (statusInfo.status == "Unfilled") {
                     log.debug("Handling Unfilled status");
                     if (parameters.messageInfo.reasonUnfilled == "transfer") {
@@ -175,7 +176,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                                 if (settingsService.hasSettingValue(SettingsData.SETTING_AUTO_REREQUEST, SETTING_YES)) {
                                     //Trigger Re-Request here
                                     actionResultDetails.qualifier = "UnfilledTransfer"; //To transition to Rerequested state
-                                    PatronRequest newRequest = rerequestService.createNewRequestFromExisting(request, RerequestService.preserveFields, ["systemInstanceIdentifier":newCluster]);
+                                    PatronRequest newRequest = rerequestService.createNewRequestFromExisting(request, RerequestService.preserveFields, ["systemInstanceIdentifier": newCluster], true);
                                 }
                             } else {
                                 log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
