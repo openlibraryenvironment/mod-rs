@@ -158,7 +158,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 if (!atLeastOne) {
                     actionResultDetails.result = ActionResult.ERROR
                     actionResultDetails.auditMessage = "NCIP CheckoutItem call failed"
-                    deleteUnusedVolumes(request)
+                    deleteFailedVolumes(request)
                     return actionResultDetails
                 }
 
@@ -243,6 +243,16 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
     private void deleteUnusedVolumes(PatronRequest request) {
         RequestVolume[] volumesToDelete = request.volumes.findAll { rv ->
             !COMPLETED_VOLUME_STATUSES.contains(rv.status.value)
+        }
+        for (def vol : volumesToDelete) {
+            request.volumes.remove(vol)
+            vol.delete()
+        }
+    }
+
+    private void deleteFailedVolumes(PatronRequest request) {
+        RequestVolume[] volumesToDelete = request.volumes.findAll { rv ->
+            VOLUME_STATUS_FAILED_LMS_CHECKOUT == rv.status.value
         }
         for (def vol : volumesToDelete) {
             request.volumes.remove(vol)
