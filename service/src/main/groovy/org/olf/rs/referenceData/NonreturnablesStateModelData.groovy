@@ -29,7 +29,8 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_BLANK_FORM_REVIEW ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED ],
-        [ status : Status.PATRON_REQUEST_UNFILLED]
+        [ status : Status.PATRON_REQUEST_UNFILLED],
+        [ status : Status.PATRON_REQUEST_REREQUESTED]
     ];
 
     static private final List nrResponderStates = [
@@ -171,11 +172,22 @@ public class NonreturnablesStateModelData {
     ];
 
     private static Map nrRequesterISO18626Delivered = [
-            code: 'requesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Loaned',
+            code: 'nrRequesterISO18626Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
             qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626UnfilledTransfer = [
+            code: 'nrRequesterISO18626UnfilledTransfer',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Unfilled, but the reason is "transfer"',
+            result: true,
+            status: Status.PATRON_REQUEST_REREQUESTED,
+            qualifier: 'UnfilledTransfer',
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -302,6 +314,8 @@ public class NonreturnablesStateModelData {
     ];
 
 
+
+
     //NR REQUESTER ACTIONEVENT RESULT LISTS
     private static Map nrRequesterNoStatusChangeList = [
             code: ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE,
@@ -353,6 +367,7 @@ public class NonreturnablesStateModelData {
             results: [
                     nrRequesterISO18626ExpectToSupply,
                     nrRequesterISO18626Unfilled,
+                    nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
             ]
     ];
@@ -365,6 +380,7 @@ public class NonreturnablesStateModelData {
             results: [
                     nrRequesterISO18626Delivered,
                     nrRequesterISO18626Unfilled,
+                    nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
             ]
     ];
