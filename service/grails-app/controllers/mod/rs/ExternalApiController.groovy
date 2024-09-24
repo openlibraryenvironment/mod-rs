@@ -1,5 +1,6 @@
 package mod.rs
 
+import groovy.xml.StreamingMarkupBuilder
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
@@ -17,6 +18,8 @@ import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses
+import org.olf.rs.logging.IIso18626LogDetails
+import org.olf.rs.logging.ProtocolAuditService
 import org.olf.rs.statemodel.events.EventMessageRequestIndService
 import org.xml.sax.SAXException;
 
@@ -31,7 +34,8 @@ class ExternalApiController {
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ConfirmationMessageService confirmationMessageService
-  StatisticsService statisticsService;
+  StatisticsService statisticsService
+  ProtocolAuditService protocolAuditService
 
   // ToDo this method needs a TTL cache and some debounce mechanism as it increases in complexity
     @ApiOperation(
@@ -98,6 +102,11 @@ class ExternalApiController {
 
     try {
       if ( request.XML != null ) {
+        IIso18626LogDetails iso18626LogDetails = protocolAuditService.getIso18626LogDetails()
+        def xmlString = new StreamingMarkupBuilder().bind { mkp.yield request.XML }
+        iso18626LogDetails.request(request.getServletPath(), xmlString.toString())
+        String requestId = null
+
         org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
         log.debug("GPATH MESSAGE: ${iso18626_msg}")
 
@@ -121,6 +130,8 @@ class ExternalApiController {
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+          iso18626LogDetails.response("200", message)
+          requestId = req_result.newRequestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
         }
@@ -139,6 +150,8 @@ class ExternalApiController {
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+          iso18626LogDetails.response("200", message)
+          requestId = req_result.requestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
         }
@@ -157,11 +170,17 @@ class ExternalApiController {
           def confirmationMessage = confirmationMessageService.makeConfirmationMessage(req_result)
           String message = confirmationMessageService.confirmationMessageReadable(confirmationMessage)
           log.debug("CONFIRMATION MESSAGE TO RETURN: ${message}")
+          iso18626LogDetails.response("200", message)
+          requestId = req_result.requestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
         }
         else {
           render(status: 400, text: 'The sent request is not valid')
+        }
+
+        if (requestId) {
+          protocolAuditService.save(requestId, iso18626LogDetails)
         }
       }
       else {

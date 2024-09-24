@@ -182,6 +182,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                             errorValue = 'requestingAgencyRequestId: ' + eventData.header?.requestingAgencyRequestId +
                                          ', supplyingAgencyRequestId: ' + eventData.header?.supplyingAgencyRequestId;
                         }
+                        eventResultDetails.responseResult.requestId = request.id
                     }
                 }
             }
