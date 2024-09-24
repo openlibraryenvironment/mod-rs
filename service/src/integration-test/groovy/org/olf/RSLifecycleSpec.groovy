@@ -152,6 +152,16 @@ class RSLifecycleSpec extends TestBase {
         return waitForRequestStateParams(tenant, timeout, params, required_state);
     }
 
+    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
+        Map params = [
+                'max':'1',
+                'offset':'0',
+                'match':'hrid',
+                'term':hrid
+        ]
+        return waitForRequestStateParams(tenant, timeout, params, required_state);
+    }
+
     private String waitForRequestStateParams(String tenant, long timeout, Map params, String required_state) {
         long start_time = System.currentTimeMillis();
         String request_id = null;
@@ -1969,6 +1979,7 @@ class DosomethingSimple {
         String jsonPayload = new File("src/integration-test/resources/scenarios/"+actionFile).text;
         String performActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
         log.debug("Posting cannot supply payload to ${performActionUrl}");
+        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
         doPost(performActionUrl, jsonPayload);
 
         waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
@@ -1976,12 +1987,25 @@ class DosomethingSimple {
         waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_REREQUESTED);
 
         //get original request
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         def requesterRequestData = doGet("${baseUrl}rs/patronrequests/${requesterRequestId}");
 
-       // def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
-        
+        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
 
+        String newRequesterRequestId = requesterRequestData.succeededBy.id;
 
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
+
+        String newHrid = newRequesterRequestData.hrid;
+
+        String newResponderRequestId = waitForRequestStateByHrid(responderTenantId, 10000, newHrid, Status.RESPONDER_IDLE);
+
+        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        def newResponderRequestData = doGet("${baseUrl}rs/patronrequests/${newResponderRequestId}");
+
+        assert(newResponderRequestData.precededBy?.id == responderRequestId)
 
         then:
         assert(true);
