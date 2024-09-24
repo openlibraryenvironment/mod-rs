@@ -23,9 +23,10 @@ import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
 abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction {
 
     private static final String VOLUME_STATUS_AWAITING_LMS_CHECK_OUT = 'awaiting_lms_check_out'
+    private static final String VOLUME_STATUS_FAILED_LMS_CHECKOUT = 'failed_lms_check_out'
     private static final List<String> COMPLETED_VOLUME_STATUSES = ["lms_check_out_(no_integration)",
                                                                    "lms_check_out_complete", "completed" ,
-                                                                   "awaiting_lms_check_in"]
+                                                                   "awaiting_lms_check_in", "failed_lms_check_out"]
 
     private static final String REASON_SPOOFED = 'spoofed';
 
@@ -108,7 +109,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 String stringDate
 
                 // Iterate over volumes not yet checked in in for loop so we can break out if we need to
-                int count = 0
+                boolean atLeastOne = false
                 for (def vol : volumesNotCheckedIn) {
                     /*
                      * Be aware that institutionalPatronIdValue here may well be blank or null.
@@ -119,7 +120,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
 
                     // Otherwise, if the checkout succeeded or failed, set appropriately
                     if (checkoutResult.result == true) {
-                        count++
+                        atLeastOne = true
                         RefdataValue volStatus = checkoutResult.reason == REASON_SPOOFED ? vol.lookupStatus('lms_check_out_(no_integration)') : vol.lookupStatus('lms_check_out_complete');
                         if (volStatus) {
                             vol.status = volStatus;
@@ -147,14 +148,17 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                             log.warn("Unable to parse ${checkoutResult?.dueDate} to date with format string ${dateFormatSetting}: ${e.getMessage()}");
                         }
                     } else {
+                        vol.status = vol.lookupStatus(VOLUME_STATUS_FAILED_LMS_CHECKOUT)
+                        vol.save(failOnError: true)
                         String message = "Host LMS integration: NCIP CheckoutItem call failed for itemId: ${vol.itemId}. Review configuration and try again or deconfigure host LMS integration in settings. " + checkoutResult.problems?.toString()
                         reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, message, null);
                     }
                 }
 
-                if (count == 0) {
+                if (!atLeastOne) {
                     actionResultDetails.result = ActionResult.ERROR
                     actionResultDetails.auditMessage = "NCIP CheckoutItem call failed"
+                    deleteUnusedVolumes(request)
                     return actionResultDetails
                 }
 

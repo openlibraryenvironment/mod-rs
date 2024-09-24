@@ -1,7 +1,6 @@
 package org.olf.rs
 
 import com.k_int.web.toolkit.refdata.Defaults
-import com.k_int.web.toolkit.refdata.RefdataCategory
 import com.k_int.web.toolkit.refdata.RefdataValue
 
 import grails.gorm.multitenancy.Tenants;
@@ -45,7 +44,8 @@ class RequestVolume implements MultiTenant<RequestVolume> {
     'Temporary item creation (no integration)', // NCIP off -- deal with manually
 
     'Requested from the ILS', // Volumes added after NCIP RequestItem call
-    'ILS request cancelled' // Checkout different item and this volume is cancelled
+    'ILS request cancelled', // Checkout different item and this volume is cancelled,
+    'Failed LMS Check Out' // Checkout different item and this volume has failed
   ])
   RefdataValue status
 
