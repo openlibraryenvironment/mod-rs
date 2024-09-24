@@ -1930,7 +1930,8 @@ class DosomethingSimple {
 
     void "Test automatic rerequest to different cluster id"(
             String deliveryMethod,
-            String ref
+            String serviceType,
+            String actionFile
     ) {
         String patronIdentifier =  "ABCD-EFG-HIJK-0001";
         String requesterTenantId = "RSInstOne";
@@ -1938,7 +1939,7 @@ class DosomethingSimple {
         String requestTitle = "YA Bad Book";
         String requestAuthor = "Mr. Boringman";
         String requestSymbol = "ISIL:RST1"
-        String patronReference = "ref-" + patronIdentifier + ref + randomCrap(6);
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
 
         when: "do the thing"
 
@@ -1954,6 +1955,7 @@ class DosomethingSimple {
                 systemInstanceIdentifier: "123-456-789",
                 oclcNumber: "1234312",
                 deliveryMethod: deliveryMethod,
+                serviceType: serviceType,
                 tags: ['RS-REREQUEST-TEST-1']
         ];
 
@@ -1964,9 +1966,9 @@ class DosomethingSimple {
 
         String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
 
-        String jsonPayload = new File("src/integration-test/resources/scenarios/supplierCannotSupplyTransfer.json").text;
+        String jsonPayload = new File("src/integration-test/resources/scenarios/"+actionFile).text;
         String performActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
-        log.debug("Posting supplierCannotSupplyTransfer payload to ${performActionUrl}");
+        log.debug("Posting cannot supply payload to ${performActionUrl}");
         doPost(performActionUrl, jsonPayload);
 
         waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
@@ -1977,6 +1979,7 @@ class DosomethingSimple {
         def requesterRequestData = doGet("${baseUrl}rs/patronrequests/${requesterRequestId}");
 
        // def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+        
 
 
 
@@ -1984,9 +1987,9 @@ class DosomethingSimple {
         assert(true);
 
         where:
-        deliveryMethod | ref
-        null           | "loan"
-        "Copy"         | "copy"
+        deliveryMethod | serviceType | actionFile
+        "URL"         | "Copy"       | "nrSupplierCannotSupplyTransfer.json"
+        null          | null         | "supplierCannotSupplyTransfer.json"
 
     }
 
