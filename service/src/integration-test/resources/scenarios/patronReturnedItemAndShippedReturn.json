@@ -1,0 +1,10 @@
+{
+  "action": "patronReturnedItemAndShippedReturn",
+  "actionParams": {
+    "itemBarcodes": [
+      {
+        "itemId": "js-test-0085"
+      }
+    ]
+  }
+}
