@@ -26,7 +26,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
     private static final String VOLUME_STATUS_FAILED_LMS_CHECKOUT = 'failed_lms_check_out'
     private static final List<String> COMPLETED_VOLUME_STATUSES = ["lms_check_out_(no_integration)",
                                                                    "lms_check_out_complete", "completed" ,
-                                                                   "awaiting_lms_check_in", "failed_lms_check_out"]
+                                                                   "awaiting_lms_check_in"]
 
     private static final String REASON_SPOOFED = 'spoofed';
 
