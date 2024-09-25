@@ -115,6 +115,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
         String errorType = null;
         Object errorValue = null;
         String requestId = getRequestId(eventData);
+        String requestUuid = null
 
         try {
             // Do we have a request id
@@ -182,7 +183,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                             errorValue = 'requestingAgencyRequestId: ' + eventData.header?.requestingAgencyRequestId +
                                          ', supplyingAgencyRequestId: ' + eventData.header?.supplyingAgencyRequestId;
                         }
-                        eventResultDetails.responseResult.requestId = request.id
+                        requestUuid = request.id
                     }
                 }
             }
@@ -200,6 +201,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
 
         // Build up the response
         eventResultDetails.responseResult = createResponseData(eventData, processedSuccessfully, errorType, errorValue);
+        eventResultDetails.responseResult.requestId = requestUuid
         return(eventResultDetails);
     }
 
