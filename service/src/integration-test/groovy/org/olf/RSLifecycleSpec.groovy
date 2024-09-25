@@ -2007,6 +2007,7 @@ class DosomethingSimple {
         setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
         def newResponderRequestData = doGet("${baseUrl}rs/patronrequests/${newResponderRequestId}");
 
+        assert(newResponderRequestData.precededBy?.id == responderRequestId)
 
         then:
         assert(newRequesterRequestData.title == "Case study research : design and methods /");
