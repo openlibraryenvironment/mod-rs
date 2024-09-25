@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses
 import org.olf.rs.logging.IIso18626LogDetails
+import org.olf.rs.logging.Iso18626LogDetails
 import org.olf.rs.logging.ProtocolAuditService
 import org.olf.rs.statemodel.events.EventMessageRequestIndService
 import org.xml.sax.SAXException;
@@ -103,6 +104,7 @@ class ExternalApiController {
     try {
       if ( request.XML != null ) {
         IIso18626LogDetails iso18626LogDetails = protocolAuditService.getIso18626LogDetails()
+        log.debug("Incoming ISO message logging enabled: ${iso18626LogDetails instanceof Iso18626LogDetails}")
         def xmlString = new StreamingMarkupBuilder().bind { mkp.yield request.XML }
         iso18626LogDetails.request(request.getServletPath(), xmlString.toString())
         String requestId = null
