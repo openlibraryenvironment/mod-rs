@@ -147,7 +147,7 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
                         String featFlagValue = settingsService.getSettingValue(featFlagKey)
 
                         // Filter only if the featureFlag is not null and equals "false"
-                        !(featFlagValue != null && featFlagValue == "false" && record.key == SettingsData.SETTING_COMBINE_FILL_AND_SHIP)
+                        !(featFlagValue != null && featFlagValue == "false")
                     }
                 }
                 return result
