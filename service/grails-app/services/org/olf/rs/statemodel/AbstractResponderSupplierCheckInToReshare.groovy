@@ -125,6 +125,9 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                         if (volStatus) {
                             vol.status = volStatus;
                         }
+                        if (checkoutResult.callNumber) {
+                            vol.callNumber = checkoutResult.callNumber
+                        }
                         vol.save(failOnError: true);
                         if (checkoutResult.loanUuid) {
                             Map customIdentifiersMap = [:]

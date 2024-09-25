@@ -679,6 +679,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.userId = response.opt('userId')
         result.itemId = response.opt('itemId')
         result.loanUuid = response.opt('loanUuid')
+        result.callNumber = response.opt("callNumber")
       }
     } else {
       result.problems = 'No institutional patron ID available'
