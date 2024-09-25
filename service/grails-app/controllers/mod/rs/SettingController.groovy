@@ -137,13 +137,16 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         // Now we can perform the lookup
         def result = doTheLookup(gormFilterClosure);
 
-        // Filter out values for state_action_config section depending on the feature flag value
-        // Particularly filter out this value if feature flag is false -> combine_fill_and_ship
-        // We need to hide this option as it does not work for SLNP state models
+        // Check if we need to filter out the 'combine_fill_and_ship' option based on feature flags
         if (params.filters.contains(SettingsData.SECTION_STATE_ACTION_CONFIG)) {
-            String value = settingsService.getSettingValue(SettingsData.SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP)
-            if (value == "false") {
-                result = result.findAll{record -> record.key != SettingsData.SETTING_COMBINE_FILL_AND_SHIP}
+            // Retrieve the feature flag value for state action configuration
+            String featureFlag = settingsService.getSettingValue(SettingsData.SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP)
+
+            // If the feature flag is false, remove the 'combine_fill_and_ship' option from the results
+            if (featureFlag == "false") {
+                result = result.findAll { record ->
+                    record.key != SettingsData.SETTING_COMBINE_FILL_AND_SHIP
+                }
             }
         }
 
