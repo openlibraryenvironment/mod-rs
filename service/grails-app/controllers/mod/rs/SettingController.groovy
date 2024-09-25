@@ -1,5 +1,6 @@
 package mod.rs
 
+import org.olf.rs.SettingsService
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -10,7 +11,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
+import org.olf.rs.referenceData.SettingsData;
 
 @Api(value = "/rs/settings/appSettings", tags = ["Settings (application) Controller"], description = "API for all things to do with application settings")
 class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
@@ -18,6 +20,7 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
     static responseFormats = ['json', 'xml'];
 
     private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
+    SettingsService settingsService
 
     SettingController() {
         super(AppSetting);
@@ -114,28 +117,44 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_SEARCH);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
-        // Use gorm criteria builder to always add your custom filter....
-        Closure gormFilterClosure = {
-            or {
-                isNull('hidden')
-                eq('hidden', false)
-            }
-        };
+        def result = []
 
-        // Are they explicitly filtering on the hidden field
-        if (params.filters != null) {
-            // they are, so see if hidden is being filtered on
-            if (params.filters.toString().indexOf("hidden") > -1) {
-                // They are explicitly filtering on it, so we do want to return hidden settings
-                gormFilterClosure = null;
+        AppSetting.withNewSession { session ->
+            AppSetting.withNewTransaction { status ->
+                // Use GORM criteria builder to add your custom filter....
+                Closure gormFilterClosure = {
+                    or {
+                        isNull('hidden')
+                        eq('hidden', false)
+                    }
+                }
+
+                // Check if explicitly filtering on the hidden field
+                if (params.filters != null && params.filters.toString().indexOf("hidden") > -1) {
+                    // They are explicitly filtering on it, so use null to avoid altering
+                    gormFilterClosure = null
+                }
+
+                // Perform the lookup
+                result = doTheLookup(gormFilterClosure)
+
+                // Iterate through each record in the result
+                result = result.findAll { record ->
+                    // Construct the feature flag value for state action configuration
+                    String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
+                    String featFlagValue = settingsService.getSettingValue(featFlagKey)
+
+                    // Filter only if the featureFlag is not null and equals "false"
+                    !(featFlagValue != null && featFlagValue == "false")
+                }
+                return result
             }
         }
 
-        // Now we can perform the lookup
-        respond doTheLookup(gormFilterClosure);
+        respond result
 
         // Record how long it took
-        ContextLogging.duration();
-        log.debug(ContextLogging.MESSAGE_EXITING);
+        ContextLogging.duration()
+        log.debug(ContextLogging.MESSAGE_EXITING)
     }
 }
