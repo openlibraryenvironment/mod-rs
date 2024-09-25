@@ -20,7 +20,7 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
     static responseFormats = ['json', 'xml'];
 
     private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
-    private static final SettingsService settingsService
+    SettingsService settingsService
 
     SettingController() {
         super(AppSetting);
@@ -117,43 +117,47 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_SEARCH);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
-        // Use gorm criteria builder to always add your custom filter....
-        Closure gormFilterClosure = {
-            or {
-                isNull('hidden')
-                eq('hidden', false)
-            }
-        };
+        def result = []
 
-        // Are they explicitly filtering on the hidden field
-        if (params.filters != null) {
-            // they are, so see if hidden is being filtered on
-            if (params.filters.toString().indexOf("hidden") > -1) {
-                // They are explicitly filtering on it, so we do want to return hidden settings
-                gormFilterClosure = null;
-            }
-        }
-
-        // Now we can perform the lookup
-        def result = doTheLookup(gormFilterClosure);
-
-        // Check if we need to filter out the 'combine_fill_and_ship' option based on feature flags
-        if (params.filters.contains(SettingsData.SECTION_STATE_ACTION_CONFIG)) {
-            // Retrieve the feature flag value for state action configuration
-            String featureFlag = settingsService.getSettingValue(SettingsData.SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP)
-
-            // If the feature flag is false, remove the 'combine_fill_and_ship' option from the results
-            if (featureFlag != null && featureFlag == "false") {
-                result = result.findAll { record ->
-                    record.key != SettingsData.SETTING_COMBINE_FILL_AND_SHIP
+        AppSetting.withNewSession { session ->
+            AppSetting.withNewTransaction { status ->
+                // Use GORM criteria builder to add your custom filter....
+                Closure gormFilterClosure = {
+                    or {
+                        isNull('hidden')
+                        eq('hidden', false)
+                    }
                 }
+
+                // Check if explicitly filtering on the hidden field
+                if (params.filters != null && params.filters.toString().indexOf("hidden") > -1) {
+                    // They are explicitly filtering on it, so use null to avoid altering
+                    gormFilterClosure = null
+                }
+
+                // Perform the lookup
+                result = doTheLookup(gormFilterClosure)
+
+                // Determine if we need to filter based on the feature flag
+                if (params.filters.contains(SettingsData.SECTION_STATE_ACTION_CONFIG)) {
+                    // Iterate through each record in the result
+                    result = result.findAll { record ->
+                        // Construct the feature flag value for state action configuration
+                        String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
+                        String featFlagValue = settingsService.getSettingValue(featFlagKey)
+
+                        // Filter only if the featureFlag is not null and equals "false"
+                        !(featFlagValue != null && featFlagValue == "false" && record.key == SettingsData.SETTING_COMBINE_FILL_AND_SHIP)
+                    }
+                }
+                return result
             }
         }
 
         respond result
 
         // Record how long it took
-        ContextLogging.duration();
-        log.debug(ContextLogging.MESSAGE_EXITING);
+        ContextLogging.duration()
+        log.debug(ContextLogging.MESSAGE_EXITING)
     }
 }
