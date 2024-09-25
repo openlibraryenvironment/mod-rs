@@ -1969,6 +1969,8 @@ class DosomethingSimple {
                 tags: ['RS-REREQUEST-TEST-1']
         ];
 
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_SHARED_INDEX_INTEGRATION) : "mock" ]);
+
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
@@ -2008,7 +2010,8 @@ class DosomethingSimple {
         assert(newResponderRequestData.precededBy?.id == responderRequestId)
 
         then:
-        assert(true);
+        assert(newRequesterRequestData.title == "Case study research : design and methods /");
+        assert(newResponderRequestData.precededBy?.id == responderRequestId);
 
         where:
         deliveryMethod | serviceType | actionFile

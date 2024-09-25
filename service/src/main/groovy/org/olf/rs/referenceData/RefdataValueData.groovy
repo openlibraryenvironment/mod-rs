@@ -130,6 +130,7 @@ public class RefdataValueData {
     public static final String SHARED_INDEX_ADAPTER_FOLIO = 'FOLIO';
     public static final String SHARED_INDEX_ADAPTER_JISC_LHD = 'jiscDiscover';
     public static final String SHARED_INDEX_ADAPTER_OAIPMH = 'OAIPMH';
+    public static final String SHARED_INDEX_ADAPTER_MOCK = 'Mock';
 
 
     public static void loadAll() {
@@ -224,6 +225,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_JISC_LHD);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, 'OAI-PMH', SHARED_INDEX_ADAPTER_OAIPMH);
+            RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_MOCK);
 
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_MANUAL);
