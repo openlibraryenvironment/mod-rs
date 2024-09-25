@@ -138,17 +138,14 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
                 // Perform the lookup
                 result = doTheLookup(gormFilterClosure)
 
-                // Determine if we need to filter based on the feature flag
-                if (params.filters.contains(SettingsData.SECTION_STATE_ACTION_CONFIG)) {
-                    // Iterate through each record in the result
-                    result = result.findAll { record ->
-                        // Construct the feature flag value for state action configuration
-                        String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
-                        String featFlagValue = settingsService.getSettingValue(featFlagKey)
+                // Iterate through each record in the result
+                result = result.findAll { record ->
+                    // Construct the feature flag value for state action configuration
+                    String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
+                    String featFlagValue = settingsService.getSettingValue(featFlagKey)
 
-                        // Filter only if the featureFlag is not null and equals "false"
-                        !(featFlagValue != null && featFlagValue == "false")
-                    }
+                    // Filter only if the featureFlag is not null and equals "false"
+                    !(featFlagValue != null && featFlagValue == "false")
                 }
                 return result
             }
