@@ -86,6 +86,7 @@ public class ProtocolAuditService {
         PatronRequest request = PatronRequest.findById(patronRequestId)
         if (request) {
             save(request, baseAuditDetails)
+            request.save(flush:true, failOnError:false)
         }
     }
 
