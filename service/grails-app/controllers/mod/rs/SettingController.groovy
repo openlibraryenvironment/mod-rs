@@ -143,7 +143,7 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
             String featureFlag = settingsService.getSettingValue(SettingsData.SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP)
 
             // If the feature flag is false, remove the 'combine_fill_and_ship' option from the results
-            if (featureFlag == "false") {
+            if (featureFlag != null && featureFlag == "false") {
                 result = result.findAll { record ->
                     record.key != SettingsData.SETTING_COMBINE_FILL_AND_SHIP
                 }
