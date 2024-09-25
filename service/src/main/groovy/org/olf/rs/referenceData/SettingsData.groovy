@@ -156,7 +156,7 @@ public class SettingsData {
 
     // Feature flag settings
     public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES                                    = 'feature_flag_automatic_fees';
-    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = 'state_action_configuration.combine_fill_and_ship.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = 'state_action_config.combine_fill_and_ship.feature_flag';
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
