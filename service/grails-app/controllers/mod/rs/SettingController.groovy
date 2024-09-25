@@ -1,5 +1,6 @@
 package mod.rs
 
+import org.olf.rs.SettingsService
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -10,7 +11,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
+import org.olf.rs.referenceData.SettingsData;
 
 @Api(value = "/rs/settings/appSettings", tags = ["Settings (application) Controller"], description = "API for all things to do with application settings")
 class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
@@ -18,6 +20,7 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
     static responseFormats = ['json', 'xml'];
 
     private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
+    private static final SettingsService settingsService
 
     SettingController() {
         super(AppSetting);
@@ -132,7 +135,19 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         }
 
         // Now we can perform the lookup
-        respond doTheLookup(gormFilterClosure);
+        def result = doTheLookup(gormFilterClosure);
+
+        // Filter out values for state_action_config section depending on the feature flag value
+        // Particularly filter out this value if feature flag is false -> combine_fill_and_ship
+        // We need to hide this option as it does not work for SLNP state models
+        if (params.filters.contains(SettingsData.SECTION_STATE_ACTION_CONFIG)) {
+            String value = settingsService.getSettingValue(SettingsData.SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP)
+            if (value == "false") {
+                result = result.findAll{record -> record.key != SettingsData.SETTING_COMBINE_FILL_AND_SHIP}
+            }
+        }
+
+        respond result
 
         // Record how long it took
         ContextLogging.duration();
