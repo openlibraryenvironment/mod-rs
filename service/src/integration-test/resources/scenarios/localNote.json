@@ -1,0 +1,4 @@
+{
+    "action": "localNote",
+    "actionParams": { "localNote":"Noted!" }
+}

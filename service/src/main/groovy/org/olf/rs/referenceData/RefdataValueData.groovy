@@ -1,5 +1,6 @@
 package org.olf.rs.referenceData
 
+import org.olf.rs.ProtocolReferenceDataValue
 import org.olf.rs.constants.CustomIdentifiersScheme;
 import org.olf.rs.constants.Directory;
 
@@ -7,7 +8,6 @@ import com.k_int.web.toolkit.custprops.CustomPropertyDefinition;
 import com.k_int.web.toolkit.custprops.types.CustomPropertyRefdataDefinition;
 import com.k_int.web.toolkit.refdata.RefdataCategory;
 import com.k_int.web.toolkit.refdata.RefdataValue;
-import org.olf.rs.ProtocolReferenceDataValue
 
 import groovy.util.logging.Slf4j;
 

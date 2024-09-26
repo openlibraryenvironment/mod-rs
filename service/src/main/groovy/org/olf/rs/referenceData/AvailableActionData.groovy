@@ -49,6 +49,9 @@ public class AvailableActionData {
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_CHECKED_IN, 'slnpPrintPullSlip'],
             [ StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, 'slnpPrintPullSlip'],
             [ StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP],
+            [ StateModel.MODEL_SLNP_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE],
+            [ StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED],
+            [ StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
@@ -64,9 +67,8 @@ public class AvailableActionData {
         // for a given state from the model OR frontend translation (May drift out of date)
 
         // RES_AWAIT_SHIP OR "Awaiting shipping"
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.FALSE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_SHIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         // RES_IDLE OR "New"
@@ -84,7 +86,7 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
 
         // RES_NEW_AWAIT_PULL_SLIP OR "Awaiting pull slip printing"
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.FALSE)
+        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
@@ -94,7 +96,6 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_CDL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.CDL_RESPONDER_CHECK_INTO_RESHARE, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
         AvailableAction.ensure(StateModel.MODEL_RESPONDER, Status.RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         // RES_ITEM_SHIPPED OR "Shipped"
@@ -140,18 +141,18 @@ public class AvailableActionData {
 
         // REQ_INVALID_PATRON OR "Invalid patron"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         // REQ_CANCEL_PENDING OR "Cancel pending"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CANCEL_PENDING_ISO18626);
 
         // REQ_CANCELLED OR "Cancelled"
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED, Actions.ACTION_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_REREQUEST_CANCELLED, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CANCELLED, Actions.ACTION_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_REREQUEST_CANCELLED);
 
         // REQ_END_OF_ROTA OR "End of Rota"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_MARK_END_OF_ROTA_REVIEWED);
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_REREQUEST_END_OF_ROTA, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_REREQUEST_END_OF_ROTA);
 
         // REQ_VALIDATED OR "Validated"
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
@@ -195,7 +196,7 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_CHECKED_IN, Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
 
         // REQ_AWAITING_RETURN_SHIPPING OR "Awaiting return shipping"
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL)
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_AWAITING_RETURN_SHIPPING_ISO18626);
@@ -227,11 +228,11 @@ public class AvailableActionData {
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
 
         // REQ_DUPLICATE_REVIEW Or "New request flagged as possible duplicate, needs review"
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_DUPLICATE_REVIEW, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         // REQ_BLANK_FORM_REVIEW
-        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, null , null, Boolean.TRUE, Boolean.TRUE);
+        AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
         AvailableAction.ensure(StateModel.MODEL_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
 
@@ -265,6 +266,7 @@ public class AvailableActionData {
         assignToAllStates(StateModel.MODEL_REQUESTER, Actions.ACTION_MESSAGE_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
         assignToAllStates(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, Actions.ACTION_MESSAGE_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
         assignToAllStates(StateModel.MODEL_RESPONDER, Actions.ACTION_MESSAGE_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        assignToAllStates(StateModel.MODEL_RESPONDER, Actions.ACTION_RESPONDER_LOCAL_NOTE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
         assignToAllStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_MESSAGE_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
 
         // The message action can be applied to all active states
@@ -388,25 +390,25 @@ public class AvailableActionData {
         );
     }
 
-    private void assignToAllStates(String model, String action, String triggerType, String resultList) {
+    static void assignToAllStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all states
         List<Status> allStates = StateModel.getAllStates(model);
         assignToStates(allStates, model, action, triggerType, resultList);
     }
 
-    private void assignToActiveStates(String model, String action, String triggerType, String resultList) {
+   static void assignToActiveStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all active states
         List<Status> activeStates = StateModel.getActiveStates(model);
         assignToStates(activeStates, model, action, triggerType, resultList);
     }
 
-    private void assignToNonTerminalStates(String model, String action, String triggerType, String resultList) {
+    static void assignToNonTerminalStates(String model, String action, String triggerType, String resultList) {
         // The supplied action can be applied to all non terminal states
         List<Status> nonTerminalStates = StateModel.getNonTerminalStates(model);
         assignToStates(nonTerminalStates, model, action, triggerType, resultList);
     }
 
-    private void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {
+    static void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {
         // Make the action to all the states in the list
         states.each { status ->
             AvailableAction.ensure(model, status.code, action, triggerType, resultList);

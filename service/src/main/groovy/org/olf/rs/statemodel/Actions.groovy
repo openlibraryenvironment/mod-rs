@@ -16,6 +16,7 @@ public class Actions {
     static public final String ACTION_RESPONDER_ISO18626_SHIPPED_RETURN                      = "ISO18626ShippedReturn";
     static public final String ACTION_RESPONDER_ISO18626_STATUS_REQUEST                      = "ISO18626StatusRequest";
 	static public final String ACTION_RESPONDER_ITEM_RETURNED                   			 = "itemReturned";
+	static public final String ACTION_RESPONDER_LOCAL_NOTE                                   = "localNote";
 	static public final String ACTION_RESPONDER_RESPOND_YES                     			 = "respondYes";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_CONDITION          			 = "supplierAddCondition";
 	static public final String ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT				 = "supplierAddURLToDocument";
@@ -44,6 +45,11 @@ public class Actions {
 	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES                     = "slnpRespondYes";
 	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED  = "slnpSupplierFillAndMarkShipped";
 	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE    = "slnpSupplierCheckOutOfReshare";
+
+	// SLNP non returnable responder actions
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED = "manuallyMarkSupplied";
+	static public final String ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE = "manuallyMarkAvailable";
 
 	// SLNP non returnable responder actions
 	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";

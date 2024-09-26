@@ -1,4 +1,4 @@
-package org.olf.rs.referenceData;
+package org.olf.rs.referenceData
 
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
@@ -60,6 +60,7 @@ public class SettingsData {
     public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
     public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
     public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location'
+    public static final String SETTING_NCIP_USE_DEFAULT_PATRON_FEE     = 'ncip_use_default_patron_fee'
 
 
     // Settings for the wmsSettings section
@@ -160,6 +161,7 @@ public class SettingsData {
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
+    public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -231,6 +233,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
             ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
+            ensureAppSetting(SETTING_NCIP_USE_DEFAULT_PATRON_FEE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, RefdataValueData.NCIP_BARCODE_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
@@ -343,6 +346,15 @@ public class SettingsData {
             ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, false, null, true);
             ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
+
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
+
+            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)
+            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN).value)
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
