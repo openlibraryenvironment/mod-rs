@@ -33,10 +33,10 @@ public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        reshareActionService.sendResponse(request, 'Unfilled', parameters, actionResultDetails);
+
         // Just send the message of unfilled
         if (!StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER.equalsIgnoreCase(request.stateModel.shortcode)) {
-            reshareActionService.sendResponse(request, 'Unfilled', parameters, actionResultDetails);
-
             log.debug("Checking to see if we need to send a CancelRequestItem");
             if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
                 if (hostLMSService.isManualCancelRequestItem()) {
@@ -55,7 +55,6 @@ public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
                 }
             }
         }
-
 
         // Now set the  audit message
         actionResultDetails.auditMessage = 'Request manually flagged unable to supply';

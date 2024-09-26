@@ -16,11 +16,13 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
     private static final String REASON_SPOOFED = 'spoofed'
 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails, String auditMessage) {
-        String itemBarcode = "rs-${request.hrid}-${UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4)}"
+        String itemBarcode = request.hrid
+        String callNumber = request.volumes ? request.volumes.iterator().next().callNumber : request.localCallNumber
         try {
             Map acceptResult = hostLMSService.acceptItem(
                     request,
                     itemBarcode,
+                    callNumber,
                     null
             )
 
@@ -30,13 +32,16 @@ abstract class AbstractSlnpNonReturnableAction extends AbstractAction {
                 // Set the selected item barcode to the new generated value
                 request.selectedItemBarcode = itemBarcode
 
-                if (acceptResult.requestUuid) {
+                if (acceptResult.requestUuid || acceptResult.itemUuid) {
                     Map customIdentifiersMap = [:]
                     if (request.customIdentifiers) {
                         customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                     }
                     if (acceptResult.requestUuid) {
                         customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                    }
+                    if (acceptResult.itemUuid) {
+                        customIdentifiersMap.put("itemUuid", acceptResult.itemUuid)
                     }
                     request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                 }

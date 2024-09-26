@@ -231,7 +231,8 @@ public class ReshareActionService {
         Map retryEventData = null
     ) {
         boolean result = false;
-        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode);
+        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode) ||
+                StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode)
 
         Long rotaPosition = pr.rotaPosition;
         // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
@@ -244,7 +245,7 @@ public class ReshareActionService {
         } else {
 
             Map eventData = retryEventData;
-            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.supplyingInstitutionSymbol] :
+            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol] :
                     requestingAgencyMessageSymbol(pr);
 
             // If we have not been supplied with the event data, we need to generate it

@@ -217,10 +217,11 @@ public class HostLMSService {
      * Creates a temporary item in the local lms using NCIP and records the messages are stored in the protocol audit table if enabled
      * @param request the request triggering the accept item message
      * @param temporaryItemBarcode the id of the temporary item to be created
+     * @param callNumber volume callNumber
      * @param requestedAction the action to be performed (no idea what actions can be performed)
      * @return a map containing the outcome of the accept item call
      */
-    public Map acceptItem(PatronRequest request, String temporaryItemBarcode, String requestedAction) {
+    public Map acceptItem(PatronRequest request, String temporaryItemBarcode, String callNumber, String requestedAction) {
         Map acceptResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
@@ -233,7 +234,7 @@ public class HostLMSService {
                 request.author, // author,
                 request.title, // title,
                 request.isbn, // isbn,
-                request.localCallNumber, // call_number,
+                callNumber,
                 request.resolvedPickupLocation?.lmsLocationCode, // pickup_location,
                 requestedAction, // requested_action
                 ncipLogDetails
@@ -246,7 +247,7 @@ public class HostLMSService {
         return(acceptResult);
     }
 
-    public Map requestItem(PatronRequest request, String requestId, String bibliographicId,
+    public Map requestItem(PatronRequest request, String pickupLocation,  String itemLocation, String bibliographicId,
             String patronId) {
         Map requestItemResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
@@ -257,8 +258,9 @@ public class HostLMSService {
                 request.hrid,
                 bibliographicId,
                 patronId,
-                request.resolvedSupplier?.owner?.lmsLocationCode,
-                ncipLogDetails);
+                pickupLocation,
+                itemLocation,
+                ncipLogDetails)
             protocolAuditService.save(request, ncipLogDetails);
         } else {
             requestItemResult = resultHostLMSNotConfigured;
@@ -283,6 +285,23 @@ public class HostLMSService {
             request.needsAttention = true;
         }
         return cancelRequestItemResult;
+    }
+
+    Map deleteItem(PatronRequest request, String itemId) {
+        Map deleteItemResult
+        HostLMSActions hostLMSActions = getHostLMSActions()
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
+            deleteItemResult = getHostLMSActions().deleteItem(
+                    settingsService,
+                    itemId,
+                    ncipLogDetails)
+            protocolAuditService.save(request, ncipLogDetails)
+        } else {
+            deleteItemResult = resultHostLMSNotConfigured
+            request.needsAttention = true
+        }
+        return deleteItemResult
     }
 
     public boolean isManualCancelRequestItem() {

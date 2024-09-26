@@ -174,9 +174,9 @@ class SLNPStateModelSpec extends TestBase {
 
         where:
         tenant_id      | changes_needed                                                                                                                                                                        | changes_needed_hidden
-        'RSSlnpOne'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
-        'RSSlnpTwo'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
-        'RSSlnpThree'  | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RSS1']                  | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpOne'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'use_request_item':'ncip', 'static_routes':'SYMBOL:ISIL:RSS3,SYMBOL:ISIL:RSS2', 'loggingISO18626':'yes'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpTwo'    | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'use_request_item':'ncip', 'static_routes':'SYMBOL:ISIL:RSS1,SYMBOL:ISIL:RSS3', 'loggingISO18626':'yes'] | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
+        'RSSlnpThree'  | [ 'copy_auto_responder_status':'off', 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'use_request_item':'ncip', 'static_routes':'SYMBOL:ISIL:RSS1', 'loggingISO18626':'yes']                  | ['requester_returnables_state_model':'SLNPRequester', 'responder_returnables_state_model':'SLNPResponder', 'requester_non_returnables_state_model':'SLNPNonReturnableRequester', 'responder_non_returnables_state_model':'SLNPNonReturnableResponder']
     }
 
     void "Validate Static Router"() {
@@ -498,10 +498,14 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                         | jsonFileName               | qualifier                                     | isAutoResponder
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED      | Status.SLNP_RESPONDER_AWAIT_SHIP           | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4367' | 'title1'  | 'Author1'  | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED | 'supplierMarkShipped'      | ActionEventResultQualifier.QUALIFIER_LOANED   | false
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4364' | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_ABORTED       | '7732-4362' | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY     | 'slnpResponderAbortSupply' | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState               | responderInitialState                      | responderResultState                | patronId    | title     | author     | action                                                       | jsonFileName                           | qualifier                                     | isAutoResponder
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_SHIPPED      | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_ITEM_SHIPPED  | '7732-4367' | 'title1'  | 'Author1'  | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED | 'slnpSupplierFillAndMarkShipped'       | ActionEventResultQualifier.QUALIFIER_LOANED   | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4364' | 'title2'  | 'Author2'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupply'             | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_ABORTED       | '7732-4362' | 'title3'  | 'Author3'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupply'             | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4365' | 'title4'  | 'Author4'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupplyWithoutNote'  | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_ABORTED      | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_ABORTED       | '7732-4369' | 'title5'  | 'Author5'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupplyWithoutNote'  | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED    | Status.SLNP_RESPONDER_IDLE                 | Status.SLNP_RESPONDER_ABORTED       | '7732-4363' | 'title6'  | 'Author6'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupplyReasonFalse'  | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED    | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_ABORTED       | '7732-4368' | 'title7'  | 'Author7'  | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupplyReasonFalse'  | ActionEventResultQualifier.QUALIFIER_ABORTED  | false
     }
 
     void "Send ISO request"(String tenant_id,
@@ -547,7 +551,7 @@ class SLNPStateModelSpec extends TestBase {
                 .replace('requestId_holder', requestId)
                 .replace('supAgencyIdValue_holder', supAgencyId)
                 .replace('status_holder',  statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? ActionEventResultQualifier.QUALIFIER_CANCELLED : statusChanged)
-                .replace('note_holder', statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? 'ABORT' : '')
+                .replace('note_holder', statusChanged == ActionEventResultQualifier.QUALIFIER_ABORTED ? '#ABORT#' : '')
 
         setHeaders([
                 'X-Okapi-Tenant': tenant_id,
@@ -620,86 +624,24 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                               | jsonFileName                     | isRequester
-        'RSSlnpOne'   | 'request1'    | 'test1'       | '1234-5678-9123-1231' | '9876-1231'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_CANCEL_LOCAL                | 'slnpRequesterCancelLocal'       | true
-        'RSSlnpOne'   | 'request2'    | 'test2'       | '1234-5678-9123-1232' | '9876-1232'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT           | 'slnpRequesterHandleAbort'       | true
-        'RSSlnpOne'   | 'request3'    | 'test3'       | '1234-5678-9123-1233' | '9876-1233'       | 'ISIL:RSS1'   | 'SLNP_REQ_SHIPPED'                  | 'SLNP_REQ_CHECKED_IN'                | Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED     | 'slnpRequesterRequesterReceived' | true
-        'RSSlnpOne'   | 'request5'    | 'test5'       | '1234-5678-9123-1235' | '9876-1235'       | 'ISIL:RSS1'   | 'SLNP_REQ_CHECKED_IN'               | 'SLNP_REQ_AWAITING_RETURN_SHIPPING'  | Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM        | 'patronReturnedItem'             | true
-        'RSSlnpOne'   | 'request7'    | 'test7'       | '1234-5678-9123-1237' | '9876-1237'       | 'ISIL:RSS1'   | 'SLNP_REQ_AWAITING_RETURN_SHIPPING' | 'SLNP_REQ_COMPLETE'                  | Actions.ACTION_REQUESTER_SHIPPED_RETURN              | 'shippedReturn'                  | true
-        'RSSlnpOne'   | 'request8'    | 'test88'      | '1234-5678-9123-1299' | '9876-1299'       | 'ISIL:RSS1'   | 'SLNP_REQ_CHECKED_IN'               | 'SLNP_REQ_ITEM_LOST'                 | Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST         | 'slnpRequesterMarkItemLost'      | true
-        'RSSlnpOne'   | 'respond8'    | 'test8'       | '1234-5678-9123-1238' | '9876-1238'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'       | Actions.ACTION_SLNP_RESPONDER_RESPOND_YES            | 'slnpSupplierAnswerYes'          | false
-        'RSSlnpOne'   | 'respond9'    | 'test9'       | '1234-5678-9123-1239' | '9876-1239'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY      | 'supplierCannotSupply'           | false
-        'RSSlnpOne'   | 'respond10'   | 'test10'      | '1234-5678-9123-1240' | '9876-1240'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_ABORTED'                   | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY           | 'slnpResponderAbortSupply'       | false
-        'RSSlnpOne'   | 'respond11'   | 'test11'      | '1234-5678-9123-1241' | '9876-1241'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'       | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'      | false
-        'RSSlnpOne'   | 'respond12'   | 'test12'      | '1234-5678-9123-1242' | '9876-1242'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP    | 'supplierPrintPullSlip'          | false
-        'RSSlnpOne'   | 'respond13'   | 'test13'      | '1234-5678-9123-1243' | '9876-1243'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY      | 'supplierCannotSupply'           | false
-        'RSSlnpOne'   | 'respond14'   | 'test14'      | '1234-5678-9123-1244' | '9876-1244'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_ABORTED'                   | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY           | 'slnpResponderAbortSupply'       | false
-        'RSSlnpOne'   | 'respond15'   | 'test15'      | '1234-5678-9123-1245' | '9876-1245'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'       | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'      | false
-        'RSSlnpOne'   | 'respond16'   | 'test16'      | '1234-5678-9123-1246' | '9876-1246'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE | 'supplierCheckInToReshare'       | false
-        'RSSlnpOne'   | 'respond17'   | 'test17'      | '1234-5678-9123-1247' | '9876-1247'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'      | false
-        'RSSlnpOne'   | 'respond18'   | 'test18'      | '1234-5678-9123-1248' | '9876-1248'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY      | 'supplierCannotSupply'           | false
-        'RSSlnpOne'   | 'respond20'   | 'test20'      | '1234-5678-9123-1250' | '9876-1250'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED       | 'supplierMarkShipped'            | false
-        'RSSlnpOne'   | 'respond21'   | 'test21'      | '1234-5678-9123-1251' | '9876-1251'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_SHIP'               | 'SLNP_RES_AWAIT_SHIP'                | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY | 'supplierConditionalSupply'      | false
-        'RSSlnpThree' | 'respond22'   | 'test22'      | '1234-5678-9123-1252' | '9876-4444'       | 'ISIL:RSS3'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE| 'supplierCheckOutOfReshare'      | false
-    }
-
-    void "Test undo action"(
-            String tenantId,
-            String requestTitle,
-            String requestAuthor,
-            String requestSystemId,
-            String requestPatronId,
-            String requestSymbol) {
-        when: "Performing the action"
-
-        Tenants.withId(tenantId.toLowerCase()+'_mod_rs') {
-            // Define headers
-            def headers = [
-                    'X-Okapi-Tenant': tenantId,
-                    'X-Okapi-Token': 'dummy',
-                    'X-Okapi-User-Id': 'dummy',
-                    'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
-            ]
-
-            setHeaders(headers);
-
-            // Create PatronRequest
-            String hrid = Long.toUnsignedString(new Random().nextLong(), 16).toUpperCase();
-            PatronRequest slnpPatronRequest = createPatronRequest(tenantId, Status.SLNP_RESPONDER_AWAIT_PICKING, requestPatronId, requestTitle, requestAuthor,
-                    requestSymbol, requestSystemId, false, hrid, 'loan');
-            log.debug("Created patron request: ${slnpPatronRequest} ID: ${slnpPatronRequest?.id}");
-
-            // Validate Responder initial state
-            String responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
-
-            and: "Check initial state"
-            assert responderRequest != null
-
-            // Perform supplierCheckInToReshare action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE);
-
-            // Validate status after action - supplierCheckInToReshare
-            responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_SHIP)
-
-            and: "Check state after supplierCheckInToReshare action"
-            assert responderRequest != null
-
-            // Perform undo action
-            performAction(slnpPatronRequest?.id, Actions.ACTION_UNDO);
-
-            // Validate status after action - undo
-            responderRequest = waitForRequestStateByHrid(tenantId, 20000, hrid, Status.SLNP_RESPONDER_AWAIT_PICKING)
-
-            and: "Check state after undo action"
-            assert responderRequest != null
-        }
-
-        then: "Check values"
-        assert true;
-
-        where:
-        tenantId        | requestTitle  | requestAuthor | requestSystemId         | requestPatronId   | requestSymbol
-        'RSSlnpThree'   | 'undoTitle'   | 'testundo1'   | '3331-5678-9123-4444'   | '7765-6999-3333'  | 'ISIL:RSS3'
+        tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                                       | jsonFileName                         | isRequester
+        'RSSlnpOne'   | 'request1'    | 'test1'       | '1234-5678-9123-1231' | '9876-1231'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_REQUESTER_CANCEL                    | 'slnpRequesterCancel'                | true
+        'RSSlnpOne'   | 'request2'    | 'test2'       | '1234-5678-9123-1232' | '9876-1232'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT                   | 'slnpRequesterHandleAbort'           | true
+        'RSSlnpOne'   | 'request3'    | 'test3'       | '1234-5678-9123-1233' | '9876-1233'       | 'ISIL:RSS1'   | 'SLNP_REQ_SHIPPED'                  | 'SLNP_REQ_CHECKED_IN'                | Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED             | 'slnpRequesterRequesterReceived'     | true
+        'RSSlnpOne'   | 'request4'    | 'test4'       | '1234-5678-9123-1234' | '9876-1235'       | 'ISIL:RSS1'   | 'SLNP_REQ_CHECKED_IN'               | 'SLNP_REQ_AWAITING_RETURN_SHIPPING'  | Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM                | 'patronReturnedItem'                 | true
+        'RSSlnpOne'   | 'request41'   | 'test41'      | '1234-5678-9123-1234' | '9876-1235'       | 'ISIL:RSS1'   | 'SLNP_REQ_CHECKED_IN'               | 'SLNP_REQ_COMPLETE'                  | Actions.ACTION_REQUESTER_PATRON_RETURNED_ITEM_AND_SHIPPED    | 'patronReturnedItemAndShippedReturn' | true
+        'RSSlnpOne'   | 'request5'    | 'test5'       | '1234-5678-9123-1235' | '9876-1237'       | 'ISIL:RSS1'   | 'SLNP_REQ_AWAITING_RETURN_SHIPPING' | 'SLNP_REQ_COMPLETE'                  | Actions.ACTION_REQUESTER_SHIPPED_RETURN                      | 'shippedReturn'                      | true
+        'RSSlnpOne'   | 'request6'    | 'test6'       | '1234-5678-9123-1299' | '9876-1299'       | 'ISIL:RSS1'   | 'SLNP_REQ_CHECKED_IN'               | 'SLNP_REQ_ITEM_LOST'                 | Actions.ACTION_SLNP_REQUESTER_MARK_ITEM_LOST                 | 'slnpRequesterMarkItemLost'          | true
+        'RSSlnpOne'   | 'respond1'    | 'test8'       | '1234-5678-9123-1238' | '9876-1238'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_SLNP_RESPONDER_RESPOND_YES                    | 'slnpSupplierAnswerYes'              | false
+        'RSSlnpOne'   | 'respond2'    | 'test9'       | '1234-5678-9123-1239' | '9876-1239'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY              | 'supplierCannotSupply'               | false
+        'RSSlnpOne'   | 'respond3'    | 'test10'      | '1234-5678-9123-1240' | '9876-1240'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_ABORTED'                   | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupply'           | false
+        'RSSlnpOne'   | 'respond4'    | 'test11'      | '1234-5678-9123-1241' | '9876-1241'       | 'ISIL:RSS1'   | 'SLNP_RES_IDLE'                     | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY         | 'supplierConditionalSupply'          | false
+        'RSSlnpOne'   | 'respond5'    | 'test12'      | '1234-5678-9123-1246' | '9876-1246'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_ITEM_SHIPPED'              | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED | 'slnpSupplierFillAndMarkShipped'     | false
+        'RSSlnpOne'   | 'respond6'    | 'test13'      | '1234-5678-9123-1247' | '9876-1247'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY         | 'supplierConditionalSupply'          | false
+        'RSSlnpOne'   | 'respond7'    | 'test14'      | '1234-5678-9123-1248' | '9876-1248'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY              | 'supplierCannotSupply'               | false
+        'RSSlnpOne'   | 'respond8'    | 'test15'      | '1234-5678-9123-1244' | '9876-1244'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_ABORTED'                   | Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY                   | 'slnpResponderAbortSupply'           | false
+        'RSSlnpOne'   | 'respond9'    | 'test16'      | '1234-5678-9123-1242' | '9876-1242'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP            | 'supplierPrintPullSlip'              | false
+        'RSSlnpThree' | 'respond10'   | 'test17'      | '1234-5678-9123-1252' | '9876-4444'       | 'ISIL:RSS3'   | 'SLNP_RES_ITEM_SHIPPED'             | 'SLNP_RES_COMPLETE'                  | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE   | 'slnpSupplierCheckOutOfReshare'      | false
     }
 
     void "Test event responder new SLNP patron request inidication service"(
@@ -754,10 +696,10 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        responderTenantId | responderSymbol | responderInitialState        | responderResultState                | patronId        | title       | author       | autoLoanEnabled
-        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_IDLE          | '7732-4367-333' | 'title123'  | 'Author123'  | false
-        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING | '7732-4362-331' | 'title234'  | 'Author234'  | true
-        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED      | '7732-4364-332' | 'title345'  | 'Author345'  | true
+        responderTenantId | responderSymbol | responderInitialState        | responderResultState                      | patronId        | title       | author       | autoLoanEnabled
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_IDLE                | '7732-4367-333' | 'title123'  | 'Author123'  | false
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING       | '7732-4362-331' | 'title234'  | 'Author234'  | true
+        'RSSlnpOne'       | 'ISIL:RSS1'     | Status.SLNP_RESPONDER_IDLE   | Status.SLNP_RESPONDER_UNFILLED            | '7732-4364-332' | 'title345'  | 'Author345'  | true
     }
 
     void "Test initial state transition to result state by performed action for non returnables"(
@@ -810,7 +752,7 @@ class SLNPStateModelSpec extends TestBase {
 
         where:
         tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                                                     | jsonFileName                                  | isRequester
-        'RSSlnpOne'   | 'request1nrs' | 'test1nrs'    | '1234-5678-9123-2221' | '9876-7771'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_CANCEL_LOCAL                                      | 'slnpRequesterCancelLocal'                    | true
+        'RSSlnpOne'   | 'request1nrs' | 'test1nrs'    | '1234-5678-9123-2221' | '9876-7771'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_REQUESTER_CANCEL                                  | 'slnpRequesterCancel'                         | true
         'RSSlnpOne'   | 'request2nrs' | 'test2nrs'    | '1234-5678-9123-2222' | '9876-7772'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT                                 | 'slnpRequesterHandleAbort'                    | true
         'RSSlnpOne'   | 'request3nrs' | 'test3nrs'    | '1234-5678-9123-2223' | '9876-7773'       | 'ISIL:RSS1'   | 'SLNP_REQ_DOCUMENT_AVAILABLE'       | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED            | 'slnpNonReturnableRequesterRequesterReceived' | true
         'RSSlnpOne'   | 'request4nrs' | 'test4nrs'    | '1234-5678-9123-2224' | '9876-7774'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED        | 'manuallyMarkSupplied'                        | true
@@ -913,8 +855,8 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState         | responderInitialState                      | responderResultState            | patronId    | title             | author     | action                                                     | jsonFileName
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_UNFILLED  | '7657-3543' | 'NonReturnable5'  | 'Rebo5'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
-        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_IDLE   | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_UNFILLED  | '6668-8562' | 'NonReturnable7'  | 'Rebo7'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
+        requesterTenantId | responderTenantId | requesterSymbol | responderSymbol | requesterInitialState       | requesterResultState              | responderInitialState                      | responderResultState            | patronId    | title             | author     | action                                                     | jsonFileName
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED   | Status.SLNP_RESPONDER_NEW_AWAIT_PULL_SLIP  | Status.SLNP_RESPONDER_UNFILLED  | '7657-3543' | 'NonReturnable5'  | 'Rebo5'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
+        'RSSlnpTwo'       | 'RSSlnpOne'       | 'ISIL:RSS2'     | 'ISIL:RSS1'     | Status.SLNP_REQUESTER_IDLE  | Status.SLNP_REQUESTER_CANCELLED   | Status.SLNP_RESPONDER_AWAIT_PICKING        | Status.SLNP_RESPONDER_UNFILLED  | '6668-8562' | 'NonReturnable7'  | 'Rebo7'    | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY            | 'supplierCannotSupply'
     }
 }

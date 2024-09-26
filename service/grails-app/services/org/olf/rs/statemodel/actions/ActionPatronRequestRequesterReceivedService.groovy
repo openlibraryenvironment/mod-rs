@@ -47,6 +47,7 @@ public class ActionPatronRequestRequesterReceivedService extends AbstractAction 
                 Map acceptResult = hostLMSService.acceptItem(
                     request,
                     vol.temporaryItemBarcode,
+                    vol.callNumber ? vol.callNumber : request.localCallNumber,
                     null
                 );
 

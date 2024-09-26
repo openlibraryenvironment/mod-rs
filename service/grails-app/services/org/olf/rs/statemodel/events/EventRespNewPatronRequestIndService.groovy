@@ -77,9 +77,12 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                         AppSetting defaultInstitutionalPatronId = AppSetting.findByKey(SETTING_INSTITUTIONAL_ID);
                         institutionalPatronIdValue = defaultInstitutionalPatronId?.value;
                     }
+                    String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
+                            request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
-                    Map requestItemResult = hostLMSService.requestItem(request, request.hrid,
+                    Map requestItemResult = hostLMSService.requestItem(request,
+                            request.resolvedSupplier?.owner?.lmsLocationCode, folioLocationFilter,
                             request.supplierUniqueRecordId, institutionalPatronIdValue);
                     log.debug("Got RequestItem result: ${requestItemResult}");
                     if (requestItemResult.result == true) {

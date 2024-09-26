@@ -206,7 +206,8 @@ public class SLNPNonReturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         // To delete an unwanted available action add Model id and action code to this array
-        [StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER).id, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED]
+        [[StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER).id, Actions.ACTION_SLNP_REQUESTER_REQUESTER_RECEIVED],
+         [StateModel.lookup(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER).id, Actions.ACTION_REQUESTER_CANCEL_LOCAL]]
                 .each { availableActionToRemove ->
             log.info("Remove available action ${availableActionToRemove}");
             try {
@@ -222,7 +223,7 @@ public class SLNPNonReturnablesStateModelData {
         }
 
         /// SLNP_REQ_IDLE OR "New"
-        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
+        AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_ISO_18626_STATUS_CHANGE)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED)
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Status.SLNP_REQUESTER_IDLE, Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE)

@@ -17,6 +17,7 @@ class ProtocolMessageBuildingService {
     private static final String END_OF_STRING_REGEX = '$'
     private static final String SEQUENCE_REGEX      = ALL_REGEX + NoteSpecials.SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
     private static final String LAST_SEQUENCE_REGEX = ALL_REGEX + NoteSpecials.LAST_SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
+    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
 
   /*
    * This method is purely for building out the structure of protocol messages
@@ -254,16 +255,19 @@ class ProtocolMessageBuildingService {
       }
     }
 
-    switch (pr.volumes.size()) {
+    Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
+          rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
+      }
+    switch (filteredVolumes.size()) {
       case 0:
         break;
       case 1:
         // We have a single volume, send as a single itemId string
-        message.deliveryInfo['itemId'] = pr.volumes[0].itemId
+        message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].itemId},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""}"
         break;
       default:
         // We have many volumes, send as an array of multiVol itemIds
-        message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}" }
+        message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.itemId},${vol.callNumber ? vol.callNumber : ""}" }
         break;
     }
 

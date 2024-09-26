@@ -71,7 +71,7 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode, String pickupLocation,
-      INcipLogDetails ncipLogDetails) {
+                         String itemLocation, INcipLogDetails ncipLogDetails) {
     return [
       result: true,
       reason: 'spoofed'
@@ -89,7 +89,14 @@ public class ManualHostLMSService implements HostLMSActions {
     return false
   }
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {
+    return [
+            result: true,
+            reason: 'spoofed'
+    ]
+  }
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails) {
     return [
             result: true,
             reason: 'spoofed'

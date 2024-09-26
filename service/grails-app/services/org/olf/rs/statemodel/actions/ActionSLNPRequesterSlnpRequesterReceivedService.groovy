@@ -40,6 +40,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
         RequestVolume[] volumesWithoutTemporaryItem = request.volumes.findAll { rv ->
             rv.status.value == VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION
         }
+        var counter = 0
         // Iterate over volumes without temp item in for loop so we can break out if we need to
         for (RequestVolume vol : volumesWithoutTemporaryItem) {
             try {
@@ -47,6 +48,7 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                 Map acceptResult = hostLMSService.acceptItem(
                     request,
                     vol.temporaryItemBarcode,
+                    vol.callNumber ? vol.callNumber : request.localCallNumber,
                     null
                 );
 
@@ -55,13 +57,16 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                     String message = "Receive succeeded for item id: ${vol.itemId} (temporaryItemBarcode: ${vol.temporaryItemBarcode}). ${acceptResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for accept item call)' : 'Host LMS integration: AcceptItem call succeeded.'}";
                     RefdataValue newVolState = acceptResult.reason == REASON_SPOOFED ? vol.lookupStatus('temporary_item_creation_(no_integration)') : vol.lookupStatus('temporary_item_created_in_host_lms');
 
-                    if (acceptResult.requestUuid) {
+                    if (acceptResult.requestUuid || acceptResult.itemUuid) {
                         Map customIdentifiersMap = [:]
                         if (request.customIdentifiers) {
                             customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
                         }
                         if (acceptResult.requestUuid) {
                             customIdentifiersMap.put("requestUuid", acceptResult.requestUuid)
+                        }
+                        if (acceptResult.itemUuid) {
+                            customIdentifiersMap.put("itemUuid", acceptResult.itemUuid)
                         }
                         request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                     }
@@ -73,7 +78,8 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
                         null);
 
                     log.debug("State for volume ${vol.itemId} set to ${newVolState}");
-                    vol.status = newVolState;
+                    vol.status = newVolState
+                    request.selectedItemBarcode = vol.temporaryItemBarcode
                     vol.save(failOnError: true);
                 } else {
                     String message = "Host LMS integration: NCIP AcceptItem call failed for temporary item barcode: ${vol.temporaryItemBarcode}. Review configuration and try again or deconfigure host LMS integration in settings. ";

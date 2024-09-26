@@ -1,12 +1,12 @@
 package org.olf.rs.referenceData
 
-import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.statemodel.StateModel;
 
 import com.k_int.web.toolkit.files.FileUploadService;
 import com.k_int.web.toolkit.settings.AppSetting;
+import org.olf.rs.ProtocolReferenceDataValue;
 
 import groovy.util.logging.Slf4j;
 
@@ -37,7 +37,7 @@ public class SettingsData {
     private static final String SECTION_REQUESTS               = 'requests';
     private static final String SECTION_ROUTING                = 'Routing';
     private static final String SECTION_SHARED_INDEX           = 'sharedIndex';
-    private static final String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
+    public static final  String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
     private static final String SECTION_STATE_MODEL            = 'state_model';
     private static final String SECTION_WMS                    = 'wmsSettings';
     private static final String SECTION_VOYAGER                = 'voyagerSettings';
@@ -142,8 +142,8 @@ public class SettingsData {
 
     // Network configuration settings
     public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS = 'network_maximum_send_attempts';
-    public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
-    public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
+    public static final String SETTING_NETWORK_RETRY_PERIOD          = 'network_retry_period';
+    public static final String SETTING_NETWORK_TIMEOUT_PERIOD        = 'network_timeout_period';
 
     // State model configuration settings
     public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';
@@ -156,9 +156,11 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
     // Feature flag settings
-    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES  = 'feature_flag_automatic_fees';
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES                                    = 'feature_flag_automatic_fees';
+    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = 'state_action_config.combine_fill_and_ship.feature_flag';
 
     // Automatic fees settings
+    public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
     public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
@@ -338,6 +340,13 @@ public class SettingsData {
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, true);
 
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
+
+            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, false, null, true);
+            ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
+
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
 

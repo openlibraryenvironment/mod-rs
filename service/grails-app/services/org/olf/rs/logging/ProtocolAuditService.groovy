@@ -82,6 +82,14 @@ public class ProtocolAuditService {
         );
     }
 
+    void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
+        PatronRequest request = PatronRequest.findById(patronRequestId)
+        if (request) {
+            save(request, baseAuditDetails)
+            request.save(flush:true, failOnError:false)
+        }
+    }
+
     /**
      * Associates the audit details with request
      * @param patronRequest The request that the audit details need to be associated with

@@ -1,38 +1,25 @@
 package org.olf
 
-import org.olf.rs.referenceData.SettingsData
-
-import java.text.SimpleDateFormat;
-
-import javax.sql.DataSource
-
-import org.grails.orm.hibernate.HibernateDatastore
-import org.olf.okapi.modules.directory.DirectoryEntry
-import org.olf.rs.EmailService
-import org.olf.rs.EventPublicationService
-import org.olf.rs.HostLMSLocation
-import org.olf.rs.HostLMSLocationService
-import org.olf.rs.HostLMSService
-import org.olf.rs.HostLMSShelvingLocation
-import org.olf.rs.HostLMSShelvingLocationService
-import org.olf.rs.PatronRequest
-import org.olf.rs.SettingsService;
-import org.olf.rs.Z3950Service
-import org.olf.rs.dynamic.DynamicGroovyService;
-import org.olf.rs.lms.HostLMSActions
-import org.olf.rs.logging.DoNothingHoldingLogDetails;
-import org.olf.rs.logging.IHoldingLogDetails;
-import org.olf.rs.routing.RankedSupplier
-import org.olf.rs.routing.StaticRouterService
-import org.olf.rs.settings.ISettings
-import org.olf.rs.statemodel.Status;
-
 import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
-import spock.lang.*
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.*
+import org.olf.rs.dynamic.DynamicGroovyService
+import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.logging.DoNothingHoldingLogDetails
+import org.olf.rs.logging.IHoldingLogDetails
+import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.routing.RankedSupplier
+import org.olf.rs.routing.StaticRouterService
+import org.olf.rs.settings.ISettings
+import org.olf.rs.statemodel.Status
+import spock.lang.Shared
+import spock.lang.Stepwise
+
+import java.text.SimpleDateFormat
 
 @Slf4j
 @Integration
@@ -43,6 +30,7 @@ class RSLifecycleSpec extends TestBase {
     private static final String SCENARIO_PATRON_REFERENCE = "scenario-patronReference";
     private static final String SCENARIO_REQUESTER_ID = "scenario-requesterId";
     private static final String SCENARIO_RESPONDER_ID = "scenario-responderId";
+    private static final String RANDOM_URL = 'https://www.url.com'
 
   private static String LONG_300_CHAR_TITLE = '123456789A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I123456789J123456789k123456789l123456789m123456789n123456789o123456789p123456789q123456789r123456789s123456789t123456789U123456789V123456789W123456789Y123456789Y12345XXXXX'
   private SimpleDateFormat scenarioDateFormatter = new SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS");
@@ -92,13 +80,8 @@ class RSLifecycleSpec extends TestBase {
     ]
   ]
 
-  def grailsApplication
   DynamicGroovyService dynamicGroovyService;
-  EventPublicationService eventPublicationService
   GrailsWebDataBinder grailsWebDataBinder
-  HibernateDatastore hibernateDatastore
-  DataSource dataSource
-  EmailService emailService
   HostLMSService hostLMSService
   HostLMSLocationService hostLMSLocationService
   HostLMSShelvingLocationService hostLMSShelvingLocationService
@@ -641,8 +624,9 @@ class RSLifecycleSpec extends TestBase {
             patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
             isRequester: true
         ];
-        deliveryMethod && (request.deliveryMethod = deliveryMethod);
         serviceType && (request.serviceType = serviceType);
+        deliveryMethod && (request.deliveryMethod = deliveryMethod)
+        deliveryMethod && (request.pickupURL = RANDOM_URL)
 
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 

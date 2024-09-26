@@ -28,7 +28,7 @@ public class ActionPatronRequestCancelLocalService extends AbstractAction {
             RefdataValue reason = RefdataValue.findByOwnerAndValue(cat, parameters.reason);
             if (reason) {
                 request.cancellationReason = reason;
-                actionResultDetails.auditMessage += ": ${reason}";
+                actionResultDetails.auditMessage += ": ${reason.label}"
             }
         }
 

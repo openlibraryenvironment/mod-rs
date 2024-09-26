@@ -36,6 +36,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_BORROWER_CHECK_METHOD                  = 'BorrowerCheckMethod';
     public static final String VOCABULARY_CANCELLATION_REASONS                   = 'cancellationReasons';
     public static final String VOCABULARY_CANNOT_SUPPLY_REASONS                  = 'cannotSupplyReasons';
+    public static final String VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS    = 'slnpCancelOrAbortSupplyReasons';
     public static final String VOCABULARY_CHAT_AUTO_READ                         = 'ChatAutoRead';
     public static final String VOCABULARY_CHECK_IN_METHOD                        = 'CheckInMethod';
     public static final String VOCABULARY_CHECK_OUT_METHOD                       = 'CheckOutMethod';
@@ -207,7 +208,6 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_NO)
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_YES)
 
-
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'NCIP');
@@ -281,6 +281,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
 
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'Without abort', 'false');
+
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'Requested item is locally available', 'available_locally');
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'User account is invalid', 'invalid_user');
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'User requested cancellation', 'patron_requested');
@@ -320,7 +323,7 @@ public class RefdataValueData {
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cat S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
@@ -342,6 +345,10 @@ public class RefdataValueData {
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
 
+            // ISO18626 Custom options for - Custom identifiers schemes
+            RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
+
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_NO)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN)

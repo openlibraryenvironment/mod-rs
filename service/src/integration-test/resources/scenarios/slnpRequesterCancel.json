@@ -1,0 +1,6 @@
+{
+  "action": "requesterCancel",
+  "actionParams": {
+    "reason": "Cancel"
+  }
+}

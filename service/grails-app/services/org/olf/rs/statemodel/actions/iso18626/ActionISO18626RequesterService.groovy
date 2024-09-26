@@ -58,14 +58,26 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
                 Boolean useBarcode = "Yes".equalsIgnoreCase(useBarcodeValue);
-                if (itemId instanceof Collection) {
+                if (itemId instanceof Collection || (itemId instanceof  String && ((String)itemId).contains("multivol"))) {
+                    if (itemId instanceof  String && ((String)itemId).contains("multivol")) {
+                        String[] transformToList = ((String)itemId).split(",multivol:")
+                        transformToList = transformToList.collect { str ->
+                            if (!str.startsWith("multivol:")) {
+                                "multivol:" + str
+                            } else {
+                                str
+                            }
+                        }
+                        itemId = transformToList
+                    }
                     // Item ids coming in, handle those
                     itemId.each { iid ->
-                        Matcher matcher = iid =~ /multivol:(.*),((?!\s*$).+)/;
+                        Matcher matcher = iid =~ /multivol:(.*),(.*),(.*)/
                         if (matcher.size() > 0) {
-                            // At this point we have an itemId of the form "multivol:<name>,<id>"
-                            String iidId = matcher[0][2];
-                            String iidName = matcher[0][1];
+                            // At this point we have an itemId of the form "multivol:<name>,<id>,<callNumber>"
+                            String iidId = matcher[0][2]
+                            String iidName = matcher[0][1]
+                            String iidCallNumber = matcher[0][3]
 
                             // Check if a RequestVolume exists for this itemId, and if not, create one
                             RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId };
@@ -74,9 +86,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                                         name: iidName ?: request.volume ?: iidId,
                                         itemId: iidId,
                                         status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
-                                );
+                                )
+                                rv.callNumber = iidCallNumber
 
-                                request.addToVolumes(rv);
+                                request.addToVolumes(rv)
 
                                 /*
                                     This _should_ be handled on the following save,
@@ -93,15 +106,27 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 } else {
                     // We have a single string, this is the usual standard case and should be handled as a single request volume
                     // Check if a RequestVolume exists for this itemId, and if not, create one
-                    RequestVolume rv = request.volumes.find { rv -> rv.itemId == itemId };
+                    // At this point we have an itemId of the form "<name>,<id>,<callNumber>"
+                    itemId = itemId + " "
+                    var iidFields = itemId.split(',')
+                    String iidId = itemId
+                    String iidName = itemId
+                    String iidCallNumber = null
+                    if (iidFields.size() == 3) {
+                        iidId = iidFields[1]
+                        iidName = iidFields[0]
+                        iidCallNumber = iidFields[2].trim()
+                    }
+                    RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId }
                     if (!rv) {
                         rv = new RequestVolume(
-                                name: request.volume ?: itemId,
-                                itemId: itemId,
+                                name: request.volume ?: iidName,
+                                itemId: iidId,
                                 status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION)
-                        );
+                        )
+                        rv.callNumber = iidCallNumber
 
-                        request.addToVolumes(rv);
+                        request.addToVolumes(rv)
 
                         /*
                             This _should_ be handled on the following save,

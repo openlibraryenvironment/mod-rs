@@ -41,6 +41,7 @@ public class CustomTextProperties {
 			ensureTextProperty("url", false);
 			ensureTextProperty("Z3950BaseName", false);
 			ensureTextProperty(Directory.KEY_LOCAL_INSTITUTION_PATRON_ID, true, "Institutional patron ID");
+			ensureTextProperty(Directory.KEY_FOLIO_LOCATION_FILTER, true, 'FOLIO location filter')
 			ensureTextProperty("ALMA_AGENCY_ID", true, "ALMA Agency ID");
 			ensureTextProperty("AdditionalHeaders", false, "Additional Headers");
 			ensureTextProperty(Directory.KEY_ILL_POLICY_BORROW_RATIO, false, "ILL Loan To Borrow Ratio");
