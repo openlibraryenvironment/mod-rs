@@ -31,8 +31,6 @@ import org.xml.sax.SAXException;
 @CurrentTenant
 @Api(value = "/rs/externalApi", tags = ["External API Controller"], description = "API for external requests that do not require authentication")
 class ExternalApiController {
-  private static final String AUDIT_MESSAGE = "INCOMING MESSAGE (logged after message is fully handled)"
-
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ConfirmationMessageService confirmationMessageService
@@ -107,7 +105,7 @@ class ExternalApiController {
         IIso18626LogDetails iso18626LogDetails = protocolAuditService.getIso18626LogDetails()
         log.debug("Incoming ISO message logging enabled: ${iso18626LogDetails instanceof Iso18626LogDetails}")
         def xmlString = new StreamingMarkupBuilder().bind { mkp.yield request.XML }
-        iso18626LogDetails.request(AUDIT_MESSAGE, xmlString.toString())
+        iso18626LogDetails.request(request.servletPath, xmlString.toString())
         String requestId = null
 
         org.grails.databinding.xml.GPathResultMap iso18626_msg = new org.grails.databinding.xml.GPathResultMap(request.XML);
