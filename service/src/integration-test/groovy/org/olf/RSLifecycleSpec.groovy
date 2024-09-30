@@ -1,14 +1,15 @@
 package org.olf
 
-import grails.databinding.SimpleMapDataBindingSource
+
+import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.*
 import org.olf.rs.dynamic.DynamicGroovyService
-import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.logging.DoNothingHoldingLogDetails
 import org.olf.rs.logging.IHoldingLogDetails
 import org.olf.rs.referenceData.SettingsData
@@ -1803,7 +1804,7 @@ class DosomethingSimple {
         // check for copyright and publication type in responder request
     }
 
-    void "Test automatic rerequest to different cluster id"(
+    void "Test automatic rerequest to different cluster id after unfilled transfer"(
             String deliveryMethod,
             String serviceType,
             String actionFile
@@ -1882,6 +1883,93 @@ class DosomethingSimple {
         deliveryMethod | serviceType | actionFile
         "URL"         | "Copy"       | "nrSupplierCannotSupplyTransfer.json"
         null          | null         | "supplierCannotSupplyTransfer.json"
+
+    }
+    void "test resubmission of request after end-of-rota reviewed state"(
+            String originalServiceType,
+            String originalDeliveryType,
+            String newServiceType,
+            String newDeliveryType,
+            String respondNoActionFile,
+            String resubmitAction,
+            String newStateModel
+    ) {
+        String patronIdentifier = "AAA-SSS-FFF-456";
+        String requesterTenantId = "RSInstThree";
+        String responderTenantId = "RSInstOne";
+        String requestTitle = "Axe U Sumpfin";
+        String requestAuthor = "Lemmy, A.";
+        String requestSymbol = "ISIL:RST3";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "121-656-989";
+
+        when: "Do it"
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : originalDeliveryType,
+                serviceType                : originalServiceType,
+                tags                       : ['RS-RESUBMIT-TEST-1']
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+        log.debug("Requester request id is ${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        log.debug("Responder request id is ${responderRequestId}");
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/" + respondNoActionFile).text;
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+        log.debug("Posting cannot supply payload to ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        doPost(responderPerformActionUrl, jsonPayload);
+
+        waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
+
+        waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_END_OF_ROTA);
+
+        String newPatronReference = "rerequest" + patronIdentifier +randomCrap(6);
+        Map rerequestParams = [
+                "action" : resubmitAction,
+                "actionParams" :
+                        [
+                            "patronReference" : newPatronReference,
+                            "deliveryMethod" : newDeliveryType,
+                            "serviceType" : newServiceType,
+                            "isRequester" : true,
+                            "title" : requestTitle,
+                            "author" : requestAuthor,
+                            "requestingInstitutionSymbol" : requestSymbol,
+                            "systemInstanceIdentifier" : systemInstanceIdentifier
+                        ]
+        ];
+
+        setHeaders(['X-Okapi-Tenant':requesterTenantId]);
+        String requesterPerformActionUrl = "${baseUrl}/rs/patronrequests/${requesterRequestId}/performAction".toString();
+        doPost(requesterPerformActionUrl, JsonOutput.toJson(rerequestParams));
+
+        String newRequesterRequestId = waitForRequestState(requesterTenantId, 10000, newPatronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
+
+
+        then:
+        assert(newRequesterRequestData.stateModel.shortcode == newStateModel);
+
+        where:
+        originalServiceType | originalDeliveryType | newServiceType | newDeliveryType | respondNoActionFile           | resubmitAction           | newStateModel
+        null                | null                 | "Copy"         | "URL"           | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_NR_REQUESTER
+        "Copy"              | "URL"                | null           | null            | "nrSupplierCannotSupply.json" | "nonreturnableRerequest" | StateModel.MODEL_REQUESTER
+        null                | null                 | null           | null            | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_REQUESTER
 
     }
 
