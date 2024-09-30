@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import groovy.util.logging.Slf4j
+import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
@@ -255,20 +256,22 @@ class ProtocolMessageBuildingService {
       }
     }
 
-    Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
-          rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
-      }
-    switch (filteredVolumes.size()) {
-      case 0:
-        break;
-      case 1:
-        // We have a single volume, send as a single itemId string
-        message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].itemId},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""}"
-        break;
-      default:
-        // We have many volumes, send as an array of multiVol itemIds
-        message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.itemId},${vol.callNumber ? vol.callNumber : ""}" }
-        break;
+    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status)) {
+        Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
+            rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
+        }
+        switch (filteredVolumes.size()) {
+            case 0:
+                break;
+            case 1:
+                // We have a single volume, send as a single itemId string
+                message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].itemId},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""}"
+                break;
+            default:
+                // We have many volumes, send as an array of multiVol itemIds
+                message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.itemId},${vol.callNumber ? vol.callNumber : ""}" }
+                break;
+        }
     }
 
     if( pr?.dueDateRS ) {
