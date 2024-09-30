@@ -118,7 +118,7 @@ class ActionEvent implements MultiTenant<ActionEvent> {
         return(actionEvent);
     }
 
-    public static ActionEvent lookup(String code) {
+    public static ActionEvent lookup(String code, StateModel stateModel) {
         ActionEvent actionEvent = null;
         if (code != null) {
             actionEvent = findByCode(code);

@@ -1,5 +1,5 @@
 {
-  "action": "nonreturnableSupplierRespondCannotSupply",
+  "action": "supplierRespondCannotSupply",
   "actionParams": {
     "reason": "transfer",
     "note": "transferToCluster:2334455667"
