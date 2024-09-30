@@ -1,6 +1,7 @@
 package org.olf
 
 import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.StateModel
 
 import java.text.SimpleDateFormat;
 
@@ -31,6 +32,7 @@ import grails.databinding.SimpleMapDataBindingSource
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import spock.lang.*
 
@@ -54,41 +56,41 @@ class RSLifecycleSpec extends TestBase {
     // is the function of the AdditionalHeaders custom property here
     @Shared
     private static List<Map> DIRECTORY_INFO = [
-            [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ],
-              services:[
-                      [
-                              slug:'RSInstOne_ISO18626',
-                              service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-                              customProperties:[
-                                      'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-                                      'AdditionalHeaders':['X-Okapi-Tenant:RSInstOne']
-                              ]
-                      ]
-              ]
+            [id      : 'RS-T-D-0001', name: 'RSInstOne', slug: 'RS_INST_ONE', symbols: [[authority: 'ISIL', symbol: 'RST1', priority: 'a']],
+             services: [
+                     [
+                             slug            : 'RSInstOne_ISO18626',
+                             service         : ['name': 'ReShare ISO18626 Service', 'address': '${baseUrl}/rs/externalApi/iso18626', 'type': 'ISO18626', 'businessFunction': 'ILL'],
+                             customProperties: [
+                                     'ILLPreferredNamespaces': ['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+                                     'AdditionalHeaders'     : ['X-Okapi-Tenant:RSInstOne']
+                             ]
+                     ]
+             ]
             ],
-            [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ],
-              services:[
-                      [
-                              slug:'RSInstTwo_ISO18626',
-                              service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-                              customProperties:[
-                                      'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-                                      'AdditionalHeaders':['X-Okapi-Tenant:RSInstTwo']
-                              ]
-                      ]
-              ]
+            [id      : 'RS-T-D-0002', name: 'RSInstTwo', slug: 'RS_INST_TWO', symbols: [[authority: 'ISIL', symbol: 'RST2', priority: 'a']],
+             services: [
+                     [
+                             slug            : 'RSInstTwo_ISO18626',
+                             service         : ['name': 'ReShare ISO18626 Service', 'address': '${baseUrl}/rs/externalApi/iso18626', 'type': 'ISO18626', 'businessFunction': 'ILL'],
+                             customProperties: [
+                                     'ILLPreferredNamespaces': ['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+                                     'AdditionalHeaders'     : ['X-Okapi-Tenant:RSInstTwo']
+                             ]
+                     ]
+             ]
             ],
-            [ id:'RS-T-D-0003', name: 'RSInstThree', slug:'RS_INST_THREE', symbols: [[ authority:'ISIL', symbol:'RST3', priority:'a'] ],
-              services:[
-                      [
-                              slug:'RSInstThree_ISO18626',
-                              service:[ 'name':'ReShare ISO18626 Service', 'address':'${baseUrl}/rs/externalApi/iso18626', 'type':'ISO18626', 'businessFunction':'ILL' ],
-                              customProperties:[
-                                      'ILLPreferredNamespaces':['ISIL', 'RESHARE', 'PALCI', 'IDS'],
-                                      'AdditionalHeaders':['X-Okapi-Tenant:RSInstThree']
-                              ]
-                      ]
-              ]
+            [id      : 'RS-T-D-0003', name: 'RSInstThree', slug: 'RS_INST_THREE', symbols: [[authority: 'ISIL', symbol: 'RST3', priority: 'a']],
+             services: [
+                     [
+                             slug            : 'RSInstThree_ISO18626',
+                             service         : ['name': 'ReShare ISO18626 Service', 'address': '${baseUrl}/rs/externalApi/iso18626', 'type': 'ISO18626', 'businessFunction': 'ILL'],
+                             customProperties: [
+                                     'ILLPreferredNamespaces': ['ISIL', 'RESHARE', 'PALCI', 'IDS'],
+                                     'AdditionalHeaders'     : ['X-Okapi-Tenant:RSInstThree']
+                             ]
+                     ]
+             ]
             ]
     ]
 
@@ -115,11 +117,11 @@ class RSLifecycleSpec extends TestBase {
     }
 
     def setup() {
-        if ( testctx.initialised == null ) {
+        if (testctx.initialised == null) {
             log.debug("Inject actual runtime port number (${serverPort}) into directory entries (${baseUrl}) ");
-            for ( Map entry: DIRECTORY_INFO ) {
-                if ( entry.services != null ) {
-                    for ( Map svc: entry.services ) {
+            for (Map entry : DIRECTORY_INFO) {
+                if (entry.services != null) {
+                    for (Map svc : entry.services) {
                         svc.service.address = "${baseUrl}rs/externalApi/iso18626".toString()
                         log.debug("${entry.id}/${entry.name}/${svc.slug}/${svc.service.name} - address updated to ${svc.service.address}");
                     }
@@ -134,30 +136,30 @@ class RSLifecycleSpec extends TestBase {
 
     private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
         Map params = [
-                'max':'100',
-                'offset':'0',
-                'match':'patronReference',
-                'term':patron_reference
+                'max'   : '100',
+                'offset': '0',
+                'match' : 'patronReference',
+                'term'  : patron_reference
         ];
         return waitForRequestStateParams(tenant, timeout, params, required_state);
     }
 
     private String waitForRequestStateById(String tenant, long timeout, String id, String required_state) {
         Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'id',
-                'term':id
+                'max'   : '1',
+                'offset': '0',
+                'match' : 'id',
+                'term'  : id
         ];
         return waitForRequestStateParams(tenant, timeout, params, required_state);
     }
 
     private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
         Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'hrid',
-                'term':hrid
+                'max'   : '1',
+                'offset': '0',
+                'match' : 'hrid',
+                'term'  : hrid
         ]
         return waitForRequestStateParams(tenant, timeout, params, required_state);
     }
@@ -167,8 +169,8 @@ class RSLifecycleSpec extends TestBase {
         String request_id = null;
         String request_state = null;
         long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
+        while ((required_state != request_state) &&
+                (elapsed < timeout)) {
 
             setHeaders(['X-Okapi-Tenant': tenant]);
             // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
@@ -178,7 +180,7 @@ class RSLifecycleSpec extends TestBase {
                 request_id = resp[0].id
                 request_state = resp[0].state?.code
             } else {
-                log.debug("waitForRequestState: Request with params ${params} not found");
+                log.debug("waitForRequestState: Request with params ${params} on tenant ${tenant} not found");
             }
 
             if (required_state != request_state) {
@@ -190,7 +192,7 @@ class RSLifecycleSpec extends TestBase {
         }
         log.debug("Found request on tenant ${tenant} with params ${params} in state ${request_state} after ${elapsed} milliseconds");
 
-        if ( required_state != request_state ) {
+        if (required_state != request_state) {
             throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
         }
 
@@ -200,7 +202,7 @@ class RSLifecycleSpec extends TestBase {
     // For the given tenant fetch the specified request
     private Map fetchRequest(String tenant, String requestId) {
 
-        setHeaders([ 'X-Okapi-Tenant': tenant ]);
+        setHeaders(['X-Okapi-Tenant': tenant]);
         // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests/{id}
         def response = doGet("${baseUrl}rs/patronrequests/${requestId}")
         return response;
@@ -209,35 +211,36 @@ class RSLifecycleSpec extends TestBase {
     private String randomCrap(int length) {
         String source = (('A'..'Z') + ('a'..'z')).join();
         Random rand = new Random();
-        return (1..length).collect { source[rand.nextInt(source.length())]}.join();
+        return (1..length).collect { source[rand.nextInt(source.length())] }.join();
     }
 
     void "Attempt to delete any old tenants"(tenantid, name) {
-        when:"We post a delete request"
+        when: "We post a delete request"
         boolean result = deleteTenant(tenantid, name);
 
-        then:"Any old tenant removed"
-        assert(result);
+        then: "Any old tenant removed"
+        assert (result);
 
         where:
-        tenantid | name
-        'RSInstOne' | 'RSInstOne'
-        'RSInstTwo' | 'RSInstTwo'
+        tenantid      | name
+        'RSInstOne'   | 'RSInstOne'
+        'RSInstTwo'   | 'RSInstTwo'
         'RSInstThree' | 'RSInstThree'
     }
 
     void "test presence of HOST LMS adapters"(String name, boolean should_be_found) {
 
-        when: "We try to look up ${name} as a host adapter"
+        when:
+        "We try to look up ${name} as a host adapter"
         log.debug("Lookup LMS adapter ${name}");
         HostLMSActions actions = hostLMSService.getHostLMSActionsFor(name)
         log.debug("result of lookup : ${actions}");
 
-        then: "We expect that the adapter should ${should_be_found ? 'BE' : 'NOT BE'} found. result was ${actions}."
-        if ( should_be_found ) {
+        then:
+        "We expect that the adapter should ${should_be_found ? 'BE' : 'NOT BE'} found. result was ${actions}."
+        if (should_be_found) {
             actions != null
-        }
-        else {
+        } else {
             actions == null
         }
 
@@ -260,24 +263,25 @@ class RSLifecycleSpec extends TestBase {
     }
 
     void "Set up test tenants "(tenantid, name) {
-        when:"We post a new tenant request to the OKAPI controller"
+        when: "We post a new tenant request to the OKAPI controller"
         boolean response = setupTenant(tenantid, name);
 
-        then:"The response is correct"
-        assert(response);
+        then: "The response is correct"
+        assert (response);
 
         where:
-        tenantid | name
-        'RSInstOne' | 'RSInstOne'
-        'RSInstTwo' | 'RSInstTwo'
+        tenantid      | name
+        'RSInstOne'   | 'RSInstOne'
+        'RSInstTwo'   | 'RSInstTwo'
         'RSInstThree' | 'RSInstThree'
     }
 
     void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
-        when:"Load the default directory (test url is ${baseUrl})"
+        when:
+        "Load the default directory (test url is ${baseUrl})"
         boolean result = true
 
-        Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        Tenants.withId(tenant_id.toLowerCase() + '_mod_rs') {
             log.info("Filling out dummy directory entries for tenant ${tenant_id}");
 
             dirents.each { entry ->
@@ -306,15 +310,15 @@ class RSLifecycleSpec extends TestBase {
 
                 // log.debug("Before save, ${de}, services:${de.services}");
                 try {
-                    de.save(flush:true, failOnError:true)
+                    de.save(flush: true, failOnError: true)
                     log.debug("Result of bind: ${de} ${de.id}");
                 }
-                catch ( Exception e ) {
-                    log.error("problem bootstrapping directory data",e);
+                catch (Exception e) {
+                    log.error("problem bootstrapping directory data", e);
                     result = false;
                 }
 
-                if ( de.errors ) {
+                if (de.errors) {
                     de.errors?.allErrors?.each { err ->
                         log.error(err?.toString())
                     }
@@ -322,11 +326,11 @@ class RSLifecycleSpec extends TestBase {
             }
         }
 
-        then:"Test directory entries are present"
+        then: "Test directory entries are present"
         assert result == true
 
         where:
-        tenant_id | dirents
+        tenant_id   | dirents
         'RSInstOne' | DIRECTORY_INFO
         'RSInstTwo' | DIRECTORY_INFO
         'RSInstThree' | DIRECTORY_INFO
@@ -339,30 +343,31 @@ class RSLifecycleSpec extends TestBase {
      *  changing this data may well break that test.
      */
     void "Configure Tenants for Mock Lending"(String tenant_id, Map changes_needed) {
-        when:"We fetch the existing settings for ${tenant_id}"
+        when:
+        "We fetch the existing settings for ${tenant_id}"
         changeSettings(tenant_id, changes_needed);
 
-        then:"Tenant is configured"
-        1==1
+        then: "Tenant is configured"
+        1 == 1
 
         where:
-        tenant_id      | changes_needed
-        'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest':'yes' ]
-        'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3' ]
-        'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1' ]
+        tenant_id     | changes_needed
+        'RSInstOne'   | ['auto_responder_status': 'off', 'auto_responder_cancel': 'off', 'routing_adapter': 'static', 'static_routes': 'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest': 'yes']
+        'RSInstTwo'   | ['auto_responder_status': 'off', 'auto_responder_cancel': 'off', 'routing_adapter': 'static', 'static_routes': 'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3']
+        'RSInstThree' | ['auto_responder_status': 'off', 'auto_responder_cancel': 'off', 'routing_adapter': 'static', 'static_routes': 'SYMBOL:ISIL:RST1']
 
     }
 
     void "Validate Static Router"() {
 
-        when:"We call the static router"
+        when: "We call the static router"
         List<RankedSupplier> resolved_rota = null;
         Tenants.withId('RSInstOne_mod_rs'.toLowerCase()) {
-            resolved_rota = staticRouterService.findMoreSuppliers([title:'Test'], null)
+            resolved_rota = staticRouterService.findMoreSuppliers([title: 'Test'], null)
         }
         log.debug("Static Router resolved to ${resolved_rota}");
 
-        then:"The expecte result is returned"
+        then: "The expecte result is returned"
         resolved_rota.size() == 2;
     }
 
@@ -380,29 +385,29 @@ class RSLifecycleSpec extends TestBase {
                                          String p_patron_reference,
                                          String requesting_symbol,
                                          String responder_symbol) {
-        when:"post new request"
+        when: "post new request"
         log.debug("Create a new request ${tenant_id} ${p_title} ${p_patron_id}");
 
         // Create a request from OCLC:PPPA TO OCLC:AVL
         def req_json_data = [
-                requestingInstitutionSymbol:requesting_symbol,
-                title: p_title,
-                author: p_author,
-                systemInstanceIdentifier: p_systemInstanceIdentifier,
-                bibliographicRecordId: p_systemInstanceIdentifier,
-                patronReference:p_patron_reference,
-                patronIdentifier:p_patron_id,
-                isRequester:true,
-                rota:[
-                        [directoryId:responder_symbol, rotaPosition:"0", 'instanceIdentifier': '001TagFromMarc', 'copyIdentifier':'COPYBarcode from 9xx']
+                requestingInstitutionSymbol: requesting_symbol,
+                title                      : p_title,
+                author                     : p_author,
+                systemInstanceIdentifier   : p_systemInstanceIdentifier,
+                bibliographicRecordId      : p_systemInstanceIdentifier,
+                patronReference            : p_patron_reference,
+                patronIdentifier           : p_patron_id,
+                isRequester                : true,
+                rota                       : [
+                        [directoryId: responder_symbol, rotaPosition: "0", 'instanceIdentifier': '001TagFromMarc', 'copyIdentifier': 'COPYBarcode from 9xx']
                 ],
-                tags: [ 'RS-TESTCASE-1' ]
+                tags                       : ['RS-TESTCASE-1']
         ]
 
         setHeaders([
-                'X-Okapi-Tenant': tenant_id,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenant_id,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ])
 
@@ -419,7 +424,7 @@ class RSLifecycleSpec extends TestBase {
         log.debug("                                               RESPONDER ID is : ${peer_request}");
 
 
-        then:"Check the return value"
+        then: "Check the return value"
         assert this.testctx.request_data[p_patron_reference] != null;
         assert peer_request != null
 
@@ -429,12 +434,12 @@ class RSLifecycleSpec extends TestBase {
     }
 
     void "Confirm fullRecord flag expands records in request list"(String tenant_id) {
-        when:"Fetch requests"
-        setHeaders([ 'X-Okapi-Tenant': tenant_id ]);
+        when: "Fetch requests"
+        setHeaders(['X-Okapi-Tenant': tenant_id]);
         def resp = doGet("${baseUrl}rs/patronrequests",
                 [
-                        'max':'1',
-                        'fullRecord':'true'
+                        'max'       : '1',
+                        'fullRecord': 'true'
                 ]);
         then:
         assert resp?.size() == 1 && resp[0].containsKey('rota') && resp[0].containsKey('audit');
@@ -456,25 +461,25 @@ class RSLifecycleSpec extends TestBase {
                                             String p_patron_reference,
                                             String requesting_symbol,
                                             String[] tags) {
-        when:"post new request"
+        when: "post new request"
         log.debug("Create a new request ${tenant_id} ${tags} ${p_title} ${p_patron_id}");
 
         // Create a request from OCLC:PPPA TO OCLC:AVL
         def req_json_data = [
-                requestingInstitutionSymbol:requesting_symbol,
-                title: p_title,
-                author: p_author,
-                systemInstanceIdentifier: p_systemInstanceIdentifier,
-                patronReference:p_patron_reference,
-                patronIdentifier:p_patron_id,
-                isRequester:true,
-                tags: tags
+                requestingInstitutionSymbol: requesting_symbol,
+                title                      : p_title,
+                author                     : p_author,
+                systemInstanceIdentifier   : p_systemInstanceIdentifier,
+                patronReference            : p_patron_reference,
+                patronIdentifier           : p_patron_id,
+                isRequester                : true,
+                tags                       : tags
         ]
 
         setHeaders([
-                'X-Okapi-Tenant': tenant_id,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenant_id,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ])
         def resp = doPost("${baseUrl}/rs/patronrequests".toString(), req_json_data)
@@ -489,26 +494,26 @@ class RSLifecycleSpec extends TestBase {
         log.debug("                                               RESPONDER ID is : ${peer_request}");
 
 
-        then:"Check the return value"
+        then: "Check the return value"
         assert this.testctx.request_data[p_patron_reference] != null;
         assert peer_request != null
 
         where:
         tenant_id   | peer_tenant   | p_title               | p_author         | p_systemInstanceIdentifier | p_patron_id | p_patron_reference        | requesting_symbol | tags
-        'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'       | [ 'RS-TESTCASE-2' ]
-        'RSInstOne' | 'RSInstThree' | LONG_300_CHAR_TITLE   | 'Author, Some'   | '1234-5678-9123-4579'      | '1234-567a' | 'RS-LIFECYCLE-TEST-00003' | 'ISIL:RST1'       | [ 'RS-TESTCASE-3' ]
+        'RSInstOne' | 'RSInstThree' | 'Platform For Change' | 'Beer, Stafford' | '1234-5678-9123-4577'      | '1234-5679' | 'RS-LIFECYCLE-TEST-00002' | 'ISIL:RST1'       | ['RS-TESTCASE-2']
+        'RSInstOne' | 'RSInstThree' | LONG_300_CHAR_TITLE   | 'Author, Some'   | '1234-5678-9123-4579'      | '1234-567a' | 'RS-LIFECYCLE-TEST-00003' | 'ISIL:RST1'       | ['RS-TESTCASE-3']
     }
 
     // For RSInstThree tenant should return the sample data loaded
     void "test API for retrieving shelving locations for #tenant_id"() {
 
-        when:"We post to the shelvingLocations endpoint for tenant"
+        when: "We post to the shelvingLocations endpoint for tenant"
         setHeaders([
                 'X-Okapi-Tenant': tenant_id
         ])
         def resp = doGet("${baseUrl}rs/shelvingLocations".toString());
 
-        then:"Got results"
+        then: "Got results"
         resp != null;
         log.debug("Got get shelving locations response: ${resp}");
 
@@ -518,17 +523,17 @@ class RSLifecycleSpec extends TestBase {
     }
 
     void "test API for creating shelving locations for #tenant_id"() {
-        when:"We post to the shelvingLocations endpoint for tenant"
+        when: "We post to the shelvingLocations endpoint for tenant"
         setHeaders([
                 'X-Okapi-Tenant': tenant_id
         ])
         def resp = doPost("${baseUrl}rs/shelvingLocations".toString(),
                 [
-                        code:'stacks',
-                        name:'stacks',
-                        supplyPreference:1
+                        code            : 'stacks',
+                        name            : 'stacks',
+                        supplyPreference: 1
                 ])
-        then:"Created"
+        then: "Created"
         resp != null;
         log.debug("Got create shelving locations response: ${resp}");
         where:
@@ -537,16 +542,16 @@ class RSLifecycleSpec extends TestBase {
     }
 
     void "test API for creating patron profiles for #tenant_id"() {
-        when:"We post to the hostLMSPatronProfiles endpoint for tenant"
+        when: "We post to the hostLMSPatronProfiles endpoint for tenant"
         setHeaders([
                 'X-Okapi-Tenant': tenant_id
         ])
         def resp = doPost("${baseUrl}rs/hostLMSPatronProfiles".toString(),
                 [
-                        code:'staff',
-                        name:'staff'
+                        code: 'staff',
+                        name: 'staff'
                 ])
-        then:"Created"
+        then: "Created"
         resp != null;
         log.debug("Got create hostLMSPatronProfiles response: ${resp}");
         where:
@@ -557,13 +562,13 @@ class RSLifecycleSpec extends TestBase {
     // For RSInstThree tenant should return the sample data loaded
     void "test API for retrieving patron profiles for #tenant_id"() {
 
-        when:"We GET to the hostLMSPatronProfiles endpoint for tenant"
+        when: "We GET to the hostLMSPatronProfiles endpoint for tenant"
         setHeaders([
                 'X-Okapi-Tenant': tenant_id
         ])
         def resp = doGet("${baseUrl}rs/hostLMSPatronProfiles".toString());
 
-        then:"Got results"
+        then: "Got results"
         resp != null;
         log.debug("Got get hostLMSPatronProfiles response: ${resp}");
 
@@ -571,11 +576,12 @@ class RSLifecycleSpec extends TestBase {
         tenant_id | _
         'RSInstThree' | _
     }
-    void "test determineBestLocation for WMS LMS adapters" () {
+
+    void "test determineBestLocation for WMS LMS adapters"() {
         when: "We mock lookupViaConnector and run determineBestLocation for WMS"
         def result = [:];
         def xml = null;
-        Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        Tenants.withId(tenant_id.toLowerCase() + '_mod_rs') {
             def actions = hostLMSService.getHostLMSActionsFor(lms);
             xml = new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text);
             actions.metaClass.lookupViaConnector { String query, ISettings settings, IHoldingLogDetails holdingLogDetails ->
@@ -594,21 +600,21 @@ class RSLifecycleSpec extends TestBase {
         result?.shelvingLocation?.code == shelvingLocation;
 
         where:
-        tenant_id | lms | zResponseFile | location | shelvingLocation | _
-        'RSInstThree' | 'wms' | 'wms-lfmm.xml' | 'LFMM' | 'General Collection' | _
-        'RSInstThree' | 'wms2' | 'wms-lfmm.xml' | 'LFMM' | 'General Collection' | _
+        tenant_id     | lms    | zResponseFile  | location | shelvingLocation     | _
+        'RSInstThree' | 'wms'  | 'wms-lfmm.xml' | 'LFMM'   | 'General Collection' | _
+        'RSInstThree' | 'wms2' | 'wms-lfmm.xml' | 'LFMM'   | 'General Collection' | _
     }
 
     void "test determineBestLocation for LMS adapters"() {
-        when:"We mock z39 and run determineBestLocation"
+        when: "We mock z39 and run determineBestLocation"
         z3950Service.metaClass.query = { ISettings settings, String query, int max, String schema, IHoldingLogDetails holdingLogDetails -> new XmlSlurper().parseText(new File("src/test/resources/zresponsexml/${zResponseFile}").text) };
         def result = [:];
-        Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+        Tenants.withId(tenant_id.toLowerCase() + '_mod_rs') {
             // perhaps generalise this to set preferences per test-case, for now we're just using it to see a temporaryLocation respected
-            def nonlendingVoyager = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve','');
+            def nonlendingVoyager = hostLMSLocationService.ensureActive('BASS, Lower Level, 24-Hour Reserve', '');
             nonlendingVoyager.setSupplyPreference(-1);
 
-            def nonlendingFolioShelvingLocation = hostLMSShelvingLocationService.ensureExists('Olin Reserve','', -1);
+            def nonlendingFolioShelvingLocation = hostLMSShelvingLocationService.ensureExists('Olin Reserve', '', -1);
 
             def actions = hostLMSService.getHostLMSActionsFor(lms);
             def pr = new PatronRequest(supplierUniqueRecordId: '123');
@@ -619,7 +625,7 @@ class RSLifecycleSpec extends TestBase {
             result['shelvingLocation'] = HostLMSShelvingLocation.findByCode(shelvingLocation);
         }
 
-        then:"Confirm location and shelving location were created and properly returned"
+        then: "Confirm location and shelving location were created and properly returned"
         result?.viaId?.location == location;
         result?.viaPrefix?.location == location;
         result?.location?.code == location;
@@ -628,23 +634,23 @@ class RSLifecycleSpec extends TestBase {
         result?.shelvingLocation?.code == shelvingLocation;
 
         where:
-        tenant_id | lms | zResponseFile | location | shelvingLocation | _
-        'RSInstThree' | 'alma'      | 'alma-princeton.xml'                                          | 'Firestone Library'           | 'stacks: Firestone Library'   | _
-        'RSInstThree' | 'alma'      | 'alma-princeton-notfound.xml'                                 | null                          | null                          | _
-        'RSInstThree' | 'alma'      | 'alma-dickinson-multiple.xml'                                 | null                          | null                          | _
-        'RSInstThree' | 'horizon'   | 'horizon-jhu.xml'                                             | 'Eisenhower'                  | null                          | _
-        'RSInstThree' | 'symphony'  | 'symphony-stanford.xml'                                       | 'SAL3'                        | 'STACKS'                      | _
-        'RSInstThree' | 'voyager'   | 'voyager-temp.xml'                                            | null                          | null                          | _
-        'RSInstThree' | 'folio'     | 'folio-not-requestable.xml'                                   | null                          | null                          | _
-        'RSInstThree' | 'polaris'   | 'polaris-with-in-item-status.xml'                             | 'Juvenile nonfiction shelves' | 'Main Library'                | _
-        'RSInstThree' | 'polaris'   | 'polaris-with-out-item-status.xml'                            | null                          | null                          | _
-        'RSInstThree' | 'polaris'   | 'polaris-with-held-item-status.xml'                           | null                          | null                          | _
-        'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-checked-out-item-status.xml'     | null                          | null                          | _
-        'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-in-transit-item-status.xml'      | null                          | null                          | _
-        'RSInstThree' | 'evergreen' | 'evergreen-lake-agassiz-with-available-item-status.xml'       | 'HAWLEY'                      | 'Main'                        | _
-        'RSInstThree' | 'evergreen' | 'evergreen-north-west-with-available-item-status.xml'         | 'ROSEAU'                      | 'Main'                        | _
-        'RSInstThree' | 'evergreen' | 'evergreen-traverse-de-sioux-with-available-item-status.xml'  | 'AM'                          | 'Children\'s Literature Area' | _
-        'RSInstThree' | 'tlc'       | 'tlc-eastern.xml'                                             | 'Warner Library'              | 'WARNER STACKS'               | _
+        tenant_id     | lms         | zResponseFile                                                | location                      | shelvingLocation              | _
+        'RSInstThree' | 'alma'      | 'alma-princeton.xml'                                         | 'Firestone Library'           | 'stacks: Firestone Library'   | _
+        'RSInstThree' | 'alma'      | 'alma-princeton-notfound.xml'                                | null                          | null                          | _
+        'RSInstThree' | 'alma'      | 'alma-dickinson-multiple.xml'                                | null                          | null                          | _
+        'RSInstThree' | 'horizon'   | 'horizon-jhu.xml'                                            | 'Eisenhower'                  | null                          | _
+        'RSInstThree' | 'symphony'  | 'symphony-stanford.xml'                                      | 'SAL3'                        | 'STACKS'                      | _
+        'RSInstThree' | 'voyager'   | 'voyager-temp.xml'                                           | null                          | null                          | _
+        'RSInstThree' | 'folio'     | 'folio-not-requestable.xml'                                  | null                          | null                          | _
+        'RSInstThree' | 'polaris'   | 'polaris-with-in-item-status.xml'                            | 'Juvenile nonfiction shelves' | 'Main Library'                | _
+        'RSInstThree' | 'polaris'   | 'polaris-with-out-item-status.xml'                           | null                          | null                          | _
+        'RSInstThree' | 'polaris'   | 'polaris-with-held-item-status.xml'                          | null                          | null                          | _
+        'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-checked-out-item-status.xml'    | null                          | null                          | _
+        'RSInstThree' | 'evergreen' | 'evergreen-east-central-with-in-transit-item-status.xml'     | null                          | null                          | _
+        'RSInstThree' | 'evergreen' | 'evergreen-lake-agassiz-with-available-item-status.xml'      | 'HAWLEY'                      | 'Main'                        | _
+        'RSInstThree' | 'evergreen' | 'evergreen-north-west-with-available-item-status.xml'        | 'ROSEAU'                      | 'Main'                        | _
+        'RSInstThree' | 'evergreen' | 'evergreen-traverse-de-sioux-with-available-item-status.xml' | 'AM'                          | 'Children\'s Literature Area' | _
+        'RSInstThree' | 'tlc'       | 'tlc-eastern.xml'                                            | 'Warner Library'              | 'WARNER STACKS'               | _
     }
 
     /**
@@ -655,20 +661,20 @@ class RSLifecycleSpec extends TestBase {
                                        String deliveryMethod = null, String serviceType = null) {
         // Create the request based on the scenario
         Map request = [
-                patronReference: 'Scenario-' + scenarioNo + '-' + scenarioDateFormatter.format(new Date()),
-                title: 'Testing-Scenario-' + scenarioNo,
-                author: 'Author-Scenario-' + scenarioNo,
+                patronReference            : 'Scenario-' + scenarioNo + '-' + scenarioDateFormatter.format(new Date()),
+                title                      : 'Testing-Scenario-' + scenarioNo,
+                author                     : 'Author-Scenario-' + scenarioNo,
                 requestingInstitutionSymbol: 'ISIL:RST1',
-                systemInstanceIdentifier: '123-Scenario-' + scenarioNo,
-                patronIdentifier: ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
-                isRequester: true
+                systemInstanceIdentifier   : '123-Scenario-' + scenarioNo,
+                patronIdentifier           : ((patronIdentifier == null) ? '987-Scenario-' + scenarioNo : patronIdentifier),
+                isRequester                : true
         ];
         deliveryMethod && (request.deliveryMethod = deliveryMethod);
         serviceType && (request.serviceType = serviceType);
 
         log.debug("Create a new request for ${requesterTenantId}, patronReference: ${request.patronReference}, title: ${request.title}");
 
-        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def requestResponse = doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
         log.debug("${request.title} -- Response: Response: ${requestResponse} Id: ${requestResponse.id}");
@@ -696,7 +702,7 @@ class RSLifecycleSpec extends TestBase {
 
         String jsonAction = new File("src/integration-test/resources/scenarios/${actionFile}").text;
         log.debug("Action json: ${jsonAction}");
-        setHeaders([ 'X-Okapi-Tenant': actionTenant ]);
+        setHeaders(['X-Okapi-Tenant': actionTenant]);
 
         if (actionRequestId == null) {
             throw new Exception("Unable to continue, no request ID has been populated");
@@ -705,7 +711,7 @@ class RSLifecycleSpec extends TestBase {
         log.debug("Posting to action url at $actionUrl");
         // Execute the action
         def actionResponse = doPost(actionUrl, jsonAction);
-        return(actionResponse.toString());
+        return (actionResponse.toString());
     }
 
     private String doScenarioAction(
@@ -748,11 +754,11 @@ class RSLifecycleSpec extends TestBase {
                 // Wait for the status and get the responder id
                 this.testctx.request_data[SCENARIO_RESPONDER_ID] = waitForRequestState(newResponderTenant, 10000, this.testctx.request_data[SCENARIO_PATRON_REFERENCE], newResponderStatus);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Exception Performing action for scenario " + scenario + " using file " + actionFile + ", expected requester status " + requesterStatus + ", expected responder status " + responderStatus, e);
-            throw(e);
+            throw (e);
         }
-        return(actionResponse);
+        return (actionResponse);
     }
 
     /**
@@ -773,7 +779,7 @@ class RSLifecycleSpec extends TestBase {
             String expectedActionResponse,
             Closure requestClosure
     ) {
-        when:"Progress the request"
+        when: "Progress the request"
 
         String actionResponse = doScenarioAction(
                 requesterTenantId,
@@ -793,7 +799,7 @@ class RSLifecycleSpec extends TestBase {
         log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
         log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
 
-        then:"Check the response value"
+        then: "Check the response value"
         assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
         assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
         assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
@@ -803,10 +809,10 @@ class RSLifecycleSpec extends TestBase {
         if (requestClosure) {
             def requesterRequest;
             def responderRequest;
-            Tenants.withId(requesterTenantId.toLowerCase()+'_mod_rs') {
+            Tenants.withId(requesterTenantId.toLowerCase() + '_mod_rs') {
                 requesterRequest = PatronRequest.findById(this.testctx.request_data[SCENARIO_REQUESTER_ID]);
             };
-            Tenants.withId(responderTenantId.toLowerCase()+'_mod_rs') {
+            Tenants.withId(responderTenantId.toLowerCase() + '_mod_rs') {
                 responderRequest = PatronRequest.findById(this.testctx.request_data[SCENARIO_RESPONDER_ID]);
             }
             assert requestClosure(requesterRequest, responderRequest);
@@ -886,28 +892,28 @@ class DosomethingSimple {
         Object classResultDefaultMethod = dynamicGroovyService.executeClass("cacheKey", classSource, ["parameter1": "request", "secondParameter": 4]);
         Object classResultCacheMethod = dynamicGroovyService.executeClass("cacheKey", "As long as its null it will be taken from the cache", null, "toString");
 
-        then:"Confirm confirm we get the expected results from executing dynamic groovy"
-        assert(scriptResult instanceof Boolean);
+        then: "Confirm confirm we get the expected results from executing dynamic groovy"
+        assert (scriptResult instanceof Boolean);
         assert (scriptResult == true);
-        assert(scriptResultAsClass instanceof Boolean);
+        assert (scriptResultAsClass instanceof Boolean);
         assert (scriptResultAsClass == true);
-        assert(scriptResultAsClassCache instanceof Boolean);
+        assert (scriptResultAsClassCache instanceof Boolean);
         assert (scriptResultAsClassCache == true);
-        assert(classResultDefaultMethod instanceof String);
-        assert(classResultDefaultMethod == "request-4");
-        assert(classResultCacheMethod instanceof String);
-        assert(classResultCacheMethod == "Goodness gracious me");
+        assert (classResultDefaultMethod instanceof String);
+        assert (classResultDefaultMethod == "request-4");
+        assert (classResultCacheMethod instanceof String);
+        assert (classResultCacheMethod == "Goodness gracious me");
     }
 
     void "test Import"(String tenantId, String importFile) {
         when: "Perform the import"
         String jsonImportFile = new File("src/integration-test/resources/stateModels/${importFile}").text;
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Perform the import
         def responseJson = doPost("${baseUrl}/rs/stateModel/import".toString(), jsonImportFile);
 
-        then:"Confirm the result json has no errors"
+        then: "Confirm the result json has no errors"
         if (responseJson instanceof Map) {
             responseJson.each { arrayElement ->
                 // The value should be of type ArrayList
@@ -917,23 +923,23 @@ class DosomethingSimple {
                             // Ignore lines beginning with "No array of "
                             if (!error.startsWith("No array of ")) {
                                 // It should end with ", errors: 0" otherwise we have problems
-                                assert(error.endsWith(", errors: 0"));
+                                assert (error.endsWith(", errors: 0"));
                             }
                         } else {
                             log.debug("List element is not of type String, it has type " + error.getClass());
-                            assert(false);
+                            assert (false);
                         }
                     }
                 } else {
                     // For some reason we did not get an array list
                     log.debug("Map element with key " + arrayElement.key + " is not an ArrayList");
-                    assert(false);
+                    assert (false);
                 }
             }
         } else {
             // We obviously did not get json returned
             log.debug("Json returned by import is not a Map");
-            assert(false);
+            assert (false);
         }
 
         where:
@@ -942,13 +948,13 @@ class DosomethingSimple {
     }
 
     void "set_responder_state_model"(String tenantId, String stateModel) {
-        when:"Progress the request"
+        when: "Progress the request"
         // Ensure we have the correct model for the responder
         log.debug("Setting responder state model to " + stateModel);
-        changeSettings(tenantId, [ state_model_responder : stateModel ], true);
+        changeSettings(tenantId, [state_model_responder: stateModel], true);
 
-        then:"If no exception assume it has been set"
-        assert(true);
+        then: "If no exception assume it has been set"
+        assert (true);
 
         where:
         tenantId      | stateModel
@@ -971,7 +977,7 @@ class DosomethingSimple {
             String patronIdentifier,
             String expectedActionResponse
     ) {
-        when:"Progress the request"
+        when: "Progress the request"
         // Default state model for instance 3 should have been set to testResponder
 
         String actionResponse = doScenarioAction(
@@ -990,7 +996,7 @@ class DosomethingSimple {
         log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
         log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
 
-        then:"Check the response value"
+        then: "Check the response value"
         assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
         assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
         assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
@@ -1024,7 +1030,7 @@ class DosomethingSimple {
             String requesterTenantId,
             String responderTenantId
     ) {
-        when:"Create the request and get valid actions"
+        when: "Create the request and get valid actions"
         // For the patron identifier NoSwimming, the action goSwimming should not be available
         String actionResponse = doScenarioAction(
                 requesterTenantId,
@@ -1040,7 +1046,7 @@ class DosomethingSimple {
         );
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
 
         String validActionsUrl = "${baseUrl}/rs/patronrequests/${this.testctx.request_data[SCENARIO_RESPONDER_ID]}/validActions";
         log.debug("doGet(" + validActionsUrl + "");
@@ -1049,8 +1055,8 @@ class DosomethingSimple {
 
         log.debug("Valid responder actions response: ${validActionsResponse.actions.toString()}");
 
-        then:"Check that goSwimmin is not a valid action"
-        assert(!validActionsResponse.actions.contains("goSwimming"));
+        then: "Check that goSwimmin is not a valid action"
+        assert (!validActionsResponse.actions.contains("goSwimming"));
 
         where:
         requesterTenantId | responderTenantId
@@ -1058,27 +1064,27 @@ class DosomethingSimple {
     }
 
     void "Check_Statistics_returned"(String tenantId, String ignore) {
-        when:"We download the statistics"
+        when: "We download the statistics"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Request the statistics
         def statisticsResponse = doGet("${baseUrl}rs/statistics");
         log.debug("Response from statistics: " + statisticsResponse.toString());
 
-        then:"Check we have received some statistics"
+        then: "Check we have received some statistics"
         // Should have the current statistics
-        assert(statisticsResponse?.current != null);
+        assert (statisticsResponse?.current != null);
 
         // We should also have the requests by state
-        assert(statisticsResponse.requestsByState != null);
+        assert (statisticsResponse.requestsByState != null);
 
         // We should have the number of requests that are actively borrowing
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeBorrowing") } != null);
+        assert (statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeBorrowing") } != null);
 
         // We should also have the number of requests that are currently on loan
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeLoans") } != null);
+        assert (statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeLoans") } != null);
 
         where:
         tenantId      | ignore
@@ -1098,7 +1104,7 @@ class DosomethingSimple {
             String patronIdentifier,
             String expectedActionResponse
     ) {
-        when:"Progress the request"
+        when: "Progress the request"
         // Default state model for instance 3 should have been set to testResponder
 
         String actionResponse = doScenarioAction(
@@ -1117,7 +1123,7 @@ class DosomethingSimple {
         log.debug("Scenario: ${scenario}, Responder id: ${this.testctx.request_data[SCENARIO_RESPONDER_ID]}, action file: ${actionFile}");
         log.debug("Expected Action response: ${expectedActionResponse}, action response: ${actionResponse}");
 
-        then:"Check the response value"
+        then: "Check the response value"
         assert this.testctx.request_data[SCENARIO_REQUESTER_ID] != null;
         assert this.testctx.request_data[SCENARIO_RESPONDER_ID] != null;
         assert this.testctx.request_data[SCENARIO_PATRON_REFERENCE] != null;
@@ -1126,20 +1132,20 @@ class DosomethingSimple {
         }
 
         where:
-        requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile                          | requesterStatus                                   | responderStatus                             | newResponderTenant | newResponderStatus    | patronIdentifier | expectedActionResponse
-        "RSInstOne"       | null              | 201      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
-        "RSInstOne"       | "RSInstThree"     | 20101    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
-        "RSInstOne"       | null              | 202      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
-        "RSInstOne"       | "RSInstThree"     | 20201    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
-        "RSInstOne"       | null              | 203      | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
-        "RSInstOne"       | "RSInstThree"     | 20301    | false             | "supplierAnswerYes.json"            | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null             | "{}"
+        requesterTenantId | responderTenantId | scenario | isRequesterAction | actionFile               | requesterStatus                                | responderStatus                      | newResponderTenant | newResponderStatus    | patronIdentifier | expectedActionResponse
+        "RSInstOne"       | null              | 201      | true              | null                     | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER | null                                 | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+        "RSInstOne"       | "RSInstThree"     | 20101    | false             | "supplierAnswerYes.json" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY        | Status.RESPONDER_NEW_AWAIT_PULL_SLIP | null               | null                  | null             | "{}"
+        "RSInstOne"       | null              | 202      | true              | null                     | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER | null                                 | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+        "RSInstOne"       | "RSInstThree"     | 20201    | false             | "supplierAnswerYes.json" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY        | Status.RESPONDER_NEW_AWAIT_PULL_SLIP | null               | null                  | null             | "{}"
+        "RSInstOne"       | null              | 203      | true              | null                     | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER | null                                 | "RSInstThree"      | Status.RESPONDER_IDLE | "Unknown"        | null
+        "RSInstOne"       | "RSInstThree"     | 20301    | false             | "supplierAnswerYes.json" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY        | Status.RESPONDER_NEW_AWAIT_PULL_SLIP | null               | null                  | null             | "{}"
     }
 
     void "Generate a Batch"(String tenantId, String ignore) {
-        when:"We generate a batch"
+        when: "We generate a batch"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Create a batch
         def generateBatchResponse = doGet("${baseUrl}rs/patronrequests/generatePickListBatch?filters=isRequester==false&filters=state.terminal==false&filters=state.code==RES_NEW_AWAIT_PULL_SLIP");
@@ -1148,12 +1154,12 @@ class DosomethingSimple {
         // set the batch id in the test context so the next text can retrieve it
         testctx.batchId = generateBatchResponse.batchId;
 
-        then:"Check we have a batch id"
+        then: "Check we have a batch id"
         // Should have the a response
-        assert(generateBatchResponse != null);
+        assert (generateBatchResponse != null);
 
         // Should have a batch id as part of the response
-        assert(generateBatchResponse.batchId != null);
+        assert (generateBatchResponse.batchId != null);
 
         where:
         tenantId      | ignore
@@ -1161,17 +1167,17 @@ class DosomethingSimple {
     }
 
     void "Print pullslip from batch"(String tenantId, String ignore) {
-        when:"Request the pull slip from a batch"
+        when: "Request the pull slip from a batch"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Generate the picklist
         def generatePickListResponse = doGet("${baseUrl}/rs/report/generatePicklist?batchId=${testctx.batchId}");
 
-        then:"Check we have file in response"
+        then: "Check we have file in response"
         // We should have a byte array
-        assert(generatePickListResponse instanceof byte[]);
+        assert (generatePickListResponse instanceof byte[]);
 
         where:
         tenantId      | ignore
@@ -1179,10 +1185,10 @@ class DosomethingSimple {
     }
 
     void "Print pullslip from batch generate error"(String tenantId, String ignore) {
-        when:"Request the pull slip from a batch"
+        when: "Request the pull slip from a batch"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Generate the picklist
         def generatePickListResponse = null;
@@ -1195,10 +1201,10 @@ class DosomethingSimple {
         }
         log.debug("Response from generatePickList: " + generatePickListResponse.toString());
 
-        then:"Check we have an error response"
+        then: "Check we have an error response"
         // The error element should exist
-        assert(generatePickListResponse?.error != null);
-        assert(statusCode == 400);
+        assert (generatePickListResponse?.error != null);
+        assert (statusCode == 400);
 
         where:
         tenantId      | ignore
@@ -1206,20 +1212,20 @@ class DosomethingSimple {
     }
 
     void "Action requsts as printed from batch"(String tenantId, String ignore) {
-        when:"Action requests in batch to be marked as printed"
+        when: "Action requests in batch to be marked as printed"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Action the requests in the batch as printed
         def markBatchAsPrintedResponse = doGet("${baseUrl}/rs/patronrequests/markBatchAsPrinted?batchId=${testctx.batchId}");
         log.debug("Response from markBatchAsPrinted: " + markBatchAsPrintedResponse.toString());
 
-        then:"Check we have file in response"
+        then: "Check we have file in response"
         // The error element should exist
-        assert(markBatchAsPrintedResponse.successful.size() == 3);
-        assert(markBatchAsPrintedResponse.failed.size() == 0);
-        assert(markBatchAsPrintedResponse.notValid.size() == 0);
+        assert (markBatchAsPrintedResponse.successful.size() == 3);
+        assert (markBatchAsPrintedResponse.failed.size() == 0);
+        assert (markBatchAsPrintedResponse.notValid.size() == 0);
 
         where:
         tenantId      | ignore
@@ -1227,10 +1233,10 @@ class DosomethingSimple {
     }
 
     void "Action requests as printed invalid batch generate error"(String tenantId, String ignore) {
-        when:"Request the pull slip from a batch"
+        when: "Request the pull slip from a batch"
 
         // Set the headers
-        setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+        setHeaders(['X-Okapi-Tenant': tenantId]);
 
         // Generate the picklist
         def markBatchAsPrintedResponse = null;
@@ -1243,10 +1249,10 @@ class DosomethingSimple {
         }
         log.debug("Response from markBatchAsPrinted: " + markBatchAsPrintedResponse.toString());
 
-        then:"Check we have a valid error response"
+        then: "Check we have a valid error response"
         // The error element should exist
-        assert(markBatchAsPrintedResponse?.error != null);
-        assert(statusCode == 400);
+        assert (markBatchAsPrintedResponse?.error != null);
+        assert (statusCode == 400);
 
         where:
         tenantId      | ignore
@@ -1261,35 +1267,35 @@ class DosomethingSimple {
             String requestPatronId,
             String requestSymbol) {
         when: "Post new duplicate requests"
-        changeSettings(tenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 3 ]);
+        changeSettings(tenantId, [(SettingsData.SETTING_CHECK_DUPLICATE_TIME): 3]);
 
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ]
 
         def req_one_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_one",
-                tags: [ 'RS-DUPLICATE-TEST-1']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_one",
+                tags                       : ['RS-DUPLICATE-TEST-1']
         ];
 
         def req_two_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
-                tags: [ 'RS-DUPLICATE-TEST-2']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
+                tags                       : ['RS-DUPLICATE-TEST-2']
         ];
 
 
@@ -1326,8 +1332,8 @@ class DosomethingSimple {
         assert true;
 
         where:
-        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
-        'RSInstOne' | 'Excellent Argument, However...'  | 'Mom, U.R.'   | '1234-5678-9123-4567' | '9876-1234'       | 'ISIL:RST1'
+        tenantId    | requestTitle                     | requestAuthor | requestSystemId       | requestPatronId | requestSymbol
+        'RSInstOne' | 'Excellent Argument, However...' | 'Mom, U.R.'   | '1234-5678-9123-4567' | '9876-1234'     | 'ISIL:RST1'
 
 
     }
@@ -1340,35 +1346,35 @@ class DosomethingSimple {
             String requestPatronId,
             String requestSymbol) {
         when: "Post new duplicate requests"
-        changeSettings(tenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 3 ]);
+        changeSettings(tenantId, [(SettingsData.SETTING_CHECK_DUPLICATE_TIME): 3]);
 
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ]
 
         def req_one_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_one",
-                tags: [ 'RS-DUPLICATE-TEST-1']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_one",
+                tags                       : ['RS-DUPLICATE-TEST-1']
         ];
 
         def req_two_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
-                tags: [ 'RS-DUPLICATE-TEST-2']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
+                tags                       : ['RS-DUPLICATE-TEST-2']
         ];
 
         setHeaders(headers);
@@ -1403,8 +1409,8 @@ class DosomethingSimple {
         assert true;
 
         where:
-        tenantId    | requestTitle                      | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
-        'RSInstOne' | 'Not My Problem'  | 'Brokit, C.U.'   | '4321-8765-1239-1234' | '6789-3241'       | 'ISIL:RST1'
+        tenantId    | requestTitle     | requestAuthor  | requestSystemId       | requestPatronId | requestSymbol
+        'RSInstOne' | 'Not My Problem' | 'Brokit, C.U.' | '4321-8765-1239-1234' | '6789-3241'     | 'ISIL:RST1'
 
 
     }
@@ -1418,24 +1424,24 @@ class DosomethingSimple {
             String requestSymbol,
             String lastResort) {
         when: "Post new request with last resort enabled"
-        changeSettings(tenantId, [ (SettingsData.SETTING_LAST_RESORT_LENDERS) : lastResort ]);
+        changeSettings(tenantId, [(SettingsData.SETTING_LAST_RESORT_LENDERS): lastResort]);
 
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ]
 
         def req_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_one",
-                tags: [ 'RS-LAST_RESORT' ]
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_one",
+                tags                       : ['RS-LAST_RESORT']
         ];
 
         setHeaders(headers);
@@ -1449,15 +1455,15 @@ class DosomethingSimple {
         def lastResorts = lastResort.split(',');
 
         then: "Ensure all last resort lenders added to the rota"
-        assert (fresh.rota.findAll {it?.directoryId in lastResort.split(',')}).size() == lastResort.split(',').size()
+        assert (fresh.rota.findAll { it?.directoryId in lastResort.split(',') }).size() == lastResort.split(',').size()
 
         where:
-        tenantId    | requestTitle              | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | lastResort
-        'RSInstOne' | 'This Is My Last Resort'  | 'Brokit, C.U.'| '4321-8765-1239-1234' | '1717-1717'       | 'ISIL:RST1'   | 'TLA:SNAFU,OMG:SCUBA'
+        tenantId    | requestTitle             | requestAuthor  | requestSystemId       | requestPatronId | requestSymbol | lastResort
+        'RSInstOne' | 'This Is My Last Resort' | 'Brokit, C.U.' | '4321-8765-1239-1234' | '1717-1717'     | 'ISIL:RST1'   | 'TLA:SNAFU,OMG:SCUBA'
     }
 
 
-    void "Test to see if blank form requests are properly handled" (
+    void "Test to see if blank form requests are properly handled"(
             String tenantId,
             String requestTitle,
             String requestAuthor,
@@ -1466,20 +1472,20 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_one",
-                tags: [ 'RS-BLANK-FORM-TEST-1']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_one",
+                tags                       : ['RS-BLANK-FORM-TEST-1']
         ];
 
         setHeaders(headers);
@@ -1504,11 +1510,10 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle          | requestAuthor | requestPatronId   | requestSymbol
-        'RSInstOne' | 'Missing References'  | 'Dunno, Ivan' | '9977-2244'       | 'ISIL:RST1'
+        tenantId    | requestTitle         | requestAuthor | requestPatronId | requestSymbol
+        'RSInstOne' | 'Missing References' | 'Dunno, Ivan' | '9977-2244'     | 'ISIL:RST1'
 
     }
-
 
 
     void "Attempt to retry a blank request after fixing"(
@@ -1522,20 +1527,20 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
-                tags: [ 'RS-BLANK-FORM-TEST-2']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
+                tags                       : ['RS-BLANK-FORM-TEST-2']
         ];
 
         setHeaders(headers);
@@ -1547,14 +1552,14 @@ class DosomethingSimple {
 
         def updated_request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                systemInstanceIdentifier: requestSystemId,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
+                systemInstanceIdentifier   : requestSystemId,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
 
-                tags: [ 'RS-BLANK-FORM-TEST-3']
+                tags                       : ['RS-BLANK-FORM-TEST-3']
 
         ];
 
@@ -1577,8 +1582,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
-        'RSInstOne' | 'Believe in Second Chances'  | 'Ageen, Trey' | '5533-2233-6654-9191' | '8877-6644'       | 'ISIL:RST1'
+        tenantId    | requestTitle                | requestAuthor | requestSystemId       | requestPatronId | requestSymbol
+        'RSInstOne' | 'Believe in Second Chances' | 'Ageen, Trey' | '5533-2233-6654-9191' | '8877-6644'     | 'ISIL:RST1'
 
 
     }
@@ -1594,20 +1599,20 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_five",
-                tags: [ 'RS-BLANK-FORM-TEST-5']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_five",
+                tags                       : ['RS-BLANK-FORM-TEST-5']
         ];
 
         setHeaders(headers);
@@ -1618,13 +1623,13 @@ class DosomethingSimple {
                 Status.PATRON_REQUEST_BLANK_FORM_REVIEW);
 
         def jsonPayload = [
-                action: "requesterRetryValidation",
+                action      : "requesterRetryValidation",
                 actionParams: [
                         requestingInstitutionSymbol: requestSymbol,
-                        systemInstanceIdentifier: requestSystemId,
-                        title: requestTitle,
-                        author: requestAuthor,
-                        patronIdentifier: requestPatronId,
+                        systemInstanceIdentifier   : requestSystemId,
+                        title                      : requestTitle,
+                        author                     : requestAuthor,
+                        patronIdentifier           : requestPatronId,
                 ]
         ];
 
@@ -1645,8 +1650,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
-        'RSInstOne' | 'Believe in Second Chances'  | 'Ageen, Trey' | '5533-2233-6654-9191' | '8177-6144'       | 'ISIL:RST1'
+        tenantId    | requestTitle                | requestAuthor | requestSystemId       | requestPatronId | requestSymbol
+        'RSInstOne' | 'Believe in Second Chances' | 'Ageen, Trey' | '5533-2233-6654-9191' | '8177-6144'     | 'ISIL:RST1'
 
 
     }
@@ -1661,20 +1666,20 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_three",
-                tags: [ 'RS-BLANK-FORM-TEST-2']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_three",
+                tags                       : ['RS-BLANK-FORM-TEST-2']
         ];
 
         setHeaders(headers);
@@ -1701,8 +1706,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle      | requestAuthor | requestPatronId   | requestSymbol
-        'RSInstOne' | 'How to be Lazy'  | 'Aroon, Lion' | '8577-6554'       | 'ISIL:RST1'
+        tenantId    | requestTitle     | requestAuthor | requestPatronId | requestSymbol
+        'RSInstOne' | 'How to be Lazy' | 'Aroon, Lion' | '8577-6554'     | 'ISIL:RST1'
 
 
     }
@@ -1716,20 +1721,20 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_four",
-                tags: [ 'RS-BLANK-FORM-TEST-4']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_four",
+                tags                       : ['RS-BLANK-FORM-TEST-4']
         ];
 
         setHeaders(headers);
@@ -1756,8 +1761,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle          | requestAuthor  | requestPatronId   | requestSymbol
-        'RSInstOne' | 'How NOT to be Lazy'  | 'Herd, Werkin' | '8577-6554'       | 'ISIL:RST1'
+        tenantId    | requestTitle         | requestAuthor  | requestPatronId | requestSymbol
+        'RSInstOne' | 'How NOT to be Lazy' | 'Herd, Werkin' | '8577-6554'     | 'ISIL:RST1'
 
 
     }
@@ -1771,37 +1776,37 @@ class DosomethingSimple {
         when: "Post requests over limit"
 
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         setHeaders(headers);
 
-        for(int i=0 ; i < requestLimit ; i++) {
+        for (int i = 0; i < requestLimit; i++) {
             def req = [
                     requestingInstitutionSymbol: requestSymbol,
-                    title: randomCrap(25),
-                    author: randomCrap(20),
-                    systemInstanceIdentifier: requestSystemId,
-                    patronIdentifier: requestPatronId,
-                    isRequester: true,
-                    patronReference: requestPatronId + "_" + i
+                    title                      : randomCrap(25),
+                    author                     : randomCrap(20),
+                    systemInstanceIdentifier   : requestSystemId,
+                    patronIdentifier           : requestPatronId,
+                    isRequester                : true,
+                    patronReference            : requestPatronId + "_" + i
             ];
             doPost("${baseUrl}/rs/patronrequests".toString(), req);
         }
 
-        changeSettings(tenantId, [ (SettingsData.SETTING_MAX_REQUESTS) : requestLimit ]);
+        changeSettings(tenantId, [(SettingsData.SETTING_MAX_REQUESTS): requestLimit]);
 
         def over_limit_req = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: randomCrap(25),
-                author: randomCrap(20),
-                systemInstanceIdentifier: requestSystemId,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_over_limit"
+                title                      : randomCrap(25),
+                author                     : randomCrap(20),
+                systemInstanceIdentifier   : requestSystemId,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_over_limit"
         ];
 
         doPost("${baseUrl}/rs/patronrequests".toString(), over_limit_req);
@@ -1829,21 +1834,21 @@ class DosomethingSimple {
 
         when: "Post new blank form requests"
         def headers = [
-                'X-Okapi-Tenant': tenantId,
-                'X-Okapi-Token': 'dummy',
-                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Tenant'     : tenantId,
+                'X-Okapi-Token'      : 'dummy',
+                'X-Okapi-User-Id'    : 'dummy',
                 'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
         ];
 
         def request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
-                serviceType: "Copy",
-                tags: [ 'RS-BLANK-FORM-TEST-2']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
+                serviceType                : "Copy",
+                tags                       : ['RS-BLANK-FORM-TEST-2']
         ];
 
         setHeaders(headers);
@@ -1855,14 +1860,14 @@ class DosomethingSimple {
 
         def updated_request_json = [
                 requestingInstitutionSymbol: requestSymbol,
-                systemInstanceIdentifier: requestSystemId,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: requestPatronId,
-                isRequester: true,
-                patronReference: requestPatronId + "_two",
-                serviceType: "Copy",
-                tags: [ 'RS-BLANK-FORM-TEST-3']
+                systemInstanceIdentifier   : requestSystemId,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : requestPatronId,
+                isRequester                : true,
+                patronReference            : requestPatronId + "_two",
+                serviceType                : "Copy",
+                tags                       : ['RS-BLANK-FORM-TEST-3']
 
         ];
 
@@ -1885,8 +1890,8 @@ class DosomethingSimple {
 
         where:
 
-        tenantId    | requestTitle                 | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol
-        'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
+        tenantId    | requestTitle          | requestAuthor | requestSystemId       | requestPatronId | requestSymbol
+        'RSInstOne' | 'We Gotta Do it Over' | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'     | 'ISIL:RST1'
 
 
     }
@@ -1898,20 +1903,20 @@ class DosomethingSimple {
         String patronReference = 'ref-' + patronIdentifier + randomCrap(6);
         when: "We create a requester request with copyright and pub info"
         Map request = [
-                patronReference: patronReference,
-                title: 'Copyright Publication Type Test',
-                author: 'UR MOM',
+                patronReference            : patronReference,
+                title                      : 'Copyright Publication Type Test',
+                author                     : 'UR MOM',
                 requestingInstitutionSymbol: 'ISIL:RST1',
-                systemInstanceIdentifier: '123-321',
-                patronIdentifier: patronIdentifier,
-                isRequester: true,
-                serviceType: "Copy",
-                deliveryMethod: "URL",
-                publicationType: publicationType,
-                copyrightType: copyrightType
+                systemInstanceIdentifier   : '123-321',
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                serviceType                : "Copy",
+                deliveryMethod             : "URL",
+                publicationType            : publicationType,
+                copyrightType              : copyrightType
         ];
 
-        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def requestResponse = doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
         //requester request sent to supplier?
@@ -1923,10 +1928,10 @@ class DosomethingSimple {
         def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
 
         then: "meh"
-        assert(responderRequestData.patronReference == patronReference);
-        assert(responderRequestData.publicationType?.value == publicationType);
-        assert(responderRequestData.copyrightType?.value == copyrightType);
-        assert(true);
+        assert (responderRequestData.patronReference == patronReference);
+        assert (responderRequestData.publicationType?.value == publicationType);
+        assert (responderRequestData.copyrightType?.value == copyrightType);
+        assert (true);
 
         where:
         copyrightType | publicationType | patronIdentifier
@@ -1938,12 +1943,12 @@ class DosomethingSimple {
 
     }
 
-    void "Test automatic rerequest to different cluster id"(
+    void "Test automatic rerequest to different cluster id after unfilled transfer"(
             String deliveryMethod,
             String serviceType,
             String actionFile
     ) {
-        String patronIdentifier =  "ABCD-EFG-HIJK-0001";
+        String patronIdentifier = "ABCD-EFG-HIJK-0001";
         String requesterTenantId = "RSInstOne";
         String responderTenantId = "RSInstThree";
         String requestTitle = "YA Bad Book";
@@ -1953,35 +1958,35 @@ class DosomethingSimple {
 
         when: "do the thing"
 
-        changeSettings(requesterTenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 0 ]);
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_CHECK_DUPLICATE_TIME): 0]);
 
         Map request = [
                 requestingInstitutionSymbol: requestSymbol,
-                title: requestTitle,
-                author: requestAuthor,
-                patronIdentifier: patronIdentifier,
-                isRequester: true,
-                patronReference: patronReference,
-                systemInstanceIdentifier: "123-456-789",
-                oclcNumber: "1234312",
-                deliveryMethod: deliveryMethod,
-                serviceType: serviceType,
-                tags: ['RS-REREQUEST-TEST-1']
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : "123-456-789",
+                oclcNumber                 : "1234312",
+                deliveryMethod             : deliveryMethod,
+                serviceType                : serviceType,
+                tags                       : ['RS-REREQUEST-TEST-1']
         ];
 
-        changeSettings(requesterTenantId, [ (SettingsData.SETTING_SHARED_INDEX_INTEGRATION) : "mock" ]);
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_SHARED_INDEX_INTEGRATION): "mock"]);
 
-        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
         String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
         String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
 
-        String jsonPayload = new File("src/integration-test/resources/scenarios/"+actionFile).text;
+        String jsonPayload = new File("src/integration-test/resources/scenarios/" + actionFile).text;
         String performActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
         log.debug("Posting cannot supply payload to ${performActionUrl}");
-        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
         doPost(performActionUrl, jsonPayload);
 
         waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
@@ -1989,35 +1994,122 @@ class DosomethingSimple {
         waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_REREQUESTED);
 
         //get original request
-        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def requesterRequestData = doGet("${baseUrl}rs/patronrequests/${requesterRequestId}");
 
-        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
         def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
 
         String newRequesterRequestId = requesterRequestData.succeededBy.id;
 
-        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
 
         String newHrid = newRequesterRequestData.hrid;
 
         String newResponderRequestId = waitForRequestStateByHrid(responderTenantId, 10000, newHrid, Status.RESPONDER_IDLE);
 
-        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
         def newResponderRequestData = doGet("${baseUrl}rs/patronrequests/${newResponderRequestId}");
 
-        assert(newResponderRequestData.precededBy?.id == responderRequestId)
+        assert (newResponderRequestData.precededBy?.id == responderRequestId)
 
         then:
-        assert(newRequesterRequestData.title == "Case study research : design and methods /");
-        assert(newResponderRequestData.precededBy?.id == responderRequestId);
+        assert (newRequesterRequestData.title == "Case study research : design and methods /");
+        assert (newResponderRequestData.precededBy?.id == responderRequestId);
 
         where:
         deliveryMethod | serviceType | actionFile
-        "URL"         | "Copy"       | "nrSupplierCannotSupplyTransfer.json"
-        null          | null         | "supplierCannotSupplyTransfer.json"
+        "URL"          | "Copy"      | "nrSupplierCannotSupplyTransfer.json"
+        null           | null        | "supplierCannotSupplyTransfer.json"
 
     }
 
+    void "test resubmission of request after end-of-rota reviewed state"(
+            String originalServiceType,
+            String originalDeliveryType,
+            String newServiceType,
+            String newDeliveryType,
+            String respondNoActionFile,
+            String resubmitAction,
+            String newStateModel
+    ) {
+        String patronIdentifier = "AAA-SSS-FFF-456";
+        String requesterTenantId = "RSInstThree";
+        String responderTenantId = "RSInstOne";
+        String requestTitle = "Axe U Sumpfin";
+        String requestAuthor = "Lemmy, A.";
+        String requestSymbol = "ISIL:RST3";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "121-656-989";
+
+        when: "Do it"
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : originalDeliveryType,
+                serviceType                : originalServiceType,
+                tags                       : ['RS-RESUBMIT-TEST-1']
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+        log.debug("Requester request id is ${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        log.debug("Responder request id is ${responderRequestId}");
+
+        String jsonPayload = new File("src/integration-test/resources/scenarios/" + respondNoActionFile).text;
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+        log.debug("Posting cannot supply payload to ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        doPost(responderPerformActionUrl, jsonPayload);
+
+        waitForRequestStateById(responderTenantId, 10000, responderRequestId, Status.RESPONDER_UNFILLED);
+
+        waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_END_OF_ROTA);
+
+        String newPatronReference = "rerequest" + patronIdentifier +randomCrap(6);
+        Map rerequestParams = [
+                "action" : resubmitAction,
+                "actionParams" :
+                        [
+                            "patronReference" : newPatronReference,
+                            "deliveryMethod" : newDeliveryType,
+                            "serviceType" : newServiceType,
+                            "isRequester" : true,
+                            "title" : requestTitle,
+                            "author" : requestAuthor,
+                            "requestingInstitutionSymbol" : requestSymbol,
+                            "systemInstanceIdentifier" : systemInstanceIdentifier
+                        ]
+        ];
+
+        setHeaders(['X-Okapi-Tenant':requesterTenantId]);
+        String requesterPerformActionUrl = "${baseUrl}/rs/patronrequests/${requesterRequestId}/performAction".toString();
+        doPost(requesterPerformActionUrl, JsonOutput.toJson(rerequestParams));
+
+        String newRequesterRequestId = waitForRequestState(requesterTenantId, 10000, newPatronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
+
+
+        then:
+        assert(newRequesterRequestData.stateModel.shortcode == newStateModel);
+
+        where:
+        originalServiceType | originalDeliveryType | newServiceType | newDeliveryType | respondNoActionFile           | resubmitAction           | newStateModel
+        null                | null                 | "Copy"         | "URL"           | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_NR_REQUESTER
+        "Copy"              | "URL"                | null           | null            | "nrSupplierCannotSupply.json" | "nonreturnableRerequest" | StateModel.MODEL_REQUESTER
+        null                | null                 | null           | null            | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_REQUESTER
+
+    }
 }
