@@ -1,4 +1,4 @@
-package org.olf.rs.statemodel;
+    package org.olf.rs.statemodel;
 
 import grails.gorm.MultiTenant;
 
@@ -125,6 +125,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
     static public final String NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
     public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = 'nrRequesterMarkEndOfRotaReviewed';
+    public static final String NR_REQUESTER_REREQUEST                          = 'nrRequesterRerequest';
     public static final String NR_REQUESTER_NO_STATUS_CHANGE                   = 'nrRequesterNoStatusChange';
     public static final String NR_REQUESTER_CLOSE_MANUAL                       = 'nrRequesterCloseManual';
     public static final String NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626     = 'nrRequesterNotificationReceivedISO18626';
