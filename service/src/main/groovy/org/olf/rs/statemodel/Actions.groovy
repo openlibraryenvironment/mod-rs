@@ -76,6 +76,7 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "nonreturnableRequesterCancel";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "nonreturnableRequesterCompleteRequest";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_REREQUEST          = "nonreturnableRerequest";
 
     // A special action for both sides that allows us to undo am action if the action allows us to
     static public final String ACTION_UNDO = "undo";
