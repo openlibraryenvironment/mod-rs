@@ -87,6 +87,7 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "nonreturnableRequesterCancel";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "nonreturnableRequesterCompleteRequest";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_REREQUEST          = "nonreturnableRerequest";
 
 	// SLNP Requester Actions
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT                       = "slnpHandleAbort";

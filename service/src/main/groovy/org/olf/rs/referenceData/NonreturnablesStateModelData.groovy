@@ -253,6 +253,16 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ]
 
+    private static Map nrRequesterRerequested = [
+            code: 'nrRequesterRerequested',
+            description: 'Request re-requested',
+            result: true,
+            status: Status.PATRON_REQUEST_END_OF_ROTA, //Should this go to re-requested status?
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
+
     private static Map defaultNRNoStatusChangeOK = [
             code: 'defaultNoStatusChangeOK',
             description: 'Default scenario, status is not changing',
@@ -442,6 +452,15 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterMarkEndOfRotaReviewed
+            ]
+    ]
+
+    private static Map nrRequesterRerequestList = [
+            code: ActionEventResultList.NR_REQUESTER_REREQUEST,
+            description: 'Re-request request',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterRerequested
             ]
     ]
 
@@ -755,6 +774,11 @@ public class NonreturnablesStateModelData {
         
         ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
                 'GenericDoNothing', ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
+
+        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, "Re-request", true,
+                StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REREQUEST.capitalize(),
+                ActionEventResultList.NR_REQUESTER_REREQUEST);
+
     }
 
     public static void loadStateModelData() {
@@ -799,6 +823,7 @@ public class NonreturnablesStateModelData {
 
         //REQ_END_OF_ROTA
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         //RES_IDLE
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL);
