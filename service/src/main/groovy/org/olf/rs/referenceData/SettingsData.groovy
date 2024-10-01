@@ -155,7 +155,7 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
-    // Feature flag settings
+    // Custom component feature flags
     public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES                                    = 'feature_flag_automatic_fees';
 
     // Section, key feature flags (Hide separate key for section)
