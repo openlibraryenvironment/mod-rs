@@ -166,9 +166,10 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         // Construct the feature flag key and get possible value
         String featureFlagKey = lastSegmentAfterRs + ".featureFlag"
         String featureFlagValue = settingsService.getSettingValue(featureFlagKey)
+        boolean isFeatureFlagEnabled = !(featureFlagValue != null && featureFlagValue == "false")
 
         // If the feature flag is set and is "false", return 404
-        if (featureFlagValue != null && featureFlagValue == "false") {
+        if (!isFeatureFlagEnabled) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND)
             return true // Indicate that feature is disabled
         }
