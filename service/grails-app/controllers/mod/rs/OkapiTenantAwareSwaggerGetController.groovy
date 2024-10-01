@@ -1,5 +1,6 @@
-package mod.rs;
+package mod.rs
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -9,7 +10,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
+
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class was written so that we had a swagger interface for all the controller end points
@@ -22,7 +26,8 @@ import io.swagger.annotations.ApiResponses;
 class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController<T>  {
 
     // Required as we override the maximum number of records that can be returned in index
-    SimpleLookupService simpleLookupService;
+    SimpleLookupService simpleLookupService
+    SettingsService settingsService
 
     /** Specifies the maximum number of records to return for a page */
     private int maxRecordsPerPage = 1000;
@@ -135,12 +140,49 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
-        // Now do the work
+        // Check feature flag and handle 404 if necessary
+        if (isFeatureDisabled(request, response)) {
+            return
+        }
+
         super.index(max);
 
         // Record how long it took
         ContextLogging.duration();
         log.debug(ContextLogging.MESSAGE_EXITING);
+    }
+
+    private boolean isFeatureDisabled(HttpServletRequest request, HttpServletResponse response) {
+        // Get URI without query parameters
+        String uri = request.getRequestURI()
+
+        // Extract the last segment after /rs/
+        String lastSegmentAfterRs = extractLastSegmentAfterRs(uri)
+
+        // Construct the feature flag key and get possible value
+        String featureFlagKey = lastSegmentAfterRs + ".featureFlag"
+        String featureFlagValue = settingsService.getFeatureFlagValue(featureFlagKey)
+
+        // If the feature flag is set and is "false", return 404
+        if (featureFlagValue != null && featureFlagValue == "false") {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+            return true // Indicate that feature is disabled
+        }
+        return false // Feature is enabled
+    }
+
+    private static String extractLastSegmentAfterRs(String uri) {
+        String pattern = "/rs/"
+        int index = uri.indexOf(pattern)
+        if (index >= 0) {
+            // Extract everything after "/rs/"
+            String afterRs = uri.substring(index + pattern.length())
+            // Split path into segments
+            String[] pathSegments = afterRs.split("/")
+            // Return the last segment
+            return pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : null
+        }
+        return null
     }
 
     @ApiOperation(

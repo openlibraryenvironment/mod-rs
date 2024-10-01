@@ -20,7 +20,6 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
     static responseFormats = ['json', 'xml'];
 
     private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
-    SettingsService settingsService
 
     SettingController() {
         super(AppSetting);
