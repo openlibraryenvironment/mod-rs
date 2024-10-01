@@ -1,5 +1,6 @@
 package mod.rs
 
+import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.rs.SettingsService;
 import org.olf.rs.logging.ContextLogging;
 
@@ -140,12 +141,15 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
-        // Check feature flag and handle 404 if necessary
-        if (isFeatureDisabled(request, response)) {
-            return
+        AppSetting.withNewSession { session ->
+            AppSetting.withNewTransaction { status ->
+                // Check feature flag and handle 404 if necessary
+                if (isFeatureDisabled(request, response)) {
+                    return
+                }
+                super.index(max);
+            }
         }
-
-        super.index(max);
 
         // Record how long it took
         ContextLogging.duration();
@@ -161,7 +165,7 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
 
         // Construct the feature flag key and get possible value
         String featureFlagKey = lastSegmentAfterRs + ".featureFlag"
-        String featureFlagValue = settingsService.getFeatureFlagValue(featureFlagKey)
+        String featureFlagValue = settingsService.getSettingValue(featureFlagKey)
 
         // If the feature flag is set and is "false", return 404
         if (featureFlagValue != null && featureFlagValue == "false") {
