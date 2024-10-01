@@ -157,7 +157,20 @@ public class SettingsData {
 
     // Feature flag settings
     public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES                                    = 'feature_flag_automatic_fees';
+
+    // Section, key feature flags (Hide separate key for section)
     public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = 'state_action_config.combine_fill_and_ship.feature_flag';
+
+    // Section feature flags (Hide whole section)
+    public static final String SETTING_FEATURE_FLAG_CHAT                      = 'chat.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = 'fileStorage.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = 'patronStore.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG  = 'pullslipTemplateConfig.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_ROUTING                   = 'Routing.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_SHARED_INDEX              = 'sharedIndex.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_VOYAGER_SETTINGS          = 'voyagerSettings.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_WMS_SETTINGS              = 'wmsSettings.feature_flag';
+    public static final String SETTING_FEATURE_FLAG_Z3950                     = 'z3950.feature_flag';
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
@@ -345,11 +358,20 @@ public class SettingsData {
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_CDL_RESPONDER, null, true);
 
-            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, false, null, true);
             ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
 
+            // Feature flag values
             ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_CHAT, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_FILE_STORAGE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PATRON_STORE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_ROUTING, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_SHARED_INDEX, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_VOYAGER_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_WMS_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_Z3950, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, "false", null, true);
 
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)

@@ -135,18 +135,9 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
                     gormFilterClosure = null
                 }
 
-                // Perform the lookup
                 result = doTheLookup(gormFilterClosure)
+                result = filterRecordsByFeatureFlags(result)
 
-                // Iterate through each record in the result
-                result = result.findAll { record ->
-                    // Construct the feature flag value for state action configuration
-                    String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
-                    String featFlagValue = settingsService.getSettingValue(featFlagKey)
-
-                    // Filter only if the featureFlag is not null and equals "false"
-                    !(featFlagValue != null && featFlagValue == "false")
-                }
                 return result
             }
         }
@@ -156,5 +147,34 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         // Record how long it took
         ContextLogging.duration()
         log.debug(ContextLogging.MESSAGE_EXITING)
+    }
+
+    def filterRecordsByFeatureFlags(result) {
+        if (result.isEmpty()) {
+            return []
+        }
+
+        // Assuming all records belong to the same section
+        def section = result[0].section
+
+        // Check the section-wide feature flag
+        String sectionFeatFlagKey = section + "." + "feature_flag"
+        String sectionFeatFlagValue = settingsService.getSettingValue(sectionFeatFlagKey)
+        boolean isSectionEnabled = !(sectionFeatFlagValue != null && sectionFeatFlagValue == "false")
+
+        if (!isSectionEnabled) {
+            // If the section is not enabled, return an empty list
+            return []
+        }
+
+        // Filter records based on key-specific feature flags
+        return result.findAll { record ->
+            // Construct the feature flag key for the specific record
+            String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
+            String featFlagValue = settingsService.getSettingValue(featFlagKey)
+
+            // Include the record if the specific feature flag is not "false"
+            !(featFlagValue != null && featFlagValue == "false")
+        }
     }
 }
