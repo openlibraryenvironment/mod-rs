@@ -157,13 +157,11 @@ public class SettingsData {
 
     private static final String FEATURE_FLAG = ".feature_flag"
 
-    // Custom component feature flags
-    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES = 'feature_flag_automatic_fees';
-
     // Section, key feature flags (Hide separate key for section)
     public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = SECTION_STATE_ACTION_CONFIG + '.' + SETTING_COMBINE_FILL_AND_SHIP + FEATURE_FLAG;
 
     // Section feature flags (Hide whole section)
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES            = SECTION_AUTOMATIC_FEES + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_CHAT                      = SECTION_CHAT + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = SECTION_FILE_STORAGE + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = SECTION_PATRON_STORE + FEATURE_FLAG;
@@ -184,7 +182,7 @@ public class SettingsData {
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
-    public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
+    public static final String SETTING_AUTOMATIC_FEES        = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -235,6 +233,20 @@ public class SettingsData {
     }
 
     /**
+     * Deletes the AppSetting entity with the specified key.
+     *
+     * @param key The key of the AppSetting to be deleted.
+     * @return The AppSetting that was deleted, or null if no such AppSetting exists.
+     */
+    AppSetting deleteByKey(String key) {
+        AppSetting result = AppSetting.findByKey(key)
+        if (result) {
+            result.delete(flush: true)
+        }
+        return result
+    }
+
+    /**
      * Loads the settings into the database
      */
     public void load() {
@@ -242,6 +254,9 @@ public class SettingsData {
             log.info('Adding settings to the database');
             // We are not a service, so we need to look it up
             ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
+
+            // Remove any app setting by key
+            deleteByKey('feature_flag_automatic_fees')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
@@ -370,7 +385,6 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
 
-            // Feature flag values
             ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_CHAT, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
