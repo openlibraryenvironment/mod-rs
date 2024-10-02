@@ -157,13 +157,11 @@ public class SettingsData {
 
     private static final String FEATURE_FLAG = ".feature_flag"
 
-    // Custom component feature flags
-    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES = 'feature_flag_automatic_fees';
-
     // Section, key feature flags (Hide separate key for section)
     public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = SECTION_STATE_ACTION_CONFIG + '.' + SETTING_COMBINE_FILL_AND_SHIP + FEATURE_FLAG;
 
     // Section feature flags (Hide whole section)
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES            = SECTION_AUTOMATIC_FEES + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_CHAT                      = SECTION_CHAT + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = SECTION_FILE_STORAGE + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = SECTION_PATRON_STORE + FEATURE_FLAG;
@@ -184,7 +182,7 @@ public class SettingsData {
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
-    public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
+    public static final String SETTING_AUTOMATIC_FEES        = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
