@@ -158,9 +158,32 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
-    // Feature flag settings
-    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES                                    = 'feature_flag_automatic_fees';
-    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = 'state_action_config.combine_fill_and_ship.feature_flag';
+    private static final String FEATURE_FLAG = ".feature_flag"
+
+    // Custom component feature flags
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES = 'feature_flag_automatic_fees';
+
+    // Section, key feature flags (Hide separate key for section)
+    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = SECTION_STATE_ACTION_CONFIG + '.' + SETTING_COMBINE_FILL_AND_SHIP + FEATURE_FLAG;
+
+    // Section feature flags (Hide whole section)
+    public static final String SETTING_FEATURE_FLAG_CHAT                      = SECTION_CHAT + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = SECTION_FILE_STORAGE + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = SECTION_PATRON_STORE + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG  = SECTION_PULLSLIP_CONFIGURATION + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_ROUTING                   = SECTION_ROUTING + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_SHARED_INDEX              = SECTION_SHARED_INDEX + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_VOYAGER_SETTINGS          = SECTION_VOYAGER + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_WMS_SETTINGS              = SECTION_WMS + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_Z3950                     = SECTION_Z3950 + FEATURE_FLAG;
+
+    // Endpoint feature flags (Return 404 if disabled)
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES = "hostLMSItemLoanPolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS          = "hostLMSLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES    = "hostLMSPatronProfiles" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_SHELVING_LOCATIONS          = "shelvingLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_NOTICE_POLICIES             = "noticePolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_TEMPLATE                    = "template" + FEATURE_FLAG;
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
@@ -350,11 +373,29 @@ public class SettingsData {
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_CDL_RESPONDER, null, true);
 
-            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
             ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
 
+            // Feature flag values
             ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_CHAT, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_FILE_STORAGE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PATRON_STORE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_ROUTING, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_SHARED_INDEX, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_VOYAGER_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_WMS_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_Z3950, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
+            // Endpoint feature flag values
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_SHELVING_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_NOTICE_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_TEMPLATE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
 
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)

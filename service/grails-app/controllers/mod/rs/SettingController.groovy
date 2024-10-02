@@ -1,6 +1,5 @@
 package mod.rs
 
-import org.olf.rs.SettingsService
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -12,7 +11,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses
-import org.olf.rs.referenceData.SettingsData;
 
 @Api(value = "/rs/settings/appSettings", tags = ["Settings (application) Controller"], description = "API for all things to do with application settings")
 class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
@@ -20,7 +18,6 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
     static responseFormats = ['json', 'xml'];
 
     private static final String RESOURCE_APP_SETTING = AppSetting.getSimpleName();
-    SettingsService settingsService
 
     SettingController() {
         super(AppSetting);
@@ -135,18 +132,9 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
                     gormFilterClosure = null
                 }
 
-                // Perform the lookup
                 result = doTheLookup(gormFilterClosure)
+                result = filterRecordsByFeatureFlags(result)
 
-                // Iterate through each record in the result
-                result = result.findAll { record ->
-                    // Construct the feature flag value for state action configuration
-                    String featFlagKey = record.section + "." + record.key + "." + "feature_flag"
-                    String featFlagValue = settingsService.getSettingValue(featFlagKey)
-
-                    // Filter only if the featureFlag is not null and equals "false"
-                    !(featFlagValue != null && featFlagValue == "false")
-                }
                 return result
             }
         }
@@ -156,5 +144,49 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         // Record how long it took
         ContextLogging.duration()
         log.debug(ContextLogging.MESSAGE_EXITING)
+    }
+
+    def filterRecordsByFeatureFlags(result) {
+        if (result.isEmpty()) {
+            return []
+        }
+
+        // Set to track enabled sections
+        def enabledSections = new HashSet<String>()
+
+        // First pass: determine and retain only records from enabled sections
+        def sectionFilteredRecords = result.findAll { record ->
+            def section = record.section
+
+            // Only check feature flag if the section hasn't been evaluated
+            if (!enabledSections.contains(section)) {
+                // Construct the section-wide feature flag key
+                String sectionFeatFlagKey = section + ".feature_flag"
+                String sectionFeatFlagValue = settingsService.getSettingValue(sectionFeatFlagKey)
+
+                // Determine if the section is enabled
+                boolean isSectionEnabled = !(sectionFeatFlagValue != null && sectionFeatFlagValue == "false")
+
+                if (isSectionEnabled) {
+                    enabledSections.add(section)
+                }
+            }
+
+            // Only include records from evaluated and enabled sections
+            return enabledSections.contains(section)
+        }
+
+        // Second pass: filter the section-filtered records by the specific key-based feature flags
+        return sectionFilteredRecords.findAll { record ->
+            def section = record.section
+            def key = record.key
+
+            // Construct the feature flag key for the specific record
+            String featFlagKey = section + "." + key + ".feature_flag"
+            String featFlagValue = settingsService.getSettingValue(featFlagKey)
+
+            // Include the record if the specific feature flag is not "false"
+            return !(featFlagValue != null && featFlagValue == "false")
+        }
     }
 }
