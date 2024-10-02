@@ -154,16 +154,6 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    private static Map slnpResponderConditionalSupply = [
-            code: 'slnpResponderConditionalSupply',
-            description: 'Item has been located and we expect to supply, staff is awaiting printing pull slip',
-            result: true,
-            status: Status.SLNP_RESPONDER_AWAIT_PICKING,
-            qualifier: null,
-            saveRestoreState: null,
-            nextActionEvent : null
-    ];
-
     public static Map slnpResponderSupplierPrintPullSlip = [
             code: 'slnpResponderSupplierPrintPullSlip',
             description: 'Pull slip has been printed and item is being pulled from the shelves',
@@ -350,24 +340,6 @@ public class SLNPStateModelData {
             ]
     ];
 
-    private static Map slnpResponderConditionalSupplyList = [
-            code: ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY,
-            description: 'The responder has said that they will supply the item(s) conditionally',
-            model: StateModel.MODEL_SLNP_RESPONDER,
-            results: [
-                    slnpResponderConditionalSupply
-            ]
-    ];
-
-    private static Map slnpResponderConditionalSupplyNoTransitionList = [
-            code: ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION,
-            description: 'Add loan condition',
-            model: StateModel.MODEL_SLNP_RESPONDER,
-            results: [
-                    slnpDefaultNoStatusChangeOK
-            ]
-    ];
-
     private static Map slnpResponderSupplierPrintPullSlipList = [
             code: ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP,
             description: 'Print pull slip',
@@ -418,9 +390,7 @@ public class SLNPStateModelData {
             slnpResponderRespondYesList,
             slnpResponderRespondCannotSupplyList,
             slnpResponderAbortSupplyList,
-            slnpResponderConditionalSupplyList,
             slnpResponderSupplierPrintPullSlipList,
-            slnpResponderConditionalSupplyNoTransitionList,
             slnpResponderSupplierFillAndMarkShippedList,
             slnpResponderCheckoutOfReshareList,
             slnpResponderNewPatronRequestIndList,
@@ -472,7 +442,8 @@ public class SLNPStateModelData {
         [
                 [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE],
                 [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_MARK_SHIPPED],
-                [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE]
+                [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE],
+                [StateModel.lookup(StateModel.MODEL_SLNP_RESPONDER).id, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY]
         ]
                 .each { availableActionToRemove ->
                     log.info("Remove available action ${availableActionToRemove}");
@@ -492,11 +463,9 @@ public class SLNPStateModelData {
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_RESPOND_YES);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY);
 
         // SLNP_RES_AWAIT_PICKING OR "Searching"
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED, null, Boolean.TRUE, Boolean.TRUE);
-        AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_SLNP_RESPONDER_ABORT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_ABORT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_SLNP_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP);
