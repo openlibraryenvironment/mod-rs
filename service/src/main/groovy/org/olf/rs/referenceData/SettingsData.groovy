@@ -256,7 +256,7 @@ public class SettingsData {
             ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
 
             // Remove any app setting by key
-            deleteByKey(SETTING_FEATURE_FLAG_AUTOMATIC_FEES)
+            deleteByKey('feature_flag_automatic_fees')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
