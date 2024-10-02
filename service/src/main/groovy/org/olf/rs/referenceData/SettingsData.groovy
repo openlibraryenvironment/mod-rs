@@ -50,18 +50,16 @@ public class SettingsData {
     public static final String SETTING_Z3950_PROXY_ADDRESS = 'z3950_proxy_address';
 
     // Settings for the localNCIP section
-    public static final String SETTING_NCIP_APP_PROFILE                = 'ncip_app_profile';
-    public static final String SETTING_NCIP_FROM_AGENCY                = 'ncip_from_agency';
-    public static final String SETTING_NCIP_FROM_AGENCY_AUTHENTICATION = 'ncip_from_agency_authentication';
-    public static final String SETTING_NCIP_SERVER_ADDRESS             = 'ncip_server_address';
-    public static final String SETTING_NCIP_TO_AGENCY                  = 'ncip_to_agency';
-    public static final String SETTING_NCIP_USE_DUE_DATE               = 'ncip_use_due_date';
-    public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
-    public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
-    public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
+    public static final String SETTING_NCIP_APP_PROFILE                  = 'ncip_app_profile';
+    public static final String SETTING_NCIP_FROM_AGENCY                  = 'ncip_from_agency';
+    public static final String SETTING_NCIP_FROM_AGENCY_AUTHENTICATION   = 'ncip_from_agency_authentication';
+    public static final String SETTING_NCIP_SERVER_ADDRESS               = 'ncip_server_address';
+    public static final String SETTING_NCIP_TO_AGENCY                    = 'ncip_to_agency';
+    public static final String SETTING_NCIP_USE_DUE_DATE                 = 'ncip_use_due_date';
+    public static final String SETTING_NCIP_DUE_DATE_FORMAT              = 'ncip_due_date_format';
+    public static final String SETTING_NCIP_USE_BARCODE                  = 'ncip_use_barcode_for_accept_item';
+    public static final String SETTING_NCIP_USE_TITLE                    = 'ncip_use_title_request_type'
     public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location'
-    public static final String SETTING_NCIP_USE_DEFAULT_PATRON_FEE     = 'ncip_use_default_patron_fee'
-
 
     // Settings for the wmsSettings section
     public static final String SETTING_WMS_API_KEY                = 'wms_api_key';
@@ -261,6 +259,7 @@ public class SettingsData {
             deleteByKey('pullslipConfiguration.feature_flag')
             deleteByKey('template.feature_flag')
             deleteByKey('shelvingLocations.feature_flag')
+            deleteByKey('ncip_use_default_patron_fee')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
@@ -275,7 +274,6 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
             ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
-            ensureAppSetting(SETTING_NCIP_USE_DEFAULT_PATRON_FEE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, RefdataValueData.NCIP_BARCODE_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
