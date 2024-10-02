@@ -168,7 +168,6 @@ public class SettingsData {
     public static final String SETTING_FEATURE_FLAG_CHAT                      = SECTION_CHAT + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = SECTION_FILE_STORAGE + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = SECTION_PATRON_STORE + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG  = SECTION_PULLSLIP_CONFIGURATION + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_ROUTING                   = SECTION_ROUTING + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_SHARED_INDEX              = SECTION_SHARED_INDEX + FEATURE_FLAG;
     public static final String SETTING_FEATURE_FLAG_VOYAGER_SETTINGS          = SECTION_VOYAGER + FEATURE_FLAG;
@@ -176,12 +175,14 @@ public class SettingsData {
     public static final String SETTING_FEATURE_FLAG_Z3950                     = SECTION_Z3950 + FEATURE_FLAG;
 
     // Endpoint feature flags (Return 404 if disabled)
-    public static final String SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES = "hostLMSItemLoanPolicies" + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS          = "hostLMSLocations" + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES    = "hostLMSPatronProfiles" + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_SHELVING_LOCATIONS          = "shelvingLocations" + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_NOTICE_POLICIES             = "noticePolicies" + FEATURE_FLAG;
-    public static final String SETTING_FEATURE_FLAG_TEMPLATE                    = "template" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES          = "hostLMSItemLoanPolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS                   = "hostLMSLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES             = "hostLMSPatronProfiles" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_SHELVING_LOCATIONS          = "hostLMSShelvingLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_NOTICE_POLICIES                      = "noticePolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_NOTICE_TEMPLATES                     = "notices" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATION_TEMPLATES     = "pullslipTemplates" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATIONS              = "pullslipNotifications" + FEATURE_FLAG;
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
@@ -260,6 +261,9 @@ public class SettingsData {
 
             // Remove any app setting by key
             deleteByKey('feature_flag_automatic_fees')
+            deleteByKey('pullslipConfiguration.feature_flag')
+            deleteByKey('template.feature_flag')
+            deleteByKey('shelvingLocations.feature_flag')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
@@ -391,25 +395,27 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
 
+            // Feature flag values for Settings sections
             ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_CHAT, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_FILE_STORAGE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_PATRON_STORE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_PULLSLIP_TEMPLATE_CONFIG, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_ROUTING, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_SHARED_INDEX, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_VOYAGER_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_WMS_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_Z3950, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-
-            // Endpoint feature flag values
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATION_TEMPLATES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_SHELVING_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_SHELVING_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
             ensureAppSetting(SETTING_FEATURE_FLAG_NOTICE_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-            ensureAppSetting(SETTING_FEATURE_FLAG_TEMPLATE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_NOTICE_TEMPLATES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
+            // Feature flag values for Settings sections keys
+            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
 
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
             ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)
