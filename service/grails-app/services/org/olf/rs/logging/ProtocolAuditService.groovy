@@ -139,7 +139,7 @@ public class ProtocolAuditService {
         }
 
         if (uriBuilder.getPath() != null) {
-            uriBuilder.setPath(uriBuilder.getPath().toLowerCase().replaceAll("ncip/ye.*", "ncip"))
+            uriBuilder.setPath(uriBuilder.getPath().toLowerCase().replaceAll("ncip/ey.*", "ncip"))
         }
 
         // Return the actual url that we accessed
