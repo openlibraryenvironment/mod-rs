@@ -34,8 +34,8 @@ public class Actions {
 	// Non-Returnable Responder Actions
 	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT	 = "supplierAddURLToDocument";
 	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "supplierPrintPullSlip";
-	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "supplierRespondYes";
-	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "supplierRespondCannotSupply";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "respondYes";
+	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "supplierCannotSupply";
 
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";

@@ -1,5 +1,5 @@
 {
-  "action": "supplierRespondCannotSupply",
+  "action": "supplierCannotSupply",
   "actionParams": {
     "reason": "missing",
     "note": "don't got it"

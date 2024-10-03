@@ -1,5 +1,5 @@
 {
-  "action": "supplierRespondYes",
+  "action": "respondYes",
   "actionParams": {
     "note": "Notes"
   }
