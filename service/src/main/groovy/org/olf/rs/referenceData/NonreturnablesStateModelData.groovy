@@ -2,6 +2,7 @@ package org.olf.rs.referenceData
 
 import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEvent
+import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.Actions
@@ -732,11 +733,7 @@ public class NonreturnablesStateModelData {
                 'Attach a URL to fulfill a nonreturnable request', true,
                 StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
                 ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'Print the pull slip', true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP.capitalize(),
-                ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
-
+        
         ActionEvent.ensure(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
                 "A new Non-Returnable patron request for the requester has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION),
@@ -752,33 +749,6 @@ public class NonreturnablesStateModelData {
                 ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
                 ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
 
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, 'Retry validation on a request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, 'The requester is asking the responder to cancel the request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REQUESTER_CANCEL.capitalize(),
-                ActionEventResultList.NR_REQUESTER_CANCEL);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, "Respond yes to supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_RESPOND_YES.capitalize(),
-                ActionEventResultList.NR_RESPONDER_ANSWER_YES);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, "Respond can't supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY.capitalize(),
-                ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
-        
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
-                'GenericDoNothing', ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, "Re-request", true,
-                StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REREQUEST.capitalize(),
-                ActionEventResultList.NR_REQUESTER_REREQUEST);
-
     }
 
     public static void loadStateModelData() {
@@ -789,30 +759,30 @@ public class NonreturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         //REQ_IDLE
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
 
         //REQ_VALIDATED
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
 
         //REQ_BLANK_FORM_REVIEW
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
 
         //REQ_INVALID_PATRON
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION)
 
         //REQ_SENT_TO_SUPPLIER
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
 
         //REQ_EXPECTS_TO_SUPPLY
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
@@ -822,22 +792,23 @@ public class NonreturnablesStateModelData {
         //AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_DOCUMENT_DELIVERED, Actions.ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         //REQ_END_OF_ROTA
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_REREQUEST);
 
         //RES_IDLE
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ANSWER_YES);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //RES_NEW_AWAIT_PULL_SLIP
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //RES_COPY_AWAIT_PICKING
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
 
@@ -876,4 +847,7 @@ public class NonreturnablesStateModelData {
         loadStateModelData();
         loadAvailableActionData();
     }
+
+
+
 }

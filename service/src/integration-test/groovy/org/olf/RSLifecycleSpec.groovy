@@ -1968,7 +1968,7 @@ class DosomethingSimple {
         where:
         originalServiceType | originalDeliveryType | newServiceType | newDeliveryType | respondNoActionFile           | resubmitAction           | newStateModel
         null                | null                 | "Copy"         | "URL"           | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_NR_REQUESTER
-        "Copy"              | "URL"                | null           | null            | "nrSupplierCannotSupply.json" | "nonreturnableRerequest" | StateModel.MODEL_REQUESTER
+        "Copy"              | "URL"                | null           | null            | "nrSupplierCannotSupply.json" | "rerequest"              | StateModel.MODEL_REQUESTER
         null                | null                 | null           | null            | "supplierCannotSupply.json"   | "rerequest"              | StateModel.MODEL_REQUESTER
 
     }
