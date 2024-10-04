@@ -23,6 +23,7 @@ where aa.model = :stateModel and
       aa.triggerType in ( :triggerTypes )
 ''';
 
+
     private static final String POSSIBLE_ACTIONS_WITH_EXCLUSIONS_QUERY =
         POSSIBLE_ACTIONS_QUERY + ' and aa.actionEvent not in ( :excludedActions )';
 
@@ -88,8 +89,10 @@ where aa.model = :stateModel and
             parameters.excludedActions = excludeActions;
         }
 
+
         // Was nice and simple lookup the available actions getting the distinct actions
         AvailableAction.executeQuery(query, parameters).each { availableAction ->
+
             // To try and make it more obvious as to what is selected, we extract them into variables here
             String code = availableAction[0];
 
