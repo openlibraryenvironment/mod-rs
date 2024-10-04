@@ -1,5 +1,5 @@
 {
-  "action": "nonreturnableRerequest",
+  "action": "rerequest",
   "actionParams": {
     "isRequester": "true",
     "title": "Not much to go on"
