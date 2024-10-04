@@ -735,13 +735,7 @@ public class NonreturnablesStateModelData {
                 'Attach a URL to fulfill a nonreturnable request', true,
                 StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
                 ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
-
-        /*
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'Print the pull slip', true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP.capitalize(),
-                ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
-        */
-
+        
         ActionEvent.ensure(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
                 "A new Non-Returnable patron request for the requester has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION),
@@ -756,38 +750,6 @@ public class NonreturnablesStateModelData {
                 "A non-returnable request has had the document delivered", false,
                 ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
                 ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
-
-        /*
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, 'Retry validation on a request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, 'The requester is asking the responder to cancel the request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REQUESTER_CANCEL.capitalize(),
-                ActionEventResultList.NR_REQUESTER_CANCEL);
-
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, "Respond yes to supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_RESPOND_YES.capitalize(),
-                ActionEventResultList.NR_RESPONDER_ANSWER_YES);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, "Respond can't supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY.capitalize(),
-                ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
-        
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
-                'GenericDoNothing', ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, "Re-request", true,
-                StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REREQUEST.capitalize(),
-                ActionEventResultList.NR_REQUESTER_REREQUEST);
-
-        */
-
 
     }
 

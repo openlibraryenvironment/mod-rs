@@ -89,7 +89,7 @@ where aa.model = :stateModel and
             parameters.excludedActions = excludeActions;
         }
 
-        
+
         // Was nice and simple lookup the available actions getting the distinct actions
         AvailableAction.executeQuery(query, parameters).each { availableAction ->
 
