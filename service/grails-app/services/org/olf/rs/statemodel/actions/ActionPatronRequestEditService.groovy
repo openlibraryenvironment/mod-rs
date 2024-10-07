@@ -93,7 +93,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
                 String fieldToSend = (fieldDetails.noteField == null ? fieldDetails.field : fieldDetails.noteField);
                 noteToSend.append(fieldDetails.notePrefix);
 
-                if (fieldDetails.isRefdata) {
+                if (fieldDetails.isRefdata && request[fieldToSend]) {
                     noteToSend.append(request[fieldToSend].value);
                 } else {
                     noteToSend.append(request[fieldToSend]);
