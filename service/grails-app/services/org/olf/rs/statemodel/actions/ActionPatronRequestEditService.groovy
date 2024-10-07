@@ -1,6 +1,8 @@
 package org.olf.rs.statemodel.actions;
 
 import com.k_int.web.toolkit.refdata.RefdataValue;
+import org.olf.rs.ReferenceDataService;
+
 import java.time.LocalDate;
 
 import org.olf.rs.PatronRequest;
@@ -21,6 +23,7 @@ import org.olf.rs.statemodel.StatusStage;
 public class ActionPatronRequestEditService extends AbstractAction {
 
     PickupLocationService pickupLocationService;
+    ReferenceDataService referenceDataService;
     ReshareActionService reshareActionService;
 
     public static final List updateableFields = [
@@ -41,6 +44,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "placeOfPublication", notePrefix: NoteSpecials.UPDATED_FIELD_PLACE_OF_PUBLICATION_PREFIX, isDate: false ],
         [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
         [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
+        [ field: "serviceType", notePrefix: NoteSpecials.UPDATED_FIELD_SERVICE_TYPE_PREFIX, isDate: false, isRefdata: true, refdataCategory: 'request.serviceType'],
         [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
         [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
         [ field: "titleOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX, isDate: false ],
@@ -76,7 +80,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         updateableFields.each() { fieldDetails ->
             log.debug("Updating field ${fieldDetails.field} in request ${request.id}");
             // Update the field
-            if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate, fieldDetails.isRefdata == true)) {
+            if (updateField(request, parameters, fieldDetails, auditMessage)) {
                 // It has changed
                 if (fieldDetails.doPickupCheck) {
                     // Perform the appropriate checks on the pickup location
@@ -89,7 +93,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
                 String fieldToSend = (fieldDetails.noteField == null ? fieldDetails.field : fieldDetails.noteField);
                 noteToSend.append(fieldDetails.notePrefix);
 
-                if (fieldDetails.isRefdata) {
+                if (fieldDetails.isRefdata && request[fieldToSend]) {
                     noteToSend.append(request[fieldToSend].value);
                 } else {
                     noteToSend.append(request[fieldToSend]);
@@ -144,17 +148,38 @@ public class ActionPatronRequestEditService extends AbstractAction {
      * @param isDate Is this a LocalDate field
      * @return true if the field was updated otherwise false
      */
-    protected boolean updateField(Object originalRecord, Object newRecord, String field, StringBuffer updateMessage, boolean isDate = false, boolean isRefdata = false) {
+    protected boolean updateField(Object originalRecord, Object newRecord, Object fieldDetails , StringBuffer updateMessage) {
         boolean updated = false;
+        String field = fieldDetails.field;
 
         Object newValue = newRecord[field];
         // Do we need to turn a string value into a LocalDate
-        if (isDate && (newValue != null)) {
+        if (fieldDetails.isDate && (newValue != null)) {
             newValue = LocalDate.parse(newValue);
         }
 
-        if (isRefdata && (newValue != null)) {
-            newValue = RefdataValue.findById(newValue.id);
+        if (fieldDetails.isRefdata && (newValue != null)) {
+            if (newValue instanceof String) {
+                def lookupValue = newValue;
+                newValue = referenceDataService.lookup(fieldDetails.refdataCategory, newValue);
+                if (!newValue) {
+                    log.error("No match for value of ${lookupValue} when editing RefData for ${field}");
+                }
+            } else if (newValue?.id) {
+                def lookupId = newValue.id;
+                newValue = RefdataValue.findById(lookupId);
+                if (!newValue) {
+                    log.error("No match for id of ${lookupId} when editing RefData for ${field}");
+                }
+            } else if (newValue?.value) {
+                def lookupValue = newValue.value;
+                newValue = referenceDataService.lookup(fieldDetails.refdataCategory, newValue.value);
+                if (!newValue) {
+                    log.error("No match for value of ${lookupValue} when editing RefData for ${field}");
+                }
+            } else {
+                log.error("Attempted PUT of RefData for ${field} with no id nor value");
+            }
         }
 
         // Is the original value null
@@ -167,17 +192,17 @@ public class ActionPatronRequestEditService extends AbstractAction {
         } else if (newValue == null) {
             // Value has been cleared
             updated = true;
-        } else if (!isRefdata && newValue != originalRecord[field]) {
+        } else if (!fieldDetails.isRefdata && newValue != originalRecord[field]) {
             // Value has changed
             updated = true;
-        } else if (isRefdata && newValue?.id != originalRecord[field]?.id) {
+        } else if (fieldDetails.isRefdata && newValue?.id != originalRecord[field]?.id) {
             updated = true;
         }
 
         // Has the field been updated
         if (updated) {
             // It has so add an appropriate message in the audit log
-            if (isRefdata) {
+            if (fieldDetails.isRefdata) {
                 updateMessage.append("\nField " + field +
                     " has changed from \"" + ((originalRecord[field] == null) ? "" : originalRecord[field]?.value) + "\"" +
                     " to \"" + newValue?.value + "\"");
