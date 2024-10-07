@@ -159,7 +159,13 @@ public class ActionPatronRequestEditService extends AbstractAction {
         }
 
         if (fieldDetails.isRefdata && (newValue != null)) {
-            if (newValue?.id) {
+            if (newValue instanceof String) {
+                def lookupValue = newValue;
+                newValue = referenceDataService.lookup(fieldDetails.refdataCategory, newValue);
+                if (!newValue) {
+                    log.error("No match for value of ${lookupValue} when editing RefData for ${field}");
+                }
+            } else if (newValue?.id) {
                 def lookupId = newValue.id;
                 newValue = RefdataValue.findById(lookupId);
                 if (!newValue) {
