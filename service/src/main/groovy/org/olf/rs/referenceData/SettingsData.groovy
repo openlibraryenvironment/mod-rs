@@ -260,6 +260,7 @@ public class SettingsData {
             deleteByKey('template.feature_flag')
             deleteByKey('shelvingLocations.feature_flag')
             deleteByKey('ncip_use_default_patron_fee')
+            deleteByKey('automaticFees.feature_flag')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
