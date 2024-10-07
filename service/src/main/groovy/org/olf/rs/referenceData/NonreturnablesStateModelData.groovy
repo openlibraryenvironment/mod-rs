@@ -24,6 +24,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
+        [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
         [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_OVER_LIMIT ],
         [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
@@ -218,7 +219,7 @@ public class NonreturnablesStateModelData {
             code: 'requesteCancelOK',
             description: 'request is cancelled',
             result: true,
-            status: Status.PATRON_REQUEST_CANCELLED,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
             qualifier: null,
             saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
@@ -323,7 +324,6 @@ public class NonreturnablesStateModelData {
             saveRestoreState: null,
             nextActionEvent: null
     ];
-
 
 
 
@@ -775,6 +775,9 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION)
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION)
+
+        // REQ_CANCEL_PENDING OR "Cancel pending"
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626);
 
         //REQ_SENT_TO_SUPPLIER
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
