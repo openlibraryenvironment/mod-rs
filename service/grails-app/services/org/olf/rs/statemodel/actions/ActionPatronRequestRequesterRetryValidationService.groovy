@@ -41,7 +41,7 @@ public class ActionPatronRequestRequesterRetryValidationService extends ActionPa
             updateableFields.each() { fieldDetails ->
                 log.debug("Updating field prior to retrying ${fieldDetails.field} in request ${request.id}");
                 // Update the field
-                if (updateField(request, parameters, fieldDetails.field, auditMessage, fieldDetails.isDate)) {
+                if (updateField(request, parameters, fieldDetails, auditMessage)) {
                     // It has changed
                     if (fieldDetails.doPickupCheck) {
                         // Perform the appropriate checks on the pickup location
