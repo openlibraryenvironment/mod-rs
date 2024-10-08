@@ -22,6 +22,8 @@ import spock.lang.Stepwise
 
 import java.text.SimpleDateFormat
 
+import com.k_int.web.toolkit.settings.AppSetting;
+
 @Slf4j
 @Integration
 @Stepwise
@@ -720,12 +722,17 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAnswerYesNoPick.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierPrintPullSlip.json"      | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_COPY_AWAIT_PICKING         | null               | null                  | "URL"          | "Copy"      | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 6        | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
-        //  "RSInstOne"       | "RSInstThree"     | 6        | true              | "nrRequesterCompleteRequest.json"   | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{status=true}"        | null
+        //"RSInstOne"       | "RSInstThree"     | 6        | true              | "nrRequesterCompleteRequest.json"   | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{status=true}"        | null
         "RSInstOne"       | null              | 7        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null                   | null
         "RSInstOne"       | "RSInstThree"     | 7        | false             | "nrSupplierAnswerYesNoPick.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 7        | false             | "nrSupplierCannotSupply.json"       | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | Status.RESPONDER_UNFILLED                   | "RSInstTwo"        | Status.RESPONDER_IDLE | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | null              | 8        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null                   | null
-        "RSInstOne"       | "RSInstThree"     | 8        | true              | "nrRequesterCancel.json"            | Status.PATRON_REQUEST_CANCELLED                   | Status.RESPONDER_CANCELLED                  | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 8        | true              | "nrRequesterCancel.json"            | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | null              | 9        | true              | "null"                              | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | "URL"          | "Copy"      | null                   | null
+        "RSInstOne"       | "RSInstThree"     | 9        | false             | "nrSupplierAnswerYesNoPick.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 9        | true              | "nrRequesterCancel.json"            | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 9        | false             | "nrSupplierRespondToCancelYes.json" | Status.PATRON_REQUEST_CANCELLED                   | Status.RESPONDER_CANCELLED                  | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
+
     }
 
     void "test Dynamic Groovy"() {
@@ -1973,4 +1980,46 @@ class DosomethingSimple {
 
     }
 
-}
+    void "test autoresponder for nonreturnables supplier"() {
+
+        String patronIdentifier = "ABA-SJS-FJF-497";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "Automating Your Workload";
+        String requestAuthor = "Matton, Otto";
+        String requestSymbol = "ISIL:RST1";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "141-636-919";
+
+        when: "Do it"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "on"]);
+        log.debug("Results from changing settings: ${changeSettingsResp}");
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : "URL",
+                serviceType                : "Copy",
+                tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
+        ];
+        
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+        log.debug("Requester request id is ${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+
+        then:
+        assert(true);
+
+    }
+ }
