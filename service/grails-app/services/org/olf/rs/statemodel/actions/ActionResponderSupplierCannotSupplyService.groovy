@@ -40,7 +40,7 @@ public class ActionResponderSupplierCannotSupplyService extends AbstractAction {
             log.debug("Checking to see if we need to send a CancelRequestItem");
             if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
                 if (hostLMSService.isManualCancelRequestItem()) {
-
+                    log.debug("Resolved requester ${request.resolvedRequester?.owner?.name}")
                     CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
                             request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
                     String institutionalPatronIdValue = institutionalPatronId?.value;
