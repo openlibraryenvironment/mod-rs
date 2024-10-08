@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.json.JsonSlurper
 import org.olf.rs.statemodel.StateModel;
 
 import java.text.SimpleDateFormat;
@@ -142,6 +143,15 @@ public class ReshareActionService {
                 if (pr.patronEmail == null) {
                     pr.patronEmail = result.patronDetails.email;
                 }
+            }
+
+            if (result.patronDetails.patronUuid) {
+                Map customIdentifiersMap = [:]
+                if (pr.customIdentifiers) {
+                    customIdentifiersMap = new JsonSlurper().parseText(pr.customIdentifiers)
+                }
+                customIdentifiersMap.put("patronUuid", result.patronDetails.patronUuid)
+                pr.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
             }
 
             // Is the patron is valid, add an audit entry
