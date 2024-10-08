@@ -68,6 +68,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                 eventResultDetails.auditMessage = 'autoRespond will-supply, determine location=' + location;
                 if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) { //is request item enabled for this responder?
 
+                    log.debug("Resolved requester ${request.resolvedRequester?.owner?.name}")
                     //Get the institutionalPatronID from the directory entry, or fall back on the default in settings
                     CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
                         request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
