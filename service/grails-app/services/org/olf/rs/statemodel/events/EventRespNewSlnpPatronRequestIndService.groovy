@@ -153,15 +153,20 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
                 }
             } else {
+                handleUnfilledResponse(request, eventResultDetails, autoRespondVariant)
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
-                reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
                 eventResultDetails.auditMessage = "Cannot Supply"
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
             }
         } else {
+            handleUnfilledResponse(request, eventResultDetails, autoRespondVariant)
             log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
-            reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
             eventResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
+        }
+    }
+
+    private void handleUnfilledResponse(PatronRequest request, EventResultDetails eventResultDetails, String autoRespondVariant) {
+        if (autoRespondVariant != "on:_will_supply_only") {
+            reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }

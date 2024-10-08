@@ -16,6 +16,7 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
+import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.StateModel
 
 /**
@@ -112,12 +113,18 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
                 reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
                 actionResultDetails.auditMessage = "Cannot Supply"
-                actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
+                handleUnfilledResponse(actionResultDetails, autoRespondVariant)
             }
         } else {
             log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
             actionResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
+            handleUnfilledResponse(actionResultDetails, autoRespondVariant)
+        }
+    }
+
+    private static void handleUnfilledResponse(ActionResultDetails actionResultDetails, String autoRespondVariant) {
+        if (autoRespondVariant == "off") {
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
