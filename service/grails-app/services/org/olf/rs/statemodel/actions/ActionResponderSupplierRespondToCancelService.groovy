@@ -31,8 +31,8 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
             actionResultDetails.auditMessage = 'Cancellation denied';
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
+            log.debug("Responder accepted cancellation");
             actionResultDetails.auditMessage = 'Cancellation accepted';
-
         }
 
         return(actionResultDetails);
