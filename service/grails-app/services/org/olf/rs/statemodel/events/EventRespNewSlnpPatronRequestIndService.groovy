@@ -89,7 +89,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             return
         }
 
-        log.debug("Attempt hold with RequestItem")
+        log.debug("Attempt hold with RequestItem and resolved requester ${request.resolvedRequester?.owner?.name}")
         CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
