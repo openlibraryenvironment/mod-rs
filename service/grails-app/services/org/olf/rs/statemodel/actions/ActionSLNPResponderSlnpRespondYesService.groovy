@@ -16,7 +16,6 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
-import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.StateModel
 
 /**
