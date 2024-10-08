@@ -24,6 +24,8 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
+        [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
+        [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_OVER_LIMIT ],
         [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
@@ -138,6 +140,28 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterISO18626Cancelled = [
+            code: 'requesterISO18626Cancelled',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Cancelled',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
+            qualifier: 'Cancelled',
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626CancelNo = [
+            code: 'requesterISO18626CancelNo',
+            description: 'An incoming ISO-18626 message for the requester has said that we are not cancelling the request',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
+            qualifier: ActionEventResultQualifier.QUALIFIER_NO,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterISO18626ExpectToSupply = [
             code: 'nrRequesterISO18626ExpectToSupply',
             description: 'Incoming ISO18686 message from the responder has said that the status is ExpectToSupply',
@@ -218,7 +242,7 @@ public class NonreturnablesStateModelData {
             code: 'requesteCancelOK',
             description: 'request is cancelled',
             result: true,
-            status: Status.PATRON_REQUEST_CANCELLED,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
             qualifier: null,
             saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
@@ -323,7 +347,6 @@ public class NonreturnablesStateModelData {
             saveRestoreState: null,
             nextActionEvent: null
     ];
-
 
 
 
@@ -487,6 +510,16 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
+    private static Map nrRequesterCancelPendingISO18626List = [
+            code: ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626,
+            description: 'In incoming ISO18626 message has been received by a requester pending cancel',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterISO18626Cancelled,
+                    nrRequesterISO18626CancelNo
+            ]
+    ]
+
 
     //NR RESPONSE ACTIONEVENT RESULTS
 
@@ -545,7 +578,7 @@ public class NonreturnablesStateModelData {
             code: 'nrResponderISO18626Cancel',
             description: 'Requester has sent cancel message',
             result: true,
-            status: Status.RESPONDER_CANCELLED,
+            status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
@@ -588,6 +621,26 @@ public class NonreturnablesStateModelData {
             status: Status.RESPONDER_UNFILLED,
             qualifier: ActionEventResultQualifier.QUALIFIER_CLOSE_UNFILLED,
             saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderCancelOK = [
+            code: 'nonreturnableResponderCancelOK',
+            description: 'Responder has replied yes to cancel',
+            result: true,
+            status: Status.RESPONDER_CANCELLED,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderCancelNoOK = [
+            code: 'nonreturnableCancelNoOK',
+            description: 'Responder replied no to cancel',
+            result: true,
+            status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_NO,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
             nextActionEvent: null
     ];
 
@@ -679,6 +732,16 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
+    private static Map nrResponderCancelList = [
+            code: ActionEventResultList.NR_RESPONDER_CANCEL,
+            description: 'Responder responds "yes" to cancel request',
+            model: StateModel.MODEL_NR_RESPONDER,
+            results: [
+                    nrResponderCancelOK,
+                    nrResponderCancelNoOK
+            ]
+    ];
+
     private static Map nrResponderNotificationReceivedISO18626List = [
             code: ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626,
             description: 'An incoming ISO18626 notifications has been received by the supplier',
@@ -706,6 +769,7 @@ public class NonreturnablesStateModelData {
             nrRequesterRetriedValidationList,
             nrRequesterCloseManualList,
             nrRequesterNotificationReceivedISO18626List,
+            nrRequesterCancelPendingISO18626List,
             nrResponderNewPatronRequestList,
             nrResponderAnswerYesList,
             nrResponderCannotSupplyList,
@@ -714,6 +778,7 @@ public class NonreturnablesStateModelData {
             nrResponderCancelRecievedISO18626,
             nrResponderNoStatusChangeList,
             nrResponderCloseManualList,
+            nrResponderCancelList,
             nrResponderNotificationReceivedISO18626List
     ];
 
@@ -774,6 +839,9 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION)
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION)
 
+        // REQ_CANCEL_PENDING OR "Cancel pending"
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626);
+
         //REQ_SENT_TO_SUPPLIER
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
@@ -811,6 +879,9 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
+
+        //RES_CANCEL_RECEIVED
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL);
 
         //messageAllSeen
         AvailableActionData.assignToAllStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGES_ALL_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
