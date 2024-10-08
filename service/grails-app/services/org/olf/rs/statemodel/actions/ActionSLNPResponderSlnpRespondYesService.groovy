@@ -13,6 +13,7 @@ import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.StateModel
@@ -111,11 +112,13 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
                 reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
                 actionResultDetails.auditMessage = "Cannot Supply"
+                actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
             }
         } else {
             log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
             actionResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
+            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
 }
