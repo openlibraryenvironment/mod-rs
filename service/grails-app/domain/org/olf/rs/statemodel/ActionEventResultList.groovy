@@ -97,12 +97,14 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     public static final String NR_REQUESTER_NO_STATUS_CHANGE                   = 'nrRequesterNoStatusChange';
     public static final String NR_REQUESTER_CLOSE_MANUAL                       = 'nrRequesterCloseManual';
     public static final String NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626     = 'nrRequesterNotificationReceivedISO18626';
+    public static final String NR_REQUESTER_CANCEL_PENDING_ISO18626            = 'nrRequesterCancelPendingISO18626';
 
     static public final String NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';
     static public final String NR_RESPONDER_EVENT_NEW_PATRON_REQUEST           = 'nrResponderEventNewPatronRequest';
     static public final String NR_RESPONDER_CANNOT_SUPPLY                      = 'nrResponderCannotSupply';
     static public final String NR_RESPONDER_PRINT_PULL_SLIP                    = 'nrResponderPrintPullSlip';
     static public final String NR_RESPONDER_ADD_URL_TO_DOCUMENT                = 'nrResponderAddURLToDocument';
+    static public final String NR_RESPONDER_CANCEL                             = 'nrResponderCancel';
 
     public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
     public static final String NR_RESPONDER_NO_STATUS_CHANGE                   = 'nrResponderNoStatusChange';

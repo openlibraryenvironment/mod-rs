@@ -6,7 +6,7 @@ import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
 import org.olf.rs.statemodel.Events
 
-public class EventNonreturnableResponderNewPatronRequestIndService extends AbstractEvent {
+public class EventNonreturnableResponderNewPatronRequestIndService extends EventRespNewPatronRequestIndService {
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         return eventResultDetails;
