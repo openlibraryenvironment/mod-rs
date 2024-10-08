@@ -49,7 +49,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
     }
 
     private void autoRespond(PatronRequest request, String autoRespondVariant, ActionResultDetails actionResultDetails) {
-        log.debug("Attempt hold with RequestItem")
+        log.debug("Attempt hold with RequestItem, Resolved requester ${request.resolvedRequester?.owner?.name}")
         CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
