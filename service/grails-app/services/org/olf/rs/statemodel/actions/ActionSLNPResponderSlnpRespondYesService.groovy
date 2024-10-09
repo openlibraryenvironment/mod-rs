@@ -14,7 +14,6 @@ import org.olf.rs.constants.Directory
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.ActionEventResultQualifier
-import org.olf.rs.statemodel.ActionResult
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.StateModel
@@ -125,7 +124,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
 
     private static void handleUnfilledResponse(ActionResultDetails actionResultDetails, String autoRespondVariant) {
         if (autoRespondVariant == "off") {
-            actionResultDetails.result = ActionResult.ERROR
+            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
 }
