@@ -533,6 +533,37 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrResponderNewPatronRequestOKLocated = [
+            code: 'nrResponderNewPatronRequestOKLocated',
+            description: 'Event triggered by a new incoming request and the item has been located',
+            result: true,
+            status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderNewPatronRequestOKUnfilled = [
+            code: 'nrResponderNewPatronRequestOKUnfilled',
+            description: 'Event triggered by a new incoming request and the item was not found',
+            result: true,
+            status: Status.RESPONDER_UNFILLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderNewPatronRequestOKRequestItem = [
+            code: 'nrResponderNewPatronRequestOKRequestItem',
+            description: 'Event triggered by a new incoming request, the item has been located and we are configured to use request item',
+            result: true,
+            status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+
     private static Map nrResponderAnswerYesOK = [
             code: 'nrResponderAnswerYesOK',
             description: 'Responder has agreed to supply non-returnable',
@@ -661,7 +692,10 @@ public class NonreturnablesStateModelData {
             description: 'Event for a new incoming request on the responder side',
             model: StateModel.MODEL_NR_RESPONDER,
             results: [
-                    nrResponderNewPatronRequestOK
+                    nrResponderNewPatronRequestOK,
+                    nrResponderNewPatronRequestOKLocated,
+                    nrResponderNewPatronRequestOKRequestItem,
+                    nrResponderNewPatronRequestOKUnfilled
             ]
     ];
 
@@ -923,14 +957,6 @@ public class NonreturnablesStateModelData {
         loadAvailableActionData();
 
     }
-
-
-
-
-
-
-
-
 
 
 }
