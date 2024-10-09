@@ -261,6 +261,7 @@ public class SettingsData {
             deleteByKey('shelvingLocations.feature_flag')
             deleteByKey('ncip_use_default_patron_fee')
             deleteByKey('automaticFees.feature_flag')
+            deleteByKey('automatic_fees')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
@@ -409,10 +410,6 @@ public class SettingsData {
 
             // Feature flag values for Settings sections keys
             ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
-
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN).value)
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);
