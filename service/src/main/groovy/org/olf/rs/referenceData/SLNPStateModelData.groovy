@@ -134,12 +134,12 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
-    public static Map slnpResponderRespondYesError = [
-            code: 'slnpResponderRespondYesError',
+    public static Map slnpResponderRespondYesUnfilled = [
+            code: 'slnpResponderRespondYesUnfilled',
             description: 'Cannot Supply',
-            result: false,
+            result: true,
             status: Status.SLNP_RESPONDER_UNFILLED,
-            qualifier: null,
+            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
             saveRestoreState: null,
             nextActionEvent : null
     ];
@@ -328,7 +328,7 @@ public class SLNPStateModelData {
             model: StateModel.MODEL_SLNP_RESPONDER,
             results: [
                     slnpResponderRespondYes,
-                    slnpResponderRespondYesError
+                    slnpResponderRespondYesUnfilled
             ]
     ];
 
