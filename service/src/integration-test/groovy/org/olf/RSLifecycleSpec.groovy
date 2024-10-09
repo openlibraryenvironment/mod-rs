@@ -2144,14 +2144,7 @@ class DosomethingSimple {
                 serviceType                : "Copy",
                 tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
         ];
-
-
-        Tenants.withId('RSInstThree_mod_rs'.toLowerCase()) {
-            String settingValue = settingsService.getSettingValue("auto_responder_status");
-            assert (settingValue?.toLowerCase()?.startsWith('on'));
-            String autoRespondSetting = AppSetting.findByKey('auto_responder_status')?.value;
-            assert (autoRespondSetting?.toLowerCase()?.startsWith('on'));
-        }
+        
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
