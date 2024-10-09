@@ -8,10 +8,6 @@ import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
 import org.olf.rs.ProtocolReferenceDataValue
-import org.olf.rs.SettingsService
-import org.olf.rs.lms.HostLMSActions
-import org.olf.rs.logging.INcipLogDetails
-import org.olf.rs.logging.ProtocolAuditService
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.AbstractEvent
@@ -28,8 +24,6 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
     PickupLocationService pickupLocationService
     NewRequestService newRequestService
     HostLMSService hostLMSService
-    ProtocolAuditService protocolAuditService
-    SettingsService settingsService
 
     private static final String REASON_SPOOFED = 'spoofed'
 
@@ -67,17 +61,14 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
             pickupLocationService.checkByName(request)
         }
 
-        HostLMSActions hostLMSActions = hostLMSService.getHostLMSActions()
-
-        if (hostLMSActions) {
+        if (hostLMSService.getHostLMSActions()) {
             log.debug('Auto Supply....')
-            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
             String userId = request.patronIdentifier
             boolean canAddFeeAutomatically = isServiceTypeValidForAddingFee(request)
 
             if (canAddFeeAutomatically) {
                 try {
-                    Map userFiscalTransactionResult = hostLMSActions.createUserFiscalTransaction(settingsService, userId, request.hrid, ncipLogDetails)
+                    Map userFiscalTransactionResult = hostLMSService.createUserFiscalTransaction(request, userId, request.hrid)
 
                     if (userFiscalTransactionResult?.result == true) {
                         String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"

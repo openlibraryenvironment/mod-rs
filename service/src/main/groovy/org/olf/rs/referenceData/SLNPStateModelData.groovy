@@ -134,6 +134,16 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
+    public static Map slnpResponderRespondYesUnfilled = [
+            code: 'slnpResponderRespondYesUnfilled',
+            description: 'Cannot Supply',
+            result: true,
+            status: Status.SLNP_RESPONDER_UNFILLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
     public static Map slnpResponderCannotSupply = [
             code: 'slnpResponderCannotSupply',
             description: 'Request cannot be filled and is complete',
@@ -312,13 +322,13 @@ public class SLNPStateModelData {
     ];
 
     // SLNP responder lists
-
     private static Map slnpResponderRespondYesList = [
             code: ActionEventResultList.SLNP_RESPONDER_RESPOND_YES,
             description: 'The responder has said that they will supply the item(s)',
             model: StateModel.MODEL_SLNP_RESPONDER,
             results: [
-                    slnpResponderRespondYes
+                    slnpResponderRespondYes,
+                    slnpResponderRespondYesUnfilled
             ]
     ];
 

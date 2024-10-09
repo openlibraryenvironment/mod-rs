@@ -436,6 +436,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           .includeUserAddressInformation()
           .includeUserPrivilege()
           .includeNameInformation()
+          .includeUserId()
           .setToAgency(ncipConnectionDetails.ncipToAgency)
           .setFromAgency(ncipConnectionDetails.ncipFromAgency)
           .setRegistryId(ncipConnectionDetails.registryId)
@@ -509,6 +510,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           result.userid = response.opt('userId') ?: response.opt('userid')
           result.givenName = response.opt('firstName')
           result.surname = response.opt('lastName')
+          result.patronUuid = response.opt('userUuid')
 
           //Check for blank (but not null) values
           ["surname", "givenName"].each( {

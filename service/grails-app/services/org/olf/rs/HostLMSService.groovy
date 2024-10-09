@@ -8,7 +8,8 @@ import org.olf.rs.logging.ProtocolAuditService;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
-import grails.core.GrailsApplication;
+import grails.core.GrailsApplication
+import org.olf.rs.settings.ISettings;
 
 /**
  * Return the right HostLMSActions for the tenant config
@@ -310,5 +311,23 @@ public class HostLMSService {
             return hostLMSActions.isManualCancelRequestItem();
         }
         return false;
+    }
+
+    Map createUserFiscalTransaction (PatronRequest request, String userId, String itemId) {
+        Map createUserFiscalTransactionItemResult
+        HostLMSActions hostLMSActions = getHostLMSActions()
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
+            createUserFiscalTransactionItemResult = getHostLMSActions().createUserFiscalTransaction(
+                    settingsService,
+                    userId,
+                    itemId,
+                    ncipLogDetails)
+            protocolAuditService.save(request, ncipLogDetails)
+        } else {
+            createUserFiscalTransactionItemResult = resultHostLMSNotConfigured
+            request.needsAttention = true
+        }
+        return createUserFiscalTransactionItemResult
     }
 }
