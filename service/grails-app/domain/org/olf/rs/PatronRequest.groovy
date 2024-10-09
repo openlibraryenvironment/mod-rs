@@ -631,4 +631,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       this[fieldName] = truncatedField;
     }
   }
+
+  DirectoryEntry getResolvedRequesterDirectoryEntry() {
+    resolvedRequester?.owner?.name
+    return resolvedRequester?.owner
+  }
+
+  DirectoryEntry getResolvedSupplierDirectoryEntry() {
+    resolvedSupplier?.owner?.name
+    return resolvedSupplier?.owner
+  }
 }

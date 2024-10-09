@@ -51,7 +51,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
 
     private void autoRespond(PatronRequest request, String autoRespondVariant, ActionResultDetails actionResultDetails) {
         log.debug("Attempt hold with RequestItem, Resolved requester ${request.resolvedRequester?.owner?.name}")
-        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
+        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequesterDirectoryEntry, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
             // If nothing on the Directory Entry then fallback to the default in settings
@@ -60,7 +60,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
         }
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
             String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                    request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
+                    request.resolvedSupplierDirectoryEntry, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
             Map requestItemResult = hostLMSService.requestItem(request,
                     request.resolvedSupplier?.owner?.lmsLocationCode, folioLocationFilter,
                     request.supplierUniqueRecordId, institutionalPatronIdValue)
