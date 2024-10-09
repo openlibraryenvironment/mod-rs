@@ -94,7 +94,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 * Here that value is a string, but in the refdata case we'd need value?.value
                 */
                 log.debug("Resolved requester ${request.resolvedRequester?.owner?.name}")
-                CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
+                CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequesterDirectoryEntry, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
                 String institutionalPatronIdValue = institutionalPatronId?.value
                 if (!institutionalPatronIdValue) {
                     // If nothing on the Directory Entry then fallback to the default in settings

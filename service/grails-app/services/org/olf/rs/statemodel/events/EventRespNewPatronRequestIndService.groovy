@@ -71,7 +71,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     log.debug("Resolved requester ${request.resolvedRequester?.owner?.name}")
                     //Get the institutionalPatronID from the directory entry, or fall back on the default in settings
                     CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                        request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
+                        request.resolvedRequesterDirectoryEntry, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID);
                     String institutionalPatronIdValue = institutionalPatronId?.value;
                     if (!institutionalPatronIdValue) {
                         // If nothing on the Directory Entry then fallback to the default in settings
@@ -79,7 +79,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                         institutionalPatronIdValue = defaultInstitutionalPatronId?.value;
                     }
                     String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                            request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
+                            request.resolvedSupplierDirectoryEntry, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
                     //send the RequestItem request
                     log.debug("Attempt hold with RequestItem");
                     Map requestItemResult = hostLMSService.requestItem(request,
