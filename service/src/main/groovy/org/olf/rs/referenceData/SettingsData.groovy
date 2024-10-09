@@ -181,7 +181,6 @@ public class SettingsData {
 
     // Automatic fees settings
     public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
-    public static final String SETTING_AUTOMATIC_FEES        = 'automatic_fees';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';

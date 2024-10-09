@@ -22,7 +22,7 @@ public class ConnectionDetailsNCIP {
         registryId = settings.getSettingValue(SettingsData.SETTING_WMS_REGISTRY_ID);
         String useTitleString = settings.getSettingValue(SettingsData.SETTING_NCIP_USE_TITLE)
         useTitle = "Yes".equalsIgnoreCase(useTitleString ? useTitleString : "No")
-        String useDefaultPatronFeeString = settings.getSettingValue(SettingsData.SETTING_AUTOMATIC_FEES)
+        String useDefaultPatronFeeString = settings.getSettingValue(SettingsData.SETTING_REQUEST_SERVICE_TYPE)
         useDefaultPatronFee = !"No".equalsIgnoreCase(useDefaultPatronFeeString)
 
         // Do we have the basic configuration we can get away with
