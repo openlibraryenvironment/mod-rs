@@ -36,6 +36,8 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import spock.lang.*
 
+import com.k_int.web.toolkit.settings.AppSetting;
+
 @Slf4j
 @Integration
 @Stepwise
@@ -2114,4 +2116,46 @@ class DosomethingSimple {
 
     }
 
-}
+    void "test autoresponder for nonreturnables supplier"() {
+
+        String patronIdentifier = "ABA-SJS-FJF-497";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "Automating Your Workload";
+        String requestAuthor = "Matton, Otto";
+        String requestSymbol = "ISIL:RST1";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "141-636-919";
+
+        when: "Do it"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "on"]);
+        log.debug("Results from changing settings: ${changeSettingsResp}");
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : "URL",
+                serviceType                : "Copy",
+                tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
+        ];
+        
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+        log.debug("Requester request id is ${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+
+        then:
+        assert(true);
+
+    }
+ }
