@@ -611,7 +611,7 @@ public class NonreturnablesStateModelData {
             result: true,
             status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
             qualifier: null,
-            saveRestoreState: null,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
     ];
 
@@ -666,7 +666,7 @@ public class NonreturnablesStateModelData {
     ];
 
     private static Map nrResponderCancelNoOK = [
-            code: 'nonreturnableCancelNoOK',
+            code: 'nonreturnableResponderCancelNoOK',
             description: 'Responder replied no to cancel',
             result: true,
             status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
