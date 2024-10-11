@@ -1,7 +1,9 @@
 package org.olf.rs.statemodel.actions
 
+import org.olf.rs.HostLMSService;
 import org.olf.rs.PatronRequest
 import org.olf.rs.statemodel.ActionEventResultQualifier;
+import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
 
@@ -12,6 +14,8 @@ import org.olf.rs.statemodel.Actions;
  */
 public class ActionResponderSupplierRespondToCancelService extends ActionResponderService {
 
+    HostLMSService hostLMSService;
+
     private static final String SETTING_REQUEST_ITEM_NCIP = "ncip";
 
     @Override
@@ -21,18 +25,40 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // Send the response to the requester
-        reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
-
-
-            // If the cancellation is denied, switch the cancel flag back to false, otherwise send request to complete
+        // If the cancellation is denied, switch the cancel flag back to false,
+        // otherwise check in and send request to complete
         if (parameters?.cancelResponse == 'no') {
-            // Set the audit message and qualifier
+            reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
             actionResultDetails.auditMessage = 'Cancellation denied';
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
-            actionResultDetails.auditMessage = 'Cancellation accepted';
+            Map resultMap = [:];
+            try {
+                resultMap = hostLMSService.checkInRequestVolumes(request);
+            }
+            catch (Exception e) {
+                log.error('NCIP Problem', e);
+                request.needsAttention = true;
+                reshareApplicationEventHandlerService.auditEntry(
+                    request,
+                    request.state,
+                    request.state,
+                    "Host LMS integration: NCIP CheckinItem call failed for volumes in request: ${request.id} when responding to cancel. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message,
+                    null);
+                resultMap.result = false;
+            }
 
+            if (resultMap.result == false) {
+                actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
+                actionResultDetails.auditMessage = 'NCIP CheckinItem call failed when responding to cancel';
+                actionResultDetails.responseResult.code = -3; // NCIP action failed
+                actionResultDetails.responseResult.message = actionResultDetails.auditMessage;
+                actionResultDetails.responseResult.status = false;
+            } else {
+                log.debug("Responder accepted cancellation");
+                reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
+                actionResultDetails.auditMessage = 'Cancellation accepted';
+            }
         }
 
         return(actionResultDetails);
