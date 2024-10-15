@@ -81,6 +81,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             if (pr) {
                                 log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
                                 pr.precededBy = preceedingPr;
+                                preceedingPr.succeededBy = pr;
+                                preceedingPr.save();
                             }
                         }
                 }
