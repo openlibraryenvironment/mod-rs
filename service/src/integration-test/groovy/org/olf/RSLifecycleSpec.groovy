@@ -1,5 +1,6 @@
 package org.olf
 
+import ch.qos.logback.core.net.AbstractSSLSocketAppender
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.StateModel
 
@@ -2020,9 +2021,12 @@ class DosomethingSimple {
 
         assert(newResponderRequestData.precededBy?.id == responderRequestId)
 
+        def updatedResponderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
         then:
         assert(newRequesterRequestData.title == "Case study research : design and methods /");
         assert(newResponderRequestData.precededBy?.id == responderRequestId);
+        assert(updatedResponderRequestData.succeededBy?.id == newResponderRequestData.id);
 
         where:
         deliveryMethod | serviceType | actionFile
