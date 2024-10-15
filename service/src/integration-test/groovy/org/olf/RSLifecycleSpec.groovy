@@ -1,7 +1,6 @@
 package org.olf
 
 
-import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -22,7 +21,6 @@ import spock.lang.Stepwise
 
 import java.text.SimpleDateFormat
 
-import com.k_int.web.toolkit.settings.AppSetting;
 
 @Slf4j
 @Integration
@@ -1884,9 +1882,12 @@ class DosomethingSimple {
 
         assert(newResponderRequestData.precededBy?.id == responderRequestId)
 
+        def updatedResponderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
         then:
         assert(newRequesterRequestData.title == "Case study research : design and methods /");
         assert(newResponderRequestData.precededBy?.id == responderRequestId);
+        assert(updatedResponderRequestData.succeededBy?.id == newResponderRequestData.id);
 
         where:
         deliveryMethod | serviceType | actionFile
