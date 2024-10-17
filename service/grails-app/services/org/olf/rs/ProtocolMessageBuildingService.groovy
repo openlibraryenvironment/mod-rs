@@ -274,7 +274,8 @@ class ProtocolMessageBuildingService {
       }
     }
 
-    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status)) {
+    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
+            !TypeStatus.UNFILLED.value().equalsIgnoreCase(status)) {
         Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
             rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
         }

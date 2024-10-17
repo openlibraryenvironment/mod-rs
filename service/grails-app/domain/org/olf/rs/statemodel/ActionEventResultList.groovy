@@ -66,8 +66,6 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
     static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
     static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
-    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY                      = 'slnpResponderConditionalSupply';
-    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION        = 'slnpResponderConditionalSupplyNoTransition'
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
     static public final String SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED          = "slnpResponderSupplierFillAndMarkShipped"
     static public final String SLNP_RESPONDER_CHECK_OUT_OF_RESHARE                    = "slnpResponderCheckOutOfReshare"
@@ -123,7 +121,6 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626          = 'nrRequesterSentToSupplierISO18626';
     static public final String NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626          = 'nrRequesterExpectToSupplyISO18626';
     static public final String NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
-    static public final String NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
     public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = 'nrRequesterMarkEndOfRotaReviewed';
     public static final String NR_REQUESTER_REREQUEST                          = 'nrRequesterRerequest';
     public static final String NR_REQUESTER_NO_STATUS_CHANGE                   = 'nrRequesterNoStatusChange';

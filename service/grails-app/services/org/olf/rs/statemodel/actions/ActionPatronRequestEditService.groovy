@@ -1,6 +1,8 @@
 package org.olf.rs.statemodel.actions;
 
-import com.k_int.web.toolkit.refdata.RefdataValue
+
+import com.k_int.web.toolkit.refdata.RefdataValue;
+
 import org.olf.rs.ReferenceDataService;
 
 import java.time.LocalDate;

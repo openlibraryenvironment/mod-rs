@@ -13,6 +13,7 @@ import org.olf.rs.SettingsService
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
+import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.Actions
 import org.olf.rs.statemodel.StateModel
@@ -48,8 +49,8 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
     }
 
     private void autoRespond(PatronRequest request, String autoRespondVariant, ActionResultDetails actionResultDetails) {
-        log.debug("Attempt hold with RequestItem")
-        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
+        log.debug("Attempt hold with RequestItem, Resolved requester ${request.resolvedRequester?.owner?.name}")
+        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequesterDirectoryEntry, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
             // If nothing on the Directory Entry then fallback to the default in settings
@@ -58,7 +59,7 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
         }
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
             String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                    request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
+                    request.resolvedSupplierDirectoryEntry, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
             Map requestItemResult = hostLMSService.requestItem(request,
                     request.resolvedSupplier?.owner?.lmsLocationCode, folioLocationFilter,
                     request.supplierUniqueRecordId, institutionalPatronIdValue)
@@ -111,11 +112,19 @@ public class ActionSLNPResponderSlnpRespondYesService extends ActionResponderSer
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
                 reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
                 actionResultDetails.auditMessage = "Cannot Supply"
+                handleUnfilledResponse(actionResultDetails, autoRespondVariant)
             }
         } else {
             log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
             reshareActionService.sendResponse(request, "Unfilled", [:], actionResultDetails)
             actionResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
+            handleUnfilledResponse(actionResultDetails, autoRespondVariant)
+        }
+    }
+
+    private static void handleUnfilledResponse(ActionResultDetails actionResultDetails, String autoRespondVariant) {
+        if (autoRespondVariant == "off") {
+            actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
 }
