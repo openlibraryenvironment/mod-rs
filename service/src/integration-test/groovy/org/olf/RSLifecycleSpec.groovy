@@ -1,6 +1,8 @@
 package org.olf
 
-
+import grails.databinding.SimpleMapDataBindingSource
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -114,6 +116,127 @@ class RSLifecycleSpec extends TestBase {
             testctx.initialised = true
         }
     }
+
+    void "Attempt to delete any old tenants"(tenantid, name) {
+        when:"We post a delete request"
+        boolean result = deleteTenant(tenantid, name);
+
+        then:"Any old tenant removed"
+        assert(result);
+
+        where:
+        tenantid | name
+        'RSInstOne' | 'RSInstOne'
+        'RSInstTwo' | 'RSInstTwo'
+        'RSInstThree' | 'RSInstThree'
+    }
+
+    void "test presence of HOST LMS adapters"(String name, boolean should_be_found) {
+
+        when: "We try to look up ${name} as a host adapter"
+        log.debug("Lookup LMS adapter ${name}");
+        HostLMSActions actions = hostLMSService.getHostLMSActionsFor(name)
+        log.debug("result of lookup : ${actions}");
+
+        then: "We expect that the adapter should ${should_be_found ? 'BE' : 'NOT BE'} found. result was ${actions}."
+        if ( should_be_found ) {
+            actions != null
+        }
+        else {
+            actions == null
+        }
+
+        where:
+        name        | should_be_found
+        'alma'      | true
+        'aleph'     | true
+        'ncsu'      | true
+        'wms'       | true
+        'wms2'      | true
+        'default'   | true
+        'manual'    | true
+        'folio'     | true
+        'symphony'  | true
+        'sierra'    | true
+        'polaris'   | true
+        'evergreen' | true
+        'tlc'       | true
+        'wibble'    | false
+    }
+
+    void "Set up test tenants "(tenantid, name) {
+        when:"We post a new tenant request to the OKAPI controller"
+        boolean response = setupTenant(tenantid, name);
+
+        then:"The response is correct"
+        assert(response);
+
+        where:
+        tenantid | name
+        'RSInstOne' | 'RSInstOne'
+        'RSInstTwo' | 'RSInstTwo'
+        'RSInstThree' | 'RSInstThree'
+    }
+
+    void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
+        when:"Load the default directory (test url is ${baseUrl})"
+        boolean result = true
+
+        Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
+            log.info("Filling out dummy directory entries for tenant ${tenant_id}");
+
+            dirents.each { entry ->
+
+                /*
+                entry.symbols.each { sym ->
+
+                  String symbol_string = sym.authority instanceof String ? sym.authority : sym.authority.symbol;
+
+                  NamingAuthority na = NamingAuthority.findBySymbol(symbol_string)
+
+                  if ( na != null ) {
+                    log.debug("[${tenant_id}] replace symbol string ${symbol_string} with a reference to the object (${na.id},${na.symbol}) to prevent duplicate creation");
+                    sym.authority = [ id: na.id, symbol: na.symbol ]
+                  }
+                  else {
+                    sym.authority = symbol_string;
+                  }
+                }
+                */
+
+                log.debug("Sync directory entry ${entry} - Detected runtime port is ${serverPort}")
+                def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
+                DirectoryEntry de = new DirectoryEntry()
+                grailsWebDataBinder.bind(de, source)
+
+                // log.debug("Before save, ${de}, services:${de.services}");
+                try {
+                    de.save(flush:true, failOnError:true)
+                    log.debug("Result of bind: ${de} ${de.id}");
+                }
+                catch ( Exception e ) {
+                    log.error("problem bootstrapping directory data",e);
+                    result = false;
+                }
+
+                if ( de.errors ) {
+                    de.errors?.allErrors?.each { err ->
+                        log.error(err?.toString())
+                    }
+                }
+            }
+        }
+
+        then:"Test directory entries are present"
+        assert result == true
+
+        where:
+        tenant_id | dirents
+        'RSInstOne' | DIRECTORY_INFO
+        'RSInstTwo' | DIRECTORY_INFO
+        'RSInstThree' | DIRECTORY_INFO
+    }
+
 
     def cleanup() {
     }
