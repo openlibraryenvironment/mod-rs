@@ -20,6 +20,7 @@ public class StaticRouterService implements RequestRouter {
     String static_routing_str = static_routing_cfg?.value
     if ( static_routing_str ) {
       String[] components = static_routing_str.split(',')  // TYPE:NAMESPACE:SYMBOL,TYPE:NAMESPACE:SYMBOL
+      log.debug("Found components ${components}")
       components.each { static_option ->
         String[] option_parts = static_option.split(':');
         Symbol s

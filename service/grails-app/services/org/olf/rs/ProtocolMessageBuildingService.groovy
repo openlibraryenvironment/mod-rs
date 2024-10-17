@@ -52,7 +52,7 @@ class ProtocolMessageBuildingService {
     //List bibliographicItemIdList = [ [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ] ];
       List bibliographicItemIdList = [ ];
     if (req.precededBy) {
-        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'preceded-by', identifierValue: req.precededBy.hrid])
+        bibliographicItemIdList.add([scheme:'reshare', bibliographicItemIdentifierCode:'preceded-by', bibliographicItemIdentifier: req.precededBy.hrid])
     }
     /*
     if (req.succeededBy) {
