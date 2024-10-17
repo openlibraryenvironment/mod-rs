@@ -408,6 +408,15 @@ public class AvailableActionData {
         assignToStates(nonTerminalStates, model, action, triggerType, resultList);
     }
 
+    static void assignToCompletedAndActiveStates(String model, String action, String triggerType, String resultList) {
+        List<Status> activeStates = StateModel.getActiveStates(model);
+        List<Status> completedStates = StateModel.getCompletedStates(model);
+        activeStates.removeAll(completedStates);
+        completedStates.addAll(activeStates);
+
+        assignToStates(completedStates, model, action, triggerType, resultList);
+    }
+
     static void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {
         // Make the action to all the states in the list
         states.each { status ->
