@@ -45,12 +45,13 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             // We now want to update the patron request's "volumes" field to reflect the incoming params
             // In order to then use the updated list later, we mimic those actions on a dummy list,
             parameters?.itemBarcodes.each { ib ->
+                String name = ib.name?.take(254)
                 RequestVolume rv = request.volumes.find { rv -> rv.itemId == ib.itemId };
 
                 // If there's no rv and the delete is true then just skip creation
                 if (!rv && !ib._delete) {
                     rv = new RequestVolume(
-                            name: ib.name ?: request.volume ?: ib.itemId,
+                            name: name ?: request.volume ?: ib.itemId,
                             itemId: ib.itemId,
                             status: RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)
                     );
@@ -61,9 +62,9 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                     if (ib._delete && rv.status.value == VOLUME_STATUS_AWAITING_LMS_CHECK_OUT) {
                         // Remove if deleted by incoming call and NCIP call hasn't succeeded yet
                         request.removeFromVolumes(rv);
-                    } else if (ib.name && rv.name != ib.name) {
+                    } else if (name && rv.name != name) {
                         // Allow changing of label up to shipping
-                        rv.name = ib.name;
+                        rv.name = name;
                     }
                     if (rv.status.value == EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS) {
                         rv.status = RequestVolume.lookupStatus(VOLUME_STATUS_AWAITING_LMS_CHECK_OUT)

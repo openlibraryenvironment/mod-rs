@@ -46,13 +46,9 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
             }
 
-            // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
-            if (!request.selectedItemBarcode && parameters.deliveryInfo.itemId) {
-                request.selectedItemBarcode = parameters.deliveryInfo.itemId;
-            }
-
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId;
+            List<String> barcodes = []
             if (itemId) {
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
@@ -78,6 +74,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             String iidId = matcher[0][2]
                             String iidName = matcher[0][1]
                             String iidCallNumber = matcher[0][3]
+                            barcodes.add(iidId)
 
                             // Check if a RequestVolume exists for this itemId, and if not, create one
                             RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId };
@@ -117,6 +114,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                         iidName = iidFields[0]
                         iidCallNumber = iidFields[2].trim()
                     }
+                    barcodes.add(iidId)
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId }
                     if (!rv) {
                         rv = new RequestVolume(
@@ -136,6 +134,12 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                         rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(false, useBarcode)
                     }
                 }
+            }
+
+            String barcodesString = barcodes.join(",")
+            // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
+            if (!request.selectedItemBarcode && barcodesString) {
+                request.selectedItemBarcode = barcodesString.take(254)
             }
 
             // If the deliveredFormat is URL and a URL is present, store it on the request
