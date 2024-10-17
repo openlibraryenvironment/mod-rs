@@ -1,5 +1,5 @@
 {
-  "action" : "nonreturnableRequesterCompleteRequest",
+  "action" : "requesterCompleteRequest",
   "actionParams" : {
   }
 }

@@ -1,5 +1,5 @@
 {
-  "action" : "nonreturnableRequesterRetryValidation",
+  "action" : "requesterRetryValidation",
   "actionParams" : {
   }
 }

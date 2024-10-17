@@ -1,0 +1,7 @@
+{
+  "action": "supplierRespondToCancel",
+  "actionParams": {
+    "cancelResponse": "no",
+    "note": "Take this request and like it"
+  }
+}

@@ -282,10 +282,10 @@ public class AvailableActionData {
         assignToNonTerminalStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_CLOSE_MANUAL);
 
         // The ISO18626Notification action can be applied to all active actions
-        assignToActiveStates(StateModel.MODEL_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
-        assignToActiveStates(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
-        assignToActiveStates(StateModel.MODEL_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
-        assignToActiveStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
+        assignToCompletedAndActiveStates(StateModel.MODEL_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
+        assignToCompletedAndActiveStates(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
+        assignToCompletedAndActiveStates(StateModel.MODEL_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
+        assignToCompletedAndActiveStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
 
         // The ISO18626StatusRequest action can be applied to all active responder actions
         assignToActiveStates(StateModel.MODEL_RESPONDER, Actions.ACTION_RESPONDER_ISO18626_STATUS_REQUEST, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
@@ -406,6 +406,15 @@ public class AvailableActionData {
         // The supplied action can be applied to all non terminal states
         List<Status> nonTerminalStates = StateModel.getNonTerminalStates(model);
         assignToStates(nonTerminalStates, model, action, triggerType, resultList);
+    }
+
+    static void assignToCompletedAndActiveStates(String model, String action, String triggerType, String resultList) {
+        List<Status> activeStates = StateModel.getActiveStates(model);
+        List<Status> completedStates = StateModel.getCompletedStates(model);
+        activeStates.removeAll(completedStates);
+        completedStates.addAll(activeStates);
+
+        assignToStates(completedStates, model, action, triggerType, resultList);
     }
 
     static void assignToStates(List<Status> states, String model, String action, String triggerType, String resultList) {

@@ -41,6 +41,8 @@ class Status implements MultiTenant<Status> {
   public static final String PATRON_REQUEST_WILL_SUPPLY                 = "REQ_WILL_SUPPLY";
   public static final String PATRON_REQUEST_DELIVERED                   = "REQ_DELIVERED";
   public static final String PATRON_REQUEST_COMPLETE                    = "REQ_COMPLETE";
+  public static final String PATRON_REQUEST_REREQUESTED                 = "REQ_REREQUESTED";
+
 
   public static final String REQUESTER_LOANED_DIGITALLY                 = "REQ_LOANED_DIGITALLY";
 

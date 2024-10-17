@@ -127,6 +127,7 @@ public class RefdataValueData {
 
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
+    public static final String NOTICE_TRIGGER_END_OF_ROTA_REVIEWED           = 'End of rota reviewed';
     public static final String NOTICE_TRIGGER_LOANED_DIGITALLY               = 'Loaned digitally';
     public static final String NOTICE_TRIGGER_OVER_LIMIT                     = 'Over limit';
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION          = 'New Host LMS Location';
@@ -148,6 +149,7 @@ public class RefdataValueData {
     public static final String SHARED_INDEX_ADAPTER_FOLIO = 'FOLIO';
     public static final String SHARED_INDEX_ADAPTER_JISC_LHD = 'jiscDiscover';
     public static final String SHARED_INDEX_ADAPTER_OAIPMH = 'OAIPMH';
+    public static final String SHARED_INDEX_ADAPTER_MOCK = 'Mock';
 
 
     public static void loadAll() {
@@ -247,6 +249,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_JISC_LHD);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, 'OAI-PMH', SHARED_INDEX_ADAPTER_OAIPMH);
+            RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_MOCK);
 
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_MANUAL);
@@ -279,6 +282,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'No longer available', 'unavailable');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Missing', 'missing');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
+            RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Transfer', 'transfer');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
 
             RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');

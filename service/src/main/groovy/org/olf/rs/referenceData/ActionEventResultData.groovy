@@ -131,6 +131,17 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterISO18626UnfilledTransfer = [
+        code: 'requesterISO18626UnfilledTransfer',
+        description: 'An incoming ISO-18626 message for the requester has said that the status is Unfilled, but the reason is "transfer"',
+        result: true,
+        status: Status.PATRON_REQUEST_REREQUESTED,
+        qualifier: 'UnfilledTransfer',
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
+    ];
+
     private static Map responderISO18626AgreeConditions = [
         code: 'responderISO18626AgreeConditions',
         description: 'Requester has said they want to agree to the conditions',
@@ -1001,6 +1012,7 @@ public class ActionEventResultData {
             requesterISO18626Conditional,
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
+            requesterISO18626UnfilledTransfer,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1047,6 +1059,7 @@ public class ActionEventResultData {
             requesterISO18626Conditional,
             requesterISO18626ExpectToSupply,
             requesterISO18626Unfilled,
+            requesterISO18626UnfilledTransfer,
             defaultNoStatusChangeOK
         ]
     ];

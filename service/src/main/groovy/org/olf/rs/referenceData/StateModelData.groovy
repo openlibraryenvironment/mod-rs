@@ -45,7 +45,8 @@ public class StateModelData {
         [ status : Status.PATRON_REQUEST_UNABLE_TO_CONTACT_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_UNFILLED ],
         [ status : Status.PATRON_REQUEST_VALIDATED ],
-        [ status : Status.PATRON_REQUEST_WILL_SUPPLY ]
+        [ status : Status.PATRON_REQUEST_WILL_SUPPLY ],
+        [ status : Status.PATRON_REQUEST_REREQUESTED, isTerminal: true ]
     ];
 
   // The states available to the default digital returnable requester state model

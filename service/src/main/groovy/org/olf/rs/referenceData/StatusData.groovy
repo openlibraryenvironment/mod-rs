@@ -59,6 +59,7 @@ public class StatusData {
         Status.ensure(Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED, StatusStage.COMPLETED, '0080', true, null, true, 3);
         Status.ensure(Status.PATRON_REQUEST_CANCELLED, StatusStage.COMPLETED, '9998', true, null, true, 4);
         Status.ensure(Status.PATRON_REQUEST_ERROR, StatusStage.ACTIVE, '9999', true, true);
+        Status.ensure(Status.PATRON_REQUEST_REREQUESTED, StatusStage.COMPLETED, '9995', true, null, true, 3);
 
         // Digital Returnable Requester
         Status.ensure(Status.REQUESTER_LOANED_DIGITALLY, StatusStage.ACTIVE_SHIPPED, '0076', true, null, false, null, [ tags.ACTIVE_BORROW, tags.ACTIVE_PATRON ]);

@@ -18,7 +18,16 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   ItemLocation determineBestLocation(ISettings settings, PatronRequest pr, IHoldingLogDetails holdingLogDetails) {
-    ItemLocation location = null;
+    ItemLocation location = new ItemLocation();
+    location.location = "spoof";
+    location.reason = "spoof";
+    location.callNumber = "spoof";
+    location.itemId = "spoof";
+    location.shelvingLocation = "spoof";
+    location.shelvingPreference = 0;
+    location.temporaryLocation = "spoof";
+    location.temporaryShelvingLocation = "spoof";
+    location.preference = 0;
     return location;
   }
 
