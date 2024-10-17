@@ -32,10 +32,6 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
             actionResultDetails.auditMessage = 'Cancellation denied';
             actionResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO;
         } else {
-<<<<<<< HEAD
-            log.debug("Responder accepted cancellation");
-            actionResultDetails.auditMessage = 'Cancellation accepted';
-=======
             Map resultMap = [:];
             try {
                 resultMap = hostLMSService.checkInRequestVolumes(request);
@@ -63,7 +59,6 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
                 reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
                 actionResultDetails.auditMessage = 'Cancellation accepted';
             }
->>>>>>> master
         }
 
         return(actionResultDetails);
