@@ -821,6 +821,7 @@ and sa.service.businessFunction.value=:ill
     return deliveryInfo
   }
 
+
   ReturnInfo makeReturnInfo(eventData) {
     ReturnInfo returnInfo = new ReturnInfo()
     if (eventData.returnInfo.returnAgencyId) {
@@ -829,6 +830,7 @@ and sa.service.businessFunction.value=:ill
       returnAgencyId.setAgencyIdType(toTypeSchemeValuePair(values[0]))
       returnAgencyId.setAgencyIdValue(values[1])
       returnInfo.setReturnAgencyId(returnAgencyId)
+
     }
     returnInfo.setName(eventData.returnInfo.name)
     if (eventData.returnInfo.physicalAddress) {

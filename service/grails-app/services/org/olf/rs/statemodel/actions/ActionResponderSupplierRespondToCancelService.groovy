@@ -59,6 +59,7 @@ public class ActionResponderSupplierRespondToCancelService extends ActionRespond
                 reshareActionService.sendSupplierCancelResponse(request, parameters, actionResultDetails);
                 actionResultDetails.auditMessage = 'Cancellation accepted';
             }
+
         }
 
         return(actionResultDetails);

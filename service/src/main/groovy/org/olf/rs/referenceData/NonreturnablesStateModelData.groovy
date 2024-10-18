@@ -2,6 +2,7 @@ package org.olf.rs.referenceData
 
 import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEvent
+import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.Actions
@@ -23,13 +24,16 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
+        [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
+        [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
         [ status : Status.PATRON_REQUEST_CANCELLED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_OVER_LIMIT ],
         [ status : Status.PATRON_REQUEST_INVALID_PATRON ],
         [ status : Status.PATRON_REQUEST_BLANK_FORM_REVIEW ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED ],
-        [ status : Status.PATRON_REQUEST_UNFILLED]
+        [ status : Status.PATRON_REQUEST_UNFILLED],
+        [ status : Status.PATRON_REQUEST_REREQUESTED]
     ];
 
     static private final List nrResponderStates = [
@@ -136,6 +140,28 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterISO18626Cancelled = [
+            code: 'requesterISO18626Cancelled',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Cancelled',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER,
+            qualifier: 'Cancelled',
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626CancelNo = [
+            code: 'requesterISO18626CancelNo',
+            description: 'An incoming ISO-18626 message for the requester has said that we are not cancelling the request',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
+            qualifier: ActionEventResultQualifier.QUALIFIER_NO,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterISO18626ExpectToSupply = [
             code: 'nrRequesterISO18626ExpectToSupply',
             description: 'Incoming ISO18686 message from the responder has said that the status is ExpectToSupply',
@@ -171,11 +197,22 @@ public class NonreturnablesStateModelData {
     ];
 
     private static Map nrRequesterISO18626Delivered = [
-            code: 'requesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Loaned',
+            code: 'nrRequesterISO18626Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
             qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626UnfilledTransfer = [
+            code: 'nrRequesterISO18626UnfilledTransfer',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Unfilled, but the reason is "transfer"',
+            result: true,
+            status: Status.PATRON_REQUEST_REREQUESTED,
+            qualifier: 'UnfilledTransfer',
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -205,7 +242,7 @@ public class NonreturnablesStateModelData {
             code: 'requesteCancelOK',
             description: 'request is cancelled',
             result: true,
-            status: Status.PATRON_REQUEST_CANCELLED,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
             qualifier: null,
             saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
@@ -237,6 +274,16 @@ public class NonreturnablesStateModelData {
             result: true,
             status: Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED,
             qualifer: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
+
+    private static Map nrRequesterRerequested = [
+            code: 'nrRequesterRerequested',
+            description: 'Request re-requested',
+            result: true,
+            status: Status.PATRON_REQUEST_END_OF_ROTA, //Should this go to re-requested status?
+            qualifier: null,
             saveRestoreState: null,
             nextActionEvent: null
     ]
@@ -302,6 +349,7 @@ public class NonreturnablesStateModelData {
     ];
 
 
+
     //NR REQUESTER ACTIONEVENT RESULT LISTS
     private static Map nrRequesterNoStatusChangeList = [
             code: ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE,
@@ -353,6 +401,7 @@ public class NonreturnablesStateModelData {
             results: [
                     nrRequesterISO18626ExpectToSupply,
                     nrRequesterISO18626Unfilled,
+                    nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
             ]
     ];
@@ -365,6 +414,7 @@ public class NonreturnablesStateModelData {
             results: [
                     nrRequesterISO18626Delivered,
                     nrRequesterISO18626Unfilled,
+                    nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
             ]
     ];
@@ -429,6 +479,15 @@ public class NonreturnablesStateModelData {
             ]
     ]
 
+    private static Map nrRequesterRerequestList = [
+            code: ActionEventResultList.NR_REQUESTER_REREQUEST,
+            description: 'Re-request request',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterRerequested
+            ]
+    ]
+
     private static Map nrRequesterCloseManualList = [
             code: ActionEventResultList.NR_REQUESTER_CLOSE_MANUAL,
             description: 'Requester is manually closing down the request',
@@ -451,6 +510,16 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
+    private static Map nrRequesterCancelPendingISO18626List = [
+            code: ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626,
+            description: 'In incoming ISO18626 message has been received by a requester pending cancel',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterISO18626Cancelled,
+                    nrRequesterISO18626CancelNo
+            ]
+    ]
+
 
     //NR RESPONSE ACTIONEVENT RESULTS
 
@@ -463,6 +532,37 @@ public class NonreturnablesStateModelData {
             saveRestoreState: null,
             nextActionEvent: null
     ];
+
+    private static Map nrResponderNewPatronRequestOKLocated = [
+            code: 'nrResponderNewPatronRequestOKLocated',
+            description: 'Event triggered by a new incoming request and the item has been located',
+            result: true,
+            status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderNewPatronRequestOKUnfilled = [
+            code: 'nrResponderNewPatronRequestOKUnfilled',
+            description: 'Event triggered by a new incoming request and the item was not found',
+            result: true,
+            status: Status.RESPONDER_UNFILLED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_UNFILLED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderNewPatronRequestOKRequestItem = [
+            code: 'nrResponderNewPatronRequestOKRequestItem',
+            description: 'Event triggered by a new incoming request, the item has been located and we are configured to use request item',
+            result: true,
+            status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            qualifier: ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
 
     private static Map nrResponderAnswerYesOK = [
             code: 'nrResponderAnswerYesOK',
@@ -509,9 +609,9 @@ public class NonreturnablesStateModelData {
             code: 'nrResponderISO18626Cancel',
             description: 'Requester has sent cancel message',
             result: true,
-            status: Status.RESPONDER_CANCELLED,
+            status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
             qualifier: null,
-            saveRestoreState: null,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
             nextActionEvent: null
     ];
 
@@ -555,6 +655,26 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrResponderCancelOK = [
+            code: 'nonreturnableResponderCancelOK',
+            description: 'Responder has replied yes to cancel',
+            result: true,
+            status: Status.RESPONDER_CANCELLED,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderCancelNoOK = [
+            code: 'nonreturnableResponderCancelNoOK',
+            description: 'Responder replied no to cancel',
+            result: true,
+            status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_NO,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+            nextActionEvent: null
+    ];
+
     private static Map nrResponderManualCloseFailure = [
             code: 'nonreturnableResponderManualCloseFailure',
             description: 'Incorrect parameters passed to manual close',
@@ -572,7 +692,10 @@ public class NonreturnablesStateModelData {
             description: 'Event for a new incoming request on the responder side',
             model: StateModel.MODEL_NR_RESPONDER,
             results: [
-                    nrResponderNewPatronRequestOK
+                    nrResponderNewPatronRequestOK,
+                    nrResponderNewPatronRequestOKLocated,
+                    nrResponderNewPatronRequestOKRequestItem,
+                    nrResponderNewPatronRequestOKUnfilled
             ]
     ];
 
@@ -643,6 +766,16 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
+    private static Map nrResponderCancelList = [
+            code: ActionEventResultList.NR_RESPONDER_CANCEL,
+            description: 'Responder responds "yes" to cancel request',
+            model: StateModel.MODEL_NR_RESPONDER,
+            results: [
+                    nrResponderCancelOK,
+                    nrResponderCancelNoOK
+            ]
+    ];
+
     private static Map nrResponderNotificationReceivedISO18626List = [
             code: ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626,
             description: 'An incoming ISO18626 notifications has been received by the supplier',
@@ -670,6 +803,7 @@ public class NonreturnablesStateModelData {
             nrRequesterRetriedValidationList,
             nrRequesterCloseManualList,
             nrRequesterNotificationReceivedISO18626List,
+            nrRequesterCancelPendingISO18626List,
             nrResponderNewPatronRequestList,
             nrResponderAnswerYesList,
             nrResponderCannotSupplyList,
@@ -678,6 +812,7 @@ public class NonreturnablesStateModelData {
             nrResponderCancelRecievedISO18626,
             nrResponderNoStatusChangeList,
             nrResponderCloseManualList,
+            nrResponderCancelList,
             nrResponderNotificationReceivedISO18626List
     ];
 
@@ -697,11 +832,7 @@ public class NonreturnablesStateModelData {
                 'Attach a URL to fulfill a nonreturnable request', true,
                 StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT.capitalize(),
                 ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, 'Print the pull slip', true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP.capitalize(),
-                ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
-
+        
         ActionEvent.ensure(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION,
                 "A new Non-Returnable patron request for the requester has been created", false,
                 ActionEventData.eventServiceName(Events.EVENT_NONRETURNABLE_REQUESTER_NEW_PATRON_REQUEST_INDICATION),
@@ -717,28 +848,6 @@ public class NonreturnablesStateModelData {
                 ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
                 ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
 
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, 'Completely bypass the validation step',
-                true,  StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_BYPASS_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, 'Retry validation on a request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_RETRY_VALIDATION.capitalize(),
-                ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, 'The requester is asking the responder to cancel the request',
-                true, StateModel.MODEL_REQUESTER.capitalize() + Actions.ACTION_REQUESTER_REQUESTER_CANCEL.capitalize(),
-                ActionEventResultList.NR_REQUESTER_CANCEL);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, "Respond yes to supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_RESPOND_YES.capitalize(),
-                ActionEventResultList.NR_RESPONDER_ANSWER_YES);
-
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, "Respond can't supply", true,
-                StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY.capitalize(),
-                ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
-        
-        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, "Review EOR", true,
-                'GenericDoNothing', ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
     }
 
     public static void loadStateModelData() {
@@ -749,30 +858,33 @@ public class NonreturnablesStateModelData {
 
     public static void loadAvailableActionData() {
         //REQ_IDLE
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
 
         //REQ_VALIDATED
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_VALIDATED, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
 
         //REQ_BLANK_FORM_REVIEW
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
 
         //REQ_INVALID_PATRON
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION)
+
+        // REQ_CANCEL_PENDING OR "Cancel pending"
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626);
 
         //REQ_SENT_TO_SUPPLIER
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
 
         //REQ_EXPECTS_TO_SUPPLY
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
@@ -782,23 +894,28 @@ public class NonreturnablesStateModelData {
         //AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_DOCUMENT_DELIVERED, Actions.ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST, AvailableAction.TRIGGER_TYPE_MANUAL);
 
         //REQ_END_OF_ROTA
-        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_END_OF_ROTA, Actions.ACTION_NONRETURNABLE_REQUESTER_REREQUEST, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_REREQUEST);
 
         //RES_IDLE
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ANSWER_YES);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //RES_NEW_AWAIT_PULL_SLIP
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //RES_COPY_AWAIT_PICKING
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE);
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL);
+
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
+
+        //RES_CANCEL_RECEIVED
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL);
 
         //messageAllSeen
         AvailableActionData.assignToAllStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGES_ALL_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
@@ -820,8 +937,8 @@ public class NonreturnablesStateModelData {
         AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CLOSE_MANUAL);
 
         //ISO18686Notification
-        AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
-        AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
+        AvailableActionData.assignToCompletedAndActiveStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626);
+        AvailableActionData.assignToCompletedAndActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626);
 
         //ISO18626StatusRequest
         AvailableActionData.assignToActiveStates(StateModel.MODEL_NR_RESPONDER, Actions.ACTION_RESPONDER_ISO18626_STATUS_REQUEST, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_NO_STATUS_CHANGE);
@@ -835,4 +952,5 @@ public class NonreturnablesStateModelData {
         loadStateModelData();
         loadAvailableActionData();
     }
+
 }

@@ -212,6 +212,23 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 // Set State, StateModel specific data, call NCIP lookup patron for SLNP Requester
                 setStateModelData(pr, eventData)
 
+                //special handling for preceded-by bibliographicItemIdentifierCode
+                def biid = eventData?.bibliographicInfo?.bibliographicItemId;
+                if (biid instanceof ArrayList) {
+                    biid.each {
+                        if (it.bibliographicItemIdentifierCode == 'preceded-by') {
+                            log.debug("Attempting to find preceding request via HRID");
+                            PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
+                            if (pr) {
+                                log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
+                                pr.precededBy = preceedingPr;
+                                preceedingPr.succeededBy = pr;
+                                preceedingPr.save();
+                            }
+                        }
+                    }
+                }
+
                 log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
                 pr.save(flush: true, failOnError: true)
 
@@ -422,5 +439,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
         String shortcode = pr.stateModel.shortcode
         return shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_REQUESTER) ||
                 shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)
+    }
+
+    public PatronRequest getPatronRequestByHrid(String id, boolean isRequester) {
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                eq('hrid', id)
+                eq('isRequester', isRequester)
+            }
+            lock false
+        }
+        return result;
     }
 }
