@@ -97,11 +97,6 @@ class ProtocolMessageBuildingService {
       informationSource: req.informationSource,
       supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
 
-      // These should be removed - they have no business being here as they are not part of the protocol
-      // oclcNumber shoud go in bibliographicItemId [ { bibliographicItemIdentifierCode:{scheme:''}, bibliographicItemIdentifier:'VALUE' } ]
-      systemInstanceIdentifier: req.systemInstanceIdentifier,
-      oclcNumber: req.oclcNumber,
-
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -274,7 +269,8 @@ class ProtocolMessageBuildingService {
       }
     }
 
-    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status)) {
+    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
+            !TypeStatus.UNFILLED.value().equalsIgnoreCase(status)) {
         Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
             rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
         }

@@ -4,6 +4,7 @@ import com.k_int.web.toolkit.custprops.CustomProperty
 import com.k_int.web.toolkit.settings.AppSetting
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
@@ -89,8 +90,8 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
             return
         }
 
-        log.debug("Attempt hold with RequestItem")
-        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequester?.owner, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
+        log.debug("Attempt hold with RequestItem and resolved requester ${request.resolvedRequester?.owner?.name}")
+        CustomProperty institutionalPatronId = directoryEntryService.extractCustomPropertyFromDirectoryEntry(request.resolvedRequesterDirectoryEntry, Directory.KEY_LOCAL_INSTITUTION_PATRON_ID)
         String institutionalPatronIdValue = institutionalPatronId?.value
         if (!institutionalPatronIdValue) {
             // If nothing on the Directory Entry then fallback to the default in settings
@@ -99,7 +100,7 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
         }
         if (settingsService.hasSettingValue(SettingsData.SETTING_USE_REQUEST_ITEM, SETTING_REQUEST_ITEM_NCIP)) {
             String folioLocationFilter = directoryEntryService.extractCustomPropertyFromDirectoryEntry(
-                    request.resolvedSupplier?.owner, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
+                    request.resolvedSupplierDirectoryEntry, Directory.KEY_FOLIO_LOCATION_FILTER)?.value
             Map requestItemResult = hostLMSService.requestItem(request,
                     request.resolvedSupplier?.owner?.lmsLocationCode, folioLocationFilter,
                     request.supplierUniqueRecordId, institutionalPatronIdValue)
@@ -153,15 +154,20 @@ public class EventRespNewSlnpPatronRequestIndService extends AbstractEvent {
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM
                 }
             } else {
+                handleUnfilledResponse(request, eventResultDetails, autoRespondVariant)
                 log.debug("Send response Unfilled to ${request.requestingInstitutionSymbol}")
-                reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
                 eventResultDetails.auditMessage = "Cannot Supply"
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
             }
         } else {
+            handleUnfilledResponse(request, eventResultDetails, autoRespondVariant)
             log.debug("NCIP not configured. Send response Unfilled to ${request.requestingInstitutionSymbol}")
-            reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
             eventResultDetails.auditMessage = "Cannot Supply. NCIP not configured."
+        }
+    }
+
+    private void handleUnfilledResponse(PatronRequest request, EventResultDetails eventResultDetails, String autoRespondVariant) {
+        if (autoRespondVariant != "on:_will_supply_only") {
+            reshareActionService.sendResponse(request, "Unfilled", [:], eventResultDetails)
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_UNFILLED
         }
     }
