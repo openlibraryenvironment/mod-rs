@@ -54,8 +54,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
 
             // Could receive a single string or an array here as per the standard/our profile
-            Object itemId = parameters?.deliveryInfo?.itemId;
-            List<String> barcodes = []
+            Object itemId = parameters?.deliveryInfo?.itemId
             if (itemId) {
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
@@ -73,15 +72,17 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                         }
                         itemId = transformToList
                     }
+                    if (!request.selectedItemBarcode && itemId) {
+                        request.selectedItemBarcode = itemId
+                    }
                     // Item ids coming in, handle those
                     itemId.each { iid ->
                         Matcher matcher = iid =~ /multivol:(.*),(.*),(.*)/
                         if (matcher.size() > 0) {
-                            // At this point we have an itemId of the form "multivol:<name>,<id>,<callNumber>"
-                            String iidId = matcher[0][2]
+                            // At this point we have an itemId of the form "multivol:<name>,<callNumber>,<id>"
+                            String iidId = matcher[0][3]
                             String iidName = matcher[0][1]
-                            String iidCallNumber = matcher[0][3]
-                            barcodes.add(iidId)
+                            String iidCallNumber = matcher[0][2]
 
                             // Check if a RequestVolume exists for this itemId, and if not, create one
                             RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId };
@@ -111,17 +112,15 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     // We have a single string, this is the usual standard case and should be handled as a single request volume
                     // Check if a RequestVolume exists for this itemId, and if not, create one
                     // At this point we have an itemId of the form "<name>,<id>,<callNumber>"
-                    itemId = itemId + " "
-                    var iidFields = itemId.split(',')
+                    Matcher matcher = itemId =~ /(.*),(.*),(.*)/
                     String iidId = itemId
                     String iidName = itemId
                     String iidCallNumber = null
-                    if (iidFields.size() == 3) {
-                        iidId = iidFields[1]
-                        iidName = iidFields[0]
-                        iidCallNumber = iidFields[2].trim()
+                    if (matcher.size() > 0) {
+                        iidId = matcher[0][3]
+                        iidName = matcher[0][1]
+                        iidCallNumber = matcher[0][2]
                     }
-                    barcodes.add(iidId)
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId }
                     if (!rv) {
                         rv = new RequestVolume(
@@ -140,13 +139,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                         */
                         rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(false, useBarcode)
                     }
+                    if (!request.selectedItemBarcode && iidId) {
+                        request.selectedItemBarcode = iidId
+                    }
                 }
-            }
-
-            String barcodesString = barcodes.join(",")
-            // If we're being told about the barcode of the selected item (and we don't already have one saved), stash it in selectedItemBarcode on the requester side
-            if (!request.selectedItemBarcode && barcodesString) {
-                request.selectedItemBarcode = barcodesString.take(254)
             }
 
             // If the deliveredFormat is URL and a URL is present, store it on the request
