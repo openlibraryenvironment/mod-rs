@@ -1,5 +1,6 @@
-package org.olf.rs.statemodel.actions;
+package org.olf.rs.statemodel.actions
 
+import org.grails.datastore.gorm.events.AutoTimestampEventListener;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestNotification;
 import org.olf.rs.statemodel.AbstractAction;
@@ -15,6 +16,8 @@ import com.k_int.web.toolkit.settings.AppSetting;
  *
  */
 public class ActionMessagesAllSeenService extends AbstractAction {
+
+    AutoTimestampEventListener autoTimestampEventListener;
 
     @Override
     String name() {
@@ -34,32 +37,42 @@ public class ActionMessagesAllSeenService extends AbstractAction {
             }
 
             PatronRequestNotification[] messages = request.notifications;
-            messages.each { message ->
-                // Firstly we only want to be setting messages as read/unread that aren't already, and that we didn't send
-                if (message.seen != seenStatus && !message.isSender) {
-                    // Next we check if we care about the user defined settings
-                    if (excluding) {
-                        // Find the chat_auto_read AppSetting
-                        AppSetting chatAutoRead = AppSetting.findByKey('chat_auto_read') ?: null;
+            autoTimestampEventListener.withoutLastUpdated(PatronRequest, {
+                messages.each { message ->
+                    // Firstly we only want to be setting messages as read/unread that aren't already, and that we didn't send
+                    if (message.seen != seenStatus && !message.isSender) {
+                        // Next we check if we care about the user defined settings
+                        if (excluding) {
+                            // Find the chat_auto_read AppSetting
+                            AppSetting chatAutoRead = AppSetting.findByKey('chat_auto_read') ?: null;
 
-                        // If the setting does not exist then assume we want to mark all as read
-                        if (chatAutoRead) {
-                            if (chatAutoRead.value) {
-                                markAsReadLogic(message, chatAutoRead.value, seenStatus);
+                            // If the setting does not exist then assume we want to mark all as read
+                            if (chatAutoRead) {
+                                if (chatAutoRead.value) {
+                                    markAsReadLogic(message, chatAutoRead.value, seenStatus);
+                                } else {
+                                    markAsReadLogic(message, chatAutoRead.defValue, seenStatus);
+                                }
                             } else {
-                                markAsReadLogic(message, chatAutoRead.defValue, seenStatus);
+                                log.warn("Couldn't find chat auto mark as read setting, assuming needs to mark all as read");
+                                message.seen = seenStatus;
                             }
                         } else {
-                            log.warn("Couldn't find chat auto mark as read setting, assuming needs to mark all as read");
+                            // Sometimes we want to just mark all as read without caring about the user defined setting
                             message.seen = seenStatus;
                         }
-                    } else {
-                        // Sometimes we want to just mark all as read without caring about the user defined setting
-                        message.seen = seenStatus;
                     }
                 }
-            }
+
+                PatronRequestNotification.withSession { session ->
+                    session.flush();
+                }
+                PatronRequest.withSession { session ->
+                    session.flush();
+                }
+            });
         }
+
 
         // Ensure the response status is set
         actionResultDetails.responseResult.status = (actionResultDetails.result == ActionResult.SUCCESS);
