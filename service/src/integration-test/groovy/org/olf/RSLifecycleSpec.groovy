@@ -2148,4 +2148,134 @@ class DosomethingSimple {
         assert(true);
 
     }
+
+    void "test messaging between tenants"() {
+        String patronIdentifier = "ABC-RJR-GGF-245";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "Staying in Touch";
+        String requestAuthor = "Mei, Karl";
+        String requestSymbol = "ISIL:RST1";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "121-434-313";
+
+        when: "Do the thing"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "off"]);
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                tags                       : ['RS-MESSAGE-TEST-1']
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+        log.debug("Requester request id is ${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+
+        Map messageRequest = [
+                action: "message",
+                actionParams: [
+                        note: "The secret code is 9871"
+                ]
+        ];
+
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requesterRequestId}/performAction".toString();
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        def messageActionResponse = doPost(performActionUrl, messageRequest);
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def responderRequestDataMessageOne = doGet("${baseUrl}/rs/patronrequests/${responderRequestId}")
+
+
+        boolean firstMessageFound = false;
+        responderRequestDataMessageOne.notifications.each { notif ->
+            if (notif.attachedAction == "Notification" && notif.isSender == false) {
+                if (notif.messageContent == "The secret code is 9871") {
+                    firstMessageFound = true;
+                }
+            }
+        }
+
+        //do a messages all seen action here
+
+        Map messagesAllSeenRequest = [
+                action: "messagesAllSeen",
+                actionParams: [
+                        seenStatus: true
+                ]
+        ];
+
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def messagesAllSeenActionResponse = doPost(responderPerformActionUrl, messagesAllSeenRequest);
+
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def responderRequestDataMessageOneAllRead = doGet("${baseUrl}/rs/patronrequests/${responderRequestId}");
+
+        //Send another message
+
+        Map newMessageRequest = [
+                action: "message",
+                actionParams: [
+                        note: "The donkey flies at midnight"
+                ]
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        def newMessageActionResponse = doPost(performActionUrl, newMessageRequest);
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def responderRequestDataMessageTwo = doGet("${baseUrl}/rs/patronrequests/${responderRequestId}")
+
+        boolean secondMessageFound = false;
+        String secondMessageId;
+        responderRequestDataMessageTwo.notifications.each { notif ->
+            if (notif.attachedAction == "Notification" && notif.isSender == false) {
+                if (notif.messageContent == "The donkey flies at midnight") {
+                    secondMessageFound = true;
+                    secondMessageId = notif.id;
+                }
+            }
+        }
+
+        //Mark the second message read
+
+        Map markMessageReadRequest = [
+                action: "messageSeen",
+                actionParams: [
+                        id: secondMessageId,
+                        seenStatus: true
+                ]
+        ];
+
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def messageTwoSeenActionResponse;
+
+        messageTwoSeenActionResponse = doPost(responderPerformActionUrl, markMessageReadRequest);
+
+        Thread.sleep(1000);
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def responderRequestDataMessageTwoRead = doGet("${baseUrl}/rs/patronrequests/${responderRequestId}");
+
+        then:
+        assert(firstMessageFound);
+        assert(secondMessageFound);
+        assert(responderRequestDataMessageOne.lastUpdated == responderRequestDataMessageOneAllRead.lastUpdated);
+        assert(responderRequestDataMessageTwo.lastUpdated == responderRequestDataMessageTwoRead.lastUpdated);
+    }
  }

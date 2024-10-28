@@ -21,6 +21,7 @@ public class ActionMessageSeenService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        log.debug("Called messageSeen service");
         // We must have an id
         if (parameters.id == null) {
             actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
@@ -34,6 +35,7 @@ public class ActionMessageSeenService extends AbstractAction {
                 actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
                 actionResultDetails.auditMessage = 'Message with id: ' + parameters.id + ' does not exist';
             } else {
+                log.debug("Message id ${parameters.id} updated");
                 message.seen = parameters.seenStatus;
                 message.save(flush:true, failOnError:true);
             }
