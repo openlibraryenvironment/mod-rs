@@ -126,8 +126,6 @@ class ProtocolMessageBuildingService {
 
       serviceType: req.serviceType?.value,
 
-      // ToDo wire in some proper information here instead of this hardcoded stuff
-      serviceLevel: 'Loan',
       anyEdition: 'Y',
 
       // Note that the internal names sometimes differ from the protocol names--pay attention with these fields
