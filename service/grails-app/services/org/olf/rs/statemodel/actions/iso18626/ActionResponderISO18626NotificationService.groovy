@@ -1,7 +1,9 @@
 package org.olf.rs.statemodel.actions.iso18626;
 
 import com.k_int.web.toolkit.refdata.RefdataCategory;
-import com.k_int.web.toolkit.refdata.RefdataValue;
+import com.k_int.web.toolkit.refdata.RefdataValue
+import org.olf.rs.patronRequest.PickupLocationService;
+
 import java.time.LocalDate;
 
 import org.olf.rs.PatronRequest;
@@ -19,6 +21,8 @@ import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
  *
  */
 public class ActionResponderISO18626NotificationService extends ActionISO18626ResponderService {
+
+    PickupLocationService pickupLocationService
 
     @Override
     String name() {
@@ -52,6 +56,7 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
             } else {
                 // Do we have any fields that need updating
                 StringBuffer auditMessage = new StringBuffer();
+                boolean pickupLocationChanged = false
                 ActionPatronRequestEditService.updateableFields.each() { fieldDetails ->
                     Map extractedFieldResult = extractFieldFromNote(note, fieldDetails.notePrefix);
                     if (extractedFieldResult?.data != null) {
@@ -85,9 +90,17 @@ public class ActionResponderISO18626NotificationService extends ActionISO18626Re
                             auditMessage.append("${fieldDetails.field} updated to \"" + extractedFieldResult.data + "\".")
                         }
 
+                        if ("pickupLocationSlug".equals(fieldDetails.field)){
+                            pickupLocationChanged = true
+                        }
+
                         // Reset the message note
                         note = extractedFieldResult.note;
                     }
+                }
+
+                if (pickupLocationChanged) {
+                    pickupLocationService.check(request)
                 }
 
                 // Did we update at least 1 field
