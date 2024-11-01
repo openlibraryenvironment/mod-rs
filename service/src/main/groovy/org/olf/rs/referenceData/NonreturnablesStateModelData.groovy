@@ -863,6 +863,7 @@ public class NonreturnablesStateModelData {
           [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
           [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP ],
           [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT ],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
