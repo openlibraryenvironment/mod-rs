@@ -934,7 +934,7 @@ public class NonreturnablesStateModelData {
 
 
         //RES_CANCEL_RECEIVED
-        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL, null, Boolean.TRUE, Boolean.TRUE);
 
         //messageAllSeen
         AvailableActionData.assignToAllStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGES_ALL_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
