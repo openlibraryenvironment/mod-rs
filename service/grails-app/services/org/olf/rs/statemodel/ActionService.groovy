@@ -44,7 +44,7 @@ public class ActionService {
             } catch (Exception e) {
                 log.error("Exception thrown while trying to execute action ${action} on request ${patronRequestId}: ${e?.getLocalizedMessage()}", e);
                 result.actionResult = ActionResult.INVALID_PARAMETERS;
-                result.message = 'System error occured while trying to process request ' + patronRequestId;
+                result.message = 'System error occurred while trying to process request ' + patronRequestId;
             }
         } else {
             // Unable to locate request
