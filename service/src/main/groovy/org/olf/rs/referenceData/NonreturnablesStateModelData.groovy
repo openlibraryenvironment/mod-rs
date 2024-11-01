@@ -857,6 +857,25 @@ public class NonreturnablesStateModelData {
     }
 
     public static void loadAvailableActionData() {
+        // To delete an unwanted action add State Model, State, Action to this array
+        [
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES ],
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP ],
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
+          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT ],
+        ].each { actionToRemove ->
+            log.info("Remove available action ${actionToRemove}");
+            try {
+                AvailableAction.executeUpdate('''delete from AvailableAction
+                                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)''',
+                        [code:actionToRemove[2], fs:actionToRemove[1], sm:actionToRemove[0]]);
+            } catch (Exception e) {
+                log.error("Unable to delete action ${actionToRemove} - ${e.message}", e);
+            }
+        }
+
+
         //REQ_IDLE
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_IDLE, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
 
