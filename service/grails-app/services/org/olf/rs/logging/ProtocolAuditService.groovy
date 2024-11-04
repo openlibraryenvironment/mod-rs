@@ -109,7 +109,7 @@ public class ProtocolAuditService {
                 protocolAudit.protocolMethod = baseAuditDetails.getProtocolMethod();
                 protocolAudit.url = removePrivateDataFromURI(baseAuditDetails.getURL());
                 protocolAudit.requestBody = baseAuditDetails.getRequestBody();
-                protocolAudit.responseStatus = baseAuditDetails.getResponseStatus();
+                protocolAudit.responseStatus = baseAuditDetails.getResponseStatus()?.take(30); // truncate to column size
                 protocolAudit.responseBody = responseBody;
                 protocolAudit.duration = baseAuditDetails.duration();
                 patronRequest.addToProtocolAudit(protocolAudit);

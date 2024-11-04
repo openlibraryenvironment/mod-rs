@@ -95,8 +95,7 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     } else {
                         log.debug("Request Item Hold Failed: ${requestItemResult?.problems}")
                         unfilled = true;
-                        eventResultDetails.auditMessage = 'Failed to place hold for item with bibliographicid '
-                                + request.supplierUniqueRecordId;
+                        eventResultDetails.auditMessage = "Failed to place hold for item with bibliographicid ${request.supplierUniqueRecordId}";
                     }
                 } else {
                     log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
