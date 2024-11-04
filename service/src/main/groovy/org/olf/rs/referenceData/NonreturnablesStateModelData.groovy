@@ -868,7 +868,7 @@ public class NonreturnablesStateModelData {
             log.info("Remove available action ${actionToRemove}");
             try {
                 AvailableAction.executeUpdate('''delete from AvailableAction
-                                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState.code=:fs and aa.model.shortcode=:sm)''',
+                                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState=:fs and aa.model'=:sm)''',
                         [code:actionToRemove[2], fs:actionToRemove[1], sm:actionToRemove[0]]);
             } catch (Exception e) {
                 log.error("Unable to delete action ${actionToRemove} - ${e.message}", e);
