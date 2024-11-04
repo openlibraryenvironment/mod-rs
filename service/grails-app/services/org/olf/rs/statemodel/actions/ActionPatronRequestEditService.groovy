@@ -41,7 +41,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "patronNote", notePrefix: NoteSpecials.UPDATED_FIELD_PATRON_NOTE_PREFIX, isDate: false ],
         // TODO temporary fix pending PR-1530
         [ field: "patronIdentifier", isDate: false, localOnly: true ],
-        [ field: "pickupLocationSlug", notePrefix: NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX, isDate: false, noteField: "pickupLocation", doPickupCheck: true ],
+        [ field: "pickupLocationSlug", notePrefix: NoteSpecials.UPDATED_FIELD_PICKUP_LOCATION_PREFIX, isDate: false, doPickupCheck: true ],
         [ field: "placeOfPublication", notePrefix: NoteSpecials.UPDATED_FIELD_PLACE_OF_PUBLICATION_PREFIX, isDate: false ],
         [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
         [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
