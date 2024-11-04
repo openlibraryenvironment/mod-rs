@@ -20,6 +20,7 @@ public class ActionPatronRequestISO18626RequestResponseService extends ActionISO
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         // Call the base class first
+        log.debug("ISO18626RequestResponseService with request ${request} in status ${request?.state.code} and parameters ${parameters}");
         actionResultDetails = super.performAction(request, parameters, actionResultDetails);
 
         // Only continue if successful

@@ -30,6 +30,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        log.debug("ISO18626RequesterService with request ${request} in status ${request?.state.code} and parameters ${parameters}");
         // Grab hold of the statusInfo as we may want to override it
         Map incomingStatus = parameters.statusInfo;
 
