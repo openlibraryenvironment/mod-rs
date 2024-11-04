@@ -47,7 +47,7 @@ public class FileService {
     /**
      * Fetches an InputStram for the specified file id
      * @param fileDefinitionId The id of the file
-     * @return A FileFetchResult object that contains either the error if any occured or the InputStream if successful
+     * @return A FileFetchResult object that contains either the error if any occurred or the InputStream if successful
      */
     public FileFetchResult fetch(String fileDefinitionId) {
         FileFetchResult result = new FileFetchResult();

@@ -8,7 +8,7 @@ enum NetworkStatus {
     /** Nothing needing to happen on the network at the moment */
     Idle,
 
-    /** An error previously occured and we are still within our retry limit */
+    /** An error previously occurred and we are still within our retry limit */
     Retry,
 
     /** Message has been sent */

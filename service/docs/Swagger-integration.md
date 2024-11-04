@@ -1,5 +1,5 @@
 # Swagger integration
-This has been achieved by using the grails plugin [swagger-grails](https://github.com/steamcleaner/swagger-grails) as the grails 4.x version was no longer in any repositories we have built this version and put it in the k-int repository, the last commit / merge we have included occured on 21/052021 at 04:32:56 with commit hash b2e8870e5b348d0aa3d70e01b23937c6ee5538b2.
+This has been achieved by using the grails plugin [swagger-grails](https://github.com/steamcleaner/swagger-grails) as the grails 4.x version was no longer in any repositories we have built this version and put it in the k-int repository, the last commit / merge we have included occurred on 21/052021 at 04:32:56 with commit hash b2e8870e5b348d0aa3d70e01b23937c6ee5538b2.
 
 ## The API document
 The endpoint for the api document can be found [here](http://localhost:8081/rs/swagger/api), a mapping hasn't been made so that it can be routed through okapi.

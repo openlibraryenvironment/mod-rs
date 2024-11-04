@@ -100,7 +100,7 @@ public class DynamicGroovyService {
      * Obtains a new instance of the groovy class provided in groovySource
      * @param key The key used for caching the instance
      * @param classSource The source that defines the class that we want an insance for
-     * @return An instance of the class defined in groovySource otherwise null if an error occured generating an instance
+     * @return An instance of the class defined in groovySource otherwise null if an error occurred generating an instance
      */
     private Object getClassInstance(String key, String classSource) {
         Object instance = null;
