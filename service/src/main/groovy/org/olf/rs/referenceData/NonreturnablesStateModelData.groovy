@@ -864,14 +864,17 @@ public class NonreturnablesStateModelData {
           [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_NEW_AWAIT_PULL_SLIP).id, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP ],
           [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_NEW_AWAIT_PULL_SLIP).id, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
           [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_COPY_AWAIT_PICKING).id, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT ],
-        ].each { actionToRemove ->
-            log.info("Remove available action ${actionToRemove}");
+        ].each { availableActionToRemove ->
+            log.info("Remove available action ${availableActionToRemove}");
             try {
-                AvailableAction.executeUpdate('''delete from AvailableAction
-                                                     where id in ( select aa.id from AvailableAction as aa where aa.actionCode=:code and aa.fromState=:fs and aa.model'=:sm)''',
-                        [code:actionToRemove[2], fs:actionToRemove[1], sm:actionToRemove[0]]);
+                AvailableAction.executeUpdate(
+                    '''
+                                    delete from AvailableAction
+                                    where aa_model = :model and aa_from_state = :status and aa_action_code = :action
+                                 ''',
+                        [model:availableActionToRemove[0], status:availableActionToRemove[1], action:availableActionToRemove[2]]);
             } catch (Exception e) {
-                log.error("Unable to delete action ${actionToRemove} - ${e.message}", e);
+                log.error("Unable to delete action ${availableActionToRemove} - ${e.message}", e);
             }
         }
 
