@@ -859,11 +859,11 @@ public class NonreturnablesStateModelData {
     public static void loadAvailableActionData() {
         // To delete an unwanted action add State Model, State, Action to this array
         [
-          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_RESPOND_YES ],
-          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
-          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP ],
-          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
-          [ StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT ],
+          [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_IDLE).id, Actions.ACTION_RESPONDER_RESPOND_YES ],
+          [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_IDLE).id, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
+          [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_NEW_AWAIT_PULL_SLIP).id, Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP ],
+          [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_NEW_AWAIT_PULL_SLIP).id, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY ],
+          [ StateModel.lookup(StateModel.MODEL_NR_RESPONDER).id, Status.lookup(Status.RESPONDER_COPY_AWAIT_PICKING).id, Actions.ACTION_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT ],
         ].each { actionToRemove ->
             log.info("Remove available action ${actionToRemove}");
             try {
