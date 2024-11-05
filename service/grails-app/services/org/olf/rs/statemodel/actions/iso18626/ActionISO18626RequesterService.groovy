@@ -121,6 +121,11 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                         iidName = matcher[0][1]
                         iidCallNumber = matcher[0][2]
                     }
+
+                    if (!request.selectedItemBarcode && iidId) {
+                        request.selectedItemBarcode = iidId
+                    }
+
                     RequestVolume rv = request.volumes.find { rv -> rv.itemId == iidId }
                     if (!rv) {
                         rv = new RequestVolume(
@@ -138,9 +143,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             adds the temporary barcode necessary for acceptItem.
                         */
                         rv.temporaryItemBarcode = rv.generateTemporaryItemBarcode(false, useBarcode)
-                    }
-                    if (!request.selectedItemBarcode && iidId) {
-                        request.selectedItemBarcode = iidId
                     }
                 }
             }
