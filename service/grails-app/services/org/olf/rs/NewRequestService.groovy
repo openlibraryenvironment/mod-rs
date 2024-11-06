@@ -27,7 +27,7 @@ public class NewRequestService {
 
         // Use this to make sessionFactory.currentSession work as expected
         PatronRequest.withSession { session ->
-            log.debug('Generate hrid');
+            log.debug("Generate hrid for prefix '${hridPrefix}'");
             Sql sql = new Sql(session.connection())
             List queryResult  = sql.rows("select nextval('pr_hrid_seq')");
             log.debug("Query result: ${queryResult }");

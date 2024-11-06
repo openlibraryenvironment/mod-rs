@@ -339,9 +339,9 @@ class RSLifecycleSpec extends TestBase {
 
     where:
       tenant_id      | changes_needed                                                                                                                                                            | changes_needed_hidden
-      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest':'yes'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3']                         | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1']                                          | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+      'RSInstOne'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST3,SYMBOL:ISIL:RST2', 'auto_rerequest':'yes', 'request_id_prefix' : 'TENANTONE'] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+      'RSInstTwo'    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1,SYMBOL:ISIL:RST3', 'request_id_prefix' : 'TENANTTWO']                          | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+      'RSInstThree'  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'static', 'static_routes':'SYMBOL:ISIL:RST1', 'request_id_prefix' : 'TENANTTHREE']                                        | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
 
 
     }
@@ -2277,5 +2277,98 @@ class DosomethingSimple {
         assert(secondMessageFound);
         assert(responderRequestDataMessageOne.lastUpdated == responderRequestDataMessageOneAllRead.lastUpdated);
         assert(responderRequestDataMessageTwo.lastUpdated == responderRequestDataMessageTwoRead.lastUpdated);
+    }
+
+    void "test transition to terminal state after unfilled"(
+            String serviceType,
+            String deliveryMethod
+    ) {
+        String patronIdentifier = "ABJ-LJR-IGF-705";
+        String requesterTenantId = "RSInstThree";
+        String responderTenantId = "RSInstOne";
+        String requestTitle = "Let It Die";
+        String requestAuthor = "Dayzeez, Pop N.";
+        String requestSymbol = "ISIL:RST3";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "131-484-333";
+
+        when: "Do the thing"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "off"]);
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : deliveryMethod,
+                serviceType                : serviceType,
+                tags                       : ['RS-TERMINAL-TEST-1']
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+        log.debug("Requester (terminal transition test) request id is ${requesterRequestId}");
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        def requesterRequestData = doGet("${baseUrl}/rs/patronrequests/${requesterRequestId}");
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        log.debug("Responder (terminal transition test) request id is ${responderRequestId}");
+
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def responderRequestData = doGet("${baseUrl}/rs/patronrequests/${responderRequestId}");
+
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+
+        Map respondYesPayload = [
+                action: "respondYes",
+                "actionParams": [
+                    "callnumber": "call number",
+                    "pickLocation": "location",
+                    "pickShelvingLocation": "shelving location",
+                    "note": "Notes"
+                ]
+        ];
+
+        log.debug("Posting 'respondYes' to responder at url ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def respondYesActionResponse = doPost(responderPerformActionUrl, respondYesPayload);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+
+        //Answer cannot supply
+        Map cannotSupplyPayload = [
+                action: "supplierCannotSupply",
+                actionParams: [
+                        reason: "missing",
+                        note: "dog ate it"
+                ]
+        ];
+
+        log.debug("Posting 'supplierCannotSupply' to responder at url ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        def cannotSupplyActionResponse = doPost(responderPerformActionUrl, cannotSupplyPayload);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_UNFILLED);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
+
+
+        then:
+        assert(true);
+
+        where:
+        deliveryMethod | serviceType
+        "Copy"         | "URL"
+        null           | null
+
     }
  }
