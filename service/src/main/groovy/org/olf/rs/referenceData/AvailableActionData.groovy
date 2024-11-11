@@ -270,10 +270,10 @@ public class AvailableActionData {
         assignToAllStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_MESSAGE_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
 
         // The message action can be applied to all active states
-        assignToActiveStates(StateModel.MODEL_REQUESTER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
-        assignToActiveStates(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
-        assignToActiveStates(StateModel.MODEL_RESPONDER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
-        assignToActiveStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        assignToCompletedAndActiveStates(StateModel.MODEL_REQUESTER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        assignToCompletedAndActiveStates(StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_NO_STATUS_CHANGE);
+        assignToCompletedAndActiveStates(StateModel.MODEL_RESPONDER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
+        assignToCompletedAndActiveStates(StateModel.MODEL_CDL_RESPONDER, Actions.ACTION_MESSAGE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.RESPONDER_NO_STATUS_CHANGE);
 
         // The manualClose action can be applied to all non terminal states
         assignToNonTerminalStates(StateModel.MODEL_REQUESTER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.REQUESTER_CLOSE_MANUAL);
