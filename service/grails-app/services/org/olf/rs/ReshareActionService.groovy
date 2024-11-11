@@ -134,13 +134,13 @@ public class ReshareActionService {
             if (result.patronDetails.userid != null) {
 
                 pr.resolvedPatron = lookupOrCreatePatronProxy(result.patronDetails);
-                if (pr.patronSurname == null) {
+                if (pr.patronSurname == null && (result.patronDetails.surname?.length() > 0)) {
                     pr.patronSurname = result.patronDetails.surname;
                 }
-                if (pr.patronGivenName == null) {
-                    pr.patronGivenName = result.patronDetails.givenName;
+                if (pr.patronGivenName == null && (result.patronDetails.givenName?.length() > 0)) {
+                        pr.patronGivenName = result.patronDetails.givenName;
                 }
-                if (pr.patronEmail == null) {
+                if (pr.patronEmail == null && (result.patronDetails.email?.length() > 0)) {
                     pr.patronEmail = result.patronDetails.email;
                 }
             }
