@@ -25,6 +25,6 @@ public class ActionResponderSupplierCheckInToReshareService extends AbstractResp
 
     @Override
     ActionResultDetails undo(PatronRequest request, PatronRequestAudit audit, ActionResultDetails actionResultDetails) {
-        return performCommonUndoAction()
+        return performCommonUndoAction(request, actionResultDetails)
     }
 }
