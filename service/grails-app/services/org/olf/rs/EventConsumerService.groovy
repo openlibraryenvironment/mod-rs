@@ -1,5 +1,7 @@
 package org.olf.rs
 
+import com.k_int.web.toolkit.tags.Tag
+
 import static groovy.transform.TypeCheckingMode.SKIP;
 
 import java.time.Duration;
@@ -260,6 +262,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               else {
                 if (payload.deleted) {
                   log.debug("Delete directory entry ${payload.slug}")
+                  Tag tag = new Tag()
+                  tag.value = "deleted"
+                  de.tags.add(tag)
+                  de.save(flush: true)
                   de.delete(flush: true)
                   endProcessing = true
                 } else {
