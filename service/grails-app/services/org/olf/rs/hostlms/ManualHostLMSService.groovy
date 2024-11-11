@@ -33,6 +33,7 @@ public class ManualHostLMSService implements HostLMSActions {
 
   public Map lookupPatron(ISettings settings, String patron_id, INcipLogDetails ncipLogDetails) {
     log.debug("lookupPatron(${patron_id})");
+    Map patronDetails = []
     Map result = [status: 'OK', reason: 'spoofed', result: true ];
     return result
   }
