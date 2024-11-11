@@ -242,42 +242,55 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug);
               log.debug("Trying to load DirectoryEntry ${payload.slug}")
               DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+              boolean endProcessing = false
               if ( de == null ) {
-                log.debug("Create new directory entry ${payload.slug} : ${data.payload}")
-                de = new DirectoryEntry()
-                if ( payload.id ) {
-                  de.id = payload.id
-                }
-                else {
-                  de.id = java.util.UUID.randomUUID().toString()
+                if ( payload.deleted ) {
+                  log.debug("This is delete directory entry message so no need to create new entry")
+                  endProcessing = true
+                } else {
+                  log.debug("Create new directory entry ${payload.slug} : ${data.payload}")
+                  de = new DirectoryEntry()
+                  if (payload.id) {
+                    de.id = payload.id
+                  } else {
+                    de.id = java.util.UUID.randomUUID().toString()
+                  }
                 }
               }
               else {
-                de.lock()
-                clearCustomProperties(de)
-                log.debug("Update directory entry ${payload.slug} : ${payload}")
+                if (payload.deleted) {
+                  log.debug("Delete directory entry ${payload.slug}")
+                  de.delete(flush: true)
+                  endProcessing = true
+                } else {
+                  de.lock()
+                  clearCustomProperties(de)
+                  log.debug("Update directory entry ${payload.slug} : ${payload}")
+                }
               }
 
-              // Add the identifier to the logging context
-              ContextLogging.setValue(ContextLogging.FIELD_ID, de.id);
+              if (!endProcessing) {
+                // Add the identifier to the logging context
+                ContextLogging.setValue(ContextLogging.FIELD_ID, de.id);
 
-              // Remove any custom properties from the payload - currently the custprops
-              // processing is additive - which means we get lots of values. Need a longer term solition for this
-              def custprops = payload.get('customProperties')
-              payload.remove('customProperties')
+                // Remove any custom properties from the payload - currently the custprops
+                // processing is additive - which means we get lots of values. Need a longer term solition for this
+                def custprops = payload.get('customProperties')
+                payload.remove('customProperties')
 
-              // Bind all the data execep the custprops
-              log.debug("Binding data except custom props")
-              bindData(de, payload)
+                // Bind all the data execep the custprops
+                log.debug("Binding data except custom props")
+                bindData(de, payload)
 
-              // Do special handling of the custprops
-              payload.customProperties = custprops
-              log.debug("Binding custom properties")
-              bindCustomProperties(de, payload)
-              expireRemovedSymbols(de, payload)
+                // Do special handling of the custprops
+                payload.customProperties = custprops
+                log.debug("Binding custom properties")
+                bindCustomProperties(de, payload)
+                expireRemovedSymbols(de, payload)
 
-              log.debug("Binding complete - ${de}")
-              de.save(flush:true, failOnError:true)
+                log.debug("Binding complete - ${de}")
+                de.save(flush: true, failOnError: true)
+              }
             }
           }
         }
