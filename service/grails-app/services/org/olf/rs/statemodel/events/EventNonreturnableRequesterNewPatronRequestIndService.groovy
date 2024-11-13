@@ -21,6 +21,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
     ReshareActionService reshareActionService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     NewRequestService newRequestService;
+    PickupLocationService pickupLocationService;
 
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
@@ -31,6 +32,11 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
 
         if (!request.hrid) {
             request.hrid = newRequestService.generateHrid();
+        }
+
+        // If we were supplied a pickup location, attempt to resolve it
+        if (!request.resolvedPickupLocation) {
+            pickupLocationService.check(request)
         }
 
         if (request.requestingInstitutionSymbol != null) {
