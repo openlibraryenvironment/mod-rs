@@ -242,7 +242,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
             DirectoryEntry.withTransaction { status ->
               log.debug("Trying to load DirectoryEntry ${payload.slug}")
-              DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+              DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+              if (de == null) {
+                de = DirectoryEntry.findBySlug(payload.slug as String)
+              }
               boolean endProcessing = false
               if (de == null) {
                 if (payload.deleted) {
@@ -300,7 +303,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             if (deletionFailed) {
               DirectoryEntry.withTransaction { status ->
                 log.debug("Deletion failed, add tag to DirectoryEntry ${payload.slug}")
-                DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+                DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+                if (de == null) {
+                  de = DirectoryEntry.findBySlug(payload.slug as String)
+                }
                 if (de) {
                   Tag deleted = new Tag()
                   deleted.value = "deleted"
