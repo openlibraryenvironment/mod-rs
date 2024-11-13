@@ -233,20 +233,19 @@ public class EventConsumerService implements EventPublisher, DataBinder {
         final String tenantSchema = OkapiTenantResolver.getTenantSchemaName("${data.tenant}")
 
         Tenants.withId(tenantSchema) {
-          DirectoryEntry.withTransaction { status ->
+          boolean deletionFailed = false
+          final Map<String,?> payload = data.payload as Map
+          log.debug("Payload for directory update is ${payload}")
+          log.debug("Process directory entry inside ${data.tenant}_mod_rs")
+          if ( payload.slug ) {
+            ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug)
 
-            final Map<String,?> payload = data.payload as Map
-
-            log.debug("Payload for directory update is ${payload}")
-
-            log.debug("Process directory entry inside ${data.tenant}_mod_rs")
-            if ( payload.slug ) {
-              ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug);
+            DirectoryEntry.withTransaction { status ->
               log.debug("Trying to load DirectoryEntry ${payload.slug}")
               DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
               boolean endProcessing = false
-              if ( de == null ) {
-                if ( payload.deleted ) {
+              if (de == null) {
+                if (payload.deleted) {
                   log.debug("This is delete directory entry message so no need to create new entry")
                   endProcessing = true
                 } else {
@@ -258,15 +257,15 @@ public class EventConsumerService implements EventPublisher, DataBinder {
                     de.id = java.util.UUID.randomUUID().toString()
                   }
                 }
-              }
-              else {
+              } else {
                 if (payload.deleted) {
-                  log.debug("Delete directory entry ${payload.slug}")
-                  Tag tag = new Tag()
-                  tag.value = "deleted"
-                  de.tags.add(tag)
-                  de.save(flush: true)
-                  de.delete(flush: true)
+                  try {
+                    log.debug("Delete directory entry ${payload.slug}")
+                    de.delete(flush: true, failOnError: true)
+                  } catch (Exception e) {
+                    log.error("failed to delete directory", e)
+                    deletionFailed = true
+                  }
                   endProcessing = true
                 } else {
                   de.lock()
@@ -296,6 +295,18 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
                 log.debug("Binding complete - ${de}")
                 de.save(flush: true, failOnError: true)
+              }
+            }
+            if (deletionFailed) {
+              DirectoryEntry.withTransaction { status ->
+                log.debug("Deletion failed, add tag to DirectoryEntry ${payload.slug}")
+                DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+                if (de) {
+                  Tag deleted = new Tag()
+                  deleted.value = "deleted"
+                  de.tags.add(deleted)
+                  de.save(flush: true, failOnError: true)
+                }
               }
             }
           }
