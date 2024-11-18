@@ -1,6 +1,8 @@
 package org.olf.rs.sharedindex
 
 import groovy.util.logging.Slf4j
+import groovy.xml.XmlSlurper
+import org.olf.rs.AvailabilityStatement
 import spock.lang.Specification
 import grails.testing.services.ServiceUnitTest
 
@@ -38,5 +40,19 @@ class ANBDSharedIndexServiceSpec extends Specification implements ServiceUnitTes
         assert(!z_response.isEmpty());
         assert(mapList.size() == 13);
         assert(recordList.size() == 5);
+    }
+
+    def 'test retrieval methods'() {
+        setup:
+        String resultXML = new File("src/test/resources/sharedindex/anbd_sample.xml").text;
+
+        when:
+        service.metaClass.retrieveRecordsFromZ3950 = { String query -> new XmlSlurper().parseText(resultXML)} ;
+        List<AvailabilityStatement> copies = service.findAppropriateCopies([systemInstanceIdentifier: ["12345", "56789"]]);
+        List<String> records = service.fetchSharedIndexRecords([systemInstanceIdentifier: ["12345", "56789"]]);
+
+        then:
+        assert(copies.size() == 13);
+        assert(records.size() == 5);
     }
 }
