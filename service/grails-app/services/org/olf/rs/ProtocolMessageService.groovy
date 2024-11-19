@@ -295,17 +295,22 @@ class ProtocolMessageService {
    * Return a prioroty order list of service accounts this symbol can accept
    */
   public List<ServiceAccount> findIllServices(String symbol) {
-    String[] symbol_components = symbol.split(':');
+    String[] symbol_components = symbol.split(':')
 
-    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}");
+    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}")
     List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
 join sa.accountHolder.symbols as symbol
 where symbol.symbol=:sym
 and symbol.authority.symbol=:auth
 and sa.service.businessFunction.value=:ill
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] );
+''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] )
 
-    log.debug("Got service accounts: ${result}");
+    log.debug("Got service accounts: ${result}")
+
+    if (result.size() == 0) {
+      result = ServiceAccount.executeQuery('select sa from ServiceAccount as sa where sa.service.businessFunction.value=:bf ', [bf:'slnp_gateway'])
+    }
+
 
     return result;
   }
