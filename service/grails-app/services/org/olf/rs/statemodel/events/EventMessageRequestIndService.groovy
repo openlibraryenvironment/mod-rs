@@ -78,7 +78,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         if (it.bibliographicItemIdentifierCode == 'preceded-by') {
                             log.debug("Attempting to find preceding request via HRID");
                             PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
-                            if (pr) {
+                            if (preceedingPr) {
                                 log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
                                 pr.precededBy = preceedingPr;
                                 preceedingPr.succeededBy = pr;
