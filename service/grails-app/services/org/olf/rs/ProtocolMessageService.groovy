@@ -187,13 +187,14 @@ class ProtocolMessageService {
       serviceAddress = ill_services_for_peer[0].service.address
     }
     else {
-      log.warn("Unable to find ILL service address for ${peer_symbol}");
+      serviceAddress = settingsService.getSettingValue(SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS)
+      log.warn("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
     }
 
     try {
       log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
       def additional_headers = [:]
-      if ( ill_services_for_peer[0].customProperties != null ) {
+      if ( ill_services_for_peer.size() > 0 && ill_services_for_peer[0].customProperties != null ) {
         log.debug("Service has custom properties: ${ill_services_for_peer[0].customProperties}");
         ill_services_for_peer[0].customProperties.value.each { cp ->
           if ( cp?.definition?.name=='AdditionalHeaders' ) {
@@ -306,12 +307,6 @@ and sa.service.businessFunction.value=:ill
 ''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] )
 
     log.debug("Got service accounts: ${result}")
-
-    if (result.size() == 0) {
-      result = ServiceAccount.executeQuery('select sa from ServiceAccount as sa where sa.service.businessFunction.value=:bf ', [bf:'slnp_gateway'])
-    }
-
-
     return result;
   }
 

@@ -142,9 +142,10 @@ public class SettingsData {
     public static final String SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP = 'combine_returned_by_patron_and_return_ship';
 
     // Network configuration settings
-    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS = 'network_maximum_send_attempts';
-    public static final String SETTING_NETWORK_RETRY_PERIOD          = 'network_retry_period';
-    public static final String SETTING_NETWORK_TIMEOUT_PERIOD        = 'network_timeout_period';
+    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS    = 'network_maximum_send_attempts';
+    public static final String SETTING_NETWORK_RETRY_PERIOD             = 'network_retry_period';
+    public static final String SETTING_NETWORK_TIMEOUT_PERIOD           = 'network_timeout_period';
+    public static final String SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS = 'iso18626_gateway_address';
 
     // State model configuration settings
     public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';
@@ -355,9 +356,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '3');
             ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');
             ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
-
-            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
-            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS, SECTION_NETWORK, SETTING_TYPE_STRING, null, null)
 
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
