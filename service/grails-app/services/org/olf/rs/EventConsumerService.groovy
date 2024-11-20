@@ -272,6 +272,7 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               log.debug("Binding custom properties")
               bindCustomProperties(de, payload)
               expireRemovedSymbols(de, payload)
+              expireRemovedServiceAccounts(de, payload)
 
               log.debug("Binding complete - ${de}")
               de.save(flush: true, failOnError: true)
@@ -527,6 +528,20 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
     catch ( Exception e ) {
       log.error("Problem detecting residual symbols",e)
+    }
+  }
+
+  private void expireRemovedServiceAccounts(DirectoryEntry de, Map payload){
+    List<Map<String, ?>> payloadServices = payload.services as List<Map<String, ?>>
+    def slugList = payloadServices.collect { it.slug }
+    def filteredServices = de.services?.findAll { it.slug !in slugList }
+    filteredServices.forEach {it ->
+      try {
+        log.debug("Remove service ${it.slug}")
+        de.removeFromServices(it)
+      } catch ( Exception e ) {
+        log.error("problem deleting service",e)
+      }
     }
   }
 
