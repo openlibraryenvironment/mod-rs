@@ -188,7 +188,7 @@ class ProtocolMessageService {
     }
     else {
       serviceAddress = settingsService.getSettingValue(SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS)
-      log.warn("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
+      log.info("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
     }
 
     try {
