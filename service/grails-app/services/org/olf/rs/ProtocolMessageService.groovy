@@ -187,13 +187,14 @@ class ProtocolMessageService {
       serviceAddress = ill_services_for_peer[0].service.address
     }
     else {
-      log.warn("Unable to find ILL service address for ${peer_symbol}");
+      serviceAddress = settingsService.getSettingValue(SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS)
+      log.info("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
     }
 
     try {
       log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
       def additional_headers = [:]
-      if ( ill_services_for_peer[0].customProperties != null ) {
+      if ( ill_services_for_peer.size() > 0 && ill_services_for_peer[0].customProperties != null ) {
         log.debug("Service has custom properties: ${ill_services_for_peer[0].customProperties}");
         ill_services_for_peer[0].customProperties.value.each { cp ->
           if ( cp?.definition?.name=='AdditionalHeaders' ) {
@@ -295,18 +296,17 @@ class ProtocolMessageService {
    * Return a prioroty order list of service accounts this symbol can accept
    */
   public List<ServiceAccount> findIllServices(String symbol) {
-    String[] symbol_components = symbol.split(':');
+    String[] symbol_components = symbol.split(':')
 
-    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}");
+    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}")
     List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
 join sa.accountHolder.symbols as symbol
 where symbol.symbol=:sym
 and symbol.authority.symbol=:auth
 and sa.service.businessFunction.value=:ill
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] );
+''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] )
 
-    log.debug("Got service accounts: ${result}");
-
+    log.debug("Got service accounts: ${result}")
     return result;
   }
 

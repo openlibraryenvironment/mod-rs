@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import com.k_int.web.toolkit.tags.Tag
+import org.olf.okapi.modules.directory.Symbol
 
 import static groovy.transform.TypeCheckingMode.SKIP;
 
@@ -233,91 +234,51 @@ public class EventConsumerService implements EventPublisher, DataBinder {
         final String tenantSchema = OkapiTenantResolver.getTenantSchemaName("${data.tenant}")
 
         Tenants.withId(tenantSchema) {
-          boolean deletionFailed = false
           final Map<String,?> payload = data.payload as Map
           log.debug("Payload for directory update is ${payload}")
           log.debug("Process directory entry inside ${data.tenant}_mod_rs")
           if ( payload.slug ) {
             ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug)
-
+            ContextLogging.setValue(ContextLogging.FIELD_ID, payload.id)
+            cleanData(payload)
             DirectoryEntry.withTransaction { status ->
-              log.debug("Trying to load DirectoryEntry ${payload.slug}")
+              log.debug("Trying to load DirectoryEntry ${payload.id}")
               DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
               if (de == null) {
-                de = DirectoryEntry.findBySlug(payload.slug as String)
-              }
-              boolean endProcessing = false
-              if (de == null) {
-                if (payload.deleted) {
-                  log.debug("This is delete directory entry message so no need to create new entry")
-                  endProcessing = true
+                log.debug("Create new directory entry ${payload.slug} : ${data.payload}")
+                de = new DirectoryEntry()
+                if (payload.id) {
+                  de.id = payload.id
                 } else {
-                  log.debug("Create new directory entry ${payload.slug} : ${data.payload}")
-                  de = new DirectoryEntry()
-                  if (payload.id) {
-                    de.id = payload.id
-                  } else {
-                    de.id = java.util.UUID.randomUUID().toString()
-                  }
+                  de.id = java.util.UUID.randomUUID().toString()
                 }
               } else {
-                if (payload.deleted) {
-                  try {
-                    log.debug("Delete directory entry ${payload.slug}")
-                    de.delete(flush: true, failOnError: true)
-                  } catch (Exception e) {
-                    log.error("failed to delete directory", e)
-                    deletionFailed = true
-                  }
-                  endProcessing = true
-                } else {
-                  de.lock()
-                  clearCustomProperties(de)
-                  log.debug("Update directory entry ${payload.slug} : ${payload}")
-                }
+                de.lock()
+                clearCustomProperties(de)
+                log.debug("Update directory entry ${payload.slug} : ${payload}")
               }
 
-              if (!endProcessing) {
-                // Add the identifier to the logging context
-                ContextLogging.setValue(ContextLogging.FIELD_ID, de.id);
+              // Remove any custom properties from the payload - currently the custprops
+              // processing is additive - which means we get lots of values. Need a longer term solition for this
+              def custprops = payload.get('customProperties')
+              payload.remove('customProperties')
 
-                // Remove any custom properties from the payload - currently the custprops
-                // processing is additive - which means we get lots of values. Need a longer term solition for this
-                def custprops = payload.get('customProperties')
-                payload.remove('customProperties')
+              // Bind all the data execep the custprops
+              log.debug("Binding data except custom props")
+              bindData(de, payload)
 
-                // Bind all the data execep the custprops
-                log.debug("Binding data except custom props")
-                bindData(de, payload)
+              // Do special handling of the custprops
+              payload.customProperties = custprops
+              log.debug("Binding custom properties")
+              bindCustomProperties(de, payload)
+              expireRemovedSymbols(de, payload)
+              expireRemovedServiceAccounts(de, payload)
 
-                // Do special handling of the custprops
-                payload.customProperties = custprops
-                log.debug("Binding custom properties")
-                bindCustomProperties(de, payload)
-                expireRemovedSymbols(de, payload)
-
-                log.debug("Binding complete - ${de}")
-                de.save(flush: true, failOnError: true)
-              }
-            }
-            if (deletionFailed) {
-              DirectoryEntry.withTransaction { status ->
-                log.debug("Deletion failed, add tag to DirectoryEntry ${payload.slug}")
-                DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
-                if (de == null) {
-                  de = DirectoryEntry.findBySlug(payload.slug as String)
-                }
-                if (de) {
-                  Tag deleted = new Tag()
-                  deleted.value = "deleted"
-                  de.tags.add(deleted)
-                  de.save(flush: true, failOnError: true)
-                }
-              }
+              log.debug("Binding complete - ${de}")
+              de.save(flush: true, failOnError: true)
             }
           }
         }
-
       }
     }
     catch ( Exception e ) {
@@ -332,6 +293,59 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
     // Clear the context, not sure if the thread is reused or not
     ContextLogging.clear();
+  }
+
+  @CompileStatic(SKIP)
+  private void cleanData(Map<String,?> payload) {
+    boolean anonymize = false
+    DirectoryEntry.withTransaction { status ->
+      try {
+        if (payload.deleted) {
+          DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+          if (de == null) {
+            de = DirectoryEntry.findBySlug(payload.slug as String)
+          }
+          if (de) {
+            log.debug("Delete directory entry ${payload.slug}")
+            de.delete(flush: true, failOnError: true)
+          }
+        } else {
+          DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+          if (de && de.id != payload.id) {
+            log.debug("Delete directory entry ${payload.slug} because of conflict id")
+            de.delete(flush: true, failOnError: true)
+          }
+        }
+      } catch (Exception e) {
+        log.info("Failed to delete directory entry so anonymize it", e)
+        anonymize = true
+      }
+    }
+    if (anonymize) {
+      anonymizeEntry(payload)
+    }
+  }
+
+  @CompileStatic(SKIP)
+  private void anonymizeEntry(Map<String,?> payload){
+    DirectoryEntry.withTransaction { status ->
+      DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+      if (de == null) {
+        de = DirectoryEntry.findBySlug(payload.slug as String)
+      }
+      if (de) {
+        Tag deleted = new Tag()
+        deleted.value = "deleted"
+        de.tags.add(deleted)
+        String prefix = "DELETED-" + System.currentTimeSeconds() + "-"
+        de.slug = prefix + de.slug
+        de.name = prefix + de.name
+        for (Symbol symbol : de.symbols) {
+          symbol.symbol = prefix + symbol.symbol
+        }
+        de.save(flush: true, failOnError: true)
+      }
+    }
   }
 
   private void clearCustomProperties(DirectoryEntry de) {
@@ -514,6 +528,20 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
     catch ( Exception e ) {
       log.error("Problem detecting residual symbols",e)
+    }
+  }
+
+  private void expireRemovedServiceAccounts(DirectoryEntry de, Map payload){
+    List<Map<String, ?>> payloadServices = payload.services as List<Map<String, ?>>
+    def slugList = payloadServices.collect { it.slug }
+    def filteredServices = de.services?.findAll { it.slug !in slugList }
+    filteredServices.forEach {it ->
+      try {
+        log.debug("Remove service ${it.slug}")
+        de.removeFromServices(it)
+      } catch ( Exception e ) {
+        log.error("problem deleting service",e)
+      }
     }
   }
 
