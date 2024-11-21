@@ -1,0 +1,103 @@
+---
+# kafka pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reshare-kafka-cardinal-data
+  namespace: reshare
+  labels:
+    app: reshare-kafka-cardinal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# kafka pvc logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reshare-kafka-cardinal-logs
+  namespace: reshare
+  labels:
+    app: reshare-kafka-cardinal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# kakfa deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reshare-kafka-cardinal
+  namespace: reshare
+spec:
+  selector:
+    matchLabels:
+      app: reshare-kafka-cardinal
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: reshare-kafka-cardinal
+    spec:
+      # allow non root user access to volume
+      securityContext:
+        fsGroup: 1001
+      containers:
+      - image: debezium/kafka:1.7
+        name: reshare-kafka-cardinal
+        ports:
+        - containerPort: 9092
+          name: kafka-internal
+        - containerPort: 29092
+          name: kafka-external
+        env:
+         - name: KAFKA_LISTENERS
+           value: "INTERNAL://:9092,EXTERNAL://:29092"
+         - name: KAFKA_ADVERTISED_LISTENERS
+           value: "INTERNAL://reshare-kafka-cardinal:9092,EXTERNAL://localhost:29092"
+         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+           value: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+         - name: KAFKA_INTER_BROKER_LISTENER_NAME
+           value: "INTERNAL"
+         - name: ZOOKEEPER_CONNECT
+           value: "reshare-zookeeper-cardinal:2181"
+        volumeMounts:
+        - name: kafka-persistent-storage
+          mountPath: /kafka/data
+        - name: kafka-persistent-logs
+          mountPath: /kafka/logs
+      volumes:
+      - name: kafka-persistent-storage
+        persistentVolumeClaim:
+          claimName: reshare-kafka-cardinal-data
+      - name: kafka-persistent-logs
+        persistentVolumeClaim:
+          claimName: reshare-kafka-cardinal-logs
+      imagePullSecrets:
+        - name: "dockerhub-cred"
+---
+# kafka service
+apiVersion: v1
+kind: Service
+metadata:
+  name: reshare-kafka-cardinal
+  namespace: reshare
+spec:
+  type: "NodePort"
+  ports:
+  - name: reshare-kafka-cardinal-internal
+    port: 9092
+    targetPort: 9092
+    protocol: TCP
+  - name: reshare-kafka-cardinal-external
+    port: 29092
+    nodePort: 30092
+  selector:
+    app: reshare-kafka-cardinal
