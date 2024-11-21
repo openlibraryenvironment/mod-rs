@@ -17,6 +17,12 @@ class Z3950Service {
         String z3950_server = settings.getSettingValue(SettingsData.SETTING_Z3950_SERVER_ADDRESS);
         if (!z3950_server) throw new Exception('Unable to query Z39.50, no server configured');
 
+        return executeQuery(z3950_server, z3950_proxy, query, max, schema, holdingLogDetails);
+    }
+
+    def executeQuery(String z3950_server, String z3950_proxy, String query, int max, String schema,
+                     IHoldingLogDetails holdingLogDetails, String username=null, String password=null) {
+
         def z_response = HttpBuilder.configure {
             request.uri = z3950_proxy
         }.get {
@@ -27,6 +33,14 @@ class Z3950Service {
 
             if (schema) {
                 request.uri.query['recordSchema'] = schema;
+            }
+
+            if (username) {
+                request.uri.query['x-username'] = username;
+            }
+
+            if (password) {
+                request.uri.query['x-password'] = password;
             }
 
             holdingLogDetails.newSearch(request.uri?.toURI().toString());
