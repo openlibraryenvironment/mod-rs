@@ -33,6 +33,7 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
             }
             Set<RequestVolume> volumes = new HashSet<>(request.volumes)
             volumes.forEach {it -> request.removeFromVolumes(it)}
+            request.selectedItemBarcode = null
         }
 
         // We have a hack where we use this  message to verify that the last one sent was actually received or not
