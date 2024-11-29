@@ -151,10 +151,15 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                                         eventData.header?.supplyingAgencyId?.agencyIdType != null &&
                                             eventData.header?.supplyingAgencyId?.agencyIdValue != null) ||
                                 EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
-                            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                            Symbol resolvedSupplyingAgency = null
+                            String symbol = ""
+                            if (eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                    eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                                resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                                symbol = "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}"
+                            }
                             request.resolvedSupplier = resolvedSupplyingAgency
-                            request.setSupplyingInstitutionSymbol(
-                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}")
+                            request.setSupplyingInstitutionSymbol(symbol)
                         }
                         // We need to determine if this request is for the current rota position
                         if (isForCurrentRotaLocation(eventData, request) ||
