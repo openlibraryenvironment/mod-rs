@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.PatronRequest
+import org.olf.rs.RequestVolume
 import org.olf.rs.iso18626.ReasonForMessage
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResult
@@ -26,8 +27,12 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        if (EventMessageRequestIndService.isSlnpRequesterStateModel(request) && parameters.statusInfo?.status == STATUS_UNFILLED) {
-            request.state = request.stateModel.initialState
+        if (EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
+            if (parameters.statusInfo?.status == STATUS_UNFILLED) {
+                request.state = request.stateModel.initialState
+            }
+            Set<RequestVolume> volumes = new HashSet<>(request.volumes)
+            volumes.forEach {it -> request.removeFromVolumes(it)}
         }
 
         // We have a hack where we use this  message to verify that the last one sent was actually received or not

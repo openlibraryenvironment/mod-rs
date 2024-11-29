@@ -40,11 +40,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         String note = sequenceResult.note;
         request.lastSequenceReceived = sequenceResult.sequence;
 
-        if (EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
-            Set<RequestVolume> volumes = new HashSet<>(request.volumes)
-            volumes.forEach {it -> request.removeFromVolumes(it)}
-        }
-
         // if parameters.deliveryInfo.itemId then we should stash the item id
         if (parameters?.deliveryInfo) { // TODO check if status is Loaned or CopyCompleted
             if (parameters?.deliveryInfo?.loanCondition) {
