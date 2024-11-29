@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.PatronRequest
+import org.olf.rs.RequestVolume
 import org.olf.rs.iso18626.ReasonForMessage
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.ActionResult
@@ -8,6 +9,7 @@ import org.olf.rs.statemodel.ActionResultDetails
 import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.events.EventMessageRequestIndService
 
 /**
  * Action that deals with the ISO18626 StatusChange message
@@ -16,6 +18,8 @@ import org.olf.rs.statemodel.StateModel
  */
 public class ActionPatronRequestISO18626StatusChangeService extends ActionISO18626RequesterService {
 
+    private static final String STATUS_UNFILLED = "Unfilled"
+
     @Override
     String name() {
         return(ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE)
@@ -23,6 +27,15 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        if (EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
+            if (parameters.statusInfo?.status == STATUS_UNFILLED) {
+                request.state = request.stateModel.initialState
+            }
+            Set<RequestVolume> volumes = new HashSet<>(request.volumes)
+            volumes.forEach {it -> request.removeFromVolumes(it)}
+            request.selectedItemBarcode = null
+        }
+
         // We have a hack where we use this  message to verify that the last one sent was actually received or not
         if (!checkForLastSequence(request, parameters.messageInfo?.note, actionResultDetails)) {
             // A normal message
