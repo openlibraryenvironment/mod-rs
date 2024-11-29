@@ -40,6 +40,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         String note = sequenceResult.note;
         request.lastSequenceReceived = sequenceResult.sequence;
 
+        if (EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
+            Set<RequestVolume> volumes = new HashSet<>(request.volumes)
+            volumes.forEach {it -> request.removeFromVolumes(it)}
+        }
 
         // if parameters.deliveryInfo.itemId then we should stash the item id
         if (parameters?.deliveryInfo) { // TODO check if status is Loaned or CopyCompleted
@@ -58,10 +62,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId
             if (itemId) {
-                if (EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
-                    Set<RequestVolume> volumes = new HashSet<>(request.volumes)
-                    volumes.forEach {it -> request.removeFromVolumes(it)}
-                }
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
