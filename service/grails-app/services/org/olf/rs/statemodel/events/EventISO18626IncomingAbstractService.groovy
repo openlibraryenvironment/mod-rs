@@ -147,10 +147,10 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                     } else {
                         if (((request.supplyingInstitutionSymbol == null ||
                                 request.getSupplyingInstitutionSymbol().contains("null") ||
-                                    request.getSupplyingInstitutionSymbol() == ":") ||
-                                EventMessageRequestIndService.isSlnpRequesterStateModel(request)) &&
+                                    request.getSupplyingInstitutionSymbol() == ":") &&
                                         eventData.header?.supplyingAgencyId?.agencyIdType != null &&
-                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) ||
+                                EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
                             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
                             request.resolvedSupplier = resolvedSupplyingAgency
                             request.setSupplyingInstitutionSymbol(
