@@ -2,7 +2,8 @@ package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
-import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
 import java.util.regex.Matcher;
 
@@ -39,9 +40,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         String note = sequenceResult.note;
         request.lastSequenceReceived = sequenceResult.sequence;
 
-
         // if parameters.deliveryInfo.itemId then we should stash the item id
-        if (parameters?.deliveryInfo) {
+        if (parameters?.deliveryInfo) { // TODO check if status is Loaned or CopyCompleted
             if (parameters?.deliveryInfo?.loanCondition) {
                 // Are we in a valid state for loan conditions ?
                 log.debug("Loan condition found: ${parameters?.deliveryInfo?.loanCondition}")
