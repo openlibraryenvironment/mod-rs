@@ -12,7 +12,7 @@ MODULES = ['mod-rs']
 
 # names of tenants to operate on
 TENANTS = [
-    'slnptest_three,
+    'slnptest_three',
     'slnptest_four'
 ]
 
