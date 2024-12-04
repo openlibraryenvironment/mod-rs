@@ -102,7 +102,7 @@ def enable(args, token):
 
     for module in MODULES:
         r = okapi_get(REGISTRY +
-                      '/_/proxy/modules?filter={}&latest=1'.format(module),
+                      '/_/proxy/modules/mod-rs-2.18.5'.format(module),
                       tenant='supertenant')
         latest_versions.append(json.loads(r)[0]['id'])
 
