@@ -12,10 +12,8 @@ MODULES = ['mod-rs']
 
 # names of tenants to operate on
 TENANTS = [
-    'reshare_east', 
-    'reshare_west',
-    'slnptest_one',
-    'slnptest_two'
+    'slnptest_three,
+    'slnptest_four'
 ]
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
