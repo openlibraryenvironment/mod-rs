@@ -102,9 +102,10 @@ def enable(args, token):
 
     for module in MODULES:
         r = okapi_get(REGISTRY +
-                      '/_/proxy/modules/mod-rs-2.18.5'.format(module),
+                      '/_/proxy/modules/mod-rs-2.18.5',
                       tenant='supertenant')
         latest_versions.append(json.loads(r)[0]['id'])
+        print(latest_versions)
 
     # post new deployment descriptors
     for module in latest_versions:
