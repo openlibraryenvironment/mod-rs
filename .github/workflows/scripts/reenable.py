@@ -90,7 +90,7 @@ def enable(args, token):
     registry = args.registry
     port = PORT
     # get new versions from registry
-    latest_versions = []
+    latest_versions = ['mod-rs-2.18.5']
 
     # sync mds
     print("syncing module descriptors from registry...")
@@ -104,7 +104,7 @@ def enable(args, token):
         r = okapi_get(REGISTRY +
                       '/_/proxy/modules?filter={}&latest=1'.format(module),
                       tenant='supertenant')
-        latest_versions.append(json.loads(r)[0]['id'])
+        #latest_versions.append(json.loads(r)[0]['id'])
         print(latest_versions)
 
     # post new deployment descriptors
