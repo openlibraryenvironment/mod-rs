@@ -307,7 +307,7 @@ class TestHostLMSController extends OkapiTenantAwareController<PatronRequest> {
 
                     // Now we can make the call
                     INcipLogDetails ncipLogDetails = new NcipLogDetails();
-                    result = hostLMSActions.checkoutItem(settings, params.requestId, params.itemBarcode, params.borrowerBarcode, ncipLogDetails);
+                    result = hostLMSActions.checkoutItem(settings, params.requestId, params.itemBarcode, params.borrowerBarcode, ncipLogDetails, params.externalReferenceValue);
                     result.logging = ncipLogDetails.toMap();
                 } else {
                     result.error = "Need to supply the requestId, itemBarcode and borrowerBarcodeno parameters to test check in";

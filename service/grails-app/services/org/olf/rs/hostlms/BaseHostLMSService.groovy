@@ -616,7 +616,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String requestId,
     String itemBarcode,
     String borrowerBarcode,
-    INcipLogDetails ncipLogDetails
+    INcipLogDetails ncipLogDetails,
+    String externalReferenceValue
   ) {
     log.debug("checkoutItem(${requestId}. ${itemBarcode})");
     Map result = [
@@ -628,7 +629,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if (checkOutValue != null) {
       switch (checkOutValue) {
         case CIRCULATION_NCIP:
-          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode, ncipLogDetails)
+          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode, ncipLogDetails, externalReferenceValue)
           break;
 
         default:
@@ -645,7 +646,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       String requestId,
       String itemBarcode,
       String borrowerBarcode,
-      INcipLogDetails ncipLogDetails
+      INcipLogDetails ncipLogDetails,
+      String externalReferenceValue
   ) {
     // set reason to ncip
     Map result = [reason: 'ncip'];
@@ -663,8 +665,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                     .setToAgency(ncipConnectionDetails.ncipToAgency)
                     .setFromAgency(ncipConnectionDetails.ncipFromAgency)
                     .setRegistryId(ncipConnectionDetails.registryId)
-                    .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
+                    .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile)
                     //.setDesiredDueDate("2020-03-18");
+
+      if (externalReferenceValue != null) {
+        checkoutItem.setExternalReferenceValue(externalReferenceValue)
+      }
 
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
       JSONObject response = ncip_client.send(checkoutItem);

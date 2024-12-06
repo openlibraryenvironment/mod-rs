@@ -29,7 +29,8 @@ public interface HostLMSActions {
       String requestId,
       String itemBarcode,
       String borrowerBarcode,
-      INcipLogDetails ncipLogDetails
+      INcipLogDetails ncipLogDetails,
+      String externalReferenceValue
   );
 
   /**
