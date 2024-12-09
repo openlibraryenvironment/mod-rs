@@ -335,7 +335,7 @@ public class HostLMSService {
         return createUserFiscalTransactionItemResult
     }
 
-    private static String extractIdentifierValue(PatronRequest patronRequest, String targetKey) {
+    private String extractIdentifierValue(PatronRequest patronRequest, String targetKey) {
         String identifierValue = null
         Set<String> validStateModels = new HashSet<>(Arrays.asList(
                 StateModel.MODEL_SLNP_RESPONDER,
