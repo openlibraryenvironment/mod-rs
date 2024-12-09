@@ -1,5 +1,7 @@
-package org.olf.rs;
+package org.olf.rs
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.logging.IHoldingLogDetails;
@@ -9,7 +11,7 @@ import org.olf.rs.logging.ProtocolAuditService;
 import com.k_int.web.toolkit.settings.AppSetting;
 
 import grails.core.GrailsApplication
-import org.olf.rs.settings.ISettings;
+import org.olf.rs.statemodel.StateModel
 
 /**
  * Return the right HostLMSActions for the tenant config
@@ -198,13 +200,15 @@ public class HostLMSService {
         Map checkoutResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
+            String customExternalReference = extractIdentifierValue(request, "ExternReferenz")
             INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
             checkoutResult = hostLMSActions.checkoutItem(
                 settingsService,
                 request.hrid,
                 itemId,
                 institutionalPatronIdValue,
-                ncipLogDetails
+                ncipLogDetails,
+                customExternalReference
             );
             protocolAuditService.save(request, ncipLogDetails);
         } else {
@@ -329,5 +333,36 @@ public class HostLMSService {
             request.needsAttention = true
         }
         return createUserFiscalTransactionItemResult
+    }
+
+    private String extractIdentifierValue(PatronRequest patronRequest, String targetKey) {
+        String identifierValue = null
+        Set<String> validStateModels = new HashSet<>(Arrays.asList(
+                StateModel.MODEL_SLNP_RESPONDER,
+                StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER
+        ))
+
+        if (validStateModels.contains(patronRequest.stateModel.shortcode)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper()
+                JsonNode customIdentifiersNode = objectMapper.readTree(patronRequest.customIdentifiers)
+
+                if (customIdentifiersNode.has("identifiers")) {
+                    JsonNode identifiersArray = customIdentifiersNode.get("identifiers")
+                    if (identifiersArray.isArray()) {
+                        for (JsonNode identifier : identifiersArray) {
+                            String key = identifier.get("key").asText()
+                            if (targetKey == key) {
+                                identifierValue = identifier.get("value").asText()
+                                break
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("HostLMSService::getHostLMSActionsFor(${e.printStackTrace()})")
+            }
+        }
+        return identifierValue
     }
 }
