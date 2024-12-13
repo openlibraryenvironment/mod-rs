@@ -126,6 +126,8 @@ class ProtocolMessageBuildingService {
 
       serviceType: req.serviceType?.value,
 
+      serviceLevel: req.serviceLevel?.value,
+
       anyEdition: 'Y',
 
       // Note that the internal names sometimes differ from the protocol names--pay attention with these fields

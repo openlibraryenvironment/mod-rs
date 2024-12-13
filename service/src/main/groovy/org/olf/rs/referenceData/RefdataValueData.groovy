@@ -61,6 +61,8 @@ public class RefdataValueData {
     public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME              = 'customIdentifiersScheme';
     public static final String VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY   = 'AutoSupply';
     public static final String VOCABULARY_FEATURE_FLAG                           = 'featureFlag';
+    public static final String VOCABULARY_CURRENCY_CODES                         = 'CurrencyCodes';
+    public static final String VOCABULARY_SERVICE_LEVELS                         = 'ServiceLevels';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -347,6 +349,20 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
+
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Australian Dollars','AUD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Canadian Dollars', 'CAD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Euros', 'EUR');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'United States Dollars', 'USD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Swedish Krona', 'SEK');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Danish Kroner','DKK');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Express', 'Express');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Normal', 'Normal');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'SecondaryMail', 'SecondaryMail');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Standard', 'Standard');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Urgent', 'Urgent');
+
 
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);

@@ -58,7 +58,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
             Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
             Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
-            log.debug('*** Create new request ***')
+            log.debug('*** Create new request ***');
+            log.debug("Creating request from eventData ${eventData}");
             def newParams = [:]
             if (eventData.bibliographicInfo instanceof Map) {
                 newParams.putAll(eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields))
@@ -119,9 +120,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.patronNote = sequenceResult.note;
                             pr.lastSequenceReceived = sequenceResult.sequence;
                         }
-
                         if (serviceInfo.copyrightCompliance) {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
+                        }
+                        if (serviceInfo.serviceLevel) {
+                            pr.serviceLevel = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
                         }
                     }
                 }
@@ -314,6 +317,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
             }
         } else if (prs.isEmpty() && !retry) {
+            log.debug("Creating new patron request from params")
             pr = new PatronRequest(newParams)
         } else {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
@@ -329,6 +333,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
         RefdataValue copyrightType = RefdataValue.findByOwnerAndValue(cat, label);
         return copyrightType;
     }
+
+    RefdataValue findRefdataValue(String label, String vocabulary) {
+        RefdataCategory cat = RefdataCategory.findByDesc(vocabulary);
+        if (cat) {
+            RefdataValue rdv = RefdataValue.findByOwnerAndValue(cat, label);
+            return rdv;
+        }
+        return null;
+    }
+
 
     static Map<String, String> getPatronRequestPropertyNames(){
         if (PATRON_REQUEST_PROPERTY_NAMES.isEmpty()) {
