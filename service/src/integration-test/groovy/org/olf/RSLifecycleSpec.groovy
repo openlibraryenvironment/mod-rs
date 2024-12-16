@@ -1881,6 +1881,8 @@ class DosomethingSimple {
         waitForRequestState(tenantId, 20000, requestPatronId + "_two",
                 Status.PATRON_REQUEST_IDLE);
 
+        Thread.sleep(500);
+
         then: "Whatever"
         assert true;
 
@@ -1889,11 +1891,11 @@ class DosomethingSimple {
         'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
     }
 
-    void "Test transmission of copyright and publication type to supplier"(
+    void "Test transmission of values to supplier"(
             String copyrightType, String publicationType, String patronIdentifier) {
         String requesterTenantId = "RSInstOne";
         String responderTenantId = "RSInstThree";
-        String patronReference = 'ref-' + patronIdentifier + randomCrap(6);
+        String patronReference = 'ref-' + patronIdentifier;
         when: "We create a requester request with copyright and pub info"
         Map request = [
                 patronReference: patronReference,
@@ -1906,7 +1908,10 @@ class DosomethingSimple {
                 serviceType: "Copy",
                 deliveryMethod: "URL",
                 publicationType: publicationType,
-                copyrightType: copyrightType
+                copyrightType: copyrightType,
+                serviceLevel: "Express",
+                maximumCostsMonetaryValue: "329.43",
+                maximumCostsCurrencyCode: "AUD"
         ];
 
 
@@ -1924,11 +1929,14 @@ class DosomethingSimple {
             assert(responderRequestData.patronReference == patronReference);
             assert(responderRequestData.publicationType?.value == publicationType);
             assert(responderRequestData.copyrightType?.value == copyrightType);
+            assert(responderRequestData.serviceLevel?.value == "express");
+            assert(responderRequestData.maximumCostsMonetaryValue == new BigDecimal("329.43"));
+            assert(responderRequestData.maximumCostsCurrencyCode?.value == "aud");
             assert(true);
 
         where:
             copyrightType | publicationType | patronIdentifier
-            'us-ccg'      | "book"          | "COPY-PUB-TYPE-0001"
+            'us-ccg'      | "book"          | "TRANS-VALS-TYPE-0001"
         // Create request on first tenant w/ copyright and pub info
         // Look for request to get to 'sent to supplier'
         // Look for responder request w/ patron reference

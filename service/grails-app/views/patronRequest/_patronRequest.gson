@@ -10,6 +10,7 @@ final def toExpand = fullRecord ? [
   'state',
   'stateModel',
   'serviceType',
+  'serviceLevel',
   'publicationType',
   'deliveryMethod',
   'pickLocation',
@@ -27,6 +28,7 @@ final def toExpand = fullRecord ? [
   'resolvedPickupLocation',
   'requestIdentifiers',
   'validActions',
+  'maximumCostsCurrencyCode',
   'customIdentifiers'
 ] : [
   // brief record view..

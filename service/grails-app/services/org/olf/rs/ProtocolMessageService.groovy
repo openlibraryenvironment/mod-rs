@@ -4,6 +4,7 @@ import org.olf.rs.iso18626.Address
 import org.olf.rs.iso18626.BibliographicInfo
 import org.olf.rs.iso18626.BibliographicItemId
 import org.olf.rs.iso18626.BibliographicRecordId
+import org.olf.rs.iso18626.BillingInfo
 import org.olf.rs.iso18626.DeliveryInfo
 import org.olf.rs.iso18626.ElectronicAddress
 import org.olf.rs.iso18626.Header
@@ -522,7 +523,12 @@ and sa.service.businessFunction.value=:ill
       log.warn("No patronInfo found")
     }
 
-    //TODO Wire in billingInfo here
+    log.debug("This is a requesting message, so needs BillingInfo")
+    if (eventData.billingInfo != null && eventData.billingInfo.maximumCosts != null) {
+      request.setBillingInfo(makeBillingInfo(eventData))
+    } else {
+      log.warn("No billingInfo found")
+    }
 
     return request
   }
@@ -682,6 +688,7 @@ and sa.service.businessFunction.value=:ill
     ServiceInfo serviceInfo = new ServiceInfo()
     serviceInfo.setCopyrightCompliance(toTypeSchemeValuePair(eventData.serviceInfo.copyrightCompliance))
     serviceInfo.setServiceType(toServiceType(eventData.serviceInfo.serviceType))
+    //serviceInfo.setServiceLevel()
     if (eventData.serviceInfo.needBeforeDate) {
       serviceInfo.setNeedBeforeDate(toZonedDateTime(eventData.serviceInfo.needBeforeDate))
     }
@@ -689,6 +696,18 @@ and sa.service.businessFunction.value=:ill
     serviceInfo.setAnyEdition(toYesNo(eventData.serviceInfo.anyEdition))
     serviceInfo.setNote(eventData.serviceInfo.note)
     return serviceInfo
+  }
+
+  BillingInfo makeBillingInfo(eventData) {
+    if (eventData?.billingInfo instanceof Map && !eventData.billingInfo.isEmpty()) {
+      BillingInfo billingInfo = new BillingInfo()
+      TypeCosts maxCost = new TypeCosts();
+      maxCost.monetaryValue = eventData.billingInfo.maximumCosts?.monetaryValue;
+      maxCost.currencyCode = toTypeSchemeValuePair(eventData.billingInfo.maximumCosts?.currencyCode);
+      billingInfo.setMaximumCosts(maxCost);
+      return billingInfo;
+    }
+    return null;
   }
 
   ZonedDateTime toZonedDateTime(String dateString) {
