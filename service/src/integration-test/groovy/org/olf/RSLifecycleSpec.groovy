@@ -1930,6 +1930,8 @@ class DosomethingSimple {
             assert(responderRequestData.publicationType?.value == publicationType);
             assert(responderRequestData.copyrightType?.value == copyrightType);
             assert(responderRequestData.serviceLevel?.value == "express");
+            assert(responderRequestData.maximumCostsMonetaryValue == new BigDecimal("329.43"));
+            assert(responderRequestData.maximumCostsCurrencyCode?.value == "aud");
             assert(true);
 
         where:

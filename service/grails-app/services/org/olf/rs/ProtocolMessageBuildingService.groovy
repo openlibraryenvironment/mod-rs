@@ -195,16 +195,24 @@ class ProtocolMessageBuildingService {
       */
      ]
 
-     /*
-      * message.billingInfo = [
+     Map maximumCosts = null;
+      if ( req.maximumCostsCurrencyCode?.value && req.maximumCostsMonetaryValue) {
+          maximumCosts = [:];
+          maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
+          maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
+      }
+     message.billingInfo = [
+      /*
       * Permitted fields:
       * PaymentMethod
       * MaximumCosts
       * BillingMethod
       * BillingName
       * Address
+      */
+        maximumCosts : maximumCosts
+
       ]
-     */
 
     return message;
   }

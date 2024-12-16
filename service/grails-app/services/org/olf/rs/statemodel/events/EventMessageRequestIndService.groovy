@@ -124,7 +124,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
                         }
                         if (serviceInfo.serviceLevel) {
-                            pr.serviceLevel = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            pr.serviceLevel = rdv;
                         }
                     }
                 }
@@ -168,6 +169,21 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         }
                         if (patronInfo.patronReference) {
                             pr.patronReference = patronInfo.patronReference;
+                        }
+                    }
+                }
+
+                if (eventData.billingInfo instanceof Map) {
+                    Map billingInfo = eventData.billingInfo
+                    if (billingInfo != null) {
+                        if (billingInfo.maximumCosts instanceof Map) {
+                            Map maximumCosts = billingInfo.maximumCosts;
+                            if (maximumCosts.monetaryValue) {
+                                pr.maximumCostsMonetaryValue = new BigDecimal(maximumCosts.monetaryValue);
+                            }
+                            if (maximumCosts.currencyCode) {
+                                pr.maximumCostsCurrencyCode = findRefdataValue(maximumCosts.currencyCode, RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                            }
                         }
                     }
                 }
