@@ -7,7 +7,7 @@ import spock.lang.Specification
 import grails.testing.services.ServiceUnitTest
 
 @Slf4j
-class ANBDSharedIndexServiceSpec extends Specification implements ServiceUnitTest<ANBDSharedIndexService> {
+class AnbdSharedIndexServiceSpec extends Specification implements ServiceUnitTest<AnbdSharedIndexService> {
     def 'test query generation'() {
         setup:
         def values = [

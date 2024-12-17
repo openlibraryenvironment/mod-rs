@@ -9,7 +9,7 @@ import org.olf.rs.logging.IHoldingLogDetails
 import org.olf.rs.referenceData.SettingsData
 import groovy.xml.XmlUtil
 
-class ANBDSharedIndexService implements SharedIndexActions {
+class AnbdSharedIndexService implements SharedIndexActions {
 
     Z3950Service z3950Service;
     SettingsService settingsService;
