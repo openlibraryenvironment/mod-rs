@@ -1335,6 +1335,81 @@ class DosomethingSimple {
 
     }
 
+    void "Test to see if requests with precededBy are ignored for duplicates"(
+            String tenantId,
+            String requestTitle,
+            String requestAuthor,
+            String requestSystemId,
+            String requestPatronId,
+            String requestSymbol) {
+        when: "Post new duplicate requests"
+        changeSettings(tenantId, [ (SettingsData.SETTING_CHECK_DUPLICATE_TIME) : 3 ]);
+
+        def headers = [
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]
+
+        def req_one_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_one",
+                tags: [ 'RS-DUPLICATE-TEST-1']
+        ];
+
+
+        setHeaders(headers);
+
+        def respOne = doPost("${baseUrl}/rs/patronrequests".toString(), req_one_json);
+        log.debug("Created PatronRequest 1: RESP: ${respOne} ID: ${respOne?.id}");
+
+        waitForRequestState(tenantId, 20000, requestPatronId + "_one",
+                Status.PATRON_REQUEST_IDLE);
+
+        Thread.sleep(2000); // I hate doing this
+
+        def req_two_json = [
+                requestingInstitutionSymbol: requestSymbol,
+                title: requestTitle,
+                author: requestAuthor,
+                systemInstanceIdentifier: requestSystemId,
+                patronIdentifier: requestPatronId,
+                isRequester: true,
+                patronReference: requestPatronId + "_two",
+                precededBy: respOne.id,
+                tags: [ 'RS-DUPLICATE-TEST-2']
+        ];
+
+        String patronRequestTwoPost = "${baseUrl}/rs/patronrequests".toString();
+        log.debug("Posting duplicate Patron Request to $patronRequestTwoPost");
+        def respTwo = doPost(patronRequestTwoPost, req_two_json);
+        log.debug("Created PatronRequest 2: RESP: ${respTwo} ID: ${respTwo?.id}");
+
+        boolean dupeFailed = false;
+        try {
+            waitForRequestState(tenantId, 20000, requestPatronId + "_two",
+                    Status.PATRON_REQUEST_DUPLICATE_REVIEW);
+        } catch (Exception e) {
+            dupeFailed = true;
+        }
+
+
+        then: "Check values"
+        assert(dupeFailed);
+
+        where:
+        tenantId    | requestTitle                      | requestAuthor     | requestSystemId       | requestPatronId   | requestSymbol
+        'RSInstOne' | 'Do We Gotta?'                    | 'Saydso, Cozzi'   | '2234-5978-9123-9567' | '9176-9234'       | 'ISIL:RST1'
+
+
+    }
+
     void "Test to see if we can cancel a duplicate request"(
             String tenantId,
             String requestTitle,
