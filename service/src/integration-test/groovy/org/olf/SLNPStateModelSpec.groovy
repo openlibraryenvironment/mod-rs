@@ -7,8 +7,8 @@ import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.PatronRequest
-import org.olf.rs.ReshareApplicationEventHandlerService
 import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.*
@@ -61,6 +61,7 @@ class SLNPStateModelSpec extends TestBase {
     ]
 
     GrailsWebDataBinder grailsWebDataBinder
+    DirectoryEntryService directoryEntryService
     StaticRouterService staticRouterService
     StatusService statusService
 
@@ -276,8 +277,7 @@ class SLNPStateModelSpec extends TestBase {
     }
 
     private static Symbol symbolFromString(String symbolString) {
-        def parts = symbolString.tokenize(":");
-        return ReshareApplicationEventHandlerService.resolveSymbol(parts[0], parts[1]);
+        return DirectoryEntryService.resolveCombinedSymbol(symbolString);
     }
 
     private PatronRequest createPatronRequest(

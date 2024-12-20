@@ -46,7 +46,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
       log.debug("Considering rota entry: ${av_stmt}");
 
       // 1. look up the directory entry for the symbol
-      Symbol s = ( av_stmt.symbol != null ) ? directoryEntryService.resolveCombinedSymbol(av_stmt.symbol) : null;
+      Symbol s = ( av_stmt.symbol != null ) ? DirectoryEntryService.resolveCombinedSymbol(av_stmt.symbol) : null;
 
       if ( s != null ) {
         log.debug("Refine availability statement ${av_stmt} for symbol ${s}");

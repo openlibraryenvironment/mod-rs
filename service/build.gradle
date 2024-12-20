@@ -109,6 +109,7 @@ dependencies {
   // Testing
   testImplementation "org.mockito:mockito-core"
   testImplementation "org.grails:grails-web-testing-support"
+  testImplementation "org.grails:grails-gorm-testing-support"
 
   /*  ---- Manually installed dependencies ---- */
   implementation 'org.grails.plugins:spring-security-core:5.2.1'

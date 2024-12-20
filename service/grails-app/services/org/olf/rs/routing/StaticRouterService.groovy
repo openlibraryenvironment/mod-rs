@@ -28,12 +28,12 @@ public class StaticRouterService implements RequestRouter {
 
         if ( option_parts.size() == 2 ) {
           // We assume SYMBOL if only 2 parts
-          s = directoryEntryService.resolveSymbol(option_parts[0], option_parts[1]);
+          s = DirectoryEntryService.resolveSymbol(option_parts[0], option_parts[1]);
           symbolString = "${option_parts[0]}:${option_parts[1]}" 
         }
         else if ( option_parts.size() == 3 ) {
           if ( option_parts[0] == 'SYMBOL' ) {
-            s = directoryEntryService.resolveSymbol(option_parts[1], option_parts[2]);
+            s = DirectoryEntryService.resolveSymbol(option_parts[1], option_parts[2]);
             symbolString = "${option_parts[1]}:${option_parts[2]}" 
           }
           else {

@@ -294,18 +294,20 @@ class ProtocolMessageService {
   }
 
   /**
-   * Return a prioroty order list of service accounts this symbol can accept
+   * Return a list of service accounts this symbol can accept
    */
-  public List<ServiceAccount> findIllServices(String symbol) {
-    String[] symbol_components = symbol.split(':')
+  public List<ServiceAccount> findIllServices(String symbolStr) {
+    def sym = DirectoryEntryService.resolveCombinedSymbol(symbolStr)
 
-    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}")
-    List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
-join sa.accountHolder.symbols as symbol
-where symbol.symbol=:sym
-and symbol.authority.symbol=:auth
-and sa.service.businessFunction.value=:ill
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] )
+    if (sym == null) {
+      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}")
+    }
+
+    log.debug("Finding ILL service accounts for ${sym.symbol}")
+    def criteria = ServiceAccount.where {
+      accountHolder == sym.owner && service.businessFunction.value == 'ill'
+    }
+    List<ServiceAccount> result = criteria.list()
 
     log.debug("Got service accounts: ${result}")
     return result;

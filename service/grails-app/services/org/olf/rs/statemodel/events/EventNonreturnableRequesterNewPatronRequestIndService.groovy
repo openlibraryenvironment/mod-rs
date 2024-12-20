@@ -2,6 +2,7 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.refdata.RefdataValue
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronNoticeService
 import org.olf.rs.PatronRequest
@@ -40,7 +41,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
         }
 
         if (request.requestingInstitutionSymbol != null) {
-            Symbol requestingSymbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+            Symbol requestingSymbol = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (requestingSymbol != null) {
                 request.resolvedRequester = requestingSymbol;
             }
