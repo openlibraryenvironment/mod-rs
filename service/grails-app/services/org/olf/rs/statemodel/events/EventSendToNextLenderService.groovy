@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.events;
 
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.NetworkStatus;
 import org.olf.rs.PatronRequest;
@@ -63,7 +64,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                     String nextResponder = prr.directoryId
 
                     log.debug("Attempt to resolve symbol \"${nextResponder}\"");
-                    Symbol s = (nextResponder != null) ? reshareApplicationEventHandlerService.resolveCombinedSymbol(nextResponder) : null;
+                    Symbol s = (nextResponder != null) ? DirectoryEntryService.resolveCombinedSymbol(nextResponder) : null;
                     log.debug("Resolved nextResponder to ${s} with status ${s?.owner?.status?.value}");
                     String ownerStatus = s.owner?.status?.value;
 

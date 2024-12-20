@@ -307,8 +307,8 @@ class ProtocolMessageBuildingService {
   public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note, boolean appendSequence = true) {
     Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
-    Symbol message_sender_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender)
-    Symbol peer_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(peer)
+    Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
+    Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
 
     message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
     message.action = action

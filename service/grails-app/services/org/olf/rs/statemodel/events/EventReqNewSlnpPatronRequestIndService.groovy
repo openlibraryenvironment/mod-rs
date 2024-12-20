@@ -4,6 +4,7 @@ import com.k_int.web.toolkit.settings.AppSetting
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
@@ -51,7 +52,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         }
 
         if (request.requestingInstitutionSymbol != null) {
-            Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
+            Symbol s = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
             if (s != null) {
                 request.resolvedRequester = s
             }

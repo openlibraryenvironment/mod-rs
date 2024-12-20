@@ -58,7 +58,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
         if (request.requestingInstitutionSymbol != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol
-            Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+            Symbol s = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (s != null) {
                 // We do this separately so that an invalid patron does not stop information being appended to the request
                 request.resolvedRequester = s;

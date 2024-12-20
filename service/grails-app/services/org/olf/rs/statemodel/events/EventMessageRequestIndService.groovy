@@ -21,6 +21,7 @@ import java.time.LocalDate
 public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
+
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     SharedIndexService sharedIndexService;
@@ -55,8 +56,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
         if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
             Map header = eventData.header
 
-            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
-            Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
+            Symbol resolvedSupplyingAgency = DirectoryEntryService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
+            Symbol resolvedRequestingAgency = DirectoryEntryService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
             log.debug('*** Create new request ***');
             log.debug("Creating request from eventData ${eventData}");

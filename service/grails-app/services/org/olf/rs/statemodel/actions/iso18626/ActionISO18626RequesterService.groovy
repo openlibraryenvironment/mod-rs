@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.actions.iso18626
 
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
 import org.olf.rs.statemodel.StateModel
@@ -49,7 +50,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
 
                 // Save the loan condition to the patron request
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
-                Symbol relevantSupplier = reshareApplicationEventHandlerService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
+                Symbol relevantSupplier = DirectoryEntryService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
 
                 reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
             }

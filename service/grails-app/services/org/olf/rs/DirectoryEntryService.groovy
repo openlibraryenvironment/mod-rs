@@ -34,23 +34,29 @@ public class DirectoryEntryService {
   }
 
   // Methods to parse a string Symbol representation and return the Symbol itself
-  public Symbol resolveCombinedSymbol(String combinedString) {
+  public static Symbol resolveCombinedSymbol(String combinedString) {
     Symbol result = null;
     if ( combinedString != null ) {
       String[] name_components = combinedString.split(':');
-      if ( name_components.length == 2 ) {
-        result = resolveSymbol(name_components[0], name_components[1]);
+      if ( name_components.length > 1 ) {
+        result = resolveSymbol(name_components[0], name_components[1..-1].join(':'));
+      } else {
+        log.warn("Unexpected lack of colon-separated authority when attempting to parse symbol ${combinedString}");
       }
+    } else {
+      log.warn("resolveCombinedSymbol called with NULL string");
     }
     return result;
   }
 
-  public Symbol resolveSymbol(String authorty, String symbol) {
+  public static Symbol resolveSymbol(String authority, String symbol) {
     Symbol result = null;
     List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-                                                   [authority:authorty?.toUpperCase(), symbol:symbol?.toUpperCase()]);
+                                                   [authority:authority?.toUpperCase(), symbol:symbol?.toUpperCase()]);
     if ( symbol_list.size() == 1 ) {
       result = symbol_list.get(0);
+    } else {
+      log.warn("Missing or multiple symbol match for : ${authority}:${symbol} (${symbol_list?.size()})");
     }
 
     return result;
