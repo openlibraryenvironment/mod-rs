@@ -57,6 +57,10 @@ public class NewRequestService {
     }
 
     public Boolean isPossibleDuplicate(PatronRequest request) {
+        if (request.precededBy != null) {
+            log.debug("Requests that have been re-requested automatically excluded from duplicate check");
+            return Boolean.FALSE;
+        }
         int duplicateTimeHours = settingsService.getSettingAsInt(
                 SettingsData.SETTING_CHECK_DUPLICATE_TIME, 0);
         log.debug("Checking PatronRequest ${request} ( patronReference ${request.patronReference} ) for duplicates within the last ${duplicateTimeHours} hours");
