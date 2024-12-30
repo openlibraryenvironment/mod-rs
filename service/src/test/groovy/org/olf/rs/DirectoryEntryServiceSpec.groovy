@@ -7,6 +7,10 @@ import org.olf.okapi.modules.directory.Symbol
 import org.olf.okapi.modules.directory.NamingAuthority
 import spock.lang.Specification
 
+/**
+ * A mock email service that allows the integration tests to complete without sending any actual emails
+ *
+ */
 @Slf4j
 class DirectoryEntryServiceSpec extends Specification implements ServiceUnitTest<DirectoryEntryService>, DomainUnitTest<Symbol> {
 
@@ -21,7 +25,7 @@ class DirectoryEntryServiceSpec extends Specification implements ServiceUnitTest
         setup:
             // executeQuery is used here and not supported but that's fine
             // we can stub it out as we're testing resolvedCombinedSymbol
-            service.metaClass.resolveSymbol = { String a, String s -> {
+            DirectoryEntryService.metaClass.static.resolveSymbol = { String a, String s -> {
                 def auth = new NamingAuthority(symbol: a);
                 return new Symbol(symbol: s, authority: auth);
             }};
