@@ -1984,7 +1984,7 @@ class DosomethingSimple {
                 deliveryMethod: "URL",
                 publicationType: publicationType,
                 copyrightType: copyrightType,
-                serviceLevel: "Express",
+                serviceLevel: "Rush",
                 maximumCostsMonetaryValue: "329.43",
                 maximumCostsCurrencyCode: "AUD"
         ];
@@ -2004,7 +2004,7 @@ class DosomethingSimple {
             assert(responderRequestData.patronReference == patronReference);
             assert(responderRequestData.publicationType?.value == publicationType);
             assert(responderRequestData.copyrightType?.value == copyrightType);
-            assert(responderRequestData.serviceLevel?.value == "express");
+            assert(responderRequestData.serviceLevel?.value == "rush");
             assert(responderRequestData.maximumCostsMonetaryValue == new BigDecimal("329.43"));
             assert(responderRequestData.maximumCostsCurrencyCode?.value == "aud");
             assert(true);

@@ -362,6 +362,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'SecondaryMail', 'SecondaryMail');
             RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Standard', 'Standard');
             RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Urgent', 'Urgent');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Rush', 'Rush');
 
 
             // ISO18626 Custom options for - Custom identifiers schemes
