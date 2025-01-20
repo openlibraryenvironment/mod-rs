@@ -10,7 +10,15 @@ public class RerequestService {
 
     SharedIndexService sharedIndexService;
 
-    public static List<String> preserveFields = ['author', 'authorOfComponent', 'copyrightType', 'edition', 'isbn', 'isRequester', 'issn', 'issue', 'neededBy', 'numberOfPages', 'oclcNumber', 'pagesRequested', 'patronEmail', 'patronGivenName', 'patronIdentifier', 'patronNote', 'patronReference', 'patronSurname', 'patronType', 'pickLocation', 'pickupLocationSlug', 'placeOfPublication', 'publicationDate', 'publisher', 'requestingInstitutionSymbol', 'serviceType', 'sponsoringBody', 'startPage', 'stateModel', 'subtitle', 'systemInstanceIdentifier', 'title', 'titleOfComponent', 'volume'];
+    public static List<String> preserveFields = [
+            'author', 'authorOfComponent', 'copyrightType', 'edition', 'isbn', 'isRequester', 'issn', 'issue',
+            'maximumCostsCurrencyCode', 'maximumCostsMonetaryValue', 'neededBy',
+            'numberOfPages', 'oclcNumber', 'pagesRequested', 'patronEmail', 'patronGivenName', 'patronIdentifier',
+            'patronNote', 'patronReference', 'patronSurname', 'patronType', 'pickLocation', 'pickupLocationSlug',
+            'placeOfPublication', 'publicationDate', 'publisher', 'requestingInstitutionSymbol', 'serviceLevel',
+            'serviceType', 'sponsoringBody', 'startPage', 'stateModel', 'subtitle', 'systemInstanceIdentifier',
+            'title', 'titleOfComponent', 'volume'
+    ];
 
     public createNewRequestFromExisting(PatronRequest originalRequest, List<String> copyFields, Map<String, Object> changeSet, Boolean updateBibRecords) {
         PatronRequest newRequest = new PatronRequest();
