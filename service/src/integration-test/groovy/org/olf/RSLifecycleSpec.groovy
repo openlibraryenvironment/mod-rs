@@ -2030,6 +2030,9 @@ class DosomethingSimple {
         String requestAuthor = "Mr. Boringman";
         String requestSymbol = "ISIL:RST1"
         String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String serviceLevel = "Express";
+        String currencyCode = "USD";
+        String monetaryValue = "25.55";
 
         when: "do the thing"
 
@@ -2046,6 +2049,9 @@ class DosomethingSimple {
                 oclcNumber: "1234312",
                 deliveryMethod: deliveryMethod,
                 serviceType: serviceType,
+                serviceLevel: serviceLevel,
+                maximumCostsMonetaryValue: monetaryValue,
+                maximumCostsCurrencyCode: currencyCode,
                 tags: ['RS-REREQUEST-TEST-1']
         ];
 
@@ -2093,8 +2099,12 @@ class DosomethingSimple {
 
         then:
         assert(newRequesterRequestData.title == "Case study research : design and methods /");
+        assert(newRequesterRequestData.serviceLevel?.value?.equals(serviceLevel.toLowerCase()));
+        assert(newRequesterRequestData.maximumCostsCurrencyCode?.value?.equals(currencyCode.toLowerCase()));
+        assert(newRequesterRequestData.maximumCostsMonetaryValue?.toString()?.equals(monetaryValue));
         assert(newResponderRequestData.precededBy?.id == responderRequestId);
         assert(updatedResponderRequestData.succeededBy?.id == newResponderRequestData.id);
+
 
         where:
         deliveryMethod | serviceType | actionFile
