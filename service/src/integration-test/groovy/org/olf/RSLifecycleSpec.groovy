@@ -1,6 +1,10 @@
 package org.olf
 
 import grails.databinding.SimpleMapDataBindingSource
+import grails.util.Holders
+import org.dmfs.rfc5545.DateTime
+import org.dmfs.rfc5545.Duration
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.statemodel.StateModel
@@ -18,10 +22,10 @@ import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.settings.ISettings
 import org.olf.rs.statemodel.Status
+import org.olf.rs.timers.TimerCheckForStaleSupplierRequestsService
 import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Ignore
-
 import java.text.SimpleDateFormat
 
 
@@ -93,6 +97,9 @@ class RSLifecycleSpec extends TestBase {
   StaticRouterService staticRouterService
   Z3950Service z3950Service
   SettingsService settingsService;
+  AutoTimestampEventListener autoTimestampEventListener;
+
+
 
 
     // This method is declared in the HttpSpec
@@ -2464,6 +2471,55 @@ class DosomethingSimple {
         deliveryMethod | serviceType
         "Copy"         | "URL"
         null           | null
+
+    }
+
+    @Ignore //Cannot get the creation of a past-dated request to work
+    void "Test stale request timers"(
+            String tenantId
+    ) {
+        when:
+        final Duration durationOneWeek = new Duration(-1, 7, 0);
+        DateTime createDate = (new DateTime(TimeZone.getTimeZone("UTC"), System.currentTimeMillis())).startOfDay();
+        createDate = createDate.addDuration(durationOneWeek);
+        String tenantString = tenantId.toLowerCase() + "_mod_rs";
+        String requestId;
+        Long dateStamp;
+        //TimerCheckForStaleSupplierRequestsService timerService;
+        String timerBeanName = "timer" + "CheckForStaleSupplierRequests" + "Service";
+        def timerService = Holders.grailsApplication.mainContext.getBean(timerBeanName);
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_1_ENABLED) : "yes"]);
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_2_DAYS) : 3]);
+        PatronRequest newRequest;
+        Tenants.withId(tenantString) {
+
+            autoTimestampEventListener.withoutDateCreated(PatronRequest, {
+                newRequest = new PatronRequest();
+                newRequest.state = Status.lookup(Status.RESPONDER_IDLE);
+                newRequest.stateModel = StateModel.lookup(StateModel.MODEL_RESPONDER);
+                newRequest.isRequester = false;
+                newRequest.save(flush:true);
+                requestId = newRequest.id
+            });
+            newRequest.dateCreated = new Date(createDate.getTimestamp());
+            newRequest.save(flush:true)
+
+        }
+        dateStamp = newRequest.dateCreated.toTimestamp().getTime();
+
+        Tenants.withId(tenantString) {
+            timerService.performTask(tenantId, null);
+        }
+
+        then:
+        assert(requestId != null);
+        assert(dateStamp == createDate.getTimestamp());
+        assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
+        assert(newRequest.state.getCode() == Status.RESPONDER_NOT_SUPPLIED);
+
+        where:
+        tenantId | _
+        "RSInstThree" | _
 
     }
  }
