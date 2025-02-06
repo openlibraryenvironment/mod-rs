@@ -2494,18 +2494,17 @@ class DosomethingSimple {
         Tenants.withId(tenantString) {
 
             autoTimestampEventListener.withoutDateCreated(PatronRequest, {
-                newRequest = new PatronRequest();
+                newRequest = new PatronRequest(dateCreated: new Date(createDate.getTimestamp()));
                 newRequest.state = Status.lookup(Status.RESPONDER_IDLE);
                 newRequest.stateModel = StateModel.lookup(StateModel.MODEL_RESPONDER);
                 newRequest.isRequester = false;
                 newRequest.save(flush:true);
-                requestId = newRequest.id
+                requestId = newRequest.id;
             });
-            newRequest.dateCreated = new Date(createDate.getTimestamp());
-            newRequest.save(flush:true)
+            //newRequest.dateCreated = new Date(createDate.getTimestamp());
+            //newRequest.save(flush:true)
 
         }
-        dateStamp = newRequest.dateCreated.toTimestamp().getTime();
 
         Tenants.withId(tenantString) {
             timerService.performTask(tenantId, null);
@@ -2513,7 +2512,6 @@ class DosomethingSimple {
 
         then:
         assert(requestId != null);
-        assert(dateStamp == createDate.getTimestamp());
         assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
         assert(newRequest.state.getCode() == Status.RESPONDER_NOT_SUPPLIED);
 
