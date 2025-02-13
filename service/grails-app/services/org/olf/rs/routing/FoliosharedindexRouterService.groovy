@@ -2,10 +2,12 @@ package org.olf.rs.routing;
 
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.AvailabilityStatement;
-import org.olf.rs.DirectoryEntryService;
+import org.olf.rs.DirectoryEntryService
+import org.olf.rs.SettingsService;
 import org.olf.rs.SharedIndexService;
 import org.olf.rs.StatisticsService;
-import org.olf.rs.constants.Directory;
+import org.olf.rs.constants.Directory
+import org.olf.rs.referenceData.SettingsData;
 
 
 public class FoliosharedindexRouterService implements RequestRouter {
@@ -13,6 +15,7 @@ public class FoliosharedindexRouterService implements RequestRouter {
   SharedIndexService sharedIndexService
   StatisticsService statisticsService
   DirectoryEntryService directoryEntryService
+  SettingsService settingsService
 
   public List<RankedSupplier> findMoreSuppliers(Map description, List<String> already_tried_symbols) {
     log.debug("FoliosharedindexRouterService::findMoreSuppliers");
@@ -41,6 +44,8 @@ public class FoliosharedindexRouterService implements RequestRouter {
   private List<RankedSupplier> createRankedRota(List<AvailabilityStatement> sia) {
     log.debug("createRankedRota(${sia})");
     List<RankedSupplier> result = new ArrayList<RankedSupplier>()
+    String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS);
+    List<Symbol> localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(localSymbolsString);
 
     sia.each { av_stmt ->
       log.debug("Considering rota entry: ${av_stmt}");
@@ -66,7 +71,8 @@ public class FoliosharedindexRouterService implements RequestRouter {
             log.debug("Unable to get owner status for ${s}");
           }
 
-          if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
+          //if ( ownerStatus != null && ( ownerStatus == "Managed" || ownerStatus == "managed" )) {
+          if ( localSymbols.contains(s)) { //is the symbol one of our local symbols?
             loadBalancingScore = 10000;
             loadBalancingReason = "Local lending sources prioritized";
           } else if ( peer_stats != null ) {

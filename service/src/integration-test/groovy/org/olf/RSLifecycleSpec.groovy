@@ -6,6 +6,7 @@ import org.dmfs.rfc5545.DateTime
 import org.dmfs.rfc5545.Duration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.constants.Directory
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
@@ -98,6 +99,7 @@ class RSLifecycleSpec extends TestBase {
   Z3950Service z3950Service
   SettingsService settingsService;
   AutoTimestampEventListener autoTimestampEventListener;
+
 
 
 
@@ -365,6 +367,29 @@ class RSLifecycleSpec extends TestBase {
 
         then:"The expecte result is returned"
         resolved_rota.size() == 2;
+    }
+
+
+    void "Test retrieval of local directory entries"(
+            String tenantId
+
+    ) {
+        when: "We need to get our list of local directories"
+        String localSymbolsString = "ISIL:RST1,ISIL:RST2";
+        Set localDirectoryEntries = [];
+        Tenants.withId(tenantId.toLowerCase()+'_mod_rs', {
+            List localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(localSymbolsString);
+            localSymbols.each {
+                localDirectoryEntries.add(it.owner);
+            }
+        });
+
+        then:
+        localDirectoryEntries.size() == 2;
+
+        where:
+        tenantId | _
+        'RSInstOne' | _
     }
 
 

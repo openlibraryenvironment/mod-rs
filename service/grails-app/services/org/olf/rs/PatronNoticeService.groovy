@@ -1,8 +1,10 @@
 package org.olf.rs
 
 import org.hibernate.LockMode;
-import org.olf.okapi.modules.directory.DirectoryEntry;
-import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.templating.TemplateContainer;
 import org.olf.templating.TemplatingService;
 
@@ -206,7 +208,11 @@ public class PatronNoticeService {
         String institutionEmail = null;
 
         // We need to look the institution directory entry, so find all the managed entries
+        String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS);
+        List<Symbol> localSymbols = resolveSymbolsFromStringList(localSymbolsString);
+
         RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
+
         DirectoryEntry[] allManaged = DirectoryEntry.findAllByStatus(refdataManaged);
         if (allManaged != null) {
             // Good start we have at least 1 managed, so loop through them to find an institution entry
