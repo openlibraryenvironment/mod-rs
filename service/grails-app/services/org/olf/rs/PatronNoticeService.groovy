@@ -31,6 +31,7 @@ public class PatronNoticeService {
 
     EmailService emailService
     TemplatingService templatingService
+    SettingsService settingsService
 
     public void triggerNotices(PatronRequest pr, RefdataValue trigger) {
         log.debug("triggerNotices(${pr.patronEmail}, ${trigger.value})")
@@ -209,7 +210,7 @@ public class PatronNoticeService {
 
         // We need to look the institution directory entry, so find all the managed entries
         String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS);
-        List<Symbol> localSymbols = resolveSymbolsFromStringList(localSymbolsString);
+        List<Symbol> localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(localSymbolsString);
 
         RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
 

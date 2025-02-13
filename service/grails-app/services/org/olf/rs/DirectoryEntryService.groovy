@@ -82,16 +82,18 @@ public class DirectoryEntryService {
   public static List<Symbol> resolveSymbolsFromStringList(String symbolListString) {
     List<Symbol> results = [];
     //Split by commas
-    List<String> symbolList = symbolListString.split(",");
-    for ( String sub : symbolList ) {
-      List<String> parts = sub.split(":", 2); //Split into no more than 2 segments, allowing colons in symbol names
-      if (parts?.size() == 2) {
-        Symbol resolvedSymbol = resolveSymbol(parts[0], parts[1]);
-        if (resolvedSymbol != null) {
-          results.add(resolvedSymbol);
+    if (symbolListString) {
+      List<String> symbolList = symbolListString.split(",");
+      for (String sub : symbolList) {
+        List<String> parts = sub.split(":", 2); //Split into no more than 2 segments, allowing colons in symbol names
+        if (parts?.size() == 2) {
+          Symbol resolvedSymbol = resolveSymbol(parts[0], parts[1]);
+          if (resolvedSymbol != null) {
+            results.add(resolvedSymbol);
+          }
+        } else {
+          log.warn("Unable to split ${sub} into authority and symbol name");
         }
-      } else {
-        log.warn("Unable to split ${sub} into authority and symbol name");
       }
     }
     return results;
