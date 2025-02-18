@@ -1,5 +1,6 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
@@ -11,7 +12,8 @@ import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ProtocolType;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
-import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.lms.ItemLocation
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -66,9 +68,16 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                     log.debug("Attempt to resolve symbol \"${nextResponder}\"");
                     Symbol s = (nextResponder != null) ? DirectoryEntryService.resolveCombinedSymbol(nextResponder) : null;
                     log.debug("Resolved nextResponder to ${s} with status ${s?.owner?.status?.value}");
-                    String ownerStatus = s.owner?.status?.value;
+                    //String ownerStatus = s.owner?.status?.value;
+                    List<Symbol> localSymbols =
+                            DirectoryEntryService.resolveSymbolsFromStringList(
+                                    settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS))
 
-                    if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
+
+
+                    //todo - Make this use the local directory setting
+                    //if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
+                    if ( s in localSymbols ) {
                         log.debug('Responder is local') //, going to review state");
                         boolean doLocalReview  = true;
                         //Check to see if we're going to try to automatically check for local

@@ -212,10 +212,14 @@ public class PatronNoticeService {
         String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS);
         List<Symbol> localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(localSymbolsString);
 
-        RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
+        //RefdataValue refdataManaged = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_STATUS, DIRECTORY_ENTRY_STATUS_MANAGED, DIRECTORY_ENTRY_STATUS_MANAGED);
 
-        DirectoryEntry[] allManaged = DirectoryEntry.findAllByStatus(refdataManaged);
-        if (allManaged != null) {
+        //DirectoryEntry[] allManaged = DirectoryEntry.findAllByStatus(refdataManaged);
+        List<DirectoryEntry> allManaged = [];
+        for (Symbol sym : localSymbols) {
+            allManaged.add(sym.owner);
+        }
+        if (allManaged != null && allManaged.size() > 0) {
             // Good start we have at least 1 managed, so loop through them to find an institution entry
             RefdataValue refdataInstitution = RefdataValue.lookupOrCreate(CATEGORY_DIRECTORY_ENTRY_TYPE, DIRECTORY_ENTRY_TYPE_INSTITUTION, DIRECTORY_ENTRY_TYPE_INSTITUTION);
             allManaged.each { directoryEntry ->
