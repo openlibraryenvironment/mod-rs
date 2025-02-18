@@ -28,7 +28,21 @@ public class PickupLocationService {
             if (request.pickupLocationSlug) {
                 pickupLoc = DirectoryEntry.findBySlug(request.pickupLocationSlug);
             } else if (request.pickupLocationCode) { // deprecated
-                pickupLoc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: request.pickupLocationCode]);
+                //pickupLoc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code and de.status.value='managed'", [code: request.pickupLocationCode]);
+                pickupLoc = DirectoryEntry.find("from DirectoryEntry de where de.lmsLocationCode=:code'", [code: request.pickupLocationCode]);
+                Boolean localMatch = false;
+                List<Symbol> localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(
+                        settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS));
+                for (Symbol sym : localSymbols) {
+                    if (sym.owner == pickupLoc) {
+                        localMatch = true;
+                        break;
+                    }
+                }
+                if (!localMatch) {
+                    pickupLoc = null;
+                }
+
             }
 
             // Did we determine the pickup location
