@@ -14,7 +14,7 @@ public class TimerData {
 		Timer.ensure(
             "CheckForStaleSupplierRequests",
             "Check supplier requests have not become stale",
-            "FREQ=DAILY",
+            "FREQ=HOURLY",
             "CheckForStaleSupplierRequests",
             null,
             true,
