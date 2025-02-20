@@ -123,7 +123,7 @@ public class SettingsData {
     public static final String SETTING_STALE_REQUEST_1_ENABLED                  = 'stale_request_1_enabled';
     public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND          = 'stale_request_3_exclude_weekend';
     public static final String SETTING_STALE_REQUEST_RUSH_HOURS                 = 'stale_request_rush_hours';
-    public static final String SETTING_STALE_REQUEST_EXPRESS_DAYS               = 'stale_request_express_days';
+    public static final String SETTING_STALE_REQUEST_EXPRESS_HOURS              = 'stale_request_express_hours';
     public static final String SETTING_CHECK_DUPLICATE_TIME                     = 'check_duplicate_time';
     public static final String SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE  = 'auto_responder_requester_non_ret';
 
@@ -345,7 +345,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_YES).value);
 
             ensureAppSetting(SETTING_STALE_REQUEST_RUSH_HOURS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null);
-            ensureAppSetting(SETTING_STALE_REQUEST_EXPRESS_DAYS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null);
+            ensureAppSetting(SETTING_STALE_REQUEST_EXPRESS_HOURS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null);
 
             ensureAppSetting(SETTING_CHECK_DUPLICATE_TIME, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '0');
 
