@@ -35,7 +35,7 @@ where pr.dateCreated < :staleDate and
 	private static Map checkMap = [
 			"default" : [ setting: SettingsData.SETTING_STALE_REQUEST_2_DAYS, hoursMultiplier: 24] ,
 			"rush" : [ setting: SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS,  hoursMultiplier: 1],
-			"express" : [ setting: SettingsData.SETTING_STALE_REQUEST_EXPRESS_DAYS, hoursMultiplier: 24],
+			"express" : [ setting: SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS, hoursMultiplier: 1],
 	];
 
 	/** The duration that represents 1 day, used for when when we are excluding the weekend from the idle period */
@@ -98,7 +98,7 @@ where pr.dateCreated < :staleDate and
 							level == request.serviceLevel?.value) {
 							// Perform a supplier cannot supply action
 							try {
-								actionService.performAction(request.stateModel.staleAction.code, request, ['note': 'Request has been idle for more than ' + numberOfIdleDays + ' days.']);
+								actionService.performAction(request.stateModel.staleAction.code, request, ['note': 'Request has been idle for more than ' + numberOfIdleHours + ' hours.']);
 							} catch (Exception e) {
 								log.error("Exception thrown while performing stale action " + request.stateModel.staleAction.code + " on request " + request.hrid + " ( " + request.id.toString() + " )", e);
 							}
