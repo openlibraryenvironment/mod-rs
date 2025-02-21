@@ -1,11 +1,13 @@
 package org.olf
 
+import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.databinding.SimpleMapDataBindingSource
 import grails.util.Holders
 import org.dmfs.rfc5545.DateTime
 import org.dmfs.rfc5545.Duration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
+import org.olf.rs.constants.Directory
 import org.olf.rs.lms.HostLMSActions
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
@@ -50,7 +52,7 @@ class RSLifecycleSpec extends TestBase {
     // is the function of the AdditionalHeaders custom property here
     @Shared
     private static List<Map> DIRECTORY_INFO = [
-            [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a'] ],
+            [ id:'RS-T-D-0001', name: 'RSInstOne', slug:'RS_INST_ONE',     symbols: [[ authority:'ISIL', symbol:'RST1', priority:'a']], type : "Institution",
               services:[
                       [
                               slug:'RSInstOne_ISO18626',
@@ -62,7 +64,7 @@ class RSLifecycleSpec extends TestBase {
                       ]
               ]
             ],
-            [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a'] ],
+            [ id:'RS-T-D-0002', name: 'RSInstTwo', slug:'RS_INST_TWO',     symbols: [[ authority:'ISIL', symbol:'RST2', priority:'a']], type: "Institution",
               services:[
                       [
                               slug:'RSInstTwo_ISO18626',
@@ -74,7 +76,7 @@ class RSLifecycleSpec extends TestBase {
                       ]
               ]
             ],
-            [ id:'RS-T-D-0003', name: 'RSInstThree', slug:'RS_INST_THREE', symbols: [[ authority:'ISIL', symbol:'RST3', priority:'a'] ],
+            [ id:'RS-T-D-0003', name: 'RSInstThree', slug:'RS_INST_THREE', symbols: [[ authority:'ISIL', symbol:'RST3', priority:'a']], type: "Branch" ,
               services:[
                       [
                               slug:'RSInstThree_ISO18626',
@@ -98,6 +100,7 @@ class RSLifecycleSpec extends TestBase {
   Z3950Service z3950Service
   SettingsService settingsService;
   AutoTimestampEventListener autoTimestampEventListener;
+
 
 
 
@@ -218,6 +221,7 @@ class RSLifecycleSpec extends TestBase {
                 grailsWebDataBinder.bind(de, source)
 
                 // log.debug("Before save, ${de}, services:${de.services}");
+
                 try {
                     de.save(flush:true, failOnError:true)
                     log.debug("Result of bind: ${de} ${de.id}");
@@ -366,6 +370,30 @@ class RSLifecycleSpec extends TestBase {
         then:"The expecte result is returned"
         resolved_rota.size() == 2;
     }
+
+
+    void "Test retrieval of local directory entries"(
+            String tenantId
+    ) {
+        when: "We need to get our list of local directories"
+        String localSymbolsString = "ISIL:RST1,ISIL:RST2";
+        Set localDirectoryEntries = [];
+        Tenants.withId(tenantId.toLowerCase() + '_mod_rs', {
+            List localSymbols = DirectoryEntryService.resolveSymbolsFromStringList(localSymbolsString);
+            localSymbols.each {
+                localDirectoryEntries.add(it.owner);
+            }
+        });
+
+        then:
+        localDirectoryEntries.size() == 2;
+
+        where:
+        tenantId    | _
+        "RSInstOne" | _
+    }
+
+
 
 
     /**
@@ -647,6 +675,43 @@ class RSLifecycleSpec extends TestBase {
         'RSInstThree' | 'evergreen' | 'evergreen-traverse-de-sioux-with-available-item-status.xml'  | 'AM'                          | 'Children\'s Literature Area' | _
         'RSInstThree' | 'tlc'       | 'tlc-eastern.xml'                                             | 'Warner Library'              | 'WARNER STACKS'               | _
     }
+
+
+    void "Test local directory entries endpoint"(
+            String tenantId,
+            String type,
+            int expectedResults
+    ) {
+        given:
+        setHeaders([
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ]);
+        String localSymbolsString = "ISIL:RST1,ISIL:RST3";
+        changeSettings(tenantId, [ "local_symbols" : localSymbolsString], false);
+        when:
+        def resp;
+        if (type) {
+            resp = doGet("$baseUrl/rs/localEntries?type=$type".toString());
+        } else {
+            resp = doGet("$baseUrl/rs/localEntries".toString());
+        }
+        then:
+        assert(resp != null);
+        assert(resp.size() == expectedResults);
+        //assert(resp["localSymbols"] == localSymbolsString);
+        cleanup:
+        changeSettings(tenantId, ["local_symbols" : ""], false);
+
+        where:
+        tenantId | type | expectedResults
+        'RSInstOne' | null | 2
+        //'RSInstOne' | 'Institution' | 1
+
+    }
+
 
     /**
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier

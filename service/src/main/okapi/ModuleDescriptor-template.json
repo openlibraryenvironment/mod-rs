@@ -253,6 +253,11 @@
           "permissionsRequired": [ "rs.directoryentry.delete" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPettern" : "/rs/localEntries",
+          "permissionsRequired": [ "rs.directoryentry.get" ]
+        },
+        {
           "methods": [ "GET", "POST", "PUT", "DELETE" ],
           "pathPattern": "/rs/custprops*",
           "permissionsRequired": [ "rs.custprops" ]

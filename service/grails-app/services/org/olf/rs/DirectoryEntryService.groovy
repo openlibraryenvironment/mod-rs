@@ -6,7 +6,7 @@ import org.olf.rs.constants.Directory;
 
 import com.k_int.web.toolkit.custprops.CustomProperty;
 
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
 
 
 @Slf4j
@@ -74,6 +74,29 @@ public class DirectoryEntryService {
     def custProps = de.customProperties?.value ?: []
     CustomProperty cp = (custProps.find {custProp -> custProp.definition?.name == cpName})
     return cp
+  }
+
+  /*
+    Given a comma-separated list of qualified symbol names, return a list of all symbols that can be resolved
+   */
+  public static List<Symbol> resolveSymbolsFromStringList(String symbolListString) {
+    List<Symbol> results = [];
+    //Split by commas
+    if (symbolListString) {
+      List<String> symbolList = symbolListString.split(",");
+      for (String sub : symbolList) {
+        List<String> parts = sub.split(":", 2); //Split into no more than 2 segments, allowing colons in symbol names
+        if (parts?.size() == 2) {
+          Symbol resolvedSymbol = resolveSymbol(parts[0], parts[1]);
+          if (resolvedSymbol != null) {
+            results.add(resolvedSymbol);
+          }
+        } else {
+          log.warn("Unable to split ${sub} into authority and symbol name");
+        }
+      }
+    }
+    return results;
   }
 
 }
