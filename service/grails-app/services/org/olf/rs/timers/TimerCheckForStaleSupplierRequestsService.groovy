@@ -82,7 +82,7 @@ where pr.dateCreated < :staleDate and
 					}
 				} else {
 					// We do not ignore weekends
-					Duration duration = new Duration(-1, numberOfIdleDays, 0);
+					Duration duration = new Duration(-1, 0, numberOfIdleHours);
 					idleBeyondDate = idleBeyondDate.addDuration(duration);
 				}
 

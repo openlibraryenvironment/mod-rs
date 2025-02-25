@@ -37,7 +37,7 @@ public class NonreturnablesStateModelData {
     ];
 
     static private final List nrResponderStates = [
-        [ status : Status.RESPONDER_IDLE ],
+        [ status : Status.RESPONDER_IDLE, canTriggerStaleRequest: true ],
         [ status : Status.RESPONDER_CANCEL_REQUEST_RECEIVED ],
         [ status : Status.RESPONDER_CANCELLED, isTerminal : true ],
         [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
