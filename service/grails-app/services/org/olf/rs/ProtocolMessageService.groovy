@@ -172,9 +172,17 @@ class ProtocolMessageService {
 
     assert eventData != null
     assert eventData.messageType != null;
-    assert peer_symbol != null;
+    //assert peer_symbol != null;
 
-    List<ServiceAccount> ill_services_for_peer = findIllServices(peer_symbol)
+    //code for null peer symbol goes here
+
+    List<ServiceAccount> ill_services_for_peer;
+
+    if (peer_symbol != null) {
+      ill_services_for_peer = findIllServices(peer_symbol);
+    } else {
+      ill_services_for_peer = [];
+    }
     log.debug("ILL Services for peer: ${ill_services_for_peer}")
 
     log.debug("Will send an ISO18626 message to ILL service")
@@ -186,8 +194,7 @@ class ProtocolMessageService {
     def serviceAddress = null;
     if ( ill_services_for_peer.size() > 0 ) {
       serviceAddress = ill_services_for_peer[0].service.address
-    }
-    else {
+    } else {
       serviceAddress = settingsService.getSettingValue(SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS)
       log.info("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
     }
@@ -297,6 +304,7 @@ class ProtocolMessageService {
    * Return a list of service accounts this symbol can accept
    */
   public List<ServiceAccount> findIllServices(String symbolStr) {
+    List<ServiceAccount> result = [];
     def sym = DirectoryEntryService.resolveCombinedSymbol(symbolStr)
 
     if (sym == null) {
@@ -304,10 +312,14 @@ class ProtocolMessageService {
     }
 
     log.debug("Finding ILL service accounts for ${sym.symbol}")
-    def criteria = ServiceAccount.where {
-      accountHolder == sym.owner && service.businessFunction.value == 'ill'
+    try {
+      def criteria = ServiceAccount.where {
+        accountHolder == sym.owner && service.businessFunction.value == 'ill'
+      }
+      result = criteria.list()
+    } catch (Exception e) {
+      log.error("Error getting service accounts for symbol ${sym.symbol}: ${e.getLocalizedMessage()}");
     }
-    List<ServiceAccount> result = criteria.list()
 
     log.debug("Got service accounts: ${result}")
     return result;

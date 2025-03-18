@@ -28,7 +28,7 @@ class TestBase extends HttpSpec {
     @Autowired
     EventBus targetEventBus
 
-    @Value('${local.server.port}')
+    @Value(value = '${local.server.port}')
     Integer serverPort;
 
     /** Contains the tenants that have the ref data loaded */

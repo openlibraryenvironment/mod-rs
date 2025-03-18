@@ -43,10 +43,35 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
+        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
         // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
         request.networkStatus = NetworkStatus.Idle;
 
-        if (request.rota.size() > 0) {
+        if (requestRouterSetting == "disabled") { //if router is disabled
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            Symbol defaultPeerSymbol = DirectoryEntryService.resolveCombinedSymbol(defaultPeerSymbolString);
+            //Can we move this outside of conditional to keep it DRYer?
+            Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
+            log.debug("Built request message request: ${requestMessageRequest }");
+
+            requestMessageRequest.header.supplyingAgencyId = [
+                    agencyIdType : defaultPeerSymbol.authority?.symbol,
+                    agencyIdValue : defaultPeerSymbol.symbol,
+            ];
+
+            Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol,
+                    defaultPeerSymbolString, requestMessageRequest);
+            if (!sendSuccess) {
+                log.warn('Unable to send with disabled router');
+                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
+                eventResultDetails.auditMessage = 'End of rota';
+            } else {
+                log.debug("Sent to lender");
+            }
+
+        }
+        else if (request.rota.size() > 0) {
             boolean messageTried  = false;
             boolean lookAtNextResponder = true;
 

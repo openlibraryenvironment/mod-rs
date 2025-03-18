@@ -3,6 +3,7 @@
 # All root settings (anything not under the 'environements' key) here are loaded for every profile. 
 ###
 
+
 reshare:
     patronNoticesEnabled: true
 
@@ -226,6 +227,8 @@ events:
 ##
 environments:
   test:
+    server:
+      port: 22553
     dataSource:
       url: "jdbc:postgresql://${db.host:localhost}:${db.port:54321}/${db.database:okapi_modules}?ApplicationName=mod-rs-test"
       properties:

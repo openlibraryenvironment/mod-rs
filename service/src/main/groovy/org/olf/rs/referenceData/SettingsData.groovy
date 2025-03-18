@@ -98,6 +98,7 @@ public class SettingsData {
     public static final String SETTING_MAX_REQUESTS                    = 'max_requests';
     public static final String SETTING_REQUEST_ID_PREFIX               = 'request_id_prefix';
     public static final String SETTING_LOCAL_SYMBOLS                   = 'local_symbols';
+    public static final String SETTING_DEFAULT_PEER_SYMBOL             = 'default_peer_symbol';
 
     // Settings for the sharedIndex section
     public static final String SETTING_SHARED_INDEX_BASE_URL    = 'shared_index_base_url';
@@ -315,6 +316,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_MAX_REQUESTS, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_LOCAL_SYMBOLS, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_DEFAULT_PEER_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO).value);
             ensureAppSetting(SETTING_SHARED_INDEX_BASE_URL, SECTION_SHARED_INDEX, SETTING_TYPE_STRING, null, 'http://shared-index.reshare-dev.indexdata.com:9130');

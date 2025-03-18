@@ -146,6 +146,7 @@ public class RefdataValueData {
     // Request routing adapter
     public static final String REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX = 'FOLIOSharedIndex';
     public static final String REQUEST_ROUTING_ADAPTER_STATIC             = 'Static';
+    public static final String REQUEST_ROUTING_ADAPTER_DISABLED           = 'Disabled';
 
     // Shared index adapter
     public static final String SHARED_INDEX_ADAPTER_FOLIO = 'FOLIO';
@@ -348,6 +349,8 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
+            RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_DISABLED);
+
 
             RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Australian Dollars','AUD');
             RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Canadian Dollars', 'CAD');
