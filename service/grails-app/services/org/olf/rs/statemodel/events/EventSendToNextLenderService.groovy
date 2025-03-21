@@ -43,6 +43,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
+
         String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
 
         // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
