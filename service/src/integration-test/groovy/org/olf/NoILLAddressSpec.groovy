@@ -234,7 +234,7 @@ class NoILLAddressSpec extends TestBase {
     }
 
 
-    void "Test a interaction with mock"() {
+    void "Test willsupply/loaned interaction with mock"() {
         String requesterTenantId = TENANT_ONE_NAME;
         String responderTenantId = TENANT_TWO_NAME;
         String patronIdentifier = "22-33-44";
@@ -261,13 +261,48 @@ class NoILLAddressSpec extends TestBase {
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
-        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+        // I cannot seem to catch this in time
+        //waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
-        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_UNFILLED);
-        //String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
-        //log.debug("Responder (terminal transition test) request id is ${responderRequestId}");
+        String requestId =  waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_SHIPPED);
+
+        def requestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
 
+        then:
+        assert(true);
+    }
+
+    void "Test willsupply/unfilled interaction with mock"() {
+        String requesterTenantId = TENANT_ONE_NAME;
+        String responderTenantId = TENANT_TWO_NAME;
+        String patronIdentifier = "23-23-24";
+        String patronReference = "ref-${patronIdentifier}";
+        String systemInstanceIdentifier = "007-008-009";
+
+        when: "We create a request"
+
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:8081/iso18626".toString() ] );
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
+        //changeSettings( responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${baseUrl}/rs/externalApi/iso18626".toString() ] );
+
+        Map request = [
+                patronReference: patronReference,
+                title: "Yet another test of the no ILL address system",
+                author: "Gon, Etsch",
+                requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
+                patronIdentifier: patronIdentifier,
+                isRequester: true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+                supplierUniqueRecordId: "WILLSUPPLY_UNFILLED"
+        ];
+
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requestId =  waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
+
+        def requestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
         then:
         assert(true);

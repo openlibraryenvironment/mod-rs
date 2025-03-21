@@ -316,13 +316,13 @@ public class StatusService {
                         log.debug("No actionEventResult from availableAction, checking actionEvent")
                         if (actionEvent.resultList != null) {
                             // We have a second bite of the cherry
-                            log.debug("Looking up actionEventResult with result ${successful}, qualifier ${qualifier} and fromStatus ${fromStatus}");
+                            log.debug("Looking up actionEventResult with result ${successful}, qualifier ${qualifier} and fromStatus ${fromStatus?.code}");
                             actionEventResult = actionEvent.resultList.lookupResult(successful, qualifier, fromStatus);
                         }
 
                         // If we still didn;t find a result log an error
                         if (actionEventResult == null) {
-                            log.error('Looking up the to status, but unable to find an ActionEventResult for Status: ' + fromStatus.code +
+                            log.error('Looking up the to status, but unable to find an ActionEventResult for Status: ' + fromStatus?.code +
                                 ', action: ' + actionCode +
                                 ', successful: ' + successful +
                                 ', qualifier: ' + qualifier);

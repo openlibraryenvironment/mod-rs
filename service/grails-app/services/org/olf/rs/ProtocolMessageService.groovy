@@ -127,9 +127,10 @@ class ProtocolMessageService {
      */
     public String buildProtocolId(PatronRequest request, String stateModel) {
         String id = (request.hrid ?: request.id)
+        String order = request.rotaPosition?.toString() ?: "norota";
         String suffix = (stateModel == StateModel.MODEL_SLNP_REQUESTER ||
                 stateModel == StateModel.MODEL_SLNP_RESPONDER) ? "" :
-                (REQUESTER_ID_SEPARATOR + request.rotaPosition.toString())
+                (REQUESTER_ID_SEPARATOR + order)
         return id + suffix
 
     }
