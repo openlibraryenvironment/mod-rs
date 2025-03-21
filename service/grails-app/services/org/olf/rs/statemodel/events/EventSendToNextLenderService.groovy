@@ -12,7 +12,7 @@ import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ProtocolType;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
-import org.olf.rs.lms.ItemLocation
+import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
@@ -32,7 +32,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
-    SettingsService settingsService;
+    //We can't rely on DI here because it apparently doesn't work when the class is called via inheritance
+    SettingsService settingsService = new SettingsService();
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
@@ -43,8 +44,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
-
-        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
 
         // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
         request.networkStatus = NetworkStatus.Idle;
