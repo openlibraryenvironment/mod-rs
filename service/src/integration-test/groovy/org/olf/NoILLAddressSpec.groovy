@@ -5,14 +5,20 @@ import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
 import grails.web.databinding.GrailsWebDataBinder
 import groovy.util.logging.Slf4j
+import groovyx.net.http.ApacheHttpBuilder
+import org.apache.http.client.config.RequestConfig
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.referenceData.SettingsData
-import org.olf.rs.routing.RankedSupplier
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.Status
+import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Shared
 import spock.lang.Stepwise
+import org.apache.http.impl.client.HttpClientBuilder;
+import groovyx.net.http.*; //euw, a star import
+
+import static groovyx.net.http.ContentTypes.XML
 
 @Slf4j
 @Integration
@@ -57,6 +63,50 @@ class NoILLAddressSpec extends TestBase {
     public String getBaseUrl() {
         //For some reason the base url keeps getting 'null' inserted into it
         return super.getBaseUrl()?.replace("null", "");
+    }
+
+    Map sendXMLMessage(String url, String message, Map additionalHeaders, long timeout) {
+        Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
+
+        HttpBuilder http_client = ApacheHttpBuilder.configure({
+            client.clientCustomizer({  HttpClientBuilder builder ->
+                   RequestConfig.Builder requestBuilder = RequestConfig.custom();
+                   requestBuilder.connectTimeout = timeout;
+                   requestBuilder.connectionRequestTimeout = timeout;
+                   requestBuilder.socketTimeout = timeout;
+                   builder.defaultRequestConfig = requestBuilder.build();
+            });
+            request.uri = url;
+            request.contentType = XML[0];
+            request.headers['accept'] = 'application/xml, text/xml';
+            additionalHeaders?.each{ k, v ->
+                request.headers[k] = v;
+            }
+        });
+
+        def response = http_client.post {
+            request.body = message;
+            response.failure({ FromServer fromServer ->
+                String errorMessage = "Error from address ${url}: ${fromServer.getStatusCode()} ${fromServer}";
+                log.error(errorMessage);
+                String responseStatus = fromServer.getStatusCode().toString() + " " + fromServer.getMessage();
+                throw new RuntimeException(errorMessage);
+            });
+            response.success({ FromServer fromServer, xml ->
+                String responseStatus = "${fromServer.getStatusCode()} ${fromServer.getMessage()}";
+                log.debug("Got response: ${responseStatus}");
+                if (xml != null) {
+                    result.rawData = groovy.xml.XmlUtil.serialize(xml);
+                } else {
+                    result.errorData = EventISO18626IncomingAbstractService.ERROR_TYPE_NO_XML_SUPPLIED;
+                }
+
+            });
+        }
+        log.debug("Got response message: ${response}");
+
+        return result;
+
     }
 
     private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
@@ -261,10 +311,26 @@ class NoILLAddressSpec extends TestBase {
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
-        // I cannot seem to catch this in time
-        //waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
         String requestId =  waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_SHIPPED);
+
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction".toString();
+        String jsonPayloadRecieved =  new File("src/integration-test/resources/scenarios/requesterReceived.json").text;
+        doPost(performActionUrl, jsonPayloadRecieved);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_CHECKED_IN);
+
+        String jsonPayloadReturn = new File("src/integration-test/resources/scenarios/patronReturnedItem.json").text;
+        doPost(performActionUrl, jsonPayloadReturn);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING);
+
+        String jsonPayloadShipped = new File("src/integration-test/resources/scenarios/shippedReturn.json").text;
+        doPost(performActionUrl, jsonPayloadShipped);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER);
 
         def requestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
@@ -300,12 +366,53 @@ class NoILLAddressSpec extends TestBase {
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
-        String requestId =  waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
 
         def requestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
         then:
         assert(true);
     }
+
+    void "Test acting as supplier to mock"() {
+        String responderTenantId = TENANT_ONE_NAME;
+        String patronReference = "ref-33-44-55"; //from xml file
+
+        when: "We post a new request to the mock to act as a requester"
+        String requestBody = new File("src/integration-test/resources/isoMessages/illmockrequest.xml").text;
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:8081/iso18626".toString() ] );
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
+
+        sendXMLMessage("http://localhost:8081/iso18626".toString(), requestBody, null, 10000);
+
+        String requestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction".toString();
+        String jsonPayloadWillsupply = new File("src/integration-test/resources/scenarios/supplierAnswerYes.json").text;
+        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+
+        doPost(performActionUrl, jsonPayloadWillsupply);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_CANCEL_REQUEST_RECEIVED);
+
+        String jsonPayloadRespondCancelYes = new File("src/integration-test/resources/scenarios/supplierRespondToCancelYes.json").text;
+        doPost(performActionUrl, jsonPayloadRespondCancelYes);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_CANCELLED);
+
+
+
+
+
+
+        then:
+        assert(true);
+
+
+    }
+
+
 
 }

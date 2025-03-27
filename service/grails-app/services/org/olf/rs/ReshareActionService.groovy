@@ -240,23 +240,45 @@ public class ReshareActionService {
         EventResultDetails eventResultDetails,
         Map retryEventData = null
     ) {
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
         boolean result = false;
         boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode) ||
                 StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode)
+        boolean routingDisabled = (requestRouterSetting == 'disabled');
+        boolean disregardRota = (isSlnpModel || routingDisabled);
 
         Long rotaPosition = pr.rotaPosition;
         // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
-        if (!isSlnpModel && pr.rota.isEmpty()) {
+        if (!disregardRota && pr.rota.isEmpty()) {
             log.error('sendRequestingAgencyMessage has been given an empty rota');
-        } else if (!isSlnpModel && rotaPosition == null) {
+        } else if (!disregardRota && rotaPosition == null) {
             log.error('sendRequestingAgencyMessage could not find current rota postition');
-        } else if (!isSlnpModel && pr.rota.empty()) {
+        } else if (!disregardRota && pr.rota.empty()) {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
 
             Map eventData = retryEventData;
+            Map symbols = null;
+            /*
             Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol] :
                     requestingAgencyMessageSymbol(pr);
+
+             */
+
+            if (isSlnpModel) {
+                symbols = [
+                        senderSymbol: pr.requestingInstitutionSymbol,
+                        receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol
+                ];
+            } else if (routingDisabled) {
+                String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+                symbols = [
+                        senderSymbol: pr.requestingInstitutionSymbol,
+                        receivingSymbol: defaultPeerSymbolString
+                ];
+            } else {
+                symbols = requestingAgencyMessageSymbol(pr);
+            }
 
             // If we have not been supplied with the event data, we need to generate it
             if (eventData == null) {
