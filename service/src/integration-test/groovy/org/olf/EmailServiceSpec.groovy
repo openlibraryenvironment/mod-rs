@@ -2,6 +2,7 @@ package org.olf
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.*
+import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.*
 import geb.spock.*
 import groovy.util.logging.Slf4j
@@ -13,6 +14,7 @@ import org.olf.rs.EmailService
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class EmailServiceSpec extends GebSpec {
   
   def grailsApplication

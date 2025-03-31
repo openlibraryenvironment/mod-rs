@@ -50,7 +50,6 @@ class NoILLAddressSpec extends TestBase {
             ]
     ];
 
-    StaticRouterService staticRouterService;
     GrailsWebDataBinder grailsWebDataBinder;
 
 
@@ -58,6 +57,21 @@ class NoILLAddressSpec extends TestBase {
     def setupSpecWithSpring() {
         super.setupSpecWithSpring();
         log.debug("setup spec completed")
+    }
+
+    //Do we need to make sure the base version doesn't happen?
+    def setupSpec() {
+        log.debug("setupSpec called");
+    }
+
+    def setup() {
+        if (testctx.niaInitialized == null) {
+            testctx.niaInitialized = true;
+        }
+    }
+
+    def cleanup() {
+        log.debug("Cleanup called");
     }
 
     public String getBaseUrl() {
@@ -183,7 +197,7 @@ class NoILLAddressSpec extends TestBase {
 
         where:
         tenantid | name
-        TENANT_ONE_NAME| TENANT_ONE_NAME
+        TENANT_ONE_NAME | TENANT_ONE_NAME
         TENANT_TWO_NAME | TENANT_TWO_NAME
     }
 
