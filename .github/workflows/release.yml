@@ -27,6 +27,10 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      # login to gh packages for crosslink repo
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.ID_GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.ID_GHCR_USER }}" --password-stdin
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2
 
