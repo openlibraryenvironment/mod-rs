@@ -293,7 +293,7 @@ class NoILLAddressSpec extends TestBase {
 
         when: "We create a request"
 
-        changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:8081/iso18626".toString() ] );
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
         //changeSettings( responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${baseUrl}/rs/externalApi/iso18626".toString() ] );
 
@@ -348,7 +348,7 @@ class NoILLAddressSpec extends TestBase {
 
         when: "We create a request"
 
-        changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:8081/iso18626".toString() ] );
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
         //changeSettings( responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${baseUrl}/rs/externalApi/iso18626".toString() ] );
 
@@ -382,10 +382,10 @@ class NoILLAddressSpec extends TestBase {
 
         when: "We post a new request to the mock to act as a requester"
         String requestBody = new File("src/integration-test/resources/isoMessages/illmockrequest.xml").text;
-        changeSettings(responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:8081/iso18626".toString() ] );
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
         changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
 
-        sendXMLMessage("http://localhost:8081/iso18626".toString(), requestBody, null, 10000);
+        sendXMLMessage("http://localhost:19083/iso18626".toString(), requestBody, null, 10000);
 
         String requestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
 
