@@ -11,12 +11,6 @@ import urllib.request
 MODULES = ['mod-rs']
 
 # names of tenants to operate on
-TENANTS = [
-    'reshare_east', 
-    'reshare_west',
-    'slnptest_one',
-    'slnptest_two'
-]
 
 REGISTRY = "https://registry.reshare-dev.indexdata.com"
 
@@ -26,11 +20,25 @@ PORT = "8080"
 def main():
     args = parse_command_line_args()
     action = args.action
+    k8s_environment = args.environment
     okapi_url = args.okapi_url
     username = args.username
     password = args.password
     registry = args.registry
     token = get_token(username, password, okapi_url)
+
+    if k8s_environment == "trove-dev":
+        TENANTS = [
+            'sydney', 
+            'melbourne'
+        ]
+    else:
+        TENANTS = [
+            'reshare_east', 
+            'reshare_west',
+            'slnptest_one',
+            'slnptest_two'
+        ]
 
     if action == "disable":
         disable_result = disable(args, token)
@@ -152,6 +160,7 @@ def parse_command_line_args():
                         default='http://localhost:9130', required=False)
     parser.add_argument('-r', '--registry', help='registry to pull mds from',
                         default='http://folio-registry.dev.folio.org', required=False)
+    parser.add_argument('-e', '--environment', help='reshare, or trove-dev', default="reshare", required=False)
 
     args = parser.parse_args()
 
