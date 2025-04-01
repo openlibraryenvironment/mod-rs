@@ -28,12 +28,12 @@ def main():
     token = get_token(username, password, okapi_url)
 
     if k8s_environment == "trove-dev":
-        TENANTS = [
+        tenants = [
             'sydney', 
             'melbourne'
         ]
     else:
-        TENANTS = [
+        tenants = [
             'reshare_east', 
             'reshare_west',
             'slnptest_one',
@@ -41,16 +41,16 @@ def main():
         ]
 
     if action == "disable":
-        disable_result = disable(args, token)
+        disable_result = disable(args, token, tenants)
     elif action == "enable":
-        enable_result = enable(args, token)
+        enable_result = enable(args, token, tenants)
     elif action == "all":
-        disable_result = disable(args, token)
-        enable_result = enable(args, token)
+        disable_result = disable(args, token, tenants)
+        enable_result = enable(args, token, tenants)
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
-def disable(args, token):
+def disable(args, token, tenants):
     action = args.action
     okapi_url = args.okapi_url
     username = args.username
@@ -61,7 +61,7 @@ def disable(args, token):
  
     for module in MODULES:
         r = okapi_get(okapi_url +
-                      '/_/proxy/tenants/{}/modules?filter={}'.format(TENANTS[0], module),
+                      '/_/proxy/tenants/{}/modules?filter={}'.format(tenants[0], module),
                       token=token)
         if (len(json.loads(r)) > 0):
             disable_versions.append({
@@ -71,7 +71,7 @@ def disable(args, token):
 
     # disable for all
     print("Disable current module")
-    for tenant in TENANTS:
+    for tenant in tenants:
         try:
              r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install'.format(tenant),
                  payload=json.dumps(disable_versions).encode('UTF-8'),
@@ -92,7 +92,7 @@ def disable(args, token):
     ## return true on success
     #return True
 
-def enable(args, token):
+def enable(args, token, tenants):
     action = args.action
     okapi_url = args.okapi_url
     username = args.username
@@ -138,7 +138,7 @@ def enable(args, token):
                 "id" : module,
                 "action" : "enable"
             })
-    for tenant in TENANTS:
+    for tenant in tenants:
         print("enabling on {}".format(tenant))
         r = okapi_post(okapi_url + '/_/proxy/tenants/{}/install?tenantParameters=loadReference%3Dtrue'.format(tenant),
             payload=json.dumps(enable_payload).encode('UTF-8'),
