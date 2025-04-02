@@ -64,15 +64,12 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
             Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol,
                     defaultPeerSymbolString, requestMessageRequest);
             if (!sendSuccess) {
-                log.warn('Unable to send with disabled router');
-                eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_END_OF_ROTA;
-                eventResultDetails.auditMessage = 'End of rota';
+                log.warn("Unable to send with disabled router: ${request?.networkStatus.toString()}");
+                eventResultDetails.auditMessage = 'Problem sending to supplier gateway, will retry';
             } else {
-                log.debug("Sent to lender");
+                log.debug("Sent to supplier gateway");
             }
-
-        }
-        else if (request.rota.size() > 0) {
+        } else if (request.rota.size() > 0) {
             boolean messageTried  = false;
             boolean lookAtNextResponder = true;
 
