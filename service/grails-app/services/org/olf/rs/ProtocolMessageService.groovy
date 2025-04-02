@@ -173,9 +173,6 @@ class ProtocolMessageService {
 
     assert eventData != null
     assert eventData.messageType != null;
-    //assert peer_symbol != null;
-
-    //code for null peer symbol goes here
 
     List<ServiceAccount> ill_services_for_peer;
 

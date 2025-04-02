@@ -272,6 +272,9 @@ public class ReshareActionService {
                 ];
             } else if (routingDisabled) {
                 String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+                if (!defaultPeerSymbolString) {
+                    log.error("No defaultPeerSymbol defined");
+                }
                 symbols = [
                         senderSymbol: pr.requestingInstitutionSymbol,
                         receivingSymbol: defaultPeerSymbolString
