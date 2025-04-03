@@ -5,12 +5,14 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
 import grails.gorm.multitenancy.Tenants;
 import grails.testing.mixin.integration.Integration;
 import groovy.json.JsonBuilder;
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
+import org.springframework.boot.test.context.SpringBootTest;
 import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class TemplateContainerSpec extends TestBase {
 
     // This method is declared in the HttpSpec

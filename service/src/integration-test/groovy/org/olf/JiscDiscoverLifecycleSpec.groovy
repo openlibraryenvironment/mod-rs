@@ -2,6 +2,7 @@ package org.olf
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.*
+import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.*
 import geb.spock.*
 import groovy.util.logging.Slf4j
@@ -15,6 +16,7 @@ import com.k_int.web.toolkit.testing.HttpSpec
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class JiscDiscoverLifecycleSpec extends HttpSpec {
   
   // Warning: You will notice that these directory entries carry and additional customProperty: AdditionalHeaders

@@ -1,5 +1,3 @@
-version: "2.1"
-
 volumes:
   minio_data:
     driver: local

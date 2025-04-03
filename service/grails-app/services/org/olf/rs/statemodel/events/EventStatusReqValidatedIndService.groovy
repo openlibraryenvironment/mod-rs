@@ -4,7 +4,9 @@ import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.rs.AvailabilityStatement;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.PatronRequestRota;
-import org.olf.rs.RequestRouterService;
+import org.olf.rs.RequestRouterService
+import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.routing.RankedSupplier;
 import org.olf.rs.routing.RequestRouter;
 import org.olf.rs.statemodel.AbstractEvent;
@@ -21,6 +23,7 @@ import org.olf.rs.statemodel.Events;
 public class EventStatusReqValidatedIndService extends AbstractEvent {
 
     RequestRouterService requestRouterService;
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -39,7 +42,13 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SOURCING;
         eventResultDetails.auditMessage = 'Sourcing potential items';
 
-        if (request.rota?.size() != 0) {
+        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
+        if (requestRouterSetting == "disabled") {
+            eventResultDetails.qualifier = null;
+            eventResultDetails.auditMessage = 'Request router disabled';
+        }
+        else if (request.rota?.size() != 0) {
             eventResultDetails.qualifier = null;
             eventResultDetails.auditMessage = 'Request supplied with Lending String';
         } else {

@@ -12,7 +12,7 @@ import org.olf.rs.ProtocolMessageService;
 import org.olf.rs.ProtocolType;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
-import org.olf.rs.lms.ItemLocation
+import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
@@ -32,7 +32,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
-    SettingsService settingsService;
+    //We can't rely on DI here because it apparently doesn't work when the class is called via inheritance
+    SettingsService settingsService = new SettingsService();
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
@@ -43,10 +44,32 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+
         // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
         request.networkStatus = NetworkStatus.Idle;
 
-        if (request.rota.size() > 0) {
+        if (requestRouterSetting == "disabled") { //if router is disabled
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            Symbol defaultPeerSymbol = DirectoryEntryService.resolveCombinedSymbol(defaultPeerSymbolString);
+            //Can we move this outside of conditional to keep it DRYer?
+            Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
+            log.debug("Built request message request: ${requestMessageRequest }");
+
+            requestMessageRequest.header.supplyingAgencyId = [
+                    agencyIdType : defaultPeerSymbol.authority?.symbol,
+                    agencyIdValue : defaultPeerSymbol.symbol,
+            ];
+
+            Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol,
+                    defaultPeerSymbolString, requestMessageRequest);
+            if (!sendSuccess) {
+                log.warn("Unable to send with disabled router: ${request?.networkStatus.toString()}");
+                eventResultDetails.auditMessage = 'Problem sending to supplier gateway, will retry';
+            } else {
+                log.debug("Sent to supplier gateway");
+            }
+        } else if (request.rota.size() > 0) {
             boolean messageTried  = false;
             boolean lookAtNextResponder = true;
 

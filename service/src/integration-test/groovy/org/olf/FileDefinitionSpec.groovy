@@ -7,12 +7,14 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import grails.testing.mixin.integration.Integration;
 import grails.web.http.HttpHeaders;
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
+import org.springframework.boot.test.context.SpringBootTest;
 import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class FileDefinitionSpec extends TestBase {
 
     // This method is declared in the HttpSpec

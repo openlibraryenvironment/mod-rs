@@ -1060,6 +1060,7 @@ public class ActionEventResultData {
             requesterISO18626ExpectToSupply,
             requesterISO18626Unfilled,
             requesterISO18626UnfilledTransfer,
+            requesterISO18626Loaned,
             defaultNoStatusChangeOK
         ]
     ];

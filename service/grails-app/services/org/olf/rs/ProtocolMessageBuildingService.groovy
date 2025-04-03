@@ -95,7 +95,8 @@ class ProtocolMessageBuildingService {
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
-      supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      //supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      supplierUniqueRecordId: req.isRequester ? req.supplierUniqueRecordId : null
 
     ]
     message.publicationInfo = [

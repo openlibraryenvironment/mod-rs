@@ -25,6 +25,7 @@ import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.settings.ISettings
 import org.olf.rs.statemodel.Status
 import org.olf.rs.timers.TimerCheckForStaleSupplierRequestsService
+import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Ignore
@@ -34,6 +35,7 @@ import java.text.SimpleDateFormat
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class RSLifecycleSpec extends TestBase {
 
     // The scenario details that are maintained between tests

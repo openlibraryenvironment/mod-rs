@@ -4,12 +4,14 @@ import org.olf.rs.statemodel.Actions;
 import org.olf.rs.statemodel.StateModel;
 
 import grails.testing.mixin.integration.Integration;
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
+import org.springframework.boot.test.context.SpringBootTest;
 import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AvailableActionSpec extends TestBase {
 
     // This method is declared in the HttpSpec

@@ -9,12 +9,14 @@ import org.olf.rs.NoticeEvent;
 import org.olf.rs.Patron
 import org.olf.rs.PatronNoticeService
 import org.olf.rs.PatronRequest
-import org.olf.rs.referenceData.RefdataValueData;
+import org.olf.rs.referenceData.RefdataValueData
+import org.springframework.boot.test.context.SpringBootTest;
 import spock.lang.Stepwise;
 
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class NoticeSpec extends TestBase {
 
     PatronNoticeService patronNoticeService;

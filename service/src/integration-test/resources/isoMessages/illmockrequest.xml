@@ -1,0 +1,76 @@
+<ISO18626Message xmlns="http://illtransactions.org/2013/iso18626"
+                 xmlns:ill="http://illtransactions.org/2013/iso18626"
+                 ill:version="1.2"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_2.xsd">
+    <request>
+        <header>
+            <supplyingAgencyId>
+                <agencyIdType>DMMY</agencyIdType>
+                <agencyIdValue>NIA1</agencyIdValue>
+            </supplyingAgencyId>
+            <requestingAgencyId>
+                <agencyIdType>DMMY</agencyIdType>
+                <agencyIdValue>NIA2</agencyIdValue>
+            </requestingAgencyId>
+            <multipleItemRequestId></multipleItemRequestId>
+            <timestamp>0001-01-01T00:00:00.000Z</timestamp>
+            <requestingAgencyRequestId>DMMYNIA2-1</requestingAgencyRequestId>
+        </header>
+        <bibliographicInfo>
+            <!--
+              specify supplier scenario via <supplierUniqueRecordId> field, see https://github.com/indexdata/crosslink/blob/main/illmock/README.md#supplier-behavior
+            -->
+            <!--
+              NOTE: when submitting a PatronRequest where the broker is the supplier peer (default),
+              and assuming the broker is configured with the mock SRU holdings adapter (also default),
+              you can specify multiple ILL scenarios for each mock supplier located by the broker with a semicolon separated list, e.g.:
+               <supplierUniqueRecordId>ERROR;UNFILLED;WILLSUPPLY_UNFILLED;LOANED</supplierUniqueRecordId>
+            -->
+            <supplierUniqueRecordId>LOANED</supplierUniqueRecordId>
+            <title>Layered of the Rungs</title>
+            <author>Junior Tooken</author>
+            <bibliographicItemId>
+                <bibliographicItemIdentifier>1884</bibliographicItemIdentifier>
+                <bibliographicItemIdentifierCode>ISBN</bibliographicItemIdentifierCode>
+            </bibliographicItemId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="RESHARE">patronReference</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>ref-33-44-55</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+        </bibliographicInfo>
+        <serviceInfo>
+            <requestType>New</requestType>
+            <!--
+              use requestSubType:PatronRequest ONLY if the mock should act as a requester and send a request to the supplier peer (broker by default)
+            -->
+            <requestSubType>PatronRequest</requestSubType>
+            <serviceType>Loan</serviceType>
+            <!--
+              specify requester behavior via the <note> field, see https://github.com/indexdata/crosslink/blob/main/illmock/README.md#requester-behavior
+            -->
+              <note>#CANCEL#</note>
+        </serviceInfo>
+        <!--
+          optionally, supplier peer address can be specified below, otherwise the default (broker) is used
+        -->
+        <!--
+        <supplierInfo>
+          <supplierDescription>https://broker.crosslink-dev.indexdata.com/iso18626</supplierDescription>
+        </supplierInfo>
+        -->
+        <!--
+          optionally, requester peer address can be specified below, otherwise the default (broker) is used
+        -->
+        <!--
+        <requestingAgencyInfo>
+          <address>
+            <electronicAddress>
+              <electronicAddressType></electronicAddressType>
+              <electronicAddressData>https://broker.crosslink-dev.indexdata.com/iso8626</electronicAddressData>
+            </electronicAddress>
+          </address>
+        </requestingAgencyInfo>
+        -->
+    </request>
+</ISO18626Message>
