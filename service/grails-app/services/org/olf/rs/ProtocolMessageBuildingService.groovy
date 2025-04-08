@@ -2,6 +2,7 @@ package org.olf.rs
 
 import groovy.util.logging.Slf4j
 import org.olf.rs.iso18626.TypeStatus
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
@@ -30,6 +31,7 @@ class ProtocolMessageBuildingService {
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ReshareActionService reshareActionService
+    SettingsService settingsService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -45,15 +47,20 @@ class ProtocolMessageBuildingService {
 
 
   public Map buildRequestMessage(PatronRequest req, boolean appendSequence = true) {
-    Map message = buildSkeletonMessage('REQUEST')
+      Map message = buildSkeletonMessage('REQUEST')
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
-    message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
+      if (req.resolvedRequester != null) {
+          message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
+      } else {
+          message.header = buildHeader(req, 'REQUEST', defaultRequestSymbolString, null);
+      }
 
     //List bibliographicItemIdList = [ [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ] ];
       List bibliographicItemIdList = [ ];
-    if (req.precededBy) {
-        bibliographicItemIdList.add([scheme:'reshare', bibliographicItemIdentifierCode:'preceded-by', bibliographicItemIdentifier: req.precededBy.hrid])
-    }
+      if (req.precededBy) {
+          bibliographicItemIdList.add([scheme:'reshare', bibliographicItemIdentifierCode:'preceded-by', bibliographicItemIdentifier: req.precededBy.hrid])
+      }
     /*
     if (req.succeededBy) {
         bibliographicItemIdList.add([scheme:'reshare', identifierCode:'succeeded-by', identifierValue: req.succeededBy.hrid])
@@ -226,7 +233,17 @@ class ProtocolMessageBuildingService {
 
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
-    message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
+      String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+      boolean routingDisabled = (requestRouterSetting == 'disabled');
+
+      if (routingDisabled) {
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultPeerSymbolString, defaultRequestSymbolString)
+      } else {
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
+      }
     message.messageInfo = [
       reasonForMessage:reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
@@ -306,14 +323,23 @@ class ProtocolMessageBuildingService {
 
 
   public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note, boolean appendSequence = true) {
-    Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
+      Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
-    Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
-    Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
+      String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
-    message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
-    message.action = action
-    message.note = buildNote(pr, note, appendSequence)
+      Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
+      Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
+
+      if (requestRouterSetting != 'disabled') {
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
+      } else {
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+      }
+
+      message.action = action
+      message.note = buildNote(pr, note, appendSequence)
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
@@ -424,6 +450,51 @@ class ProtocolMessageBuildingService {
       return(constructedNote);
   }
 
+
+    private Map buildHeader(PatronRequest pr, String messageType, String message_sender_symbol, String peer_symbol) {
+        Map supplyingAgencyId
+        Map requestingAgencyId
+        String requestingAgencyRequestId
+        String supplyingAgencyRequestId
+
+        log.debug("ProtocolMessageBuildingService::buildHeader(${pr}, ${messageType}, ${message_sender_symbol}, ${peer_symbol})");
+
+
+        if (messageType == 'REQUEST' || messageType == 'REQUESTING_AGENCY_MESSAGE') {
+
+            // Set the requestingAgencyId and the requestingAgencyRequestId
+            requestingAgencyId = buildHeaderRequestingAgencyId(message_sender_symbol)
+            requestingAgencyRequestId = protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode);
+
+            if (messageType == 'REQUEST') {
+                // If this message is a request then the supplying Agency details get filled out later and the supplying request id is null
+                supplyingAgencyRequestId = null
+            } else {
+                supplyingAgencyId = buildHeaderSupplyingAgencyId(peer_symbol)
+                supplyingAgencyRequestId = pr.peerRequestIdentifier
+            }
+
+        } else {
+            // Set the AgencyIds
+            supplyingAgencyId = buildHeaderSupplyingAgencyId(message_sender_symbol)
+            requestingAgencyId = buildHeaderRequestingAgencyId(peer_symbol)
+
+            // Set the RequestIds
+            requestingAgencyRequestId = pr.peerRequestIdentifier
+            supplyingAgencyRequestId = pr.id
+        }
+
+        Map header = [
+                supplyingAgencyId: supplyingAgencyId,
+                requestingAgencyId: requestingAgencyId,
+
+                requestingAgencyRequestId:requestingAgencyRequestId,
+                supplyingAgencyRequestId:supplyingAgencyRequestId
+        ]
+
+        return header;
+    }
+
   private Map buildHeader(PatronRequest pr, String messageType, Symbol message_sender_symbol, Symbol peer_symbol) {
     Map supplyingAgencyId
     Map requestingAgencyId
@@ -476,6 +547,15 @@ class ProtocolMessageBuildingService {
     return supplyingAgencyId;
   }
 
+    private Map buildHeaderSupplyingAgencyId(String supplier) {
+        def (auth,sym) = supplier.split(":",2);
+        Map supplyingAgencyId = [
+                agencyIdType: auth,
+                agencyIdValue: sym
+        ]
+        return supplyingAgencyId;
+    }
+
   private Map buildHeaderRequestingAgencyId(Symbol requester) {
     Map requestingAgencyId = [
       agencyIdType: requester?.authority?.symbol,
@@ -483,5 +563,14 @@ class ProtocolMessageBuildingService {
     ]
     return requestingAgencyId;
   }
+
+    private Map buildHeaderRequestingAgencyId(String requester) {
+        def (auth,sym) = requester.split(":",2);
+        Map requestingAgencyId = [
+                agencyIdType: auth,
+                agencyIdValue: sym
+        ]
+        return requestingAgencyId;
+    }
 
 }

@@ -272,11 +272,12 @@ public class ReshareActionService {
                 ];
             } else if (routingDisabled) {
                 String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+                String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
                 if (!defaultPeerSymbolString) {
                     log.error("No defaultPeerSymbol defined");
                 }
                 symbols = [
-                        senderSymbol: pr.requestingInstitutionSymbol,
+                        senderSymbol: defaultRequestSymbolString,
                         receivingSymbol: defaultPeerSymbolString
                 ];
             } else {
@@ -490,11 +491,31 @@ public class ReshareActionService {
     ) {
 
         log.debug('sendResponse(....)');
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+        boolean routingDisabled = (requestRouterSetting == 'disabled');
         boolean result = false;
 
         // pr.supplyingInstitutionSymbol
         // pr.peerRequestIdentifier
-        if ((pr.resolvedSupplier != null) &&
+        if (routingDisabled) {
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+            Map supplyingMessageRequest;
+
+            if (retryEventData != null) {
+                supplyingMessageRequest = retryEventData;
+            } else {
+                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(
+                        pr, reasonForMessage, status, messageParams, appendSequence);
+            }
+            eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+            Map symbols = [
+                    senderSymbol: defaultPeerSymbolString,
+                    receivingSymbol: defaultRequestSymbolString
+            ];
+            result = sendProtocolMessage(pr, symbols.senderSymbol, symbols.receivingSymbol, supplyingMessageRequest, false);
+
+        } else if ((pr.resolvedSupplier != null) &&
             (pr.resolvedRequester != null)) {
             Map supplyingMessageRequest = retryEventData;
 

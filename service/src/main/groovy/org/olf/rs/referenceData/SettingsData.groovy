@@ -100,6 +100,7 @@ public class SettingsData {
     public static final String SETTING_LOCAL_SYMBOLS                   = 'local_symbols';
     public static final String SETTING_DEFAULT_PEER_SYMBOL             = 'default_peer_symbol';
 
+
     // Settings for the sharedIndex section
     public static final String SETTING_SHARED_INDEX_BASE_URL    = 'shared_index_base_url';
     public static final String SETTING_SHARED_INDEX_INTEGRATION = 'shared_index_integration';
