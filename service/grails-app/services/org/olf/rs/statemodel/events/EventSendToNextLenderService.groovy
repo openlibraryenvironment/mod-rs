@@ -51,17 +51,21 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
 
         if (requestRouterSetting == "disabled") { //if router is disabled
             String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
-            Symbol defaultPeerSymbol = DirectoryEntryService.resolveCombinedSymbol(defaultPeerSymbolString);
+            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+            //Symbol defaultPeerSymbol = DirectoryEntryService.resolveCombinedSymbol(defaultPeerSymbolString);
             //Can we move this outside of conditional to keep it DRYer?
             Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
             log.debug("Built request message request: ${requestMessageRequest }");
 
+
+            def (auth, sym) = defaultRequestSymbolString.split(":", 2);
             requestMessageRequest.header.supplyingAgencyId = [
-                    agencyIdType : defaultPeerSymbol.authority?.symbol,
-                    agencyIdValue : defaultPeerSymbol.symbol,
+                    agencyIdType : auth,
+                    agencyIdValue : sym
             ];
 
-            Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, request.requestingInstitutionSymbol,
+            Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, defaultRequestSymbolString,
                     defaultPeerSymbolString, requestMessageRequest);
             if (!sendSuccess) {
                 log.warn("Unable to send with disabled router: ${request?.networkStatus.toString()}");

@@ -34,6 +34,7 @@ class NoILLAddressSpec extends TestBase {
     final static String TENANT_ONE_DB = (TENANT_ONE_NAME + "_mod_rs").toLowerCase();
     final static String TENANT_TWO_DB = (TENANT_TWO_NAME + "_mod_rs").toLowerCase();
 
+    /*
     @Shared
     private static List<Map> DIRECTORY_INFO = [
             [ id:'RS-T-D-0001',
@@ -49,6 +50,8 @@ class NoILLAddressSpec extends TestBase {
               type: "Institution"
             ]
     ];
+
+     */
 
     GrailsWebDataBinder grailsWebDataBinder;
 
@@ -214,6 +217,7 @@ class NoILLAddressSpec extends TestBase {
         TENANT_TWO_NAME | TENANT_TWO_NAME
     }
 
+    /*
     void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
         when:"Load the default directory (test url is ${baseUrl})"
         boolean result = true
@@ -253,6 +257,7 @@ class NoILLAddressSpec extends TestBase {
         TENANT_ONE_NAME | DIRECTORY_INFO
         TENANT_TWO_NAME | DIRECTORY_INFO
     }
+     */
 
     @Shared
     private final TENANT_ONE_SETTINGS_VISIBLE = [
@@ -309,13 +314,14 @@ class NoILLAddressSpec extends TestBase {
 
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"]);
         //changeSettings( responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${baseUrl}/rs/externalApi/iso18626".toString() ] );
 
         Map request = [
                 patronReference: patronReference,
                 title: "A test of the no ILL address system",
                 author: "Lilly, Noel",
-                requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
+                //requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
                 patronIdentifier: patronIdentifier,
                 isRequester: true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
@@ -364,13 +370,14 @@ class NoILLAddressSpec extends TestBase {
 
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
         changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
+        changeSettings( requesterTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"]);
         //changeSettings( responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${baseUrl}/rs/externalApi/iso18626".toString() ] );
 
         Map request = [
                 patronReference: patronReference,
                 title: "Yet another test of the no ILL address system",
                 author: "Gon, Etsch",
-                requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
+                //requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
                 patronIdentifier: patronIdentifier,
                 isRequester: true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
@@ -397,7 +404,8 @@ class NoILLAddressSpec extends TestBase {
         when: "We post a new request to the mock to act as a requester"
         String requestBody = new File("src/integration-test/resources/isoMessages/illmockrequest.xml").text;
         changeSettings(responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
-        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"]);
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
 
         sendXMLMessage("http://localhost:19083/iso18626".toString(), requestBody, null, 10000);
 

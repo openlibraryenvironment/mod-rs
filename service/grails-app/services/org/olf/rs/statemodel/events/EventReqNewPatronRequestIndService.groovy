@@ -6,6 +6,7 @@ import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 /**
  * This event service takes a new requester patron request and validates it and tries to determine the rota
@@ -18,6 +19,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
     NewRequestService newRequestService;
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -56,7 +58,10 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             pickupLocationService.check(request)
         }
 
-        if (request.requestingInstitutionSymbol != null) {
+
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+        if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol
             Symbol s = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (s != null) {
@@ -68,7 +73,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             if (lookupPatron.callSuccess) {
                 boolean patronValid = lookupPatron.patronValid;
 
-                if (s == null) {
+                if (s == null && defaultRequestSymbolString == null) {
                     // An unknown requesting institution symbol is a bigger deal than an invalid patron
                     request.needsAttention = true;
                     log.warn("Unknown requesting institution symbol : ${request.requestingInstitutionSymbol}");

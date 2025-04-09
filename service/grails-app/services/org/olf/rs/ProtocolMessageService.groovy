@@ -309,14 +309,14 @@ class ProtocolMessageService {
       log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}")
     }
 
-    log.debug("Finding ILL service accounts for ${sym.symbol}")
+    log.debug("Finding ILL service accounts for ${sym?.symbol}")
     try {
       def criteria = ServiceAccount.where {
         accountHolder == sym.owner && service.businessFunction.value == 'ill'
       }
       result = criteria.list()
     } catch (Exception e) {
-      log.error("Error getting service accounts for symbol ${sym.symbol}: ${e.getLocalizedMessage()}");
+      log.error("Error getting service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
     }
 
     log.debug("Got service accounts: ${result}")
