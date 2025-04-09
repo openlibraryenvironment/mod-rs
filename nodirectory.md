@@ -1,4 +1,4 @@
-# mod-rs without mod-directory
+# Configure mod-rs to work with CrossLink Broker
 Changes have been implemented to allow mod-rs to function without an external directory, allowing the rota and selection of peers to be handled by an external broker.
 
 In order to put mod-rs in this mode of operation, the `routing_adapter` setting in the **Routing** section needs to be set to 'disabled'. This will inform mod-rs that we will not attempt to build a rota, nor will we pull from a rota when sending messages on to a lender.
