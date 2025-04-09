@@ -308,7 +308,7 @@ class NoILLAddressSpec extends TestBase {
         String responderTenantId = TENANT_TWO_NAME;
         String patronIdentifier = "22-33-44";
         String patronReference = "ref-${patronIdentifier}";
-        String systemInstanceIdentifier = "007-008-009";
+        String systemInstanceIdentifier = "WILLSUPPLY_LOANED"; //test transmission to supplierUniqueRecordId
 
         when: "We create a request"
 
@@ -321,11 +321,10 @@ class NoILLAddressSpec extends TestBase {
                 patronReference: patronReference,
                 title: "A test of the no ILL address system",
                 author: "Lilly, Noel",
-                //requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
                 patronIdentifier: patronIdentifier,
                 isRequester: true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
-                supplierUniqueRecordId: "WILLSUPPLY_LOANED"
+                //supplierUniqueRecordId: "WILLSUPPLY_LOANED"
         ];
 
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
@@ -377,7 +376,6 @@ class NoILLAddressSpec extends TestBase {
                 patronReference: patronReference,
                 title: "Yet another test of the no ILL address system",
                 author: "Gon, Etsch",
-                //requestingInstitutionSymbol: "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}",
                 patronIdentifier: patronIdentifier,
                 isRequester: true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
