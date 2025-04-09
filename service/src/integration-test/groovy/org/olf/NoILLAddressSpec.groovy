@@ -404,8 +404,8 @@ class NoILLAddressSpec extends TestBase {
         when: "We post a new request to the mock to act as a requester"
         String requestBody = new File("src/integration-test/resources/isoMessages/illmockrequest.xml").text;
         changeSettings(responderTenantId, [ (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "http://localhost:19083/iso18626".toString() ] );
-        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
-        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"]);
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"]);
+        changeSettings(responderTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"]);
 
         sendXMLMessage("http://localhost:19083/iso18626".toString(), requestBody, null, 10000);
 
