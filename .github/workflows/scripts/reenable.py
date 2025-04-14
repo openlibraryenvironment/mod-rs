@@ -30,6 +30,7 @@ def main():
     if k8s_environment == "trove-dev":
         tenants = [
             'sydney', 
+            'pentest', 
             'melbourne'
         ]
     else:
