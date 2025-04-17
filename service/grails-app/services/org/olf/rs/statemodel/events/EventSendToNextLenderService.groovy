@@ -59,7 +59,7 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
             log.debug("Built request message request: ${requestMessageRequest }");
 
 
-            def (auth, sym) = defaultRequestSymbolString.split(":", 2);
+            def (auth, sym) = defaultPeerSymbolString.split(":", 2);
             requestMessageRequest.header.supplyingAgencyId = [
                     agencyIdType : auth,
                     agencyIdValue : sym
