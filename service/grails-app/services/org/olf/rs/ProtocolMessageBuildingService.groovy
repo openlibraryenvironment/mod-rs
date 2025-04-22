@@ -240,7 +240,7 @@ class ProtocolMessageBuildingService {
       boolean routingDisabled = (requestRouterSetting == 'disabled');
 
       if (routingDisabled) {
-          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultPeerSymbolString, defaultRequestSymbolString)
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
