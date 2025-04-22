@@ -498,8 +498,12 @@ public class ReshareActionService {
         // pr.supplyingInstitutionSymbol
         // pr.peerRequestIdentifier
         if (routingDisabled) {
-            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
-            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+            /*
+            We use the peer symbol as our sending symbol and the request symbol as our peer symbol because we're
+            acting as supplier, not requester
+             */
+            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
             Map supplyingMessageRequest;
 
             if (retryEventData != null) {
