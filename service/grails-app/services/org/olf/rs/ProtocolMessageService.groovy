@@ -91,7 +91,14 @@ class ProtocolMessageService {
                 id = id.substring(0, separatorPosition);
             }
         }
-        return(id);
+        if (id.length() > 32) {
+          if (id.contains("-")) {
+            id = id.substring(0, id.lastIndexOf('-'))
+          } else {
+            id = id.substring(0, 32)
+          }
+        }
+        return id
     }
 
     /**
