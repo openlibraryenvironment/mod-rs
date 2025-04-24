@@ -8,8 +8,10 @@ import org.olf.rs.PatronNoticeService
 import org.olf.rs.PatronRequest
 import org.olf.rs.ReshareActionService
 import org.olf.rs.ReshareApplicationEventHandlerService
+import org.olf.rs.SettingsService
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.EventFetchRequestMethod
@@ -23,6 +25,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     NewRequestService newRequestService;
     PickupLocationService pickupLocationService;
+    SettingsService settingsService;
 
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
@@ -40,7 +43,9 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             pickupLocationService.check(request)
         }
 
-        if (request.requestingInstitutionSymbol != null) {
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+        if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
             Symbol requestingSymbol = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (requestingSymbol != null) {
                 request.resolvedRequester = requestingSymbol;
@@ -49,7 +54,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             Map lookupPatron = reshareActionService.lookupPatron(request, null);
             if (lookupPatron.callSuccess) {
                 boolean patronValid = lookupPatron.patronValid;
-                if (requestingSymbol == null) {
+                if (requestingSymbol == null && defaultRequestSymbolString == null) {
                     request.needsAttention = true;
                     log.warn("Unknown requesting institution symbol : ${request.requestingInstitutionSymbol}");
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
