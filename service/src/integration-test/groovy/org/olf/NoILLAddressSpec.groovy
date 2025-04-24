@@ -358,10 +358,15 @@ class NoILLAddressSpec extends TestBase {
         assert(true);
     }
 
-    void "Test willsupply/unfilled interaction with mock"() {
+    void "Test willsupply/unfilled interaction with mock"(
+            String deliveryMethod,
+            String serviceType,
+            String patronIdentifier
+    ) {
         String requesterTenantId = TENANT_ONE_NAME;
         String responderTenantId = TENANT_TWO_NAME;
-        String patronIdentifier = "23-23-24";
+        //String patronIdentifier = "23-23-24";
+
         String patronReference = "ref-${patronIdentifier}";
         String systemInstanceIdentifier = "007-008-009";
 
@@ -378,8 +383,9 @@ class NoILLAddressSpec extends TestBase {
                 author: "Gon, Etsch",
                 patronIdentifier: patronIdentifier,
                 isRequester: true,
-                systemInstanceIdentifier: systemInstanceIdentifier,
-                supplierUniqueRecordId: "WILLSUPPLY_UNFILLED"
+                systemInstanceIdentifier: "WILLSUPPLY_UNFILLED",
+                deliveryMethod: deliveryMethod,
+                serviceType: serviceType
         ];
 
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
@@ -393,6 +399,11 @@ class NoILLAddressSpec extends TestBase {
 
         then:
         assert(true);
+
+        where:
+        deliveryMethod | serviceType | patronIdentifier
+        null           | null        | "23-23-24"
+        "URL"          | "Copy"      | "223-223-224"
     }
 
     void "Test acting as supplier to mock"() {
