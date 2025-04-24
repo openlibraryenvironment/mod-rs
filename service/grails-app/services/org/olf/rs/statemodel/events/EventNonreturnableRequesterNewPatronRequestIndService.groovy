@@ -34,6 +34,19 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             return eventResultDetails;
         }
 
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+
+
+
+        //Shim so that we can populate this value via the systemInstanceIdentifier
+        if (requestRouterSetting == 'disabled') {
+            if (!request.supplierUniqueRecordId && request.systemInstanceIdentifier != null) {
+                request.supplierUniqueRecordId = request.systemInstanceIdentifier;
+            }
+        }
+
+         
+
         if (!request.hrid) {
             request.hrid = newRequestService.generateHrid();
         }
