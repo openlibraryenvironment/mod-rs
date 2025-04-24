@@ -391,11 +391,16 @@ class NoILLAddressSpec extends TestBase {
         setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
-        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
-
-        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
         def requestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
+        
+        assert(requestData.requestingInstitutionSymbol == "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}");
+        assert(requestData.supplyingInstitutionSymbol == "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}");
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_END_OF_ROTA);
+
+
 
         then:
         assert(true);
