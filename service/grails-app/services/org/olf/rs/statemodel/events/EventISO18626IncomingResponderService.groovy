@@ -18,7 +18,7 @@ public class EventISO18626IncomingResponderService extends EventISO18626Incoming
 
     @Override
     public String getRequestId(Map eventData) {
-        return(eventData.header?.supplyingAgencyRequestId);
+        return eventData.header?.supplyingAgencyRequestId ?: "" // supplyingAgencyRequestId is optional so return empty string if missing
     }
 
     @Override
