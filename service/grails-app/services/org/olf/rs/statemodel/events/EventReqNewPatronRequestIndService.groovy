@@ -69,6 +69,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
 
 
         String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+        String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
 
         if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol
@@ -124,6 +125,11 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
             request.needsAttention = true;
             eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
+        }
+
+        if (requestRouterSetting == 'disabled') {
+            request.requestingInstitutionSymbol = defaultRequestSymbolString;
+            request.supplyingInstitutionSymbol = defaultPeerSymbolString;
         }
 
         // TODO: reconcile these two identifiers as both are in use

@@ -57,6 +57,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
         }
 
         String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+        String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
 
         if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
             Symbol requestingSymbol = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
@@ -100,6 +101,11 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
             request.needsAttention = true;
             eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
+        }
+
+        if (requestRouterSetting == 'disabled') {
+            request.requestingInstitutionSymbol = defaultRequestSymbolString;
+            request.supplyingInstitutionSymbol = defaultPeerSymbolString;
         }
 
         return eventResultDetails;
