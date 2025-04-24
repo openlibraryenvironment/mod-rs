@@ -408,10 +408,13 @@ class NoILLAddressSpec extends TestBase {
         sendXMLMessage("http://localhost:19083/iso18626".toString(), requestBody, null, 10000);
 
         String requestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+
+        def requestData = doGet("${baseUrl}/rs/patronrequests/${requestId}");
 
         String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction".toString();
         String jsonPayloadWillsupply = new File("src/integration-test/resources/scenarios/supplierAnswerYes.json").text;
-        setHeaders([ 'X-Okapi-Tenant': responderTenantId ]);
+
 
         doPost(performActionUrl, jsonPayloadWillsupply);
 
