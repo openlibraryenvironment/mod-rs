@@ -174,10 +174,10 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         if ( routingDisabled ) {
                             String requestingSymbol = requestingSymbolFromEventData(eventData);
                             String supplyingSymbol = supplyingSymbolFromEventData(eventData);
-                            if (requestingSymbol && !request.requestingInstitutionSymbol) {
+                            if (requestingSymbol) {
                                 request.requestingInstitutionSymbol = requestingSymbol;
                             }
-                            if (supplyingSymbol && !request.supplyingInstitutionSymbol) {
+                            if (supplyingSymbol) {
                                 request.supplyingInstitutionSymbol = supplyingSymbol;
                             }
                         }  else if (((request.supplyingInstitutionSymbol == null ||
