@@ -1,6 +1,7 @@
 package org.olf.rs.statemodel.actions;
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
+import org.olf.rs.SettingsService;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -15,6 +16,8 @@ import org.olf.rs.statemodel.StateModel
  *
  */
 public class ActionPatronRequestRequesterCancelService extends ActionPatronRequestCancelService {
+
+    SettingsService settingsService
 
     @Override
     String name() {
@@ -31,10 +34,13 @@ public class ActionPatronRequestRequesterCancelService extends ActionPatronReque
                 request.cancellationReason = val;
             }
         }
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter')
+        boolean routingDisabled = (requestRouterSetting == 'disabled')
 
         // If we do not already have a resolved supplier in hand we cannot send ISO18626 messages
         if (request.resolvedSupplier?.id || StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode) ||
-                StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode)) {
+                StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(request.stateModel.shortcode) ||
+                routingDisabled) {
             sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, parameters, actionResultDetails);
         } else {
             // In this case, set the qualifier to no supplier
