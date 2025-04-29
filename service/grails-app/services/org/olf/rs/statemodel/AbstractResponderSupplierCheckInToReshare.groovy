@@ -232,7 +232,7 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             // Since no due date was set use default if available
             log.debug("No due date set")
             String dlpStr = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_LOAN_PERIOD);
-            int defaultLoanPeriod = dlpStr.isInteger() ? (dlpStr as int) : 0;
+            int defaultLoanPeriod = dlpStr?.isInteger() ? (dlpStr as int) : 0;
             if (defaultLoanPeriod > 0) {
                 log.debug("Using default loan period")
                 request.parsedDueDateRS = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).plusDays(defaultLoanPeriod).toInstant());
