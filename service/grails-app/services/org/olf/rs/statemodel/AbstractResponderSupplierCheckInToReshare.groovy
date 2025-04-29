@@ -6,6 +6,8 @@ import com.k_int.web.toolkit.settings.AppSetting
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import java.time.ZonedDateTime
+import java.time.ZoneId
 import org.olf.rs.Counter
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
@@ -16,6 +18,7 @@ import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.actions.ActionResponderSupplierCheckOutOfReshareService
 import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
+
 /**
  * Abstract Responder supplier check in to reshare service implementation
  */
@@ -225,6 +228,15 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             if (actionResultDetails.responseResult.message == null) {
                 actionResultDetails.responseResult.message = 'NCIP CheckoutItem call failed.';
             }
+        } else if (!request.dueDateRS) {
+            // Since no due date was set use default if available
+            log.debug("No due date set")
+            String dlpStr = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_LOAN_PERIOD);
+            int defaultLoanPeriod = dlpStr?.isInteger() ? (dlpStr as int) : 0;
+            if (defaultLoanPeriod > 0) {
+                log.debug("Using default loan period")
+                request.parsedDueDateRS = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).plusDays(defaultLoanPeriod).toInstant());
+            }
         }
 
         return(actionResultDetails);
@@ -280,8 +292,9 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
         request.dueDateFromLMS = null;
         request.parsedDueDateFromLMS = null;
 
-        // Remove the RS due date too if that was likely set from the LMS one,
-        if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')) {
+        // Remove the RS due date too if that was likely set from the LMS one or a default,
+        if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')
+            || !settingsService.hasSettingValue(SettingsData.SETTING_DEFAULT_LOAN_PERIOD, null)) {
             request.dueDateRS = null;
             request.parsedDueDateRS = null;
         }
