@@ -49,7 +49,6 @@ public class PickupLocationService {
             if (pickupLoc == null) {
                 // We did not so ensured the fields are cleared as we maybe editing
                 request.resolvedPickupLocation = null;
-                request.pickupLocation = null;
             } else {
                 // We know about the supplied pickup location
                 request.resolvedPickupLocation = pickupLoc;
