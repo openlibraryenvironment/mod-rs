@@ -6,8 +6,9 @@ import com.k_int.web.toolkit.settings.AppSetting
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import org.olf.rs.Counter
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
@@ -235,7 +236,14 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             int defaultLoanPeriod = dlpStr?.isInteger() ? (dlpStr as int) : 0;
             if (defaultLoanPeriod > 0) {
                 log.debug("Using default loan period")
-                request.parsedDueDateRS = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).plusDays(defaultLoanPeriod).toInstant());
+                // request.dueDateRS is what is sent to the requester
+                //
+                // Need to use a ZoneOffset rather than ZoneId to produce a string that both the UI and
+                // message builder will parse (and it also can't have more than three digits of
+                // fractional seconds based on the default date format).
+                ZonedDateTime defaultDue = ZonedDateTime.now(ZoneOffset.UTC).plusDays(defaultLoanPeriod);
+                request.parsedDueDateRS = Date.from(defaultDue.toInstant());
+                request.dueDateRS = defaultDue.truncatedTo(ChronoUnit.SECONDS).toString();
             }
         }
 
