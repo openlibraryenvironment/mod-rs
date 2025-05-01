@@ -34,6 +34,7 @@ import org.xml.sax.SAXException
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -731,6 +732,10 @@ class ProtocolMessageService {
 
   ZonedDateTime toZonedDateTime(String dateString) {
     return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+  }
+
+  ZonedDateTime toZonedDateTime(LocalDate localDate) {
+    return localDate.atStartOfDay(ZoneId.from("UTC"));
   }
 
   ZonedDateTime currentZonedDateTime(){
