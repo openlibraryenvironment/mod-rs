@@ -46,7 +46,7 @@ public class EventStatusReqValidatedIndService extends AbstractEvent {
 
         if (requestRouterSetting == "disabled") {
             eventResultDetails.qualifier = null;
-            eventResultDetails.auditMessage = 'Request router disabled';
+            eventResultDetails.auditMessage = 'Request sent to external broker';
         }
         else if (request.rota?.size() != 0) {
             eventResultDetails.qualifier = null;
