@@ -4,6 +4,7 @@ import com.k_int.web.toolkit.custprops.CustomProperty
 import com.k_int.web.toolkit.settings.AppSetting
 import org.olf.rs.*
 import org.olf.rs.constants.Directory
+import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.lms.ItemLocation
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
@@ -87,8 +88,8 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                             request.supplierUniqueRecordId, institutionalPatronIdValue);
                     log.debug("Got RequestItem result: ${requestItemResult}");
                     if (requestItemResult.result == true) {
-                        log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                        reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails);
+                        log.debug("Send WillSupply response to ${request.requestingInstitutionSymbol}");
+                        reshareActionService.sendResponse(request,  TypeStatus.WILL_SUPPLY.value(), [:], eventResultDetails);
                         log.debug("Set externalHoldRequestId of PatronRequest to ${requestItemResult.requestId}");
                         request.externalHoldRequestId = requestItemResult.requestId;
                         eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED_REQUEST_ITEM;
@@ -98,8 +99,8 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                         eventResultDetails.auditMessage = "Failed to place hold for item with bibliographicid ${request.supplierUniqueRecordId}";
                     }
                 } else {
-                    log.debug("Send ExpectToSupply response to ${request.requestingInstitutionSymbol}");
-                    reshareActionService.sendResponse(request,  'ExpectToSupply', [:], eventResultDetails)
+                    log.debug("Send WillSupply response to ${request.requestingInstitutionSymbol}");
+                    reshareActionService.sendResponse(request,  TypeStatus.WILL_SUPPLY.value(), [:], eventResultDetails)
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCATED;
                 }
             } else {
