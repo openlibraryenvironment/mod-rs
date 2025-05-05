@@ -22,6 +22,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
     static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
+    static public final String REQUESTER_EXPECTS_TO_SUPPLY_INDICATION        = 'requesterExpectsToSupplyIndication';
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
     static public final String REQUESTER_FILLED_LOCALLY                      = 'requesterFilledLocally';
     static public final String REQUESTER_LOCAL_CANNOT_SUPPLY                 = 'requesterLocalCannotSupply';
@@ -35,6 +36,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
     static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
     static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
+    static public final String REQUESTER_REQUEST_SENT_TO_SUPPLIER_INDICATION = 'requesterSentToSupplierInd';
     static public final String REQUESTER_REREQUEST_CANCELLED                 = 'requesterRerequestCancelled';
     static public final String REQUESTER_REREQUEST_END_OF_ROTA               = 'requesterRerequestEndOfRota';
     static public final String REQUESTER_RETRIED_VALIDATION                  = 'requesterRetriedValidation';

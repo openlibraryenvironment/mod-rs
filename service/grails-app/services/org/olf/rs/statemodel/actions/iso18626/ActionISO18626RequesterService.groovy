@@ -189,11 +189,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             // Set the qualifier on the result
             actionResultDetails.qualifier = statusInfo.status;
 
-            if (actionResultDetails.qualifier == TypeStatus.WILL_SUPPLY.value()) {
-                log.debug("WillSupply should be processed as ExpectToSupply")
-                actionResultDetails.qualifier = TypeStatus.EXPECT_TO_SUPPLY.value()
-            }
-
             // Special case for Unfilled
             if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER) ||
                     request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_NR_REQUESTER)) {

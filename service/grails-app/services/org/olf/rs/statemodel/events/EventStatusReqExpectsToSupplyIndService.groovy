@@ -9,9 +9,10 @@ import org.olf.rs.statemodel.Events
 
 class EventStatusReqExpectsToSupplyIndService extends AbstractEvent {
 
+
     @Override
     String name() {
-        return(Events.EVENT_STATUS_REQ_EXPECTS_TO_SUPPLY)
+        return(Events.EVENT_STATUS_REQ_EXPECTS_TO_SUPPLY_INDICATION)
     }
 
     @Override
@@ -22,6 +23,7 @@ class EventStatusReqExpectsToSupplyIndService extends AbstractEvent {
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Expect to supply check for request ${request.hrid}")
+
         return(eventResultDetails)
     }
 }
