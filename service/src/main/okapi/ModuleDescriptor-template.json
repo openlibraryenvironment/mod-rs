@@ -145,7 +145,17 @@
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/settings*",
-          "permissionsRequired": [ "rs.settings.get" ]
+          "permissionsRequired": [ "rs.settings.get" ],
+          "permissionsDesired": [
+            "rs.settings.getsection.all",
+            "rs.settings.getsection.autoresponder",
+            "rs.settings.getsection.hostlmsintegration",
+            "rs.settings.getsection.other",
+            "rs.settings.getsection.requests",
+            "rs.settings.getsection.state_action_config",
+            "rs.settings.getsection.state_model",
+            "rs.settings.getsection.z3950"
+          ]
         },
         {
           "methods": [ "POST" ],
@@ -620,6 +630,50 @@
           "rs.refdata.delete"
       ]
     },
+
+    {
+      "permissionName": "rs.settings.getsection.all",
+      "displayName": "settings get (all)",
+      "description": "get all settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.autoresponder",
+      "displayName": "settings get (section: autoresponder)",
+      "description": "get autoresponder settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.hostlmsintegration",
+      "displayName": "settings get (section: hostlmsintegration)",
+      "description": "get hostlmsintegration settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.requests",
+      "displayName": "settings get (section: requests)",
+      "description": "get requests settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.state_action_config",
+      "displayName": "settings get (section: state_action_config)",
+      "description": "get state_action_config settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.state_model",
+      "displayName": "settings get (section: state_model)",
+      "description": "get state_model settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.z3950",
+      "displayName": "settings get (section: z3950)",
+      "description": "get z3950 settings",
+      "visible": false
+    },
+
     {
       "permissionName": "rs.settings.get",
       "displayName": "settings get",
