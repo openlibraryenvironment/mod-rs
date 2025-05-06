@@ -12,6 +12,7 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
+import org.olf.rs.statemodel.events.EventStatusReqRequestSentToSupplierIndService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Shared
 import spock.lang.Stepwise
@@ -191,6 +192,23 @@ class NoILLAddressSpec extends TestBase {
         return request_id;
     }
 
+
+    void "Test local symbol parsing" (String localSymbol, String localSymbolList, boolean expectedResult) {
+        when:
+            boolean result = EventStatusReqRequestSentToSupplierIndService.symbolPresent(localSymbol, localSymbolList);
+
+        then:
+            assert(result == expectedResult);
+
+        where:
+        localSymbol | localSymbolList | expectedResult
+        'auth:sym1' | 'auth:sym1,auth:sym2' | true
+        ''          | 'auth:sym1'           | false
+        'sym1'      | 'auth:sym1,auth:sym2' | false
+        'auth:sym1' | 'AUTH:SYM1,AUTH:SYM2' | true
+    }
+
+
     void "Attempt to delete any old tenants"(tenantid, name) {
         when:"We post a delete request"
         boolean result = deleteTenant(tenantid, name);
@@ -216,48 +234,6 @@ class NoILLAddressSpec extends TestBase {
         TENANT_ONE_NAME | TENANT_ONE_NAME
         TENANT_TWO_NAME | TENANT_TWO_NAME
     }
-
-    /*
-    void "Bootstrap directory data for integration tests"(String tenant_id, List<Map> dirents) {
-        when:"Load the default directory (test url is ${baseUrl})"
-        boolean result = true
-
-        Tenants.withId(tenant_id.toLowerCase()+'_mod_rs') {
-            log.info("Filling out dummy directory entries for tenant ${tenant_id}");
-
-            dirents.each { entry ->
-
-                log.debug("Sync directory entry ${entry} - Detected runtime port is ${serverPort}")
-                def SimpleMapDataBindingSource source = new SimpleMapDataBindingSource(entry)
-                DirectoryEntry de = new DirectoryEntry()
-                grailsWebDataBinder.bind(de, source)
-
-                try {
-                    de.save(flush:true, failOnError:true)
-                    log.debug("Result of bind: ${de} ${de.id}");
-                }
-                catch ( Exception e ) {
-                    log.error("problem bootstrapping directory data",e);
-                    result = false;
-                }
-
-                if ( de.errors ) {
-                    de.errors?.allErrors?.each { err ->
-                        log.error(err?.toString())
-                    }
-                }
-            }
-        }
-
-        then:"Test directory entries are present"
-        assert result == true
-
-        where:
-        tenant_id | dirents
-        TENANT_ONE_NAME | DIRECTORY_INFO
-        TENANT_TWO_NAME | DIRECTORY_INFO
-    }
-     */
 
     @Shared
     private final TENANT_ONE_SETTINGS_VISIBLE = [
