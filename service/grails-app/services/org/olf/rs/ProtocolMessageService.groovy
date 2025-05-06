@@ -735,7 +735,7 @@ class ProtocolMessageService {
   }
 
   ZonedDateTime toZonedDateTime(LocalDate localDate) {
-    return localDate.atStartOfDay(ZoneId.from("UTC"));
+    return localDate.atStartOfDay(ZoneId.of("UTC"));
   }
 
   ZonedDateTime currentZonedDateTime(){
