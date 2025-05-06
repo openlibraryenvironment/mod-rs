@@ -79,7 +79,7 @@
     <logger name="org.olf" level="debug"/>
     <logger name="org.olf.okapi.modules.directory.CustomBinders" level="warn"/>
 
-    <logger name="com.k_int" level="debug"/>
+    <logger name="com.k_int" level="warn"/>
     <logger name="com.k_int.okapi" level="warn"/>
     <logger name="com.k_int.okapi.DataloadingService" level="debug"/>
     <logger name="com.k_int.okapi.TenantController" level="debug"/>
