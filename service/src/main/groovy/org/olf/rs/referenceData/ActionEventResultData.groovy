@@ -578,11 +578,11 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map requesterRequestSentToSupplierFillLocally = [
+    private static Map requesterRequestSentToSupplierLocalReview = [
         code: 'requesterRequestSentToSupplierFillLocally',
         description: 'Request to be filled locally',
         result: true,
-        status: Status.PATRON_REQUEST_FILLED_LOCALLY,
+        status: Status.PATRON_REQUEST_LOCAL_REVIEW,
         qualifier: ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW,
         saveRestoreState: null,
         nextActionEvent: null
@@ -1283,7 +1283,7 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
                 requesterRequestSentToSupplierOK,
-                requesterRequestSentToSupplierFillLocally
+                requesterRequestSentToSupplierLocalReview
         ]
     ]
 
