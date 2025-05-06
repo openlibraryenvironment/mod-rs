@@ -12,7 +12,6 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.routing.StaticRouterService
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
-import org.olf.rs.statemodel.events.EventStatusReqExpectsToSupplyIndService
 import org.olf.rs.statemodel.events.EventStatusReqRequestSentToSupplierIndService
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Shared

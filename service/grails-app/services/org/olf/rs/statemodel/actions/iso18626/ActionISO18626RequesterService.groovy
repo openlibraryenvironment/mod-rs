@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.actions.iso18626
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
-import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
