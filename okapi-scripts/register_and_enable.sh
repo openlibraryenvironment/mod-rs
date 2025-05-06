@@ -40,6 +40,7 @@ curl -XDELETE "${OKAPI_URL}/_/proxy/modules/${SVC_ID}"
 
 # ./gradlew clean generateDescriptors
 echo Install latest module ${SVC_ID}/${INS_ID} 
+echo curl -XPOST ${OKAPI_URL}/_/proxy/modules -d @"${DESCRIPTORDIR}/ModuleDescriptor.json"
 curl -XPOST ${OKAPI_URL}/_/proxy/modules -d @"${DESCRIPTORDIR}/ModuleDescriptor.json"
 
 echo Install deployment descriptor

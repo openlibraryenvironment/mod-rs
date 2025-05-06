@@ -133,7 +133,7 @@ grails:
           - "yyyy-MM-dd'T'HH:mm:ss.SSS"
           - 'yyyy-MM-dd'
     server:
-        host: 10.0.2.2
+        host: host.k3d.internal
         port: 8081
 
 okapi:
