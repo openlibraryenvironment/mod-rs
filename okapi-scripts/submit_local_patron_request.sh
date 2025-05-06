@@ -13,11 +13,12 @@ fi
 
 
 
-  # serviceType:"Copy",
+#  serviceType:"Loan",
 PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOKEN}" -H "Content-Type: application/json" -X POST http://localhost:9130/rs/patronrequests -d ' {
   requestingInstitutionSymbol:"RESHARE:LOCALHOSTA",
   title:"Platform for Change",
   author:"Beer, Stafford A",
+  neededBy: "2020-01-01",
   pickupLocation: "An undisclosed shadowy corridor somewhere",
   patronNote: "Can I have it in red, please",
   subtitle:"A message from Stafford Beer",
@@ -39,7 +40,6 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   patronType: "Faculty Staff",
   sendToPatron: true,
   state:"Idle",
-  systemInstanceIdentifier:"Idle",
   isRequester:true,
   notARealProperty:"Test that this is ignored in accordance with Postels law",
   pendingAction:"approve",
@@ -51,7 +51,7 @@ PATRON_REQ_1=`curl --header "X-Okapi-Tenant: diku" -H "X-Okapi-Token: ${AUTH_TOK
   },
   rota:[
     {
-      directoryId:"RESHARE:COL:ON", 
+      directoryId:"RESHARE:LOCALHOSTB", 
       rotaPosition:"0",
     }
   ]
