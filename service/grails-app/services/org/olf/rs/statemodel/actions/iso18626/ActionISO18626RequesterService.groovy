@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.actions.iso18626
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
-import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
@@ -188,11 +187,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         if (statusInfo.status) {
             // Set the qualifier on the result
             actionResultDetails.qualifier = statusInfo.status;
-
-            if (actionResultDetails.qualifier == TypeStatus.WILL_SUPPLY.value()) {
-                log.debug("WillSupply should be processed as ExpectToSupply")
-                actionResultDetails.qualifier = TypeStatus.EXPECT_TO_SUPPLY.value()
-            }
 
             // Special case for Unfilled
             if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER) ||
