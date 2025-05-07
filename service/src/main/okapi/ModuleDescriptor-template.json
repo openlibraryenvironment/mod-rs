@@ -655,12 +655,6 @@
       "visible": false
     },
     {
-      "permissionName": "rs.settings.getsection.other",
-      "displayName": "settings get (section: other)",
-      "description": "get other settings",
-      "visible": false
-    },
-    {
       "permissionName": "rs.settings.getsection.requests",
       "displayName": "settings get (section: requests)",
       "description": "get requests settings",
