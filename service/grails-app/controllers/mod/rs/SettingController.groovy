@@ -1,5 +1,6 @@
 package mod.rs
 
+import groovy.json.JsonSlurper;
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.web.toolkit.settings.AppSetting;
@@ -134,6 +135,11 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
 
                 result = doTheLookup(gormFilterClosure)
                 result = filterRecordsByFeatureFlags(result)
+                result = filterRecordsByPermissions(result, request)
+
+                if (result.size() == 0) {
+                    log.info("No available settings match request with query string ${request.getQueryString() ?: "(none)"}")
+                }
 
                 return result
             }
@@ -188,5 +194,28 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
             // Include the record if the specific feature flag is not "false"
             return !(featFlagValue != null && featFlagValue == "false")
         }
+    }
+
+    static def filterRecordsByPermissions(result, request) {
+        def permStr = request.getHeader("x-okapi-permissions")
+        if (result.isEmpty() || !permStr) {
+            return []
+        }
+        ArrayList perms
+        try {
+            perms = new JsonSlurper().parseText(permStr) as ArrayList
+        } catch(ignored) {
+           log.error("Error parsing x-okapi-permissions header")
+           return []
+        }
+
+        if (perms.contains("rs.settings.getsection.all")) return result;
+
+        def prefix = "rs.settings.getsection."
+        def enabledSections = perms.findAll { it.startsWith(prefix) }
+            .collect { it.substring(prefix.length()) } as HashSet
+        log.debug("Settings access limited to sections: ${enabledSections}")
+
+        return result.findAll { record -> enabledSections.contains(record.section.toLowerCase()) }
     }
 }
