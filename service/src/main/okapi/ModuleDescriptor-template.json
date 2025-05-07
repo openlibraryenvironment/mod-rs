@@ -144,7 +144,12 @@
         },
         {
           "methods": [ "GET" ],
-          "pathPattern": "/rs/settings",
+          "pathPattern": "/rs/settings*",
+          "permissionsRequired": [ "rs.settings.get" ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/settings/appSettings",
           "permissionsRequired": [ "rs.settings.get" ],
           "permissionsDesired": [
             "rs.settings.getsection.all",
@@ -159,7 +164,7 @@
         },
         {
           "methods": [ "GET" ],
-          "pathPattern": "/rs/settings/{id}",
+          "pathPattern": "/rs/settings/appSettings/{id}",
           "permissionsRequired": [ "rs.settings.item.get" ]
         },
         {
