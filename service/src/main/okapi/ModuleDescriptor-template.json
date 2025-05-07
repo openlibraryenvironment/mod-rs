@@ -157,6 +157,8 @@
             "rs.settings.getsection.hostlmsintegration",
             "rs.settings.getsection.other",
             "rs.settings.getsection.requests",
+            "rs.settings.getsection.routing",
+            "rs.settings.getsection.sharedindex",
             "rs.settings.getsection.state_action_config",
             "rs.settings.getsection.state_model",
             "rs.settings.getsection.z3950"
@@ -672,6 +674,18 @@
       "visible": false
     },
     {
+      "permissionName": "rs.settings.getsection.routing",
+      "displayName": "settings get (section: routing)",
+      "description": "get routing settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.sharedindex",
+      "displayName": "settings get (section: sharedindex)",
+      "description": "get sharedindex settings",
+      "visible": false
+    },
+    {
       "permissionName": "rs.settings.getsection.state_action_config",
       "displayName": "settings get (section: state_action_config)",
       "description": "get state_action_config settings",
@@ -741,6 +755,7 @@
           "rs.settings.getsection.hostlmsintegration",
           "rs.settings.getsection.other",
           "rs.settings.getsection.requests",
+          "rs.settings.getsection.routing",
           "rs.settings.getsection.state_action_config",
           "rs.settings.getsection.state_model",
           "rs.settings.getsection.z3950"
