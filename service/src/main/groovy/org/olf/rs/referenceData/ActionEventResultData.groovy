@@ -306,6 +306,17 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterLocalCannotSupplyContinue = [
+            code: 'requesterLocalCannotSupplyContinue',
+            description: 'Local supplier cannot supply continue with next supplier',
+            result: true,
+            status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+            qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map requesterManualCheckInOK = [
         code: 'requesterManualCheckInOK',
         description: 'Requester has manually checked the item(s) into the local LMS',
@@ -1227,7 +1238,8 @@ public class ActionEventResultData {
         description: 'It cannot be supplied locally',
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterLocalCannotSupplyOK
+            requesterLocalCannotSupplyOK,
+            requesterLocalCannotSupplyContinue
         ]
     ];
 
