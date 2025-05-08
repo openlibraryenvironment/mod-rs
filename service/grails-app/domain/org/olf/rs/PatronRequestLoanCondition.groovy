@@ -33,6 +33,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
   String note
 
   Symbol relevantSupplier
+  String supplyingInstitutionSymbol
 
 
   static constraints = {
@@ -43,6 +44,7 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
     code( nullable: true)
     note( nullable: true)
     relevantSupplier (nullable: true)
+    supplyingInstitutionSymbol (nullable: true)
   }
 
   static mapping = {
@@ -55,5 +57,6 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
        patronRequest column : 'prlc_patron_request_fk'
     relevantSupplier column : 'prlc_relevant_supplier_fk'
             accepted column : 'prlc_accepted'
+    supplyingInstitutionSymbol column : 'prlc_sup_inst_symbol'
   }
 }

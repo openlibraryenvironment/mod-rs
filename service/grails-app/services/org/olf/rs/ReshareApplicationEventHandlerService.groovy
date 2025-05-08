@@ -408,7 +408,7 @@ public class ReshareApplicationEventHandlerService {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
-
+      loanCondition.setSupplyingInstitutionSymbol(pr.supplyingInstitutionSymbol)
 	  pr.addToConditions(loanCondition);
   }
 

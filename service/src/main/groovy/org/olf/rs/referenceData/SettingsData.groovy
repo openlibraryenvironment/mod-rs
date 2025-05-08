@@ -145,6 +145,7 @@ public class SettingsData {
     // Settings for the Other section
     public static final String SETTING_DEFAULT_COPYRIGHT_TYPE = 'default_copyright_type';
     public static final String SETTING_DEFAULT_SERVICE_LEVEL = 'default_service_level';
+    public static final String SETTING_DISPLAYED_SERVICE_LEVELS = 'displayed_service_levels';
 
     // State/Action configuration settings
     public static final String SETTING_COMBINE_FILL_AND_SHIP                      = 'combine_fill_and_ship';
@@ -397,6 +398,7 @@ public class SettingsData {
 
             ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
             ensureAppSetting(SETTING_DEFAULT_SERVICE_LEVEL, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+            ensureAppSetting(SETTING_DISPLAYED_SERVICE_LEVELS, SECTION_OTHER, SETTING_TYPE_STRING);
 
             // Requester state model values
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_REQUESTER, null, true);

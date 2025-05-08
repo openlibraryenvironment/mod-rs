@@ -174,6 +174,17 @@ public class NonreturnablesStateModelData {
 
     ];
 
+    private static Map nrRequesterISO18626WillSupply = [
+            code: 'nrRequesterISO18626WillSupply',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is WillSupply',
+            result: true,
+            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, //Yes, WillSupply yields Expect_To_Supply status
+            qualifier: ActionEventResultQualifier.QUALIFIER_WILL_SUPPLY,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterISO18626Unfilled = [
             code: 'nrRequesterISO18626Unfilled',
             description: 'Incoming ISO18626 message from the responder has said the status is Unfilled',
@@ -400,6 +411,7 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626ExpectToSupply,
+                    nrRequesterISO18626WillSupply,
                     nrRequesterISO18626Unfilled,
                     nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
@@ -890,6 +902,11 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_BLANK_FORM_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_BYPASSED_VALIDATION);
 
+        //REQ_LOCAL_REVIEW
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_FILL_LOCALLY, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_CANCEL_LOCAL, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_LOCAL_REVIEW, Actions.ACTION_NONRETURNABLE_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
+        
         //REQ_INVALID_PATRON
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL)
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_INVALID_PATRON, Actions.ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_RETRIED_VALIDATION)
