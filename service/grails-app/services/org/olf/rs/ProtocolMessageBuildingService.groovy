@@ -471,7 +471,7 @@ class ProtocolMessageBuildingService {
                 supplyingAgencyRequestId = null
             } else {
                 supplyingAgencyId = buildHeaderSupplyingAgencyId(peer_symbol)
-                supplyingAgencyRequestId = pr.peerRequestIdentifier ?: pr.hrid
+                supplyingAgencyRequestId = pr.peerRequestIdentifier
             }
 
         } else {
@@ -480,7 +480,7 @@ class ProtocolMessageBuildingService {
             requestingAgencyId = buildHeaderRequestingAgencyId(peer_symbol)
 
             // Set the RequestIds
-            requestingAgencyRequestId = pr.peerRequestIdentifier ?: pr.hrid
+            requestingAgencyRequestId = pr.peerRequestIdentifier ?: protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode)
             supplyingAgencyRequestId = pr.id
         }
 
