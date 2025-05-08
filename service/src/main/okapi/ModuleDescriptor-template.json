@@ -154,6 +154,7 @@
           "permissionsDesired": [
             "rs.settings.getsection.all",
             "rs.settings.getsection.autoresponder",
+            "rs.settings.getsection.featureflags",
             "rs.settings.getsection.hostlmsintegration",
             "rs.settings.getsection.other",
             "rs.settings.getsection.requests",
@@ -656,6 +657,12 @@
       "visible": false
     },
     {
+      "permissionName": "rs.settings.getsection.featureflags",
+      "displayName": "settings get (section: featureflags)",
+      "description": "get featureflags settings",
+      "visible": false
+    },
+    {
       "permissionName": "rs.settings.getsection.hostlmsintegration",
       "displayName": "settings get (section: hostlmsintegration)",
       "description": "get hostlmsintegration settings",
@@ -752,6 +759,7 @@
       "subPermissions": [
           "rs.settings.get",
           "rs.settings.getsection.autoresponder",
+          "rs.settings.getsection.featureflags",
           "rs.settings.getsection.hostlmsintegration",
           "rs.settings.getsection.other",
           "rs.settings.getsection.requests",
