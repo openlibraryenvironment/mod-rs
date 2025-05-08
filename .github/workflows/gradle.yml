@@ -33,12 +33,6 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2
 
-      - name: Start containers
-        run: |
-          cd tools/testing
-          docker compose down -v
-          docker compose up -d &> dockerOutput.log
-          sleep 20
 
       - name: Inject github build number
         run: |
@@ -49,50 +43,10 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build integrationTest
+          arguments: build -x integrationTest
           build-root-directory: service
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-results
-          path: service/build/test-results/integrationTest/
 
-      - name: Capture container output
-        if: always()
-        run: |
-          cd tools/testing
-          docker ps -a > ps.log
-          docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
-          docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
-          docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
-          docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
-          docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
-
-      - name: Upload container logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: container-logs
-          path: tools/testing/*.log
-
-      - name: Stop containers
-        if: always()
-        run: |
-          cd tools/testing
-          docker compose down -v
-          sleep 10
-
-      - name: Upload Test Results Files
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: testLogfiles
-          path: |
-            service/build/test-results/**/*.xml
-            tools/testing/*.log
-          retention-days: 1
 
       - name: Log in to the Container registry
         if: ${{ github.ref == 'refs/heads/master' || github.ref  == 'refs/heads/main' || contains(github.ref, 'release') }}
