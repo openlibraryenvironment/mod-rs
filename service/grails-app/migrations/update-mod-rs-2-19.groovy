@@ -27,4 +27,9 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "pr_service_level_fk", baseTableName: "patron_request", constraintName: "FK_pr_service_level", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
 
     }
+    changeSet(author: "janis", id: '20250508-1514-001') {
+        addColumn(tableName: "patron_request_loan_condition") {
+            column(name: "prlc_sup_inst_symbol", type: "VARCHAR")
+        }
+    }
 }
