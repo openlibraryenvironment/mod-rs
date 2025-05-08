@@ -36,7 +36,6 @@ public class NoteSpecials {
     public static final String FIELD_PUBLICATION_DATE           = 'PublicationDate';
     public static final String FIELD_PUBLISHER                  = 'Publisher';
     public static final String FIELD_SERVICE_LEVEL              = 'ServiceLevel';
-    public static final String FIELD_SERVICE_TYPE               = 'ServiceType';
     public static final String FIELD_SYSTEM_INSTANCE_IDENTIFIER = 'SystemInstanceIdentifier';
     public static final String FIELD_TITLE                      = 'Title';
     public static final String FIELD_TITLE_OF_COMPONENT         = 'TitleOfComponent';
@@ -64,7 +63,6 @@ public class NoteSpecials {
     public static final String UPDATED_FIELD_PUBLISHER_PREFIX                  = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_PUBLISHER + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_SYSTEM_INSTANCE_IDENTIFIER + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_SERVICE_LEVEL_PREFIX              = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_SERVICE_LEVEL + SPECIAL_FIELD_SEPARATOR;
-    public static final String UPDATED_FIELD_SERVICE_TYPE_PREFIX               = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_SERVICE_TYPE + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_TITLE_PREFIX                      = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_TITLE + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX         = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_TITLE_OF_COMPONENT + SPECIAL_SEPARATOR;
     public static final String UPDATED_FIELD_VOLUME_PREFIX                     = UPDATE_FIELD + SPECIAL_FIELD_SEPARATOR + FIELD_VOLUME + SPECIAL_SEPARATOR;
