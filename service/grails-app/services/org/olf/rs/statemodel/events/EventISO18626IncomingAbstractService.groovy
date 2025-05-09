@@ -178,6 +178,9 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                                 request.requestingInstitutionSymbol = requestingSymbol;
                             }
                             if (supplyingSymbol) {
+                                if (request.supplyingInstitutionSymbol != supplyingSymbol) {
+                                    request.stateHasChanged = true
+                                }
                                 request.supplyingInstitutionSymbol = supplyingSymbol;
                             }
                         }  else if (((request.supplyingInstitutionSymbol == null ||
