@@ -23,6 +23,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED ],
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
+        [ status : Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED ],
         [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
         [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
@@ -43,6 +44,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
         [ status : Status.RESPONDER_UNFILLED ],
         [ status : Status.RESPONDER_COPY_AWAIT_PICKING ],
+        [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
         [ status : Status.RESPONDER_DOCUMENT_DELIVERED, isTerminal: true ]
     ];
 
@@ -811,13 +813,17 @@ public class NonreturnablesStateModelData {
             nrRequesterCancelList,
             nrRequesterBypassedValidationList,
             nrRequesterMarkEndOfRotaReviewedList,
+            nrRequesterAgreeConditionsList,
+            nrRequesterRejectConditionsList,
             nrRequesterNoStatusChangeList,
             nrRequesterRetriedValidationList,
             nrRequesterCloseManualList,
             nrRequesterNotificationReceivedISO18626List,
             nrRequesterCancelPendingISO18626List,
             nrResponderNewPatronRequestList,
+            nrResponderAddConditionalList,
             nrResponderAnswerYesList,
+            nrResponderMarkConditionsAgreedList,
             nrResponderCannotSupplyList,
             nrResponderPrintPullslipList,
             nrResponderAddURLToDocumentList,
@@ -922,6 +928,16 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
 
+        //REQ_CONDITIONAL_ANSWER_RECEIVED
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+
+
         //REQ_EXPECTS_TO_SUPPLY
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
@@ -940,20 +956,30 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ANSWER_YES);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
+
 
         //RES_NEW_AWAIT_PULL_SLIP
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL)
+
 
         //RES_COPY_AWAIT_PICKING
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL);
 
 
         //RES_CANCEL_RECEIVED
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL, null, Boolean.TRUE, Boolean.TRUE);
+
+        //RES_PENDING_CONDITIONAL_ANSWER
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //messageAllSeen
         AvailableActionData.assignToAllStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGES_ALL_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
