@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.olf.rs.statemodel.actions.ActionPatronRequestEditService;
 
 @Slf4j
 @CurrentTenant
@@ -31,6 +32,7 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
     private static final String RESOURCE_PATRON_REQUEST = PatronRequest.getSimpleName();
 
 	ActionService actionService;
+    ActionPatronRequestEditService actionPatronRequestEditService;
     BatchService batchService;
     OpenUrlService openUrlService;
     ReportService reportService;
@@ -1051,6 +1053,44 @@ class PatronRequestController extends OkapiTenantAwareSwaggerController<PatronRe
         // Record how long it took and the request id
         ContextLogging.setValue(ContextLogging.FIELD_ID, result.id);
         ContextLogging.duration();
+        log.debug(ContextLogging.MESSAGE_EXITING);
+    }
+
+    /**
+     * Returns an array of which field names are editable for a given operation
+     */
+    @ApiOperation(
+        value = "Which fields are editable for this operation?",
+        nickname = "patronrequests/editableFields/{op}",
+        httpMethod = "GET"
+    )
+    @ApiResponses([
+        @ApiResponse(code = 200, message = "Success"),
+        @ApiResponse(code = 400, message = "Unknown operation")
+    ])
+    @ApiImplicitParams([
+        @ApiImplicitParam(
+            name = "op",
+            paramType = "path",
+            required = true,
+            allowMultiple = false,
+            value = "Operation",
+            dataType = "string"
+        )
+    ])
+    def editableFields() {
+        log.debug(ContextLogging.MESSAGE_ENTERING);
+        ContextLogging.setValue(ContextLogging.FIELD_ACTION, 'editableFields');
+        def ops = ["edit"]
+        def result = [];
+        if (!ops.contains(params?.op)) {
+            response.status = 400;
+            result = ['message': 'Unknown operation'];
+        }
+        if (params?.op == "edit") {
+            result = actionPatronRequestEditService.updateableFields.collect({ it.field })
+        }
+        render result as JSON;
         log.debug(ContextLogging.MESSAGE_EXITING);
     }
 }
