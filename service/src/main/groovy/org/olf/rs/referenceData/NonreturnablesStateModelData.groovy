@@ -23,6 +23,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.PATRON_REQUEST_SUPPLIER_IDENTIFIED ],
         [ status : Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY ],
         [ status : Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER ],
+        [ status : Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED ],
         [ status : Status.PATRON_REQUEST_DOCUMENT_DELIVERED, isTerminal : true ],
         [ status : Status.PATRON_REQUEST_CANCEL_PENDING ],
         [ status : Status.PATRON_REQUEST_CANCELLED_WITH_SUPPLIER ],
@@ -43,6 +44,7 @@ public class NonreturnablesStateModelData {
         [ status : Status.RESPONDER_NEW_AWAIT_PULL_SLIP, canTriggerStaleRequest : true, triggerPullSlipEmail : true ],
         [ status : Status.RESPONDER_UNFILLED ],
         [ status : Status.RESPONDER_COPY_AWAIT_PICKING ],
+        [ status : Status.RESPONDER_PENDING_CONDITIONAL_ANSWER ],
         [ status : Status.RESPONDER_DOCUMENT_DELIVERED, isTerminal: true ]
     ];
 
@@ -162,6 +164,30 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterISO18626Conditional = [
+            code: 'nrRequesterISO18626Conditional',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Conditional',
+            result: true,
+            status: Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONAL,
+            saveRestoreState: null,
+            fromStatus: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626NotificationConditionalExpectToSupply = [
+            code: 'nrRequesterISO18626NotificationConditionalExpectToSupply',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is Conditional',
+            result: true,
+            status: Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+            qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONAL,
+            saveRestoreState: null,
+            fromStatus: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterISO18626ExpectToSupply = [
             code: 'nrRequesterISO18626ExpectToSupply',
             description: 'Incoming ISO18686 message from the responder has said that the status is ExpectToSupply',
@@ -197,6 +223,16 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterAgreeConditionsOK = [
+            code: 'nrRequesterAgreeConditionsOK',
+            description: 'Requester has agreed to the conditions',
+            result: true,
+            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
     private static Map nrDefaultNoStatusChangeOK = [
             code: 'nrDefaultNoStatusChangeOK',
             description: "Default scenario, don't change",
@@ -217,6 +253,7 @@ public class NonreturnablesStateModelData {
             updateRotaLocation: true,
             nextActionEvent: null
     ];
+
 
     private static Map nrRequesterISO18626UnfilledTransfer = [
             code: 'nrRequesterISO18626UnfilledTransfer',
@@ -287,7 +324,17 @@ public class NonreturnablesStateModelData {
             qualifer: null,
             saveRestoreState: null,
             nextActionEvent: null
-    ]
+    ];
+
+    private static Map nrRequesterRejectConditionsOK = [
+            code: 'nrRequesterRejectConditionsOK',
+            description: 'Requester has rejected the conditions from the responder',
+            result: true,
+            status: Status.PATRON_REQUEST_CANCEL_PENDING,
+            qualifier: null,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+            nextActionEvent: null
+    ];
 
     private static Map nrRequesterRerequested = [
             code: 'nrRequesterRerequested',
@@ -405,11 +452,13 @@ public class NonreturnablesStateModelData {
             ]
     ];
 
+
     private static Map nrRequesterSentToSupplierISO18626List = [
             code: ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626,
             description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
+                    nrRequesterISO18626Conditional,
                     nrRequesterISO18626ExpectToSupply,
                     nrRequesterISO18626WillSupply,
                     nrRequesterISO18626Unfilled,
@@ -424,11 +473,23 @@ public class NonreturnablesStateModelData {
             description: 'Sets our status based on an incoming ISO 18626 status when we are in state ' + Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
+                    nrRequesterISO18626Conditional,
                     nrRequesterISO18626Delivered,
                     nrRequesterISO18626Unfilled,
                     nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
             ]
+    ];
+
+    private static Map nrRequesterConditionAnswerReceivedISO18626List = [
+            code: ActionEventResultList.NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626,
+            description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterISO18626Delivered,
+                    nrDefaultNoStatusChangeOK
+            ]
+
     ];
 
     private static Map nrRequesterDeliveredList = [
@@ -451,6 +512,25 @@ public class NonreturnablesStateModelData {
             ]
     ];
     */
+
+
+    private static Map nrRequesterAgreeConditionsList = [
+            code: ActionEventResultList.NR_REQUESTER_AGREE_CONDITIONS,
+            description: 'Requester has agreed to the conditions',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterAgreeConditionsOK
+            ]
+    ];
+
+    private static Map nrRequesterRejectConditionsList = [
+            code: ActionEventResultList.NR_REQUESTER_REJECT_CONDITIONS,
+            description: 'Requester has rejected the conditions',
+            model: StateModel.MODEL_NR_REQUESTER,
+            results: [
+                    nrRequesterRejectConditionsOK
+            ]
+    ];
 
 
     private static Map nrRequesterCancelList = [
@@ -518,6 +598,7 @@ public class NonreturnablesStateModelData {
             description: 'An incoming ISO18626 notifications has been received by the requester',
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
+                    nrRequesterISO18626NotificationConditionalExpectToSupply,
                     nrDefaultNoStatusChangeOK
             ]
     ];
@@ -575,6 +656,47 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrResponderAddConditionalHoldingOK = [
+            code: 'nrResponderAddConditionalHoldingOK',
+            description: 'Responder has added a conditional to the request placing the request on hold',
+            result: true,
+            status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+            qualifier: ActionEventResultQualifier.QUALIFIER_HOLDING,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+            overrideSaveStatus: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderAddConditionalOK = [
+            code: 'nrResponderAddConditionalOK',
+            description: 'Responder has added a conditional without placing the request on hold',
+            result: true,
+            status: null,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderAnswerConditionalHoldingOK = [
+            code: 'brResponderAnswerConditionalHoldingOK',
+            description: 'Responder has responded with a conditional and placed the request on hold',
+            result: true,
+            status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+            qualifier: ActionEventResultQualifier.QUALIFIER_HOLDING,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
+            overrideSaveStatus: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderAnswerConditionalOK = [
+            code: 'nrResponderAnswerConditionalOK',
+            description: 'Responder has responded with a conditional without placing the request on hold',
+            result: true,
+            status: Status.RESPONDER_NEW_AWAIT_PULL_SLIP,
+            qualifier: null,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
 
     private static Map nrResponderAnswerYesOK = [
             code: 'nrResponderAnswerYesOK',
@@ -594,6 +716,16 @@ public class NonreturnablesStateModelData {
             status: Status.RESPONDER_UNFILLED,
             qualifier: null,
             saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map nrResponderMarkConditionsAgreedOK = [
+            code: 'nrResponderMarkConditionsAgreedOK',
+            description: 'Responder is saying that the requester has agreed to the conditions placed on the request',
+            result: true,
+            status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+            qualifier: null,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
             nextActionEvent: null
     ];
 
@@ -699,6 +831,18 @@ public class NonreturnablesStateModelData {
 
     //NR RESPONSE ACTIONEVENT RESULT LISTS
 
+    private static Map nrResponderISO18626AgreeConditions = [
+            code: 'responderISO18626AgreeConditions',
+            description: 'Requester has said they want to agree to the conditions',
+            result: true,
+            status: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+            qualifier: ActionEventResultQualifier.QUALIFIER_CONDITIONS_AGREED,
+            saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE,
+            fromStatus: Status.RESPONDER_PENDING_CONDITIONAL_ANSWER,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrResponderNewPatronRequestList = [
             code: ActionEventResultList.NR_RESPONDER_EVENT_NEW_PATRON_REQUEST,
             description: 'Event for a new incoming request on the responder side',
@@ -793,7 +937,37 @@ public class NonreturnablesStateModelData {
             description: 'An incoming ISO18626 notifications has been received by the supplier',
             model: StateModel.MODEL_NR_RESPONDER,
             results: [
+                    nrResponderISO18626AgreeConditions,
                     nrDefaultNoStatusChangeOK
+            ]
+    ];
+
+    private static Map nrResponderAddConditionalList = [
+            code: ActionEventResultList.NR_RESPONDER_ADD_CONDITIONAL,
+            description: 'The responder is adding a conditional',
+            model: StateModel.MODEL_NR_RESPONDER,
+            results: [
+                    nrResponderAddConditionalHoldingOK,
+                    nrResponderAddConditionalOK
+            ]
+    ];
+
+    private static Map nrResponderAnswerConditionalList = [
+            code: ActionEventResultList.NR_RESPONDER_ANSWER_CONDITIONAL,
+            description: 'The responder has said that they will supply the item(s) ',
+            model: StateModel.MODEL_RESPONDER,
+            results: [
+                    nrResponderAnswerConditionalOK,
+                    nrResponderAnswerConditionalHoldingOK
+            ]
+    ];
+
+    private static Map nrResponderMarkConditionsAgreedList = [
+            code: ActionEventResultList.NR_RESPONDER_MARK_CONDITIONS_AGREED,
+            description: 'The responder has reported that the reqquester has agreed to the conditions',
+            model: StateModel.MODEL_NR_RESPONDER,
+            results: [
+                    nrResponderMarkConditionsAgreedOK
             ]
     ];
 
@@ -806,18 +980,24 @@ public class NonreturnablesStateModelData {
             nrRequesterSendToNextLocationList,
             nrRequesterSentToSupplierISO18626List,
             nrRequesterExpectToSupplyISO18626List,
+            nrRequesterConditionAnswerReceivedISO18626List,
             nrRequesterDeliveredList,
             //nrRequesterCompletedList,
             nrRequesterCancelList,
             nrRequesterBypassedValidationList,
             nrRequesterMarkEndOfRotaReviewedList,
+            nrRequesterAgreeConditionsList,
+            nrRequesterRejectConditionsList,
             nrRequesterNoStatusChangeList,
             nrRequesterRetriedValidationList,
             nrRequesterCloseManualList,
             nrRequesterNotificationReceivedISO18626List,
             nrRequesterCancelPendingISO18626List,
             nrResponderNewPatronRequestList,
+            nrResponderAddConditionalList,
+            nrResponderAnswerConditionalList,
             nrResponderAnswerYesList,
+            nrResponderMarkConditionsAgreedList,
             nrResponderCannotSupplyList,
             nrResponderPrintPullslipList,
             nrResponderAddURLToDocumentList,
@@ -859,6 +1039,13 @@ public class NonreturnablesStateModelData {
                 "A non-returnable request has had the document delivered", false,
                 ActionEventData.eventServiceName(Events.EVENT_STATUS_REQ_DOCUMENT_DELIVERED_INDICATION),
                 ActionEventResultList.NR_REQUESTER_DOCUMENT_DELIVERED);
+
+        ActionEvent.ensure(Actions.ACTION_NONRETURNABLE_RESPONDER_ADD_CONDITION, 'The responder has added a loan condition',
+                true, StateModel.MODEL_RESPONDER.capitalize() + Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION.capitalize(),
+                ActionEventResultList.NR_RESPONDER_ADD_CONDITIONAL);
+
+
+
 
     }
 
@@ -922,6 +1109,16 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626);
 
+        //REQ_CONDITIONAL_ANSWER_RECEIVED
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_AGREE_CONDITIONS, AvailableAction.TRIGGER_TYPE_MANUAL, null, null, Boolean.TRUE, Boolean.TRUE)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Actions.ACTION_REQUESTER_ISO18626_STATUS_REQUEST_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626);
+
+
         //REQ_EXPECTS_TO_SUPPLY
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Actions.ACTION_ISO18626_NOTIFICATION, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626);
@@ -940,20 +1137,30 @@ public class NonreturnablesStateModelData {
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ANSWER_YES);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_IDLE, Actions.ACTION_RESPONDER_SUPPLIER_CONDITIONAL_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ANSWER_CONDITIONAL);
+
 
         //RES_NEW_AWAIT_PULL_SLIP
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_PRINT_PULL_SLIP);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_CONDITIONAL);
+
 
         //RES_COPY_AWAIT_PICKING
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_URL_TO_DOCUMENT, null, Boolean.TRUE, Boolean.TRUE);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANNOT_SUPPLY);
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_RESPONDER_CANCEL_RECEIVED_ISO18626);
-
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_COPY_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_ADD_CONDITION, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_ADD_CONDITIONAL);
 
         //RES_CANCEL_RECEIVED
+
         AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, Actions.ACTION_RESPONDER_SUPPLIER_RESPOND_TO_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_CANCEL, null, Boolean.TRUE, Boolean.TRUE);
+
+        //RES_PENDING_CONDITIONAL_ANSWER
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_SUPPLIER_MARK_CONDITIONS_AGREED, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_RESPONDER_MARK_CONDITIONS_AGREED);
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL)
+        AvailableAction.ensure(StateModel.MODEL_NR_RESPONDER, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, Actions.ACTION_RESPONDER_ISO18626_CANCEL, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.RESPONDER_CANCEL_RECEIVED_ISO18626);
 
         //messageAllSeen
         AvailableActionData.assignToAllStates(StateModel.MODEL_NR_REQUESTER, Actions.ACTION_MESSAGES_ALL_SEEN, AvailableAction.TRIGGER_TYPE_SYSTEM, ActionEventResultList.NR_REQUESTER_NO_STATUS_CHANGE);
