@@ -72,6 +72,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.put" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/editableFields/{op}",
+          "permissionsRequired": [ "rs.patronrequests.item.put" ]
+        },
+        {
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
           "permissionsRequired": [ "rs.patronrequests.item.delete" ]

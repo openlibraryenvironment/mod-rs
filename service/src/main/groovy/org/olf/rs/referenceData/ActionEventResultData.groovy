@@ -307,14 +307,14 @@ public class ActionEventResultData {
     ];
 
     private static Map requesterLocalCannotSupplyContinue = [
-            code: 'requesterLocalCannotSupplyContinue',
-            description: 'Local supplier cannot supply continue with next supplier',
-            result: true,
-            status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
-            qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
-            saveRestoreState: null,
-            updateRotaLocation: true,
-            nextActionEvent: null
+        code: 'requesterLocalCannotSupplyContinue',
+        description: 'Local supplier cannot supply continue with next supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
     ];
 
     private static Map requesterManualCheckInOK = [
