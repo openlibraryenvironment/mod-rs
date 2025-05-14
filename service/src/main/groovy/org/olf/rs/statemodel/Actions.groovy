@@ -36,7 +36,7 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "supplierPrintPullSlip";
 	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "respondYes";
 	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "supplierCannotSupply";
-	public static final String ACTION_NONRETURNABLE_RESPONDER_ADD_CONDITION					= 'supplierAddCondition';
+	public static final String ACTION_NONRETURNABLE_RESPONDER_ADD_CONDITION		     		 = 'supplierAddCondition';
 
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
