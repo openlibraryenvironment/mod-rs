@@ -188,11 +188,16 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    /*
+        Mirroring our odd behavior from ActionEventResultData.groovy
+     */
+
     private static Map nrRequesterISO18626ExpectToSupply = [
             code: 'nrRequesterISO18626ExpectToSupply',
             description: 'Incoming ISO18686 message from the responder has said that the status is ExpectToSupply',
             result: true,
-            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            //status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            status: null,
             qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
             saveRestoreState: null,
             updateRotaLocation: true,
