@@ -44,8 +44,8 @@ services:
       HTTP_PORT: 8080
       DB_USER: folio_admin
       DB_PASSWORD: folio_admin
-      DB_HOST: host.docker.internal
-      DB_PORT: 54321
+      DB_HOST: testing_pg
+      DB_PORT: 5432
       DB_DATABASE: postgres
     extra_hosts:
       - "host.docker.internal:host-gateway"
