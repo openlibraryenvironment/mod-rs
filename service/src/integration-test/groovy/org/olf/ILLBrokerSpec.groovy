@@ -8,6 +8,7 @@ import groovyx.net.http.FromServer
 import groovyx.net.http.HttpBuilder
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClientBuilder
+import org.codehaus.groovy.runtime.DefaultGroovyMethods
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
@@ -221,7 +222,7 @@ class ILLBrokerSpec extends TestBase {
             doDelete("${BROKER_BASE_URL}/peers/${peerData.items[0].ID}")
         }
 
-        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"${baseUrl}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{}}"
+        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"http://host.docker.internal:${serverPort}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{}}"
         doPost("${BROKER_BASE_URL}/peers", body)
         then:"Peer is saved"
         1==1
