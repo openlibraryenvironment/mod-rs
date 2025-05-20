@@ -1,6 +1,8 @@
-package org.olf.rs.statemodel.events;
+package org.olf.rs.statemodel.events
 
+import org.olf.okapi.modules.directory.DirectoryEntry;
 import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.DirectoryEntryService;
 import org.olf.rs.HostLMSService;
 import org.olf.rs.NetworkStatus;
 import org.olf.rs.PatronRequest;
@@ -11,6 +13,7 @@ import org.olf.rs.ProtocolType;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.SettingsService;
 import org.olf.rs.lms.ItemLocation;
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 import org.olf.rs.statemodel.EventFetchRequestMethod;
@@ -29,7 +32,8 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
-    SettingsService settingsService;
+    //We can't rely on DI here because it apparently doesn't work when the class is called via inheritance
+    SettingsService settingsService = new SettingsService();
 
     EventFetchRequestMethod fetchRequestMethod() {
         return(EventFetchRequestMethod.PAYLOAD_ID);
@@ -40,10 +44,36 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         log.debug("Got request (HRID Is ${request.hrid}) (Status code is ${request.state?.code})");
 
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+
         // Set the network status to Idle, just in case we do not attempt to send the message, to avoid confusion
         request.networkStatus = NetworkStatus.Idle;
 
-        if (request.rota.size() > 0) {
+        if (requestRouterSetting == "disabled") { //if router is disabled
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+            //Symbol defaultPeerSymbol = DirectoryEntryService.resolveCombinedSymbol(defaultPeerSymbolString);
+            //Can we move this outside of conditional to keep it DRYer?
+            Map requestMessageRequest  = protocolMessageBuildingService.buildRequestMessage(request);
+            log.debug("Built request message request: ${requestMessageRequest }");
+
+
+            def (auth, sym) = defaultPeerSymbolString.split(":", 2);
+            requestMessageRequest.header.supplyingAgencyId = [
+                    agencyIdType : auth,
+                    agencyIdValue : sym
+            ];
+
+            Boolean sendSuccess = reshareActionService.sendProtocolMessage(request, defaultRequestSymbolString,
+                    defaultPeerSymbolString, requestMessageRequest);
+            if (!sendSuccess) {
+                log.warn("Unable to send with disabled router: ${request?.networkStatus.toString()}");
+                eventResultDetails.auditMessage = 'Problem sending to supplier gateway, will retry';
+            } else {
+                log.debug("Sent to supplier gateway");
+            }
+        } else if (request.rota.size() > 0) {
             boolean messageTried  = false;
             boolean lookAtNextResponder = true;
 
@@ -63,11 +93,18 @@ public abstract class EventSendToNextLenderService extends AbstractEvent {
                     String nextResponder = prr.directoryId
 
                     log.debug("Attempt to resolve symbol \"${nextResponder}\"");
-                    Symbol s = (nextResponder != null) ? reshareApplicationEventHandlerService.resolveCombinedSymbol(nextResponder) : null;
+                    Symbol s = (nextResponder != null) ? DirectoryEntryService.resolveCombinedSymbol(nextResponder) : null;
                     log.debug("Resolved nextResponder to ${s} with status ${s?.owner?.status?.value}");
-                    String ownerStatus = s.owner?.status?.value;
+                    //String ownerStatus = s.owner?.status?.value;
+                    List<Symbol> localSymbols =
+                            DirectoryEntryService.resolveSymbolsFromStringList(
+                                    settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS))
 
-                    if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
+
+
+                    //todo - Make this use the local directory setting
+                    //if (ownerStatus == 'Managed' || ownerStatus == 'managed') {
+                    if ( s in localSymbols ) {
                         log.debug('Responder is local') //, going to review state");
                         boolean doLocalReview  = true;
                         //Check to see if we're going to try to automatically check for local

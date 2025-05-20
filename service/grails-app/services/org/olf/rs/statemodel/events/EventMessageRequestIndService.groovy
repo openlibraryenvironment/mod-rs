@@ -21,6 +21,7 @@ import java.time.LocalDate
 public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
+
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     SharedIndexService sharedIndexService;
@@ -55,10 +56,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
         if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
             Map header = eventData.header
 
-            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
-            Symbol resolvedRequestingAgency = reshareApplicationEventHandlerService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
+            Symbol resolvedSupplyingAgency = DirectoryEntryService.resolveSymbol(header.supplyingAgencyId?.agencyIdType, header.supplyingAgencyId?.agencyIdValue);
+            Symbol resolvedRequestingAgency = DirectoryEntryService.resolveSymbol(header.requestingAgencyId?.agencyIdType, header.requestingAgencyId?.agencyIdValue);
 
-            log.debug('*** Create new request ***')
+            log.debug('*** Create new request ***');
+            log.debug("Creating request from eventData ${eventData}");
             def newParams = [:]
             if (eventData.bibliographicInfo instanceof Map) {
                 newParams.putAll(eventData.bibliographicInfo.subMap(ReshareApplicationEventHandlerService.preserveFields))
@@ -119,9 +121,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.patronNote = sequenceResult.note;
                             pr.lastSequenceReceived = sequenceResult.sequence;
                         }
-
                         if (serviceInfo.copyrightCompliance) {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
+                        }
+                        if (serviceInfo.serviceLevel) {
+                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            pr.serviceLevel = rdv;
                         }
                     }
                 }
@@ -169,6 +174,21 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     }
                 }
 
+                if (eventData.billingInfo instanceof Map) {
+                    Map billingInfo = eventData.billingInfo
+                    if (billingInfo != null) {
+                        if (billingInfo.maximumCosts instanceof Map) {
+                            Map maximumCosts = billingInfo.maximumCosts;
+                            if (maximumCosts.monetaryValue) {
+                                pr.maximumCostsMonetaryValue = new BigDecimal(maximumCosts.monetaryValue);
+                            }
+                            if (maximumCosts.currencyCode) {
+                                pr.maximumCostsCurrencyCode = findRefdataValue(maximumCosts.currencyCode, RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                            }
+                        }
+                    }
+                }
+
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
                 pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
 
@@ -179,6 +199,22 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
                 pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
+
+                if (eventData.supplierInfo instanceof Map){
+                    Map supplierInfo = eventData.supplierInfo
+                    if (supplierInfo.callNumber) {
+                        RequestVolume rv = pr.volumes.find { rv -> rv.callNumber == supplierInfo.callNumber }
+                        if (!rv) {
+                            rv = new RequestVolume(
+                                    name: pr.hrid,
+                                    itemId: "--",
+                                    status: RequestVolume.lookupStatus(EventRespNewSlnpPatronRequestIndService.VOLUME_STATUS_REQUESTED_FROM_THE_ILS)
+                            )
+                            rv.callNumber = supplierInfo.callNumber
+                            pr.addToVolumes(rv)
+                        }
+                    }
+                }
 
                 if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {
                     log.debug("Incoming request with pr.bibliographicRecordId - calling fetchSharedIndexRecords ${pr.bibliographicRecordId}");
@@ -195,6 +231,23 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
                 // Set State, StateModel specific data, call NCIP lookup patron for SLNP Requester
                 setStateModelData(pr, eventData)
+
+                //special handling for preceded-by bibliographicItemIdentifierCode
+                def biid = eventData?.bibliographicInfo?.bibliographicItemId;
+                if (biid instanceof ArrayList) {
+                    biid.each {
+                        if (it.bibliographicItemIdentifierCode == 'preceded-by') {
+                            log.debug("Attempting to find preceding request via HRID");
+                            PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
+                            if (pr) {
+                                log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
+                                pr.precededBy = preceedingPr;
+                                preceedingPr.succeededBy = pr;
+                                preceedingPr.save();
+                            }
+                        }
+                    }
+                }
 
                 log.debug("Saving new PatronRequest(SupplyingAgency) - Req:${pr.resolvedRequester} Res:${pr.resolvedSupplier} PeerId:${pr.peerRequestIdentifier}");
                 pr.save(flush: true, failOnError: true)
@@ -281,6 +334,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
             }
         } else if (prs.isEmpty() && !retry) {
+            log.debug("Creating new patron request from params")
             pr = new PatronRequest(newParams)
         } else {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
@@ -296,6 +350,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
         RefdataValue copyrightType = RefdataValue.findByOwnerAndValue(cat, label);
         return copyrightType;
     }
+
+    RefdataValue findRefdataValue(String label, String vocabulary) {
+        RefdataCategory cat = RefdataCategory.findByDesc(vocabulary);
+        if (cat) {
+            RefdataValue rdv = RefdataValue.findByOwnerAndValue(cat, label);
+            return rdv;
+        }
+        return null;
+    }
+
 
     static Map<String, String> getPatronRequestPropertyNames(){
         if (PATRON_REQUEST_PROPERTY_NAMES.isEmpty()) {
@@ -406,5 +470,16 @@ public class EventMessageRequestIndService extends AbstractEvent {
         String shortcode = pr.stateModel.shortcode
         return shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_REQUESTER) ||
                 shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER)
+    }
+
+    public PatronRequest getPatronRequestByHrid(String id, boolean isRequester) {
+        PatronRequest result = PatronRequest.createCriteria().get {
+            and {
+                eq('hrid', id)
+                eq('isRequester', isRequester)
+            }
+            lock false
+        }
+        return result;
     }
 }

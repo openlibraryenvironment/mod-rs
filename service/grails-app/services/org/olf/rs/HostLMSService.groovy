@@ -1,5 +1,7 @@
-package org.olf.rs;
+package org.olf.rs
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.olf.rs.lms.HostLMSActions;
 import org.olf.rs.lms.ItemLocation;
 import org.olf.rs.logging.IHoldingLogDetails;
@@ -8,7 +10,8 @@ import org.olf.rs.logging.ProtocolAuditService;
 
 import com.k_int.web.toolkit.settings.AppSetting;
 
-import grails.core.GrailsApplication;
+import grails.core.GrailsApplication
+import org.olf.rs.statemodel.StateModel
 
 /**
  * Return the right HostLMSActions for the tenant config
@@ -197,13 +200,15 @@ public class HostLMSService {
         Map checkoutResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
+            String customExternalReference = extractIdentifierValue(request, "ExternReferenz")
             INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails();
             checkoutResult = hostLMSActions.checkoutItem(
                 settingsService,
                 request.hrid,
                 itemId,
                 institutionalPatronIdValue,
-                ncipLogDetails
+                ncipLogDetails,
+                customExternalReference
             );
             protocolAuditService.save(request, ncipLogDetails);
         } else {
@@ -217,10 +222,11 @@ public class HostLMSService {
      * Creates a temporary item in the local lms using NCIP and records the messages are stored in the protocol audit table if enabled
      * @param request the request triggering the accept item message
      * @param temporaryItemBarcode the id of the temporary item to be created
+     * @param callNumber volume callNumber
      * @param requestedAction the action to be performed (no idea what actions can be performed)
      * @return a map containing the outcome of the accept item call
      */
-    public Map acceptItem(PatronRequest request, String temporaryItemBarcode, String requestedAction) {
+    public Map acceptItem(PatronRequest request, String temporaryItemBarcode, String callNumber, String requestedAction) {
         Map acceptResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
@@ -233,7 +239,7 @@ public class HostLMSService {
                 request.author, // author,
                 request.title, // title,
                 request.isbn, // isbn,
-                request.localCallNumber, // call_number,
+                callNumber,
                 request.resolvedPickupLocation?.lmsLocationCode, // pickup_location,
                 requestedAction, // requested_action
                 ncipLogDetails
@@ -246,7 +252,7 @@ public class HostLMSService {
         return(acceptResult);
     }
 
-    public Map requestItem(PatronRequest request, String requestId, String bibliographicId,
+    public Map requestItem(PatronRequest request, String pickupLocation,  String itemLocation, String bibliographicId,
             String patronId) {
         Map requestItemResult;
         HostLMSActions hostLMSActions = getHostLMSActions();
@@ -257,8 +263,9 @@ public class HostLMSService {
                 request.hrid,
                 bibliographicId,
                 patronId,
-                request.resolvedSupplier?.owner?.lmsLocationCode,
-                ncipLogDetails);
+                pickupLocation,
+                itemLocation,
+                ncipLogDetails)
             protocolAuditService.save(request, ncipLogDetails);
         } else {
             requestItemResult = resultHostLMSNotConfigured;
@@ -285,11 +292,77 @@ public class HostLMSService {
         return cancelRequestItemResult;
     }
 
+    Map deleteItem(PatronRequest request, String itemId) {
+        Map deleteItemResult
+        HostLMSActions hostLMSActions = getHostLMSActions()
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
+            deleteItemResult = getHostLMSActions().deleteItem(
+                    settingsService,
+                    itemId,
+                    ncipLogDetails)
+            protocolAuditService.save(request, ncipLogDetails)
+        } else {
+            deleteItemResult = resultHostLMSNotConfigured
+            request.needsAttention = true
+        }
+        return deleteItemResult
+    }
+
     public boolean isManualCancelRequestItem() {
         HostLMSActions hostLMSActions = getHostLMSActions();
         if (hostLMSActions) {
             return hostLMSActions.isManualCancelRequestItem();
         }
         return false;
+    }
+
+    Map createUserFiscalTransaction (PatronRequest request, String userId, String itemId) {
+        Map createUserFiscalTransactionItemResult
+        HostLMSActions hostLMSActions = getHostLMSActions()
+        if (hostLMSActions) {
+            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
+            createUserFiscalTransactionItemResult = getHostLMSActions().createUserFiscalTransaction(
+                    settingsService,
+                    userId,
+                    itemId,
+                    ncipLogDetails)
+            protocolAuditService.save(request, ncipLogDetails)
+        } else {
+            createUserFiscalTransactionItemResult = resultHostLMSNotConfigured
+            request.needsAttention = true
+        }
+        return createUserFiscalTransactionItemResult
+    }
+
+    private String extractIdentifierValue(PatronRequest patronRequest, String targetKey) {
+        String identifierValue = null
+        Set<String> validStateModels = new HashSet<>(Arrays.asList(
+                StateModel.MODEL_SLNP_RESPONDER,
+                StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER
+        ))
+
+        if (validStateModels.contains(patronRequest.stateModel.shortcode)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper()
+                JsonNode customIdentifiersNode = objectMapper.readTree(patronRequest.customIdentifiers)
+
+                if (customIdentifiersNode.has("identifiers")) {
+                    JsonNode identifiersArray = customIdentifiersNode.get("identifiers")
+                    if (identifiersArray.isArray()) {
+                        for (JsonNode identifier : identifiersArray) {
+                            String key = identifier.get("key").asText()
+                            if (targetKey == key) {
+                                identifierValue = identifier.get("value").asText()
+                                break
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("HostLMSService::getHostLMSActionsFor(${e.printStackTrace()})")
+            }
+        }
+        return identifierValue
     }
 }

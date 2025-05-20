@@ -3,7 +3,8 @@ package org.olf
 import grails.testing.mixin.integration.Integration;
 import grails.gorm.multitenancy.Tenants;
 import groovy.json.JsonBuilder;
-import groovy.util.logging.Slf4j;
+import groovy.util.logging.Slf4j
+import org.springframework.boot.test.context.SpringBootTest;
 import spock.lang.Stepwise;
 
 import org.olf.rs.referenceData.SettingsData;
@@ -13,6 +14,7 @@ import org.olf.rs.ReferenceDataService;
 @Slf4j
 @Integration
 @Stepwise
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AppSettingSpec extends TestBase {
 
     // This method is declared in the HttpSpec
@@ -204,7 +206,10 @@ class AppSettingSpec extends TestBase {
         when:"Search for AppSettings"
 
             // Set the headers
-            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+            setHeaders([
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Permissions': '["rs.settings.get", "rs.settings.getsection.all"]'
+            ]);
 
             // Perform a search
             def response = doGet("${baseUrl}/rs/settings/appSettings", [ filters : "key==" + testctx.appSetting.key ]);

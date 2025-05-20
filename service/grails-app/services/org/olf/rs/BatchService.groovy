@@ -37,7 +37,7 @@ public class BatchService {
      * @param filters The filters to be applied to the search
      * @param maxBatchSize The maximum size that that the batch is allowed to be
      * @param description The description for the batch
-     * @param appendDateTime Dhould the current date / time be appended to the batch
+     * @param appendDateTime Should the current date / time be appended to the batch
      * @return A map containing any error that occurred or the batch identifier
      */
     public Map generatePickListBatchFromFilter(
@@ -51,18 +51,18 @@ public class BatchService {
         Map result = [ : ];
         int page = 1;
         List patronRequests = [ ];
-        boolean continuePageing = true;
+        boolean continuePaging = true;
 
 
         // Keep looping until we hit an error or we have no more results
-        while (continuePageing) {
+        while (continuePaging) {
             // Search for the requests
             List pagedResults = simpleLookupService.lookup(PatronRequest, term, NUMBER_PER_PAGE, page, filters, searchFields);
 
             // Did we find any
             if (pagedResults.size() == 0) {
                 // No we did not so no need to continue
-                continuePageing = false;
+                continuePaging = false;
             } else {
                 // Add all of the results to the list
                 patronRequests.addAll(pagedResults);
@@ -70,8 +70,8 @@ public class BatchService {
                 // Do we have to many items
                 if (patronRequests.size() > maxBatchSize) {
                     // We do so set the error and bail out
-                    result.error = "Too many items to be printed, extend the filter to reduce the number of requests selected";
-                    continuePageing = false;
+                    result.error = "Too many items to be printed (${patronRequests.size()}), extend the filter to reduce the number of requests selected below ${maxBatchSize}";
+                    continuePaging = false;
                 } else {
                     // Move on to the next page of results
                     page++;

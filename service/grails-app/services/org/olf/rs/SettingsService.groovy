@@ -15,12 +15,15 @@ public class SettingsService implements ISettings {
 		String result = null;
 
 		// Look up the setting
-		AppSetting appSetting = AppSetting.findByKey(setting);
-		if (appSetting != null) {
-			result = appSetting.value;
-			if (result == null) {
-				// Take the default value
-				result = appSetting.defValue;
+
+		if (setting) {
+			AppSetting appSetting = AppSetting.findByKey(setting);
+			if (appSetting != null) {
+				result = appSetting.value;
+				if (result == null) {
+					// Take the default value
+					result = appSetting.defValue;
+				}
 			}
 		}
 

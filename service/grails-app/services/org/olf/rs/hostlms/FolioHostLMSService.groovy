@@ -92,4 +92,8 @@ public class FolioHostLMSService extends BaseHostLMSService {
     return availability_summary;
   }
 
+  @Override
+  boolean isManualCancelRequestItem() {
+    return true
+  }
 }

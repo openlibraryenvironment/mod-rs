@@ -65,12 +65,28 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    /*
+        This is a little bit odd. When we get a "Will Supply" message, we transition to "Expects to Supply."
+        When we get "Expects to Supply" we do not change state.
+     */
+
     private static Map requesterISO18626ExpectToSupply = [
         code: 'requesterISO18626ExpectToSupply',
         description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
         result: true,
-        status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+        status: null,
         qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterISO18626WillSupply = [
+        code: 'requesterISO18626WillSupply',
+        description: 'An incoming ISO-18626 message for the requester has said that the status is WillSupply',
+        result: true,
+        status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, //See comment above
+        qualifier: ActionEventResultQualifier.QUALIFIER_WILL_SUPPLY,
         saveRestoreState: null,
         updateRotaLocation: true,
         nextActionEvent: null
@@ -131,6 +147,17 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterISO18626UnfilledTransfer = [
+        code: 'requesterISO18626UnfilledTransfer',
+        description: 'An incoming ISO-18626 message for the requester has said that the status is Unfilled, but the reason is "transfer"',
+        result: true,
+        status: Status.PATRON_REQUEST_REREQUESTED,
+        qualifier: 'UnfilledTransfer',
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
+    ];
+
     private static Map responderISO18626AgreeConditions = [
         code: 'responderISO18626AgreeConditions',
         description: 'Requester has said they want to agree to the conditions',
@@ -145,8 +172,8 @@ public class ActionEventResultData {
 
     private static Map responderISO18626Cancel = [
         code: 'responderISO18626Cancel',
-        description: 'Requester has said they want to cancel the request',
         result: true,
+        description: 'Requester has said they want to cancel the request',
         status: Status.RESPONDER_CANCEL_REQUEST_RECEIVED,
         qualifier: null,
         saveRestoreState: RefdataValueData.ACTION_EVENT_RESULT_SAVE_RESTORE_SAVE,
@@ -256,6 +283,7 @@ public class ActionEventResultData {
         nextActionEvent: null
     ]
 
+
     private static Map requesterFillLocallyOK = [
         code: 'requesterFillLocallyOK',
         description: 'Requester is is fulfilling the request locally',
@@ -273,6 +301,17 @@ public class ActionEventResultData {
         result: true,
         status: Status.PATRON_REQUEST_UNFILLED,
         qualifier: null,
+        saveRestoreState: null,
+        updateRotaLocation: true,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterLocalCannotSupplyContinue = [
+        code: 'requesterLocalCannotSupplyContinue',
+        description: 'Local supplier cannot supply continue with next supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+        qualifier: ActionEventResultQualifier.QUALIFIER_CONTINUE,
         saveRestoreState: null,
         updateRotaLocation: true,
         nextActionEvent: null
@@ -540,6 +579,26 @@ public class ActionEventResultData {
       nextActionEvent: null
     ];
 
+    private static Map requesterRequestSentToSupplierOK = [
+        code: 'requesterRequestSentToSupplierOK',
+        description: 'Request has been sent to supplier',
+        result: true,
+        status: null,
+        qualifier: null,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
+    private static Map requesterRequestSentToSupplierLocalReview = [
+        code: 'requesterRequestSentToSupplierFillLocally',
+        description: 'Request to be filled locally',
+        result: true,
+        status: Status.PATRON_REQUEST_LOCAL_REVIEW,
+        qualifier: ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW,
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map requesterValidateIndIndOK = [
         code: 'requesterValidateIndIndOK',
         description: 'Event triggered by a status change to Validate',
@@ -797,7 +856,7 @@ public class ActionEventResultData {
 
     private static Map responderItemReturnedOK = [
         code: 'responderItemReturnedOK',
-        description: 'The requester has returned the itrm)s) to the supplier successfully',
+        description: 'The requester has returned the items to the supplier successfully',
         result: true,
         status: Status.RESPONDER_COMPLETE,
         qualifier: null,
@@ -1001,6 +1060,7 @@ public class ActionEventResultData {
             requesterISO18626Conditional,
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
+            requesterISO18626UnfilledTransfer,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1046,7 +1106,10 @@ public class ActionEventResultData {
         results: [
             requesterISO18626Conditional,
             requesterISO18626ExpectToSupply,
+            requesterISO18626WillSupply,
             requesterISO18626Unfilled,
+            requesterISO18626UnfilledTransfer,
+            requesterISO18626Loaned,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1160,6 +1223,7 @@ public class ActionEventResultData {
         ]
     ];
 
+
     private static Map requesterFilledLocallyList = [
         code: ActionEventResultList.REQUESTER_FILLED_LOCALLY,
         description: 'Requester has fulfilled the request locally',
@@ -1174,7 +1238,8 @@ public class ActionEventResultData {
         description: 'It cannot be supplied locally',
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterLocalCannotSupplyOK
+            requesterLocalCannotSupplyOK,
+            requesterLocalCannotSupplyContinue
         ]
     ];
 
@@ -1223,6 +1288,16 @@ public class ActionEventResultData {
             requesterNewPatronRequestIndOK
         ]
     ];
+
+    private static Map requesterRequestSentToSupplierIndList = [
+        code: ActionEventResultList.REQUESTER_REQUEST_SENT_TO_SUPPLIER_INDICATION,
+        description: 'Event for patron request being sent to supplier',
+        model: StateModel.MODEL_REQUESTER,
+        results: [
+                requesterRequestSentToSupplierOK,
+                requesterRequestSentToSupplierLocalReview
+        ]
+    ]
 
     private static Map requesterCancelledDuplicateList = [
         code: ActionEventResultList.REQUESTER_CANCEL_DUPLICATE,
@@ -1539,7 +1614,7 @@ public class ActionEventResultData {
       description: 'An incoming ISO-18626 message for the requester has said that the status is Loaned',
       result: true,
       status: Status.REQUESTER_LOANED_DIGITALLY,
-      qualifier: 'Loaned',
+      qualifier: ActionEventResultQualifier.QUALIFIER_LOANED,
       saveRestoreState: null,
       nextActionEvent: null
     ];
@@ -1633,6 +1708,7 @@ public class ActionEventResultData {
             requesterCancelledDuplicateList,
             requesterRetriedValidationList,
             requesterCancelledBlankFormList,
+            requesterRequestSentToSupplierIndList,
 
             // Digital returnable requester lists
             digitalReturnableRequesterExpectToSupplyISO18626,

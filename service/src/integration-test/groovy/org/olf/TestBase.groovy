@@ -28,7 +28,7 @@ class TestBase extends HttpSpec {
     @Autowired
     EventBus targetEventBus
 
-    @Value('${local.server.port}')
+    @Value(value = '${local.server.port}')
     Integer serverPort;
 
     /** Contains the tenants that have the ref data loaded */
@@ -95,7 +95,10 @@ class TestBase extends HttpSpec {
 
     protected List changeSettings(String tenantId, Map changesNeeded, boolean hidden = false) {
         // RequestRouter = Static
-        setHeaders(['X-Okapi-Tenant': tenantId]);
+        setHeaders([
+            'X-Okapi-Tenant': tenantId,
+            'X-Okapi-Permissions': '["rs.settings.get", "rs.settings.getsection.all"]'
+        ]);
         def resp = doGet("${baseUrl}rs/settings/appSettings", [ 'max':'100', 'offset':'0', 'filters' : "hidden==${hidden}"]);
         log.debug("Number of settings found: " + resp.size() + ", hidden: " + hidden + ", results: " + resp.toString());
         if ( changesNeeded != null ) {

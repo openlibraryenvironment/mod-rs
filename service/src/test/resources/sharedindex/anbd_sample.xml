@@ -1,0 +1,681 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
+  <zs:numberOfRecords>5</zs:numberOfRecords>
+  <zs:records>
+    <zs:record>
+      <zs:recordSchema>marcxml</zs:recordSchema>
+      <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+      <zs:recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>02447cam a2200469 i 4500</leader>
+          <controlfield tag="001">000066653580</controlfield>
+          <controlfield tag="003">AuCNLKIN</controlfield>
+          <controlfield tag="005">20240812153008.0</controlfield>
+          <controlfield tag="008">201123t20202020enk    e      000 1 eng d</controlfield>
+          <datafield tag="020" ind1=" " ind2=" ">
+            <subfield code="a">9781780897448 (paperback)</subfield>
+          </datafield>
+          <datafield tag="040" ind1=" " ind2=" ">
+            <subfield code="a">NJB</subfield>
+            <subfield code="b">eng</subfield>
+            <subfield code="c">NJB</subfield>
+            <subfield code="e">rda</subfield>
+          </datafield>
+          <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="a">Cline, Ernest,</subfield>
+            <subfield code="e">author.</subfield>
+          </datafield>
+          <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">Ready player two /</subfield>
+            <subfield code="c">Ernest Cline.</subfield>
+          </datafield>
+          <datafield tag="246" ind1="3" ind2=" ">
+            <subfield code="a">Ready player 2</subfield>
+          </datafield>
+          <datafield tag="264" ind1=" " ind2="1">
+            <subfield code="a">London :</subfield>
+            <subfield code="b">Century,</subfield>
+            <subfield code="c">2020.</subfield>
+          </datafield>
+          <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="a">370 pages ;</subfield>
+            <subfield code="c">24 cm.</subfield>
+          </datafield>
+          <datafield tag="336" ind1=" " ind2=" ">
+            <subfield code="a">text</subfield>
+            <subfield code="b">txt</subfield>
+          </datafield>
+          <datafield tag="337" ind1=" " ind2=" ">
+            <subfield code="a">unmediated</subfield>
+            <subfield code="b">n</subfield>
+            <subfield code="2">rdamedia</subfield>
+          </datafield>
+          <datafield tag="338" ind1=" " ind2=" ">
+            <subfield code="a">volume</subfield>
+            <subfield code="b">nc</subfield>
+            <subfield code="2">rdacarrier</subfield>
+          </datafield>
+          <datafield tag="500" ind1=" " ind2=" ">
+            <subfield code="a">Sequel to: ready player one.</subfield>
+          </datafield>
+          <datafield tag="500" ind1=" " ind2=" ">
+            <subfield code="a">First published in the USA by Ballantine Books in 2020.</subfield>
+          </datafield>
+          <datafield tag="520" ind1=" " ind2=" ">
+            <subfield code="a">Days after winning OASIS founder James Halliday's contest, Wade Watts makes a discovery that changes everything. Hidden within Halliday's vaults, waiting for his heir to find it, lies a technological advancement that will once again change the world and make the OASIS a thousand times more wondrous - and addictive - than even Wade dreamed possible. With it comes a new riddle, and a new quest: a last Easter egg from Halliday, hinting at a mysterious prize. And an unexpected, impossibly powerful, and dangerous new rival awaits, one who'll kill millions to get what he wants. Wade's life and the future of the OASIS are again at stake, but this time the fate of humanity also hangs in the balance.</subfield>
+          </datafield>
+          <datafield tag="600" ind1="1" ind2="0">
+            <subfield code="a">Watts, Wade,</subfield>
+            <subfield code="c">(Fictitious character)</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Technology</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Virtual reality</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Utopias</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Shared virtual environments</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Video gamers</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Easter eggs</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Regression (Civilization)</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="650" ind1=" " ind2="0">
+            <subfield code="a">Puzzles</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+          </datafield>
+          <datafield tag="655" ind1=" " ind2="0">
+            <subfield code="a">Science fiction</subfield>
+            <subfield code="v">Teenage</subfield>
+          </datafield>
+          <datafield tag="655" ind1=" " ind2="0">
+            <subfield code="a">Dystopian fiction</subfield>
+            <subfield code="v">Teenage fiction</subfield>
+          </datafield>
+          <datafield tag="655" ind1=" " ind2="7">
+            <subfield code="a">Fantasy fiction</subfield>
+            <subfield code="v">Teenage fiction.</subfield>
+            <subfield code="2">lcgft</subfield>
+          </datafield>
+          <datafield tag="655" ind1=" " ind2="0">
+            <subfield code="a">Teenage fiction</subfield>
+          </datafield>
+          <datafield tag="830" ind1=" " ind2="0">
+            <subfield code="a">Ready player one ;</subfield>
+            <subfield code="v">2</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">__ NRIV</subfield>
+            <subfield code="b">oai:NRIV:brn/151450</subfield>
+            <subfield code="c">held - Held at the following branches: RRL Admin Centre, Cootamundra, Tumut, Corowa.</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">NCHC</subfield>
+            <subfield code="b">oai:NCHC:brn/299433</subfield>
+            <subfield code="c">Held RedHatTesting</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">NRUL</subfield>
+            <subfield code="b">oai:AuNRUL:1006909849</subfield>
+            <subfield code="c">Held</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">VBOR</subfield>
+            <subfield code="b">oai:VBOR:brn/549970</subfield>
+            <subfield code="c">T FIC CLINE</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">VCCLC</subfield>
+            <subfield code="b">(lv)2203076:VCCLC</subfield>
+            <subfield code="c">CLI</subfield>
+          </datafield>
+          <datafield tag="850" ind1=" " ind2=" ">
+            <subfield code="a">VPPLS</subfield>
+            <subfield code="b">oai:VPPLS:brn/569444</subfield>
+            <subfield code="c">Held</subfield>
+          </datafield>
+        </record>
+      </zs:recordData>
+      <zs:recordPosition>1</zs:recordPosition>
+    </zs:record>
+    <zs:record>
+      <zs:recordSchema>marcxml</zs:recordSchema>
+      <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+      <zs:recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>03084cam a22004811a 4500</leader>
+  <controlfield tag="001">000066413758</controlfield>
+  <controlfield tag="003">AuCNLKIN</controlfield>
+  <controlfield tag="005">20241015190803.0</controlfield>
+  <controlfield tag="006">m    ||  d |      </controlfield>
+  <controlfield tag="007">cr |||||||||||</controlfield>
+  <controlfield tag="008">191130s2019    sz      ob    001 0 eng d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9783030282622</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">3030282627</subfield>
+  </datafield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">99983412828</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)1129191004</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)on1129191004</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">NhCcYBP</subfield>
+    <subfield code="c">NhCcYBP</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">anuc</subfield>
+  </datafield>
+  <datafield tag="050" ind1=" " ind2="4">
+    <subfield code="a">GV1469.34.S52</subfield>
+    <subfield code="b">M35 2019</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="4">
+    <subfield code="a">794.8</subfield>
+    <subfield code="2">23</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Maloney, Marcus,</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">Gender, masculinity and video gaming :</subfield>
+    <subfield code="b">analysing Reddit's r/gaming community /</subfield>
+    <subfield code="c">Marcus Maloney, Steven Roberts, Timothy Graham.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">Cham :</subfield>
+    <subfield code="b">Palgrave Macmillan,</subfield>
+    <subfield code="c">[2019]</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">1 online resource ( 109 pages)</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">online resource</subfield>
+    <subfield code="b">cr</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">online resource</subfield>
+    <subfield code="b">cr</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references and index.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Intro; Acknowledgements; Contents; List of Figures; List of Tables; Chapter 1: Introduction; Idle Hands, (Folk) Devil's Playthings; Why Reddit?; Methodology; Data Collection and Text Processing; Methods of Analysis; Discussion of Methodology; Ready Player One; References; Chapter 2: Hegemonic, Inclusive and Geek Masculinities; Hegemonic Masculinity; Geek Masculinity As Hegemonic Masculinity?; Adding to Connell's Tools; Conclusion; References; Chapter 3: Computational Survey; Voting and Sentiment Analysis; Topic Model Analysis of 'Masculine Gendered' /r/Gaming Comments.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="8" ind2=" ">
+    <subfield code="a">Topic Model Analysis of 'Feminine Gendered' /r/Gaming CommentsReferences; Chapter 4: Masculine Discourses in r/gaming; 'I'm Very Glad You Enjoyed This Game but I Actually Hate It'; 'I'm So Confused Why I'm Failing. I WAS Following the Damn Train'; Competition and Cohesion; References; Chapter 5: Feminine Discourses in r/gaming; 'Half Naked Women Make Literally Every Single Thing Better'; 'Spare Me the Bullshit ...'; 'If You Weren't Female They'd Harass You for Something Else'; '... Not Even If You Were TheLastDudeguy on Earth'; Battlegrounds and Contestations; References; Chapter 6: Conclusion.</subfield>
+  </datafield>
+  <datafield tag="506" ind1=" " ind2=" ">
+    <subfield code="a">Subscription and registration required for access.</subfield>
+  </datafield>
+  <datafield tag="588" ind1=" " ind2=" ">
+    <subfield code="a">Online resource; title from PDF title page (SpringerLink, viewed December 3, 2019)</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Video games</subfield>
+    <subfield code="x">Social aspects.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Masculinity.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Sex role.</subfield>
+  </datafield>
+  <datafield tag="653" ind1=" " ind2=" ">
+    <subfield code="a">Australian</subfield>
+  </datafield>
+  <datafield tag="655" ind1=" " ind2="0">
+    <subfield code="a">Electronic books</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Roberts, Steven,</subfield>
+    <subfield code="d">1978-,</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Graham, Timothy,</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">EBSCOhost</subfield>
+  </datafield>
+  <datafield tag="776" ind1="0" ind2="8">
+    <subfield code="i">Print version</subfield>
+    <subfield code="a">Maloney, Marcus</subfield>
+    <subfield code="t">Gender, Masculinity and Video Gaming : Analysing Reddit's R/gaming Community</subfield>
+    <subfield code="d">Cham : Springer International Publishing AG,c2020</subfield>
+    <subfield code="z">9783030282615</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">ANL</subfield>
+    <subfield code="b">oai:nla-test.folio.ebsco.com:fs00001069/0107e985-3297-5043-859f-b1061085f733</subfield>
+    <subfield code="c">8152104 - Electronic resource</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">QU</subfield>
+    <subfield code="b">991014074673203131</subfield>
+    <subfield code="c">Online: Not available for loan</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="0">
+    <subfield code="u">http://search.ebscohost.com/login.aspx?direct=true&amp;scope=site&amp;db=nlebk&amp;db=nlabk&amp;AN=2317758</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>2</zs:recordPosition></zs:record><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02462cam a2200349 a 4500</leader>
+  <controlfield tag="001">000059268678</controlfield>
+  <controlfield tag="003">AuCNLKIN</controlfield>
+  <controlfield tag="005">20190524104755.0</controlfield>
+  <controlfield tag="006">m        u        </controlfield>
+  <controlfield tag="007">cr cn ||||||||</controlfield>
+  <controlfield tag="008">190423s2019    xx      o           eng d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="z">9781593279387</subfield>
+  </datafield>
+  <datafield tag="024" ind1="8" ind2=" ">
+    <subfield code="a">9781492071242</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">QUT</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Anthropy, Anna,</subfield>
+    <subfield code="e">author.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">Make Your Own Twine Games!</subfield>
+    <subfield code="h">[electronic resource] /</subfield>
+    <subfield code="c">Anthropy, Anna.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">1st edition.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="b">No Starch Press,</subfield>
+    <subfield code="c">2019.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">104 p.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">computer</subfield>
+    <subfield code="b">c</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">online resource</subfield>
+    <subfield code="b">cr</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="347" ind1=" " ind2=" ">
+    <subfield code="a">text file</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Twine is a free online tool that lets anyone new to programming create their own interactive, story-based adventure games in a web page. In Make Your Own Twine Games! , game designer Anna Anthropy takes you step-by-step through the game development process, from coming up with a basic idea to structuring your game. You'll learn the basics of Twine like how to use links and apply images and formatting to make your game look more distinct. You'll get tips on how to test your game, export it, and publish it online, and even understand more advanced features like scripting to get your game to remember and respond to player choices. As you make your way through the book and begin crafting your own interactive fiction, you'll learn other cool tricks like how to: &#x2022;Write stories that follow multiple paths using hyperlinks &#x2022;Create variables to track your player's actions &#x2022;Add scripting like "if" and "else" to decide when ghosts should appear in your game &#x2022;Use hooks to add fancy touches like text effects, pictures, and sound With example games to act as inspiration, Make Your Own Twine Games! will take you from story-teller to game designer in just a few clicks! Ready player one? The game starts now. Covers Twine 2.</subfield>
+  </datafield>
+  <datafield tag="533" ind1=" " ind2=" ">
+    <subfield code="a">Electronic reproduction.</subfield>
+    <subfield code="b">Boston, MA :</subfield>
+    <subfield code="c">Safari.</subfield>
+    <subfield code="n">Available via World Wide Web.</subfield>
+  </datafield>
+  <datafield tag="538" ind1=" " ind2=" ">
+    <subfield code="a">Mode of access: World Wide Web.</subfield>
+  </datafield>
+  <datafield tag="542" ind1=" " ind2=" ">
+    <subfield code="f">Copyright &#xA9; No Starch Press</subfield>
+  </datafield>
+  <datafield tag="550" ind1=" " ind2=" ">
+    <subfield code="a">Made available through: Safari, an O'Reilly Media Company.</subfield>
+  </datafield>
+  <datafield tag="655" ind1=" " ind2="7">
+    <subfield code="a">Electronic books.</subfield>
+    <subfield code="2">local</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">Safari, an O'Reilly Media Company.</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">QUT</subfield>
+    <subfield code="b">991009692037504001</subfield>
+    <subfield code="c">Online : Licence restrictions may apply</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="0">
+    <subfield code="z">Connect to this resource online</subfield>
+    <subfield code="u">https://www.safaribooksonline.com/library/view/-/9781492071242/?ar</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>3</zs:recordPosition></zs:record><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>05068cam a2200517 i 4500</leader>
+  <controlfield tag="001">000066047974</controlfield>
+  <controlfield tag="003">AuCNLKIN</controlfield>
+  <controlfield tag="005">20240604224351.0</controlfield>
+  <controlfield tag="006">m    |o  d |      </controlfield>
+  <controlfield tag="007">cr || ||||||||</controlfield>
+  <controlfield tag="008">190828s2019    gw     fo     000 0 eng d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9783110659405</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">3110659409</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9783110655728</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">3110655721</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="a">10.1515/9783110659405</subfield>
+    <subfield code="2">doi</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)1114910745</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DEGRU</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="e">pn</subfield>
+    <subfield code="c">DEGRU</subfield>
+    <subfield code="d">OCLCQ</subfield>
+    <subfield code="d">YDX</subfield>
+    <subfield code="d">N$T</subfield>
+    <subfield code="d">OCLCF</subfield>
+    <subfield code="d">YDX</subfield>
+    <subfield code="d">OCL</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">OCLCQ</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">OCLCQ</subfield>
+    <subfield code="d">DEGRU</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">OCLCL</subfield>
+    <subfield code="d">UKAHL</subfield>
+  </datafield>
+  <datafield tag="044" ind1=" " ind2=" ">
+    <subfield code="a">gw</subfield>
+    <subfield code="c">DE</subfield>
+  </datafield>
+  <datafield tag="072" ind1=" " ind2="7">
+    <subfield code="a">HIS035000</subfield>
+    <subfield code="2">bisacsh</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">Playing the Field :</subfield>
+    <subfield code="b">Video Games and American Studies /</subfield>
+    <subfield code="c">edited by Sascha Po&#x308;hlmann.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="a">Berlin ;</subfield>
+    <subfield code="a">Boston :</subfield>
+    <subfield code="b">De Gruyter Oldenbourg,</subfield>
+    <subfield code="c">[2019]</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">1 online resource.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">computer</subfield>
+    <subfield code="b">c</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">online resource</subfield>
+    <subfield code="b">cr</subfield>
+  </datafield>
+  <datafield tag="347" ind1=" " ind2=" ">
+    <subfield code="a">text file</subfield>
+    <subfield code="b">PDF</subfield>
+    <subfield code="2">rda</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2="0">
+    <subfield code="t">Frontmatter --</subfield>
+    <subfield code="t">Table of Contents --</subfield>
+    <subfield code="t">Introduction: Video Games and American Studies /</subfield>
+    <subfield code="r">Po&#x308;hlmann, Sascha --</subfield>
+    <subfield code="t">Video Games and the American Cultural Context /</subfield>
+    <subfield code="r">Wolf, Mark J. P. --</subfield>
+    <subfield code="t">The end is nigh! Bring forth the Shepard! Mass Effect, the Apocalypse, and the Puritan Imagination /</subfield>
+    <subfield code="r">Fuchs, Michael / Phillips, Michael / Rabitsch, Stefan --</subfield>
+    <subfield code="t">The Last of the US: The Game as Cultural Geography /</subfield>
+    <subfield code="r">Callahan, David --</subfield>
+    <subfield code="t">Mobility and Choices in Role-Playing Games /</subfield>
+    <subfield code="r">Maier, Patricia --</subfield>
+    <subfield code="t">Playing the Urban Future: The Scripting of Movement and Space in Mirror&#x2019;s Edge (2008) /</subfield>
+    <subfield code="r">Meinel, Dietmar --</subfield>
+    <subfield code="t">Playing on Fields: Seasonal Seriality, Tele-Realism, and the Bio-Politics of Digital Sports Games /</subfield>
+    <subfield code="r">Lu&#x308;the, Martin --</subfield>
+    <subfield code="t">Narrative and Play in American Studies: Ludic Textuality in the Video Game Alan Wake and the TV Series Westworld /</subfield>
+    <subfield code="r">Schubert, Stefan --</subfield>
+    <subfield code="t">Toward a Reconsideration of Hypermediacy: Immersion in Survival Horror Games and Eighteenth-Century Novels /</subfield>
+    <subfield code="r">Nae, Andrei / Bacalu, Alexandra Ileana --</subfield>
+    <subfield code="t">Ludic Literature: Ready Player One as Didactic Fiction for the Neoliberal Subject /</subfield>
+    <subfield code="r">Stark, Doug --</subfield>
+    <subfield code="t">Strategies against Structure: Video Game Terrorism as the Ultimate American Agency Narrative /</subfield>
+    <subfield code="r">Domsch, Sebastian --</subfield>
+    <subfield code="t">Why We Play Role-Playing Games /</subfield>
+    <subfield code="r">Adams, Jon --</subfield>
+    <subfield code="t">Narrative Glitches: Action Adventure Games and Metaleptic Convergence /</subfield>
+    <subfield code="r">Schlarb, Damien B. --</subfield>
+    <subfield code="t">Time Travelling to the American Revolution &#x2014; Why Immersive Media Need American Studies /</subfield>
+    <subfield code="r">Mittermeier, Sabrina --</subfield>
+    <subfield code="t">A Shining City and the Sodom Below: Historical Guilt and Personal Agency in BioShock Infinite /</subfield>
+    <subfield code="r">Franz, Manuel / Jansen, Henning --</subfield>
+    <subfield code="t">The Art of BioShock Infinite: Identity, Race, and Manifest Destiny /</subfield>
+    <subfield code="r">Blank, Jacqueline --</subfield>
+    <subfield code="t">Sounds of Tears: Mozart&#x2019;s Lacrimosa in Different Media /</subfield>
+    <subfield code="r">Keller, Veronika --</subfield>
+    <subfield code="t">Unspoken Adventures: On Sound, Story, and Nonverbal Gameplay in Journey and Inside /</subfield>
+    <subfield code="r">Aghoro, Nathalie --</subfield>
+    <subfield code="t">Contributors --</subfield>
+    <subfield code="t">Index of Names --</subfield>
+    <subfield code="t">Index of Subjects.</subfield>
+  </datafield>
+  <datafield tag="506" ind1="0" ind2=" ">
+    <subfield code="a">restricted access :</subfield>
+    <subfield code="u">http://purl.org/coar/access_right/c_16ec</subfield>
+    <subfield code="f">online access with authorization</subfield>
+    <subfield code="2">star</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">American Studies has only gradually turned its attention to video games in the twenty-first century, even though the medium has grown into a cultural industry that is arguably the most important force in American and global popular culture today. There is an urgent need for a substantial theoretical reflection on how the field and its object of study relate to each other. This anthology, the first of its kind, seeks to address this need by asking a dialectic question: first, how may American Studies apply its highly diverse theoretical and methodological tools to the analysis of video games, and second, how are these theories and methods in turn affected by the games? The eighteen essays offer exemplary approaches to video games from the perspective of American cultural and historical studies as they consider a broad variety of topics: the US-American games industry, Puritan rhetoric, cultural geography, mobility and race, urbanity and space, digital sports, ludic textuality, survival horror and the eighteenth-century novel, gamer culture and neoliberalism, terrorism and agency, algorithm culture, glitches, theme parks, historical guilt, visual art, sonic meaning-making, and nonverbal gameplay.</subfield>
+  </datafield>
+  <datafield tag="538" ind1=" " ind2=" ">
+    <subfield code="a">Mode of access: Internet via World Wide Web.</subfield>
+  </datafield>
+  <datafield tag="546" ind1=" " ind2=" ">
+    <subfield code="a">In English.</subfield>
+  </datafield>
+  <datafield tag="588" ind1=" " ind2=" ">
+    <subfield code="a">Description based on online resource; title from PDF title page (publisher's Web site, viewed 28. Aug 2019)</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Video games</subfield>
+    <subfield code="x">Social aspects</subfield>
+    <subfield code="z">United States.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Video games</subfield>
+    <subfield code="z">United States.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Video games</subfield>
+    <subfield code="x">Social aspects.</subfield>
+    <subfield code="2">fast</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Education.</subfield>
+    <subfield code="2">fast</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">Video games.</subfield>
+    <subfield code="2">fast</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="a">HISTORY</subfield>
+    <subfield code="x">Study &amp; Teaching.</subfield>
+    <subfield code="2">bisacsh</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="0">
+    <subfield code="a">United States</subfield>
+    <subfield code="x">Study and teaching.</subfield>
+  </datafield>
+  <datafield tag="651" ind1=" " ind2="7">
+    <subfield code="a">United States.</subfield>
+    <subfield code="2">fast</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Po&#x308;hlmann, Sascha,</subfield>
+    <subfield code="e">editor.</subfield>
+  </datafield>
+  <datafield tag="776" ind1="0" ind2=" ">
+    <subfield code="c">EPUB</subfield>
+    <subfield code="z">9783110655728</subfield>
+  </datafield>
+  <datafield tag="776" ind1="0" ind2=" ">
+    <subfield code="c">print</subfield>
+    <subfield code="z">9783110655254</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">QU</subfield>
+    <subfield code="b">991014040169003131</subfield>
+    <subfield code="c">Online: Not available for loan</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">VMCD</subfield>
+    <subfield code="b">on1114910745</subfield>
+    <subfield code="c">Held</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>4</zs:recordPosition></zs:record><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>04751cjm a2200361 i 4500</leader>
+  <controlfield tag="001">000063992938</controlfield>
+  <controlfield tag="003">AuCNLKIN</controlfield>
+  <controlfield tag="005">20200704073349.0</controlfield>
+  <controlfield tag="008">181002s2018    enkmp|ee            eng d</controlfield>
+  <datafield tag="024" ind1="0" ind2=" ">
+    <subfield code="a">738572155520</subfield>
+  </datafield>
+  <datafield tag="028" ind1="3" ind2="0">
+    <subfield code="a">SILCD1555</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">VDGV</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">VDGV</subfield>
+  </datafield>
+  <datafield tag="082" ind1="0" ind2="4">
+    <subfield code="a">781.542</subfield>
+    <subfield code="2">23</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">100 greatest science fiction themes.</subfield>
+  </datafield>
+  <datafield tag="246" ind1="3" ind2=" ">
+    <subfield code="a">One hundred greatest science fiction themes</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="2">
+    <subfield code="a">[London] :</subfield>
+    <subfield code="b">Silva Screen Records,</subfield>
+    <subfield code="c">[2018]</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">5 CDs :</subfield>
+    <subfield code="b">digital ;</subfield>
+    <subfield code="c">12 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">performed music</subfield>
+    <subfield code="b">prm</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">audio</subfield>
+    <subfield code="b">s</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">audio disc</subfield>
+    <subfield code="b">sd</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">"Six disc collection" -- spine.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Credits on container.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc 01. 1. Main Title (Ready Player One) -- 2. Corellia Chase (Solo: A Star Wars Story) -- 3. Finale (Star Wars: The Last Jedi) -- 4. 2049 (Blade Runner 2049) -- 5. Showtime A-Holes (Guardians Of The Galaxy Vol 2) -- 6. Theme (Star Trek: Discovery) -- 7. Heptapod B (Arrival) -- 8. Space Station (Mars) -- 9. Spacewalk (Passengers) -- 10. Stranger Things -- 11. Westworld -- 12. Warcraft -- 13. The Imperial Suite (Rogue One: A Star Wars Story) -- 14. Rey's Theme (Star Wars: The Force Awakens) -- 15. March Of The Resistance (Star Wars: The Force Awakens) -- 16. Farewell &amp; The Trip (Star Wars: The Force Awakens) -- 17. Skin (Ex Machina) -- 18. Tessa (Transformers: Age Of Extinction).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc  02. 1. Cornfield Chase (Interstellar) -- 2. No Time For Caution (Interstellar) -- 3. The Hanging Tree (The Hunger Games: Mockingjay part 1) -- 4. Gravity -- 5. Iron Man 3 -- 6. London Calling (Star Trek: Into Darkness) -- 7. Waking Up (Oblivion) -- 8. Life (Prometheus) -- 9. Person Of Interest -- 10. Theme (Doctor Who - Series 5) -- 11. It's Our Fight (Transformers: Dark Of The Moon) -- 12. Suite (Super 8) -- 13. The Consolations Of Philosophy (Black Mirror) -- 14. A Dream Within A Dream (Inception) -- 15. Mombasa (Inception) -- 16. Time (Inception) -- 17. Outlands (Tron: Legacy) -- 18. Recognizer (Tron: Legacy) -- 19. War (Avatar).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc 03. 1. Forest Battle (Transformers: Revenge Of The Fallen) -- 2. Welcome To Lunar Industries (Moon) -- 3. Hella Bar Talk/Enterprising Young Men (Star Trek) -- 4. Roar! (Cloverfield) -- 5. Driving With The Top Down (Iron Man) -- 6. Adagio In D Minor (Sunshine) -- 7. The Last Man (The Fountain) -- 8. Together We Will Live Forever (The Fountain) -- 9. My Name Is Lincoln (The Island) -- 10. Battle Of The Heroes (Star Wars: Revenge Of The Sith) -- 11. War Of The Worlds -- 12. Don't Blow It (Solaris) -- 13. Across The Stars (Star Wars: Attack Of The Clones) -- 14. Where Dreams Are Born (Artificial Intelligence: AI) -- 15. Main Theme (Galaxy Quest) -- 16. Duel Of The Fates (Star Wars: The Phantom Menace) -- 17. Anything Is Possible (The Matrix).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc 04. 1. Harry &amp; Greg/Launch (Armageddon) -- 2. The Wedding (Deep Impact) -- 3. End Titles (Lost In Space) -- 4. The Story Ends (Mercury Rising) -- 5. Contact -- 6. The Departure (Gattaca) -- 7. End Credits (Independence Day) -- 8. Apollo 13 -- 9. Suite (Judge Dredd) -- 10. Species -- 11. Giza 1928/Going Home (Stargate) -- 12. Overture (Star Trek VI: The Undiscovered Country) -- 13. Suite (Terminator 2: Judgment Day) -- 14. Total Recall.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc 05. 1. End Credits (The Abyss) -- 2. Closing Credits (Dead Ringers) -- 3. Predator -- 4. Rock Shop/Home/Van Chase/The Dream (Robocop) -- 5. Prelude/Ripley's Rescue (Aliens) -- 6. Main Theme (Back To The Future) -- 7. Lifeforce -- 8. Dune -- 9. Bird Of Prey Decloaks (Star Trek III: The Search For Spock) -- 10. Starman -- 11. Main Theme (The Last Starfighter) -- 12. The Right Stuff -- 13. End Credits (Twilight Zone: The Movie) -- 14. Love Theme (Blade Runner) -- 15. Closing Theme (Blade Runner).</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Disc 06. 1. Adventures On Earth (ET: The Extra-Terrestrial) -- 2. Overture (Star Trek II: The Wrath Of Khan) -- 3. The Thing -- 4. The Imperial March (Star Wars: The Empire Strikes Back) -- 5. Alien -- 6. Main Theme (Phantasm) -- 7. End Titles/Klingon Attack (Star Trek: The Motion Picture) -- 8. The Black Hole -- 9. Main Theme/The Destruction Of Peace (Battlestar Galactica) -- 10. Main Title (Star Wars: A New Hope) -- 11. Resolution &amp; Finale (Close Encounters Of The Third Kind) -- 12. Also Sprach Zarathustra (2001: A Space Odyssey) -- 13. Star Trek -- 14. London 1900/Filbey's Theme (The Time Machine) -- 15. Forbidden Planet -- 16. Suite (The Day The Earth Stood Still) -- 17. March (Things To Come).</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Motion picture music.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Film soundtracks.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Popular music.</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">VDGV</subfield>
+    <subfield code="b">(plvtest)1927151:VDGV</subfield>
+    <subfield code="c">CD VAR GRE</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">VWMR</subfield>
+    <subfield code="b">oai:VWMR:brn/577489</subfield>
+    <subfield code="c">Held</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>5</zs:recordPosition></zs:record></zs:records><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:queryType>pqf</zs:queryType><zs:query>@or @or @attr 1=12 000066653580 @attr 1=12 000066413758 @or @attr 1=12 000063992938 @or @attr 1=12 000059268678 @attr 1=12 000066047974</zs:query><zs:maximumRecords>100</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordSchema>marcxml</zs:recordSchema><zs:extraRequestData><zs:target>http://z3950-test.librariesaustralia.nla.gov.au:210/Bibliographic</zs:target></zs:extraRequestData></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

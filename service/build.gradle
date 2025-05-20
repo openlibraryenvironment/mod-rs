@@ -109,6 +109,7 @@ dependencies {
   // Testing
   testImplementation "org.mockito:mockito-core"
   testImplementation "org.grails:grails-web-testing-support"
+  testImplementation "org.grails:grails-gorm-testing-support"
 
   /*  ---- Manually installed dependencies ---- */
   implementation 'org.grails.plugins:spring-security-core:5.2.1'
@@ -162,20 +163,20 @@ dependencies {
   }
 
   // NCIP deps
-  implementation 'org.olf.rs:lib-ncip-client:0.23.19'
+  implementation 'org.olf.rs:lib-ncip-client:0.24.4'
   implementation 'com.github.jknack:handlebars:4.2.0'
   implementation 'uk.co.cacoethes:groovy-handlebars-engine:0.2'
   implementation 'org.apache.commons:commons-collections4:4.4'
   implementation 'org.jsoup:jsoup:1.10.2'
   implementation 'org.json:json:20190722'
-  implementation 'org.extensiblecatalog.ncip.v2:service:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:common:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0_bc:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-wclv1_0:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:2.0.0'
-  implementation 'org.extensiblecatalog.ncip.v2:binding-jar:2.0.0'
+  implementation 'org.extensiblecatalog.ncip.v2:service:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:common:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0_bc:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ilsdiv1_0:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-wclv1_0:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_02:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-ncipv2_01:4.1.1'
+  implementation 'org.extensiblecatalog.ncip.v2:binding-jar:4.1.1'
 
   // Domain model for directory
   implementation 'org.scala-saddle:google-rfc-2445:20110304'

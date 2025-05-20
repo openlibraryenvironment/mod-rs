@@ -32,17 +32,20 @@ public class Actions {
 	static public final String ACTION_RESPONDER_SUPPLIER_CHECK_INTO_RESHARE_AND_MARK_SHIPPED = "supplierCheckInToReshareAndSupplierMarkShipped"
 
 	// Non-Returnable Responder Actions
-	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT	 = "nonreturnableSupplierAddURLToDocument";
-	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "nonreturnableSupplierPrintPullSlip";
-	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "nonreturnableSupplierRespondYes";
-	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "nonreturnableSupplierRespondCannotSupply";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_ADD_URL_TO_DOCUMENT	 = "supplierAddURLToDocument";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "supplierPrintPullSlip";
+	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "respondYes";
+	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "supplierCannotSupply";
+	public static final String ACTION_NONRETURNABLE_RESPONDER_ADD_CONDITION		     		 = 'supplierAddCondition';
 
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
 
 	// SLNP Responder Actions
-	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY = "slnpAbortSupply";
-	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES  = "slnpRespondYes";
+	static public final String ACTION_SLNP_RESPONDER_ABORT_SUPPLY                    = "slnpAbortSupply";
+	static public final String ACTION_SLNP_RESPONDER_RESPOND_YES                     = "slnpRespondYes";
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED  = "slnpSupplierFillAndMarkShipped";
+	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_CHECKOUT_OF_RESHARE    = "slnpSupplierCheckOutOfReshare";
 
 	// SLNP non returnable responder actions
 	static public final String ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            = "slnpSupplierSuppliesDocument";
@@ -80,11 +83,15 @@ public class Actions {
 	static public final String ACTION_REQUESTER_COMPLETE_REQUEST				 = "requesterCompleteRequest";
 
 	// Nonreturnable Requester Actions
-	static public final String ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION  = "nonreturnableRequesterBypassValidation";
-	static public final String ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION   = "nonreturnableRequesterRetryValidation";
-	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "nonreturnableRequesterCancel";
-	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "nonreturnableRequesterCompleteRequest";
-	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "nonreturnableRequesterMarkEndOfRotaReviewed";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_BYPASS_VALIDATION  = "requesterBypassValidation";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_RETRY_VALIDATION   = "requesterRetryValidation";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL   = "requesterCancel";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "requesterCompleteRequest";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "requesterMarkEndOfRotaReviewed";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_REREQUEST          = "rerequest";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_FILL_LOCALLY       = "fillLocally";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_CANCEL_LOCAL       = "cancelLocal";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY = "localSupplierCannotSupply";
 
 	// SLNP Requester Actions
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT                       = "slnpHandleAbort";

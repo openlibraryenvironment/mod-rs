@@ -2,13 +2,16 @@ package org.olf.rs.statemodel.events
 
 import com.k_int.web.toolkit.refdata.RefdataValue
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronNoticeService
 import org.olf.rs.PatronRequest
 import org.olf.rs.ReshareActionService
 import org.olf.rs.ReshareApplicationEventHandlerService
+import org.olf.rs.SettingsService
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.EventFetchRequestMethod
@@ -21,6 +24,8 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
     ReshareActionService reshareActionService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
     NewRequestService newRequestService;
+    PickupLocationService pickupLocationService;
+    SettingsService settingsService;
 
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
@@ -29,12 +34,33 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             return eventResultDetails;
         }
 
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+
+
+
+        //Shim so that we can populate this value via the systemInstanceIdentifier
+        if (requestRouterSetting == 'disabled') {
+            if (!request.supplierUniqueRecordId && request.systemInstanceIdentifier != null) {
+                request.supplierUniqueRecordId = request.systemInstanceIdentifier;
+            }
+        }
+
+         
+
         if (!request.hrid) {
             request.hrid = newRequestService.generateHrid();
         }
 
-        if (request.requestingInstitutionSymbol != null) {
-            Symbol requestingSymbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+        // If we were supplied a pickup location, attempt to resolve it
+        if (!request.resolvedPickupLocation) {
+            pickupLocationService.check(request)
+        }
+
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+        String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+
+        if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
+            Symbol requestingSymbol = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (requestingSymbol != null) {
                 request.resolvedRequester = requestingSymbol;
             }
@@ -42,7 +68,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             Map lookupPatron = reshareActionService.lookupPatron(request, null);
             if (lookupPatron.callSuccess) {
                 boolean patronValid = lookupPatron.patronValid;
-                if (requestingSymbol == null) {
+                if (requestingSymbol == null && defaultRequestSymbolString == null) {
                     request.needsAttention = true;
                     log.warn("Unknown requesting institution symbol : ${request.requestingInstitutionSymbol}");
                     eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
@@ -75,6 +101,11 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
             request.needsAttention = true;
             eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
+        }
+
+        if (requestRouterSetting == 'disabled') {
+            request.requestingInstitutionSymbol = defaultRequestSymbolString;
+            request.supplyingInstitutionSymbol = defaultPeerSymbolString;
         }
 
         return eventResultDetails;

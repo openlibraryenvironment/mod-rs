@@ -18,12 +18,22 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   ItemLocation determineBestLocation(ISettings settings, PatronRequest pr, IHoldingLogDetails holdingLogDetails) {
-    ItemLocation location = null;
+    ItemLocation location = new ItemLocation();
+    location.location = "spoof";
+    location.reason = "spoof";
+    location.callNumber = "spoof";
+    location.itemId = "spoof";
+    location.shelvingLocation = "spoof";
+    location.shelvingPreference = 0;
+    location.temporaryLocation = "spoof";
+    location.temporaryShelvingLocation = "spoof";
+    location.preference = 0;
     return location;
   }
 
   public Map lookupPatron(ISettings settings, String patron_id, INcipLogDetails ncipLogDetails) {
     log.debug("lookupPatron(${patron_id})");
+    Map patronDetails = [:];
     Map result = [status: 'OK', reason: 'spoofed', result: true ];
     return result
   }
@@ -33,7 +43,8 @@ public class ManualHostLMSService implements HostLMSActions {
     String requestId,
     String itemBarcode,
     String borrowerBarcode,
-    INcipLogDetails ncipLogDetails
+    INcipLogDetails ncipLogDetails,
+    String externalReferenceValue
   ) {
     log.debug("checkoutItem(${itemBarcode},${borrowerBarcode})");
 
@@ -71,7 +82,7 @@ public class ManualHostLMSService implements HostLMSActions {
   }
 
   public Map requestItem(ISettings settings, String requestId, String itemId, String borrowerBarcode, String pickupLocation,
-      INcipLogDetails ncipLogDetails) {
+                         String itemLocation, INcipLogDetails ncipLogDetails) {
     return [
       result: true,
       reason: 'spoofed'
@@ -89,7 +100,14 @@ public class ManualHostLMSService implements HostLMSActions {
     return false
   }
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {
+    return [
+            result: true,
+            reason: 'spoofed'
+    ]
+  }
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails) {
     return [
             result: true,
             reason: 'spoofed'

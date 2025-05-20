@@ -2,4 +2,4 @@ import groovy.transform.*
 import org.olf.rs.RequestVolume;
 
 @Field RequestVolume requestVolume
-json g.render(requestVolume, [includes: ['id', 'name', 'itemId', 'status', 'temporaryItemBarcode'], expand: ['status']])
+json g.render(requestVolume, [includes: ['id', 'name', 'itemId', 'status', 'temporaryItemBarcode', 'callNumber'], expand: ['status']])

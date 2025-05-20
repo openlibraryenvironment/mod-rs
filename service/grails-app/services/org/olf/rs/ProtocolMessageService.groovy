@@ -4,6 +4,7 @@ import org.olf.rs.iso18626.Address
 import org.olf.rs.iso18626.BibliographicInfo
 import org.olf.rs.iso18626.BibliographicItemId
 import org.olf.rs.iso18626.BibliographicRecordId
+import org.olf.rs.iso18626.BillingInfo
 import org.olf.rs.iso18626.DeliveryInfo
 import org.olf.rs.iso18626.ElectronicAddress
 import org.olf.rs.iso18626.Header
@@ -33,6 +34,7 @@ import org.xml.sax.SAXException
 
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -90,7 +92,14 @@ class ProtocolMessageService {
                 id = id.substring(0, separatorPosition);
             }
         }
-        return(id);
+        if (id.length() > 32) {
+          if (id.contains("-")) {
+            id = id.substring(0, id.lastIndexOf('-'))
+          } else {
+            id = id.substring(0, 32)
+          }
+        }
+        return id
     }
 
     /**
@@ -126,9 +135,10 @@ class ProtocolMessageService {
      */
     public String buildProtocolId(PatronRequest request, String stateModel) {
         String id = (request.hrid ?: request.id)
+        String order = request.rotaPosition?.toString() ?: "norota";
         String suffix = (stateModel == StateModel.MODEL_SLNP_REQUESTER ||
                 stateModel == StateModel.MODEL_SLNP_RESPONDER) ? "" :
-                (REQUESTER_ID_SEPARATOR + request.rotaPosition.toString())
+                (REQUESTER_ID_SEPARATOR + order)
         return id + suffix
 
     }
@@ -171,9 +181,14 @@ class ProtocolMessageService {
 
     assert eventData != null
     assert eventData.messageType != null;
-    assert peer_symbol != null;
 
-    List<ServiceAccount> ill_services_for_peer = findIllServices(peer_symbol)
+    List<ServiceAccount> ill_services_for_peer;
+
+    if (peer_symbol != null) {
+      ill_services_for_peer = findIllServices(peer_symbol);
+    } else {
+      ill_services_for_peer = [];
+    }
     log.debug("ILL Services for peer: ${ill_services_for_peer}")
 
     log.debug("Will send an ISO18626 message to ILL service")
@@ -185,15 +200,15 @@ class ProtocolMessageService {
     def serviceAddress = null;
     if ( ill_services_for_peer.size() > 0 ) {
       serviceAddress = ill_services_for_peer[0].service.address
-    }
-    else {
-      log.warn("Unable to find ILL service address for ${peer_symbol}");
+    } else {
+      serviceAddress = settingsService.getSettingValue(SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS)
+      log.info("Unable to find ILL service address for ${peer_symbol}. Use default ${serviceAddress}");
     }
 
     try {
       log.debug("Sending ISO18626 message to symbol ${peer_symbol} - resolved address ${serviceAddress}")
       def additional_headers = [:]
-      if ( ill_services_for_peer[0].customProperties != null ) {
+      if ( ill_services_for_peer.size() > 0 && ill_services_for_peer[0].customProperties != null ) {
         log.debug("Service has custom properties: ${ill_services_for_peer[0].customProperties}");
         ill_services_for_peer[0].customProperties.value.each { cp ->
           if ( cp?.definition?.name=='AdditionalHeaders' ) {
@@ -292,21 +307,27 @@ class ProtocolMessageService {
   }
 
   /**
-   * Return a prioroty order list of service accounts this symbol can accept
+   * Return a list of service accounts this symbol can accept
    */
-  public List<ServiceAccount> findIllServices(String symbol) {
-    String[] symbol_components = symbol.split(':');
+  public List<ServiceAccount> findIllServices(String symbolStr) {
+    List<ServiceAccount> result = [];
+    def sym = DirectoryEntryService.resolveCombinedSymbol(symbolStr)
 
-    log.debug("symbol: ${symbol}, symbol components: ${symbol_components}");
-    List<ServiceAccount> result = ServiceAccount.executeQuery('''select sa from ServiceAccount as sa
-join sa.accountHolder.symbols as symbol
-where symbol.symbol=:sym
-and symbol.authority.symbol=:auth
-and sa.service.businessFunction.value=:ill
-''', [ ill:'ill', sym:symbol_components[1], auth:symbol_components[0] ] );
+    if (sym == null) {
+      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}")
+    }
 
-    log.debug("Got service accounts: ${result}");
+    log.debug("Finding ILL service accounts for ${sym?.symbol}")
+    try {
+      def criteria = ServiceAccount.where {
+        accountHolder == sym.owner && service.businessFunction.value == 'ill'
+      }
+      result = criteria.list()
+    } catch (Exception e) {
+      log.error("Error getting service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
+    }
 
+    log.debug("Got service accounts: ${result}")
     return result;
   }
 
@@ -522,7 +543,12 @@ and sa.service.businessFunction.value=:ill
       log.warn("No patronInfo found")
     }
 
-    //TODO Wire in billingInfo here
+    log.debug("This is a requesting message, so needs BillingInfo")
+    if (eventData.billingInfo != null && eventData.billingInfo.maximumCosts != null) {
+      request.setBillingInfo(makeBillingInfo(eventData))
+    } else {
+      log.warn("No billingInfo found")
+    }
 
     return request
   }
@@ -682,6 +708,7 @@ and sa.service.businessFunction.value=:ill
     ServiceInfo serviceInfo = new ServiceInfo()
     serviceInfo.setCopyrightCompliance(toTypeSchemeValuePair(eventData.serviceInfo.copyrightCompliance))
     serviceInfo.setServiceType(toServiceType(eventData.serviceInfo.serviceType))
+    //serviceInfo.setServiceLevel()
     if (eventData.serviceInfo.needBeforeDate) {
       serviceInfo.setNeedBeforeDate(toZonedDateTime(eventData.serviceInfo.needBeforeDate))
     }
@@ -691,8 +718,24 @@ and sa.service.businessFunction.value=:ill
     return serviceInfo
   }
 
+  BillingInfo makeBillingInfo(eventData) {
+    if (eventData?.billingInfo instanceof Map && !eventData.billingInfo.isEmpty()) {
+      BillingInfo billingInfo = new BillingInfo()
+      TypeCosts maxCost = new TypeCosts();
+      maxCost.monetaryValue = eventData.billingInfo.maximumCosts?.monetaryValue;
+      maxCost.currencyCode = toTypeSchemeValuePair(eventData.billingInfo.maximumCosts?.currencyCode);
+      billingInfo.setMaximumCosts(maxCost);
+      return billingInfo;
+    }
+    return null;
+  }
+
   ZonedDateTime toZonedDateTime(String dateString) {
     return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+  }
+
+  ZonedDateTime toZonedDateTime(LocalDate localDate) {
+    return localDate.atStartOfDay(ZoneId.of("UTC"));
   }
 
   ZonedDateTime currentZonedDateTime(){
@@ -821,6 +864,7 @@ and sa.service.businessFunction.value=:ill
     return deliveryInfo
   }
 
+
   ReturnInfo makeReturnInfo(eventData) {
     ReturnInfo returnInfo = new ReturnInfo()
     if (eventData.returnInfo.returnAgencyId) {
@@ -829,6 +873,7 @@ and sa.service.businessFunction.value=:ill
       returnAgencyId.setAgencyIdType(toTypeSchemeValuePair(values[0]))
       returnAgencyId.setAgencyIdValue(values[1])
       returnInfo.setReturnAgencyId(returnAgencyId)
+
     }
     returnInfo.setName(eventData.returnInfo.name)
     if (eventData.returnInfo.physicalAddress) {

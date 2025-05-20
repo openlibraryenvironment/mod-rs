@@ -1,12 +1,12 @@
 package org.olf.rs.referenceData
 
-import org.olf.rs.ProtocolReferenceDataValue;
 import org.olf.rs.ReferenceDataService;
 import org.olf.rs.ReshareActionService;
 import org.olf.rs.statemodel.StateModel;
 
 import com.k_int.web.toolkit.files.FileUploadService;
 import com.k_int.web.toolkit.settings.AppSetting;
+import org.olf.rs.ProtocolReferenceDataValue;
 
 import groovy.util.logging.Slf4j;
 
@@ -37,7 +37,7 @@ public class SettingsData {
     private static final String SECTION_REQUESTS               = 'requests';
     private static final String SECTION_ROUTING                = 'Routing';
     private static final String SECTION_SHARED_INDEX           = 'sharedIndex';
-    private static final String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
+    public static final  String SECTION_STATE_ACTION_CONFIG    = 'state_action_config';
     private static final String SECTION_STATE_MODEL            = 'state_model';
     private static final String SECTION_WMS                    = 'wmsSettings';
     private static final String SECTION_VOYAGER                = 'voyagerSettings';
@@ -50,18 +50,16 @@ public class SettingsData {
     public static final String SETTING_Z3950_PROXY_ADDRESS = 'z3950_proxy_address';
 
     // Settings for the localNCIP section
-    public static final String SETTING_NCIP_APP_PROFILE                = 'ncip_app_profile';
-    public static final String SETTING_NCIP_FROM_AGENCY                = 'ncip_from_agency';
-    public static final String SETTING_NCIP_FROM_AGENCY_AUTHENTICATION = 'ncip_from_agency_authentication';
-    public static final String SETTING_NCIP_SERVER_ADDRESS             = 'ncip_server_address';
-    public static final String SETTING_NCIP_TO_AGENCY                  = 'ncip_to_agency';
-    public static final String SETTING_NCIP_USE_DUE_DATE               = 'ncip_use_due_date';
-    public static final String SETTING_NCIP_DUE_DATE_FORMAT            = 'ncip_due_date_format';
-    public static final String SETTING_NCIP_USE_BARCODE                = 'ncip_use_barcode_for_accept_item';
-    public static final String SETTING_NCIP_USE_TITLE                  = 'ncip_use_title_request_type'
+    public static final String SETTING_NCIP_APP_PROFILE                  = 'ncip_app_profile';
+    public static final String SETTING_NCIP_FROM_AGENCY                  = 'ncip_from_agency';
+    public static final String SETTING_NCIP_FROM_AGENCY_AUTHENTICATION   = 'ncip_from_agency_authentication';
+    public static final String SETTING_NCIP_SERVER_ADDRESS               = 'ncip_server_address';
+    public static final String SETTING_NCIP_TO_AGENCY                    = 'ncip_to_agency';
+    public static final String SETTING_NCIP_USE_DUE_DATE                 = 'ncip_use_due_date';
+    public static final String SETTING_NCIP_DUE_DATE_FORMAT              = 'ncip_due_date_format';
+    public static final String SETTING_NCIP_USE_BARCODE                  = 'ncip_use_barcode_for_accept_item';
+    public static final String SETTING_NCIP_USE_TITLE                    = 'ncip_use_title_request_type'
     public static final String SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION = 'ncip_request_item_pickup_location'
-    public static final String SETTING_NCIP_USE_DEFAULT_PATRON_FEE     = 'ncip_use_default_patron_fee'
-
 
     // Settings for the wmsSettings section
     public static final String SETTING_WMS_API_KEY                = 'wms_api_key';
@@ -99,6 +97,12 @@ public class SettingsData {
     public static final String SETTING_LAST_RESORT_LENDERS             = 'last_resort_lenders';
     public static final String SETTING_MAX_REQUESTS                    = 'max_requests';
     public static final String SETTING_REQUEST_ID_PREFIX               = 'request_id_prefix';
+    public static final String SETTING_LOCAL_SYMBOLS                   = 'local_symbols';
+    public static final String SETTING_DEFAULT_PEER_SYMBOL             = 'default_peer_symbol';
+    public static final String SETTING_FREE_PICKUP_LOCATION            = 'free_text_pickup_location';
+    public static final String SETTING_DIRECTORY_API                   = 'directory_api_url';
+    public static final String SETTING_DEFAULT_LOAN_PERIOD             = 'default_loan_period';
+
 
     // Settings for the sharedIndex section
     public static final String SETTING_SHARED_INDEX_BASE_URL    = 'shared_index_base_url';
@@ -116,6 +120,7 @@ public class SettingsData {
     public static final String SETTING_PATRON_STORE_USER     = 'patron_store_user';
 
     // Settings for the autoResponder section
+
     public static final String SETTING_AUTO_RESPONDER_CANCEL                    = 'auto_responder_cancel';
     public static final String SETTING_AUTO_RESPONDER_LOCAL                     = 'auto_responder_local';
     public static final String SETTING_AUTO_RESPONDER_STATUS                    = 'auto_responder_status';
@@ -123,8 +128,12 @@ public class SettingsData {
     public static final String SETTING_STALE_REQUEST_2_DAYS                     = 'stale_request_2_days';
     public static final String SETTING_STALE_REQUEST_1_ENABLED                  = 'stale_request_1_enabled';
     public static final String SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND          = 'stale_request_3_exclude_weekend';
+    public static final String SETTING_STALE_REQUEST_RUSH_HOURS                 = 'stale_request_rush_hours';
+    public static final String SETTING_STALE_REQUEST_EXPRESS_HOURS              = 'stale_request_express_hours';
     public static final String SETTING_CHECK_DUPLICATE_TIME                     = 'check_duplicate_time';
     public static final String SETTING_AUTO_RESPONDER_REQUESTER_NON_RETURNABLE  = 'auto_responder_requester_non_ret';
+
+    public static final String SETTING_AUTO_REREQUEST                           = 'auto_rerequest';
 
     // Settings for the chat section
     public static final String SETTING_CHAT_AUTO_READ = 'chat_auto_read';
@@ -135,15 +144,18 @@ public class SettingsData {
 
     // Settings for the Other section
     public static final String SETTING_DEFAULT_COPYRIGHT_TYPE = 'default_copyright_type';
+    public static final String SETTING_DEFAULT_SERVICE_LEVEL = 'default_service_level';
+    public static final String SETTING_DISPLAYED_SERVICE_LEVELS = 'displayed_service_levels';
 
     // State/Action configuration settings
     public static final String SETTING_COMBINE_FILL_AND_SHIP                      = 'combine_fill_and_ship';
     public static final String SETTING_COMBINE_RETURNED_BY_PATRON_AND_RETURN_SHIP = 'combine_returned_by_patron_and_return_ship';
 
     // Network configuration settings
-    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS = 'network_maximum_send_attempts';
-    public static final String SETTING_NETWORK_RETRY_PERIOD         = 'network_retry_period';
-    public static final String SETTING_NETWORK_TIMEOUT_PERIOD       = 'network_timeout_period';
+    public static final String SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS    = 'network_maximum_send_attempts';
+    public static final String SETTING_NETWORK_RETRY_PERIOD             = 'network_retry_period';
+    public static final String SETTING_NETWORK_TIMEOUT_PERIOD           = 'network_timeout_period';
+    public static final String SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS = 'iso18626_gateway_address';
 
     // State model configuration settings
     public static final String SETTING_STATE_MODEL_REQUESTER                        = 'state_model_requester';
@@ -155,11 +167,34 @@ public class SettingsData {
     public static final String SETTING_STATE_MODEL_RESPONDER_CDL                    = 'state_model_responder_cdl';
     public static final String SETTING_STATE_MODEL_RESPONDER                        = 'state_model_responder';
 
-    // Feature flag settings
-    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES  = 'feature_flag_automatic_fees';
+    private static final String FEATURE_FLAG = ".feature_flag"
+
+    // Section, key feature flags (Hide separate key for section)
+    public static final String SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP  = SECTION_STATE_ACTION_CONFIG + '.' + SETTING_COMBINE_FILL_AND_SHIP + FEATURE_FLAG;
+
+    // Section feature flags (Hide whole section)
+    public static final String SETTING_FEATURE_FLAG_AUTOMATIC_FEES            = SECTION_AUTOMATIC_FEES + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_CHAT                      = SECTION_CHAT + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_FILE_STORAGE              = SECTION_FILE_STORAGE + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PATRON_STORE              = SECTION_PATRON_STORE + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_ROUTING                   = SECTION_ROUTING + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_SHARED_INDEX              = SECTION_SHARED_INDEX + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_VOYAGER_SETTINGS          = SECTION_VOYAGER + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_WMS_SETTINGS              = SECTION_WMS + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_Z3950                     = SECTION_Z3950 + FEATURE_FLAG;
+
+    // Endpoint feature flags (Return 404 if disabled)
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES          = "hostLMSItemLoanPolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS                   = "hostLMSLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES             = "hostLMSPatronProfiles" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_HOST_LMS_SHELVING_LOCATIONS          = "hostLMSShelvingLocations" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_NOTICE_POLICIES                      = "noticePolicies" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_NOTICE_TEMPLATES                     = "notices" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATION_TEMPLATES     = "pullslipTemplates" + FEATURE_FLAG;
+    public static final String SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATIONS              = "pullslipNotifications" + FEATURE_FLAG;
 
     // Automatic fees settings
-    public static final String SETTING_AUTOMATIC_FEES  = 'automatic_fees';
+    public static final String SETTING_REQUEST_SERVICE_TYPE  = 'request_service_type';
 
     public static final String SETTING_FILE_STORAGE_ENGINE           = 'storageEngine';
     public static final String SETTING_FILE_STORAGE_S3_ENDPOINT      = 'S3Endpoint';
@@ -210,6 +245,20 @@ public class SettingsData {
     }
 
     /**
+     * Deletes the AppSetting entity with the specified key.
+     *
+     * @param key The key of the AppSetting to be deleted.
+     * @return The AppSetting that was deleted, or null if no such AppSetting exists.
+     */
+    AppSetting deleteByKey(String key) {
+        AppSetting result = AppSetting.findByKey(key)
+        if (result) {
+            result.delete(flush: true)
+        }
+        return result
+    }
+
+    /**
      * Loads the settings into the database
      */
     public void load() {
@@ -217,6 +266,15 @@ public class SettingsData {
             log.info('Adding settings to the database');
             // We are not a service, so we need to look it up
             ReferenceDataService referenceDataService = ReferenceDataService.getInstance();
+
+            // Remove any app setting by key
+            deleteByKey('feature_flag_automatic_fees')
+            deleteByKey('pullslipConfiguration.feature_flag')
+            deleteByKey('template.feature_flag')
+            deleteByKey('shelvingLocations.feature_flag')
+            deleteByKey('ncip_use_default_patron_fee')
+            deleteByKey('automaticFees.feature_flag')
+            deleteByKey('automatic_fees')
 
             ensureAppSetting(SETTING_Z3950_SERVER_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_Z3950_PROXY_ADDRESS, SECTION_Z3950, SETTING_TYPE_STRING, null, 'http://reshare-mp.folio-dev.indexdata.com:9000');
@@ -231,7 +289,6 @@ public class SettingsData {
             ensureAppSetting(SETTING_NCIP_USE_BARCODE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_BARCODE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_BARCODE, RefdataValueData.NCIP_BARCODE_NO).value);
             ensureAppSetting(SETTING_NCIP_REQUEST_ITEM_PICKUP_LOCATION, SECTION_LOCAL_NCIP, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_NCIP_USE_TITLE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_TITLE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_TITLE, RefdataValueData.NCIP_BARCODE_NO).value)
-            ensureAppSetting(SETTING_NCIP_USE_DEFAULT_PATRON_FEE, SECTION_LOCAL_NCIP, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, RefdataValueData.NCIP_BARCODE_NO).value)
 
             ensureAppSetting(SETTING_WMS_API_KEY, SECTION_WMS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_WMS_API_SECRET, SECTION_WMS, SETTING_TYPE_STRING);
@@ -263,6 +320,11 @@ public class SettingsData {
             ensureAppSetting(SETTING_LAST_RESORT_LENDERS, SECTION_REQUESTS, SETTING_TYPE_STRING, null, '');
             ensureAppSetting(SETTING_MAX_REQUESTS, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_DEFAULT_INSTITUTIONAL_PATRON_ID, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_LOCAL_SYMBOLS, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_DEFAULT_PEER_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_FREE_PICKUP_LOCATION, SECTION_REQUESTS, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
+            ensureAppSetting(SETTING_DIRECTORY_API, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_DEFAULT_LOAN_PERIOD, SECTION_REQUESTS, SETTING_TYPE_STRING);
 
             ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO).value);
             ensureAppSetting(SETTING_SHARED_INDEX_BASE_URL, SECTION_SHARED_INDEX, SETTING_TYPE_STRING, null, 'http://shared-index.reshare-dev.indexdata.com:9130');
@@ -294,7 +356,12 @@ public class SettingsData {
             ensureAppSetting(SETTING_STALE_REQUEST_2_DAYS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '3');
             ensureAppSetting(SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_YES).value);
 
+            ensureAppSetting(SETTING_STALE_REQUEST_RUSH_HOURS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null);
+            ensureAppSetting(SETTING_STALE_REQUEST_EXPRESS_HOURS, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null);
+
             ensureAppSetting(SETTING_CHECK_DUPLICATE_TIME, SECTION_AUTO_RESPONDER, SETTING_TYPE_STRING, null, '0');
+
+            ensureAppSetting(SETTING_AUTO_REREQUEST, SECTION_AUTO_RESPONDER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
             ensureAppSetting(SETTING_CHAT_AUTO_READ, SECTION_CHAT, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_CHAT_AUTO_READ, 'on');
 
@@ -307,9 +374,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_NETWORK_MAXIMUM_SEND_ATTEMPTS, SECTION_NETWORK, SETTING_TYPE_STRING, null, '3');
             ensureAppSetting(SETTING_NETWORK_RETRY_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '10');
             ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
-
-            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
-            ensureAppSetting(SETTING_NETWORK_TIMEOUT_PERIOD, SECTION_NETWORK, SETTING_TYPE_STRING, null, '30');
+            ensureAppSetting(SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS, SECTION_NETWORK, SETTING_TYPE_STRING, null, null)
 
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
@@ -332,20 +397,43 @@ public class SettingsData {
             ensureAppSetting(SETTING_LOGGING_Z3950_RESPONDER_DAYS, SECTION_LOGGING, SETTING_TYPE_STRING, null, '30');
 
             ensureAppSetting(SETTING_DEFAULT_COPYRIGHT_TYPE, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_COPYRIGHT_TYPE);
+            ensureAppSetting(SETTING_DEFAULT_SERVICE_LEVEL, SECTION_OTHER, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+            ensureAppSetting(SETTING_DISPLAYED_SERVICE_LEVELS, SECTION_OTHER, SETTING_TYPE_STRING);
 
+            // Requester state model values
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_REQUESTER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_REQUESTER_DIGITAL_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_DIGITAL_RETURNABLE_REQUESTER, null, true);
 
+            // Responder state model values
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_NON_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_NR_RESPONDER, null, true);
             ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_RETURNABLE, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_RESPONDER, null, true);
-            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, StateModel.MODEL_CDL_RESPONDER, null, null, true);
+            ensureAppSetting(SETTING_STATE_MODEL_RESPONDER_CDL, SECTION_STATE_MODEL, SETTING_TYPE_STRING, null, StateModel.MODEL_CDL_RESPONDER, null, true);
 
-            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
 
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY).value)
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN).value)
-            ensureAppSetting(SETTING_AUTOMATIC_FEES, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, ProtocolReferenceDataValue.lookup(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN).value)
+            ensureAppSetting(SETTING_REQUEST_SERVICE_TYPE, SECTION_AUTOMATIC_FEES, SETTING_TYPE_REF_DATA,  ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, null, null)
+
+            // Feature flag values for Settings sections
+            ensureAppSetting(SETTING_FEATURE_FLAG_AUTOMATIC_FEES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, "true", true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_CHAT, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_FILE_STORAGE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PATRON_STORE, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_ROUTING, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_SHARED_INDEX, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_VOYAGER_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_WMS_SETTINGS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_Z3950, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATION_TEMPLATES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_ITEM_LOAN_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_PATRON_PROFILES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_HOST_LMS_SHELVING_LOCATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_NOTICE_POLICIES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_NOTICE_TEMPLATES, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+            ensureAppSetting(SETTING_FEATURE_FLAG_PULL_SLIP_NOTIFICATIONS, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING, RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
+
+            // Feature flag values for Settings sections keys
+            ensureAppSetting(SETTING_FEATURE_FLAG_STATE_ACTION_CONFIGURATION_COMBINE_FILL_AND_SHIP, SECTION_FEATURE_FLAGS, SETTING_TYPE_STRING,  RefdataValueData.VOCABULARY_FEATURE_FLAG, null, null, true);
 
         } catch (Exception e) {
             log.error('Exception thrown while loading settings', e);

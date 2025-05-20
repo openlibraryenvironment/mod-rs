@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.json.JsonSlurper
 import org.olf.rs.statemodel.StateModel;
 
 import java.text.SimpleDateFormat;
@@ -133,15 +134,24 @@ public class ReshareActionService {
             if (result.patronDetails.userid != null) {
 
                 pr.resolvedPatron = lookupOrCreatePatronProxy(result.patronDetails);
-                if (pr.patronSurname == null) {
+                if (pr.patronSurname == null && (result.patronDetails.surname?.length() > 0)) {
                     pr.patronSurname = result.patronDetails.surname;
                 }
-                if (pr.patronGivenName == null) {
-                    pr.patronGivenName = result.patronDetails.givenName;
+                if (pr.patronGivenName == null && (result.patronDetails.givenName?.length() > 0)) {
+                        pr.patronGivenName = result.patronDetails.givenName;
                 }
-                if (pr.patronEmail == null) {
+                if (pr.patronEmail == null && (result.patronDetails.email?.length() > 0)) {
                     pr.patronEmail = result.patronDetails.email;
                 }
+            }
+
+            if (result.patronDetails.patronUuid) {
+                Map customIdentifiersMap = [:]
+                if (pr.customIdentifiers) {
+                    customIdentifiersMap = new JsonSlurper().parseText(pr.customIdentifiers)
+                }
+                customIdentifiersMap.put("patronUuid", result.patronDetails.patronUuid)
+                pr.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
             }
 
             // Is the patron is valid, add an audit entry
@@ -230,22 +240,49 @@ public class ReshareActionService {
         EventResultDetails eventResultDetails,
         Map retryEventData = null
     ) {
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
         boolean result = false;
-        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode);
+        boolean isSlnpModel = StateModel.MODEL_SLNP_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode) ||
+                StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.equalsIgnoreCase(pr.stateModel.shortcode)
+        boolean routingDisabled = (requestRouterSetting == 'disabled');
+        boolean disregardRota = (isSlnpModel || routingDisabled);
 
         Long rotaPosition = pr.rotaPosition;
         // We check that it is sensible to send a message, ie that we have a non-empty rota and are pointing at an entry in that.
-        if (!isSlnpModel && pr.rota.isEmpty()) {
+        if (!disregardRota && pr.rota.isEmpty()) {
             log.error('sendRequestingAgencyMessage has been given an empty rota');
-        } else if (!isSlnpModel && rotaPosition == null) {
+        } else if (!disregardRota && rotaPosition == null) {
             log.error('sendRequestingAgencyMessage could not find current rota postition');
-        } else if (!isSlnpModel && pr.rota.empty()) {
+        } else if (!disregardRota && pr.rota.empty()) {
             log.error('sendRequestingAgencyMessage has been handed an empty rota');
         } else {
 
             Map eventData = retryEventData;
-            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.supplyingInstitutionSymbol] :
+            Map symbols = null;
+            /*
+            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol] :
                     requestingAgencyMessageSymbol(pr);
+
+             */
+
+            if (isSlnpModel) {
+                symbols = [
+                        senderSymbol: pr.requestingInstitutionSymbol,
+                        receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol
+                ];
+            } else if (routingDisabled) {
+                String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+                String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+                if (!defaultPeerSymbolString) {
+                    log.error("No defaultPeerSymbol defined");
+                }
+                symbols = [
+                        senderSymbol: defaultRequestSymbolString,
+                        receivingSymbol: defaultPeerSymbolString
+                ];
+            } else {
+                symbols = requestingAgencyMessageSymbol(pr);
+            }
 
             // If we have not been supplied with the event data, we need to generate it
             if (eventData == null) {
@@ -454,11 +491,32 @@ public class ReshareActionService {
     ) {
 
         log.debug('sendResponse(....)');
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+        boolean routingDisabled = (requestRouterSetting == 'disabled');
         boolean result = false;
 
         // pr.supplyingInstitutionSymbol
         // pr.peerRequestIdentifier
-        if ((pr.resolvedSupplier != null) &&
+        if (routingDisabled) {
+
+            String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+            String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+            Map supplyingMessageRequest;
+
+            if (retryEventData != null) {
+                supplyingMessageRequest = retryEventData;
+            } else {
+                supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(
+                        pr, reasonForMessage, status, messageParams, appendSequence);
+            }
+            eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+            Map symbols = [
+                    senderSymbol: defaultRequestSymbolString,
+                    receivingSymbol: defaultPeerSymbolString
+            ];
+            result = sendProtocolMessage(pr, symbols.senderSymbol, symbols.receivingSymbol, supplyingMessageRequest, false);
+
+        } else if ((pr.resolvedSupplier != null) &&
             (pr.resolvedRequester != null)) {
             Map supplyingMessageRequest = retryEventData;
 

@@ -1,6 +1,8 @@
 package org.olf.rs
 
 import groovy.util.logging.Slf4j
+import org.olf.rs.iso18626.TypeStatus
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.ActionEventResultQualifier;
 
 import java.util.regex.Matcher;
@@ -17,6 +19,7 @@ class ProtocolMessageBuildingService {
     private static final String END_OF_STRING_REGEX = '$'
     private static final String SEQUENCE_REGEX      = ALL_REGEX + NoteSpecials.SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
     private static final String LAST_SEQUENCE_REGEX = ALL_REGEX + NoteSpecials.LAST_SEQUENCE_PREFIX + NUMBER_REGEX + NoteSpecials.SPECIAL_WRAPPER + END_OF_STRING_REGEX;
+    private static final String VOLUME_STATUS_ILS_REQUEST_CANCELLED = 'ils_request_cancelled'
 
   /*
    * This method is purely for building out the structure of protocol messages
@@ -28,6 +31,7 @@ class ProtocolMessageBuildingService {
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ReshareActionService reshareActionService
+    SettingsService settingsService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -43,9 +47,26 @@ class ProtocolMessageBuildingService {
 
 
   public Map buildRequestMessage(PatronRequest req, boolean appendSequence = true) {
-    Map message = buildSkeletonMessage('REQUEST')
+      Map message = buildSkeletonMessage('REQUEST')
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
-    message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
+      if (req.resolvedRequester != null) {
+          message.header = buildHeader(req, 'REQUEST', req.resolvedRequester, null)
+      } else {
+          message.header = buildHeader(req, 'REQUEST', defaultRequestSymbolString, null);
+      }
+
+    //List bibliographicItemIdList = [ [ scheme:'oclc', identifierCode:'oclc', identifierValue: req.oclcNumber ] ];
+      List bibliographicItemIdList = [ ];
+      if (req.precededBy) {
+          bibliographicItemIdList.add([scheme:'reshare', bibliographicItemIdentifierCode:'preceded-by', bibliographicItemIdentifier: req.precededBy.hrid])
+      }
+    /*
+    if (req.succeededBy) {
+        bibliographicItemIdList.add([scheme:'reshare', identifierCode:'succeeded-by', identifierValue: req.succeededBy.hrid])
+    }
+
+     */
 
     message.bibliographicInfo = [
       title: req.title,
@@ -76,12 +97,14 @@ class ProtocolMessageBuildingService {
               [ bibliographicRecordIdentifierCode:'patronReference', bibliographicRecordIdentifier: req.patronReference ]
       ],  // Shared index bib record ID (Instance identifier)
       bibliographicItemId: [[ bibliographicItemIdentifierCode:'issn', bibliographicItemIdentifier: req.issn ],
-                            [ bibliographicItemIdentifierCode:'isbn', bibliographicItemIdentifier: req.isbn ]],
+                            [ bibliographicItemIdentifierCode:'isbn', bibliographicItemIdentifier: req.isbn ]] + bibliographicItemIdList,
       titleOfComponent: req.titleOfComponent,
       authorOfComponent: req.authorOfComponent,
       sponsor: req.sponsor,
       informationSource: req.informationSource,
-      supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      //supplierUniqueRecordId: null,   // Set later on from rota where we store the supplier id
+      supplierUniqueRecordId: req.isRequester ? req.supplierUniqueRecordId : null
+
     ]
     message.publicationInfo = [
       publisher: req.publisher,
@@ -111,8 +134,8 @@ class ProtocolMessageBuildingService {
 
       serviceType: req.serviceType?.value,
 
-      // ToDo wire in some proper information here instead of this hardcoded stuff
-      serviceLevel: 'Loan',
+      serviceLevel: req.serviceLevel?.value,
+
       anyEdition: 'Y',
 
       // Note that the internal names sometimes differ from the protocol names--pay attention with these fields
@@ -180,16 +203,24 @@ class ProtocolMessageBuildingService {
       */
      ]
 
-     /*
-      * message.billingInfo = [
+     Map maximumCosts = null;
+      if ( req.maximumCostsCurrencyCode?.value && req.maximumCostsMonetaryValue) {
+          maximumCosts = [:];
+          maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
+          maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
+      }
+     message.billingInfo = [
+      /*
       * Permitted fields:
       * PaymentMethod
       * MaximumCosts
       * BillingMethod
       * BillingName
       * Address
+      */
+        maximumCosts : maximumCosts
+
       ]
-     */
 
     return message;
   }
@@ -202,7 +233,17 @@ class ProtocolMessageBuildingService {
 
     Map message = buildSkeletonMessage('SUPPLYING_AGENCY_MESSAGE')
 
-    message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
+      String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+
+      boolean routingDisabled = (requestRouterSetting == 'disabled');
+
+      if (routingDisabled) {
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+      } else {
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
+      }
     message.messageInfo = [
       reasonForMessage:reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
@@ -254,17 +295,23 @@ class ProtocolMessageBuildingService {
       }
     }
 
-    switch (pr.volumes.size()) {
-      case 0:
-        break;
-      case 1:
-        // We have a single volume, send as a single itemId string
-        message.deliveryInfo['itemId'] = pr.volumes[0].itemId
-        break;
-      default:
-        // We have many volumes, send as an array of multiVol itemIds
-        message.deliveryInfo['itemId'] = pr.volumes.collect { vol -> "multivol:${vol.name},${vol.itemId}" }
-        break;
+    if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
+            !TypeStatus.UNFILLED.value().equalsIgnoreCase(status)) {
+        Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
+            rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
+        }
+        switch (filteredVolumes.size()) {
+            case 0:
+                break;
+            case 1:
+                // We have a single volume, send as a single itemId string
+                message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
+                break;
+            default:
+                // We have many volumes, send as an array of multiVol itemIds
+                message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
+                break;
+        }
     }
 
     if( pr?.dueDateRS ) {
@@ -276,14 +323,23 @@ class ProtocolMessageBuildingService {
 
 
   public Map buildRequestingAgencyMessage(PatronRequest pr, String message_sender, String peer, String action, String note, boolean appendSequence = true) {
-    Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
+      Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
-    Symbol message_sender_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(message_sender)
-    Symbol peer_symbol = reshareApplicationEventHandlerService.resolveCombinedSymbol(peer)
+      String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
-    message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
-    message.action = action
-    message.note = buildNote(pr, note, appendSequence)
+      Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
+      Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
+
+      if (requestRouterSetting != 'disabled') {
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
+      } else {
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+      }
+
+      message.action = action
+      message.note = buildNote(pr, note, appendSequence)
 
     // Whenever a note is attached to the message, create a notification with action.
     if (note != null) {
@@ -394,6 +450,51 @@ class ProtocolMessageBuildingService {
       return(constructedNote);
   }
 
+
+    private Map buildHeader(PatronRequest pr, String messageType, String message_sender_symbol, String peer_symbol) {
+        Map supplyingAgencyId
+        Map requestingAgencyId
+        String requestingAgencyRequestId
+        String supplyingAgencyRequestId
+
+        log.debug("ProtocolMessageBuildingService::buildHeader(${pr}, ${messageType}, ${message_sender_symbol}, ${peer_symbol})");
+
+
+        if (messageType == 'REQUEST' || messageType == 'REQUESTING_AGENCY_MESSAGE') {
+
+            // Set the requestingAgencyId and the requestingAgencyRequestId
+            requestingAgencyId = buildHeaderRequestingAgencyId(message_sender_symbol)
+            requestingAgencyRequestId = protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode);
+
+            if (messageType == 'REQUEST') {
+                // If this message is a request then the supplying Agency details get filled out later and the supplying request id is null
+                supplyingAgencyRequestId = null
+            } else {
+                supplyingAgencyId = buildHeaderSupplyingAgencyId(peer_symbol)
+                supplyingAgencyRequestId = pr.peerRequestIdentifier
+            }
+
+        } else {
+            // Set the AgencyIds
+            supplyingAgencyId = buildHeaderSupplyingAgencyId(message_sender_symbol)
+            requestingAgencyId = buildHeaderRequestingAgencyId(peer_symbol)
+
+            // Set the RequestIds
+            requestingAgencyRequestId = pr.peerRequestIdentifier ?: protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode)
+            supplyingAgencyRequestId = pr.id
+        }
+
+        Map header = [
+                supplyingAgencyId: supplyingAgencyId,
+                requestingAgencyId: requestingAgencyId,
+
+                requestingAgencyRequestId:requestingAgencyRequestId,
+                supplyingAgencyRequestId:supplyingAgencyRequestId
+        ]
+
+        return header;
+    }
+
   private Map buildHeader(PatronRequest pr, String messageType, Symbol message_sender_symbol, Symbol peer_symbol) {
     Map supplyingAgencyId
     Map requestingAgencyId
@@ -446,6 +547,15 @@ class ProtocolMessageBuildingService {
     return supplyingAgencyId;
   }
 
+    private Map buildHeaderSupplyingAgencyId(String supplier) {
+        def (auth,sym) = supplier.split(":",2);
+        Map supplyingAgencyId = [
+                agencyIdType: auth,
+                agencyIdValue: sym
+        ]
+        return supplyingAgencyId;
+    }
+
   private Map buildHeaderRequestingAgencyId(Symbol requester) {
     Map requestingAgencyId = [
       agencyIdType: requester?.authority?.symbol,
@@ -453,5 +563,14 @@ class ProtocolMessageBuildingService {
     ]
     return requestingAgencyId;
   }
+
+    private Map buildHeaderRequestingAgencyId(String requester) {
+        def (auth,sym) = requester.split(":",2);
+        Map requestingAgencyId = [
+                agencyIdType: auth,
+                agencyIdValue: sym
+        ]
+        return requestingAgencyId;
+    }
 
 }

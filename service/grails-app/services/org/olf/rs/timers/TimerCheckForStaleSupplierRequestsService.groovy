@@ -1,5 +1,6 @@
-package org.olf.rs.timers;
+package org.olf.rs.timers
 
+import grails.gorm.DetachedCriteria;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import org.olf.rs.PatronRequest;
@@ -31,6 +32,12 @@ where pr.dateCreated < :staleDate and
                          s.canTriggerStaleRequest = true)
 """;
 
+	private static Map checkMap = [
+			"default" : [ setting: SettingsData.SETTING_STALE_REQUEST_2_DAYS, hoursMultiplier: 24] ,
+			"rush" : [ setting: SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS,  hoursMultiplier: 1],
+			"express" : [ setting: SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS, hoursMultiplier: 1],
+	];
+
 	/** The duration that represents 1 day, used for when when we are excluding the weekend from the idle period */
 	private static final Duration DURATION_ONE_DAY = new Duration(-1, 1, 0);
 
@@ -45,42 +52,61 @@ where pr.dateCreated < :staleDate and
 
 	@Override
 	public void performTask(String tenant, String config) {
+		def checkLevels = checkMap.keySet();
 		if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES)) {
 			// We look to see if a request has been sitting at a supplier for more than X days without the pull slip being printed
 
 			// The date that we request must have been created before, for us to take notice off, I believe dates are stored as UTC
-			int numberOfIdleDays = numberOfIdleDays();
-			DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
+			//int numberOfIdleDays = numberOfIdleDays();
+			checkLevels.each(level -> {
+				Map checkEntry = checkMap[level];
+				int numberOfIdleHours = getNumberOfIdleHours(checkEntry.setting, checkEntry.hoursMultiplier);
+				if (!numberOfIdleHours) {
+					return;
+				}
+				int numberOfIdleDays = Math.floor(numberOfIdleHours / 24);
 
-			// if we are ignoring weekends then the calculation for the idle start date will be slightly different
-			if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES) && (numberOfIdleDays > 0)) {
-				// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
-				for (int i = 0; i < numberOfIdleDays; i++) {
-					idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
-					int dayOfWeek = idleBeyondDate.getDayOfWeek();
-					if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
-						// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
-						i--;
+				//initialize initial date before we remove durations from it
+				DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
+
+				// if we are ignoring weekends then the calculation for the idle start date will be slightly different
+				if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES) && (numberOfIdleDays > 0)) {
+					// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
+					for (int i = 0; i < numberOfIdleDays; i++) {
+						idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
+						int dayOfWeek = idleBeyondDate.getDayOfWeek();
+						if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
+							// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
+							i--;
+						}
+					}
+				} else {
+					// We do not ignore weekends
+					Duration duration = new Duration(-1, 0, numberOfIdleHours);
+					idleBeyondDate = idleBeyondDate.addDuration(duration);
+				}
+
+
+
+				// Now find all the stale requests
+				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : new Date(idleBeyondDate.getTimestamp()) ]);
+
+				if ((requests != null) && (requests.size() > 0)) {
+					requests.each { request ->
+
+						if ( (level == "default" && !checkLevels.contains(request.serviceLevel?.value)) ||
+							level == request.serviceLevel?.value) {
+							// Perform a supplier cannot supply action
+							try {
+								actionService.performAction(request.stateModel.staleAction.code, request, ['note': 'Request has been idle for more than ' + numberOfIdleHours + ' hours.']);
+							} catch (Exception e) {
+								log.error("Exception thrown while performing stale action " + request.stateModel.staleAction.code + " on request " + request.hrid + " ( " + request.id.toString() + " )", e);
+							}
+						}
 					}
 				}
-			} else {
-				// We do not ignore weekends
-				Duration duration = new Duration(-1, numberOfIdleDays, 0);
-				idleBeyondDate = idleBeyondDate.addDuration(duration);
-			}
+			});
 
-			// Now find all the stale requests
-			List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : new Date(idleBeyondDate.getTimestamp()) ]);
-			if ((requests != null) && (requests.size() > 0)) {
-				requests.each { request ->
-					// Perform a supplier cannot supply action
-                    try {
-                        actionService.performAction(request.stateModel.staleAction.code, request, ['note' : 'Request has been idle for more than ' + numberOfIdleDays + ' days.' ]);
-                    } catch (Exception e) {
-                        log.error("Exception thrown while performing stale action " + request.stateModel.staleAction.code + " on request " + request.hrid + " ( " + request.id.toString() + " )", e);
-                    }
-				}
-			}
 		}
 	}
 
@@ -88,8 +114,15 @@ where pr.dateCreated < :staleDate and
 	 * Obtains the number of idle days
 	 * @return the number of idle days
 	 */
+	/*
 	private int numberOfIdleDays() {
 		// Get hold of the number of idle days
 		return(settingsService.getSettingAsInt(SettingsData.SETTING_STALE_REQUEST_2_DAYS, DEFAULT_IDLE_DAYS, false));
+	}
+	*/
+
+	private int getNumberOfIdleHours(String setting, int hoursMultiplier) {
+		int number = settingsService.getSettingAsInt(setting, DEFAULT_IDLE_DAYS, false);
+		return number * hoursMultiplier;
 	}
 }

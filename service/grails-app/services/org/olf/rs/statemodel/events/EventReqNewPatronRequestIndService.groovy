@@ -6,6 +6,7 @@ import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 /**
  * This event service takes a new requester patron request and validates it and tries to determine the rota
@@ -18,6 +19,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
     ReshareActionService reshareActionService;
     SharedIndexService sharedIndexService;
     NewRequestService newRequestService;
+    SettingsService settingsService;
 
     @Override
     String name() {
@@ -41,6 +43,15 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             return(eventResultDetails);
         }
 
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+
+        //Shim so that we can populate this value via the systemInstanceIdentifier
+        if (requestRouterSetting == 'disabled') {
+            if (!request.supplierUniqueRecordId && request.systemInstanceIdentifier != null) {
+                request.supplierUniqueRecordId = request.systemInstanceIdentifier;
+            }
+        }
+
         // Generate a human readable ID to use
         if (!request.hrid) {
             request.hrid = newRequestService.generateHrid();
@@ -56,9 +67,13 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             pickupLocationService.check(request)
         }
 
-        if (request.requestingInstitutionSymbol != null) {
+
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+        String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
+
+        if (request.requestingInstitutionSymbol != null || defaultRequestSymbolString != null) {
             // We need to validate the requesting location - and check that we can act as requester for that symbol
-            Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
+            Symbol s = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol);
             if (s != null) {
                 // We do this separately so that an invalid patron does not stop information being appended to the request
                 request.resolvedRequester = s;
@@ -68,7 +83,7 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             if (lookupPatron.callSuccess) {
                 boolean patronValid = lookupPatron.patronValid;
 
-                if (s == null) {
+                if (s == null && defaultRequestSymbolString == null) {
                     // An unknown requesting institution symbol is a bigger deal than an invalid patron
                     request.needsAttention = true;
                     log.warn("Unknown requesting institution symbol : ${request.requestingInstitutionSymbol}");
@@ -110,6 +125,11 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
             eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_NO_INSTITUTION_SYMBOL;
             request.needsAttention = true;
             eventResultDetails.auditMessage = 'No Requesting Institution Symbol';
+        }
+
+        if (requestRouterSetting == 'disabled') {
+            request.requestingInstitutionSymbol = defaultRequestSymbolString;
+            request.supplyingInstitutionSymbol = defaultPeerSymbolString;
         }
 
         // TODO: reconcile these two identifiers as both are in use

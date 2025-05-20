@@ -253,6 +253,14 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   /** JSON object containing custom identifiers */
   String customIdentifiers
 
+  BigDecimal maximumCostsMonetaryValue;
+
+  @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
+  RefdataValue maximumCostsCurrencyCode;
+
+  @CategoryId(RefdataValueData.VOCABULARY_SERVICE_LEVELS)
+  RefdataValue serviceLevel;
+
   static transients = ['systemUpdate', 'stateHasChanged', 'descriptiveMetadata', 'manuallyClosed', 'validActions'];
 
   // The audit of what has happened to this request and tags that are associated with the request, as well as the rota and notifications */
@@ -400,6 +408,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     externalHoldRequestId (nullable: true)
     customIdentifiers (nullable: true)
+
+    maximumCostsMonetaryValue(nullable: true)
+    maximumCostsCurrencyCode(nullable: true)
+
+    serviceLevel (nullable: true)
   }
 
   static mapping = {
@@ -531,6 +544,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     batches column : 'bpr_patron_request_id', joinTable : 'batch_patron_request'
 
     customIdentifiers column : 'pr_custom_identifiers'
+
+    maximumCostsMonetaryValue column : 'pr_maximum_costs_value'
+    maximumCostsCurrencyCode column : 'pr_maximum_costs_code_fk'
+
+    serviceLevel column: 'pr_service_level_fk'
   }
 
   /**
@@ -630,5 +648,15 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
       log.warn("${fieldName} ${field} more than ${truncateLength} characters. Truncated to ${truncatedField}")
       this[fieldName] = truncatedField;
     }
+  }
+
+  DirectoryEntry getResolvedRequesterDirectoryEntry() {
+    resolvedRequester?.owner?.name
+    return resolvedRequester?.owner
+  }
+
+  DirectoryEntry getResolvedSupplierDirectoryEntry() {
+    resolvedSupplier?.owner?.name
+    return resolvedSupplier?.owner
   }
 }

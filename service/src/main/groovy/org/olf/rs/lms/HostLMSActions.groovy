@@ -29,7 +29,8 @@ public interface HostLMSActions {
       String requestId,
       String itemBarcode,
       String borrowerBarcode,
-      INcipLogDetails ncipLogDetails
+      INcipLogDetails ncipLogDetails,
+      String externalReferenceValue
   );
 
   /**
@@ -71,6 +72,7 @@ public interface HostLMSActions {
           String itemId,
           String borrowerBarcode,
           String pickupLocation,
+          String itemLocation,
           INcipLogDetails ncipLogDetails
   );
 
@@ -82,5 +84,7 @@ public interface HostLMSActions {
    */
   public boolean isManualCancelRequestItem();
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails)
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails)
+
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails)
 }

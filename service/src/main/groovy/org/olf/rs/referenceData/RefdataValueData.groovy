@@ -36,6 +36,7 @@ public class RefdataValueData {
     public static final String VOCABULARY_BORROWER_CHECK_METHOD                  = 'BorrowerCheckMethod';
     public static final String VOCABULARY_CANCELLATION_REASONS                   = 'cancellationReasons';
     public static final String VOCABULARY_CANNOT_SUPPLY_REASONS                  = 'cannotSupplyReasons';
+    public static final String VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS    = 'slnpCancelOrAbortSupplyReasons';
     public static final String VOCABULARY_CHAT_AUTO_READ                         = 'ChatAutoRead';
     public static final String VOCABULARY_CHECK_IN_METHOD                        = 'CheckInMethod';
     public static final String VOCABULARY_CHECK_OUT_METHOD                       = 'CheckOutMethod';
@@ -60,6 +61,8 @@ public class RefdataValueData {
     public static final String VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME              = 'customIdentifiersScheme';
     public static final String VOCABULARY_AUTO_RESPONDER_REQUESTER_AUTO_SUPPLY   = 'AutoSupply';
     public static final String VOCABULARY_FEATURE_FLAG                           = 'featureFlag';
+    public static final String VOCABULARY_CURRENCY_CODES                         = 'CurrencyCodes';
+    public static final String VOCABULARY_SERVICE_LEVELS                         = 'ServiceLevels';
 
     // Action Event Result Save / Restore
     public static final String ACTION_EVENT_RESULT_SAVE_RESTORE_RESTORE = 'Restore';
@@ -126,6 +129,7 @@ public class RefdataValueData {
 
     // Notice triggers
     public static final String NOTICE_TRIGGER_END_OF_ROTA                    = 'End of rota';
+    public static final String NOTICE_TRIGGER_END_OF_ROTA_REVIEWED           = 'End of rota reviewed';
     public static final String NOTICE_TRIGGER_LOANED_DIGITALLY               = 'Loaned digitally';
     public static final String NOTICE_TRIGGER_OVER_LIMIT                     = 'Over limit';
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_LOCATION          = 'New Host LMS Location';
@@ -142,11 +146,14 @@ public class RefdataValueData {
     // Request routing adapter
     public static final String REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX = 'FOLIOSharedIndex';
     public static final String REQUEST_ROUTING_ADAPTER_STATIC             = 'Static';
+    public static final String REQUEST_ROUTING_ADAPTER_DISABLED           = 'Disabled';
 
     // Shared index adapter
     public static final String SHARED_INDEX_ADAPTER_FOLIO = 'FOLIO';
     public static final String SHARED_INDEX_ADAPTER_JISC_LHD = 'jiscDiscover';
     public static final String SHARED_INDEX_ADAPTER_OAIPMH = 'OAIPMH';
+    public static final String SHARED_INDEX_ADAPTER_MOCK = 'Mock';
+    public static final String SHARED_INDEX_ADAPTER_ANBD = "ANBD";
 
 
     public static void loadAll() {
@@ -207,7 +214,6 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_NO)
             RefdataValue.lookupOrCreate(VOCABULARY_NCIP_USE_DEFAULT_PATRON_FEE, NCIP_BARCODE_YES)
 
-
             // External LMS call methods -- none represents no integration and we will spoof a passing response instead
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'None');
             RefdataValue.lookupOrCreate(VOCABULARY_BORROWER_CHECK_METHOD, 'NCIP');
@@ -247,6 +253,8 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_JISC_LHD);
             RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, 'OAI-PMH', SHARED_INDEX_ADAPTER_OAIPMH);
+            RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_MOCK);
+            RefdataValue.lookupOrCreate(VOCABULARY_SHARED_INDEX_ADAPTER, SHARED_INDEX_ADAPTER_ANBD);
 
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_FOLIO);
             RefdataValue.lookupOrCreate(VOCABULARY_PATRON_STORE_ADAPTER, PATRON_STORE_ADAPTER_MANUAL);
@@ -280,6 +288,9 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Missing', 'missing');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'Without abort', 'false');
 
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'Requested item is locally available', 'available_locally');
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'User account is invalid', 'invalid_user');
@@ -320,7 +331,7 @@ public class RefdataValueData {
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LOAN, false, Directory.CATEGORY_LOAN_POLICY, 'ILL Loan Policy');
             ensureRefdataProperty(Directory.KEY_ILL_POLICY_LAST_RESORT, false, Directory.CATEGORY_YES_NO, 'Consider Institution As Last Resort');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
+            RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Cat S183 – Commonwealth (Australia)', 'AU-CopyRCatS183ComW');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S183 – State (Australia)', 'AU-CopyRCatS183State');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S49  (Australia)', 'AU-CopyrightActS49');
             RefdataValue.lookupOrCreate(VOCABULARY_COPYRIGHT_TYPE, 'Copyright Act S50[1] (Australia)', 'AU-CopyrightActS50-1');
@@ -338,10 +349,31 @@ public class RefdataValueData {
 
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_FOLIO_SHARED_INDEX);
             RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_STATIC);
+            RefdataValue.lookupOrCreate(VOCABULARY_REQUEST_ROUTING_ADAPTER, REQUEST_ROUTING_ADAPTER_DISABLED);
+
+
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Australian Dollars','AUD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Canadian Dollars', 'CAD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Euros', 'EUR');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'United States Dollars', 'USD');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Swedish Krona', 'SEK');
+            RefdataValue.lookupOrCreate(VOCABULARY_CURRENCY_CODES, 'Danish Kroner','DKK');
+
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Express', 'Express');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Normal', 'Normal');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'SecondaryMail', 'SecondaryMail');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Standard', 'Standard');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Urgent', 'Urgent');
+            RefdataValue.lookupOrCreate(VOCABULARY_SERVICE_LEVELS, 'Rush', 'Rush');
+
 
             // ISO18626 Custom options for - Custom identifiers schemes
             RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
 
+            // ISO18626 Custom options for - Custom identifiers schemes
+            RefdataValue.lookupOrCreate(VOCABULARY_CUSTOM_IDENTIFIERS_SCHEME, CustomIdentifiersScheme.ZFL);
+
+            ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_NO)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_LOAN)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY)
             ProtocolReferenceDataValue.lookupOrCreate(ProtocolReferenceDataValue.CATEGORY_SERVICE_TYPE, ProtocolReferenceDataValue.SERVICE_TYPE_COPY_OR_LOAN)

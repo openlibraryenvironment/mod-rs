@@ -1,5 +1,8 @@
 package org.olf.rs
 
+import com.k_int.web.toolkit.tags.Tag
+import org.olf.okapi.modules.directory.Symbol
+
 import static groovy.transform.TypeCheckingMode.SKIP;
 
 import java.time.Duration;
@@ -38,7 +41,7 @@ import groovy.transform.CompileStatic;
 @CompileStatic
 public class EventConsumerService implements EventPublisher, DataBinder {
 
-  private static final String TOPIC_PATRON_REQUESTS_SUFFIX = '_mod_rs_PatronRequestEvents'
+  public static final String TOPIC_PATRON_REQUESTS_SUFFIX = '_mod_rs_PatronRequestEvents'
   private static final String TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX = '_mod_directory_DirectoryEntryUpdate'
 
   private static final String[] TOPIC_SUFFIXES = [TOPIC_PATRON_REQUESTS_SUFFIX, TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX] as String[]
@@ -54,8 +57,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
   @javax.annotation.PostConstruct
   public void init() {
+    if (Boolean.parseBoolean(System.getenv('MOD_RS_DISABLE_KAFKA'))) return;
     log.debug("Configuring event consumer service")
-
     version = grailsApplication.metadata.applicationVersion ?: version
     final Properties props = new Properties()
     try {
@@ -231,35 +234,29 @@ public class EventConsumerService implements EventPublisher, DataBinder {
         final String tenantSchema = OkapiTenantResolver.getTenantSchemaName("${data.tenant}")
 
         Tenants.withId(tenantSchema) {
-          DirectoryEntry.withTransaction { status ->
-
-            final Map<String,?> payload = data.payload as Map
-
-            log.debug("Payload for directory update is ${payload}")
-
-            log.debug("Process directory entry inside ${data.tenant}_mod_rs")
-            if ( payload.slug ) {
-              ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug);
-              log.debug("Trying to load DirectoryEntry ${payload.slug}")
-              DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
-              if ( de == null ) {
+          final Map<String,?> payload = data.payload as Map
+          log.debug("Payload for directory update is ${payload}")
+          log.debug("Process directory entry inside ${data.tenant}_mod_rs")
+          if ( payload.slug ) {
+            ContextLogging.setValue(ContextLogging.FIELD_SLUG, payload.slug)
+            ContextLogging.setValue(ContextLogging.FIELD_ID, payload.id)
+            cleanData(payload)
+            DirectoryEntry.withTransaction { status ->
+              log.debug("Trying to load DirectoryEntry ${payload.id}")
+              DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+              if (de == null) {
                 log.debug("Create new directory entry ${payload.slug} : ${data.payload}")
                 de = new DirectoryEntry()
-                if ( payload.id ) {
+                if (payload.id) {
                   de.id = payload.id
-                }
-                else {
+                } else {
                   de.id = java.util.UUID.randomUUID().toString()
                 }
-              }
-              else {
+              } else {
                 de.lock()
                 clearCustomProperties(de)
                 log.debug("Update directory entry ${payload.slug} : ${payload}")
               }
-
-              // Add the identifier to the logging context
-              ContextLogging.setValue(ContextLogging.FIELD_ID, de.id);
 
               // Remove any custom properties from the payload - currently the custprops
               // processing is additive - which means we get lots of values. Need a longer term solition for this
@@ -275,13 +272,13 @@ public class EventConsumerService implements EventPublisher, DataBinder {
               log.debug("Binding custom properties")
               bindCustomProperties(de, payload)
               expireRemovedSymbols(de, payload)
+              expireRemovedServiceAccounts(de, payload)
 
               log.debug("Binding complete - ${de}")
-              de.save(flush:true, failOnError:true)
+              de.save(flush: true, failOnError: true)
             }
           }
         }
-
       }
     }
     catch ( Exception e ) {
@@ -296,6 +293,59 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
     // Clear the context, not sure if the thread is reused or not
     ContextLogging.clear();
+  }
+
+  @CompileStatic(SKIP)
+  private void cleanData(Map<String,?> payload) {
+    boolean anonymize = false
+    DirectoryEntry.withTransaction { status ->
+      try {
+        if (payload.deleted) {
+          DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+          if (de == null) {
+            de = DirectoryEntry.findBySlug(payload.slug as String)
+          }
+          if (de) {
+            log.debug("Delete directory entry ${payload.slug}")
+            de.delete(flush: true, failOnError: true)
+          }
+        } else {
+          DirectoryEntry de = DirectoryEntry.findBySlug(payload.slug as String)
+          if (de && de.id != payload.id) {
+            log.debug("Delete directory entry ${payload.slug} because of conflict id")
+            de.delete(flush: true, failOnError: true)
+          }
+        }
+      } catch (Exception e) {
+        log.info("Failed to delete directory entry so anonymize it", e)
+        anonymize = true
+      }
+    }
+    if (anonymize) {
+      anonymizeEntry(payload)
+    }
+  }
+
+  @CompileStatic(SKIP)
+  private void anonymizeEntry(Map<String,?> payload){
+    DirectoryEntry.withTransaction { status ->
+      DirectoryEntry de = DirectoryEntry.findById(payload.id as String)
+      if (de == null) {
+        de = DirectoryEntry.findBySlug(payload.slug as String)
+      }
+      if (de) {
+        Tag deleted = new Tag()
+        deleted.value = "deleted"
+        de.tags.add(deleted)
+        String prefix = "DELETED-" + System.currentTimeSeconds() + "-"
+        de.slug = prefix + de.slug
+        de.name = prefix + de.name
+        for (Symbol symbol : de.symbols) {
+          symbol.symbol = prefix + symbol.symbol
+        }
+        de.save(flush: true, failOnError: true)
+      }
+    }
   }
 
   private void clearCustomProperties(DirectoryEntry de) {
@@ -321,7 +371,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
             Directory.KEY_ILL_POLICY_LOAN,
             Directory.KEY_ILL_POLICY_LAST_RESORT,
             Directory.KEY_ILL_POLICY_RETURNS,
-            Directory.KEY_ILL_POLICY_BORROW_RATIO].contains(k) ) {
+            Directory.KEY_ILL_POLICY_BORROW_RATIO,
+            Directory.KEY_FOLIO_LOCATION_FILTER].contains(k) ) {
         log.debug("processing binding for ${k} -> ${v}")
         boolean first = true
 
@@ -477,6 +528,20 @@ public class EventConsumerService implements EventPublisher, DataBinder {
     }
     catch ( Exception e ) {
       log.error("Problem detecting residual symbols",e)
+    }
+  }
+
+  private void expireRemovedServiceAccounts(DirectoryEntry de, Map payload){
+    List<Map<String, ?>> payloadServices = payload.services as List<Map<String, ?>>
+    def slugList = payloadServices.collect { it.slug }
+    def filteredServices = de.services?.findAll { it.slug !in slugList }
+    filteredServices.forEach {it ->
+      try {
+        log.debug("Remove service ${it.slug}")
+        de.removeFromServices(it)
+      } catch ( Exception e ) {
+        log.error("problem deleting service",e)
+      }
     }
   }
 

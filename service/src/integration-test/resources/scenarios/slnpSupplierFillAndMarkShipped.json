@@ -1,0 +1,9 @@
+{
+    "action": "slnpSupplierFillAndMarkShipped",
+    "actionParams": {
+        "itemBarcodes": [{
+                "itemId": "123"
+            }
+        ]
+    }
+}

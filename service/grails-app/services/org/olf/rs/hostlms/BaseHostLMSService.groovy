@@ -14,6 +14,7 @@ import org.olf.rs.circ.client.AcceptItem;
 import org.olf.rs.circ.client.CheckinItem;
 import org.olf.rs.circ.client.CheckoutItem
 import org.olf.rs.circ.client.CreateUserFiscalTransaction;
+import org.olf.rs.circ.client.DeleteItem;
 import org.olf.rs.circ.client.RequestItem;
 import org.olf.rs.circ.client.CancelRequestItem;
 import org.olf.rs.circ.client.CirculationClient;
@@ -435,6 +436,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           .includeUserAddressInformation()
           .includeUserPrivilege()
           .includeNameInformation()
+          .includeUserId()
           .setToAgency(ncipConnectionDetails.ncipToAgency)
           .setFromAgency(ncipConnectionDetails.ncipFromAgency)
           .setRegistryId(ncipConnectionDetails.registryId)
@@ -508,6 +510,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           result.userid = response.opt('userId') ?: response.opt('userid')
           result.givenName = response.opt('firstName')
           result.surname = response.opt('lastName')
+          result.patronUuid = response.opt('userUuid')
 
           //Check for blank (but not null) values
           ["surname", "givenName"].each( {
@@ -613,7 +616,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     String requestId,
     String itemBarcode,
     String borrowerBarcode,
-    INcipLogDetails ncipLogDetails
+    INcipLogDetails ncipLogDetails,
+    String externalReferenceValue
   ) {
     log.debug("checkoutItem(${requestId}. ${itemBarcode})");
     Map result = [
@@ -625,7 +629,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     if (checkOutValue != null) {
       switch (checkOutValue) {
         case CIRCULATION_NCIP:
-          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode, ncipLogDetails)
+          result = ncip2CheckoutItem(settings, requestId, itemBarcode, borrowerBarcode, ncipLogDetails, externalReferenceValue)
           break;
 
         default:
@@ -642,7 +646,8 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       String requestId,
       String itemBarcode,
       String borrowerBarcode,
-      INcipLogDetails ncipLogDetails
+      INcipLogDetails ncipLogDetails,
+      String externalReferenceValue
   ) {
     // set reason to ncip
     Map result = [reason: 'ncip'];
@@ -660,8 +665,12 @@ public abstract class BaseHostLMSService implements HostLMSActions {
                     .setToAgency(ncipConnectionDetails.ncipToAgency)
                     .setFromAgency(ncipConnectionDetails.ncipFromAgency)
                     .setRegistryId(ncipConnectionDetails.registryId)
-                    .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile);
+                    .setApplicationProfileType(ncipConnectionDetails.ncipAppProfile)
                     //.setDesiredDueDate("2020-03-18");
+
+      if (externalReferenceValue != null) {
+        checkoutItem.setExternalReferenceValue(externalReferenceValue)
+      }
 
       log.debug("[${CurrentTenant.get()}] NCIP2 checkoutItem request ${checkoutItem}");
       JSONObject response = ncip_client.send(checkoutItem);
@@ -678,6 +687,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
         result.userId = response.opt('userId')
         result.itemId = response.opt('itemId')
         result.loanUuid = response.opt('loanUuid')
+        result.callNumber = response.opt("callNumber")
       }
     } else {
       result.problems = 'No institutional patron ID available'
@@ -743,6 +753,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
             result.problems = response.get('problems')
           } else {
             result.requestUuid = response.opt("requestId")
+            result.itemUuid = response.opt("itemUuid")
           }
           break;
 
@@ -861,6 +872,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
           String itemId,
           String borrowerBarcode,
           String pickupLocation,
+          String itemLocation,
           INcipLogDetails ncipLogDetails
   ) {
     Map result = [
@@ -885,6 +897,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       .setToAgency(ncipConnectionDetails.ncipToAgency)
       .setFromAgency(ncipConnectionDetails.ncipFromAgency)
       .setRegistryId(ncipConnectionDetails.registryId)
+      .setItemLocationCode(itemLocation)
       .setPickupLocation(getRequestItemPickupLocation(pickupLocation))
 
     log.debug("[${CurrentTenant.get()}] NCIP2 RequestItem request ${requestItem}")
@@ -901,6 +914,7 @@ public abstract class BaseHostLMSService implements HostLMSActions {
       result.barcode = response.opt("barcode")
       result.callNumber = response.opt("callNumber")
       result.location = response.opt("location")
+      result.library = response.opt("library")
       result.userUuid = response.opt("userUuid")
     }
 
@@ -1035,37 +1049,65 @@ public abstract class BaseHostLMSService implements HostLMSActions {
     return availability_summary;
   }
 
-  Map createUserFiscalTransaction(ISettings settings, String userId, INcipLogDetails ncipLogDetails) {
+  Map deleteItem(ISettings settings, String itemId, INcipLogDetails ncipLogDetails) {
+    Map result = [
+            result: true,
+            reason: 'ncip'
+    ]
+
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+
+    DeleteItem deleteItem = new DeleteItem()
+            .setToAgency(ncipConnectionDetails.ncipToAgency)
+            .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setItemIdString(itemId)
+
+    log.debug("[${CurrentTenant.get()}] NCIP2 DeleteItem request ${deleteItem}");
+    JSONObject response = client.send(deleteItem);
+    log.debug("[${CurrentTenant.get()}] NCIP2 DeleteItem response ${response}");
+    protocolInformationToResult(response, ncipLogDetails);
+
+    if ( response.has('problems') ) {
+      result.result = false;
+      result.problems = response.get('problems');
+    } else {
+      result.itemId = response.opt("itemId")
+    }
+    return result
+  }
+
+  Map createUserFiscalTransaction(ISettings settings, String userId, String itemId, INcipLogDetails ncipLogDetails) {
     Map result = [
             result: true,
             reason: 'ncip'
     ];
 
 
-    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings);
-    if (ncipConnectionDetails.useDefaultPatronFee) {
-      CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress);
+    ConnectionDetailsNCIP ncipConnectionDetails = new ConnectionDetailsNCIP(settings)
+    CirculationClient client = getCirculationClient(settings, ncipConnectionDetails.ncipServerAddress)
 
-      CreateUserFiscalTransaction createUserFiscalTransaction = new CreateUserFiscalTransaction()
-              .setToAgency(ncipConnectionDetails.ncipToAgency)
-              .setFromAgency(ncipConnectionDetails.ncipFromAgency)
-              .setRegistryId(ncipConnectionDetails.registryId)
-              .setUseridString(userId)
-              .setChargeDefaultPatronFee(ncipConnectionDetails.useDefaultPatronFee)
+    CreateUserFiscalTransaction createUserFiscalTransaction = new CreateUserFiscalTransaction()
+            .setToAgency(ncipConnectionDetails.ncipToAgency)
+            .setFromAgency(ncipConnectionDetails.ncipFromAgency)
+            .setRegistryId(ncipConnectionDetails.registryId)
+            .setUserId(userId)
+            .setChargeDefaultPatronFee(true)
+            .setItemId(itemId)
 
-      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
-      JSONObject response = client.send(createUserFiscalTransaction);
-      log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction response ${response}");
-      protocolInformationToResult(response, ncipLogDetails);
+    log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction request ${createUserFiscalTransaction}");
+    JSONObject response = client.send(createUserFiscalTransaction);
+    log.debug("[${CurrentTenant.get()}] NCIP2 CreateUserFiscalTransaction response ${response}");
+    protocolInformationToResult(response, ncipLogDetails);
 
-      if (response.has('problems')) {
-        result.result = false;
-        result.problems = response.get('problems');
-      } else {
-        result.userUuid = response.opt("userUuid")
-        result.feeUuid = response.opt("feeUuid")
-      }
+    if (response.has('problems')) {
+      result.result = false;
+      result.problems = response.get('problems');
+    } else {
+      result.userUuid = response.opt("userUuid")
+      result.feeUuid = response.opt("feeUuid")
     }
-    return result;
+    return result
   }
 }

@@ -20,6 +20,7 @@ public class StaticRouterService implements RequestRouter {
     String static_routing_str = static_routing_cfg?.value
     if ( static_routing_str ) {
       String[] components = static_routing_str.split(',')  // TYPE:NAMESPACE:SYMBOL,TYPE:NAMESPACE:SYMBOL
+      log.debug("Found components ${components}")
       components.each { static_option ->
         String[] option_parts = static_option.split(':');
         Symbol s
@@ -27,12 +28,12 @@ public class StaticRouterService implements RequestRouter {
 
         if ( option_parts.size() == 2 ) {
           // We assume SYMBOL if only 2 parts
-          s = directoryEntryService.resolveSymbol(option_parts[0], option_parts[1]);
+          s = DirectoryEntryService.resolveSymbol(option_parts[0], option_parts[1]);
           symbolString = "${option_parts[0]}:${option_parts[1]}" 
         }
         else if ( option_parts.size() == 3 ) {
           if ( option_parts[0] == 'SYMBOL' ) {
-            s = directoryEntryService.resolveSymbol(option_parts[1], option_parts[2]);
+            s = DirectoryEntryService.resolveSymbol(option_parts[1], option_parts[2]);
             symbolString = "${option_parts[1]}:${option_parts[2]}" 
           }
           else {

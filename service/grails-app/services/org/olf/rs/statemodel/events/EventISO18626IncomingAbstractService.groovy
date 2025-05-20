@@ -1,14 +1,17 @@
 package org.olf.rs.statemodel.events
 
 import org.olf.okapi.modules.directory.Symbol;
-import org.olf.rs.PatronRequest;
+import org.olf.rs.DirectoryEntryService;
+import org.olf.rs.PatronRequest
+import org.olf.rs.SettingsService;
 import org.olf.rs.statemodel.AbstractEvent;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails
 import org.olf.rs.statemodel.ActionService
 import org.olf.rs.statemodel.EventFetchRequestMethod;
 import org.olf.rs.statemodel.EventResultDetails
-import org.olf.rs.statemodel.StateModel;
+import org.olf.rs.statemodel.StateModel
+import org.springframework.security.core.parameters.P;
 
 /**
  * Contains the base methods and definitions required to interpret the 18626 protocol
@@ -51,6 +54,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
 
     // The service used to run the actions
     ActionService actionService;
+    SettingsService settingsService;
 
     @Override
     EventFetchRequestMethod fetchRequestMethod() {
@@ -104,6 +108,24 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
      */
     public abstract boolean isForCurrentRotaLocation(Map eventData, PatronRequest request);
 
+    public String requestingSymbolFromEventData(Map eventData) {
+        String agencyIdType = eventData?.header?.requestingAgencyId?.agencyIdType;
+        String agencyIdValue = eventData?.header?.requestingAgencyId?.agencyIdValue;
+        if (!agencyIdType || !agencyIdValue) {
+            return null;
+        }
+        return "${agencyIdType}:${agencyIdValue}";
+    }
+
+    public String supplyingSymbolFromEventData(Map eventData) {
+        String agencyIdType = eventData?.header?.supplyingAgencyId?.agencyIdType;
+        String agencyIdValue = eventData?.header?.supplyingAgencyId?.agencyIdValue;
+        if (!agencyIdType || !agencyIdValue) {
+            return null;
+        }
+        return "${agencyIdType}:${agencyIdValue}";
+    }
+
     /**
      * Processes the data received from an ISO18626 sender
      * @param eventData The message that was sent
@@ -115,6 +137,11 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
         String errorType = null;
         Object errorValue = null;
         String requestId = getRequestId(eventData);
+        String requestUuid = null;
+        settingsService = new SettingsService();
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+        Boolean routingDisabled = (requestRouterSetting == 'disabled');
+
 
         try {
             // Do we have a request id
@@ -144,15 +171,33 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
-                        if ((request.supplyingInstitutionSymbol == null ||
+                        if ( routingDisabled ) {
+                            String requestingSymbol = requestingSymbolFromEventData(eventData);
+                            String supplyingSymbol = supplyingSymbolFromEventData(eventData);
+                            if (requestingSymbol) {
+                                request.requestingInstitutionSymbol = requestingSymbol;
+                            }
+                            if (supplyingSymbol) {
+                                if (request.supplyingInstitutionSymbol != supplyingSymbol) {
+                                    request.stateHasChanged = true
+                                }
+                                request.supplyingInstitutionSymbol = supplyingSymbol;
+                            }
+                        }  else if (((request.supplyingInstitutionSymbol == null ||
                                 request.getSupplyingInstitutionSymbol().contains("null") ||
                                     request.getSupplyingInstitutionSymbol() == ":") &&
                                         eventData.header?.supplyingAgencyId?.agencyIdType != null &&
-                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
-                            Symbol resolvedSupplyingAgency = reshareApplicationEventHandlerService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                                            eventData.header?.supplyingAgencyId?.agencyIdValue != null) ||
+                                EventMessageRequestIndService.isSlnpRequesterStateModel(request)) {
+                            Symbol resolvedSupplyingAgency = null
+                            String symbol = ""
+                            if (eventData.header?.supplyingAgencyId?.agencyIdType != null &&
+                                    eventData.header?.supplyingAgencyId?.agencyIdValue != null) {
+                                resolvedSupplyingAgency = DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue)
+                                symbol = "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}"
+                            }
                             request.resolvedSupplier = resolvedSupplyingAgency
-                            request.setSupplyingInstitutionSymbol(
-                                    "${eventData.header.supplyingAgencyId.agencyIdType.toString()}:${eventData.header.supplyingAgencyId.agencyIdValue.toString()}")
+                            request.setSupplyingInstitutionSymbol(symbol)
                         }
                         // We need to determine if this request is for the current rota position
                         if (isForCurrentRotaLocation(eventData, request) ||
@@ -182,6 +227,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                             errorValue = 'requestingAgencyRequestId: ' + eventData.header?.requestingAgencyRequestId +
                                          ', supplyingAgencyRequestId: ' + eventData.header?.supplyingAgencyRequestId;
                         }
+                        requestUuid = request.id
                     }
                 }
             }
@@ -199,6 +245,7 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
 
         // Build up the response
         eventResultDetails.responseResult = createResponseData(eventData, processedSuccessfully, errorType, errorValue);
+        eventResultDetails.responseResult.requestId = requestUuid
         return(eventResultDetails);
     }
 

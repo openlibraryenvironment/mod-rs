@@ -1,16 +1,16 @@
 package org.olf.rs.statemodel.events
 
+import com.k_int.web.toolkit.settings.AppSetting
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.olf.okapi.modules.directory.Symbol
+import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.NewRequestService
 import org.olf.rs.PatronRequest
-import org.olf.rs.SettingsService
-import org.olf.rs.lms.HostLMSActions
-import org.olf.rs.logging.INcipLogDetails
-import org.olf.rs.logging.ProtocolAuditService
+import org.olf.rs.ProtocolReferenceDataValue
 import org.olf.rs.patronRequest.PickupLocationService
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.AbstractEvent
 import org.olf.rs.statemodel.EventFetchRequestMethod
 import org.olf.rs.statemodel.EventResultDetails
@@ -25,8 +25,6 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
     PickupLocationService pickupLocationService
     NewRequestService newRequestService
     HostLMSService hostLMSService
-    ProtocolAuditService protocolAuditService
-    SettingsService settingsService
 
     private static final String REASON_SPOOFED = 'spoofed'
 
@@ -54,7 +52,7 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
         }
 
         if (request.requestingInstitutionSymbol != null) {
-            Symbol s = reshareApplicationEventHandlerService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
+            Symbol s = DirectoryEntryService.resolveCombinedSymbol(request.requestingInstitutionSymbol)
             if (s != null) {
                 request.resolvedRequester = s
             }
@@ -64,44 +62,44 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
             pickupLocationService.checkByName(request)
         }
 
-        HostLMSActions hostLMSActions = hostLMSService.getHostLMSActions()
-
-        if (hostLMSActions) {
+        if (hostLMSService.getHostLMSActions()) {
             log.debug('Auto Supply....')
-            INcipLogDetails ncipLogDetails = protocolAuditService.getNcipLogDetails()
             String userId = request.patronIdentifier
+            boolean canAddFeeAutomatically = isServiceTypeValidForAddingFee(request)
 
-            try {
-                Map userFiscalTransactionResult = hostLMSActions.createUserFiscalTransaction(settingsService, userId, ncipLogDetails)
+            if (canAddFeeAutomatically) {
+                try {
+                    Map userFiscalTransactionResult = hostLMSService.createUserFiscalTransaction(request, userId, request.hrid)
 
-                if (userFiscalTransactionResult?.result == true) {
-                    String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"
+                    if (userFiscalTransactionResult?.result == true) {
+                        String message = "Receive succeeded for (userId: ${userId}). ${userFiscalTransactionResult.reason == REASON_SPOOFED ? '(No host LMS integration configured for create user fiscal transaction call)' : 'Host LMS integration: CreateUserFiscalTransaction call succeeded.'}"
 
-                    if (userFiscalTransactionResult.userUuid && userFiscalTransactionResult.feeUuid) {
-                        Map customIdentifiersMap = [:]
-                        if (request.customIdentifiers) {
-                            customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                        if (userFiscalTransactionResult.userUuid && userFiscalTransactionResult.feeUuid) {
+                            Map customIdentifiersMap = [:]
+                            if (request.customIdentifiers) {
+                                customIdentifiersMap = new JsonSlurper().parseText(request.customIdentifiers)
+                            }
+                            customIdentifiersMap.put("patronUuid", userFiscalTransactionResult.userUuid)
+                            customIdentifiersMap.put("feeUuid", userFiscalTransactionResult.feeUuid)
+                            request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
                         }
-                        customIdentifiersMap.put("userUuid", userFiscalTransactionResult.userUuid)
-                        customIdentifiersMap.put("feeUuid", userFiscalTransactionResult.feeUuid)
-                        request.customIdentifiers = new JsonBuilder(customIdentifiersMap).toPrettyString()
-                    }
 
-                    reshareApplicationEventHandlerService.auditEntry(request,
-                            request.state,
-                            request.state,
-                            message,
-                            null)
-                } else {
-                    String message = "Host LMS integration: NCIP CreateUserFiscalTransaction call failed for userId: ${userId}. Review configuration and try again or deconfigure host LMS integration in settings."
-                    reshareApplicationEventHandlerService.auditEntry(request,
-                            request.state,
-                            request.state,
-                            message + userFiscalTransactionResult?.problems,
-                            null)
+                        reshareApplicationEventHandlerService.auditEntry(request,
+                                request.state,
+                                request.state,
+                                message,
+                                null)
+                    } else {
+                        String message = "Host LMS integration: NCIP CreateUserFiscalTransaction call failed for userId: ${userId}. Review configuration and try again or deconfigure host LMS integration in settings."
+                        reshareApplicationEventHandlerService.auditEntry(request,
+                                request.state,
+                                request.state,
+                                message + userFiscalTransactionResult?.problems,
+                                null)
+                    }
+                } catch (Exception e) {
+                    reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CreateUserFiscalTransaction call failed for userId: ${userId}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null)
                 }
-            } catch (Exception e) {
-                reshareApplicationEventHandlerService.auditEntry(request, request.state, request.state, "Host LMS integration: NCIP CreateUserFiscalTransaction call failed for userId: ${userId}. Review configuration and try again or deconfigure host LMS integration in settings. " + e.message, null)
             }
         }
 
@@ -111,4 +109,21 @@ public class EventReqNewSlnpPatronRequestIndService extends AbstractEvent {
 
         return(eventResultDetails)
     }
+
+    private static boolean isServiceTypeValidForAddingFee(PatronRequest request) {
+        def serviceTypeDefaults = ["loan", "copy", "copyorloan"]
+        String requestServiceType = request.serviceType.value.toLowerCase()
+        String automaticFeeRequestServiceType = AppSetting.findByKey(SettingsData.SETTING_REQUEST_SERVICE_TYPE)?.value
+
+        if (automaticFeeRequestServiceType == null != ProtocolReferenceDataValue.SERVICE_TYPE_NO.equalsIgnoreCase(automaticFeeRequestServiceType)) {
+            return false
+        }
+
+        if (automaticFeeRequestServiceType.equalsIgnoreCase("copyorloan") && serviceTypeDefaults.contains(requestServiceType)) {
+            return true
+        }
+
+        return automaticFeeRequestServiceType.equalsIgnoreCase(requestServiceType)
+    }
+
 }

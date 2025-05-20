@@ -82,6 +82,14 @@ public class ProtocolAuditService {
         );
     }
 
+    void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
+        PatronRequest request = PatronRequest.findById(patronRequestId)
+        if (request) {
+            save(request, baseAuditDetails)
+            request.save(flush:true, failOnError:false)
+        }
+    }
+
     /**
      * Associates the audit details with request
      * @param patronRequest The request that the audit details need to be associated with
@@ -101,7 +109,7 @@ public class ProtocolAuditService {
                 protocolAudit.protocolMethod = baseAuditDetails.getProtocolMethod();
                 protocolAudit.url = removePrivateDataFromURI(baseAuditDetails.getURL());
                 protocolAudit.requestBody = baseAuditDetails.getRequestBody();
-                protocolAudit.responseStatus = baseAuditDetails.getResponseStatus();
+                protocolAudit.responseStatus = baseAuditDetails.getResponseStatus()?.take(30); // truncate to column size
                 protocolAudit.responseBody = responseBody;
                 protocolAudit.duration = baseAuditDetails.duration();
                 patronRequest.addToProtocolAudit(protocolAudit);
@@ -128,6 +136,10 @@ public class ProtocolAuditService {
 
             // Now replace the query parameters
             uriBuilder.setQuery(queryParameters);
+        }
+
+        if (uriBuilder.getPath() != null) {
+            uriBuilder.setPath(uriBuilder.getPath().toLowerCase().replaceAll("ncip/ey.*", "ncip"))
         }
 
         // Return the actual url that we accessed

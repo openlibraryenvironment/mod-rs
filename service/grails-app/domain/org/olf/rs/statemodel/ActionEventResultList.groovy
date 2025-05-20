@@ -1,4 +1,4 @@
-package org.olf.rs.statemodel;
+    package org.olf.rs.statemodel;
 
 import grails.gorm.MultiTenant;
 
@@ -22,6 +22,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
     static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
+    static public final String REQUESTER_EXPECTS_TO_SUPPLY_INDICATION        = 'requesterExpectsToSupplyIndication';
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
     static public final String REQUESTER_FILLED_LOCALLY                      = 'requesterFilledLocally';
     static public final String REQUESTER_LOCAL_CANNOT_SUPPLY                 = 'requesterLocalCannotSupply';
@@ -35,6 +36,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
     static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
     static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
+    static public final String REQUESTER_REQUEST_SENT_TO_SUPPLIER_INDICATION = 'requesterSentToSupplierInd';
     static public final String REQUESTER_REREQUEST_CANCELLED                 = 'requesterRerequestCancelled';
     static public final String REQUESTER_REREQUEST_END_OF_ROTA               = 'requesterRerequestEndOfRota';
     static public final String REQUESTER_RETRIED_VALIDATION                  = 'requesterRetriedValidation';
@@ -66,11 +68,8 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
     static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
     static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
-    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY                      = 'slnpResponderConditionalSupply';
-    static public final String SLNP_RESPONDER_CONDITIONAL_SUPPLY_NO_TRANSITION        = 'slnpResponderConditionalSupplyNoTransition'
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
-    static public final String SLNP_RESPONDER_SUPPLIER_CHECK_IN_RESHARE               = "slnpResponderSupplierCheckInReshare"
-    static public final String SLNP_RESPONDER_SUPPLIER_MARK_SHIPPED                   = "slnpResponderSupplierMarkShipped"
+    static public final String SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED          = "slnpResponderSupplierFillAndMarkShipped"
     static public final String SLNP_RESPONDER_CHECK_OUT_OF_RESHARE                    = "slnpResponderCheckOutOfReshare"
     static public final String SLNP_RESPONDER_EVENT_NEW_PATRON_REQUEST                = 'slnpResponderNewPatronRequestIndList'
 
@@ -124,24 +123,31 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_REQUESTER_SENT_TO_SUPPLIER_ISO18626          = 'nrRequesterSentToSupplierISO18626';
     static public final String NR_REQUESTER_EXPECT_TO_SUPPLY_ISO18626          = 'nrRequesterExpectToSupplyISO18626';
     static public final String NR_REQUESTER_DOCUMENT_DELIVERED                 = 'nrRequesterDocumentDelivered';
-    static public final String NR_REQUESTER_COMPLETED                          = 'nrRequesterCompleted';
     public static final String NR_REQUESTER_MARK_END_OF_ROTA_REVIEWED          = 'nrRequesterMarkEndOfRotaReviewed';
+    public static final String NR_REQUESTER_REREQUEST                          = 'nrRequesterRerequest';
     public static final String NR_REQUESTER_NO_STATUS_CHANGE                   = 'nrRequesterNoStatusChange';
     public static final String NR_REQUESTER_CLOSE_MANUAL                       = 'nrRequesterCloseManual';
     public static final String NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626     = 'nrRequesterNotificationReceivedISO18626';
+    public static final String NR_REQUESTER_CANCEL_PENDING_ISO18626            = 'nrRequesterCancelPendingISO18626';
+    public static final String NR_REQUESTER_AGREE_CONDITIONS                   = 'nrRequesterAgreeConditions';
+    public static final String NR_REQUESTER_REJECT_CONDITIONS                  = 'nrRequesterRejectConditions';
+    public static final String NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626 = 'nrRequesterConditionAnswerReceivedISO18626';
 
     static public final String NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';
     static public final String NR_RESPONDER_EVENT_NEW_PATRON_REQUEST           = 'nrResponderEventNewPatronRequest';
     static public final String NR_RESPONDER_CANNOT_SUPPLY                      = 'nrResponderCannotSupply';
     static public final String NR_RESPONDER_PRINT_PULL_SLIP                    = 'nrResponderPrintPullSlip';
     static public final String NR_RESPONDER_ADD_URL_TO_DOCUMENT                = 'nrResponderAddURLToDocument';
+    static public final String NR_RESPONDER_CANCEL                             = 'nrResponderCancel';
+    static public final String NR_RESPONDER_ADD_CONDITIONAL                    = 'nrResponderAddConditional';
+    public static final String NR_RESPONDER_ANSWER_CONDITIONAL                 = 'nrResponderAnswerConditional';
+    public static final String NR_RESPONDER_MARK_CONDITIONS_AGREED             = 'nrResponderMarkConditionsAgreed';
+
 
     public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
     public static final String NR_RESPONDER_NO_STATUS_CHANGE                   = 'nrResponderNoStatusChange';
     public static final String NR_RESPONDER_CLOSE_MANUAL                       = 'nrResponderCloseManual';
     public static final String NR_RESPONDER_NOTIFICATION_RECEIVED_ISO18626     = 'nrResponderNotificationReceivedISO18626';
-
-
 
     // Query to find all the result lists that save the status before setting the status
     private static final String SAVE_RESULT_LISTS_QUERY = 'from ActionEventResultList aerl where exists (from aerl.results r where r.saveRestoreState.value = :saveRestoreStateValue and r.status = :status)';

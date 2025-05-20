@@ -2,7 +2,9 @@ package org.olf.rs.statemodel.events;
 
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolMessageService;
-import org.olf.rs.ReshareActionService;
+import org.olf.rs.ReshareActionService
+import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 
@@ -15,6 +17,7 @@ public class EventISO18626IncomingRequesterService extends EventISO18626Incoming
 
     ProtocolMessageService protocolMessageService;
     ReshareActionService reshareActionService;
+    SettingsService settingsService;
 
     @Override
     public String name() {
@@ -54,9 +57,15 @@ public class EventISO18626IncomingRequesterService extends EventISO18626Incoming
         // By default we assume it is not
         boolean isCorrectRotaLocation = false;
 
+
+        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
         // First of all we will see if the rota position is in the id field
         long idRotaPosition = protocolMessageService.extractRotaPositionFromProtocolId(eventData.header?.requestingAgencyRequestId);
         if (idRotaPosition < 0) {
+            if (requestRouterSetting == "disabled") {
+                return true; //There's no rota, so it'll be the correct position
+            }
             // We failed to find the rota position, so we need to fallback on checking symbols, this can still fail as the same location can be in the rota multiple times
             Map symbols = reshareActionService.requestingAgencyMessageSymbol(request);
             if (symbols.receivingSymbol != null) {

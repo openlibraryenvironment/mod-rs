@@ -27,7 +27,7 @@ public class NewRequestService {
 
         // Use this to make sessionFactory.currentSession work as expected
         PatronRequest.withSession { session ->
-            log.debug('Generate hrid');
+            log.debug("Generate hrid for prefix '${hridPrefix}'");
             Sql sql = new Sql(session.connection())
             List queryResult  = sql.rows("select nextval('pr_hrid_seq')");
             log.debug("Query result: ${queryResult }");
@@ -57,6 +57,10 @@ public class NewRequestService {
     }
 
     public Boolean isPossibleDuplicate(PatronRequest request) {
+        if (request.precededBy != null) {
+            log.debug("Requests that have been re-requested automatically excluded from duplicate check");
+            return Boolean.FALSE;
+        }
         int duplicateTimeHours = settingsService.getSettingAsInt(
                 SettingsData.SETTING_CHECK_DUPLICATE_TIME, 0);
         log.debug("Checking PatronRequest ${request} ( patronReference ${request.patronReference} ) for duplicates within the last ${duplicateTimeHours} hours");

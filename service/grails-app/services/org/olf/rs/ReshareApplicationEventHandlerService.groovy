@@ -45,7 +45,7 @@ public class ReshareApplicationEventHandlerService {
 
     static List<String> preserveFields = ['supplierUniqueRecordId','title','author','subtitle','seriesTitle','edition','titleOfComponent','authorOfComponent','volume','issue','pagesRequested','estimatedNoPages','sponsor','informationSource']
 
-  	EventNoImplementationService eventNoImplementationService;
+    EventNoImplementationService eventNoImplementationService;
     EventISO18626IncomingRequesterService eventISO18626IncomingRequesterService;
     EventISO18626IncomingResponderService eventISO18626IncomingResponderService;
     EventMessageRequestIndService eventMessageRequestIndService;
@@ -382,13 +382,13 @@ public class ReshareApplicationEventHandlerService {
         inboundMessage.setActionData(eventData.deliveryInfo.loanCondition)
       }
 
-      inboundMessage.setMessageSender(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
-      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent(note)
     } else {
-      inboundMessage.setMessageSender(resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
-      inboundMessage.setMessageReceiver(resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setAttachedAction(eventData.action)
       inboundMessage.setMessageContent(note)
     }
@@ -408,7 +408,7 @@ public class ReshareApplicationEventHandlerService {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
-
+      loanCondition.setSupplyingInstitutionSymbol(pr.supplyingInstitutionSymbol)
 	  pr.addToConditions(loanCondition);
   }
 
@@ -444,35 +444,4 @@ public class ReshareApplicationEventHandlerService {
     }
     return returnList.join(",");
   }
-
-	public static Symbol resolveSymbol(String authority, String symbol) {
-		Symbol result = null;
-	    List<Symbol> symbol_list = Symbol.executeQuery('select s from Symbol as s where s.authority.symbol = :authority and s.symbol = :symbol',
-	                                                   [authority:authority?.toUpperCase(), symbol:symbol?.toUpperCase()]);
-	    if ( symbol_list.size() == 1 ) {
-			result = symbol_list.get(0);
-	    }
-            else {
-              log.warn("Missing or multiple symbol match for : ${authority}:${symbol} (${symbol_list?.size()})");
-            }
-
-	    return result;
-	}
-
-	public Symbol resolveCombinedSymbol(String combinedString) {
-		Symbol result = null;
-		if ( combinedString != null ) {
-			String[] name_components = combinedString.split(':');
-			if ( name_components.length == 2 ) {
-				result = resolveSymbol(name_components[0], name_components[1]);
-			}
-                        else {
-                          log.warn("unexpected number of name components attempting to parse ${combinedString}: ${name_components}");
-                        }
-		}
-                else {
-                        log.warn("resolveCombinedSymbol called with NULL string");
-                }
-		return result;
-	}
 }

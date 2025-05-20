@@ -1,5 +1,6 @@
-package mod.rs;
+package mod.rs
 
+import org.olf.rs.SettingsService;
 import org.olf.rs.logging.ContextLogging;
 
 import com.k_int.okapi.OkapiTenantAwareController;
@@ -9,7 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponses
 
 /**
  * This class was written so that we had a swagger interface for all the controller end points
@@ -22,7 +23,8 @@ import io.swagger.annotations.ApiResponses;
 class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController<T>  {
 
     // Required as we override the maximum number of records that can be returned in index
-    SimpleLookupService simpleLookupService;
+    SimpleLookupService simpleLookupService
+    SettingsService settingsService
 
     /** Specifies the maximum number of records to return for a page */
     private int maxRecordsPerPage = 1000;
@@ -135,7 +137,6 @@ class OkapiTenantAwareSwaggerGetController<T> extends OkapiTenantAwareController
         ContextLogging.setValue(ContextLogging.FIELD_STATISTICS_REQUIRED, params.stats);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
-        // Now do the work
         super.index(max);
 
         // Record how long it took
