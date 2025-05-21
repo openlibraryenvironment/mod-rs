@@ -53,6 +53,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_DATABASE: postgres
+      BROKER_MODE: transparent
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

@@ -8,7 +8,6 @@ import groovyx.net.http.FromServer
 import groovyx.net.http.HttpBuilder
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClientBuilder
-import org.codehaus.groovy.runtime.DefaultGroovyMethods
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
@@ -244,8 +243,8 @@ class ILLBrokerSpec extends TestBase {
         when: "We create a request"
         Map request = [
                 patronReference         : patronReference,
-                title                   : "A test of the no ILL address system",
-                author                  : "Lilly, Noel",
+                title                   : "Integration testing with the broker",
+                author                  : "Kerr, Bro",
                 patronIdentifier        : patronIdentifier,
                 isRequester             : true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
@@ -286,6 +285,4 @@ class ILLBrokerSpec extends TestBase {
         then:
         assert(true)
     }
-
-
 }
