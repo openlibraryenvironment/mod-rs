@@ -295,7 +295,6 @@ public class StatusService {
                     // Get hold of the AvailableAction
                     AvailableAction availableAction = lookupAvailableAction(model, fromStatus, actionEvent);
                     log.debug("Found AvailableAction ${availableAction} with resultList ${availableAction?.resultList?.code}");
-                    ActionEventResultList resultList = availableAction.resultList;
                     if (availableAction != null) {
                         // Now do we have a resultList on the availableAction
                         if (availableAction.resultList != null) {
