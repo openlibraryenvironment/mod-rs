@@ -285,4 +285,35 @@ class ILLBrokerSpec extends TestBase {
         then:
         assert(true)
     }
+
+    void "Test local supplier with broker" () {
+        String requesterTenantId = TENANT_ONE_NAME;
+        String patronIdentifier = "Broker-test-2-" + System.currentTimeMillis();
+        String patronReference = "ref-${patronIdentifier}";
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_ONE_NAME}::send_this_back"; // we want to test local review
+        String localSymbolsString = "ISIL:${SYMBOL_ONE_NAME}";
+        changeSettings(requesterTenantId, [ "local_symbols" : localSymbolsString], false);
+
+        when: "Create the request"
+
+        Map request = [
+                patronReference             : patronReference,
+                title                       : "Local review state with broker test",
+                author                      : "Bach, Kohm",
+                patronIdentifier            : patronIdentifier,
+                isRequester                 : true,
+                systemInstanceIdentifier    : systemInstanceIdentifier
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+        String requestId = response?.id
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_LOCAL_REVIEW);
+
+        then:
+        assert(true);
+    }
+
+
 }
