@@ -23,12 +23,6 @@ class EventStatusReqRequestSentToSupplierIndService extends AbstractEvent {
                 log.debug("Symbol ${request.supplyingInstitutionSymbol} is local");
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_LOCAL_REVIEW;
                 eventResultDetails.auditMessage = 'Sent to local review';
-                // Set supplying symbol back to the default
-                String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
-                if (defaultPeerSymbolString) {
-                    log.debug("Setting supplying institution symbol to ${defaultPeerSymbolString}");
-                    request.supplyingInstitutionSymbol = defaultPeerSymbolString;
-                }
             }
         }
 
