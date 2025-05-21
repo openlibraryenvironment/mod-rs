@@ -19,6 +19,46 @@ services:
     ports:
       - 5432:5432
       - 54321:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+      start_period: 3s
+
+  illmock:
+    image: ghcr.io/indexdata/crosslink-illmock:main
+    container_name: illmock
+    ports:
+      - "19083:8080"
+    environment:
+      HTTP_PORT: 8080
+      PEER_URL: "http://host.docker.internal:22553/rs/externalApi/iso18626"
+      HTTP_HEADERS: "X-Okapi-Tenant:NIAInstOne"
+      SUPPLYING_AGENCY_ID: NIA2
+      REQUESTING_AGENCY_ID: NIA1
+      MESSAGE_DELAY: 3000ms
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  illbroker:
+    image: ghcr.io/indexdata/crosslink-broker:main
+    container_name: illbroker
+    ports:
+      - "19082:8080"
+    environment:
+      HTTP_PORT: 8080
+      DB_USER: folio_admin
+      DB_PASSWORD: folio_admin
+      DB_HOST: docker.for.mac.localhost
+      DB_PORT: 5432
+      DB_DATABASE: postgres
+      BROKER_MODE: transparent
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   # See https://github.com/simplesteph/kafka-stack-docker-compose
   zoo1:
