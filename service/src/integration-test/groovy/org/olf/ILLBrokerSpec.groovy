@@ -285,4 +285,41 @@ class ILLBrokerSpec extends TestBase {
         then:
         assert(true)
     }
+
+    void "Test local supplier with broker" () {
+        String requesterTenantId = TENANT_ONE_NAME;
+        String patronIdentifier = "Broker-test-2-" + System.currentTimeMillis();
+        String patronReference = "ref-${patronIdentifier}";
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_ONE_NAME}::send_this_back;return-ISIL:${SYMBOL_TWO_NAME}::send_this_back2"; // we want to test local review
+        String localSymbolsString = "ISIL:${SYMBOL_ONE_NAME}";
+        changeSettings(requesterTenantId, [ "local_symbols" : localSymbolsString], false);
+
+        when: "Create the request"
+
+        Map request = [
+                patronReference             : patronReference,
+                title                       : "Local review state with broker test",
+                author                      : "Bach, Kohm",
+                patronIdentifier            : patronIdentifier,
+                isRequester                 : true,
+                systemInstanceIdentifier    : systemInstanceIdentifier
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        def response = doPost("${baseUrl}/rs/patronrequests".toString(), request);
+        String requestId = response?.id
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_LOCAL_REVIEW)
+
+        String payload = new File("src/integration-test/resources/scenarios/requesterLoSupCannotSupply.json").text
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost(performActionUrl, payload)
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+
+        then:
+        assert(true);
+    }
+
+
 }
