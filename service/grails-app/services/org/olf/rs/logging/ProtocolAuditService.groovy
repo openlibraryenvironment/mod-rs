@@ -1,5 +1,6 @@
 package org.olf.rs.logging
 
+import grails.gorm.transactions.Transactional
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolAudit;
 import org.olf.rs.ProtocolMethod;
@@ -83,8 +84,9 @@ public class ProtocolAuditService {
         );
     }
 
+    @Transactional
     void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
-        PatronRequest request = PatronRequest.lock(patronRequestId) //Use pessimistic locking
+        PatronRequest request = PatronRequest.get(patronRequestId)
         if (request) {
             save(request, baseAuditDetails)
             request.save(flush: true, failOnError: false)
