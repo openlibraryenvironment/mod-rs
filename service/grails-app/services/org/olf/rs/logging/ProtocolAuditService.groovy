@@ -90,7 +90,7 @@ public class ProtocolAuditService {
             try {
                 request.save(flush: true, failOnError: false)
             } catch (HibernateOptimisticLockingFailureException holfhe) {
-                log.warning("Hibernate Optimistic Locking Failure Exception: ${holfhe.getLocalizedMessage()}");
+                log.warn("Hibernate Optimistic Locking Failure Exception: ${holfhe.getLocalizedMessage()}");
             }
         }
     }
