@@ -288,6 +288,7 @@ class ILLBrokerSpec extends TestBase {
 
     void "Test local supplier with broker" () {
         String requesterTenantId = TENANT_ONE_NAME;
+        String responderTenantId = TENANT_TWO_NAME;
         String patronIdentifier = "Broker-test-2-" + System.currentTimeMillis();
         String patronReference = "ref-${patronIdentifier}";
         String systemInstanceIdentifier = "return-ISIL:${SYMBOL_ONE_NAME}::send_this_back;return-ISIL:${SYMBOL_TWO_NAME}::send_this_back2"; // we want to test local review
@@ -308,14 +309,23 @@ class ILLBrokerSpec extends TestBase {
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def response = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         String requestId = response?.id
-        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+        String requesterPerformActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
 
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_LOCAL_REVIEW)
 
         String payload = new File("src/integration-test/resources/scenarios/requesterLoSupCannotSupply.json").text
         setHeaders(['X-Okapi-Tenant': requesterTenantId])
-        doPost(performActionUrl, payload)
+        doPost(requesterPerformActionUrl, payload)
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+
+        def responderId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderId}/performAction"
+
+        String payload2 = new File("src/integration-test/resources/scenarios/supplierCannotSupply.json").text;
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        doPost(responderPerformActionUrl, payload2);
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_END_OF_ROTA);
 
         then:
         assert(true);

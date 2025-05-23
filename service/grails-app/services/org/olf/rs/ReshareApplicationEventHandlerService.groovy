@@ -211,7 +211,7 @@ public class ReshareApplicationEventHandlerService {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_REQUEST_MESSAGE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
-        log.debug(ContextLogging.MESSAGE_ENTERING);
+        log.debug("${ContextLogging.MESSAGE_ENTERING} handleRequestMessage");
 
         // Just call event handler directly
         EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
