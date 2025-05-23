@@ -84,14 +84,10 @@ public class ProtocolAuditService {
     }
 
     void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
-        PatronRequest request = PatronRequest.findById(patronRequestId)
+        PatronRequest request = PatronRequest.lock(patronRequestId) //Use pessimistic locking
         if (request) {
             save(request, baseAuditDetails)
-            try {
-                request.save(flush: true, failOnError: false)
-            } catch (HibernateOptimisticLockingFailureException holfhe) {
-                log.warn("Hibernate Optimistic Locking Failure Exception: ${holfhe.getLocalizedMessage()}");
-            }
+            request.save(flush: true, failOnError: false)
         }
     }
 
