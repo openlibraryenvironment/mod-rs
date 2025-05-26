@@ -2,42 +2,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "mod-tags-1-3-0"
+  name: "mod-permissions-6-5-0"
   labels:
-    app: "mod-tags-1-3-0"
-    module: "mod-tags"
+    app: "mod-permissions-6-5-0"
+    module: "mod-permissions"
     folio_role: "backend-module"
   namespace: "reshare"
 spec:
   selector:
     matchLabels:
-      app: "mod-tags-1-3-0"
+      app: "mod-permissions-6-5-0"
   replicas: 1
   template:
     metadata:
       labels:
-        app: "mod-tags-1-3-0"
-        module: "mod-tags"
+        app: "mod-permissions-6-5-0"
+        module: "mod-permissions"
         folio_role: "backend-module"
     spec:
       containers:
-        - name: "mod-tags-1-3-0"
-          image: "folioorg/mod-tags:1.3.0"
+        - name: "mod-permissions-6-5-0"
+          image: "folioorg/mod-permissions:6.5.0"
           envFrom:
             - secretRef:
-                name: folio-db-connect
+                name: "folio-db-connect"
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: JAVA_OPTIONS
-              value: "-XX:MaxRAMPercentage=85.0 -Dlog4j2.formatMsgNoLookups=true"
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j2.formatMsgNoLookups=true"
           ports:
             - containerPort: 8081
               protocol: TCP
           resources:
             limits:
-              memory: 1Gi
+              memory: 715827883
       imagePullSecrets:
         - name: "dockerhub-cred"

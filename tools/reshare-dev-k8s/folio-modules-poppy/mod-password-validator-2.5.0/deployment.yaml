@@ -38,6 +38,6 @@ spec:
               protocol: TCP
           resources:
             limits:
-              memory: 536870912
+              memory: 1Gi
       imagePullSecrets:
         - name: "dockerhub-cred"

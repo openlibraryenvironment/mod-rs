@@ -2,28 +2,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "mod-tags-1-3-0"
+  name: "mod-authtoken-2-15-2"
   labels:
-    app: "mod-tags-1-3-0"
-    module: "mod-tags"
+    app: "mod-authtoken-2-15-2"
+    module: "mod-authtoken"
     folio_role: "backend-module"
   namespace: "reshare"
 spec:
   selector:
     matchLabels:
-      app: "mod-tags-1-3-0"
+      app: "mod-authtoken-2-15-2"
   replicas: 1
   template:
     metadata:
       labels:
-        app: "mod-tags-1-3-0"
-        module: "mod-tags"
+        app: "mod-authtoken-2-15-2"
+        module: "mod-authtoken"
         folio_role: "backend-module"
     spec:
       containers:
-        - name: "mod-tags-1-3-0"
-          image: "folioorg/mod-tags:1.3.0"
+        - name: "mod-authtoken-2-15-2"
+          image: "folioorg/mod-authtoken:2.15.2"
           envFrom:
+            - secretRef:
+                name: mod-authtoken-signing-key
             - secretRef:
                 name: folio-db-connect
           env:
@@ -32,12 +34,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: JAVA_OPTIONS
-              value: "-XX:MaxRAMPercentage=85.0 -Dlog4j2.formatMsgNoLookups=true"
+              value: "-XX:MaxRAMPercentage=66.0 -Dcache.permissions=true -Djwt.signing.key=$(SIGNING_KEY) -Dlog4j2.formatMsgNoLookups=true"
           ports:
             - containerPort: 8081
               protocol: TCP
           resources:
             limits:
-              memory: 1Gi
+              memory: 357913941
       imagePullSecrets:
         - name: "dockerhub-cred"

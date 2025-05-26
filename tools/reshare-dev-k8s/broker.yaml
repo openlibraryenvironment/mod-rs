@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "broker"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "broker"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "broker"
+    spec:
+      containers:
+        - name: broker
+          image: ghcr.io/indexdata/crosslink-broker:main
+          envFrom:
+            - secretRef:
+                name: "folio-db-connect"
+          env:
+          - name: BROKER_MODE
+            value: opaque
+          ports:
+          - containerPort: 8081
+            protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "broker"
+  namespace: reshare
+spec:
+  type: "ClusterIP"
+  selector:
+    app: "broker"
+  ports:
+  - name: broker
+    port: 8081
+    nodePort: 30333

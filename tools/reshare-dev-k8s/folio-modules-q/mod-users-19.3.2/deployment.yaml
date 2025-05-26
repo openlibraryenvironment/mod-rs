@@ -2,37 +2,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "mod-tags-1-3-0"
+  name: "mod-users-19-3-2"
   labels:
-    app: "mod-tags-1-3-0"
-    module: "mod-tags"
+    app: "mod-users-19-3-2"
+    module: "mod-users"
     folio_role: "backend-module"
   namespace: "reshare"
 spec:
   selector:
     matchLabels:
-      app: "mod-tags-1-3-0"
+      app: "mod-users-19-3-2"
   replicas: 1
   template:
     metadata:
       labels:
-        app: "mod-tags-1-3-0"
-        module: "mod-tags"
+        app: "mod-users-19-3-2"
+        module: "mod-users"
         folio_role: "backend-module"
     spec:
       containers:
-        - name: "mod-tags-1-3-0"
-          image: "folioorg/mod-tags:1.3.0"
+        - name: "mod-users-19-3-2"
+          image: "folioorg/mod-users:19.3.2"
           envFrom:
             - secretRef:
-                name: folio-db-connect
+                name: "folio-db-connect"
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: JAVA_OPTIONS
-              value: "-XX:MaxRAMPercentage=85.0 -Dlog4j2.formatMsgNoLookups=true"
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j2.formatMsgNoLookups=true"
+            - name: "ENV"
+              value: "reshare"
+            - name: "KAFKA_HOST"
+              value: "reshare-kafka-cardinal"
+            - name: "KAFKA_PORT"
+              value: "9092"
           ports:
             - containerPort: 8081
               protocol: TCP
