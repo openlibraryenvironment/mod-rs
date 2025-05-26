@@ -143,6 +143,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             if (stringifiedPickupLocation?.trim()?.length() > 0) {
                                 pr.pickupLocation = stringifiedPickupLocation.trim();
                             }
+
+                            // The above was for situations where it was largely used to stash a shipping ID.
+                            // In case it's actually an address, let's also format it as a multi-line string.
+                            pr.deliveryAddress = formatPhysicalAddress(eventData.requestedDeliveryInfo.address.physicalAddress)
                         }
 
                         // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
@@ -464,6 +468,22 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }
         result.newRequestId = pr.id
+    }
+
+    static String formatPhysicalAddress(Map pa) {
+        def lines = []
+
+        if (pa.line1) lines << pa.line1
+        if (pa.line2) lines << pa.line2
+
+        def cityLine = [pa.locality, pa.region, pa.postalCode]
+            .findAll() // filter out non-truthy elements
+            .join(', ')
+        if (cityLine) lines << cityLine
+
+        if (pa.country) lines << pa.country
+
+        return lines.join('\n')
     }
 
     static boolean isSlnpRequesterStateModel(PatronRequest pr) {

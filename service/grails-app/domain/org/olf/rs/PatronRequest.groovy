@@ -114,6 +114,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String pickupLocationSlug
   DirectoryEntry resolvedPickupLocation
   String pickupURL
+  String deliveryAddress
+  String returnAddress
 
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
@@ -413,6 +415,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     maximumCostsCurrencyCode(nullable: true)
 
     serviceLevel (nullable: true)
+
+    deliveryAddress (nullable: true)
+    returnAddress (nullable: true)
   }
 
   static mapping = {
@@ -549,6 +554,9 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
     maximumCostsCurrencyCode column : 'pr_maximum_costs_code_fk'
 
     serviceLevel column: 'pr_service_level_fk'
+
+    deliveryAddress column : 'pr_delivery_address'
+    returnAddress column : 'pr_return_address'
   }
 
   /**
