@@ -84,13 +84,15 @@ public class ProtocolAuditService {
     }
 
     void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
-        PatronRequest request = PatronRequest.get(patronRequestId)
-        if (request) {
-            try {
-                save(request, baseAuditDetails)
-                request = request.merge(flush: false, failOnError: false)
-            } catch (OptimisticLockingFailureException olfe) {
-                log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
+        PatronRequest.withTransaction { status ->
+            PatronRequest request = PatronRequest.lock(patronRequestId)
+            if (request) {
+                try {
+                    save(request, baseAuditDetails)
+                    request.save(flush: true, failOnError: false)
+                } catch (OptimisticLockingFailureException olfe) {
+                    log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
+                }
             }
         }
     }
