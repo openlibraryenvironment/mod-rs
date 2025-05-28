@@ -328,6 +328,7 @@ class ILLBrokerSpec extends TestBase {
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_END_OF_ROTA);
 
         then:
+        
         assert(true);
     }
 
