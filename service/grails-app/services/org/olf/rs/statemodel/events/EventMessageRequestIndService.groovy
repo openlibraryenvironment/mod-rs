@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
 import javax.servlet.http.HttpServletRequest
@@ -22,8 +23,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
 
+    NewDirectoryService newDirectoryService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
+    SettingsService settingsService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
     ReshareActionService reshareActionService;
@@ -199,6 +202,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr.resolvedRequester = resolvedRequestingAgency;
                 pr.resolvedSupplier = resolvedSupplyingAgency;
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
+
+                String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+                if (requestRouterSetting == "disabled") {
+                    pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
+                }
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
