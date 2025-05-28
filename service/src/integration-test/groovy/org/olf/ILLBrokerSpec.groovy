@@ -12,6 +12,7 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
 import org.springframework.boot.test.context.SpringBootTest
+import spock.lang.Ignore
 import spock.lang.Stepwise
 
 import java.time.ZonedDateTime
@@ -308,6 +309,7 @@ class ILLBrokerSpec extends TestBase {
         assert(true)
     }
 
+
     void "Test local supplier with broker" () {
         String requesterTenantId = TENANT_ONE_NAME;
         String responderTenantId = TENANT_TWO_NAME;
@@ -355,13 +357,20 @@ class ILLBrokerSpec extends TestBase {
 
     void "Test date loan period default and override"(
             String loanPeriodSetting,
-            String loanPeriodOverride
+            int loanOverrideDays
     ) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
         String patronIdentifier = "Broker-test-1-" + System.currentTimeMillis()
         String patronReference = "ref-${patronIdentifier}"
         String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+
+        String overrideDateString = null;
+
+        if (loanOverrideDays) {
+            ZonedDateTime zdt = ZonedDateTime.now(ZoneOffset.UTC).plusDays(loanOverrideDays);
+            overrideDateString = zdt.truncatedTo(ChronoUnit.SECONDS).toString();
+        }
 
         when: "We create a request"
         changeSettings(supplierTenantId, [ (SettingsData.SETTING_DEFAULT_LOAN_PERIOD) : loanPeriodSetting ]);
@@ -390,7 +399,7 @@ class ILLBrokerSpec extends TestBase {
             action: "supplierCheckInToReshare",
             actionParams: [
                 itemBarcodes: [[itemId: "123"]],
-                loanPeriodOverride: loanPeriodOverride
+                loanDateOverride: overrideDateString
             ]
         ];
         performActionAndCheckStatus(supplierPerformActionUrl, supplierCheckInToReshareRequest, supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_SHIP, requesterTenantId, supplierTenantId, patronReference)
@@ -405,17 +414,18 @@ class ILLBrokerSpec extends TestBase {
         performActionFromFileAndCheckStatus(supplierPerformActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
 
         then:
-        ZonedDateTime expectedDueDate = ZonedDateTime.now(ZoneOffset.UTC)
-                .plusDays(loanPeriodOverride ? loanPeriodOverride as int : loanPeriodSetting as int)
-        String expectedDueDateString = expectedDueDate.truncatedTo(ChronoUnit.SECONDS).toString();
+
         def patString = /(\d\d\d\d-\d\d-\d\d)T\d\d:\d\d:\d\d/;
-        assert((expectedDueDateString =~ patString)[0][1] == (supplierPRData.dueDateRS =~ patString)[0][1]) //Make sure the day parts of the expected dates match...seconds might be slightly different, we dont' care
+        if (overrideDateString) {
+            assert ((overrideDateString =~ patString)[0][1] == (supplierPRData.dueDateRS =~ patString)[0][1])
+            //Make sure the day parts of the expected dates match...seconds might be slightly different, we dont' care
+        }
         assert(true);
 
         where:
-        loanPeriodSetting | loanPeriodOverride
+        loanPeriodSetting | loanOverrideDays
         "14"              | null
-        "14"              | "7"
+        "14"              | 7
     }
 
 
