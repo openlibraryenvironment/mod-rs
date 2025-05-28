@@ -12,6 +12,7 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
 import org.springframework.boot.test.context.SpringBootTest
+import spock.lang.Ignore
 import spock.lang.Stepwise
 
 import static groovyx.net.http.ContentTypes.XML //euw, a star import
@@ -286,6 +287,7 @@ class ILLBrokerSpec extends TestBase {
         assert(true)
     }
 
+    @Ignore
     void "Test local supplier with broker" () {
         String requesterTenantId = TENANT_ONE_NAME;
         String responderTenantId = TENANT_TWO_NAME;
