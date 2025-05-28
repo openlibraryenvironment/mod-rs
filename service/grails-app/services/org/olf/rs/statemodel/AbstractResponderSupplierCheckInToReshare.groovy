@@ -42,6 +42,8 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
 
+        String loanPeriodOverride = parameters?.loanPeriodOverride;
+
         if (parameters?.itemBarcodes?.size() > 0) {
             // TODO For now we still use this, so just set to first item in array for now. Should be removed though
             request.selectedItemBarcode = parameters?.itemBarcodes[0]?.itemId;
@@ -232,10 +234,10 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
         } else if (!request.dueDateRS) {
             // Since no due date was set use default if available
             log.debug("No due date set")
-            String dlpStr = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_LOAN_PERIOD);
+            String dlpStr = loanPeriodOverride ?: settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_LOAN_PERIOD);
             int defaultLoanPeriod = dlpStr?.isInteger() ? (dlpStr as int) : 0;
             if (defaultLoanPeriod > 0) {
-                log.debug("Using default loan period")
+                log.debug("Using default loan period");
                 // request.dueDateRS is what is sent to the requester
                 //
                 // Need to use a ZoneOffset rather than ZoneId to produce a string that both the UI and
