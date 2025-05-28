@@ -28,10 +28,11 @@ class ProtocolMessageBuildingService {
    *
   */
 
+  NewDirectoryService newDirectoryService
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ReshareActionService reshareActionService
-    SettingsService settingsService
+  SettingsService settingsService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -156,6 +157,8 @@ class ProtocolMessageBuildingService {
     ]
      */
 
+    String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
     // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
     if (req.deliveryMethod?.value == 'url') {
       message.requestedDeliveryInfo = [
@@ -166,6 +169,15 @@ class ProtocolMessageBuildingService {
           ]
         ]
       ]
+    } else if (requestRouterSetting == "disabled") {
+        def pickupEntry = newDirectoryService.branchEntryByNameAndParentSymbol(req.pickupLocation, req.requestingInstitutionSymbol);
+        if (pickupEntry) {
+            message.requestedDeliveryInfo = [
+                address: [
+                    physicalAddress: newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation)
+                ]
+            ]
+        }
     } else {
       message.requestedDeliveryInfo = [
         // SortOrder
@@ -176,7 +188,7 @@ class ProtocolMessageBuildingService {
             locality:null,
             postalCode:null,
             region:null,
-            county:null
+            country:null
           ]
         ]
       ]
