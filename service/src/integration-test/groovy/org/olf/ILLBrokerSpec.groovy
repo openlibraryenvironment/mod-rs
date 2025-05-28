@@ -194,7 +194,7 @@ class ILLBrokerSpec extends TestBase {
     }
 
 
-        void "Attempt to delete any old tenants"(tenantid, name) {
+    void "Attempt to delete any old tenants"(tenantid, name) {
         when:"We post a delete request"
         boolean result = deleteTenant(tenantid, name)
 
@@ -409,7 +409,7 @@ class ILLBrokerSpec extends TestBase {
                 .plusDays(loanPeriodOverride ? loanPeriodOverride as int : loanPeriodSetting as int)
         String expectedDueDateString = expectedDueDate.truncatedTo(ChronoUnit.SECONDS).toString();
         def patString = /(\d\d\d\d-\d\d-\d\d)T\d\d:\d\d:\d\d/;
-        assert((expectedDueDateString =~ patString)[0][1] == (supplierPRData.dueDateRS =~ patString)[0][1])
+        assert((expectedDueDateString =~ patString)[0][1] == (supplierPRData.dueDateRS =~ patString)[0][1]) //Make sure the day parts of the expected dates match...seconds might be slightly different, we dont' care
         assert(true);
 
         where:
