@@ -42,7 +42,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   illbroker:
-    image: ghcr.io/indexdata/crosslink-broker@sha256:0aa3148431bea12594e684db39faec9c6c826e69689ded7ade52bea177cc71f4
+    image: ghcr.io/indexdata/crosslink-broker:main
     container_name: illbroker
     ports:
       - "19082:8080"
