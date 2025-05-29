@@ -149,7 +149,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
                             // The above was for situations where it was largely used to stash a shipping ID.
                             // In case it's actually an address, let's also format it as a multi-line string.
-                            pr.deliveryAddress = formatPhysicalAddress(eventData.requestedDeliveryInfo.address.physicalAddress)
+                            pr.deliveryAddress = formatPhysicalAddress(eventData?.requestedDeliveryInfo?.address?.physicalAddress)
                         }
 
                         // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
@@ -479,6 +479,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
     }
 
     static String formatPhysicalAddress(Map pa) {
+        if (!pa) return null
+
         def lines = []
 
         if (pa.line1) lines << pa.line1
