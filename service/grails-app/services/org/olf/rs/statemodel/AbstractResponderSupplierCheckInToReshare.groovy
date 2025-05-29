@@ -47,7 +47,9 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
     protected ActionResultDetails performCommonAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean result = false;
 
-        String loanDateOverrideString = parameters?.loanDateOverride;
+        log.debug("Got parameters: ${parameters}");
+
+        final String loanDateOverrideString = parameters?.loanDateOverride;
 
         if (parameters?.itemBarcodes?.size() > 0) {
             // TODO For now we still use this, so just set to first item in array for now. Should be removed though
@@ -264,8 +266,6 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                     request.dueDateRS = defaultDue.truncatedTo(ChronoUnit.SECONDS).toString();
                 }
             } else {
-                //ZonedDateTime defaultDue = ZonedDateTime.parse(loanDateOverrideString);
-                //request.parsedDueDateRS = Date.from(defaultDue.toInstant());
                 request.parsedDueDateRS = loanDateOverride;
                 request.dueDateRS = loanDateOverrideString;
             }
