@@ -357,7 +357,7 @@ class ILLBrokerSpec extends TestBase {
 
     void "Test date loan period default and override"(
             String loanPeriodSetting,
-            int loanOverrideDays
+            Integer loanOverrideDays
     ) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
