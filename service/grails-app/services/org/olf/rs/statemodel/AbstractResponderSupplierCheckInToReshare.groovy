@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
+import java.time.Instant
 import org.olf.rs.Counter
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
@@ -21,6 +22,8 @@ import org.olf.rs.constants.Directory
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.actions.ActionResponderSupplierCheckOutOfReshareService
 import org.olf.rs.statemodel.events.EventRespNewSlnpPatronRequestIndService
+
+import java.time.temporal.TemporalAccessor
 
 /**
  * Abstract Responder supplier check in to reshare service implementation
@@ -240,7 +243,8 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
             if (loanDateOverrideString) {
                 try {
                     DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
-                    loanDateOverride = dtf.parse(loanDateOverrideString);
+                    TemporalAccessor ta = dtf.parse(loanDateOverrideString);
+                    loanDateOverride = new Date(Instant.from(ta).toEpochMilli());
                 } catch (Exception e) {
                     log.warn("Unable to parse date string ${loanDateOverrideString}: ${e.getLocalizedMessage()}");
                 }
@@ -260,8 +264,10 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                     request.dueDateRS = defaultDue.truncatedTo(ChronoUnit.SECONDS).toString();
                 }
             } else {
-                request.parsedDueDateRS = loanDateOverrideString;
-                request.dueDateRS = loanDateOverride;
+                //ZonedDateTime defaultDue = ZonedDateTime.parse(loanDateOverrideString);
+                //request.parsedDueDateRS = Date.from(defaultDue.toInstant());
+                request.parsedDueDateRS = loanDateOverride;
+                request.dueDateRS = loanDateOverrideString;
             }
         }
 

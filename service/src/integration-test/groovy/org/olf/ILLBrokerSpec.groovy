@@ -424,8 +424,8 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         loanPeriodSetting | loanOverrideDays
-        "14"              | null
         "14"              | 7
+        "14"              | null
     }
 
 
