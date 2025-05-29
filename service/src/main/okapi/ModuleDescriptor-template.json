@@ -449,7 +449,8 @@
           "pathPattern": "/rs/settings/worker",
           "unit": "minute",
           "delay": "2",
-          "modulePermissions": [ 
+          "modulePermissions": [
+            "illmock.directory.entries.get",
             "configuration.entries.item.get", 
             "configuration.entries.collection.get", 
             "templates.item.get",
