@@ -244,7 +244,7 @@ class ILLBrokerSpec extends TestBase {
             doDelete("${BROKER_BASE_URL}/peers/${peerData.items[0].ID}")
         }
 
-        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"http://host.docker.internal:${serverPort}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{}}"
+        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"http://host.docker.internal:${serverPort}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{},\"BrokerMode\":\"transparent\"}"
         doPost("${BROKER_BASE_URL}/peers", body)
         then:"Peer is saved"
         1==1
