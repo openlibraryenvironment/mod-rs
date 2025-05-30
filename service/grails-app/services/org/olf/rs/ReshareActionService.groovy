@@ -509,7 +509,9 @@ public class ReshareActionService {
                 supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(
                         pr, reasonForMessage, status, messageParams, appendSequence);
             }
-            eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+            if (eventResultDetails) {
+                eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+            }
             Map symbols = [
                     senderSymbol: defaultRequestSymbolString,
                     receivingSymbol: defaultPeerSymbolString
@@ -523,7 +525,9 @@ public class ReshareActionService {
             // If it is not a retry we need to generate the message
             if (supplyingMessageRequest == null) {
                 supplyingMessageRequest = protocolMessageBuildingService.buildSupplyingAgencyMessage(pr, reasonForMessage, status, messageParams, appendSequence);
-                eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+                if (eventResultDetails) {
+                    eventResultDetails.messageSequenceNo = pr.lastSequenceSent;
+                }
             }
 
             // Now send the message
