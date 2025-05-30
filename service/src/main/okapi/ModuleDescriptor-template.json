@@ -233,22 +233,35 @@
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "POST" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
+
         },
         {
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "GET" ],
@@ -450,7 +463,6 @@
           "unit": "minute",
           "delay": "2",
           "modulePermissions": [
-            "illmock.directory.entries.get",
             "configuration.entries.item.get", 
             "configuration.entries.collection.get", 
             "templates.item.get",
