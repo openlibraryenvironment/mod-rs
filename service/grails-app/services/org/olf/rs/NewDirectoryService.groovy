@@ -13,12 +13,15 @@ public class NewDirectoryService {
         def result = null
         log.debug("Attempting to retrieve directory entries for ${symbol}")
         try {
-            result = okapiClient.getSync("/directory/entries", [cql:URLEncoder.encode("symbol any ${symbol}", "UTF-8")])
+            String cqlParam = URLEncoder.encode("symbol any ${symbol}", "UTF-8");
+            log.debug("Sending cql parameter: ${cqlParam}")
+            result = okapiClient.getSync("/directory/entries", [cql:cqlParam])
             log.debug("Got directory entries ${result}");
         }
         catch ( Exception e ) {
             log.error("Problem connecting to directory ${e.toString()}");
-            e.printStackTrace()
+            log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+            e.printStackTrace();
         }
         return result;
     }
