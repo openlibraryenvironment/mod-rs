@@ -13,9 +13,7 @@ public class NewDirectoryService {
         def result = null
         log.debug("Attempting to retrieve directory entries for ${symbol}")
         try {
-            String cqlParam = "symbol any ${symbol}";
-            log.debug("Sending cql parameter: ${cqlParam}")
-            result = okapiClient.getSync("/directory/entries", [cql:cqlParam])
+            result = okapiClient.getSync("/directory/entries", [cql:"symbol any ${symbol}"])
             log.debug("Got directory entries ${result}");
         }
         catch ( Exception e ) {
