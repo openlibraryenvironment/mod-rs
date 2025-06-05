@@ -6,9 +6,8 @@ import com.k_int.okapi.OkapiClient
 @Slf4j
 public class NewDirectoryService {
 
-    //@Autowired
-    //OkapiClient okapiClient
-    SimpleOkapiService simpleOkapiService;
+    @Autowired
+    OkapiClient okapiClient
 
     Object entriesBySymbol(String symbol) {
         def result = null
@@ -16,13 +15,12 @@ public class NewDirectoryService {
         try {
             String cqlParam = URLEncoder.encode("symbol any ${symbol}", "UTF-8");
             log.debug("Sending cql parameter: ${cqlParam}")
-            //result = okapiClient.getSync("/directory/entries", [cql:cqlParam])
-            result = simpleOkapiService.get("/directory/entries", [cql:cqlParam]);
+            result = okapiClient.getSync("/directory/entries", [cql:cqlParam])
             log.debug("Got directory entries ${result}");
         }
         catch ( Exception e ) {
             log.error("Problem connecting to directory ${e.toString()}");
-            //log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+            log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
             e.printStackTrace();
         }
         return result;
