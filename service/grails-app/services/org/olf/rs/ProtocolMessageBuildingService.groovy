@@ -171,10 +171,15 @@ class ProtocolMessageBuildingService {
       ]
     } else if (requestRouterSetting == "disabled") {
         def pickupEntry = newDirectoryService.branchEntryByNameAndParentSymbol(req.pickupLocation, req.requestingInstitutionSymbol);
-        if (pickupEntry) {
+        def physicalAddress = newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation);
+        if (!physicalAddress) {
+            def parentPickupEntry = newDirectoryService.institutionEntryBySymbol(req.requestingInstitutionSymbol);
+            physicalAddress = newDirectoryService.shippingAddressMapForEntry(parentPickupEntry, req.pickupLocation);
+        }
+        if (physicalAddress) {
             message.requestedDeliveryInfo = [
                 address: [
-                    physicalAddress: newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation)
+                    physicalAddress: physicalAddress
                 ]
             ]
         }

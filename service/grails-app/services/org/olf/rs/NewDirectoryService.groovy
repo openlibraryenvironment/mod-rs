@@ -6,7 +6,7 @@ import com.k_int.okapi.OkapiClient
 @Slf4j
 public class NewDirectoryService {
 
-    @Autowired
+    //@Autowired
     OkapiClient okapiClient
 
     Object entriesBySymbol(String symbol) {
