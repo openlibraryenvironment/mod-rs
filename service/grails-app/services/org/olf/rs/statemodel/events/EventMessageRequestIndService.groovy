@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
 import javax.servlet.http.HttpServletRequest
@@ -22,8 +23,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
 
+    NewDirectoryService newDirectoryService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
+    SettingsService settingsService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
     ReshareActionService reshareActionService;
@@ -143,6 +146,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             if (stringifiedPickupLocation?.trim()?.length() > 0) {
                                 pr.pickupLocation = stringifiedPickupLocation.trim();
                             }
+
+                            // The above was for situations where it was largely used to stash a shipping ID.
+                            // In case it's actually an address, let's also format it as a multi-line string.
+                            pr.deliveryAddress = formatPhysicalAddress(eventData?.requestedDeliveryInfo?.address?.physicalAddress)
                         }
 
                         // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
@@ -195,6 +202,11 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr.resolvedRequester = resolvedRequestingAgency;
                 pr.resolvedSupplier = resolvedSupplyingAgency;
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
+
+                String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+                if (requestRouterSetting == "disabled") {
+                    pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
+                }
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
@@ -464,6 +476,24 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }
         result.newRequestId = pr.id
+    }
+
+    static String formatPhysicalAddress(Map pa) {
+        if (!pa) return null
+
+        def lines = []
+
+        if (pa.line1) lines << pa.line1
+        if (pa.line2) lines << pa.line2
+
+        def cityLine = [pa.locality, pa.region, pa.postalCode]
+            .findAll() // filter out non-truthy elements
+            .join(', ')
+        if (cityLine) lines << cityLine
+
+        if (pa.country) lines << pa.country
+
+        return lines.join('\n')
     }
 
     static boolean isSlnpRequesterStateModel(PatronRequest pr) {

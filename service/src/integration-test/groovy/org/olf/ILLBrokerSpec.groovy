@@ -12,9 +12,14 @@ import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
 import org.springframework.boot.test.context.SpringBootTest
+import spock.lang.Ignore
 import spock.lang.Stepwise
 
-import static groovyx.net.http.ContentTypes.XML //euw, a star import
+import java.time.ZonedDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+
+import static groovyx.net.http.ContentTypes.XML
 
 @Slf4j
 @Integration
@@ -163,14 +168,32 @@ class ILLBrokerSpec extends TestBase {
         return request_id
     }
 
-    private void performActionAndCheckStatus(String performSupActionUrl, String fileName, String tenant, String reqStatus, String supStatus, String requesterTenantId, String responderTenantId, String patronReference){
-        String payload = new File("src/integration-test/resources/scenarios/${fileName}").text
-        setHeaders(['X-Okapi-Tenant': tenant])
-        doPost(performSupActionUrl, payload)
-        waitForRequestState(requesterTenantId, 10000, patronReference, reqStatus)
-        waitForRequestState(responderTenantId, 10000, patronReference, supStatus)
-
+    private Map performActionFromFileAndCheckStatus(String performSupActionUrl, String actionFileName, String tenant,
+            String reqStatus, String supStatus, String requesterTenantId, String responderTenantId,
+            String patronReference) {
+        String payload = new File("src/integration-test/resources/scenarios/${actionFileName}").text
+        return performActionAndCheckStatus(performSupActionUrl, payload, tenant, reqStatus, supStatus,
+                requesterTenantId, responderTenantId, patronReference);
     }
+
+
+    private Map performActionAndCheckStatus(String performSupActionUrl, Object actionPayload, String tenant,
+            String reqStatus, String supStatus, String requesterTenantId, String responderTenantId,
+            String patronReference) {
+        setHeaders(['X-Okapi-Tenant': tenant])
+        doPost(performSupActionUrl, actionPayload)
+        String requesterResult = waitForRequestState(requesterTenantId, 10000, patronReference, reqStatus);
+        String responderResult = waitForRequestState(responderTenantId, 10000, patronReference, supStatus);
+        return [responderResult : responderResult, requesterResult : requesterResult];
+    }
+
+    private Map getPatronRequestData(String requestId, String tenantId) {
+        setHeaders(['X-Okapi-Tenant' : tenantId]);
+        String patronRequestUrl = "${baseUrl}/rs/patronrequests/${requestId}";
+        Map data = doGet(patronRequestUrl) as Map;
+        return data;
+    }
+
 
     void "Attempt to delete any old tenants"(tenantid, name) {
         when:"We post a delete request"
@@ -216,12 +239,12 @@ class ILLBrokerSpec extends TestBase {
     void "Create broker peers"(String peer_symbol, String tenant) {
         when:"We clean and update peer ${peer_symbol}"
 
-        Map peerData = doGet("${BROKER_BASE_URL}/peers?cql=symbol+any+${peer_symbol}")
+        Map peerData = doGet("${BROKER_BASE_URL}/peers?cql=symbol+any+${peer_symbol}") as Map
         if (peerData.items?.size == 1) {
             doDelete("${BROKER_BASE_URL}/peers/${peerData.items[0].ID}")
         }
 
-        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"http://host.docker.internal:${serverPort}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{}}"
+        String body = "{\"HttpHeaders\":{\"x-okapi-tenant\":\"${tenant}\"},\"Name\":\"${peer_symbol}\",\"RefreshPolicy\":\"never\",\"Symbols\":[\"${peer_symbol}\"],\"Url\":\"http://host.docker.internal:${serverPort}/rs/externalApi/iso18626\",\"Vendor\":\"illmock\",\"CustomData\":{},\"BrokerMode\":\"transparent\"}"
         doPost("${BROKER_BASE_URL}/peers", body)
         then:"Peer is saved"
         1==1
@@ -259,35 +282,37 @@ class ILLBrokerSpec extends TestBase {
         String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
         String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
         // Respond yes
-        performActionAndCheckStatus(performSupActionUrl, "nrSupplierAnswerYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierAnswerYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
 
         // Mark pullslip
-        performActionAndCheckStatus(performSupActionUrl, "nrSupplierPrintPullSlip.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_PICKING, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierPrintPullSlip.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_PICKING, requesterTenantId, supplierTenantId, patronReference)
 
         // Check in
-        performActionAndCheckStatus(performSupActionUrl, "supplierCheckInToReshare.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_SHIP, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierCheckInToReshare.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_SHIP, requesterTenantId, supplierTenantId, patronReference)
 
         // Mark shipped
-        performActionAndCheckStatus(performSupActionUrl, "supplierMarkShipped.json", supplierTenantId, Status.PATRON_REQUEST_SHIPPED, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierMarkShipped.json", supplierTenantId, Status.PATRON_REQUEST_SHIPPED, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
 
         // Mark received
-        performActionAndCheckStatus(performActionUrl, "requesterReceived.json", requesterTenantId, Status.PATRON_REQUEST_CHECKED_IN, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "requesterReceived.json", requesterTenantId, Status.PATRON_REQUEST_CHECKED_IN, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
 
         // Patron returned
-        performActionAndCheckStatus(performActionUrl, "patronReturnedItem.json", requesterTenantId, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "patronReturnedItem.json", requesterTenantId, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
 
         // Return shipped
-        performActionAndCheckStatus(performActionUrl, "shippedReturn.json", requesterTenantId, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, Status.RESPONDER_ITEM_RETURNED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "shippedReturn.json", requesterTenantId, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, Status.RESPONDER_ITEM_RETURNED, requesterTenantId, supplierTenantId, patronReference)
 
         // Mark shipped
-        performActionAndCheckStatus(performSupActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
 
         then:
         assert(true)
     }
 
+
     void "Test local supplier with broker" () {
         String requesterTenantId = TENANT_ONE_NAME;
+        String responderTenantId = TENANT_TWO_NAME;
         String patronIdentifier = "Broker-test-2-" + System.currentTimeMillis();
         String patronReference = "ref-${patronIdentifier}";
         String systemInstanceIdentifier = "return-ISIL:${SYMBOL_ONE_NAME}::send_this_back;return-ISIL:${SYMBOL_TWO_NAME}::send_this_back2"; // we want to test local review
@@ -308,18 +333,101 @@ class ILLBrokerSpec extends TestBase {
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         def response = doPost("${baseUrl}/rs/patronrequests".toString(), request);
         String requestId = response?.id
-        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+        String requesterPerformActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
 
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_LOCAL_REVIEW)
 
         String payload = new File("src/integration-test/resources/scenarios/requesterLoSupCannotSupply.json").text
         setHeaders(['X-Okapi-Tenant': requesterTenantId])
-        doPost(performActionUrl, payload)
+        doPost(requesterPerformActionUrl, payload)
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+
+        def responderId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderId}/performAction"
+
+        String payload2 = new File("src/integration-test/resources/scenarios/supplierCannotSupply.json").text;
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+        doPost(responderPerformActionUrl, payload2);
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_END_OF_ROTA);
 
         then:
         assert(true);
     }
+
+    void "Test date loan period default and override"(
+            String loanPeriodSetting,
+            Integer loanOverrideDays
+    ) {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-test-1-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+
+        String overrideDateString = null;
+
+        if (loanOverrideDays) {
+            ZonedDateTime zdt = ZonedDateTime.now(ZoneOffset.UTC).plusDays(loanOverrideDays);
+            overrideDateString = zdt.truncatedTo(ChronoUnit.SECONDS).toString();
+        }
+
+        when: "We create a request"
+        changeSettings(supplierTenantId, [ (SettingsData.SETTING_DEFAULT_LOAN_PERIOD) : loanPeriodSetting ]);
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Integration testing with the broker",
+                author                  : "Kerr, Bro",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supplierRequestId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        String supplierPerformActionUrl = "${baseUrl}/rs/patronrequests/${supplierRequestId}/performAction"
+        String requesterPerformActionUrl = "${baseUrl}/rs/patronrequests/${requesterRequestId}/performAction"
+
+        Map requestIdMap = performActionFromFileAndCheckStatus(supplierPerformActionUrl, "nrSupplierAnswerYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(supplierPerformActionUrl, "nrSupplierPrintPullSlip.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_PICKING, requesterTenantId, supplierTenantId, patronReference)
+
+        Map supplierCheckInToReshareRequest = [
+            action: "supplierCheckInToReshare",
+            actionParams: [
+                itemBarcodes: [[itemId: "123"]],
+                loanDateOverride: overrideDateString
+            ]
+        ];
+        performActionAndCheckStatus(supplierPerformActionUrl, supplierCheckInToReshareRequest, supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_SHIP, requesterTenantId, supplierTenantId, patronReference)
+
+        Map supplierPRData = getPatronRequestData(supplierRequestId, supplierTenantId);
+        Map requesterPRData = getPatronRequestData(requesterRequestId, requesterTenantId);
+
+        performActionFromFileAndCheckStatus(supplierPerformActionUrl, "supplierMarkShipped.json", supplierTenantId, Status.PATRON_REQUEST_SHIPPED, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(requesterPerformActionUrl, "requesterReceived.json", requesterTenantId, Status.PATRON_REQUEST_CHECKED_IN, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(requesterPerformActionUrl, "patronReturnedItem.json", requesterTenantId, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(requesterPerformActionUrl, "shippedReturn.json", requesterTenantId, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, Status.RESPONDER_ITEM_RETURNED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(supplierPerformActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
+
+        then:
+
+        def patString = /(\d\d\d\d-\d\d-\d\d)T\d\d:\d\d:\d\d/;
+        if (overrideDateString) {
+            assert ((overrideDateString =~ patString)[0][1] == (supplierPRData.dueDateRS =~ patString)[0][1])
+            //Make sure the day parts of the expected dates match...seconds might be slightly different, we dont' care
+        }
+        assert(true);
+
+        where:
+        loanPeriodSetting | loanOverrideDays
+        "14"              | 7
+        "14"              | null
+    }
+
 
 
 }
