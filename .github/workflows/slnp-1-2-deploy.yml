@@ -1,4 +1,4 @@
-name: deploy
+name: slnp-1-2-deploy
 
 on:
   workflow_dispatch:
