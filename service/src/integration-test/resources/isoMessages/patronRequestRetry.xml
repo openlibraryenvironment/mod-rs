@@ -1,0 +1,67 @@
+<ISO18626Message xmlns="http://illtransactions.org/2013/iso18626" ill:version="1.2" xmlns:ill="http://illtransactions.org/2013/iso18626" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://illtransactions.org/2013/iso18626 http://illtransactions.org/schemas/ISO-18626-v1_2.xsd">
+    <request>
+        <header>
+            <requestingAgencyId>
+                <agencyIdType scheme="">ISIL</agencyIdType>
+                <agencyIdValue></agencyIdValue>
+            </requestingAgencyId>
+            <multipleItemRequestId></multipleItemRequestId>
+            <timestamp>2023-11-16T12:32:11.056Z</timestamp>
+            <requestingAgencyRequestId>requestId_holder</requestingAgencyRequestId>
+        </header>
+        <bibliographicInfo>
+            <supplierUniqueRecordId>54321</supplierUniqueRecordId>
+            <title>Lord of the Rings</title>
+            <author>J.R.R. Tolkien</author>
+            <authorId></authorId>
+            <subtitle></subtitle>
+            <seriesTitle></seriesTitle>
+            <edition></edition>
+            <titleOfComponent></titleOfComponent>
+            <authorOfComponent></authorOfComponent>
+            <issue></issue>
+            <pagesRequested></pagesRequested>
+            <estimatedNoPages></estimatedNoPages>
+            <bibliographicItemId>
+                <bibliographicItemIdentifierCode scheme="">ISBN</bibliographicItemIdentifierCode>
+                <bibliographicItemIdentifier>12321312</bibliographicItemIdentifier>
+            </bibliographicItemId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">TitelId</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>in00000000002</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">BsTyp2</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>L</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+            <bibliographicRecordId>
+                <bibliographicRecordIdentifierCode ill:scheme="ZFL">MedTyp</bibliographicRecordIdentifierCode>
+                <bibliographicRecordIdentifier>ml</bibliographicRecordIdentifier>
+            </bibliographicRecordId>
+            <sponsor></sponsor>
+            <informationSource></informationSource>
+        </bibliographicInfo>
+        <serviceInfo>
+            <requestType>Retry</requestType>
+            <requestSubType>PatronRequest</requestSubType>
+            <requestingAgencyPreviousRequestId></requestingAgencyPreviousRequestId>
+            <serviceType>Loan</serviceType>
+            <needBeforeDate></needBeforeDate>
+            <startDate></startDate>
+            <endDate></endDate>
+            <note></note>
+        </serviceInfo>
+        <patronInfo>
+            <patronId>patronId_holder</patronId>
+            <surname></surname>
+            <givenName></givenName>
+        </patronInfo>
+        <requestedDeliveryInfo>
+            <address>
+                <physicalAddress>
+                    <line1>RSSlnpOne</line1>
+                </physicalAddress>
+            </address>
+        </requestedDeliveryInfo>
+    </request>
+</ISO18626Message>

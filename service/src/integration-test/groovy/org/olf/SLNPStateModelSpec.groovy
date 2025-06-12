@@ -575,6 +575,75 @@ class SLNPStateModelSpec extends TestBase {
         'RSSlnpOne' | 'RSSlnpThree' | 'RSS1'        | 'RSS3'      | '1234-5678-3' | '1234-5671' | 'patronRequest.xml' | 'ISIL:RSS1'       | 'supplyingAgencyMessage_statusChange.xml' | ActionEventResultQualifier.QUALIFIER_ABORTED   | Status.SLNP_REQUESTER_ABORTED   | [ 'RS-TESTCASE-ISO-3' ]
     }
 
+    void "Send ISO request and retry"(String tenant_id,
+                            String peer_tenant,
+                            String agencyIdValue,
+                            String requestId,
+                            String patronId,
+                            String requestFile,
+                            String requesting_symbol,
+                            String messageFile,
+                            String finalStatus,
+                            String[] tags) {
+        when:"post new request"
+        log.debug("Create a new request ${tenant_id} ${tags} ${requestId} ${patronId}")
+
+        String requestXml = new File("src/integration-test/resources/isoMessages/${requestFile}").text
+        requestXml = requestXml.replace('agencyIdValue_holder', agencyIdValue)
+                .replace('requestId_holder', requestId)
+                .replace('patronId_holder', patronId)
+
+        setHeaders([
+                'X-Okapi-Tenant': tenant_id,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ])
+
+        // Set Auto Responder
+        changeSettings(tenant_id, [ 'auto_responder_status' : 'off' ])
+
+        def resp = doPost("${baseUrl}/rs/externalApi/iso18626".toString(), requestXml)
+
+        log.debug("CreateReqTest2 -- Response: RESP:${resp.ISO18626Message} ")
+
+        String req_request = waitForRequestStateByHrid(tenant_id, 20000, requestId, Status.SLNP_REQUESTER_IDLE)
+        waitForNewEventProcessed(tenant_id, 10000, req_request)
+        log.debug("Created new request for iso test case 1. RESQUESTER ID is : ${req_request}")
+
+        String messageXml = new File("src/integration-test/resources/isoMessages/${messageFile}").text
+        messageXml = messageXml.replace('requestId_holder', requestId)
+
+        setHeaders([
+                'X-Okapi-Tenant': tenant_id,
+                'X-Okapi-Token': 'dummy',
+                'X-Okapi-User-Id': 'dummy',
+                'X-Okapi-Permissions': '[ "directory.admin", "directory.user", "directory.own.read", "directory.any.read" ]'
+        ])
+        doPost("${baseUrl}/rs/externalApi/iso18626".toString(), messageXml)
+
+        String message_request = waitForRequestStateByHrid(tenant_id, 20000, requestId, finalStatus)
+        log.debug("Updated status. RESQUESTER ID is : ${message_request} with status: ${finalStatus}")
+
+        setHeaders([ 'X-Okapi-Tenant': tenant_id ]);
+        def request = doGet("${baseUrl}rs/patronrequests",
+                [
+                        'max':'100',
+                        'offset':'0',
+                        'match':'hrid',
+                        'term':requestId
+                ])
+
+        then:"Check the return value"
+        assert req_request != null
+        assert message_request != null
+        assert request[0].requestingInstitutionSymbol == "ISIL:RSS1"
+
+        where:
+        tenant_id   | peer_tenant   | agencyIdValue | requestId     | patronId    | requestFile         | requesting_symbol | messageFile              | finalStatus                 | tags
+        'RSSlnpOne' | 'RSSlnpThree' | 'RSS1'        | '1234-5678-8' | '1234-5679' | 'patronRequest.xml' | 'ISIL:RSS1'       | 'patronRequestRetry.xml' | Status.SLNP_REQUESTER_IDLE  | [ 'RS-TESTCASE-ISO-RETRY-1' ]
+    }
+
     void "Test initial state transition to result state by performed action"(
             String tenantId,
             String requestTitle,
