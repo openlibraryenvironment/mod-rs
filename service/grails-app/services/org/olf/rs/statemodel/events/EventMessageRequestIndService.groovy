@@ -197,10 +197,14 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
-                pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+                if (!pr.requestingInstitutionSymbol || header.requestingAgencyId?.agencyIdValue) {
+                    pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+                }
 
                 pr.resolvedRequester = resolvedRequestingAgency;
-                pr.resolvedSupplier = resolvedSupplyingAgency;
+                if (pr.resolvedSupplier == null || resolvedRequestingAgency != null) {
+                    pr.resolvedSupplier = resolvedSupplyingAgency;
+                }
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
 
                 String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
@@ -271,8 +275,14 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.messageType = Iso18626Constants.REQUEST
             result.supIdType = header.supplyingAgencyId?.agencyIdType // supplyingAgencyId can be null
             result.supId = header.supplyingAgencyId?.agencyIdValue // supplyingAgencyId can be null
-            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
-            result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            if (header.requestingAgencyId.agencyIdValue) {
+                result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
+                result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            } else {
+                List<String> parts = pr.requestingInstitutionSymbol.split(':')
+                result.reqAgencyIdType = parts[0]
+                result.reqAgencyId = parts[1]
+            }
             result.reqId = header.requestingAgencyRequestId
             result.timeRec = header.timestamp
         } else {
