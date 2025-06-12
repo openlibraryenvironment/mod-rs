@@ -32,7 +32,7 @@ def main():
             'sydney', 
             'melbourne'
         ]
-    else if k8s_environment == "slnp":
+    elif k8s_environment == "slnp":
         tenants = [
             'slnptest_one', 
             'slnptest_two',
