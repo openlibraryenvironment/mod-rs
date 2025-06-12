@@ -945,7 +945,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierPrintPullSlip.json"      | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_COPY_AWAIT_PICKING         | null               | null                  | "URL"          | "Copy"      | "{status=true}"        | null
-        "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"                   | ({ r, s -> r.pickupURL == 'https://some.domain?param=value' })
     }
 
     void "test Dynamic Groovy"() {

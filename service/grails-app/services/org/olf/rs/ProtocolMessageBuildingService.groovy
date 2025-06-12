@@ -305,11 +305,15 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
+    boolean isUrlDelivery = false;
     if (messageParams?.deliveredFormat) {
-      message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
-      if (messageParams.url) {
-        message.deliveryInfo['url'] = messageParams.url;
-      }
+        message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
+    }
+   if (messageParams.url) {
+          //this needs to go into itemId instead
+          message.deliveryInfo['url'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url;
+          isUrlDelivery = true;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
@@ -317,17 +321,19 @@ class ProtocolMessageBuildingService {
         Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
             rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
         }
-        switch (filteredVolumes.size()) {
-            case 0:
-                break;
-            case 1:
-                // We have a single volume, send as a single itemId string
-                message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
-                break;
-            default:
-                // We have many volumes, send as an array of multiVol itemIds
-                message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
-                break;
+        if (!isUrlDelivery) {
+            switch (filteredVolumes.size()) {
+                case 0:
+                    break;
+                case 1:
+                    // We have a single volume, send as a single itemId string
+                    message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
+                    break;
+                default:
+                    // We have many volumes, send as an array of multiVol itemIds
+                    message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
+                    break;
+            }
         }
     }
 

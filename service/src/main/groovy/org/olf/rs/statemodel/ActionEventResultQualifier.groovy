@@ -41,4 +41,5 @@ public class ActionEventResultQualifier {
     static public final String QUALIFIER_DOCUMENT_AVAILABLE    = 'DocumentAvailable';
     static public final String QUALIFIER_SENT_TO_SUPPLIER      = 'SentToSupplier';
     static public final String QUALIFIER_WILL_SUPPLY           = 'WillSupply';
+    static public final String QUALIFIER_COPY_COMPLETED        = 'CopyCompleted';
 }
