@@ -21,7 +21,7 @@ jobs:
             -a "disable" \
             -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
             -u "okapi_admin" \
-            -e "slnp"
+            -e "slnp" \
             -p ${{ secrets.OKAPI_ADMIN_PW }} \
 
       - name: Deploy latest to K8s
@@ -42,6 +42,6 @@ jobs:
             -a "enable" \
             -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
             -u "okapi_admin" \
+            -e "slnp" \
             -p ${{ secrets.OKAPI_ADMIN_PW }} \
-            -e "slnp"
             -r "https://registry.reshare-dev.indexdata.com"
