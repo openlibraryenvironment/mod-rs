@@ -10,7 +10,7 @@ import org.olf.rs.statemodel.Actions
 class ActionResponderSupplierAddURLToDocumentService extends AbstractAction{
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_LOANED, [deliveredFormat: 'URL', *:parameters], actionResultDetails);
+        reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_COPY_COMPLETED, [deliveredFormat: 'URL', *:parameters], actionResultDetails);
         actionResultDetails.auditMessage = 'URL Added';
 
         return actionResultDetails;

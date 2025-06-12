@@ -848,8 +848,7 @@ class ProtocolMessageService {
     }
     if (!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
       TypeSchemeValuePair pair = new TypeSchemeValuePair()
-      pair.setScheme('URL')
-      pair.setValue(eventData.deliveryInfo.url)
+      pair.setValue('URL')
       deliveryInfo.setSentVia(pair)
     }
     deliveryInfo.setSentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
