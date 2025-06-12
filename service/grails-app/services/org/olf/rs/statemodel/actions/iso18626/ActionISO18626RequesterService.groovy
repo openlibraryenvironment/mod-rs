@@ -150,8 +150,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
 
             // If the deliveredFormat is URL and a URL is present, store it on the request
-            if (parameters.deliveryInfo?.deliveredFormat == 'URL') {
-                def url = parameters.deliveryInfo?.itemId ?: parameters.deliveryInfo?.sentVia
+            if (parameters.deliveryInfo?.sentVia == 'URL') {
+                def url = parameters.deliveryInfo?.itemId
                 if (url) {
                     request.pickupURL = url
                 }

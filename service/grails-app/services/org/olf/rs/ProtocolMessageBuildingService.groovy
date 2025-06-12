@@ -307,13 +307,13 @@ class ProtocolMessageBuildingService {
 
     boolean isUrlDelivery = false;
     if (messageParams?.deliveredFormat) {
-      message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
-      if (messageParams.url) {
+        message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
+    }
+   if (messageParams.url) {
           //this needs to go into itemId instead
           message.deliveryInfo['url'] = messageParams.url;
           message.deliveryInfo['itemId'] = messageParams.url;
           isUrlDelivery = true;
-      }
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
