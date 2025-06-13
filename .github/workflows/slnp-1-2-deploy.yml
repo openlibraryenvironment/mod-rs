@@ -1,0 +1,47 @@
+name: slnp-1-2-deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  K8S_NAMESPACE: 'reshare'
+  K8S_DEPLOYMENT: 'mod-rs-eighteen'
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout module
+        uses: actions/checkout@v4
+
+      - name: Deactivate mod-rs
+        run: |
+          /usr/bin/python3 .github/workflows/scripts/reenable.py \
+            -a "disable" \
+            -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
+            -u "okapi_admin" \
+            -e "slnp" \
+            -p ${{ secrets.OKAPI_ADMIN_PW }} \
+
+      - name: Deploy latest to K8s
+        uses: actions-hub/kubectl@v1.21.2
+        env:
+          KUBE_CONFIG: ${{ secrets.RESHARE_DEV_SA_KUBECONFIG }}
+        with:
+          args:
+            -n ${{ env.K8S_NAMESPACE }} rollout restart deployment ${{ env.K8S_DEPLOYMENT }}
+
+      - name: Wait for new image to come up
+        run: sleep 180
+        shell: bash
+
+      - name: Reactivate mod-rs
+        run: |
+          /usr/bin/python3 .github/workflows/scripts/reenable.py \
+            -a "enable" \
+            -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
+            -u "okapi_admin" \
+            -e "slnp" \
+            -p ${{ secrets.OKAPI_ADMIN_PW }} \
+            -r "https://registry.reshare-dev.indexdata.com"

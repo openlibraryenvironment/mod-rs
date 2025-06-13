@@ -32,12 +32,15 @@ def main():
             'sydney', 
             'melbourne'
         ]
+    elif k8s_environment == "slnp":
+        tenants = [
+            'slnptest_one', 
+            'slnptest_two',
+        ]
     else:
         tenants = [
             'reshare_east', 
             'reshare_west',
-            'slnptest_one',
-            'slnptest_two'
         ]
 
     if action == "disable":
