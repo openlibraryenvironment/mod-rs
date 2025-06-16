@@ -2318,7 +2318,6 @@ class DosomethingSimple {
                 tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
         ];
 
-
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
 
