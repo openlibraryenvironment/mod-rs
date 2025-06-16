@@ -46,10 +46,10 @@ def main():
     if action == "disable":
         disable_result = disable(args, token, tenants)
     elif action == "enable":
-        enable_result = enable(args, token, tenants)
+        enable_result = enable(args, token, tenants, k8s_environment)
     elif action == "all":
         disable_result = disable(args, token, tenants)
-        enable_result = enable(args, token, tenants)
+        enable_result = enable(args, token, tenants, k8s_environment)
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
@@ -95,7 +95,7 @@ def disable(args, token, tenants):
     ## return true on success
     #return True
 
-def enable(args, token, tenants):
+def enable(args, token, tenants, k8s_environment):
     action = args.action
     okapi_url = args.okapi_url
     username = args.username
