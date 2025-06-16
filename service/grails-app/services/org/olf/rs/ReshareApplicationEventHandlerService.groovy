@@ -2,6 +2,7 @@ package org.olf.rs
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang3.ObjectUtils
+import org.olf.rs.referenceData.RefdataValueData
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -51,6 +52,7 @@ public class ReshareApplicationEventHandlerService {
     EventMessageRequestIndService eventMessageRequestIndService;
     HostLMSLocationService hostLMSLocationService;
     HostLMSShelvingLocationService hostLMSShelvingLocationService;
+    ReferenceDataService referenceDataService;
     StatusService statusService;
 
       /**
@@ -400,7 +402,7 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
-  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null, String cost = null, String costCurrency = null) {
 	  def loanCondition = new PatronRequestLoanCondition();
 	  loanCondition.setPatronRequest(pr);
 	  loanCondition.setCode(code);
@@ -409,6 +411,10 @@ public class ReshareApplicationEventHandlerService {
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
       loanCondition.setSupplyingInstitutionSymbol(pr.supplyingInstitutionSymbol)
+      if (cost != null && costCurrency != null) {
+          loanCondition.setCost(new BigDecimal(cost));
+          loanCondition.setCostCurrency(referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, costCurrency));
+      }
 	  pr.addToConditions(loanCondition);
   }
 
