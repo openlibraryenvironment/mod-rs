@@ -105,19 +105,22 @@ def enable(args, token, tenants):
     # get new versions from registry
     latest_versions = []
 
-    # sync mds
-    print("syncing module descriptors from registry...")
-    r = okapi_post(okapi_url + '/_/proxy/pull/modules',
-        payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
-        tenant='supertenant',
-        token=token
-    )
+    if k8s_environment == 'slnp':
+        latest_versions = ["mod-rs-2.18.5"]
+    else:
+        # sync mds
+        print("syncing module descriptors from registry...")
+        r = okapi_post(okapi_url + '/_/proxy/pull/modules',
+            payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
+            tenant='supertenant',
+            token=token
+        )
 
-    for module in MODULES:
-        r = okapi_get(REGISTRY +
-                      '/_/proxy/modules?filter={}&latest=1'.format(module),
-                      tenant='supertenant')
-        latest_versions.append(json.loads(r)[0]['id'])
+        for module in MODULES:
+            r = okapi_get(REGISTRY +
+                          '/_/proxy/modules?filter={}&latest=1'.format(module),
+                          tenant='supertenant')
+            latest_versions.append(json.loads(r)[0]['id'])
 
     # post new deployment descriptors
     for module in latest_versions:
