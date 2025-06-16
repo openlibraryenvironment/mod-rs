@@ -209,7 +209,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
                 String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
                 if (requestRouterSetting == "disabled") {
-                    pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
+                    //pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
+                    
                 }
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be

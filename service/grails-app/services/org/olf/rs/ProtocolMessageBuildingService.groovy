@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.referenceData.SettingsData
@@ -170,12 +171,16 @@ class ProtocolMessageBuildingService {
         ]
       ]
     } else if (requestRouterSetting == "disabled") {
+        /*
         def pickupEntry = newDirectoryService.branchEntryByNameAndParentSymbol(req.pickupLocation, req.requestingInstitutionSymbol);
         def physicalAddress = newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation);
         if (!physicalAddress) {
             def parentPickupEntry = newDirectoryService.institutionEntryBySymbol(req.requestingInstitutionSymbol);
             physicalAddress = newDirectoryService.shippingAddressMapForEntry(parentPickupEntry, req.pickupLocation);
         }
+         */
+        def slurper = new JsonSlurper();
+        def physicalAddress = slurper.parser(req.deliveryAddress);
         if (physicalAddress) {
             message.requestedDeliveryInfo = [
                 address: [
