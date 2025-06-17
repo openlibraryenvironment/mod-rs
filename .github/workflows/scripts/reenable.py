@@ -106,7 +106,7 @@ def enable(args, token, tenants, k8s_environment):
     latest_versions = []
 
     if k8s_environment == 'slnp':
-        latest_versions = ["mod-rs-2.18.5"]
+        latest_versions = ["mod-rs-2.18.5-release"]
     else:
         # sync mds
         print("syncing module descriptors from registry...")
