@@ -248,7 +248,7 @@ public class NonreturnablesStateModelData {
 
     private static Map nrRequesterISO18626CopyCompleted = [
             code: 'nrRequesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is CopyCompleted',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
             qualifier: ActionEventResultQualifier.QUALIFIER_COPY_COMPLETED,
