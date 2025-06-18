@@ -1,8 +1,11 @@
 package org.olf.rs
 
-import org.olf.okapi.modules.directory.Symbol;
+import grails.gorm.MultiTenant;
 
-import grails.gorm.MultiTenant
+import com.k_int.web.toolkit.refdata.CategoryId;
+import com.k_int.web.toolkit.refdata.RefdataValue;
+import org.olf.okapi.modules.directory.Symbol;
+import org.olf.rs.referenceData.RefdataValueData;
 
 class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanCondition> {
 
@@ -29,6 +32,11 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
    */
   String code
 
+  BigDecimal cost
+
+  @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
+  RefdataValue costCurrency
+
   // Note passed along with the code, human readable content for explanation of user defined codes or extension of what the code says
   String note
 
@@ -42,6 +50,8 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
     lastUpdated (nullable: true, bindable: false)
     patronRequest (nullable: true)
     code( nullable: true)
+    cost( nullable: true)
+    costCurrency( nullable: true)
     note( nullable: true)
     relevantSupplier (nullable: true)
     supplyingInstitutionSymbol (nullable: true)
@@ -53,6 +63,8 @@ class PatronRequestLoanCondition implements MultiTenant<PatronRequestLoanConditi
          dateCreated column : 'prlc_date_created'
          lastUpdated column : 'prlc_last_updated'
                 code column : 'prlc_code'
+                cost column : 'prlc_cost'
+        costCurrency column : 'prlc_cost_currency_fk'
                 note column : 'prlc_note'
        patronRequest column : 'prlc_patron_request_fk'
     relevantSupplier column : 'prlc_relevant_supplier_fk'

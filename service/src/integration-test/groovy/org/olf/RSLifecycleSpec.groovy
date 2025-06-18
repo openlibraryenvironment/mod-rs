@@ -893,7 +893,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 0        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 0        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null                   | null
-        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupplyWithCost.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.conditions[0].cost == 42.54 && r.conditions[0].costCurrency.value == "cad" && s.conditions[0].cost == 42.54 && s.conditions[0].costCurrency.value == "cad" })
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
@@ -2317,7 +2317,6 @@ class DosomethingSimple {
                 serviceType                : "Copy",
                 tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
         ];
-        
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);

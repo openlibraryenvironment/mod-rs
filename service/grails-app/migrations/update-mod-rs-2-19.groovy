@@ -42,4 +42,12 @@ databaseChangeLog = {
             column(name: "pr_return_address", type: "TEXT")
         }
     }
+
+    changeSet(author: "jskomorowski", id: '20250613-1200-001') {
+        addColumn(tableName: "patron_request_loan_condition") {
+            column(name: "prlc_cost", type: "DECIMAL(10,2)")
+            column(name: "prlc_cost_currency_fk", type: "VARCHAR(36)")
+        }
+        addForeignKeyConstraint(baseColumnNames: "prlc_cost_currency_fk", baseTableName: "patron_request_loan_condition", constraintName: "FK_prlc_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    }
 }

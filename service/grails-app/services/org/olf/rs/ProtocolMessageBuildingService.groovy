@@ -261,8 +261,16 @@ class ProtocolMessageBuildingService {
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
+
+      Map offeredCosts = null;
+      if ( messageParams?.cost ) {
+          offeredCosts = [:];
+          offeredCosts.monetaryValue = messageParams?.cost;
+          offeredCosts.currencyCode = messageParams?.costCurrency;
+      }
     message.messageInfo = [
-      reasonForMessage:reason_for_message,
+      offeredCosts: offeredCosts,
+      reasonForMessage: reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
     ]
     message.statusInfo = [
@@ -286,7 +294,7 @@ class ProtocolMessageBuildingService {
     message.deliveryInfo = [:]
     if ( messageParams?.loanCondition ) {
       message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
-      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note, messageParams?.cost, messageParams?.costCurrency)
     }
 
     // Whenever a note is attached to the message, create a notification with action.
