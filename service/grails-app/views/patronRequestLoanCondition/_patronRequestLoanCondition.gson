@@ -5,6 +5,7 @@ import org.olf.rs.PatronRequestLoanCondition
 json g.render(patronRequestLoanCondition, [expand: [
                                             'id',
                                             'code',
+                                            'costCurrency',
                                             'note',
                                             'relevantSupplier'
                                           ],
