@@ -6,6 +6,7 @@ class BootStrap {
 
   def grailsApplication
   def housekeepingService
+  DataSource dataSource
   OkapiTenantAdminService okapiTenantAdminService
   
   def init = { servletContext ->
@@ -19,6 +20,13 @@ class BootStrap {
     log.info("            build host -> ${grailsApplication.metadata['build.host']}");
     log.info("         Base JDBC URL -> ${grailsApplication.config.dataSource.url}");
   }
+
+    def hikariDataSource = dataSource?.unwrap(HikariDataSource)
+    if (hikariDataSource) {
+      log.info "HikariCP maximumPoolSize: ${hikariDataSource.maximumPoolSize}"
+    } else {
+      log.info "Could not determine HikariCP maximumPoolSize"
+    }
 
   def destroy = {
   }
