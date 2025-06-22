@@ -1,0 +1,13 @@
+{
+    "action": "supplierConditionalSupply",
+    "actionParams": {
+        "cost": "42.54",
+        "costCurrency": "CAD",
+        "holdingState": "yes",
+        "callnumber": "call number",
+        "pickLocation": "location",
+        "pickShelvingLocation": "shelving location",
+        "loanCondition": "other",
+        "note": "A note to the wise"
+    }
+}

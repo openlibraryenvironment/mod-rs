@@ -9,6 +9,7 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -30,6 +31,12 @@ import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Ignore
 import java.text.SimpleDateFormat
+import org.olf.rs.statemodel.ActionResultDetails
+import org.olf.rs.iso18626.ReasonForMessage
+import org.olf.rs.statemodel.ActionEventResultQualifier
+
+
+
 
 
 @Slf4j
@@ -102,6 +109,8 @@ class RSLifecycleSpec extends TestBase {
   Z3950Service z3950Service
   SettingsService settingsService;
   AutoTimestampEventListener autoTimestampEventListener;
+  ReshareActionService reshareActionService;
+
 
 
 
@@ -714,6 +723,54 @@ class RSLifecycleSpec extends TestBase {
 
     }
 
+    void "Test nonreturnable copycomplete state transition in sent-to-supplier"() {
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String patronIdentifier = "TEST-COPY-COMPLETE-0001";
+        String patronReference = 'ref-' + patronIdentifier;
+        when: "We create a requester request"
+        Map request = [
+                patronReference: patronReference,
+                title: 'Nonreturnable State Transition Test',
+                author: 'El Guapo',
+                requestingInstitutionSymbol: 'ISIL:RST1',
+                systemInstanceIdentifier: '323-121',
+                patronIdentifier: patronIdentifier,
+                isRequester: true,
+                serviceType: "Copy",
+                deliveryMethod: "URL"
+        ];
+
+
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        // requester request sent to supplier?
+        String requesterId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        // responder request created?
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
+        //Manually send ISO18626 message to requester to with CopyCompleted status to send requester to Document Delivered
+        Tenants.withId(responderTenantId.toLowerCase() + "_mod_rs", {
+            PatronRequest req;
+            req = PatronRequest.get(responderRequestId);
+
+            def parameters = [:];
+            ActionResultDetails ard = new ActionResultDetails();
+            reshareActionService.sendSupplyingAgencyMessage(req,
+                    ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_COPY_COMPLETED,
+                    parameters, ard);
+        });
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_DOCUMENT_DELIVERED);
+
+        then: "Assert values"
+        assert(true);
+
+    }
+
 
     /**
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
@@ -893,7 +950,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 0        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 0        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null                   | null
-        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupplyWithCost.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.conditions[0].cost == 42.54 && r.conditions[0].costCurrency.value == "cad" && s.conditions[0].cost == 42.54 && s.conditions[0].costCurrency.value == "cad" })
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
@@ -2317,7 +2374,6 @@ class DosomethingSimple {
                 serviceType                : "Copy",
                 tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
         ];
-        
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
@@ -2602,4 +2658,6 @@ class DosomethingSimple {
         "RSInstThree" | _
 
     }
+
+
  }

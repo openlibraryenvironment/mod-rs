@@ -784,10 +784,10 @@ class ProtocolMessageService {
     messageInfo.setNote(eventData.messageInfo.note)
     messageInfo.setReasonUnfilled(toTypeSchemeValuePair(eventData.messageInfo.reasonUnfilled))
     messageInfo.setReasonRetry(toTypeSchemeValuePair(eventData.messageInfo.reasonRetry))
-    if (eventData.messageInfo.offeredCosts) {
+    if (eventData.messageInfo?.offeredCosts?.monetaryValue && eventData?.messageInfo?.offeredCosts?.currencyCode) {
       TypeCosts offeredCosts = new TypeCosts()
-      offeredCosts.setCurrencyCode()
-      offeredCosts.setMonetaryValue(eventData.messageInfo.offeredCosts)
+      offeredCosts.setCurrencyCode(toTypeSchemeValuePair(eventData.messageInfo.offeredCosts.currencyCode))
+      offeredCosts.setMonetaryValue(new BigDecimal(eventData.messageInfo.offeredCosts.monetaryValue))
       messageInfo.setOfferedCosts(offeredCosts)
     }
     if (eventData.messageInfo.retryAfter) {
