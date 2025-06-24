@@ -317,11 +317,18 @@ class ProtocolMessageBuildingService {
     if (messageParams?.deliveredFormat) {
         message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
     }
+
    if (messageParams.url) {
           //this needs to go into itemId instead
           message.deliveryInfo['url'] = messageParams.url;
           message.deliveryInfo['itemId'] = messageParams.url;
           isUrlDelivery = true;
+    }
+    message.returnInfo = [:];
+    if (messageParams.returnAddress) {
+        //def address = [:]
+        message.returnInfo.physicalAddress = messageParams.returnAddress;
+        //message.returnInfo.address = address;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
