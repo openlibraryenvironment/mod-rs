@@ -326,9 +326,7 @@ class ProtocolMessageBuildingService {
     }
     message.returnInfo = [:];
     if (messageParams.returnAddress) {
-        //def address = [:]
         message.returnInfo.physicalAddress = messageParams.returnAddress;
-        //message.returnInfo.address = address;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
