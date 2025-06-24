@@ -135,29 +135,35 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
+                def address = null;
                 if (eventData.requestedDeliveryInfo instanceof Map) {
-                    if (eventData.requestedDeliveryInfo?.address instanceof Map) {
-                        if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
-                            log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-                            // We join all the lines of physical address and stuff them into pickup location for now.
-                            String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
+                    address = eventData.requestedDeliveryInfo.address;
+                } else if (eventData.requestedDeliveryInfo instanceof List) {
+                    Map rdiMap = listToMap(eventData.requestedDeliveryInfo);
+                    address = rdiMap.address
+                }
+                if (address instanceof Map) {
+                    if (address.physicalAddress instanceof Map) {
+                        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+                        // We join all the lines of physical address and stuff them into pickup location for now.
+                        String stringifiedPickupLocation = address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
 
-                            // If we've not been given any address information, don't translate that into a pickup location
-                            if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                                pr.pickupLocation = stringifiedPickupLocation.trim();
-                            }
-
-                            // The above was for situations where it was largely used to stash a shipping ID.
-                            // In case it's actually an address, let's also format it as a multi-line string.
-                            pr.deliveryAddress = formatPhysicalAddress(eventData?.requestedDeliveryInfo?.address?.physicalAddress)
+                        // If we've not been given any address information, don't translate that into a pickup location
+                        if (stringifiedPickupLocation?.trim()?.length() > 0) {
+                            pr.pickupLocation = stringifiedPickupLocation.trim();
                         }
 
-                        // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-                        if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
-                            pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
-                        }
+                        // The above was for situations where it was largely used to stash a shipping ID.
+                        // In case it's actually an address, let's also format it as a multi-line string.
+                        pr.deliveryAddress = formatPhysicalAddress(address?.physicalAddress)
+                    }
+
+                    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                    if (address.electronicAddress instanceof Map) {
+                        pr.deliveryMethod = pr.lookupDeliveryMethod(address?.electronicAddress?.electronicAddressType);
                     }
                 }
+
 
                 // Add patron information to Patron Request
                 if (eventData.patronInfo instanceof Map) {
@@ -521,5 +527,17 @@ public class EventMessageRequestIndService extends AbstractEvent {
             lock false
         }
         return result;
+    }
+
+    Map listToMap(List list) {
+        Map result = [ address : [:] ];
+        list.each({ item -> {
+                if (item.address instanceof Map) {
+                    item.address.each({ k, v ->
+                        result.address[k] = v;
+                    });
+                }
+            }
+        });
     }
 }
