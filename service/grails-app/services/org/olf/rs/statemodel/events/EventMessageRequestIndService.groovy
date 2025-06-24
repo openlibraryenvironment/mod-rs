@@ -139,7 +139,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 if (eventData.requestedDeliveryInfo instanceof Map) {
                     address = eventData.requestedDeliveryInfo.address;
                 } else if (eventData.requestedDeliveryInfo instanceof List) {
-                    Map rdiMap = listToMap(eventData.requestedDeliveryInfo);
+                    Map rdiMap = addressListToMap(eventData.requestedDeliveryInfo);
                     address = rdiMap.address
                 }
                 if (address instanceof Map) {
@@ -529,15 +529,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
         return result;
     }
 
-    Map listToMap(List list) {
+    public Map addressListToMap(List list) {
         Map result = [ address : [:] ];
-        list.each({ item -> {
-                if (item.address instanceof Map) {
-                    item.address.each({ k, v ->
-                        result.address[k] = v;
-                    });
-                }
+        for ( item in list ) {
+            if (item.address instanceof Map) {
+                item.address.each({ k, v ->
+                    result.address[k] = v;
+                });
             }
-        });
+        }
+        return result;
     }
 }
