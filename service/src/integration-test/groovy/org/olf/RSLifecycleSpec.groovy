@@ -772,6 +772,7 @@ class RSLifecycleSpec extends TestBase {
     }
 
 
+
     /**
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
      * so if the scenario test is moved out we will also need to setup the directories and settings in that spec file as well
@@ -2112,6 +2113,90 @@ class DosomethingSimple {
         'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
     }
 
+    void "test transmission of physical address in supplying agency message"() {
+
+        String patronIdentifier = "ABf-SPS-FJF-222";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "Sending it Back";
+        String requestAuthor = "Myne, Gymee";
+        String requestSymbol = "ISIL:RST1";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "144-636-999";
+
+        when: "Do it"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "off"]);
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : "URL",
+                tags                       : ['RS-PHYSADDRESS-TEST-1']
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+
+        Map respondYesPayload = [
+                action: "respondYes",
+                "actionParams": [
+                        "callnumber": "call number",
+                        "pickLocation": "location",
+                        "pickShelvingLocation": "shelving location",
+                        "note": "Notes"
+                ]
+        ];
+
+        log.debug("Posting 'respondYes' to responder at url ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+
+        def respondYesActionResponse = doPost(responderPerformActionUrl, respondYesPayload);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+
+        Tenants.withId(responderTenantId.toLowerCase() + "_mod_rs", {
+            PatronRequest req;
+            req = PatronRequest.get(responderRequestId);
+
+            def parameters = [:];
+            def physicalAddress = [
+                    "line1":"Melbourne dev tenant / Remote Storage",
+                    "line2":"99 Starving Road",
+                    "locality":"Everywhere",
+                    "postalCode":"7800",
+                    "region":["#text":"ACT"],"country":[:]
+            ];
+            parameters.returnAddress = physicalAddress;
+            ActionResultDetails ard = new ActionResultDetails();
+            reshareActionService.sendSupplyingAgencyMessage(req,
+                    ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_LOANED,
+                    parameters, ard);
+
+            Thread.sleep(2000); //Let the status change go through
+
+            def requesterRequestData = doGet("${baseUrl}/rs/patronrequests/${requesterRequestId}");
+
+            assert(requesterRequestData.returnAddress != null)
+        });
+        then:
+        assert(true);
+    }
+
+
     void "Test transmission of values to supplier"(
             String copyrightType, String publicationType, String patronIdentifier) {
         String requesterTenantId = "RSInstOne";
@@ -2387,6 +2472,8 @@ class DosomethingSimple {
         assert(true);
 
     }
+
+
 
     @Ignore //Inconsistent
     void "test messaging between tenants"() {
