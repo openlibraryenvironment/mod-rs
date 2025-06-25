@@ -47,7 +47,7 @@ public class ActionPatronRequestEditService extends AbstractAction {
         [ field: "publicationDate", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLICATION_DATE_PREFIX, isDate: false ],
         [ field: "publisher", notePrefix: NoteSpecials.UPDATED_FIELD_PUBLISHER_PREFIX, isDate: false ],
         [ field: "serviceLevel", notePrefix: NoteSpecials.UPDATED_FIELD_SERVICE_LEVEL_PREFIX, isDate: false, isRefdata: true, refdataCategory: RefdataValueData.VOCABULARY_SERVICE_LEVELS ],
-        [ field: "serviceType", notePrefix: NoteSpecials.UPDATED_FIELD_SERVICE_TYPE_PREFIX, isDate: false, isRefdata: true, refdataCategory: 'request.serviceType'],
+        [ field: "subtitle", notePrefix: NoteSpecials.UPDATED_FIELD_SUBTITLE_PREFIX, isDate: false ],
         [ field: "systemInstanceIdentifier", notePrefix: NoteSpecials.UPDATED_FIELD_SYSTEM_INSTANCE_IDENTIFIER_PREFIX, isDate: false ],
         [ field: "title", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_PREFIX, isDate: false ],
         [ field: "titleOfComponent", notePrefix: NoteSpecials.UPDATED_FIELD_TITLE_OF_COMPONENT_PREFIX, isDate: false ],

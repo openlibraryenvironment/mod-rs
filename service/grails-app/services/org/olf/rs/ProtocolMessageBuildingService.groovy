@@ -28,10 +28,11 @@ class ProtocolMessageBuildingService {
    *
   */
 
+  NewDirectoryService newDirectoryService
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ReshareActionService reshareActionService
-    SettingsService settingsService
+  SettingsService settingsService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -156,6 +157,8 @@ class ProtocolMessageBuildingService {
     ]
      */
 
+    String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
     // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
     if (req.deliveryMethod?.value == 'url') {
       message.requestedDeliveryInfo = [
@@ -166,6 +169,20 @@ class ProtocolMessageBuildingService {
           ]
         ]
       ]
+    } else if (requestRouterSetting == "disabled") {
+        def pickupEntry = newDirectoryService.branchEntryByNameAndParentSymbol(req.pickupLocation, req.requestingInstitutionSymbol);
+        def physicalAddress = newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation);
+        if (!physicalAddress) {
+            def parentPickupEntry = newDirectoryService.institutionEntryBySymbol(req.requestingInstitutionSymbol);
+            physicalAddress = newDirectoryService.shippingAddressMapForEntry(parentPickupEntry, req.pickupLocation);
+        }
+        if (physicalAddress) {
+            message.requestedDeliveryInfo = [
+                address: [
+                    physicalAddress: physicalAddress
+                ]
+            ]
+        }
     } else {
       message.requestedDeliveryInfo = [
         // SortOrder
@@ -176,7 +193,7 @@ class ProtocolMessageBuildingService {
             locality:null,
             postalCode:null,
             region:null,
-            county:null
+            country:null
           ]
         ]
       ]
@@ -244,8 +261,16 @@ class ProtocolMessageBuildingService {
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
+
+      Map offeredCosts = null;
+      if ( messageParams?.cost ) {
+          offeredCosts = [:];
+          offeredCosts.monetaryValue = messageParams?.cost;
+          offeredCosts.currencyCode = messageParams?.costCurrency;
+      }
     message.messageInfo = [
-      reasonForMessage:reason_for_message,
+      offeredCosts: offeredCosts,
+      reasonForMessage: reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
     ]
     message.statusInfo = [
@@ -269,7 +294,7 @@ class ProtocolMessageBuildingService {
     message.deliveryInfo = [:]
     if ( messageParams?.loanCondition ) {
       message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
-      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note, messageParams?.cost, messageParams?.costCurrency)
     }
 
     // Whenever a note is attached to the message, create a notification with action.
@@ -288,11 +313,20 @@ class ProtocolMessageBuildingService {
       reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
     }
 
+    boolean isUrlDelivery = false;
     if (messageParams?.deliveredFormat) {
-      message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
-      if (messageParams.url) {
-        message.deliveryInfo['url'] = messageParams.url;
-      }
+        message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
+    }
+
+   if (messageParams.url) {
+          //this needs to go into itemId instead
+          message.deliveryInfo['url'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url;
+          isUrlDelivery = true;
+    }
+    message.returnInfo = [:];
+    if (messageParams.returnAddress) {
+        message.returnInfo.physicalAddress = messageParams.returnAddress;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
@@ -300,17 +334,19 @@ class ProtocolMessageBuildingService {
         Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
             rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
         }
-        switch (filteredVolumes.size()) {
-            case 0:
-                break;
-            case 1:
-                // We have a single volume, send as a single itemId string
-                message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
-                break;
-            default:
-                // We have many volumes, send as an array of multiVol itemIds
-                message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
-                break;
+        if (!isUrlDelivery) {
+            switch (filteredVolumes.size()) {
+                case 0:
+                    break;
+                case 1:
+                    // We have a single volume, send as a single itemId string
+                    message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
+                    break;
+                default:
+                    // We have many volumes, send as an array of multiVol itemIds
+                    message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
+                    break;
+            }
         }
     }
 
@@ -480,7 +516,7 @@ class ProtocolMessageBuildingService {
             requestingAgencyId = buildHeaderRequestingAgencyId(peer_symbol)
 
             // Set the RequestIds
-            requestingAgencyRequestId = pr.peerRequestIdentifier
+            requestingAgencyRequestId = pr.peerRequestIdentifier ?: protocolMessageService.buildProtocolId(pr, pr.stateModel?.shortcode)
             supplyingAgencyRequestId = pr.id
         }
 

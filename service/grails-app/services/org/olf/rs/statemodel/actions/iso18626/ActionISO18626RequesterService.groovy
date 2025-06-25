@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.actions.iso18626
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
-import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
@@ -53,7 +52,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
                 Symbol relevantSupplier = DirectoryEntryService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
 
-                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
+                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note, parameters?.messageInfo?.offeredCosts?.monetaryValue, parameters?.messageInfo?.offeredCosts?.currencyCode);
             }
 
             // Could receive a single string or an array here as per the standard/our profile
@@ -151,8 +150,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
 
             // If the deliveredFormat is URL and a URL is present, store it on the request
-            if (parameters.deliveryInfo?.deliveredFormat == 'URL') {
-                def url = parameters.deliveryInfo?.URL ?: parameters.deliveryInfo?.sentVia
+            if (parameters.deliveryInfo?.sentVia == 'URL') {
+                def url = parameters.deliveryInfo?.itemId
                 if (url) {
                     request.pickupURL = url
                 }
@@ -188,11 +187,6 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         if (statusInfo.status) {
             // Set the qualifier on the result
             actionResultDetails.qualifier = statusInfo.status;
-
-            if (actionResultDetails.qualifier == TypeStatus.WILL_SUPPLY.value()) {
-                log.debug("WillSupply should be processed as ExpectToSupply")
-                actionResultDetails.qualifier = TypeStatus.EXPECT_TO_SUPPLY.value()
-            }
 
             // Special case for Unfilled
             if (request.stateModel.shortcode.equalsIgnoreCase(StateModel.MODEL_REQUESTER) ||

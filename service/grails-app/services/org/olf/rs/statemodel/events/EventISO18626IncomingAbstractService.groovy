@@ -171,13 +171,16 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
-                        if ( routingDisabled ) {
+                        if (routingDisabled) {
                             String requestingSymbol = requestingSymbolFromEventData(eventData);
                             String supplyingSymbol = supplyingSymbolFromEventData(eventData);
                             if (requestingSymbol) {
                                 request.requestingInstitutionSymbol = requestingSymbol;
                             }
                             if (supplyingSymbol) {
+                                if (request.supplyingInstitutionSymbol != supplyingSymbol) {
+                                    request.stateHasChanged = true
+                                }
                                 request.supplyingInstitutionSymbol = supplyingSymbol;
                             }
                         }  else if (((request.supplyingInstitutionSymbol == null ||

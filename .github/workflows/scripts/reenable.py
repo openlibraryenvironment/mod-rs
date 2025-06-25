@@ -30,24 +30,26 @@ def main():
     if k8s_environment == "trove-dev":
         tenants = [
             'sydney', 
-            'pentest', 
             'melbourne'
+        ]
+    elif k8s_environment == "slnp":
+        tenants = [
+            'slnptest_one', 
+            'slnptest_two',
         ]
     else:
         tenants = [
             'reshare_east', 
             'reshare_west',
-            'slnptest_one',
-            'slnptest_two'
         ]
 
     if action == "disable":
         disable_result = disable(args, token, tenants)
     elif action == "enable":
-        enable_result = enable(args, token, tenants)
+        enable_result = enable(args, token, tenants, k8s_environment)
     elif action == "all":
         disable_result = disable(args, token, tenants)
-        enable_result = enable(args, token, tenants)
+        enable_result = enable(args, token, tenants, k8s_environment)
     else:
         print("Unkown action: {}. User enable, disable, or all".format(action))
 
@@ -93,7 +95,7 @@ def disable(args, token, tenants):
     ## return true on success
     #return True
 
-def enable(args, token, tenants):
+def enable(args, token, tenants, k8s_environment):
     action = args.action
     okapi_url = args.okapi_url
     username = args.username
@@ -103,19 +105,22 @@ def enable(args, token, tenants):
     # get new versions from registry
     latest_versions = []
 
-    # sync mds
-    print("syncing module descriptors from registry...")
-    r = okapi_post(okapi_url + '/_/proxy/pull/modules',
-        payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
-        tenant='supertenant',
-        token=token
-    )
+    if k8s_environment == 'slnp':
+        latest_versions = ["mod-rs-2.18.5-release"]
+    else:
+        # sync mds
+        print("syncing module descriptors from registry...")
+        r = okapi_post(okapi_url + '/_/proxy/pull/modules',
+            payload=json.dumps({"urls" : [ "https://registry.reshare-dev.indexdata.com" ]}).encode('UTF-8'),
+            tenant='supertenant',
+            token=token
+        )
 
-    for module in MODULES:
-        r = okapi_get(REGISTRY +
-                      '/_/proxy/modules?filter={}&latest=1'.format(module),
-                      tenant='supertenant')
-        latest_versions.append(json.loads(r)[0]['id'])
+        for module in MODULES:
+            r = okapi_get(REGISTRY +
+                          '/_/proxy/modules?filter={}&latest=1'.format(module),
+                          tenant='supertenant')
+            latest_versions.append(json.loads(r)[0]['id'])
 
     # post new deployment descriptors
     for module in latest_versions:

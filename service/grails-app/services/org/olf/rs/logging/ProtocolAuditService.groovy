@@ -9,7 +9,8 @@ import org.olf.rs.SettingsService;
 import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.referenceData.SettingsData;
 
-import groovyx.net.http.URIBuilder;
+import groovyx.net.http.URIBuilder
+import org.springframework.dao.OptimisticLockingFailureException
 
 /**
  * Provides the necessary methods for interfacing with the ProtocolAudit table
@@ -83,10 +84,14 @@ public class ProtocolAuditService {
     }
 
     void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
-        PatronRequest request = PatronRequest.findById(patronRequestId)
+        PatronRequest request = PatronRequest.get(patronRequestId)
         if (request) {
-            save(request, baseAuditDetails)
-            request.save(flush:true, failOnError:false)
+            try {
+                save(request, baseAuditDetails)
+                request = request.merge(flush: false, failOnError: false)
+            } catch (OptimisticLockingFailureException olfe) {
+                log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
+            }
         }
     }
 

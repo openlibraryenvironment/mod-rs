@@ -23,6 +23,7 @@ class UrlMappings {
     "/rs/patronrequests/generatePickListBatch" (controller: "patronRequest", action: "generatePickListBatch")
     "/rs/patronrequests/markBatchAsPrinted" (controller: "patronRequest", action: "markBatchAsPrinted")
     "/rs/patronrequests/openURL" (controller: "patronRequest", action: "openURL")
+    "/rs/patronrequests/editableFields/$op" (controller: "patronRequest", action: "editableFields")
 
     "/rs/patron/$patronIdentifier/canCreateRequest" (controller: 'patron', action: 'canCreateRequest')
     "/rs/patron/validate" (controller: 'patron', action: 'validate')

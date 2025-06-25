@@ -735,7 +735,7 @@ class ProtocolMessageService {
   }
 
   ZonedDateTime toZonedDateTime(LocalDate localDate) {
-    return localDate.atStartOfDay(ZoneId.from("UTC"));
+    return localDate.atStartOfDay(ZoneId.of("UTC"));
   }
 
   ZonedDateTime currentZonedDateTime(){
@@ -784,10 +784,10 @@ class ProtocolMessageService {
     messageInfo.setNote(eventData.messageInfo.note)
     messageInfo.setReasonUnfilled(toTypeSchemeValuePair(eventData.messageInfo.reasonUnfilled))
     messageInfo.setReasonRetry(toTypeSchemeValuePair(eventData.messageInfo.reasonRetry))
-    if (eventData.messageInfo.offeredCosts) {
+    if (eventData.messageInfo?.offeredCosts?.monetaryValue && eventData?.messageInfo?.offeredCosts?.currencyCode) {
       TypeCosts offeredCosts = new TypeCosts()
-      offeredCosts.setCurrencyCode()
-      offeredCosts.setMonetaryValue(eventData.messageInfo.offeredCosts)
+      offeredCosts.setCurrencyCode(toTypeSchemeValuePair(eventData.messageInfo.offeredCosts.currencyCode))
+      offeredCosts.setMonetaryValue(new BigDecimal(eventData.messageInfo.offeredCosts.monetaryValue))
       messageInfo.setOfferedCosts(offeredCosts)
     }
     if (eventData.messageInfo.retryAfter) {
@@ -848,8 +848,7 @@ class ProtocolMessageService {
     }
     if (!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
       TypeSchemeValuePair pair = new TypeSchemeValuePair()
-      pair.setScheme('URL')
-      pair.setValue(eventData.deliveryInfo.url)
+      pair.setValue('URL')
       deliveryInfo.setSentVia(pair)
     }
     deliveryInfo.setSentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
@@ -876,9 +875,28 @@ class ProtocolMessageService {
 
     }
     returnInfo.setName(eventData.returnInfo.name)
-    if (eventData.returnInfo.physicalAddress) {
+    if (eventData.returnInfo?.physicalAddress) {
+      def physicalAddressMap = eventData.returnInfo.physicalAddress;
       PhysicalAddress physicalAddress = new PhysicalAddress()
-      physicalAddress.setLine1(eventData.returnInfo.physicalAddress)
+      //physicalAddress.setLine1(eventData.returnInfo.address.physicalAddress)
+      if (physicalAddressMap.line1) {
+        physicalAddress.setLine1(physicalAddressMap.line1)
+      }
+      if (physicalAddressMap.line2) {
+        physicalAddress.setLine2(physicalAddressMap.line2)
+      }
+      if (physicalAddressMap.locality) {
+        physicalAddress.setLocality(physicalAddressMap.locality)
+      }
+      if (physicalAddressMap.postalCode) {
+        physicalAddress.setPostalCode(physicalAddressMap.postalCode)
+      }
+      if (physicalAddressMap.region instanceof List && physicalAddressMap.region.size() == 2) {
+        physicalAddress.setRegion(toTypeSchemeValuePair(physicalAddressMap.region[1]))
+      }
+      if (physicalAddressMap.country instanceof List && physicalAddressMap.country.size() == 2) {
+        physicalAddress.setCountry(toTypeSchemeValuePair(physicalAddressMap.country[1]))
+      }
       returnInfo.setPhysicalAddress(physicalAddress)
     }
     return returnInfo

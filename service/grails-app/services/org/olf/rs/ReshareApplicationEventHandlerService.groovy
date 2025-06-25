@@ -2,6 +2,7 @@ package org.olf.rs
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang3.ObjectUtils
+import org.olf.rs.referenceData.RefdataValueData
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -51,6 +52,7 @@ public class ReshareApplicationEventHandlerService {
     EventMessageRequestIndService eventMessageRequestIndService;
     HostLMSLocationService hostLMSLocationService;
     HostLMSShelvingLocationService hostLMSShelvingLocationService;
+    ReferenceDataService referenceDataService;
     StatusService statusService;
 
       /**
@@ -211,7 +213,7 @@ public class ReshareApplicationEventHandlerService {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_REQUEST_MESSAGE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
-        log.debug(ContextLogging.MESSAGE_ENTERING);
+        log.debug("${ContextLogging.MESSAGE_ENTERING} handleRequestMessage");
 
         // Just call event handler directly
         EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
@@ -400,7 +402,7 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
-  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null, String cost = null, String costCurrency = null) {
 	  def loanCondition = new PatronRequestLoanCondition();
 	  loanCondition.setPatronRequest(pr);
 	  loanCondition.setCode(code);
@@ -408,7 +410,11 @@ public class ReshareApplicationEventHandlerService {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
-
+      loanCondition.setSupplyingInstitutionSymbol(pr.supplyingInstitutionSymbol)
+      if (cost != null && costCurrency != null) {
+          loanCondition.setCost(new BigDecimal(cost));
+          loanCondition.setCostCurrency(referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, costCurrency));
+      }
 	  pr.addToConditions(loanCondition);
   }
 

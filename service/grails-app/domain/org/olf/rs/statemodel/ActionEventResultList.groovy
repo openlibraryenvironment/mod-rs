@@ -22,6 +22,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_CHECKED_IN_ISO18626                 = 'requesterCheckedInISO18626';
     static public final String REQUESTER_CLOSE_MANUAL                        = 'requesterCloseManual';
     static public final String REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626  = 'requesterConditionalAnswerReceivedISO18626';
+    static public final String REQUESTER_EXPECTS_TO_SUPPLY_INDICATION        = 'requesterExpectsToSupplyIndication';
     static public final String REQUESTER_EXPECTS_TO_SUPPLY_ISO18626          = 'requesterExpectsToSupplyISO18626';
     static public final String REQUESTER_FILLED_LOCALLY                      = 'requesterFilledLocally';
     static public final String REQUESTER_LOCAL_CANNOT_SUPPLY                 = 'requesterLocalCannotSupply';
@@ -35,6 +36,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_RECALLED_ISO18626                   = 'requesterRecalledISO18626';
     static public final String REQUESTER_RECEIVED                            = 'requesterReceived';
     static public final String REQUESTER_REJECT_CONDITIONS                   = 'requesterRejectConditions';
+    static public final String REQUESTER_REQUEST_SENT_TO_SUPPLIER_INDICATION = 'requesterSentToSupplierInd';
     static public final String REQUESTER_REREQUEST_CANCELLED                 = 'requesterRerequestCancelled';
     static public final String REQUESTER_REREQUEST_END_OF_ROTA               = 'requesterRerequestEndOfRota';
     static public final String REQUESTER_RETRIED_VALIDATION                  = 'requesterRetriedValidation';
@@ -127,6 +129,9 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     public static final String NR_REQUESTER_CLOSE_MANUAL                       = 'nrRequesterCloseManual';
     public static final String NR_REQUESTER_NOTIFICATION_RECEIVED_ISO18626     = 'nrRequesterNotificationReceivedISO18626';
     public static final String NR_REQUESTER_CANCEL_PENDING_ISO18626            = 'nrRequesterCancelPendingISO18626';
+    public static final String NR_REQUESTER_AGREE_CONDITIONS                   = 'nrRequesterAgreeConditions';
+    public static final String NR_REQUESTER_REJECT_CONDITIONS                  = 'nrRequesterRejectConditions';
+    public static final String NR_REQUESTER_CONDITION_ANSWER_RECEIVED_ISO18626 = 'nrRequesterConditionAnswerReceivedISO18626';
 
     static public final String NR_RESPONDER_ANSWER_YES                         = 'nrResponderAnswerYes';
     static public final String NR_RESPONDER_EVENT_NEW_PATRON_REQUEST           = 'nrResponderEventNewPatronRequest';
@@ -134,6 +139,10 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String NR_RESPONDER_PRINT_PULL_SLIP                    = 'nrResponderPrintPullSlip';
     static public final String NR_RESPONDER_ADD_URL_TO_DOCUMENT                = 'nrResponderAddURLToDocument';
     static public final String NR_RESPONDER_CANCEL                             = 'nrResponderCancel';
+    static public final String NR_RESPONDER_ADD_CONDITIONAL                    = 'nrResponderAddConditional';
+    public static final String NR_RESPONDER_ANSWER_CONDITIONAL                 = 'nrResponderAnswerConditional';
+    public static final String NR_RESPONDER_MARK_CONDITIONS_AGREED             = 'nrResponderMarkConditionsAgreed';
+
 
     public static final String NR_RESPONDER_CANCEL_RECEIVED_ISO18626           = 'nrResponderCancelReceivedISO18626';
     public static final String NR_RESPONDER_NO_STATUS_CHANGE                   = 'nrResponderNoStatusChange';

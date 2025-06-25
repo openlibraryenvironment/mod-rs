@@ -1,6 +1,9 @@
 package org.olf.rs.statemodel.actions;
 
-import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequest
+import org.olf.rs.SettingsService
+import org.olf.rs.iso18626.ReasonForMessage
+import org.olf.rs.iso18626.TypeStatus;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.Actions;
@@ -14,6 +17,7 @@ import com.k_int.web.toolkit.refdata.RefdataValue;
  *
  */
 public class ActionPatronRequestCancelLocalService extends AbstractAction {
+    SettingsService settingsService
 
     @Override
     String name() {
@@ -31,7 +35,10 @@ public class ActionPatronRequestCancelLocalService extends AbstractAction {
                 actionResultDetails.auditMessage += ": ${reason.label}"
             }
         }
-
+        String requestRouterSetting = settingsService.getSettingValue('routing_adapter')
+        if (requestRouterSetting == 'disabled') {
+            reshareActionService.sendSupplyingAgencyMessage(request, ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, TypeStatus.CANCELLED.value(), [*: parameters], actionResultDetails)
+        }
         return(actionResultDetails);
     }
 }

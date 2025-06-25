@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
 import javax.servlet.http.HttpServletRequest
@@ -22,8 +23,10 @@ public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
 
+    NewDirectoryService newDirectoryService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
+    SettingsService settingsService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
     ReshareActionService reshareActionService;
@@ -132,25 +135,35 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
+                def address = null;
                 if (eventData.requestedDeliveryInfo instanceof Map) {
-                    if (eventData.requestedDeliveryInfo?.address instanceof Map) {
-                        if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
-                            log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-                            // We join all the lines of physical address and stuff them into pickup location for now.
-                            String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
+                    address = eventData.requestedDeliveryInfo.address;
+                } else if (eventData.requestedDeliveryInfo instanceof List) {
+                    Map rdiMap = addressListToMap(eventData.requestedDeliveryInfo);
+                    address = rdiMap.address
+                }
+                if (address instanceof Map) {
+                    if (address.physicalAddress instanceof Map) {
+                        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+                        // We join all the lines of physical address and stuff them into pickup location for now.
+                        String stringifiedPickupLocation = address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
 
-                            // If we've not been given any address information, don't translate that into a pickup location
-                            if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                                pr.pickupLocation = stringifiedPickupLocation.trim();
-                            }
+                        // If we've not been given any address information, don't translate that into a pickup location
+                        if (stringifiedPickupLocation?.trim()?.length() > 0) {
+                            pr.pickupLocation = stringifiedPickupLocation.trim();
                         }
 
-                        // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-                        if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
-                            pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
-                        }
+                        // The above was for situations where it was largely used to stash a shipping ID.
+                        // In case it's actually an address, let's also format it as a multi-line string.
+                        pr.deliveryAddress = formatPhysicalAddress(address?.physicalAddress)
+                    }
+
+                    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                    if (address.electronicAddress instanceof Map) {
+                        pr.deliveryMethod = pr.lookupDeliveryMethod(address?.electronicAddress?.electronicAddressType);
                     }
                 }
+
 
                 // Add patron information to Patron Request
                 if (eventData.patronInfo instanceof Map) {
@@ -190,11 +203,20 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
-                pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+                if (!pr.requestingInstitutionSymbol || header.requestingAgencyId?.agencyIdValue) {
+                    pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+                }
 
                 pr.resolvedRequester = resolvedRequestingAgency;
-                pr.resolvedSupplier = resolvedSupplyingAgency;
+                if (pr.resolvedSupplier == null || resolvedRequestingAgency != null) {
+                    pr.resolvedSupplier = resolvedSupplyingAgency;
+                }
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
+
+                String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+                if (requestRouterSetting == "disabled") {
+                    pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
+                }
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
@@ -259,8 +281,14 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.messageType = Iso18626Constants.REQUEST
             result.supIdType = header.supplyingAgencyId?.agencyIdType // supplyingAgencyId can be null
             result.supId = header.supplyingAgencyId?.agencyIdValue // supplyingAgencyId can be null
-            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
-            result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            if (header.requestingAgencyId.agencyIdValue) {
+                result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
+                result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            } else {
+                List<String> parts = pr.requestingInstitutionSymbol.split(':')
+                result.reqAgencyIdType = parts[0]
+                result.reqAgencyId = parts[1]
+            }
             result.reqId = header.requestingAgencyRequestId
             result.timeRec = header.timestamp
         } else {
@@ -466,6 +494,24 @@ public class EventMessageRequestIndService extends AbstractEvent {
         result.newRequestId = pr.id
     }
 
+    static String formatPhysicalAddress(Map pa) {
+        if (!pa) return null
+
+        def lines = []
+
+        if (pa.line1) lines << pa.line1
+        if (pa.line2) lines << pa.line2
+
+        def cityLine = [pa.locality, pa.region, pa.postalCode]
+            .findAll() // filter out non-truthy elements
+            .join(', ')
+        if (cityLine) lines << cityLine
+
+        if (pa.country) lines << pa.country
+
+        return lines.join('\n')
+    }
+
     static boolean isSlnpRequesterStateModel(PatronRequest pr) {
         String shortcode = pr.stateModel.shortcode
         return shortcode.equalsIgnoreCase(StateModel.MODEL_SLNP_REQUESTER) ||
@@ -479,6 +525,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 eq('isRequester', isRequester)
             }
             lock false
+        }
+        return result;
+    }
+
+    public Map addressListToMap(List list) {
+        Map result = [ address : [:] ];
+        for ( item in list ) {
+            if (item.address instanceof Map) {
+                item.address.each({ k, v ->
+                    result.address[k] = v;
+                });
+            }
         }
         return result;
     }

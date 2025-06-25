@@ -36,6 +36,7 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP       = "supplierPrintPullSlip";
 	static public final String ACTION_NONRETURNABLE_RESPONDER_RESPOND_YES                    = "respondYes";
 	public static final String ACTION_NONRETURNABLE_RESPONDER_SUPPLIER_CANNOT_SUPPLY         = "supplierCannotSupply";
+	public static final String ACTION_NONRETURNABLE_RESPONDER_ADD_CONDITION		     		 = 'supplierAddCondition';
 
 	// CDL Responder Actions
 	static public final String ACTION_RESPONDER_SUPPLIER_FILL_DIGITAL_LOAN = "supplierFillDigitalLoan";
@@ -88,6 +89,9 @@ public class Actions {
 	static public final String ACTION_NONRETURNABLE_REQUESTER_COMPLETE_REQUEST   = "requesterCompleteRequest";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_MARK_END_OF_ROTA_REVIEWED = "requesterMarkEndOfRotaReviewed";
 	static public final String ACTION_NONRETURNABLE_REQUESTER_REREQUEST          = "rerequest";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_FILL_LOCALLY       = "fillLocally";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_CANCEL_LOCAL       = "cancelLocal";
+	static public final String ACTION_NONRETURNABLE_REQUESTER_LOCAL_SUPPLIER_CANNOT_SUPPLY = "localSupplierCannotSupply";
 
 	// SLNP Requester Actions
 	static public final String ACTION_SLNP_REQUESTER_HANDLE_ABORT                       = "slnpHandleAbort";

@@ -41,7 +41,7 @@ import groovy.transform.CompileStatic;
 @CompileStatic
 public class EventConsumerService implements EventPublisher, DataBinder {
 
-  private static final String TOPIC_PATRON_REQUESTS_SUFFIX = '_mod_rs_PatronRequestEvents'
+  public static final String TOPIC_PATRON_REQUESTS_SUFFIX = '_mod_rs_PatronRequestEvents'
   private static final String TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX = '_mod_directory_DirectoryEntryUpdate'
 
   private static final String[] TOPIC_SUFFIXES = [TOPIC_PATRON_REQUESTS_SUFFIX, TOPIC_DIRECTORY_ENTRY_UPDATE_SUFFIX] as String[]
@@ -57,8 +57,8 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
   @javax.annotation.PostConstruct
   public void init() {
+    if (Boolean.parseBoolean(System.getenv('MOD_RS_DISABLE_KAFKA'))) return;
     log.debug("Configuring event consumer service")
-
     version = grailsApplication.metadata.applicationVersion ?: version
     final Properties props = new Properties()
     try {

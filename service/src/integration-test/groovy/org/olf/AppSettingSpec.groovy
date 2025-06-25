@@ -206,7 +206,10 @@ class AppSettingSpec extends TestBase {
         when:"Search for AppSettings"
 
             // Set the headers
-            setHeaders([ 'X-Okapi-Tenant': tenantId ]);
+            setHeaders([
+                'X-Okapi-Tenant': tenantId,
+                'X-Okapi-Permissions': '["rs.settings.get", "rs.settings.getsection.all"]'
+            ]);
 
             // Perform a search
             def response = doGet("${baseUrl}/rs/settings/appSettings", [ filters : "key==" + testctx.appSetting.key ]);

@@ -72,6 +72,11 @@
           "permissionsRequired": [ "rs.patronrequests.item.put" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/patronrequests/editableFields/{op}",
+          "permissionsRequired": [ "rs.patronrequests.item.put" ]
+        },
+        {
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/patronrequests/{id}/*",
           "permissionsRequired": [ "rs.patronrequests.item.delete" ]
@@ -148,6 +153,29 @@
           "permissionsRequired": [ "rs.settings.get" ]
         },
         {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/settings/appSettings",
+          "permissionsRequired": [ "rs.settings.get" ],
+          "permissionsDesired": [
+            "rs.settings.getsection.all",
+            "rs.settings.getsection.autoresponder",
+            "rs.settings.getsection.featureflags",
+            "rs.settings.getsection.hostlmsintegration",
+            "rs.settings.getsection.other",
+            "rs.settings.getsection.requests",
+            "rs.settings.getsection.routing",
+            "rs.settings.getsection.sharedindex",
+            "rs.settings.getsection.state_action_config",
+            "rs.settings.getsection.state_model",
+            "rs.settings.getsection.z3950"
+          ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/rs/settings/appSettings/{id}",
+          "permissionsRequired": [ "rs.settings.item.get" ]
+        },
+        {
           "methods": [ "POST" ],
           "pathPattern": "/rs/settings*",
           "permissionsRequired": [ "rs.settings.post" ]
@@ -205,22 +233,35 @@
         {
           "methods": [ "GET" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "POST" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "PUT" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
+
         },
         {
           "methods": [ "DELETE" ],
           "pathPattern": "/rs/externalApi*",
-          "permissionsRequired": [ ]
+          "permissionsRequired": [ ],
+          "modulePermissions": [
+            "illmock.directory.entries.get"
+          ]
         },
         {
           "methods": [ "GET" ],
@@ -421,7 +462,7 @@
           "pathPattern": "/rs/settings/worker",
           "unit": "minute",
           "delay": "2",
-          "modulePermissions": [ 
+          "modulePermissions": [
             "configuration.entries.item.get", 
             "configuration.entries.collection.get", 
             "templates.item.get",
@@ -620,12 +661,86 @@
           "rs.refdata.delete"
       ]
     },
+
+    {
+      "permissionName": "rs.settings.getsection.all",
+      "displayName": "settings get (all)",
+      "description": "get all settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.autoresponder",
+      "displayName": "settings get (section: autoresponder)",
+      "description": "get autoresponder settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.featureflags",
+      "displayName": "settings get (section: featureflags)",
+      "description": "get featureflags settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.hostlmsintegration",
+      "displayName": "settings get (section: hostlmsintegration)",
+      "description": "get hostlmsintegration settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.other",
+      "displayName": "settings get (section: other)",
+      "description": "get other settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.requests",
+      "displayName": "settings get (section: requests)",
+      "description": "get requests settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.routing",
+      "displayName": "settings get (section: routing)",
+      "description": "get routing settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.sharedindex",
+      "displayName": "settings get (section: sharedindex)",
+      "description": "get sharedindex settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.state_action_config",
+      "displayName": "settings get (section: state_action_config)",
+      "description": "get state_action_config settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.state_model",
+      "displayName": "settings get (section: state_model)",
+      "description": "get state_model settings",
+      "visible": false
+    },
+    {
+      "permissionName": "rs.settings.getsection.z3950",
+      "displayName": "settings get (section: z3950)",
+      "description": "get z3950 settings",
+      "visible": false
+    },
+
     {
       "permissionName": "rs.settings.get",
       "displayName": "settings get",
       "description": "get settings",
       "visible": false
-    }, 
+    },
+    {
+      "permissionName": "rs.settings.item.get",
+      "displayName": "settings item get",
+      "description": "get settings item",
+      "visible": false
+    },
     {
       "permissionName": "rs.settings.post",
       "displayName": "settings post",
@@ -646,10 +761,30 @@
     {
       "permissionName": "rs.settings.read",
       "displayName": "settings read",
-      "description": "read settings",
+      "description": "read all settings",
       "visible": false,
       "subPermissions": [
-          "rs.settings.get"
+          "rs.settings.get",
+          "rs.settings.getsection.all",
+          "rs.settings.item.get"
+      ]
+    },
+    {
+      "permissionName": "rs.settings.ui",
+      "displayName": "ui settings",
+      "description": "get settings needed for ui functionality",
+      "visible": false,
+      "subPermissions": [
+          "rs.settings.get",
+          "rs.settings.getsection.autoresponder",
+          "rs.settings.getsection.featureflags",
+          "rs.settings.getsection.hostlmsintegration",
+          "rs.settings.getsection.other",
+          "rs.settings.getsection.requests",
+          "rs.settings.getsection.routing",
+          "rs.settings.getsection.state_action_config",
+          "rs.settings.getsection.state_model",
+          "rs.settings.getsection.z3950"
       ]
     },
     {
