@@ -321,7 +321,7 @@ class ProtocolMessageBuildingService {
    if (messageParams.url) {
           //this needs to go into itemId instead
           message.deliveryInfo['url'] = messageParams.url;
-          message.deliveryInfo['itemId'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
           isUrlDelivery = true;
     }
     message.returnInfo = [:];

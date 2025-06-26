@@ -1,6 +1,6 @@
 {
   "action": "supplierAddURLToDocument",
   "actionParams": {
-    "url": "https://some.domain?param=value"
+    "url": "https://s3-ap-southeast-2.amazonaws.com/grove-dev-msd/perth/e600598c-6287-4514-bc88-3acdec4a3172"
   }
 }
