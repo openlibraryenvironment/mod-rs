@@ -2,7 +2,6 @@ package org.olf.rs.referenceData
 
 import groovy.util.logging.Slf4j
 import org.olf.rs.statemodel.ActionEvent
-import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.ActionEventResultList;
 import org.olf.rs.statemodel.ActionEventResultQualifier
 import org.olf.rs.statemodel.Actions
@@ -247,9 +246,9 @@ public class NonreturnablesStateModelData {
 
     ];
 
-    private static Map nrRequesterISO18626Delivered = [
+    private static Map nrRequesterISO18626CopyCompleted = [
             code: 'nrRequesterISO18626Delivered',
-            description: 'Incoming ISO18626 message from the responder has said the status is Delivered',
+            description: 'Incoming ISO18626 message from the responder has said the status is CopyCompleted',
             result: true,
             status: Status.PATRON_REQUEST_DOCUMENT_DELIVERED,
             qualifier: ActionEventResultQualifier.QUALIFIER_COPY_COMPLETED,
@@ -464,6 +463,7 @@ public class NonreturnablesStateModelData {
             results: [
                     nrRequesterISO18626Conditional,
                     nrRequesterISO18626ExpectToSupply,
+                    nrRequesterISO18626CopyCompleted,
                     nrRequesterISO18626WillSupply,
                     nrRequesterISO18626Unfilled,
                     nrRequesterISO18626UnfilledTransfer,
@@ -478,7 +478,7 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626Conditional,
-                    nrRequesterISO18626Delivered,
+                    nrRequesterISO18626CopyCompleted,
                     nrRequesterISO18626Unfilled,
                     nrRequesterISO18626UnfilledTransfer,
                     nrDefaultNoStatusChangeOK
@@ -490,7 +490,7 @@ public class NonreturnablesStateModelData {
             description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED,
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
-                    nrRequesterISO18626Delivered,
+                    nrRequesterISO18626CopyCompleted,
                     nrDefaultNoStatusChangeOK
             ]
 

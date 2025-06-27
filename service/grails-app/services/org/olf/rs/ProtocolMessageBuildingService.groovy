@@ -266,8 +266,16 @@ class ProtocolMessageBuildingService {
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
+
+      Map offeredCosts = null;
+      if ( messageParams?.cost ) {
+          offeredCosts = [:];
+          offeredCosts.monetaryValue = messageParams?.cost;
+          offeredCosts.currencyCode = messageParams?.costCurrency;
+      }
     message.messageInfo = [
-      reasonForMessage:reason_for_message,
+      offeredCosts: offeredCosts,
+      reasonForMessage: reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
     ]
     message.statusInfo = [
@@ -291,7 +299,7 @@ class ProtocolMessageBuildingService {
     message.deliveryInfo = [:]
     if ( messageParams?.loanCondition ) {
       message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
-      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note, messageParams?.cost, messageParams?.costCurrency)
     }
 
     // Whenever a note is attached to the message, create a notification with action.
@@ -314,11 +322,16 @@ class ProtocolMessageBuildingService {
     if (messageParams?.deliveredFormat) {
         message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
     }
+
    if (messageParams.url) {
           //this needs to go into itemId instead
           message.deliveryInfo['url'] = messageParams.url;
-          message.deliveryInfo['itemId'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
           isUrlDelivery = true;
+    }
+    message.returnInfo = [:];
+    if (messageParams.returnAddress) {
+        message.returnInfo.physicalAddress = messageParams.returnAddress;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&

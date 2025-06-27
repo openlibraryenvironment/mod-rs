@@ -52,12 +52,12 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
                 Symbol relevantSupplier = DirectoryEntryService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
 
-                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
+                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note, parameters?.messageInfo?.offeredCosts?.monetaryValue, parameters?.messageInfo?.offeredCosts?.currencyCode);
             }
 
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId
-            if (itemId) {
+            if (itemId && parameters?.deliveryInfo?.sentVia != 'URL') {
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
