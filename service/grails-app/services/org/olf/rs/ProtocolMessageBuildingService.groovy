@@ -171,14 +171,17 @@ class ProtocolMessageBuildingService {
         ]
       ]
     } else if (requestRouterSetting == "disabled") {
-        def slurper = new JsonSlurper();
-        def physicalAddress = slurper.parser(req.deliveryAddress);
-        if (physicalAddress) {
-            message.requestedDeliveryInfo = [
-                address: [
-                    physicalAddress: physicalAddress
+        if (req.deliveryAddress) {
+            def slurper = new JsonSlurper();
+            def physicalAddress = slurper.parseText(req.deliveryAddress);
+
+            if (physicalAddress) {
+                message.requestedDeliveryInfo = [
+                        address: [
+                                physicalAddress: physicalAddress
+                        ]
                 ]
-            ]
+            }
         }
     } else {
       message.requestedDeliveryInfo = [
