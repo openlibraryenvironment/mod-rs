@@ -428,6 +428,60 @@ class ILLBrokerSpec extends TestBase {
         "14"              | null
     }
 
+    void "Test parsing of deliveryaddress from front end"(String deliveryAddress, String expectedDeliveryAddress) {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-test-7-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+        //String expectedDeliveryAddress = "Imaginary Melbourne Storage Location\nSomewhere, ACT, 2600";
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Testing delivery address",
+                author                  : "Eer, Send",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+                //deliveryAddress: "{\"line1\":\"Imaginary Melbourne Storage Location\",\"locality\":\"Somewhere\",\"postalCode\":\"2600\",\"region\":\"ACT\",\"country\":\"AUS\"}",
+                deliveryAddress: deliveryAddress
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        setHeaders(['X-Okapi-Tenant' : supplierTenantId]);
+        def responderData = doGet("${baseUrl}rs/patronrequests/${supReqId}");
+
+        assert(responderData.deliveryAddress == expectedDeliveryAddress)
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+
+        // Finish the other stuff to move the request through
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierAnswerYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierPrintPullSlip.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_PICKING, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierCheckInToReshare.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_AWAIT_SHIP, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierMarkShipped.json", supplierTenantId, Status.PATRON_REQUEST_SHIPPED, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "requesterReceived.json", requesterTenantId, Status.PATRON_REQUEST_CHECKED_IN, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "patronReturnedItem.json", requesterTenantId, Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING, Status.RESPONDER_ITEM_SHIPPED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performActionUrl, "shippedReturn.json", requesterTenantId, Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER, Status.RESPONDER_ITEM_RETURNED, requesterTenantId, supplierTenantId, patronReference)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
+
+        then:
+        assert(true)
+
+        where:
+        deliveryAddress                                                                                                                                  | expectedDeliveryAddress
+        "{\"line1\":\"Imaginary Melbourne Storage Location\",\"locality\":\"Somewhere\",\"postalCode\":\"2600\",\"region\":\"ACT\",\"country\":\"AUS\"}" | "Imaginary Melbourne Storage Location\nSomewhere, ACT, 2600"
+        null                                                                                                                                             | null
+
+    }
+
 
 
 }
