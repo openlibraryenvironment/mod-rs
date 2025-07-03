@@ -435,6 +435,7 @@ class ILLBrokerSpec extends TestBase {
         String patronReference = "ref-${patronIdentifier}"
         String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
 
+
         when: "We create a request"
         Map request = [
                 patronReference         : patronReference,
@@ -443,6 +444,7 @@ class ILLBrokerSpec extends TestBase {
                 patronIdentifier        : patronIdentifier,
                 isRequester             : true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
+
                 deliveryAddress: deliveryAddress
         ]
 
