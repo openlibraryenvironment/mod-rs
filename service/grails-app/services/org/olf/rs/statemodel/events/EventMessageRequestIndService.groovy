@@ -233,6 +233,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.addToVolumes(rv)
                         }
                     }
+                    //Populate returnAddress, if present
+                    if (supplierInfo.supplierDescription) {
+                        String pattern = /(?ms)#RETURN_TO#(.+)#RT_END#/
+                        def matcher = supplierInfo.supplierDescription =~ pattern;
+                        if (matcher?.find()) {
+                            String returnAddress = matcher.group(1);
+                            pr.returnAddress = returnAddress;
+                        }
+                    }
                 }
 
                 if ((pr.bibliographicRecordId != null) && (pr.bibliographicRecordId.length() > 0)) {

@@ -434,7 +434,7 @@ class ILLBrokerSpec extends TestBase {
         String patronIdentifier = "Broker-test-7-" + System.currentTimeMillis()
         String patronReference = "ref-${patronIdentifier}"
         String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
-        //String expectedDeliveryAddress = "Imaginary Melbourne Storage Location\nSomewhere, ACT, 2600";
+
 
         when: "We create a request"
         Map request = [
@@ -444,7 +444,7 @@ class ILLBrokerSpec extends TestBase {
                 patronIdentifier        : patronIdentifier,
                 isRequester             : true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
-                //deliveryAddress: "{\"line1\":\"Imaginary Melbourne Storage Location\",\"locality\":\"Somewhere\",\"postalCode\":\"2600\",\"region\":\"ACT\",\"country\":\"AUS\"}",
+
                 deliveryAddress: deliveryAddress
         ]
 
