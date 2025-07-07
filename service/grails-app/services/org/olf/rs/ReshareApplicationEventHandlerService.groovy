@@ -440,6 +440,7 @@ public class ReshareApplicationEventHandlerService {
     conditions.each {cond ->
       cond.setAccepted(true)
       cond.save(flush: true, failOnError: true)
+      if (cond.cost && (pr.maximumCostsMonetaryValue < cond.cost)) pr.maximumCostsMonetaryValue = cond.cost;
     }
   }
 

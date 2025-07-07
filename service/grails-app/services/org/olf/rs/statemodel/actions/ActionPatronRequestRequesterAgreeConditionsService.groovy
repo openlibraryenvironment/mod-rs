@@ -37,6 +37,7 @@ public class ActionPatronRequestRequesterAgreeConditionsService extends Abstract
             conditions.each { condition ->
                 condition.accepted = true;
                 condition.save(flush: true, failOnError: true);
+                if (condition.cost && (request.maximumCostsMonetaryValue < condition.cost)) request.maximumCostsMonetaryValue = condition.cost;
             }
 
             actionResultDetails.auditMessage = 'Agreed to loan conditions';
