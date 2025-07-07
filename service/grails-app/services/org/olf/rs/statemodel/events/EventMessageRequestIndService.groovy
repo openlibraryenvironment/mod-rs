@@ -170,12 +170,12 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
-                if (!pr.requestingInstitutionSymbol || header.requestingAgencyId?.agencyIdValue) {
+                if (!pr.requestingInstitutionSymbol && header.requestingAgencyId?.agencyIdValue) {
                     pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
                 }
 
                 pr.resolvedRequester = resolvedRequestingAgency;
-                if (pr.resolvedSupplier == null || resolvedRequestingAgency != null) {
+                if (pr.resolvedSupplier == null && resolvedSupplyingAgency != null) {
                     pr.resolvedSupplier = resolvedSupplyingAgency;
                 }
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
