@@ -174,10 +174,14 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
                 }
 
-                pr.resolvedRequester = resolvedRequestingAgency;
+                if (!pr.resolvedRequester && resolvedRequestingAgency != null) {
+                    pr.resolvedRequester = resolvedRequestingAgency;
+                }
+
                 if (pr.resolvedSupplier == null && resolvedSupplyingAgency != null) {
                     pr.resolvedSupplier = resolvedSupplyingAgency;
                 }
+
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
