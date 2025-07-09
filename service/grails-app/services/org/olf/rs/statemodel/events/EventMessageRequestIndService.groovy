@@ -128,7 +128,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
                         }
                         if (serviceInfo.serviceLevel) {
-                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel?.toLowerCase(), RefdataValueData.VOCABULARY_SERVICE_LEVELS);
                             pr.serviceLevel = rdv;
                         }
                     }
