@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.referenceData.SettingsData
@@ -170,18 +171,17 @@ class ProtocolMessageBuildingService {
         ]
       ]
     } else if (requestRouterSetting == "disabled") {
-        def pickupEntry = newDirectoryService.branchEntryByNameAndParentSymbol(req.pickupLocation, req.requestingInstitutionSymbol);
-        def physicalAddress = newDirectoryService.shippingAddressMapForEntry(pickupEntry, req.pickupLocation);
-        if (!physicalAddress) {
-            def parentPickupEntry = newDirectoryService.institutionEntryBySymbol(req.requestingInstitutionSymbol);
-            physicalAddress = newDirectoryService.shippingAddressMapForEntry(parentPickupEntry, req.pickupLocation);
-        }
-        if (physicalAddress) {
-            message.requestedDeliveryInfo = [
-                address: [
-                    physicalAddress: physicalAddress
+        if (req.deliveryAddress) {
+            def slurper = new JsonSlurper();
+            def physicalAddress = slurper.parseText(req.deliveryAddress);
+
+            if (physicalAddress) {
+                message.requestedDeliveryInfo = [
+                        address: [
+                                physicalAddress: physicalAddress
+                        ]
                 ]
-            ]
+            }
         }
     } else {
       message.requestedDeliveryInfo = [
@@ -321,7 +321,7 @@ class ProtocolMessageBuildingService {
    if (messageParams.url) {
           //this needs to go into itemId instead
           message.deliveryInfo['url'] = messageParams.url;
-          message.deliveryInfo['itemId'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
           isUrlDelivery = true;
     }
     message.returnInfo = [:];

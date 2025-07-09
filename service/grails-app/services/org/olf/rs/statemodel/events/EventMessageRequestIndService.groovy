@@ -214,9 +214,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
 
                 String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
-                if (requestRouterSetting == "disabled") {
-                    pr.returnAddress = newDirectoryService.shippingAddressForEntry(newDirectoryService.institutionEntryBySymbol(pr.supplyingInstitutionSymbol));
-                }
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
@@ -234,6 +231,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             )
                             rv.callNumber = supplierInfo.callNumber
                             pr.addToVolumes(rv)
+                        }
+                    }
+                    //Populate returnAddress, if present
+                    if (supplierInfo.supplierDescription) {
+                        String pattern = /(?ms)#RETURN_TO#(.+)#RT_END#/
+                        def matcher = supplierInfo.supplierDescription =~ pattern;
+                        if (matcher?.find()) {
+                            String returnAddress = matcher.group(1);
+                            pr.returnAddress = returnAddress;
                         }
                     }
                 }

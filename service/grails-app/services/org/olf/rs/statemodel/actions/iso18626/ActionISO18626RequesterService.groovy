@@ -57,7 +57,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
 
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId
-            if (itemId) {
+            if (itemId && parameters?.deliveryInfo?.sentVia != 'URL') {
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
