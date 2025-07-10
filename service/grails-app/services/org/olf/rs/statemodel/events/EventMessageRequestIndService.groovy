@@ -169,16 +169,21 @@ public class EventMessageRequestIndService extends AbstractEvent {
                     }
                 }
 
-                pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
+                if (header.supplyingAgencyId?.agencyIdType && header.supplyingAgencyId?.agencyIdValue) {
+                    pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
+                }
+
                 if (!pr.requestingInstitutionSymbol && header.requestingAgencyId?.agencyIdValue) {
                     pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
                 }
 
                 if (!pr.resolvedRequester && resolvedRequestingAgency != null) {
+                    log.debug("Assigning new value for resolvedRequester");
                     pr.resolvedRequester = resolvedRequestingAgency;
                 }
 
                 if (pr.resolvedSupplier == null && resolvedSupplyingAgency != null) {
+                    log.debug("Assigning new value for resolvedSupplier");
                     pr.resolvedSupplier = resolvedSupplyingAgency;
                 }
 
