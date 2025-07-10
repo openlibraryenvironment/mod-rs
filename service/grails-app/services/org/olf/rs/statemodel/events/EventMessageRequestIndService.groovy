@@ -180,11 +180,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 if (!pr.resolvedRequester && resolvedRequestingAgency != null) {
                     log.debug("Assigning new value for resolvedRequester");
                     pr.resolvedRequester = resolvedRequestingAgency;
+                } else {
+                    log.debug("No changes to resolvedRequester");
                 }
 
                 if (pr.resolvedSupplier == null && resolvedSupplyingAgency != null) {
                     log.debug("Assigning new value for resolvedSupplier");
                     pr.resolvedSupplier = resolvedSupplyingAgency;
+                } else {
+                    log.debug("No changes to resolvedSupplier");
                 }
 
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
