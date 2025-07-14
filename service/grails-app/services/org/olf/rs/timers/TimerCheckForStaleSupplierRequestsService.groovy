@@ -32,6 +32,7 @@ where pr.dateCreated < :staleDate and
                          s.canTriggerStaleRequest = true)
 """;
 
+
 	private static Map checkMap = [
 			"default" : [ setting: SettingsData.SETTING_STALE_REQUEST_2_DAYS, hoursMultiplier: 24] ,
 			"rush" : [ setting: SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS,  hoursMultiplier: 1],
