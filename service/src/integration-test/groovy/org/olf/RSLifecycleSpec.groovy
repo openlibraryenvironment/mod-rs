@@ -2716,7 +2716,8 @@ class DosomethingSimple {
             String tenantId,
             String serviceLevel,
             int durationDays,
-            int durationHours
+            int durationHours,
+            boolean excludeWeekends
     ) {
         when:
         final Duration duration = new Duration(-1, durationDays, durationHours);
@@ -2730,7 +2731,14 @@ class DosomethingSimple {
         def timerService = Holders.grailsApplication.mainContext.getBean(timerBeanName);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_1_ENABLED) : "yes"]);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_2_DAYS) : 3]);
-        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS) : 5])
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS) : 76])
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS) : 2])
+        if (excludeWeekends) {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'yes']);
+        } else {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'no']);
+        }
+
         PatronRequest newRequest;
 
         String updateQuery = "update PatronRequest set dateCreated = :newDateCreated where id = :id"
@@ -2776,9 +2784,10 @@ class DosomethingSimple {
         assert(newRequestData.state.code == Status.RESPONDER_UNFILLED);
         assert(true)
         where:
-        tenantId      | serviceLevel | durationDays | durationHours
-        "RSInstThree" | null         | 7            | 0
-        "RSInstThree" | "rush"       | 0            | 6
+        tenantId      | serviceLevel | durationDays | durationHours | excludeWeekends
+        "RSInstThree" | null         | 7            | 0             | false
+        "RSInstThree" | "rush"       | 4            | 2             | false
+        "RSInstThree" | "express"    | 0            | 3             | true
 
     }
 
