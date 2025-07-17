@@ -43,14 +43,12 @@ public class FolioEmailServiceImpl implements EmailService {
       }
       else {
         error = "okapiClient not properly injected - unable to send email"
-        errors.add(error);
         log.warn(error);
       }
     }
     catch ( Exception e ) {
       error = "Problem talking to mod-email: ${e.getLocalizedMessage()}";
       log.error(error, e);
-      errors.add(error);
       log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
     }
 
