@@ -23,6 +23,9 @@ public class FolioEmailServiceImpl implements EmailService {
   OkapiClient okapiClient
 
   public Map sendEmail(Map email_params) {
+    boolean successfulSend = false;
+    String error = "";
+
     try {
       log.debug("Send email (okapiClient=${okapiClient})")
 
@@ -32,17 +35,27 @@ public class FolioEmailServiceImpl implements EmailService {
   
           // post(URL, JsonPayload, Params)
           def email_result = okapiClient.post("/email", email_params)
+          successfulSend = true;
   
           log.debug("Email result: ${email_result}");
-        // }
+          return email_result as Map; //implicit returns are for suckers
+
       }
       else {
-        log.warn("okapiClient not properly injcted - unable to send email");
+        error = "okapiClient not properly injected - unable to send email"
+        errors.add(error);
+        log.warn(error);
       }
     }
     catch ( Exception e ) {
-      log.error("Problem talking to mod-email",e);
+      error = "Problem talking to mod-email: ${e.getLocalizedMessage()}";
+      log.error(error, e);
+      errors.add(error);
       log.debug("okapiClient: ${okapiClient} ${okapiClient?.inspect()}");
+    }
+
+    if (!successfulSend) {
+      throw new Exception(error);
     }
 
   }
