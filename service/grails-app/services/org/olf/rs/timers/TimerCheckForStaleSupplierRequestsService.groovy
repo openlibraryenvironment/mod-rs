@@ -68,11 +68,12 @@ where pr.dateCreated < :staleDate and
 				if (!numberOfIdleHours) {
 					return;
 				}
-				log.debug("Checking requests at level '${level}' at a threshold of ${numberOfIdleHours} hours");
+
 				int numberOfIdleDays = Math.floor(numberOfIdleHours / 24);
 
 				//initialize initial date before we remove durations from it
 				DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
+
 
 				// if we are ignoring weekends then the calculation for the idle start date will be slightly different
 				if (excludeWeekends && (numberOfIdleDays > 0)) {
@@ -93,9 +94,11 @@ where pr.dateCreated < :staleDate and
 				}
 
 
+				Date staleDate = new Date(idleBeyondDate.getTimestamp());
+				log.debug("Checking requests at level '${level}' at a threshold of ${numberOfIdleHours} hours, stale date is ${staleDate}");
 
 				// Now find all the stale requests
-				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : new Date(idleBeyondDate.getTimestamp()) ]);
+				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : staleDate ]);
 
 				if ((requests != null) && (requests.size() > 0)) {
 					for ( request in requests ) {
@@ -103,7 +106,7 @@ where pr.dateCreated < :staleDate and
 							level == request.serviceLevel?.value) {
 							// Perform a supplier cannot supply action
 							try {
-								log.debug("Calling stale request action '${request?.stateModel?.staleAction?.code}' for request ${request?.hrid}")
+								log.debug("Calling stale request action '${request?.stateModel?.staleAction?.code}' for request ${request?.hrid} with createDate ${request?.dateCreated}");
 								actionService.performAction(request.stateModel.staleAction.code, request, ['note': 'Request has been idle for more than ' + numberOfIdleHours + ' hours.']);
 							} catch (Exception e) {
 								log.error("Exception thrown while performing stale action " + request.stateModel.staleAction.code + " on request " + request.hrid + " ( " + request.id.toString() + " )", e);
