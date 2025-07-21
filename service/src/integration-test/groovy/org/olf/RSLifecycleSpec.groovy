@@ -2787,7 +2787,7 @@ class DosomethingSimple {
         tenantId      | serviceLevel | durationDays | durationHours | excludeWeekends
         "RSInstThree" | null         | 7            | 0             | false
         "RSInstThree" | "rush"       | 4            | 2             | false
-        "RSInstThree" | "express"    | 0            | 3             | true
+        "RSInstThree" | "express"    | 0            | 3             | false
 
     }
 
