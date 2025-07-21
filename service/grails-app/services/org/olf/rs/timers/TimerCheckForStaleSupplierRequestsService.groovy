@@ -72,30 +72,14 @@ where pr.dateCreated < :staleDate and
 				int numberOfIdleDays = Math.floor(numberOfIdleHours / 24);
 
 				//initialize initial date before we remove durations from it
-				DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
+				DateTime initialIdleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis()));
+				log.debug("Initial idle date prior to adjustment is ${initialIdleBeyondDate}");
 
-
-				// if we are ignoring weekends then the calculation for the idle start date will be slightly different
-				if (excludeWeekends && (numberOfIdleDays > 0)) {
-					// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
-					for (int i = 0; i < numberOfIdleDays; i++) {
-						idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
-						int dayOfWeek = idleBeyondDate.getDayOfWeek();
-						if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
-							// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
-							i--;
-						}
-					}
-				} else {
-					// We do not ignore weekends
-					int hoursPart = numberOfIdleHours % 24;
-					Duration duration = new Duration(-1, numberOfIdleDays, hoursPart);
-					idleBeyondDate = idleBeyondDate.addDuration(duration);
-				}
+				DateTime idleBeyondDate = getAdjustedDateTime(numberOfIdleHours, initialIdleBeyondDate, excludeWeekends);
 
 
 				Date staleDate = new Date(idleBeyondDate.getTimestamp());
-				log.debug("Checking requests at level '${level}' at a threshold of ${numberOfIdleHours} hours, stale date is ${staleDate}");
+				log.debug("Checking requests at level '${level}' at a threshold of ${numberOfIdleHours} hours, stale date is ${staleDate} (${idleBeyondDate})");
 
 				// Now find all the stale requests
 				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : staleDate ]);
@@ -120,19 +104,36 @@ where pr.dateCreated < :staleDate and
 		}
 	}
 
-	/**
-	 * Obtains the number of idle days
-	 * @return the number of idle days
-	 */
-	/*
-	private int numberOfIdleDays() {
-		// Get hold of the number of idle days
-		return(settingsService.getSettingAsInt(SettingsData.SETTING_STALE_REQUEST_2_DAYS, DEFAULT_IDLE_DAYS, false));
-	}
-	*/
 
 	private int getNumberOfIdleHours(String setting, int hoursMultiplier) {
 		int number = settingsService.getSettingAsInt(setting, DEFAULT_IDLE_DAYS, false);
 		return number * hoursMultiplier;
+	}
+
+	public static DateTime getAdjustedDateTime(int idleHoursThreshold, DateTime idleBeyondDate, boolean excludeWeekends) {
+		int numberOfIdleDays = Math.floor(idleHoursThreshold / 24);
+
+		int hoursPart = idleHoursThreshold % 24;
+
+		if (excludeWeekends && (numberOfIdleDays > 0)) {
+			// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
+			for (int i = 0; i < numberOfIdleDays; i++) {
+				idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
+				int dayOfWeek = idleBeyondDate.getDayOfWeek();
+				if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
+					// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
+					i--;
+				}
+			}
+			//Now remove the hours part
+			Duration duration = new Duration( -1, 0, hoursPart, 0, 0);
+			idleBeyondDate = idleBeyondDate.addDuration(duration);
+		} else {
+			// We do not ignore weekends
+			Duration duration = new Duration(-1, numberOfIdleDays, hoursPart, 0, 0);
+			idleBeyondDate = idleBeyondDate.addDuration(duration);
+		}
+
+		return idleBeyondDate;
 	}
 }
