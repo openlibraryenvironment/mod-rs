@@ -436,11 +436,14 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public void markAllLoanConditionsAccepted(PatronRequest pr) {
-    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr)
+    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr, [sort: "dateCreated", order: "asc"])
     conditions.each {cond ->
-      cond.setAccepted(true)
-      cond.save(flush: true, failOnError: true)
-      if (cond.cost && (pr.maximumCostsMonetaryValue < cond.cost)) pr.maximumCostsMonetaryValue = cond.cost;
+      cond.setAccepted(true);
+      cond.save(flush: true, failOnError: true);
+      if (cond.cost != null && cond.costCurrency != null) {
+          pr.cost = cond.cost;
+          pr.costCurrency = cond.costCurrency;
+      }
     }
   }
 

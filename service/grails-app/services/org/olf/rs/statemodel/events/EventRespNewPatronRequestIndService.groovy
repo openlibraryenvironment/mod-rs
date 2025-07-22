@@ -35,6 +35,15 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
     @Override
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         if (request != null) {
+            String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+            if (requestRouterSetting == 'disabled') {
+                // TODO: consider making use of tiers an explicit setting rather than implicit based on routing
+                if (request.maximumCostsMonetaryValue != null && request.maximumCostsCurrencyCode != null) {
+                    request.cost = request.maximumCostsMonetaryValue;
+                    request.costCurrency = request.maximumCostsCurrencyCode;
+                }
+            }
+
             try {
                 log.debug('Launch auto responder for request');
                 String autoRespondSetting = AppSetting.findByKey('auto_responder_status')?.value
