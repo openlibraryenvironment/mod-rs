@@ -130,6 +130,12 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
         if (requestRouterSetting == 'disabled') {
             request.requestingInstitutionSymbol = defaultRequestSymbolString;
             request.supplyingInstitutionSymbol = defaultPeerSymbolString;
+
+            // TODO: consider making use of tiers an explicit setting rather than implicit based on routing
+            if (request.maximumCostsMonetaryValue != null && request.maximumCostsCurrencyCode != null) {
+                request.cost = request.maximumCostsMonetaryValue;
+                request.costCurrency = request.maximumCostsCurrencyCode;
+            }
         }
 
         // TODO: reconcile these two identifiers as both are in use
