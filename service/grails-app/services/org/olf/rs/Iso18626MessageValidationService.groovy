@@ -7,11 +7,12 @@ import javax.xml.XMLConstants
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
 import javax.xml.validation.Schema
+import javax.xml.validation.Validator
 
 @Slf4j
 class Iso18626MessageValidationService {
 
-    def validator = null
+    Validator validator = null
 
     void validateAgainstXSD(String xml) {
         try {
@@ -25,6 +26,9 @@ class Iso18626MessageValidationService {
         } catch (SAXException e) {
             log.error("XSD schema validation failed", e)
             throw e
+        } catch (Exception e) {
+            log.error("Error attempting to validate iso18626 message against schema  ${e.getLocalizedMessage()}");
+            throw e;
         }
     }
 }
