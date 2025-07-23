@@ -221,11 +221,11 @@ class ProtocolMessageBuildingService {
      ]
 
      Map maximumCosts = null;
-      if ( req.maximumCostsCurrencyCode?.value && req.maximumCostsMonetaryValue) {
-          maximumCosts = [:];
-          maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
-          maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
-      }
+     if ( req.maximumCostsCurrencyCode?.value != null && req.maximumCostsMonetaryValue != null) {
+         maximumCosts = [:];
+         maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
+         maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
+     }
      message.billingInfo = [
       /*
       * Permitted fields:
