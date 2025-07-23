@@ -50,4 +50,13 @@ databaseChangeLog = {
         }
         addForeignKeyConstraint(baseColumnNames: "prlc_cost_currency_fk", baseTableName: "patron_request_loan_condition", constraintName: "FK_prlc_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
     }
+
+    changeSet(author: "jskomorowski", id: '20250718-0900-001') {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_cost", type: "DECIMAL(10,2)")
+            column(name: "pr_cost_currency_fk", type: "VARCHAR(36)")
+        }
+
+        addForeignKeyConstraint(baseColumnNames: "pr_cost_currency_fk", baseTableName: "patron_request", constraintName: "FK_pr_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    }
 }

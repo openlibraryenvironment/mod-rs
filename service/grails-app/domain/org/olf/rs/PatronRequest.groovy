@@ -260,6 +260,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
   RefdataValue maximumCostsCurrencyCode;
 
+  BigDecimal cost;
+
+  @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
+  RefdataValue costCurrency;
+
   @CategoryId(RefdataValueData.VOCABULARY_SERVICE_LEVELS)
   RefdataValue serviceLevel;
 
@@ -413,6 +418,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     maximumCostsMonetaryValue(nullable: true)
     maximumCostsCurrencyCode(nullable: true)
+    cost(nullable: true)
+    costCurrency(nullable: true)
 
     serviceLevel (nullable: true)
 
@@ -552,6 +559,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     maximumCostsMonetaryValue column : 'pr_maximum_costs_value'
     maximumCostsCurrencyCode column : 'pr_maximum_costs_code_fk'
+    cost column : 'pr_cost'
+    costCurrency column : 'pr_cost_currency_fk'
 
     serviceLevel column: 'pr_service_level_fk'
 

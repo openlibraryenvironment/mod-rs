@@ -21,6 +21,7 @@ final def toExpand = fullRecord ? [
   'notifications',
   'cancellationReason',
   'conditions',
+  'costCurrency',
   'protocolAudit',
   'resolvedRequester',
   'resolvedPatron',

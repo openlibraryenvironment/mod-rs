@@ -14,6 +14,8 @@ import org.olf.rs.statemodel.*
 import javax.servlet.http.HttpServletRequest
 import java.time.LocalDate
 
+import static EventStatusReqRequestSentToSupplierIndService.symbolPresent
+
 /**
  * Service that processes the Request-ind event
  * @author Chas
@@ -23,7 +25,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
     static final String ADDRESS_SEPARATOR = ' '
     private static final Map<String, String> PATRON_REQUEST_PROPERTY_NAMES = new HashMap<>()
 
-    NewDirectoryService newDirectoryService;
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
     SettingsService settingsService;
@@ -54,6 +55,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
          */
 
         Map result = [:];
+
+        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
         // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
         if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
@@ -128,7 +132,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
                         }
                         if (serviceInfo.serviceLevel) {
-                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel?.toLowerCase(), RefdataValueData.VOCABULARY_SERVICE_LEVELS);
                             pr.serviceLevel = rdv;
                         }
                     }
@@ -203,6 +207,32 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
 
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
+
+
+                if (requestRouterSetting == 'disabled') {
+                    String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS) ?: "";
+
+                    // Because we are going to be relying on this symbol when we send messages, we need to make sure that it
+                    // either matches our defined peer symbol, or is in our local symbol list
+                    boolean validSymbol = false;
+                    if (pr.supplyingInstitutionSymbol == defaultRequestSymbolString) {
+                        validSymbol = true;
+                    } else {
+                        if (symbolPresent(pr.supplyingInstitutionSymbol, localSymbolsString)) {
+                            validSymbol = true;
+                        }
+                    }
+                    if (!validSymbol) {
+                        String errorMessage = "${pr.supplyingInstitutionSymbol} is not a valid symbol for this supplier";
+                        result.status = EventISO18626IncomingAbstractService.STATUS_ERROR;
+                        result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST;
+                        result.errorValue = errorMessage;
+                        log.error(errorMessage);
+                    }
+                }
+
+
+
                 if (!pr.requestingInstitutionSymbol || header.requestingAgencyId?.agencyIdValue) {
                     pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
                 }
@@ -213,7 +243,6 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 }
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
 
-                String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
@@ -494,6 +523,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
             result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
             result.errorValue = "NCIP lookup patron call failure for patron identifier: ${pr.patronIdentifier}"
+        } else if (result.status == EventISO18626IncomingAbstractService.STATUS_ERROR) {
+            log.debug("Result has been set to error");
         } else {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }

@@ -1,5 +1,6 @@
 package org.olf
 
+import com.k_int.web.toolkit.refdata.RefdataCategory
 import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.databinding.SimpleMapDataBindingSource
 import grails.util.Holders
@@ -9,6 +10,7 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
@@ -342,6 +344,16 @@ class RSLifecycleSpec extends TestBase {
         String source = (('A'..'Z') + ('a'..'z')).join();
         Random rand = new Random();
         return (1..length).collect { source[rand.nextInt(source.length())]}.join();
+    }
+
+    // Rudely copy-pasted from EventMessageRequestIndService
+    RefdataValue findRefdataValue(String label, String vocabulary) {
+        RefdataCategory cat = RefdataCategory.findByDesc(vocabulary);
+        if (cat) {
+            RefdataValue rdv = RefdataValue.findByOwnerAndValue(cat, label);
+            return rdv;
+        }
+        return null;
     }
 
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
@@ -952,7 +964,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 0        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupplyWithCost.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.conditions[0].cost == 42.54 && r.conditions[0].costCurrency.value == "cad" && s.conditions[0].cost == 42.54 && s.conditions[0].costCurrency.value == "cad" })
-        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.maximumCostsMonetaryValue == 42.54 && s.maximumCostsMonetaryValue == 42.54 })
+        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.cost == 42.54 && s.cost == 42.54 })
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | null
@@ -2699,14 +2711,18 @@ class DosomethingSimple {
 
     }
 
-    @Ignore //Cannot get the creation of a past-dated request to work
+    // @Ignore //Cannot get the creation of a past-dated request to work
     void "Test stale request timers"(
-            String tenantId
+            String tenantId,
+            String serviceLevel,
+            int durationDays,
+            int durationHours,
+            boolean excludeWeekends
     ) {
         when:
-        final Duration durationOneWeek = new Duration(-1, 7, 0);
+        final Duration duration = new Duration(-1, durationDays, durationHours);
         DateTime createDate = (new DateTime(TimeZone.getTimeZone("UTC"), System.currentTimeMillis())).startOfDay();
-        createDate = createDate.addDuration(durationOneWeek);
+        createDate = createDate.addDuration(duration);
         String tenantString = tenantId.toLowerCase() + "_mod_rs";
         String requestId;
         Long dateStamp;
@@ -2715,34 +2731,63 @@ class DosomethingSimple {
         def timerService = Holders.grailsApplication.mainContext.getBean(timerBeanName);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_1_ENABLED) : "yes"]);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_2_DAYS) : 3]);
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS) : 76])
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS) : 2])
+        if (excludeWeekends) {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'yes']);
+        } else {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'no']);
+        }
+
         PatronRequest newRequest;
+
+        String updateQuery = "update PatronRequest set dateCreated = :newDateCreated where id = :id"
         Tenants.withId(tenantString) {
 
-            autoTimestampEventListener.withoutDateCreated(PatronRequest, {
-                newRequest = new PatronRequest(dateCreated: new Date(createDate.getTimestamp()));
+            autoTimestampEventListener.withoutTimestamps({
+                //newRequest = new PatronRequest(dateCreated: new Date(createDate.getTimestamp()));
+                newRequest = new PatronRequest();
                 newRequest.state = Status.lookup(Status.RESPONDER_IDLE);
                 newRequest.stateModel = StateModel.lookup(StateModel.MODEL_RESPONDER);
                 newRequest.isRequester = false;
-                newRequest.save(flush:true);
+                if (serviceLevel) {
+                    RefdataValue rdv = findRefdataValue(serviceLevel.toLowerCase(), RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                    newRequest.serviceLevel = rdv;
+                }
+                newRequest.save(flush: true);
                 requestId = newRequest.id;
-            });
-            //newRequest.dateCreated = new Date(createDate.getTimestamp());
-            //newRequest.save(flush:true)
 
+
+                //newRequest.dateCreated = new Date(createDate.getTimestamp());
+                //newRequest.save(flush: true)
+            });
+
+        }
+
+        //pull the request via web and look at it to check date
+        assert(newRequest != null);
+
+        Tenants.withId(tenantString) {
+            PatronRequest.executeUpdate(updateQuery, [ newDateCreated: new Date(createDate.getTimestamp()), id: requestId])
         }
 
         Tenants.withId(tenantString) {
             timerService.performTask(tenantId, null);
         }
 
-        then:
-        assert(requestId != null);
-        assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
-        assert(newRequest.state.getCode() == Status.RESPONDER_NOT_SUPPLIED);
+        setHeaders(['X-Okapi-Tenant':tenantId]);
+        def newRequestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
+        then:
+        //assert(requestId != null);
+        //assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
+        assert(newRequestData.state.code == Status.RESPONDER_UNFILLED);
+        assert(true)
         where:
-        tenantId | _
-        "RSInstThree" | _
+        tenantId      | serviceLevel | durationDays | durationHours | excludeWeekends
+        "RSInstThree" | null         | 7            | 0             | false
+        "RSInstThree" | "rush"       | 4            | 2             | false
+        "RSInstThree" | "express"    | 0            | 3             | false
 
     }
 

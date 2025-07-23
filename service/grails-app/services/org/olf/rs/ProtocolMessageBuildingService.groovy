@@ -221,11 +221,11 @@ class ProtocolMessageBuildingService {
      ]
 
      Map maximumCosts = null;
-      if ( req.maximumCostsCurrencyCode?.value && req.maximumCostsMonetaryValue) {
-          maximumCosts = [:];
-          maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
-          maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
-      }
+     if ( req.maximumCostsCurrencyCode?.value != null && req.maximumCostsMonetaryValue != null) {
+         maximumCosts = [:];
+         maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
+         maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
+     }
      message.billingInfo = [
       /*
       * Permitted fields:
@@ -257,7 +257,9 @@ class ProtocolMessageBuildingService {
       boolean routingDisabled = (requestRouterSetting == 'disabled');
 
       if (routingDisabled) {
-          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          String supplierSymbolString = pr.supplyingInstitutionSymbol;
+          //message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', supplierSymbolString, defaultPeerSymbolString)
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
