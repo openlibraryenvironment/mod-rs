@@ -222,7 +222,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 // able to use that for our request.
                 pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
 
-                if (eventData.supplierInfo instanceof Map){
+                if (eventData.supplierInfo instanceof Map) {
                     Map supplierInfo = eventData.supplierInfo
                     if (supplierInfo.callNumber) {
                         RequestVolume rv = pr.volumes.find { rv -> rv.callNumber == supplierInfo.callNumber }
@@ -261,7 +261,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         if (it.bibliographicItemIdentifierCode == 'preceded-by') {
                             log.debug("Attempting to find preceding request via HRID");
                             PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
-                            if (pr) {
+                            if (preceedingPr) {
                                 log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
                                 pr.precededBy = preceedingPr;
                                 preceedingPr.succeededBy = pr;
