@@ -2229,7 +2229,13 @@ class DosomethingSimple {
                 copyrightType: copyrightType,
                 serviceLevel: "Rush",
                 maximumCostsMonetaryValue: "329.43",
-                maximumCostsCurrencyCode: "AUD"
+                maximumCostsCurrencyCode: "AUD",
+                patronNote: """This is the note that never ends, yes it goes
+on and on my friend, some people started singing it, not knowing what it what
+and they'll just keep on singing it forever just because this is the note that
+never ends, yes it goes on and on my friend, some people started singing it not
+knowing what it was and they'll just keep on singing it forever just because it 
+is the note that never ends..."""
         ];
 
 
