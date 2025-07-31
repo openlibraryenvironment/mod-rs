@@ -207,18 +207,26 @@ class ProtocolMessageBuildingService {
      * Address
     ]
      */
-     message.patronInfo = [
-      // Note that the internal names differ from the protocol name
-      patronId: req.patronIdentifier,
-      surname: req.patronSurname,
-      givenName: req.patronGivenName,
+      boolean suppressPatron = false;
+      if (settingsService.getSettingValue(SettingsData.SETTING_SUPPRESS_PATRON_INFO) == "yes") {
+          suppressPatron = true;
+      }
+      if (!suppressPatron) {
+          message.patronInfo = [
+                  // Note that the internal names differ from the protocol name
+                  patronId  : req.patronIdentifier,
+                  surname   : req.patronSurname,
+                  givenName : req.patronGivenName,
 
-      patronType: req.patronType,
-      /* Also permitted:
+                  patronType: req.patronType,
+                  /* Also permitted:
        * SendToPatron
        * Address
       */
-     ]
+          ]
+      } else {
+          message.patronInfo = null
+      }
 
      Map maximumCosts = null;
      if ( req.maximumCostsCurrencyCode?.value != null && req.maximumCostsMonetaryValue != null) {
