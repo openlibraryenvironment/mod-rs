@@ -59,4 +59,10 @@ databaseChangeLog = {
 
         addForeignKeyConstraint(baseColumnNames: "pr_cost_currency_fk", baseTableName: "patron_request", constraintName: "FK_pr_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
     }
+
+
+    changeSet(author: "knordstrom", id: '20250729-1543-001') {
+        modifyDataType(tableName: "patron_request", columnName: "pr_patron_note", newDataType: "TEXT")
+    }
+     
 }

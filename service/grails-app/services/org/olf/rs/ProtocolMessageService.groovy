@@ -314,26 +314,25 @@ class ProtocolMessageService {
     def sym = DirectoryEntryService.resolveCombinedSymbol(symbolStr)
 
     if (sym == null) {
-      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}")
-    }
+      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}");
+    } else {
 
-    log.debug("Finding ILL service accounts for ${sym?.symbol}")
-    try {
-      def criteria = ServiceAccount.where {
-        accountHolder == sym.owner && service.businessFunction.value == 'ill'
+      log.debug("Finding ILL service accounts for ${sym?.symbol}")
+      try {
+        def criteria = ServiceAccount.where {
+          accountHolder == sym.owner && service.businessFunction.value == 'ill'
+        }
+        result = criteria.list()
+        log.debug("Got service accounts: ${result}");
+      } catch (Exception e) {
+        log.error("Unable to find service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
       }
-      result = criteria.list()
-    } catch (Exception e) {
-      log.error("Error getting service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
     }
-
-    log.debug("Got service accounts: ${result}")
     return result;
   }
 
 
   def makeISO18626Message(Map eventData) {
-
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
     ISO18626Message message = new ISO18626Message()
@@ -371,9 +370,8 @@ class ProtocolMessageService {
     StringWriter sw = new StringWriter()
     getMarshaller().marshal(makeISO18626Message(eventData), sw)
     String message = sw.toString();
-    iso18626MessageValidationService.validateAgainstXSD(message)
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
-//    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
+    iso18626MessageValidationService.validateAgainstXSD(message);
 
     if ( address != null ) {
       // It is stored as seconds in the settings, so need to multiply by 1000
