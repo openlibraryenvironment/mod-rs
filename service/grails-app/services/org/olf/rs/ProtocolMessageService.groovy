@@ -795,7 +795,7 @@ and sa.service.businessFunction.value=:ill
     if (eventData.deliveryInfo.itemId instanceof Collection) {
       // Build multiple ItemIds
       // TODO How to handle
-      deliveryInfo.setItemId(eventData.deliveryInfo.itemId.join(","))
+      deliveryInfo.setItemId(eventData.deliveryInfo.itemId.join("###"))
     } else {
       // Build single ItemId
       deliveryInfo.setItemId(eventData.deliveryInfo.itemId)
