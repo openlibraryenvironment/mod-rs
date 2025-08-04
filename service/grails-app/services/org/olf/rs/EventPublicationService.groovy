@@ -13,12 +13,16 @@ import grails.core.GrailsApplication
 public class EventPublicationService implements EventPublisher {
 
   private KafkaProducer producer = null;
-  private Boolean disableKafka = Boolean.parseBoolean(System.getenv('MOD_RS_DISABLE_KAFKA'));
+  String disableKafkaEnv = System.getenv('MOD_RS_DISABLE_KAFKA');
+  private Boolean disableKafka = Boolean.parseBoolean(disableKafkaEnv);
   GrailsApplication grailsApplication
 
   @javax.annotation.PostConstruct
   public void init() {
-    if (disableKafka) return;
+    if (disableKafka) {
+      log.debug("Kafka is disabled");
+      return;
+    };
     log.debug("Configuring event publication service")
     Properties props = new Properties()
     grailsApplication.config.events.publisher.toProperties().each { final String key, final String value ->
