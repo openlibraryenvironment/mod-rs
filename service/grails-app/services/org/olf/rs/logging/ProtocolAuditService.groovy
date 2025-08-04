@@ -117,6 +117,7 @@ public class ProtocolAuditService {
                 protocolAudit.responseStatus = baseAuditDetails.getResponseStatus()?.take(30); // truncate to column size
                 protocolAudit.responseBody = responseBody;
                 protocolAudit.duration = baseAuditDetails.duration();
+                protocolAudit.patronRequest = patronRequest
                 protocolAudit.save(flush: true, failOnError: true);
                 patronRequest.addToProtocolAudit(protocolAudit);
             }
