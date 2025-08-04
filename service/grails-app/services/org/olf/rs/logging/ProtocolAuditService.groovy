@@ -88,7 +88,7 @@ public class ProtocolAuditService {
         if (request) {
             try {
                 save(request, baseAuditDetails)
-                request = request.merge(flush: false, failOnError: false)
+                request.save(flush:true, failOnError: true)
             } catch (OptimisticLockingFailureException olfe) {
                 log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
             }
@@ -117,6 +117,7 @@ public class ProtocolAuditService {
                 protocolAudit.responseStatus = baseAuditDetails.getResponseStatus()?.take(30); // truncate to column size
                 protocolAudit.responseBody = responseBody;
                 protocolAudit.duration = baseAuditDetails.duration();
+                protocolAudit.save(flush: true, failOnError: true);
                 patronRequest.addToProtocolAudit(protocolAudit);
             }
         }

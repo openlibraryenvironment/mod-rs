@@ -178,6 +178,7 @@ class ExternalApiController {
         }
 
         if (requestId) {
+          log.debug("Saving protocol log for request ${requestId}");
           protocolAuditService.save(requestId, iso18626LogDetails)
         }
       } else {
