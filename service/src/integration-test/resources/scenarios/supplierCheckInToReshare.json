@@ -2,6 +2,7 @@
     "action": "supplierCheckInToReshare",
     "actionParams": {
         "itemBarcodes": [{
+                "name": "Some vol",
                 "itemId": "123"
             }
         ]
