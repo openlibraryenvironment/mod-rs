@@ -326,7 +326,7 @@ public class SettingsData {
             ensureAppSetting(SETTING_DEFAULT_PEER_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FREE_PICKUP_LOCATION, SECTION_REQUESTS, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_DIRECTORY_API, SECTION_REQUESTS, SETTING_TYPE_STRING);
-            ensureAppSetting(SETTING_DEFAULT_LOAN_PERIOD, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_DEFAULT_LOAN_PERIOD, SECTION_REQUESTS, SETTING_TYPE_STRING, null, "56");
             ensureAppSetting(SETTING_MINIMUM_COST, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_SUPPRESS_PATRON_INFO, SECTION_REQUESTS, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
