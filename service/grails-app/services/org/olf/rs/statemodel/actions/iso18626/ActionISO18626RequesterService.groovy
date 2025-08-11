@@ -63,7 +63,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 Boolean useBarcode = "Yes".equalsIgnoreCase(useBarcodeValue);
                 if (itemId instanceof Collection || (itemId instanceof  String && ((String)itemId).contains("multivol"))) {
                     if (itemId instanceof  String && ((String)itemId).contains("multivol")) {
-                        String[] transformToList = ((String)itemId).split(",multivol:")
+                        String[] transformToList = ((String)itemId).split("###multivol:")
                         transformToList = transformToList.collect { str ->
                             if (!str.startsWith("multivol:")) {
                                 "multivol:" + str
@@ -78,9 +78,9 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     }
                     // Item ids coming in, handle those
                     itemId.each { iid ->
-                        Matcher matcher = iid =~ /multivol:(.*),(.*),(.*)/
+                        Matcher matcher = iid =~ /multivol:(.*)##(.*)##(.*)/
                         if (matcher.size() > 0) {
-                            // At this point we have an itemId of the form "multivol:<name>,<callNumber>,<id>"
+                            // At this point we have an itemId of the form "multivol:<name>##<callNumber>##<id>"
                             String iidId = matcher[0][3]
                             String iidName = matcher[0][1]
                             String iidCallNumber = matcher[0][2]
@@ -113,7 +113,7 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     // We have a single string, this is the usual standard case and should be handled as a single request volume
                     // Check if a RequestVolume exists for this itemId, and if not, create one
                     // At this point we have an itemId of the form "<name>,<id>,<callNumber>"
-                    Matcher matcher = itemId =~ /(.*),(.*),(.*)/
+                    Matcher matcher = itemId =~ /(.*)##(.*)##(.*)/
                     String iidId = itemId
                     String iidName = itemId
                     String iidCallNumber = null
