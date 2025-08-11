@@ -95,6 +95,7 @@ public class JasperReportService {
         String fallbackReportResource = null
     ) {
         InputStream result = null;
+        ByteArrayOutputStream outputStream = null;
 
         // If you are having issues with fonts, take a look at
         // https://community.jaspersoft.com/wiki/custom-font-font-extension
@@ -127,12 +128,13 @@ public class JasperReportService {
 
         try {
             // Now output the report
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            outputStream = new ByteArrayOutputStream();
             JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
             result = new ByteArrayInputStream(outputStream.toByteArray());
-            outputStream.close();
         } catch(Exception e) {
             log.error("Exception thrown while generating a report PDF", e);
+        } finally {
+            outputStream.close();
         }
 
         // Return the result to the caller
