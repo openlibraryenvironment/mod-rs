@@ -131,7 +131,7 @@ class ProtocolMessageBuildingService {
        * EndDate
        * Note
       */
-            
+
       copyrightCompliance: req.copyrightType?.value,
 
       serviceType: req.serviceType?.value,
@@ -342,11 +342,11 @@ class ProtocolMessageBuildingService {
                     break;
                 case 1:
                     // We have a single volume, send as a single itemId string
-                    message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
+                    message.deliveryInfo['itemId'] = "${filteredVolumes[0].name}##${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""}##${filteredVolumes[0].itemId}"
                     break;
                 default:
                     // We have many volumes, send as an array of multiVol itemIds
-                    message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
+                    message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name}##${vol.callNumber ? vol.callNumber : ""}##${vol.itemId}" }
                     break;
             }
         }
