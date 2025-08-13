@@ -1,6 +1,9 @@
 package org.olf.rs.timers;
 
-import org.dmfs.rfc5545.DateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import org.olf.rs.OkapiSettingsService;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.statemodel.Status;
@@ -26,12 +29,15 @@ where pr.parsedDueDateRS < :today and
                          s.canTriggerOverdueRequest = true)
 """;
 
+    OkapiSettingsService okapiSettingsService;
     ReshareApplicationEventHandlerService reshareApplicationEventHandlerService;
 
 	@Override
 	public void performTask(String tenant, String config) {
-        // Only interested in the date segment and that it is in UTC
-        Date today = new Date((new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay().getTimestamp());
+        // We need to take the tenant timezone into account when calculating the beginning of the day
+        Map localeSettings = okapiSettingsService.getLocaleSettings();
+        ZoneId zoneId = ZoneId.of(localeSettings?.timezone ?: "UTC");
+        Date today = Date.from(ZonedDateTime.now(zoneId).truncatedTo(ChronoUnit.DAYS).withLaterOffsetAtOverlap().toInstant());
 
 		// Now find all the incoming requests
 		List<PatronRequest> requests = PatronRequest.findAll(OVERDUE_REQUESTS_QUERY, [ today : today ]);
