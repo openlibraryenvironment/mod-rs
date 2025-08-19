@@ -136,6 +136,8 @@ public class RefdataValueData {
     public static final String NOTICE_TRIGGER_NEW_HOST_LMS_SHELVING_LOCATION = 'New Host LMS Shelving Location';
     public static final String NOTICE_TRIGGER_NEW_PATRON_PROFILE             = 'New patron profile';
     public static final String NOTICE_TRIGGER_NEW_REQUEST                    = 'New request';
+    public static final String NOTICE_TRIGGER_NEW_SUPPLY_REQUEST             = 'new_supply_request';
+    public static final String NOTICE_TRIGGER_NEW_SUPPLY_REQUEST_EXPEDITED   = 'new_supply_request_expedited';
     public static final String NOTICE_TRIGGER_REQUEST_CANCELLED              = 'Request cancelled';
     public static final String NOTICE_TRIGGER_DOCUMENT_DELIVERED             = 'Document delivered';
 
@@ -289,7 +291,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_BORT_SUPPLY_REASONS, 'With abort', 'true');
             RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'Without abort', 'false');
 
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'Requested item is locally available', 'available_locally');
@@ -318,6 +320,8 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_FORMATS, 'E-mail', 'email');
 
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_NEW_REQUEST);
+            RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, 'New request (supply)', NOTICE_TRIGGER_NEW_SUPPLY_REQUEST);
+            RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, 'New expedited request (supply)', NOTICE_TRIGGER_NEW_SUPPLY_REQUEST_EXPEDITED);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_END_OF_ROTA);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_LOANED_DIGITALLY);
             RefdataValue.lookupOrCreate(VOCABULARY_NOTICE_TRIGGERS, NOTICE_TRIGGER_OVER_LIMIT);

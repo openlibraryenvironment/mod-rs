@@ -6,13 +6,14 @@ import org.olf.rs.*
 import org.olf.rs.constants.Directory
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.lms.ItemLocation
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 /**
  * This event service takes a new responder patron request and attempts to locate the item if enabled
  * @author Chas
  */
-public class EventRespNewPatronRequestIndService extends AbstractEvent {
+public class EventRespNewPatronRequestIndService extends EventTriggerNoticesService {
     private static final String SETTING_REQUEST_ITEM_NCIP = "ncip"; //refdata seems to set values to lowercase
     private static final String SETTING_INSTITUTIONAL_ID = 'default_institutional_patron_id';
 
@@ -42,6 +43,12 @@ public class EventRespNewPatronRequestIndService extends AbstractEvent {
                     request.cost = request.maximumCostsMonetaryValue;
                     request.costCurrency = request.maximumCostsCurrencyCode;
                 }
+            }
+
+            triggerNotice(request, RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST);
+            def notExpedited = ['Standard', 'Normal'];
+            if (request?.serviceLevel?.value != null && !(request.serviceLevel.value in notExpedited)) {
+                triggerNotice(request, RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST_EXPEDITED);
             }
 
             try {
