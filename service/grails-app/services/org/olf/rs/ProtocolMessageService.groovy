@@ -66,7 +66,7 @@ class ProtocolMessageService {
   SettingsService settingsService;
   Iso18626MessageValidationService iso18626MessageValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class)
-  Marshaller marshaller = null
+  
   def grailsApplication
 
   // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
@@ -355,20 +355,22 @@ class ProtocolMessageService {
     return message
   }
 
-  Marshaller getMarshaller() {
-    if(marshaller == null){
-      marshaller = context.createMarshaller()
-      marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
-      marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper())
-    }
-    return marshaller
+
+  void marshalIsoMessage(ISO18626Message isoMessage, StringWriter stringWriter) {
+    log.debug("Attempting to marshal ISO message");
+    Marshaller marshaller = context.createMarshaller();
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION);
+    marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper());
+
+    marshaller.marshal(isoMessage, stringWriter);
   }
 
   private Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
     StringWriter sw = new StringWriter()
-    getMarshaller().marshal(makeISO18626Message(eventData), sw)
+    ISO18626Message isoMessage = makeISO18626Message(eventData);
+    marshalIsoMessage(isoMessage, sw);
     String message = sw.toString();
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
     iso18626MessageValidationService.validateAgainstXSD(message);
