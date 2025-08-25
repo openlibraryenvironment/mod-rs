@@ -12,6 +12,7 @@ import com.k_int.okapi.OkapiTenantAwareController;
 
 import grails.converters.JSON;
 import grails.gorm.multitenancy.CurrentTenant;
+import grails.gorm.transactions.NotTransactional;
 import groovy.util.logging.Slf4j;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -171,6 +172,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             dataType = "string"
         )
     ])
+    @NotTransactional
     def generatePicklist() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_REPORT);
@@ -235,6 +237,7 @@ class ReportController extends OkapiTenantAwareController<Report>  {
             dataType = "string"
         )
     ])
+    @NotTransactional
     def execute() {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_RESOURCE, RESOURCE_REPORT);
