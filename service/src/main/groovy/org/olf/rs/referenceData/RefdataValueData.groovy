@@ -291,7 +291,7 @@ public class RefdataValueData {
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Incorrect', 'incorrect');
             RefdataValue.lookupOrCreate(VOCABULARY_CANNOT_SUPPLY_REASONS, 'Other', 'other');
 
-            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_BORT_SUPPLY_REASONS, 'With abort', 'true');
+            RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'With abort', 'true');
             RefdataValue.lookupOrCreate(VOCABULARY_SLNP_CANCEL_OR_ABORT_SUPPLY_REASONS, 'Without abort', 'false');
 
             RefdataValue.lookupOrCreate(VOCABULARY_CANCELLATION_REASONS, 'Requested item is locally available', 'available_locally');
