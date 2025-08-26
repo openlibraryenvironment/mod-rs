@@ -45,7 +45,7 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
             }
         }
 
-         
+
 
         if (!request.hrid) {
             request.hrid = newRequestService.generateHrid();
@@ -106,6 +106,12 @@ public class EventNonreturnableRequesterNewPatronRequestIndService extends Abstr
         if (requestRouterSetting == 'disabled') {
             request.requestingInstitutionSymbol = defaultRequestSymbolString;
             request.supplyingInstitutionSymbol = defaultPeerSymbolString;
+
+            // TODO: consider making use of tiers an explicit setting rather than implicit based on routing
+            if (request.maximumCostsMonetaryValue != null && request.maximumCostsCurrencyCode != null) {
+                request.cost = request.maximumCostsMonetaryValue;
+                request.costCurrency = request.maximumCostsCurrencyCode;
+            }
         }
 
         return eventResultDetails;
