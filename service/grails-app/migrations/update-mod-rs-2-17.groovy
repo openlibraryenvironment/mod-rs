@@ -4,4 +4,14 @@ databaseChangeLog = {
             column(name: "pr_local_note", type: "TEXT")
         }
     }
+
+    changeSet(author: "jskomorowski", id: '20250828-1000-001') {
+        createIndex(indexName: "idx_patron_request_audit_patron_request_fk", tableName: "patron_request_audit") {
+            column(name: "pra_patron_request_fk")
+        }
+
+        createIndex(indexName: "idx_patron_request_rota_patron_request_fk", tableName: "patron_request_rota") {
+            column(name: "prr_patron_request_fk")
+        }
+    }
 }
