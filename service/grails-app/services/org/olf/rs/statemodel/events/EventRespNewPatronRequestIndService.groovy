@@ -46,8 +46,8 @@ public class EventRespNewPatronRequestIndService extends EventTriggerNoticesServ
             }
 
             triggerNotice(request, RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST);
-            def notExpedited = ['Standard', 'Normal'];
-            if (request?.serviceLevel?.value != null && !(request.serviceLevel.value in notExpedited)) {
+            def notExpedited = ['standard', 'normal'];
+            if (request?.serviceLevel?.value != null && !(request.serviceLevel.value.toLowerCase() in notExpedited)) {
                 triggerNotice(request, RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST_EXPEDITED);
             }
 
