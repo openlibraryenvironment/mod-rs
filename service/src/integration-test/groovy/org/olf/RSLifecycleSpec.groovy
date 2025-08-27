@@ -2261,10 +2261,67 @@ is the note that never ends..."""
         where:
             copyrightType | publicationType | patronIdentifier
             'us-ccg'      | "book"          | "TRANS-VALS-TYPE-0001"
-        // Create request on first tenant w/ copyright and pub info
-        // Look for request to get to 'sent to supplier'
-        // Look for responder request w/ patron reference
-        // check for copyright and publication type in responder request
+
+    }
+
+
+    void "Test transmission of patron info"(
+            String patronIdentifier,
+            boolean suppressPatronInfo) {
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String patronReference = 'ref-' + patronIdentifier;
+        when: "We create a requester request with copyright and pub info"
+        Map request = [
+                patronReference            : patronReference,
+                title                      : 'Patron Info Transmission Test',
+                author                     : 'UR DAD',
+                requestingInstitutionSymbol: 'ISIL:RST1',
+                systemInstanceIdentifier   : '123-321-321-123',
+                patronIdentifier           : patronIdentifier,
+                patronGivenName            : "Borgar",
+                patronSurname              : "Kang",
+                patronEmail                : "bk@bk.com",
+                isRequester                : true,
+                serviceType                : "Copy",
+                deliveryMethod             : "URL"
+        ];
+
+        String settingsValue = suppressPatronInfo ? "yes" : "no";
+
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_SUPPRESS_PATRON_INFO): settingsValue]);
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        // requester request sent to supplier?
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        // responder request created?
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_SUPPRESS_PATRON_INFO): "no"]); //clean up
+
+        then: "Assert values"
+        assert (responderRequestData.patronReference == patronReference);
+
+        if (suppressPatronInfo) {
+            assert(responderRequestData.patronIdentifier == null);
+            assert(responderRequestData.patronGivenName == null);
+            assert(responderRequestData.patronSurname == null);
+            assert(responderRequestData.patronEmail == null);
+        } else {
+            assert(responderRequestData.patronIdentifier == patronIdentifier);
+            assert(responderRequestData.patronGivenName == 'Borgar');
+            assert(responderRequestData.patronSurname == 'Kang');
+            assert(responderRequestData.patronEmail == null);
+        }
+
+        where:
+        patronIdentifier               | suppressPatronInfo
+        "patron_info_transmission_001" | false
+        "patron_info_transmission_002" | true
     }
 
     void "Test automatic rerequest to different cluster id after unfilled transfer"(

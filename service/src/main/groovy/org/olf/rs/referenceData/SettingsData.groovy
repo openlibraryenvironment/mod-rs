@@ -103,6 +103,7 @@ public class SettingsData {
     public static final String SETTING_DIRECTORY_API                   = 'directory_api_url';
     public static final String SETTING_DEFAULT_LOAN_PERIOD             = 'default_loan_period';
     public static final String SETTING_MINIMUM_COST                    = 'minimum_cost';
+    public static final String SETTING_SUPPRESS_PATRON_INFO            = 'suppress_patron_info';
 
 
     // Settings for the sharedIndex section
@@ -325,8 +326,9 @@ public class SettingsData {
             ensureAppSetting(SETTING_DEFAULT_PEER_SYMBOL, SECTION_REQUESTS, SETTING_TYPE_STRING);
             ensureAppSetting(SETTING_FREE_PICKUP_LOCATION, SECTION_REQUESTS, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
             ensureAppSetting(SETTING_DIRECTORY_API, SECTION_REQUESTS, SETTING_TYPE_STRING);
-            ensureAppSetting(SETTING_DEFAULT_LOAN_PERIOD, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_DEFAULT_LOAN_PERIOD, SECTION_REQUESTS, SETTING_TYPE_STRING, null, "56");
             ensureAppSetting(SETTING_MINIMUM_COST, SECTION_REQUESTS, SETTING_TYPE_STRING);
+            ensureAppSetting(SETTING_SUPPRESS_PATRON_INFO, SECTION_REQUESTS, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_YES_NO, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_YES_NO, RefdataValueData.YES_NO_NO).value);
 
             ensureAppSetting(SETTING_SHARED_INDEX_INTEGRATION, SECTION_SHARED_INDEX, SETTING_TYPE_REF_DATA, RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, null, referenceDataService.lookup(RefdataValueData.VOCABULARY_SHARED_INDEX_ADAPTER, RefdataValueData.SHARED_INDEX_ADAPTER_FOLIO).value);
             ensureAppSetting(SETTING_SHARED_INDEX_BASE_URL, SECTION_SHARED_INDEX, SETTING_TYPE_STRING, null, 'http://shared-index.reshare-dev.indexdata.com:9130');

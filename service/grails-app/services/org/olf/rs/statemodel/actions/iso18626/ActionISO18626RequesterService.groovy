@@ -1,8 +1,10 @@
 package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.DirectoryEntryService
+import org.olf.rs.ReferenceDataService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
@@ -26,9 +28,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
     private static final String SETTING_YES = 'yes';
 
-    StatusService statusService;
-    SettingsService settingsService;
+    ReferenceDataService referenceDataService;
     RerequestService rerequestService;
+    SettingsService settingsService;
+    StatusService statusService;
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
@@ -42,17 +45,30 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         request.lastSequenceReceived = sequenceResult.sequence;
 
         // if parameters.deliveryInfo.itemId then we should stash the item id
-        if (parameters?.deliveryInfo) { // TODO check if status is Loaned or CopyCompleted
+        if (parameters?.deliveryInfo) {
             if (parameters?.deliveryInfo?.loanCondition) {
                 // Are we in a valid state for loan conditions ?
                 log.debug("Loan condition found: ${parameters?.deliveryInfo?.loanCondition}")
-                incomingStatus = [status: 'Conditional']
+
+                // Don't override status to Conditional for supplied items
+                boolean isSupplied = incomingStatus?.status in ['Loaned', 'CopyCompleted'];
+
+                if (!isSupplied) {
+                    incomingStatus = [status: 'Conditional']
+                }
 
                 // Save the loan condition to the patron request
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
                 Symbol relevantSupplier = DirectoryEntryService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
 
-                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note, parameters?.messageInfo?.offeredCosts?.monetaryValue, parameters?.messageInfo?.offeredCosts?.currencyCode);
+                // Conditions on supplied items are presumed to be accepted but not explicitly so ergo null
+                Boolean accepted = isSupplied ? null : false;
+                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note, parameters?.messageInfo?.offeredCosts?.monetaryValue, parameters?.messageInfo?.offeredCosts?.currencyCode, accepted);
+
+                if (isSupplied && parameters?.messageInfo?.offeredCosts?.monetaryValue && parameters?.messageInfo?.offeredCosts?.currencyCode) {
+                    request.cost = new BigDecimal(parameters.messageInfo.offeredCosts.monetaryValue);
+                    request.costCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.messageInfo.offeredCosts.currencyCode);
+                }
             }
 
             // Could receive a single string or an array here as per the standard/our profile

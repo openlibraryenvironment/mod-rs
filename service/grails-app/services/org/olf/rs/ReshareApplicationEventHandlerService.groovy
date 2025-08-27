@@ -402,10 +402,11 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
-  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null, String cost = null, String costCurrency = null) {
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null, String cost = null, String costCurrency = null, Boolean accepted = false) {
 	  def loanCondition = new PatronRequestLoanCondition();
 	  loanCondition.setPatronRequest(pr);
 	  loanCondition.setCode(code);
+	  loanCondition.setAccepted(accepted);
 	  if (note != null) {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }

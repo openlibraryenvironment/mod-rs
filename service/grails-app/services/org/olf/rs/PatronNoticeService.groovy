@@ -29,15 +29,34 @@ public class PatronNoticeService {
       (RefdataValueData.NOTICE_TRIGGER_END_OF_ROTA): [ RefdataValueData.NOTICE_TRIGGER_NEW_REQUEST ]
     ];
 
+    // Notice triggers that should use admin email instead of patron email
+    static final List TRIGGERS_USE_ADMIN_EMAIL = [
+        RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST,
+        RefdataValueData.NOTICE_TRIGGER_NEW_SUPPLY_REQUEST_EXPEDITED
+    ];
+
     EmailService emailService
     TemplatingService templatingService
     SettingsService settingsService
+    NewDirectoryService newDirectoryService
 
     public void triggerNotices(PatronRequest pr, RefdataValue trigger) {
-        log.debug("triggerNotices(${pr.patronEmail}, ${trigger.value})")
+        log.debug("triggerNotices(${pr.hrid}, ${trigger.value})")
 
         // The values from the request we are interested in for the notices
         Map values = requestValues(pr);
+
+        // For certain triggers, use admin email instead of patron email
+        if (TRIGGERS_USE_ADMIN_EMAIL.contains(trigger.value)) {
+            String adminEmail = getAdminEmail();
+            if (adminEmail) {
+                values.email = adminEmail;
+            } else {
+                log.error("Cannot retrieve admin email from directory when processing notice trigger that requires it")
+                return;
+            }
+        }
+
         triggerNotices(new JsonBuilder(values).toString(), trigger, pr);
     }
 
@@ -206,6 +225,21 @@ public class PatronNoticeService {
      * @return The administrators email address or null if it does not find one
      */
     private String getAdminEmail() {
+        String routingAdapterSetting = settingsService.getSettingValue('routing_adapter');
+
+        // If routing is disabled, use NewDirectoryService with default_request_symbol
+        if (routingAdapterSetting == 'disabled') {
+            String defaultRequestSymbol = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
+            if (defaultRequestSymbol) {
+                def institutionEntry = newDirectoryService.institutionEntryBySymbol(defaultRequestSymbol);
+                if (institutionEntry?.email) {
+                    return institutionEntry.email;
+                }
+            }
+            return null;
+        }
+
+        // Routing not disabled, use managed entry from sync'd directory
         String institutionEmail = null;
 
         // We need to look the institution directory entry, so find all the managed entries
