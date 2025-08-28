@@ -64,5 +64,11 @@ databaseChangeLog = {
     changeSet(author: "knordstrom", id: '20250729-1543-001') {
         modifyDataType(tableName: "patron_request", columnName: "pr_patron_note", newDataType: "TEXT")
     }
+
+    changeSet(author: "jskomorowski", id: '20250828-1200-001') {
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_sender_symbol", type: "VARCHAR(255)")
+        }
+    }
      
 }

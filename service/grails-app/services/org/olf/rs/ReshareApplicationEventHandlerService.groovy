@@ -386,11 +386,13 @@ public class ReshareApplicationEventHandlerService {
 
       inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setSenderSymbol("${eventData.header.supplyingAgencyId.agencyIdType}:${eventData.header.supplyingAgencyId.agencyIdValue}")
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent(note)
     } else {
       inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setSenderSymbol("${eventData.header.requestingAgencyId.agencyIdType}:${eventData.header.requestingAgencyId.agencyIdValue}")
       inboundMessage.setAttachedAction(eventData.action)
       inboundMessage.setMessageContent(note)
     }

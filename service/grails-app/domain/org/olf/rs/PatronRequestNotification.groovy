@@ -38,6 +38,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
   // The sender/receiver variables must be nullable, since we could have a system automated timeout notifcation etc
   Symbol messageSender
   Symbol messageReceiver
+  String senderSymbol
 
   // This will hold a String containing all the information to be displayed to the user
   String messageContent
@@ -55,6 +56,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
     isSender (nullable: true)
     messageSender (nullable: true)
     messageReceiver (nullable: true)
+    senderSymbol (nullable: true)
   }
 
   static mapping = {
@@ -70,6 +72,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
     actionData column: 'prn_action_data'
     messageSender column : 'prn_message_sender_fk'
     messageReceiver column : 'prn_message_receiver_fk'
+    senderSymbol column : 'prn_sender_symbol'
     messageContent column : 'prn_message_content'
     patronRequest column : 'prn_patron_request_fk'
   }
