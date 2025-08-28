@@ -88,7 +88,6 @@ public class ProtocolAuditService {
         if (request) {
             try {
                 save(request, baseAuditDetails)
-                request.save(flush:true, failOnError: true)
             } catch (OptimisticLockingFailureException olfe) {
                 log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
             }
