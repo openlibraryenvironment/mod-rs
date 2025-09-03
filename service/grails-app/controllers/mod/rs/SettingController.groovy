@@ -133,6 +133,8 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
                     gormFilterClosure = null
                 }
 
+                log.debug("Retrieving settings with query string ${request.getQueryString()}")
+
                 result = doTheLookup(gormFilterClosure)
                 result = filterRecordsByFeatureFlags(result)
                 result = filterRecordsByPermissions(result, request)
