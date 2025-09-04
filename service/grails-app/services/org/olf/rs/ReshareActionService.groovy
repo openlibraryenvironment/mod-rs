@@ -574,8 +574,10 @@ public class ReshareActionService {
             outboundMessage.timestamp = Instant.now();
             outboundMessage.messageSender = messageSender;
             outboundMessage.messageReceiver = messageReceiver;
-            if (pr?.requestingInstitutionSymbol) {
-                outboundMessage.senderSymbol = pr.requestingInstitutionSymbol
+            if (pr?.isRequester == true && pr?.requestingInstitutionSymbol) {
+                outboundMessage.senderSymbol = pr.requestingInstitutionSymbol;
+            } else if (pr?.supplyingInstitutionSymbol) {
+                outboundMessage.senderSymbol = pr.supplyingInstitutionSymbol;
             }
             outboundMessage.isSender = true;
 
