@@ -53,6 +53,8 @@ public class ReportService {
                 // Get hold of the logo if we have one
                 InputStream logoInputStream = getImage(imageId);
 
+                log.debug("Generating report for identifiers ${identifiers}");
+
                 // Execute the jasper report
                 result.inputStream = jasperReportService.executeReport(report?.fileDefinition, schema, identifiers, logoInputStream, fallbackReportResource);
 
