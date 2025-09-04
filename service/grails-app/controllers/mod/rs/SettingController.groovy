@@ -115,6 +115,8 @@ class SettingController extends OkapiTenantAwareSwaggerController<AppSetting> {
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_SEARCH);
         log.debug(ContextLogging.MESSAGE_ENTERING);
 
+        log.debug("Retrieving settings with query string ${request.getQueryString()}")
+
         def result = []
 
         AppSetting.withNewSession { session ->
