@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "okapi"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "okapi"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "okapi"
+    spec:
+      containers:
+        - name: okapi
+          image: folioorg/okapi:5.3.0
+          args:
+            - dev
+          env:
+          - name: JAVA_OPTIONS
+            value: "-Djava.awt.headless=true -Dstorage=postgres -Dpostgres_host=postgres -Dpostgres_port=5432 -Dpostgres_username=folio_admin -Dpostgres_password=folio_admin -Dpostgres_database=okapi_modules -Dhost=okapi -Dokapiurl=http://okapi:9130 -Dlog4j2.formatMsgNoLookups=true"
+          ports:
+          - containerPort: 9130
+            protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "okapi"
+  namespace: reshare
+spec:
+  type: "NodePort"
+  selector:
+    app: "okapi"
+  ports:
+  - name: okapi
+    port: 9130
+    nodePort: 30130
