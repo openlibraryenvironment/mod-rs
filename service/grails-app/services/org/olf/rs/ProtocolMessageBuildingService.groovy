@@ -307,21 +307,7 @@ class ProtocolMessageBuildingService {
       reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note, messageParams?.cost, messageParams?.costCurrency)
     }
 
-    // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
-      Map actionMap = [action: reason_for_message]
-      actionMap.status = status
-
-      if (messageParams.loanCondition) {
-        actionMap.status = "Conditional"
-        actionMap.data = messageParams.loanCondition
-      }
-      if (messageParams.reason) {
-        actionMap.data = messageParams.reason
-      }
-
-      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
-    }
+    // Notification will be created in sendProtocolMessage after protocol response
 
     boolean isUrlDelivery = false;
     if (messageParams?.deliveredFormat) {
@@ -387,18 +373,7 @@ class ProtocolMessageBuildingService {
       message.action = action
       message.note = buildNote(pr, note, appendSequence)
 
-    // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
-      Map actionMap = [action: action]
-      reshareActionService.outgoingNotificationEntry(
-        pr,
-        note,
-        actionMap,
-        message_sender_symbol,
-        peer_symbol,
-        true
-      )
-    }
+    // Notification will be created in sendProtocolMessage after protocol response
     return message
   }
 

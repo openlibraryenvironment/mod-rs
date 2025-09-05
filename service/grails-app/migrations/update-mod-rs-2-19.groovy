@@ -70,5 +70,11 @@ databaseChangeLog = {
             column(name: "prn_sender_symbol", type: "VARCHAR(255)")
         }
     }
+
+    changeSet(author: "jskomorowski", id: '20250905-1200-001') {
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_message_status", type: "TEXT")
+        }
+    }
      
 }

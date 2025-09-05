@@ -43,6 +43,8 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
   // This will hold a String containing all the information to be displayed to the user
   String messageContent
 
+  String messageStatus
+
 
   static constraints = {
     dateCreated (nullable: true, bindable: false)
@@ -57,6 +59,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
     messageSender (nullable: true)
     messageReceiver (nullable: true)
     senderSymbol (nullable: true)
+    messageStatus (nullable: true)
   }
 
   static mapping = {
@@ -74,6 +77,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
     messageReceiver column : 'prn_message_receiver_fk'
     senderSymbol column : 'prn_sender_symbol'
     messageContent column : 'prn_message_content'
+    messageStatus column : 'prn_message_status'
     patronRequest column : 'prn_patron_request_fk'
   }
 }
