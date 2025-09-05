@@ -18,31 +18,6 @@ public class StatisticsService {
 
   private Map<String, Map> stats_cache = [:]
 
-  public incrementCounter(String context) {
-    Counter.withTransaction { status ->
-      Counter c = Counter.createCriteria().get {
-        eq('context', context)
-        lock true
-      }
-      if ( c == null )
-        c = new Counter(context:context, value:0)
-      c.value++
-      c.save(flush:true, failOnError:true);
-    }
-  }
-
-  public decrementCounter(String context) {
-    Counter.withTransaction { status ->
-      Counter c = Counter.createCriteria().get {
-        eq('context', context)
-        lock true
-      }
-      if ( c == null )
-        c = new Counter(context:context, value:0)
-      c.value--
-      c.save(flush:true, failOnError:true);
-    }
-  }
 
   /**
    * Given a symbol, try to retrieve the stats for a symbol - if needed, refresh the cache
@@ -135,10 +110,7 @@ public class StatisticsService {
 
   public Map processRatioInfo(String stats_json, String ratio) {
     def current_stats = new JsonSlurper().parseText(stats_json)
-    if ( current_stats.requestsByTag != null )
-      return processDynamicRatioInfo(current_stats,ratio);
-    else
-      return processCounterBasedRatioInfo(current_stats,ratio);
+    return processDynamicRatioInfo(current_stats,ratio);
   }
 
   // Extract into more testable lump
@@ -167,33 +139,6 @@ public class StatisticsService {
     return result;
   }
 
-  public Map processCounterBasedRatioInfo(Map current_stats, String ratio) {
-
-    log.debug("Loan to borrow ratio is : ${ratio}");
-    log.debug("Stats output is : ${current_stats}");
-
-    Map result = null;
-
-    String[] parsed_ratio = ratio.split(':')
-    long ratio_loan = Long.parseLong(parsed_ratio[0])
-    long ratio_borrow = Long.parseLong(parsed_ratio[1])
-
-    if ( current_stats ) {
-      def activeContext = current_stats.current.find { it.context=='/activeLoans' };
-      long current_loans = ((activeContext == null) ? 0 : activeContext.value);
-      def borrowingContext = current_stats.current.find { it.context=='/activeBorrowing' };
-      long current_borrowing = ((borrowingContext == null) ? 0 : borrowingContext.value);
-      result = [
-        timestamp: System.currentTimeMillis(),
-        lbr_loan:ratio_loan,
-        lbr_borrow:ratio_borrow,
-        current_loan_level:current_loans,
-        current_borrowing_level:current_borrowing,
-        reason:'Statistics collected from stats service'
-      ]
-    }
-    return result;
-  }
 
   public Map generateRequestsByState() {
     Map result = [:]

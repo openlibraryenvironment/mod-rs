@@ -194,7 +194,6 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 }
 
                 if (volumesNotCheckedIn.size() == 0) {
-                    statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
                     request.activeLoan = true;
                     request.needsAttention = false;
                     if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')) {

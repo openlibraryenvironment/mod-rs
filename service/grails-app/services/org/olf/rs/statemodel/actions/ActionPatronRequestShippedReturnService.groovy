@@ -20,8 +20,6 @@ public class ActionPatronRequestShippedReturnService extends AbstractAction {
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
-        // Decrement the active borrowing counter - we are returning the item
-        statisticsService.decrementCounter(Counter.COUNTER_ACTIVE_BORROWING);
         reshareActionService.sendRequestingAgencyMessage(request, 'ShippedReturn', parameters, actionResultDetails);
 
         actionResultDetails.responseResult.status = true;
