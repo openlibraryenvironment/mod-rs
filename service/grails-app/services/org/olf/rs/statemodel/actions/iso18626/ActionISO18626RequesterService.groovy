@@ -174,8 +174,8 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
         }
 
-        // If there is a note, create notification entry
-        if (note) {
+        // If there is a note, or a reason for the message create a notification entry
+        if (note || parameters.messageInfo?.reasonUnfilled) {
             reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, true, note);
         }
 
