@@ -15,6 +15,7 @@ import org.olf.rs.iso18626.NoteSpecials;
 import org.olf.rs.iso18626.ReasonForMessage;
 import org.olf.rs.logging.IIso18626LogDetails;
 import org.olf.rs.logging.ProtocolAuditService;
+import org.olf.rs.PatronRequestNotification;
 import org.olf.rs.patronstore.PatronStoreActions;
 import org.olf.rs.referenceData.SettingsData;
 import org.olf.rs.statemodel.ActionEvent;
@@ -309,6 +310,58 @@ public class ReshareActionService {
         return(symbols);
     }
 
+    /**
+     * Creates outgoing notification based on eventData and protocol response
+     */
+    private void createOutgoingNotification(PatronRequest pr, Map eventData, Map sendResult) {
+        if (eventData.messageType == 'SUPPLYING_AGENCY_MESSAGE' || eventData.messageType == 'REQUESTING_AGENCY_MESSAGE') {
+            PatronRequestNotification n = new PatronRequestNotification();
+            n.patronRequest = pr;
+            n.timestamp = Instant.now();
+            n.seen = false;
+            n.isSender = true;
+            // Strip sequence tracking from end of note
+            // For requester messages, note is in eventData.note
+            // For supplier messages, note is in eventData.messageInfo.note
+            String displayNote = eventData.note ?: eventData.messageInfo?.note;
+            if (displayNote != null) {
+                int seqIndex = displayNote.lastIndexOf(NoteSpecials.SEQUENCE_PREFIX);
+                if (seqIndex >= 0) {
+                    displayNote = displayNote.substring(0, seqIndex);
+                }
+            }
+            n.messageContent = displayNote;
+            n.messageStatus = sendResult?.response?.messageStatus;
+
+            if (eventData.messageType == 'SUPPLYING_AGENCY_MESSAGE') {
+                n.attachedAction = eventData.messageInfo?.reasonForMessage;
+                n.actionStatus = eventData.statusInfo?.status;
+
+                if (eventData.deliveryInfo?.loanCondition) {
+                    n.actionStatus = "Conditional";
+                    n.actionData = eventData.deliveryInfo.loanCondition;
+                }
+
+                if (eventData.messageInfo?.reasonUnfilled) {
+                    n.actionData = eventData.messageInfo.reasonUnfilled;
+                }
+
+                n.messageSender = pr.resolvedSupplier;
+                n.messageReceiver = pr.resolvedRequester;
+                n.senderSymbol = pr.supplyingInstitutionSymbol;
+
+            } else if (eventData.messageType == 'REQUESTING_AGENCY_MESSAGE') {
+                n.attachedAction = eventData.action;
+
+                n.messageSender = pr.resolvedRequester;
+                n.messageReceiver = pr.resolvedSupplier;
+                n.senderSymbol = pr.requestingInstitutionSymbol;
+            }
+
+            pr.addToNotifications(n);
+        }
+    }
+
     public boolean sendProtocolMessage(PatronRequest request, String sendingSymbol, String receivingSymbol, Map eventData, boolean resetSendAttempts = true) {
         boolean result = false;
 
@@ -361,6 +414,15 @@ public class ReshareActionService {
                 setNetworkStatus(request, NetworkStatus.Error, eventData, false)
                 auditEntry(request, request.state, request.state, sendResult.response, null)
                 break
+        }
+
+        // For requester messages, note is in eventData.note
+        // For supplier messages, note is in eventData.messageInfo.note
+        String messageNote = eventData.note ?: eventData.messageInfo?.note
+
+        // If we are notifying the other side of a field change then we do not want to record it
+        if (messageNote != null && !messageNote.startsWith(NoteSpecials.UPDATE_FIELD)) {
+            createOutgoingNotification(request, eventData, sendResult)
         }
 
         return(result);
@@ -553,45 +615,6 @@ public class ReshareActionService {
         ]);
     }
 
-    public void outgoingNotificationEntry(
-        PatronRequest pr,
-        String note,
-        Map actionMap,
-        Symbol messageSender,
-        Symbol messageReceiver,
-        Boolean isRequester
-    ) {
-        // if we are notifying the other side of a field change then we do not want to record it
-        // Check can be removed when we get extensions
-        if ((note != null) && !note.startsWith(NoteSpecials.UPDATE_FIELD)) {
-            // It is a normal note
-            String attachedAction = actionMap.action;
-            String actionStatus = actionMap.status;
-            String actionData = actionMap.data;
-
-            PatronRequestNotification outboundMessage = new PatronRequestNotification();
-            outboundMessage.patronRequest = pr;
-            outboundMessage.timestamp = Instant.now();
-            outboundMessage.messageSender = messageSender;
-            outboundMessage.messageReceiver = messageReceiver;
-            if (pr?.isRequester == true && pr?.requestingInstitutionSymbol) {
-                outboundMessage.senderSymbol = pr.requestingInstitutionSymbol;
-            } else if (pr?.supplyingInstitutionSymbol) {
-                outboundMessage.senderSymbol = pr.supplyingInstitutionSymbol;
-            }
-            outboundMessage.isSender = true;
-
-            outboundMessage.attachedAction = attachedAction;
-            outboundMessage.actionStatus = actionStatus;
-            outboundMessage.actionData = actionData;
-
-            outboundMessage.messageContent = note;
-
-            log.debug("Outbound Message: ${outboundMessage.messageContent}");
-            pr.addToNotifications(outboundMessage);
-            //outboundMessage.save(flush:true, failOnError:true);
-        }
-    }
 
     protected Date parseDateString(String dateString, String dateFormat = DEFAULT_DATE_FORMAT) {
         Date date;
