@@ -312,7 +312,6 @@ public class ReshareActionService {
 
     /**
      * Creates outgoing notification based on eventData and protocol response
-     * Replaces the original outgoingNotificationEntry calls that occurred during message building
      */
     private void createOutgoingNotification(PatronRequest pr, Map eventData, Map sendResult) {
         if (eventData.messageType == 'SUPPLYING_AGENCY_MESSAGE' || eventData.messageType == 'REQUESTING_AGENCY_MESSAGE') {
@@ -420,7 +419,7 @@ public class ReshareActionService {
         // For requester messages, note is in eventData.note
         // For supplier messages, note is in eventData.messageInfo.note
         String messageNote = eventData.note ?: eventData.messageInfo?.note
-        
+
         // If we are notifying the other side of a field change then we do not want to record it
         if (messageNote != null && !messageNote.startsWith(NoteSpecials.UPDATE_FIELD)) {
             createOutgoingNotification(request, eventData, sendResult)
