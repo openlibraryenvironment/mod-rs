@@ -200,7 +200,8 @@ public class EventMessageRequestIndService extends AbstractEvent {
                                 pr.maximumCostsMonetaryValue = new BigDecimal(maximumCosts.monetaryValue);
                             }
                             if (maximumCosts.currencyCode) {
-                                pr.maximumCostsCurrencyCode = findRefdataValue(maximumCosts.currencyCode, RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                                RefdataValue rdv = findRefdataValue(maximumCosts.currencyCode?.toLowerCase(), RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                                pr.maximumCostsCurrencyCode = rdv;
                             }
                         }
                     }
