@@ -30,7 +30,8 @@ def main():
     if k8s_environment == "trove-dev":
         tenants = [
             'sydney', 
-            'melbourne'
+            'melbourne',
+            'brisbane'
         ]
     elif k8s_environment == "slnp":
         tenants = [

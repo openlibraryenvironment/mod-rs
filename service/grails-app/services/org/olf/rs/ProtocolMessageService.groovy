@@ -365,7 +365,7 @@ class ProtocolMessageService {
     marshaller.marshal(isoMessage, stringWriter);
   }
 
-  private Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
+  protected Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
     StringWriter sw = new StringWriter()
@@ -452,7 +452,7 @@ class ProtocolMessageService {
               } else {
                   // We did so pull back the status and any error data
                   result.messageStatus = responseNode.confirmationHeader.messageStatus;
-                  result.errorData = responseNode.confirmationHeader.errorData;
+                  result.errorData = responseNode.errorData;
               }
           }
         }
