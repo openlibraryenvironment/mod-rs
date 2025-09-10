@@ -39,6 +39,23 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         // Grab hold of the statusInfo as we may want to override it
         Map incomingStatus = parameters.statusInfo;
 
+        // Reset cost when receiving ExpectToSupply from new supplier
+        if (incomingStatus?.status == "ExpectToSupply" || incomingStatus?.status == "WillSupply" ) {
+            log.debug("RequestResponse/StatusChange with ExpectToSupply/WillSupply - resetting cost fields");
+            String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+            if (requestRouterSetting == "disabled") {
+                // Using tiers - reset to maximum cost
+                request.cost = request.maximumCostsMonetaryValue;
+                request.costCurrency = request.maximumCostsCurrencyCode;
+                log.debug("Router disabled: reset cost to maxCost ${request.cost}");
+            } else {
+                // Using router - clear cost fields
+                request.cost = null;
+                request.costCurrency = null;
+                log.debug("Router enabled: cleared cost fields");
+            }
+        }
+
         // Extract the sequence from the note
         Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(parameters.messageInfo?.note);
         String note = sequenceResult.note;
