@@ -374,7 +374,7 @@ public class ReshareApplicationEventHandlerService {
         inboundMessage.setActionStatus(status)
 
         if (status == "Unfilled") {
-          inboundMessage.setActionData(eventData.messageInfo.reasonunfilled)
+          inboundMessage.setActionData(eventData.messageInfo.reasonUnfilled)
         }
       }
 

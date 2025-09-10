@@ -60,6 +60,7 @@ class PatronRequestNotification implements MultiTenant<PatronRequestNotification
     messageReceiver (nullable: true)
     senderSymbol (nullable: true)
     messageStatus (nullable: true)
+    messageContent (nullable: true)
   }
 
   static mapping = {

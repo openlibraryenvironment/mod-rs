@@ -76,5 +76,9 @@ databaseChangeLog = {
             column(name: "prn_message_status", type: "TEXT")
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20250909-1700-001") {
+        dropNotNullConstraint(tableName: "patron_request_notification", columnName: "prn_message_content", columnDataType: "TEXT")
+    }
      
 }
