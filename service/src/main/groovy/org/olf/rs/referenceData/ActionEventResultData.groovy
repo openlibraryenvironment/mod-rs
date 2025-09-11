@@ -158,6 +158,16 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
+    private static Map requesterISO18626UnfilledContinue = [
+        code: 'requesterISO18626UnfilledContinue',
+        description: 'An incoming ISO-18626 message for the requester has said that the status is Unfilled but the broker expects to continue to next supplier',
+        result: true,
+        status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+        qualifier: 'UnfilledContinue',
+        saveRestoreState: null,
+        nextActionEvent: null
+    ];
+
     private static Map responderISO18626AgreeConditions = [
         code: 'responderISO18626AgreeConditions',
         description: 'Requester has said they want to agree to the conditions',
@@ -1048,6 +1058,7 @@ public class ActionEventResultData {
         model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626Loaned,
+            requesterISO18626Unfilled,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1071,6 +1082,7 @@ public class ActionEventResultData {
         model: StateModel.MODEL_RESPONDER,
         results: [
             requesterISO18626NotificationConditionalExpectToSupply,
+            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
