@@ -18,6 +18,7 @@ public class ActionPatronRequestRequesterRejectConditionsService extends ActionP
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
+        parameters.usePRSenderSymbol = true; //This tells us to use the stored symbol in the PR, rather than the default symbol, for broker mode
         sendCancel(request, Actions.ACTION_REQUESTER_REQUESTER_REJECT_CONDITIONS, parameters, actionResultDetails);
         actionResultDetails.auditMessage = 'Rejected loan conditions';
 
