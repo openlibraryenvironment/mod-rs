@@ -1059,6 +1059,7 @@ public class ActionEventResultData {
         results: [
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
+            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1072,6 +1073,7 @@ public class ActionEventResultData {
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
             requesterISO18626UnfilledTransfer,
+            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1082,7 +1084,6 @@ public class ActionEventResultData {
         model: StateModel.MODEL_RESPONDER,
         results: [
             requesterISO18626NotificationConditionalExpectToSupply,
-            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1639,6 +1640,7 @@ public class ActionEventResultData {
         requesterISO18626Conditional,
         digitalReturnableRequesterISO18626Loaned,
         requesterISO18626Unfilled,
+        requesterISO18626UnfilledContinue,
         defaultNoStatusChangeOK
       ]
     ];
