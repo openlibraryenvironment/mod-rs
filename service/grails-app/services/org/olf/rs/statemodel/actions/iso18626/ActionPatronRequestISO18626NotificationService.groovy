@@ -24,14 +24,6 @@ public class ActionPatronRequestISO18626NotificationService extends ActionISO186
 
         // Only continue if successful
         if (actionResultDetails.result == ActionResult.SUCCESS) {
-            if (parameters.statusInfo?.status == "Unfilled") {
-                // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
-                request.supplyingInstitutionSymbol = null;
-
-                // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
-                actionResultDetails.qualifier = "UnfilledContinue";
-            }
-
             // Add an audit entry
             actionResultDetails.auditMessage = "Notification message received from supplying agency: ${protocolMessageBuildingService.extractSequenceFromNote(parameters.messageInfo?.note).note}";
         }

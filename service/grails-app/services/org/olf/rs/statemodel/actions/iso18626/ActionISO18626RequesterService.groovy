@@ -245,6 +245,15 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             }
                         }
                     }
+
+                    // Special handling for Unfilled in Notification messages
+                    if (parameters.messageInfo?.reasonForMessage == "Notification") {
+                        // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
+                        request.supplyingInstitutionSymbol = null;
+
+                        // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
+                        actionResultDetails.qualifier = "UnfilledContinue";
+                    }
                 }
             }
         }
