@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StatusService;
@@ -188,6 +189,41 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                 if (url) {
                     request.pickupURL = url
                 }
+            }
+
+            // Handle deliveryCosts if present
+            if (parameters.deliveryInfo?.deliveryCosts instanceof Map &&
+                parameters.deliveryInfo?.deliveryCosts?.monetaryValue &&
+                parameters.deliveryInfo?.deliveryCosts?.currencyCode) {
+                BigDecimal newCost = new BigDecimal(parameters.deliveryInfo.deliveryCosts.monetaryValue)
+                def newCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.deliveryInfo.deliveryCosts.currencyCode)
+
+                // Check if costs are different from what requester expected
+                boolean costsDiffer = false
+                if (request.cost != null && newCost != request.cost) {
+                    costsDiffer = true
+                } else if (request.costCurrency != null && newCurrency != request.costCurrency) {
+                    costsDiffer = true
+                } else if ((request.cost == null) != (newCost == null) || (request.costCurrency == null) != (newCurrency == null)) {
+                    costsDiffer = true
+                }
+
+                if (costsDiffer) {
+                    String costNote = "Delivery cost differs from expected: supplier reports ${newCurrency?.value ?: 'unknown currency'} ${newCost}, requester expected ${request.costCurrency?.value ?: 'unknown currency'} ${request.cost ?: 'no cost'}"
+                    request.addToAudit(new PatronRequestAudit(
+                        patronRequest: request,
+                        dateCreated: new Date(),
+                        fromStatus: request.state,
+                        toStatus: request.state,
+                        message: costNote,
+                        auditNo: request.incrementLastAuditNo(),
+                        rotaPosition: request.rotaPosition
+                    ))
+                    log.warn("Cost difference detected for request ${request.hrid}: ${costNote}")
+                }
+
+                request.cost = newCost
+                request.costCurrency = newCurrency
             }
         }
 

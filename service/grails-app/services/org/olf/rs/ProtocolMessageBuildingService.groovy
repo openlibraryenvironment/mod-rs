@@ -320,6 +320,12 @@ class ProtocolMessageBuildingService {
           message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
           isUrlDelivery = true;
     }
+
+    if (pr?.cost && pr?.costCurrency && (status == 'Loaned' || status == 'CopyCompleted')) {
+        message.deliveryInfo['deliveryCosts'] = [:]
+        message.deliveryInfo['deliveryCosts']['currencyCode'] = pr.costCurrency.value
+        message.deliveryInfo['deliveryCosts']['monetaryValue'] = pr.cost.toString()
+    }
     message.returnInfo = [:];
     if (messageParams.returnAddress) {
         message.returnInfo.physicalAddress = messageParams.returnAddress;

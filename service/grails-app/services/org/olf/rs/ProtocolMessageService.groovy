@@ -856,8 +856,8 @@ class ProtocolMessageService {
     deliveryInfo.setDeliveredFormat(toTypeSchemeValuePair(eventData.deliveryInfo.deliveredFormat))
     if (eventData.deliveryInfo.deliveryCosts) {
       TypeCosts costs = new TypeCosts()
-      costs.setCurrencyCode(null)
-      costs.setMonetaryValue(eventData.deliveryInfo.deliveryCosts)
+      costs.setCurrencyCode(toTypeSchemeValuePair(eventData.deliveryInfo.deliveryCosts.currencyCode))
+      costs.setMonetaryValue(new BigDecimal(eventData.deliveryInfo.deliveryCosts.monetaryValue))
       deliveryInfo.setDeliveryCosts(costs)
     }
     return deliveryInfo
