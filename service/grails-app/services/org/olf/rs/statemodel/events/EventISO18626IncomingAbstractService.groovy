@@ -171,13 +171,15 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                         processedSuccessfully = false;
                         errorType = ERROR_TYPE_UNABLE_TO_FIND_REQUEST;
                     } else {
+                        String actionToPerform = getActionToPerform(eventData);
+
                         if (routingDisabled) {
                             String requestingSymbol = requestingSymbolFromEventData(eventData);
                             String supplyingSymbol = supplyingSymbolFromEventData(eventData);
                             if (requestingSymbol) {
                                 request.requestingInstitutionSymbol = requestingSymbol;
                             }
-                            if (supplyingSymbol) {
+                            if (supplyingSymbol && !"Notification".equals(actionToPerform)) {
                                 if (request.supplyingInstitutionSymbol != supplyingSymbol) {
                                     request.stateHasChanged = true
                                 }
@@ -204,8 +206,6 @@ public abstract class EventISO18626IncomingAbstractService extends AbstractEvent
                                 (StateModel.MODEL_SLNP_REQUESTER == request.stateModel.shortcode ||
                                         StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER == request.stateModel.shortcode)) {
                             // We now need to execute the action for the message
-                            String actionToPerform = getActionToPerform(eventData);
-
                             // Ensure we have an action
                             if (actionToPerform == null) {
                                 // We have not been supplied an action
