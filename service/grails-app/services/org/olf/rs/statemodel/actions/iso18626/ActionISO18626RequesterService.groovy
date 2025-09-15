@@ -192,7 +192,9 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
 
             // Handle deliveryCosts if present
-            if (parameters.deliveryInfo?.deliveryCosts?.monetaryValue && parameters.deliveryInfo?.deliveryCosts?.currencyCode) {
+            if (parameters.deliveryInfo?.deliveryCosts instanceof Map &&
+                parameters.deliveryInfo?.deliveryCosts?.monetaryValue &&
+                parameters.deliveryInfo?.deliveryCosts?.currencyCode) {
                 BigDecimal newCost = new BigDecimal(parameters.deliveryInfo.deliveryCosts.monetaryValue)
                 def newCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.deliveryInfo.deliveryCosts.currencyCode)
 
