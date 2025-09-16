@@ -6,6 +6,7 @@ import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
 import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
 import java.util.regex.Matcher;
@@ -284,11 +285,13 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
 
                     // Special handling for Unfilled in Notification messages
                     if (parameters.messageInfo?.reasonForMessage == "Notification") {
-                        // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
-                        request.supplyingInstitutionSymbol = null;
+                        if (request.state.code in [Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED]) {
+                            // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
+                            request.supplyingInstitutionSymbol = null;
 
-                        // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
-                        actionResultDetails.qualifier = "UnfilledContinue";
+                            // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
+                            actionResultDetails.qualifier = "UnfilledContinue";
+                        }
                     }
                 }
             }
