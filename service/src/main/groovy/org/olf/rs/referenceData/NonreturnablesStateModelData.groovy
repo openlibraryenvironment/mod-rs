@@ -10,6 +10,7 @@ import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StatusStage;
+import org.olf.rs.referenceData.ActionEventResultData;
 
 @Slf4j
 public class NonreturnablesStateModelData {
@@ -603,6 +604,7 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626NotificationConditionalExpectToSupply,
+                    ActionEventResultData.requesterISO18626UnfilledContinue,
                     nrDefaultNoStatusChangeOK
             ]
     ];
