@@ -8,6 +8,9 @@ import org.olf.rs.patronRequest.PickupLocationService
 import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
+
+import javax.json.JsonException
+
 /**
  * This event service takes a new requester patron request and validates it and tries to determine the rota
  * @author Chas
@@ -161,7 +164,10 @@ public class EventReqNewPatronRequestIndService extends AbstractEvent {
                                 break;
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (JsonException je) {
+                        log.info("Not able to extract oclcId from bibrecord, because not valid json");
+                    }
+                    catch (Exception e) {
                         log.warn("Unable to parse bib json: ${e}");
                     }
                 }
