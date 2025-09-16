@@ -1059,7 +1059,6 @@ public class ActionEventResultData {
         results: [
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
-            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1073,7 +1072,6 @@ public class ActionEventResultData {
             requesterISO18626Loaned,
             requesterISO18626Unfilled,
             requesterISO18626UnfilledTransfer,
-            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1081,9 +1079,10 @@ public class ActionEventResultData {
     private static Map requesterNotificationReceivedISO18626 = [
         code: ActionEventResultList.REQUESTER_NOTIFICATION_RECEIVED_ISO18626,
         description: 'An incoming ISO18626 notifications has been received by the requester',
-        model: StateModel.MODEL_RESPONDER,
+        model: StateModel.MODEL_REQUESTER,
         results: [
             requesterISO18626NotificationConditionalExpectToSupply,
+            requesterISO18626UnfilledContinue,
             defaultNoStatusChangeOK
         ]
     ];
@@ -1640,7 +1639,6 @@ public class ActionEventResultData {
         requesterISO18626Conditional,
         digitalReturnableRequesterISO18626Loaned,
         requesterISO18626Unfilled,
-        requesterISO18626UnfilledContinue,
         defaultNoStatusChangeOK
       ]
     ];

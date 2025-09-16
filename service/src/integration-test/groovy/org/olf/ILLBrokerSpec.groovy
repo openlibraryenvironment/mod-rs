@@ -482,6 +482,59 @@ class ILLBrokerSpec extends TestBase {
 
     }
 
+    void "Test Unfilled Notification should continue to next supplier"() {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-unfilled-test-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY;return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY"
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Unfilled notification test",
+                author                  : "Test, Author",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+
+        // Supplier responds yes (gets to EXPECTS_TO_SUPPLY)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierAnswerYes.json",
+            supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
+
+        // Get the requester request data to build the XML message
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
+        // Load and customize the Unfilled Notification XML
+        String unfilledXml = new File("src/integration-test/resources/isoMessages/unfilledNotification.xml").text
+        unfilledXml = unfilledXml.replace("supplierSymbol_holder", SYMBOL_TWO_NAME)
+        unfilledXml = unfilledXml.replace("requesterSymbol_holder", SYMBOL_ONE_NAME)
+        unfilledXml = unfilledXml.replace("requestId_holder", requesterHrid)
+        unfilledXml = unfilledXml.replace("timestamp_holder", new Date().toInstant().toString())
+
+        // Send the XML message to the requester's ISO18626 endpoint
+        Map xmlHeaders = ['X-Okapi-Tenant': requesterTenantId]
+        String iso18626Url = "${baseUrl}/rs/externalApi/iso18626"
+        sendXMLMessage(iso18626Url, unfilledXml, xmlHeaders, 10000)
+
+        // Should transition back to REQ_REQUEST_SENT_TO_SUPPLIER via UnfilledContinue qualifier
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+
+        then:
+        assert(true)
+    }
+
     void "Test interactions with supplier symbol that is different from default requester"() {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
