@@ -95,11 +95,13 @@ public class JasperReportService {
         String fallbackReportResource = null
     ) {
         InputStream result = null;
+        ByteArrayOutputStream outputStream = null;
 
         // If you are having issues with fonts, take a look at
         // https://community.jaspersoft.com/wiki/custom-font-font-extension
         Connection connection = dataSource.getConnection();
-        try{
+        JasperPrint jasperPrint;
+        try {
             Map<String, Object> parameters = new HashMap<String, Object>();
             parameters.put(PARAMETER_IDS, idsForReport);
             parameters.put(PARAMETER_SCHEMA, schema);
@@ -110,15 +112,10 @@ public class JasperReportService {
             JasperReport jasperReport = getReport(fileDefinition, fallbackReportResource);
 
             // Execute the report
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
-
-            // Now output the report
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-            result = new ByteArrayInputStream(outputStream.toByteArray());
-            outputStream.close();
+            jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
         } catch(Exception e) {
             log.error("Exception thrown while generating a report", e);
+            return result;
         } finally {
             // Not forgetting to close the connection
             connection.close();
@@ -127,6 +124,17 @@ public class JasperReportService {
             if (imageInputStream != null) {
                 imageInputStream.close();
             }
+        }
+
+        try {
+            // Now output the report
+            outputStream = new ByteArrayOutputStream();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            result = new ByteArrayInputStream(outputStream.toByteArray());
+        } catch(Exception e) {
+            log.error("Exception thrown while generating a report PDF", e);
+        } finally {
+            outputStream.close();
         }
 
         // Return the result to the caller
