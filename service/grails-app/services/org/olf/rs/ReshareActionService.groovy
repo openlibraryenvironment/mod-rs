@@ -275,8 +275,8 @@ public class ReshareActionService {
                     log.error("No defaultPeerSymbol defined");
                 }
                 symbols = [
-                        senderSymbol: ( usePRSenderSymbol ? pr.supplyingInstitutionSymbol : defaultRequestSymbolString ),
-                        receivingSymbol: defaultPeerSymbolString
+                        senderSymbol: defaultRequestSymbolString,
+                        receivingSymbol: ( usePRSenderSymbol ? pr.supplyingInstitutionSymbol : defaultPeerSymbolString )
                 ];
             } else {
                 symbols = requestingAgencyMessageSymbol(pr);
