@@ -98,7 +98,7 @@ services:
   minio:
     container_name: minio_tests
     hostname: minio
-    image:  docker.io/bitnami/minio:2023.3.24
+    image:  docker.io/bitnamilegacy/minio:2023.3.24
     environment:
       - MINIO_ROOT_USER=DEVDEVDEV001
       - MINIO_ROOT_PASSWORD=DEVDEVDEV001
@@ -114,7 +114,7 @@ services:
 
   setup:
     container_name: minio_setup
-    image: docker.io/bitnami/minio:2023.3.24
+    image: docker.io/bitnamilegacy/minio:2023.3.24
     depends_on:
       - minio
     volumes:
