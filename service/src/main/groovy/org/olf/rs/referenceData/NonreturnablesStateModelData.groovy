@@ -215,6 +215,17 @@ public class NonreturnablesStateModelData {
             nextActionEvent: null
     ];
 
+    private static Map nrRequesterISO18626ExpectToSupplyCancelResponse = [
+            code: 'nrRequesterISO18626ExpectToSupplyCancelResponse',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
+            result: true,
+            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
     private static Map nrRequesterISO18626Unfilled = [
             code: 'nrRequesterISO18626Unfilled',
             description: 'Incoming ISO18626 message from the responder has said the status is Unfilled',
@@ -615,7 +626,9 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626Cancelled,
-                    nrRequesterISO18626CancelNo
+                    nrRequesterISO18626CancelNo,
+                    nrRequesterISO18626ExpectToSupplyCancelResponse,
+                    nrRequesterISO18626Unfilled
             ]
     ]
 

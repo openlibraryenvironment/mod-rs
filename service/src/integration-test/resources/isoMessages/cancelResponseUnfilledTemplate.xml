@@ -1,0 +1,25 @@
+<ISO18626Message version="">
+    <supplyingAgencyMessage>
+        <header>
+            <supplyingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>_SUPPLY_AGENCY_ID_</agencyIdValue>
+            </supplyingAgencyId>
+            <requestingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>_REQUEST_AGENCY_ID_</agencyIdValue>
+            </requestingAgencyId>
+            <multipleItemRequestId></multipleItemRequestId>
+            <timestamp>_TIMESTAMP_</timestamp>
+            <requestingAgencyRequestId>_REQUEST_ID_</requestingAgencyRequestId>
+        </header>
+        <messageInfo>
+            <reasonForMessage>CancelResponse</reasonForMessage>
+            <answerYesNo>Y</answerYesNo>
+        </messageInfo>
+        <statusInfo>
+            <status>Unfilled</status>
+            <lastChange>_TIMESTAMP_</lastChange>
+        </statusInfo>
+    </supplyingAgencyMessage>
+</ISO18626Message>
