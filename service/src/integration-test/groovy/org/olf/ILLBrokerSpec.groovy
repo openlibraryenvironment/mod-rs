@@ -599,7 +599,8 @@ class ILLBrokerSpec extends TestBase {
     }
 
 
-    void "Test continuations after requester has rejected loan conditions"() {
+    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState,
+            String serviceType, String deliveryMethod) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
         String patronIdentifier = "Broker-reject-continue-test-" + System.currentTimeMillis()
@@ -617,6 +618,8 @@ class ILLBrokerSpec extends TestBase {
                 patronIdentifier        : patronIdentifier,
                 isRequester             : true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
+                serviceType             : serviceType,
+                deliveryMethod          : deliveryMethod
         ]
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId])
@@ -625,12 +628,29 @@ class ILLBrokerSpec extends TestBase {
         String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
         String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
 
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
         String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
         String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
 
         performActionFromFileAndCheckStatus(performSupActionUrl, "supplierConditionalSupply.json", supplierTenantId, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, requesterTenantId, supplierTenantId, patronReference);
 
         performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
+
+        //Send mocked XML
+        String mockXMLString = new File("src/integration-test/resources/isoMessages/${xmlFileTemplate}").text;
+        mockXMLString = mockXMLString.replace('_SUPPLY_AGENCY_ID_', SYMBOL_TWO_NAME);
+        mockXMLString = mockXMLString.replace('_REQUEST_AGENCY_ID_', SYMBOL_ONE_NAME);
+        mockXMLString = mockXMLString.replace('_REQUEST_ID_', requesterHrid);
+        mockXMLString = mockXMLString.replace('_TIMESTAMP_', new Date().toInstant().toString())
+
+        Map xmlHeaders = ['X-Okapi-Tenant': requesterTenantId];
+        String iso18626Url = "${baseUrl}/rs/externalApi/iso18626";
+        sendXMLMessage(iso18626Url, mockXMLString, xmlHeaders, 10000);
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, finalState);
+
 
         //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
 
@@ -639,6 +659,14 @@ class ILLBrokerSpec extends TestBase {
 
         then:
         assert(true);
+
+        where:
+        xmlFileTemplate                            | finalState                                        | serviceType | deliveryMethod
+        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | null        | null
+        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | null        | null
+        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | "Copy"      | "URL"
+        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
+        "cancelResponseReplyNoTemplate.xml"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
 
 
     }
