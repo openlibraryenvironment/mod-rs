@@ -81,7 +81,7 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map requesterISO18626ExpectToSupplyCancelResponse = [
+    private static Map requesterISO18626ExpectToSupply_change_state = [
             code: 'requesterISO18626ExpectToSupplyCancelResponse',
             description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
             result: true,
@@ -1046,11 +1046,11 @@ public class ActionEventResultData {
         description: 'Maps the incoming ISO-18626 incoming status to one of our internal status when we are in the state ' + Status.PATRON_REQUEST_CANCEL_PENDING,
         model: StateModel.MODEL_REQUESTER,
         results: [
-            requesterISO18626Cancelled,
-            requesterISO18626CancelNo,
-            requesterISO18626Loaned,
-            requesterISO18626ExpectToSupplyCancelResponse,
-            requesterISO18626Unfilled
+                requesterISO18626Cancelled,
+                requesterISO18626CancelNo,
+                requesterISO18626Loaned,
+                requesterISO18626ExpectToSupply_change_state,
+                requesterISO18626Unfilled
         ]
     ];
 
