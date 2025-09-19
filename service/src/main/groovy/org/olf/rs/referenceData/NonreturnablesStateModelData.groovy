@@ -219,7 +219,7 @@ public class NonreturnablesStateModelData {
             code: 'nrRequesterISO18626ExpectToSupplyCancelResponse',
             description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
             result: true,
-            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
             qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
             saveRestoreState: null,
             updateRotaLocation: true,

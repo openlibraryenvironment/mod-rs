@@ -81,11 +81,11 @@ public class ActionEventResultData {
         nextActionEvent: null
     ];
 
-    private static Map requesterISO18626ExpectToSupply_change_state = [
+    private static Map requesterISO18626ExpectToSupplyCancelResponse = [
             code: 'requesterISO18626ExpectToSupplyCancelResponse',
             description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
             result: true,
-            status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
             qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
             saveRestoreState: null,
             updateRotaLocation: true,
@@ -1049,7 +1049,7 @@ public class ActionEventResultData {
                 requesterISO18626Cancelled,
                 requesterISO18626CancelNo,
                 requesterISO18626Loaned,
-                requesterISO18626ExpectToSupply_change_state,
+                requesterISO18626ExpectToSupplyCancelResponse,
                 requesterISO18626Unfilled
         ]
     ];
