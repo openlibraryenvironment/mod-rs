@@ -599,7 +599,8 @@ class ILLBrokerSpec extends TestBase {
     }
 
 
-    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState) {
+    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState,
+            String serviceType, String deliveryMethod) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
         String patronIdentifier = "Broker-reject-continue-test-" + System.currentTimeMillis()
@@ -617,6 +618,8 @@ class ILLBrokerSpec extends TestBase {
                 patronIdentifier        : patronIdentifier,
                 isRequester             : true,
                 systemInstanceIdentifier: systemInstanceIdentifier,
+                serviceType             : serviceType,
+                deliveryMethod          : deliveryMethod
         ]
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId])
@@ -658,10 +661,12 @@ class ILLBrokerSpec extends TestBase {
         assert(true);
 
         where:
-        xmlFileTemplate | finalState
-        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY
-        "cancelResponseUnfilledTemplate.xml"   | Status.PATRON_REQUEST_END_OF_ROTA
-        "cancelResponseReplyNoTemplate.xml" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED
+        xmlFileTemplate                            | finalState                                        | serviceType | deliveryMethod
+        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | null        | null
+        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | null        | null
+        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | "Copy"      | "URL"
+        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
+        "cancelResponseReplyNoTemplate.xml"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
 
 
     }
