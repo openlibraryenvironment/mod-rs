@@ -662,10 +662,10 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         xmlFileTemplate                            | finalState                                        | serviceType | deliveryMethod
-        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | null        | null
-        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | null        | null
-        "cancelResponseExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | "Copy"      | "URL"
-        "cancelResponseUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
+        "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | null        | null
+        "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | null        | null
+        "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | "Copy"      | "URL"
+        "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
         "cancelResponseReplyNoTemplate.xml"        | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
 
 

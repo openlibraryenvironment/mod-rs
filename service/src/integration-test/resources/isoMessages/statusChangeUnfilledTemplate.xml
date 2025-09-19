@@ -14,8 +14,7 @@
             <requestingAgencyRequestId>_REQUEST_ID_</requestingAgencyRequestId>
         </header>
         <messageInfo>
-            <reasonForMessage>CancelResponse</reasonForMessage>
-            <answerYesNo>Y</answerYesNo>
+            <reasonForMessage>StatusChange</reasonForMessage>
         </messageInfo>
         <statusInfo>
             <status>Unfilled</status>
