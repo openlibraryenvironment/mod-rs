@@ -2492,6 +2492,8 @@ is the note that never ends..."""
 
         String newRequesterRequestId = waitForRequestState(requesterTenantId, 10000, newPatronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
+        waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED);
+
         def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
 
 

@@ -592,7 +592,7 @@ public class NonreturnablesStateModelData {
             description: 'Re-request request',
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
-                    nrRequesterRerequested
+                    nrRequesterMarkEndOfRotaReviewed
             ]
     ]
 
@@ -1005,6 +1005,7 @@ public class NonreturnablesStateModelData {
             nrRequesterCancelList,
             nrRequesterBypassedValidationList,
             nrRequesterMarkEndOfRotaReviewedList,
+            nrRequesterRerequestList,
             nrRequesterAgreeConditionsList,
             nrRequesterRejectConditionsList,
             nrRequesterNoStatusChangeList,
