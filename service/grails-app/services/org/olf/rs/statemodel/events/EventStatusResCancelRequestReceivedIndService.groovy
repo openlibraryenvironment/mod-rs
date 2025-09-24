@@ -37,9 +37,11 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         String autoCancel = AppSetting.findByKey('auto_responder_cancel')?.value;
         if (autoCancel?.toLowerCase()?.startsWith('on')) {
-            log.debug('Auto cancel is on');
+            log.debug('Auto cancel is on'); // System has auto-respond cancel on
 
-            // System has auto-respond cancel on
+            //delay for a moment before taking action, to permit any current requests to finish
+            Thread.sleep(2000);
+
             if (request.state?.stage == StatusStage.ACTIVE_SHIPPED) {
                 // Revert the state to it's original before the cancel request was received - previousState
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
