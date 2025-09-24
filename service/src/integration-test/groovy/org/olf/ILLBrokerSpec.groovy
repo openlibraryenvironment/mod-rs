@@ -99,8 +99,9 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         tenantid | name
-        TENANT_ONE_NAME | TENANT_ONE_NAME
-        TENANT_TWO_NAME | TENANT_TWO_NAME
+        TENANT_ONE_NAME   | TENANT_ONE_NAME
+        TENANT_TWO_NAME   | TENANT_TWO_NAME
+        TENANT_THREE_NAME | TENANT_THREE_NAME
     }
 
     void "Set up test tenants"(tenantid, name) {
@@ -112,8 +113,9 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         tenantid | name
-        TENANT_ONE_NAME | TENANT_ONE_NAME
-        TENANT_TWO_NAME | TENANT_TWO_NAME
+        TENANT_ONE_NAME   | TENANT_ONE_NAME
+        TENANT_TWO_NAME   | TENANT_TWO_NAME
+        TENANT_THREE_NAME | TENANT_THREE_NAME
     }
 
     void "Configure Tenants for lending without rota or directory"(String tenant_id, Map changes_needed, Map changes_needed_hidden) {
@@ -129,6 +131,8 @@ class ILLBrokerSpec extends TestBase {
         tenant_id          | changes_needed               | changes_needed_hidden
         TENANT_ONE_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'auto_rerequest':'yes',  'request_id_prefix' : 'TENANTONE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
         TENANT_TWO_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTTWO', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+        TENANT_THREE_NAME  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTHREE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+
     }
 
     void "Create broker peers"(String peer_symbol, String tenant) {
@@ -146,8 +150,9 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         peer_symbol | tenant
-        "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}" | TENANT_ONE_NAME
-        "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" | TENANT_TWO_NAME
+        "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"   | TENANT_ONE_NAME
+        "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"   | TENANT_TWO_NAME
+        "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" | TENANT_THREE_NAME
     }
 
 
@@ -494,7 +499,7 @@ class ILLBrokerSpec extends TestBase {
     }
 
 
-    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState,
+    void "Test continuations after requester has rejected loan conditions (manual xml)"(String xmlFileTemplate, String finalState,
             String serviceType, String deliveryMethod) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
@@ -562,6 +567,61 @@ class ILLBrokerSpec extends TestBase {
         "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | "Copy"      | "URL"
         "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
         "cancelResponseReplyNoTemplate.xml"      | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
+
+
+    }
+
+    void "Test continuations after requester has rejected loan conditions"(String serviceType, String deliveryMethod) {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-reject-continue-test-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::98754541231;return-ISIL:${SYMBOL_THREE_NAME}::98754541231" //test transmission to supplierUniqueRecordId
+        //String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:DUMMY" ])
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Testing cancel continuation with broker",
+                author                  : "Bott, Rob",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+                serviceType             : serviceType,
+                deliveryMethod          : deliveryMethod
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierConditionalSupply.json", supplierTenantId, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, requesterTenantId, supplierTenantId, patronReference);
+
+        performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
+
+
+        //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
+
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ]) //so future tests aren't messed
+
+        then:
+        assert(true);
+
+        where:
+        serviceType | deliveryMethod
+        null        | null
+        "Copy"      | "URL"
 
 
     }
