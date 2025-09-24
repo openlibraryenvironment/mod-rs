@@ -1,5 +1,6 @@
 package org.olf.rs.statemodel.events
 
+import grails.events.EventPublisher
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareActionService
 import org.olf.rs.statemodel.AbstractEvent;
@@ -18,7 +19,7 @@ import com.k_int.web.toolkit.settings.AppSetting;
  * @author Chas
  *
  */
-public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent {
+public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent implements EventPublisher {
 
     ActionResponderSupplierRespondToCancelService actionResponderSupplierRespondToCancelService;
     ReshareActionService reshareActionService;
@@ -46,7 +47,9 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
                 // Revert the state to it's original before the cancel request was received - previousState
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SHIPPED;
-                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no'], eventResultDetails);
+                log.debug('create event sendSupplierCancelResponse')
+                notify("sendSupplierCancelResponse", request, [cancelResponse : 'no'], eventResultDetails)
+                log.debug('event sendSupplierCancelResponse created')
             } else {
                 ActionResultDetails actionResultDetails = new ActionResultDetails();
                 actionResponderSupplierRespondToCancelService.performAction(request, [ cancelResponse: 'yes' ], actionResultDetails);
