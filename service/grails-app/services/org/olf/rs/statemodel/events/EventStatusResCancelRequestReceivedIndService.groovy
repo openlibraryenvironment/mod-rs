@@ -11,9 +11,7 @@ import org.olf.rs.statemodel.EventResultDetails;
 import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StatusStage;
 
-import com.k_int.web.toolkit.settings.AppSetting
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.task.TaskExecutor
+import com.k_int.web.toolkit.settings.AppSetting;
 
 /**
  * Event triggered when a cancel request is received from the requester
@@ -24,8 +22,6 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
 
     ActionResponderSupplierRespondToCancelService actionResponderSupplierRespondToCancelService;
     ReshareActionService reshareActionService;
-    @Autowired
-    TaskExecutor taskExecutor
 
     @Override
     String name() {
@@ -41,14 +37,16 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
     EventResultDetails processEvent(PatronRequest request, Map eventData, EventResultDetails eventResultDetails) {
         String autoCancel = AppSetting.findByKey('auto_responder_cancel')?.value;
         if (autoCancel?.toLowerCase()?.startsWith('on')) {
-            log.debug('Auto cancel is on');
+            log.debug('Auto cancel is on'); // System has auto-respond cancel on
 
-            // System has auto-respond cancel on
+            //delay for a moment before taking action, to permit any current requests to finish
+            Thread.sleep(2000);
+
             if (request.state?.stage == StatusStage.ACTIVE_SHIPPED) {
                 // Revert the state to it's original before the cancel request was received - previousState
                 eventResultDetails.auditMessage = 'AutoResponder:Cancel is ON - but item is SHIPPED. Responding NO to cancel, revert to previous state';
                 eventResultDetails.qualifier = ActionEventResultQualifier.QUALIFIER_SHIPPED;
-                sendAsyncSupplierMessage(request, eventResultDetails)
+                reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no'], eventResultDetails);
             } else {
                 ActionResultDetails actionResultDetails = new ActionResultDetails();
                 actionResponderSupplierRespondToCancelService.performAction(request, [ cancelResponse: 'yes' ], actionResultDetails);
@@ -71,11 +69,5 @@ public class EventStatusResCancelRequestReceivedIndService extends AbstractEvent
         }
 
         return(eventResultDetails);
-    }
-
-    void sendAsyncSupplierMessage(PatronRequest request, EventResultDetails eventResultDetails) {
-        taskExecutor.execute {
-            reshareActionService.sendSupplierCancelResponse(request, [cancelResponse : 'no'], eventResultDetails)
-        }
     }
 }
