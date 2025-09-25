@@ -130,7 +130,7 @@ class ILLBrokerSpec extends TestBase {
         where:
         tenant_id          | changes_needed               | changes_needed_hidden
         TENANT_ONE_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'auto_rerequest':'yes',  'request_id_prefix' : 'TENANTONE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-        TENANT_TWO_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTTWO', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+        TENANT_TWO_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'on', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTTWO', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
         TENANT_THREE_NAME  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTHREE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
 
     }
@@ -149,7 +149,7 @@ class ILLBrokerSpec extends TestBase {
         1==1
 
         where:
-        peer_symbol | tenant
+        peer_symbol                                | tenant
         "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"   | TENANT_ONE_NAME
         "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"   | TENANT_TWO_NAME
         "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" | TENANT_THREE_NAME
@@ -581,6 +581,8 @@ class ILLBrokerSpec extends TestBase {
 
         changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:DUMMY" ])
 
+        long start_time = System.currentTimeMillis();
+
         when: "We create a request"
         Map request = [
                 patronReference         : patronReference,
@@ -609,14 +611,19 @@ class ILLBrokerSpec extends TestBase {
 
         performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
 
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
         //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
 
+        long finish_time = System.currentTimeMillis()
+
+        long elapsed_time = finish_time - start_time;
+        log.debug("Test ran in ${elapsed_time} millis");
 
         changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ]) //so future tests aren't messed
 
         then:
-        assert(true);
+        assert(elapsed_time < 10000);
 
         where:
         serviceType | deliveryMethod
