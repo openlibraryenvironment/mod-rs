@@ -1,5 +1,6 @@
 package mod.rs
 
+import grails.events.EventPublisher
 import groovy.xml.StreamingMarkupBuilder
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
@@ -30,7 +31,7 @@ import org.xml.sax.SAXException;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/externalApi", tags = ["External API Controller"], description = "API for external requests that do not require authentication")
-class ExternalApiController {
+class ExternalApiController implements EventPublisher {
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ConfirmationMessageService confirmationMessageService
@@ -178,8 +179,8 @@ class ExternalApiController {
         }
 
         if (requestId) {
-          log.debug("Saving protocol log for request ${requestId}");
-          protocolAuditService.save(requestId, iso18626LogDetails)
+          log.debug("Saving protocol log for request ${requestId}")
+          notify("ProtocolAuditService.saveSubscriber", requestId, iso18626LogDetails)
         }
       } else {
         log.error("NO XML Supplied in request. Unable to proceed");
