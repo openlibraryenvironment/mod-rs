@@ -1,6 +1,7 @@
 package mod.rs
 
 import grails.events.EventPublisher
+import grails.gorm.multitenancy.Tenants
 import groovy.xml.StreamingMarkupBuilder
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
@@ -180,7 +181,7 @@ class ExternalApiController implements EventPublisher {
 
         if (requestId) {
           log.debug("Saving protocol log for request ${requestId}")
-          notify("ProtocolAuditService.saveSubscriber", requestId, iso18626LogDetails)
+          notify("ProtocolAuditService.saveSubscriber", Tenants.currentId(), requestId, iso18626LogDetails)
         }
       } else {
         log.error("NO XML Supplied in request. Unable to proceed");
