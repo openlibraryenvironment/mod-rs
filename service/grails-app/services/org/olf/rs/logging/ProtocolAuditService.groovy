@@ -1,5 +1,6 @@
 package org.olf.rs.logging
 
+import grails.events.annotation.Subscriber
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolAudit;
 import org.olf.rs.ProtocolMethod;
@@ -92,6 +93,11 @@ public class ProtocolAuditService {
                 log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
             }
         }
+    }
+
+    @Subscriber("ProtocolAuditService.saveSubscriber")
+    void saveSubscriber(String patronRequestId, IBaseAuditDetails baseAuditDetails){
+        save(patronRequestId, baseAuditDetails)
     }
 
     /**
