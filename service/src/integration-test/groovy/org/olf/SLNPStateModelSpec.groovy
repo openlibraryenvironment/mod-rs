@@ -325,46 +325,6 @@ class SLNPStateModelSpec extends TestBase {
         return slnpPatronRequest.save(flush: true, failOnError: true);
     }
 
-    // For the given tenant, block up to timeout ms until the given request is found in the given state
-    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
-        long start_time = System.currentTimeMillis();
-        String request_id = null;
-        String request_state = null;
-        long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders([ 'X-Okapi-Tenant': tenant ]);
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    [
-                            'max':'100',
-                            'offset':'0',
-                            'match':'hrid',
-                            'term':hrid
-                    ])
-            if ( resp?.size() == 1 ) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with hrid ${hrid} not found");
-            }
-
-            if ( required_state != request_state ) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping");
-                Thread.sleep(1000);
-            }
-            elapsed = System.currentTimeMillis() - start_time
-        }
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-        }
-
-        return request_id;
-    }
-
     private String waitForNewEventProcessed(String tenant, long timeout, String id) {
         long start_time = System.currentTimeMillis();
         String request_id = null;
