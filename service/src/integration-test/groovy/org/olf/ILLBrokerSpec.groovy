@@ -611,11 +611,12 @@ class ILLBrokerSpec extends TestBase {
 
         performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
 
+        long finish_time = System.currentTimeMillis()
+
         waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
         //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
 
-        long finish_time = System.currentTimeMillis()
 
         long elapsed_time = finish_time - start_time;
         log.debug("Test ran in ${elapsed_time} millis");
