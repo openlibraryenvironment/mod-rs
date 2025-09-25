@@ -6,6 +6,7 @@ import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
 import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
 import java.util.regex.Matcher;
@@ -13,6 +14,7 @@ import java.util.regex.Matcher;
 import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StatusService;
@@ -189,6 +191,41 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                     request.pickupURL = url
                 }
             }
+
+            // Handle deliveryCosts if present
+            if (parameters.deliveryInfo?.deliveryCosts instanceof Map &&
+                parameters.deliveryInfo?.deliveryCosts?.monetaryValue &&
+                parameters.deliveryInfo?.deliveryCosts?.currencyCode) {
+                BigDecimal newCost = new BigDecimal(parameters.deliveryInfo.deliveryCosts.monetaryValue)
+                def newCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.deliveryInfo.deliveryCosts.currencyCode)
+
+                // Check if costs are different from what requester expected
+                boolean costsDiffer = false
+                if (request.cost != null && newCost != request.cost) {
+                    costsDiffer = true
+                } else if (request.costCurrency != null && newCurrency != request.costCurrency) {
+                    costsDiffer = true
+                } else if ((request.cost == null) != (newCost == null) || (request.costCurrency == null) != (newCurrency == null)) {
+                    costsDiffer = true
+                }
+
+                if (costsDiffer) {
+                    String costNote = "Delivery cost differs from expected: supplier reports ${newCurrency?.value ?: 'unknown currency'} ${newCost}, requester expected ${request.costCurrency?.value ?: 'unknown currency'} ${request.cost ?: 'no cost'}"
+                    request.addToAudit(new PatronRequestAudit(
+                        patronRequest: request,
+                        dateCreated: new Date(),
+                        fromStatus: request.state,
+                        toStatus: request.state,
+                        message: costNote,
+                        auditNo: request.incrementLastAuditNo(),
+                        rotaPosition: request.rotaPosition
+                    ))
+                    log.warn("Cost difference detected for request ${request.hrid}: ${costNote}")
+                }
+
+                request.cost = newCost
+                request.costCurrency = newCurrency
+            }
         }
 
         // If there is a note, or a reason for the message create a notification entry
@@ -243,6 +280,17 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             } else {
                                 log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
                             }
+                        }
+                    }
+
+                    // Special handling for Unfilled in Notification messages
+                    if (parameters.messageInfo?.reasonForMessage == "Notification") {
+                        if (request.state.code in [Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED]) {
+                            // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
+                            request.supplyingInstitutionSymbol = null;
+
+                            // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
+                            actionResultDetails.qualifier = "UnfilledContinue";
                         }
                     }
                 }

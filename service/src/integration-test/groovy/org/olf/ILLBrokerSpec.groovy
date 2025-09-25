@@ -351,6 +351,8 @@ class ILLBrokerSpec extends TestBase {
 
         waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_END_OF_ROTA);
 
+        changeSettings(requesterTenantId, [ "local_symbols" : ""], false); //reset setting
+
         then:
         assert(true);
     }
@@ -482,6 +484,59 @@ class ILLBrokerSpec extends TestBase {
 
     }
 
+    void "Test Unfilled Notification should continue to next supplier"() {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-unfilled-test-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY;return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY"
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Unfilled notification test",
+                author                  : "Test, Author",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+
+        // Supplier responds yes (gets to EXPECTS_TO_SUPPLY)
+        performActionFromFileAndCheckStatus(performSupActionUrl, "nrSupplierAnswerYes.json",
+            supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY,
+            Status.RESPONDER_NEW_AWAIT_PULL_SLIP, requesterTenantId, supplierTenantId, patronReference)
+
+        // Get the requester request data to build the XML message
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
+        // Load and customize the Unfilled Notification XML
+        String unfilledXml = new File("src/integration-test/resources/isoMessages/unfilledNotification.xml").text
+        unfilledXml = unfilledXml.replace("supplierSymbol_holder", SYMBOL_TWO_NAME)
+        unfilledXml = unfilledXml.replace("requesterSymbol_holder", SYMBOL_ONE_NAME)
+        unfilledXml = unfilledXml.replace("requestId_holder", requesterHrid)
+        unfilledXml = unfilledXml.replace("timestamp_holder", new Date().toInstant().toString())
+
+        // Send the XML message to the requester's ISO18626 endpoint
+        Map xmlHeaders = ['X-Okapi-Tenant': requesterTenantId]
+        String iso18626Url = "${baseUrl}/rs/externalApi/iso18626"
+        sendXMLMessage(iso18626Url, unfilledXml, xmlHeaders, 10000)
+
+        // Should transition back to REQ_REQUEST_SENT_TO_SUPPLIER via UnfilledContinue qualifier
+        waitForRequestStateById(requesterTenantId, 10000, requestId, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+
+        then:
+        assert(true)
+    }
+
     void "Test interactions with supplier symbol that is different from default requester"() {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
@@ -537,10 +592,87 @@ class ILLBrokerSpec extends TestBase {
         performActionFromFileAndCheckStatus(performSupActionUrl, "supplierCheckOutOfReshare.json", supplierTenantId, Status.PATRON_REQUEST_REQUEST_COMPLETE, Status.RESPONDER_COMPLETE, requesterTenantId, supplierTenantId, patronReference)
 
         changeSettings(supplierTenantId, [ (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ]) //so future tests aren't messed
+        changeSettings(supplierTenantId, [ "local_symbols" : ""], false);
 
         then:
         assert(true)
     }
+
+
+    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState,
+            String serviceType, String deliveryMethod) {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-reject-continue-test-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        //String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::98754541231;return-ISIL:${SYMBOL_ONE_NAME}::98754541231" //test transmission to supplierUniqueRecordId
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:DUMMY" ])
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Testing cancel continuation with broker",
+                author                  : "Bott, Rob",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+                serviceType             : serviceType,
+                deliveryMethod          : deliveryMethod
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierConditionalSupply.json", supplierTenantId, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, requesterTenantId, supplierTenantId, patronReference);
+
+        performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
+
+        //Send mocked XML
+        String mockXMLString = new File("src/integration-test/resources/isoMessages/${xmlFileTemplate}").text;
+        mockXMLString = mockXMLString.replace('_SUPPLY_AGENCY_ID_', SYMBOL_TWO_NAME);
+        mockXMLString = mockXMLString.replace('_REQUEST_AGENCY_ID_', SYMBOL_ONE_NAME);
+        mockXMLString = mockXMLString.replace('_REQUEST_ID_', requesterHrid);
+        mockXMLString = mockXMLString.replace('_TIMESTAMP_', new Date().toInstant().toString())
+
+        Map xmlHeaders = ['X-Okapi-Tenant': requesterTenantId];
+        String iso18626Url = "${baseUrl}/rs/externalApi/iso18626";
+        sendXMLMessage(iso18626Url, mockXMLString, xmlHeaders, 10000);
+
+        waitForRequestStateById(requesterTenantId, 10000, requestId, finalState);
+
+
+        //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
+
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ]) //so future tests aren't messed
+
+        then:
+        assert(true);
+
+        where:
+        xmlFileTemplate                          | finalState                                        | serviceType | deliveryMethod
+        "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null        | null
+        "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | null        | null
+        "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | "Copy"      | "URL"
+        "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
+        "cancelResponseReplyNoTemplate.xml"      | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
+
+
+    }
+
+
+
 
 
 

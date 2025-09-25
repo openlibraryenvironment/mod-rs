@@ -45,6 +45,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String REQUESTER_SHIPPED_RETURN                      = 'requesterShippedReturn';
     static public final String REQUESTER_SHIPPED_TO_SUPPLIER_ISO18626        = 'requesterShippedToSupplierISO18626';
     static public final String REQUESTER_SEND_TO_NEXT_LOCATION               = 'requesterSendToNextLocationList';
+    static public final String REQUESTER_STATUS_CHANGE_ISO18626              = 'requesterStatusChangeISO18626';
     static public final String REQUESTER_VALIDATE_INDICATION                 = 'requesterValidateIndList';
 
 

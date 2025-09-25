@@ -320,6 +320,12 @@ class ProtocolMessageBuildingService {
           message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
           isUrlDelivery = true;
     }
+
+    if (pr?.cost && pr?.costCurrency && (status == 'Loaned' || status == 'CopyCompleted')) {
+        message.deliveryInfo['deliveryCosts'] = [:]
+        message.deliveryInfo['deliveryCosts']['currencyCode'] = pr.costCurrency.value
+        message.deliveryInfo['deliveryCosts']['monetaryValue'] = pr.cost.toString()
+    }
     message.returnInfo = [:];
     if (messageParams.returnAddress) {
         message.returnInfo.physicalAddress = messageParams.returnAddress;
@@ -358,8 +364,6 @@ class ProtocolMessageBuildingService {
       Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
       String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
-      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
-      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
       Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
       Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
@@ -367,7 +371,7 @@ class ProtocolMessageBuildingService {
       if (requestRouterSetting != 'disabled') {
           message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
       } else {
-          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender, peer)
       }
 
       message.action = action

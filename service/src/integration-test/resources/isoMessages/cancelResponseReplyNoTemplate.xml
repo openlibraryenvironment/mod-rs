@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ill:ISO18626Message ill:version="1.2" xsi:schemaLocation="http://illtransactions.org/2013/iso18626 https://illtransactions.org/schemas/ISO-18626-v1_2.xsd" xmlns:ill="http://illtransactions.org/2013/iso18626" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ill:supplyingAgencyMessage>
+        <ill:header>
+            <ill:supplyingAgencyId>
+                <ill:agencyIdType>ISIL</ill:agencyIdType>
+                <ill:agencyIdValue>_SUPPLY_AGENCY_ID_</ill:agencyIdValue>
+            </ill:supplyingAgencyId>
+            <ill:requestingAgencyId>
+                <ill:agencyIdType>ISIL</ill:agencyIdType>
+                <ill:agencyIdValue>_REQUEST_AGENCY_ID_</ill:agencyIdValue>
+            </ill:requestingAgencyId>
+            <ill:multipleItemRequestId></ill:multipleItemRequestId>
+            <ill:timestamp>_TIMESTAMP_</ill:timestamp>
+            <ill:requestingAgencyRequestId>_REQUEST_ID_</ill:requestingAgencyRequestId>
+            <ill:supplyingAgencyRequestId>_REQUEST_ID_</ill:supplyingAgencyRequestId>
+        </ill:header>
+        <ill:messageInfo>
+            <ill:reasonForMessage>CancelResponse</ill:reasonForMessage>
+            <ill:answerYesNo>N</ill:answerYesNo>
+            <ill:reasonUnfilled></ill:reasonUnfilled>
+            <ill:reasonRetry></ill:reasonRetry>
+        </ill:messageInfo>
+        <ill:deliveryInfo>
+            <ill:dateSent>_TIMESTAMP_</ill:dateSent>
+            <ill:sentToPatron>false</ill:sentToPatron>
+            <ill:loanCondition></ill:loanCondition>
+            <ill:deliveredFormat></ill:deliveredFormat>
+        </ill:deliveryInfo>
+        <ill:returnInfo></ill:returnInfo>
+    </ill:supplyingAgencyMessage>
+</ill:ISO18626Message>

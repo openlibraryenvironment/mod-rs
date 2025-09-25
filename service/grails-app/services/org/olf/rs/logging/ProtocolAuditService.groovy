@@ -1,5 +1,7 @@
 package org.olf.rs.logging
 
+import grails.events.annotation.Subscriber
+import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolAudit;
 import org.olf.rs.ProtocolMethod;
@@ -91,6 +93,13 @@ public class ProtocolAuditService {
             } catch (OptimisticLockingFailureException olfe) {
                 log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
             }
+        }
+    }
+
+    @Subscriber("ProtocolAuditService.saveSubscriber")
+    void saveSubscriber(Serializable tenant, String patronRequestId, IBaseAuditDetails baseAuditDetails){
+        Tenants.withId(tenant) {
+            save(patronRequestId, baseAuditDetails)
         }
     }
 

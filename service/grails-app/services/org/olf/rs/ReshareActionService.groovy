@@ -260,11 +260,6 @@ public class ReshareActionService {
 
             Map eventData = retryEventData;
             Map symbols = null;
-            /*
-            Map symbols = isSlnpModel ? [ senderSymbol: pr.requestingInstitutionSymbol, receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol] :
-                    requestingAgencyMessageSymbol(pr);
-
-             */
 
             if (isSlnpModel) {
                 symbols = [
@@ -272,6 +267,8 @@ public class ReshareActionService {
                         receivingSymbol: pr.resolvedSupplier ? pr.supplyingInstitutionSymbol : pr.requestingInstitutionSymbol
                 ];
             } else if (routingDisabled) {
+                boolean usePRSenderSymbol = messageParams?.usePRSenderSymbol ?: false;
+                log.debug("usePRSenderSymbol is ${usePRSenderSymbol}");
                 String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
                 String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
                 if (!defaultPeerSymbolString) {
@@ -279,7 +276,7 @@ public class ReshareActionService {
                 }
                 symbols = [
                         senderSymbol: defaultRequestSymbolString,
-                        receivingSymbol: defaultPeerSymbolString
+                        receivingSymbol: ( usePRSenderSymbol ? pr.supplyingInstitutionSymbol : defaultPeerSymbolString )
                 ];
             } else {
                 symbols = requestingAgencyMessageSymbol(pr);

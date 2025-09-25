@@ -10,6 +10,7 @@ import org.olf.rs.statemodel.Events;
 import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.StatusStage;
+import org.olf.rs.referenceData.ActionEventResultData;
 
 @Slf4j
 public class NonreturnablesStateModelData {
@@ -209,6 +210,17 @@ public class NonreturnablesStateModelData {
             result: true,
             status: Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, //Yes, WillSupply yields Expect_To_Supply status
             qualifier: ActionEventResultQualifier.QUALIFIER_WILL_SUPPLY,
+            saveRestoreState: null,
+            updateRotaLocation: true,
+            nextActionEvent: null
+    ];
+
+    private static Map nrRequesterISO18626ExpectToSupplyCancelResponse = [
+            code: 'nrRequesterISO18626ExpectToSupplyCancelResponse',
+            description: 'An incoming ISO-18626 message for the requester has said that the status is ExpectToSupply',
+            result: true,
+            status: Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER,
+            qualifier: ActionEventResultQualifier.QUALIFIER_EXPECT_TO_SUPPLY,
             saveRestoreState: null,
             updateRotaLocation: true,
             nextActionEvent: null
@@ -580,7 +592,7 @@ public class NonreturnablesStateModelData {
             description: 'Re-request request',
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
-                    nrRequesterRerequested
+                    nrRequesterMarkEndOfRotaReviewed
             ]
     ]
 
@@ -603,6 +615,7 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626NotificationConditionalExpectToSupply,
+                    ActionEventResultData.requesterISO18626UnfilledContinue,
                     nrDefaultNoStatusChangeOK
             ]
     ];
@@ -613,7 +626,9 @@ public class NonreturnablesStateModelData {
             model: StateModel.MODEL_NR_REQUESTER,
             results: [
                     nrRequesterISO18626Cancelled,
-                    nrRequesterISO18626CancelNo
+                    nrRequesterISO18626CancelNo,
+                    nrRequesterISO18626ExpectToSupplyCancelResponse,
+                    nrRequesterISO18626Unfilled
             ]
     ]
 
@@ -990,6 +1005,7 @@ public class NonreturnablesStateModelData {
             nrRequesterCancelList,
             nrRequesterBypassedValidationList,
             nrRequesterMarkEndOfRotaReviewedList,
+            nrRequesterRerequestList,
             nrRequesterAgreeConditionsList,
             nrRequesterRejectConditionsList,
             nrRequesterNoStatusChangeList,
@@ -1105,6 +1121,8 @@ public class NonreturnablesStateModelData {
 
         // REQ_CANCEL_PENDING OR "Cancel pending"
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_CANCEL_RESPONSE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626);
+        AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_CANCEL_PENDING, Actions.ACTION_REQUESTER_ISO18626_STATUS_CHANGE, AvailableAction.TRIGGER_TYPE_PROTOCOL, ActionEventResultList.NR_REQUESTER_CANCEL_PENDING_ISO18626);
+
 
         //REQ_SENT_TO_SUPPLIER
         AvailableAction.ensure(StateModel.MODEL_NR_REQUESTER, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER, Actions.ACTION_NONRETURNABLE_REQUESTER_REQUESTER_CANCEL, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.NR_REQUESTER_CANCEL);
