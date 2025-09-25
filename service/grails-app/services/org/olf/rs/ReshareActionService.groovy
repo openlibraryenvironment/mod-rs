@@ -1,8 +1,7 @@
 package org.olf.rs
 
-import grails.events.annotation.Subscriber
 import groovy.json.JsonSlurper
-import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.StateModel;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -199,13 +198,6 @@ public class ReshareActionService {
         }
 
         return result;
-    }
-
-    @Subscriber("sendSupplierCancelResponse")
-    void sendSupplierCancelResponseListener(PatronRequest pr, Map actionParams, EventResultDetails eventResultDetails) {
-        log.debug("received event sendSupplierCancelResponse")
-        sendSupplierCancelResponse(pr, actionParams, eventResultDetails)
-        log.debug("event sendSupplierCancelResponse processed")
     }
 
     public boolean sendSupplierCancelResponse(PatronRequest pr, Map actionParams, EventResultDetails eventResultDetails) {
