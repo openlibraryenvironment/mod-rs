@@ -1,0 +1,51 @@
+# -*- mode: yaml; -*-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "mod-inventory-storage-27-1-4"
+  labels:
+    app: "mod-inventory-storage-27-1-4"
+    module: "mod-inventory-storage"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "mod-inventory-storage-27-1-4"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mod-inventory-storage-27-1-4"
+        module: "mod-inventory-storage"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: "mod-inventory-storage-27-1-4"
+          image: "folioorg/mod-inventory-storage:27.1.4"
+          envFrom:
+            - secretRef:
+                name: "folio-db-connect"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j2.formatMsgNoLookups=true"
+            - name: "ENV"
+              value: "reshare"
+            - name: "KAFKA_HOST"
+              value: "reshare-kafka-cardinal"
+            - name: "KAFKA_PORT"
+              value: "9092"
+            - name: "REPLICATION_FACTOR"
+              value: "1"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          resources:
+            limits:
+              memory: 2Gi
+      imagePullSecrets:
+        - name: "dockerhub-cred"

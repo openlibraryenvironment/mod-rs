@@ -1,0 +1,13 @@
+# -*- mode: yaml; -*-
+apiVersion: v1
+kind: Service
+metadata:
+  name: "mod-login-7-11-2"
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: "mod-login-7-11-2"
+  ports:
+    - port: 8081
+      name: 8081tcp

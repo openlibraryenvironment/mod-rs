@@ -1,0 +1,43 @@
+# -*- mode: yaml; -*-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "mod-settings-1-0-3"
+  labels:
+    app: "mod-settings-1-0-3"
+    module: "mod-settings"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "mod-settings-1-0-3"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mod-settings-1-0-3"
+        module: "mod-settings"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: "mod-settings-1-0-3"
+          image: "folioorg/mod-settings:1.0.3"
+          envFrom:
+            - secretRef:
+                name: "folio-db-connect"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j2.formatMsgNoLookups=true"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          resources:
+            limits:
+              memory: 2147483648
+      imagePullSecrets:
+        - name: "dockerhub-cred"

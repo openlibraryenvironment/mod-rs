@@ -1,0 +1,12 @@
+# -*- mode: yaml; -*-
+apiVersion: v1
+kind: Service
+metadata:
+  name: "mod-login-saml-2-5-1"
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: "mod-login-saml-2-5-1"
+  ports:
+    - port: 8081

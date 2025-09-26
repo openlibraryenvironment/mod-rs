@@ -1,0 +1,53 @@
+# -*- mode: yaml; -*-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "mod-pubsub-2-13-1"
+  labels:
+    app: "mod-pubsub-2-13-1"
+    module: "mod-pubsub"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "mod-pubsub-2-13-1"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mod-pubsub-2-13-1"
+        module: "mod-pubsub"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: "mod-pubsub-2-13-1"
+          image: "folioorg/mod-pubsub:2.13.1"
+          envFrom:
+            - secretRef:
+                name: "folio-db-connect"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0 -XX:+HeapDumpOnOutOfMemoryError -Dlog4j2.formatMsgNoLookups=true"
+            - name: "KAFKA_HOST"
+              value: "reshare-kafka-cardinal"
+            - name: "KAFKA_PORT"
+              value: "9092"
+            - name: "OKAPI_URL"
+              value: "http://okapi:9130"
+            - name: "SYSTEM_USER_NAME"
+              value: "pubsub_user"
+            - name: "SYSTEM_USER_PASSWORD"
+              value: "PAuY9FgSx6qlGQ8KiwJc"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          resources:
+            limits:
+              memory: 1073741824
+      imagePullSecrets:
+        - name: "dockerhub-cred"
