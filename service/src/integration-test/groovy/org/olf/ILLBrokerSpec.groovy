@@ -44,6 +44,7 @@ class ILLBrokerSpec extends TestBase {
     //Do we need to make sure the base version doesn't happen?
     def setupSpec() {
         log.debug("setupSpec called")
+        setEnv("MOD_RS_DISABLE_KAFKA", "true");
     }
 
     def setup() {
@@ -54,6 +55,7 @@ class ILLBrokerSpec extends TestBase {
 
     def cleanup() {
         log.debug("Cleanup called")
+        setEnv("MOD_RS_DISABLE_KAFKA", "false");
     }
 
     public String getBaseUrl() {
