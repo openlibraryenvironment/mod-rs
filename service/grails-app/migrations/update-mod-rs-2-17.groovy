@@ -44,4 +44,9 @@ databaseChangeLog = {
             column(name: "pr_hrid")
         }
     }
+
+    changeSet(author: "jskomorowski", id: "20250925-drop-counter-table") {
+        comment("Drop unused counter table - counter-based statistics have been replaced with dynamic calculation")
+        dropTable(tableName: "counter")
+    }
 }
