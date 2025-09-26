@@ -8,7 +8,8 @@ import groovyx.net.http.HttpBuilder
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClientBuilder
 import org.olf.rs.GrailsEventIdentifier
-import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService;
+import org.olf.rs.statemodel.events.EventISO18626IncomingAbstractService
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.k_int.web.toolkit.testing.HttpSpec;
@@ -18,6 +19,9 @@ import groovy.json.JsonBuilder;
 import groovy.util.logging.Slf4j;
 import spock.lang.Shared;
 import spock.util.concurrent.PollingConditions
+
+import java.lang.reflect.Field
+import java.util.*
 
 import static groovyx.net.http.ContentTypes.XML;
 
@@ -312,5 +316,19 @@ class TestBase extends HttpSpec {
             return rdv;
         }
         return null;
+    }
+
+    //Hack to override the environment variable
+    public static void setEnv(String key, String value) {
+        try {
+            Map<String, String> env = System.getenv();
+            Class<?> cl = env.getClass();
+            Field field = cl.getDeclaredField("m");
+            field.setAccessible(true);
+            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
+            writableEnv.put(key, value);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to set environment variable", e);
+        }
     }
 }
