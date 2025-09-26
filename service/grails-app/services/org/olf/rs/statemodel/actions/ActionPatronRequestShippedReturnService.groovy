@@ -1,6 +1,5 @@
 package org.olf.rs.statemodel.actions;
 
-import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResultDetails;

@@ -1143,17 +1143,11 @@ class DosomethingSimple {
         log.debug("Response from statistics: " + statisticsResponse.toString());
 
         then:"Check we have received some statistics"
-        // Should have the current statistics
-        assert(statisticsResponse?.current != null);
-
-        // We should also have the requests by state
+        // We should have the requests by state
         assert(statisticsResponse.requestsByState != null);
 
-        // We should have the number of requests that are actively borrowing
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeBorrowing") } != null);
-
-        // We should also have the number of requests that are currently on loan
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeLoans") } != null);
+        // We should have the requests by tag (includes active borrowing and loans)
+        assert(statisticsResponse.requestsByTag != null);
 
         where:
         tenantId      | ignore

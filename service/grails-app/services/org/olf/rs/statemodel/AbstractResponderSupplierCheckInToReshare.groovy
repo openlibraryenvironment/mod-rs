@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
 import java.time.Instant
-import org.olf.rs.Counter
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest

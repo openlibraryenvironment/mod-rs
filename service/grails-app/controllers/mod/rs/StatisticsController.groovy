@@ -1,6 +1,5 @@
 package mod.rs
 
-import org.olf.rs.Counter;
 import org.olf.rs.StatisticsService;
 import org.olf.rs.logging.ContextLogging;
 
@@ -35,8 +34,8 @@ class StatisticsController {
 
         def result = [
             asAt: new Date(),
-            current: Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
-            requestsByState: statisticsService.generateRequestsByState()
+            requestsByState: statisticsService.generateRequestsByState(),
+            requestsByTag: statisticsService.generateRequestsByStateTag()
         ];
 
         render result as JSON
