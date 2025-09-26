@@ -8,10 +8,13 @@ import org.apache.commons.lang3.ObjectUtils
 import org.olf.okapi.modules.directory.Symbol
 import org.olf.rs.*
 import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.referenceData.SettingsData
 import org.olf.rs.statemodel.*
 
 import javax.servlet.http.HttpServletRequest
 import java.time.LocalDate
+
+import static EventStatusReqRequestSentToSupplierIndService.symbolPresent
 
 /**
  * Service that processes the Request-ind event
@@ -24,6 +27,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
 
     ProtocolMessageBuildingService protocolMessageBuildingService;
     ProtocolMessageService protocolMessageService;
+    SettingsService settingsService;
     SharedIndexService sharedIndexService;
     StatusService statusService;
     ReshareActionService reshareActionService;
@@ -51,6 +55,9 @@ public class EventMessageRequestIndService extends AbstractEvent {
          */
 
         Map result = [:];
+
+        String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+        String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
         // Check that we understand both the requestingAgencyId (our peer)and the SupplyingAgencyId (us)
         if ((eventData.bibliographicInfo != null) && (eventData.header != null)) {
@@ -125,32 +132,42 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             pr.copyrightType = findCopyrightType(serviceInfo.copyrightCompliance);
                         }
                         if (serviceInfo.serviceLevel) {
-                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel, RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                            RefdataValue rdv = findRefdataValue(serviceInfo.serviceLevel?.toLowerCase(), RefdataValueData.VOCABULARY_SERVICE_LEVELS);
                             pr.serviceLevel = rdv;
                         }
                     }
                 }
 
                 // UGH! Protocol delivery info is not remotely compatible with the UX prototypes - sort this later
+                def address = null;
                 if (eventData.requestedDeliveryInfo instanceof Map) {
-                    if (eventData.requestedDeliveryInfo?.address instanceof Map) {
-                        if (eventData.requestedDeliveryInfo?.address.physicalAddress instanceof Map) {
-                            log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
-                            // We join all the lines of physical address and stuff them into pickup location for now.
-                            String stringifiedPickupLocation = eventData.requestedDeliveryInfo?.address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
+                    address = eventData.requestedDeliveryInfo.address;
+                } else if (eventData.requestedDeliveryInfo instanceof List) {
+                    Map rdiMap = addressListToMap(eventData.requestedDeliveryInfo);
+                    address = rdiMap.address
+                }
+                if (address instanceof Map) {
+                    if (address.physicalAddress instanceof Map) {
+                        log.debug("Incoming request contains delivery info: ${eventData.requestedDeliveryInfo?.address?.physicalAddress}");
+                        // We join all the lines of physical address and stuff them into pickup location for now.
+                        String stringifiedPickupLocation = address?.physicalAddress.collect { k, v -> v }.join(ADDRESS_SEPARATOR);
 
-                            // If we've not been given any address information, don't translate that into a pickup location
-                            if (stringifiedPickupLocation?.trim()?.length() > 0) {
-                                pr.pickupLocation = stringifiedPickupLocation.trim();
-                            }
+                        // If we've not been given any address information, don't translate that into a pickup location
+                        if (stringifiedPickupLocation?.trim()?.length() > 0) {
+                            pr.pickupLocation = stringifiedPickupLocation.trim();
                         }
 
-                        // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
-                        if (eventData.requestedDeliveryInfo?.address.electronicAddress instanceof Map) {
-                            pr.deliveryMethod = pr.lookupDeliveryMethod(eventData.requestedDeliveryInfo?.address?.electronicAddress?.electronicAddressType);
-                        }
+                        // The above was for situations where it was largely used to stash a shipping ID.
+                        // In case it's actually an address, let's also format it as a multi-line string.
+                        pr.deliveryAddress = formatPhysicalAddress(address?.physicalAddress)
+                    }
+
+                    // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
+                    if (address.electronicAddress instanceof Map) {
+                        pr.deliveryMethod = pr.lookupDeliveryMethod(address?.electronicAddress?.electronicAddressType);
                     }
                 }
+
 
                 // Add patron information to Patron Request
                 if (eventData.patronInfo instanceof Map) {
@@ -183,24 +200,56 @@ public class EventMessageRequestIndService extends AbstractEvent {
                                 pr.maximumCostsMonetaryValue = new BigDecimal(maximumCosts.monetaryValue);
                             }
                             if (maximumCosts.currencyCode) {
-                                pr.maximumCostsCurrencyCode = findRefdataValue(maximumCosts.currencyCode, RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                                RefdataValue rdv = findRefdataValue(maximumCosts.currencyCode?.toLowerCase(), RefdataValueData.VOCABULARY_CURRENCY_CODES);
+                                pr.maximumCostsCurrencyCode = rdv;
                             }
                         }
                     }
                 }
 
                 pr.supplyingInstitutionSymbol = "${header.supplyingAgencyId?.agencyIdType}:${header.supplyingAgencyId?.agencyIdValue}";
-                pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+
+
+                if (requestRouterSetting == 'disabled') {
+                    String localSymbolsString = settingsService.getSettingValue(SettingsData.SETTING_LOCAL_SYMBOLS) ?: "";
+
+                    // Because we are going to be relying on this symbol when we send messages, we need to make sure that it
+                    // either matches our defined peer symbol, or is in our local symbol list
+                    boolean validSymbol = false;
+                    if (pr.supplyingInstitutionSymbol == defaultRequestSymbolString) {
+                        validSymbol = true;
+                    } else {
+                        if (symbolPresent(pr.supplyingInstitutionSymbol, localSymbolsString)) {
+                            validSymbol = true;
+                        }
+                    }
+                    if (!validSymbol) {
+                        String errorMessage = "${pr.supplyingInstitutionSymbol} is not a valid symbol for this supplier";
+                        result.status = EventISO18626IncomingAbstractService.STATUS_ERROR;
+                        result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST;
+                        result.errorValue = errorMessage;
+                        log.error(errorMessage);
+                    }
+                }
+
+
+
+                if (!pr.requestingInstitutionSymbol || header.requestingAgencyId?.agencyIdValue) {
+                    pr.requestingInstitutionSymbol = "${header.requestingAgencyId?.agencyIdType}:${header.requestingAgencyId?.agencyIdValue}";
+                }
 
                 pr.resolvedRequester = resolvedRequestingAgency;
-                pr.resolvedSupplier = resolvedSupplyingAgency;
+                if (pr.resolvedSupplier == null || resolvedRequestingAgency != null) {
+                    pr.resolvedSupplier = resolvedSupplyingAgency;
+                }
                 pr.peerRequestIdentifier = header.requestingAgencyRequestId;
+
 
                 // For reshare - we assume that the requester is sending us a globally unique HRID and we would like to be
                 // able to use that for our request.
                 pr.hrid = protocolMessageService.extractIdFromProtocolId(header?.requestingAgencyRequestId);
 
-                if (eventData.supplierInfo instanceof Map){
+                if (eventData.supplierInfo instanceof Map) {
                     Map supplierInfo = eventData.supplierInfo
                     if (supplierInfo.callNumber) {
                         RequestVolume rv = pr.volumes.find { rv -> rv.callNumber == supplierInfo.callNumber }
@@ -212,6 +261,15 @@ public class EventMessageRequestIndService extends AbstractEvent {
                             )
                             rv.callNumber = supplierInfo.callNumber
                             pr.addToVolumes(rv)
+                        }
+                    }
+                    //Populate returnAddress, if present
+                    if (supplierInfo.supplierDescription) {
+                        String pattern = /(?ms)#RETURN_TO#(.+)#RT_END#/
+                        def matcher = supplierInfo.supplierDescription =~ pattern;
+                        if (matcher?.find()) {
+                            String returnAddress = matcher.group(1);
+                            pr.returnAddress = returnAddress;
                         }
                     }
                 }
@@ -239,7 +297,7 @@ public class EventMessageRequestIndService extends AbstractEvent {
                         if (it.bibliographicItemIdentifierCode == 'preceded-by') {
                             log.debug("Attempting to find preceding request via HRID");
                             PatronRequest preceedingPr = getPatronRequestByHrid(it.bibliographicItemIdentifier, pr.isRequester ? true : false);
-                            if (pr) {
+                            if (preceedingPr) {
                                 log.debug("Found request associated with HRID ${it.bibliographicItemIdentifier}");
                                 pr.precededBy = preceedingPr;
                                 preceedingPr.succeededBy = pr;
@@ -259,8 +317,14 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.messageType = Iso18626Constants.REQUEST
             result.supIdType = header.supplyingAgencyId?.agencyIdType // supplyingAgencyId can be null
             result.supId = header.supplyingAgencyId?.agencyIdValue // supplyingAgencyId can be null
-            result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
-            result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            if (header.requestingAgencyId.agencyIdValue) {
+                result.reqAgencyIdType = header.requestingAgencyId.agencyIdType
+                result.reqAgencyId = header.requestingAgencyId.agencyIdValue
+            } else {
+                List<String> parts = pr.requestingInstitutionSymbol.split(':')
+                result.reqAgencyIdType = parts[0]
+                result.reqAgencyId = parts[1]
+            }
             result.reqId = header.requestingAgencyRequestId
             result.timeRec = header.timestamp
         } else {
@@ -460,10 +524,30 @@ public class EventMessageRequestIndService extends AbstractEvent {
             result.status = EventISO18626IncomingAbstractService.STATUS_ERROR
             result.errorType = EventISO18626IncomingAbstractService.ERROR_TYPE_INVALID_PATRON_REQUEST
             result.errorValue = "NCIP lookup patron call failure for patron identifier: ${pr.patronIdentifier}"
+        } else if (result.status == EventISO18626IncomingAbstractService.STATUS_ERROR) {
+            log.debug("Result has been set to error");
         } else {
             result.status = EventISO18626IncomingAbstractService.STATUS_OK
         }
         result.newRequestId = pr.id
+    }
+
+    static String formatPhysicalAddress(Map pa) {
+        if (!pa) return null
+
+        def lines = []
+
+        if (pa.line1) lines << pa.line1
+        if (pa.line2) lines << pa.line2
+
+        def cityLine = [pa.locality, pa.region, pa.postalCode]
+            .findAll() // filter out non-truthy elements
+            .join(', ')
+        if (cityLine) lines << cityLine
+
+        if (pa.country) lines << pa.country
+
+        return lines.join('\n')
     }
 
     static boolean isSlnpRequesterStateModel(PatronRequest pr) {
@@ -479,6 +563,18 @@ public class EventMessageRequestIndService extends AbstractEvent {
                 eq('isRequester', isRequester)
             }
             lock false
+        }
+        return result;
+    }
+
+    public Map addressListToMap(List list) {
+        Map result = [ address : [:] ];
+        for ( item in list ) {
+            if (item.address instanceof Map) {
+                item.address.each({ k, v ->
+                    result.address[k] = v;
+                });
+            }
         }
         return result;
     }

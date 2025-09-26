@@ -114,6 +114,8 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
   String pickupLocationSlug
   DirectoryEntry resolvedPickupLocation
   String pickupURL
+  String deliveryAddress
+  String returnAddress
 
   // A json blob containing the response to a lookup in the shared index.
   String bibRecord
@@ -257,6 +259,11 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
   @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
   RefdataValue maximumCostsCurrencyCode;
+
+  BigDecimal cost;
+
+  @CategoryId(RefdataValueData.VOCABULARY_CURRENCY_CODES)
+  RefdataValue costCurrency;
 
   @CategoryId(RefdataValueData.VOCABULARY_SERVICE_LEVELS)
   RefdataValue serviceLevel;
@@ -411,8 +418,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     maximumCostsMonetaryValue(nullable: true)
     maximumCostsCurrencyCode(nullable: true)
+    cost(nullable: true)
+    costCurrency(nullable: true)
 
     serviceLevel (nullable: true)
+
+    deliveryAddress (nullable: true)
+    returnAddress (nullable: true)
   }
 
   static mapping = {
@@ -547,8 +559,13 @@ class PatronRequest implements CustomProperties, MultiTenant<PatronRequest> {
 
     maximumCostsMonetaryValue column : 'pr_maximum_costs_value'
     maximumCostsCurrencyCode column : 'pr_maximum_costs_code_fk'
+    cost column : 'pr_cost'
+    costCurrency column : 'pr_cost_currency_fk'
 
     serviceLevel column: 'pr_service_level_fk'
+
+    deliveryAddress column : 'pr_delivery_address'
+    returnAddress column : 'pr_return_address'
   }
 
   /**

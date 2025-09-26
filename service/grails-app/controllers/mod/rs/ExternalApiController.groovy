@@ -1,5 +1,7 @@
 package mod.rs
 
+import grails.events.EventPublisher
+import grails.gorm.multitenancy.Tenants
 import groovy.xml.StreamingMarkupBuilder
 import org.olf.rs.ConfirmationMessageService;
 import org.olf.rs.Counter;
@@ -30,7 +32,7 @@ import org.xml.sax.SAXException;
 @Slf4j
 @CurrentTenant
 @Api(value = "/rs/externalApi", tags = ["External API Controller"], description = "API for external requests that do not require authentication")
-class ExternalApiController {
+class ExternalApiController implements EventPublisher {
   GrailsApplication grailsApplication
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ConfirmationMessageService confirmationMessageService
@@ -135,8 +137,7 @@ class ExternalApiController {
           requestId = req_result.newRequestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-        }
-        else if ( iso18626_msg.supplyingAgencyMessage != null ) {
+        } else if ( iso18626_msg.supplyingAgencyMessage != null ) {
 
           def msam = iso18626_msg.supplyingAgencyMessage;
           log.debug("Process inbound supplyingAgencyMessage message. requestingAgencyId is ${msam?.header?.requestingAgencyId}");
@@ -155,8 +156,7 @@ class ExternalApiController {
           requestId = req_result.requestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-        }
-        else if ( iso18626_msg.requestingAgencyMessage != null ) {
+        } else if ( iso18626_msg.requestingAgencyMessage != null ) {
 
           def mram = iso18626_msg.requestingAgencyMessage;
           log.debug("Process inbound requestingAgencyMessage message. SupplyingAgencyId is ${mram?.header?.supplyingAgencyId}");
@@ -175,26 +175,23 @@ class ExternalApiController {
           requestId = req_result.requestId
 
           render(text: message, contentType: "application/xml", encoding: "UTF-8")
-        }
-        else {
+        } else {
           render(status: 400, text: 'The sent request is not valid')
         }
 
         if (requestId) {
-          protocolAuditService.save(requestId, iso18626LogDetails)
+          log.debug("Saving protocol log for request ${requestId}")
+          notify("ProtocolAuditService.saveSubscriber", Tenants.currentId(), requestId, iso18626LogDetails)
         }
-      }
-      else {
+      } else {
         log.error("NO XML Supplied in request. Unable to proceed");
         render(status: 400, text: 'The sent request is not valid')
       }
     } catch (SAXException e){
       return render(status: 400, text: "Response validation failed: ${e.message}")
-    }
-    catch ( Exception e ) {
+    } catch ( Exception e ) {
       log.error("Exception receiving ISO message",e);
-    }
-    finally {
+    } finally {
       log.debug("ExternalApiController::iso18626 exiting cleanly");
     }
 

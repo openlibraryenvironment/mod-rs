@@ -33,10 +33,14 @@ public class ActionPatronRequestRequesterAgreeConditionsService extends Abstract
             // Inform the responder
             reshareActionService.sendRequestingAgencyMessage(request, 'Notification', parameters, actionResultDetails);
 
-            PatronRequestLoanCondition[] conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(request, request.resolvedSupplier);
+            PatronRequestLoanCondition[] conditions = PatronRequestLoanCondition.findAllByPatronRequestAndRelevantSupplier(request, request.resolvedSupplier, [sort: "dateCreated", order: "asc"]);
             conditions.each { condition ->
                 condition.accepted = true;
                 condition.save(flush: true, failOnError: true);
+                if (condition.cost != null && condition.costCurrency != null) {
+                    request.cost = condition.cost;
+                    request.costCurrency = condition.costCurrency;
+                }
             }
 
             actionResultDetails.auditMessage = 'Agreed to loan conditions';

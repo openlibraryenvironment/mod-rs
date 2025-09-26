@@ -19,6 +19,7 @@ import org.olf.rs.statemodel.events.EventMessageRequestIndService
 public class ActionPatronRequestISO18626StatusChangeService extends ActionISO18626RequesterService {
 
     private static final String STATUS_UNFILLED = "Unfilled"
+    private static final String STATUS_LOANED = "Loaned"
 
     @Override
     String name() {
@@ -31,10 +32,22 @@ public class ActionPatronRequestISO18626StatusChangeService extends ActionISO186
             if (parameters.statusInfo?.status == STATUS_UNFILLED) {
                 request.state = request.stateModel.initialState
             }
+
             Set<RequestVolume> volumes = new HashSet<>(request.volumes)
             volumes.forEach {it -> request.removeFromVolumes(it)}
             request.selectedItemBarcode = null
         }
+
+        if (parameters.statusInfo?.status == STATUS_LOANED) {
+            //Populate return address if present
+            if ( parameters.returnInfo instanceof Map ) {
+                def physicalAddress = parameters.returnInfo?.physicalAddress
+                if (physicalAddress instanceof Map) {
+                    request.returnAddress = EventMessageRequestIndService.formatPhysicalAddress(physicalAddress)
+                }
+            }
+        }
+
 
         // We have a hack where we use this  message to verify that the last one sent was actually received or not
         if (!checkForLastSequence(request, parameters.messageInfo?.note, actionResultDetails)) {

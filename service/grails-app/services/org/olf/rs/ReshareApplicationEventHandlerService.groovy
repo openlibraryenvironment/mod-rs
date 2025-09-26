@@ -2,6 +2,7 @@ package org.olf.rs
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang3.ObjectUtils
+import org.olf.rs.referenceData.RefdataValueData
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -51,6 +52,7 @@ public class ReshareApplicationEventHandlerService {
     EventMessageRequestIndService eventMessageRequestIndService;
     HostLMSLocationService hostLMSLocationService;
     HostLMSShelvingLocationService hostLMSShelvingLocationService;
+    ReferenceDataService referenceDataService;
     StatusService statusService;
 
       /**
@@ -211,7 +213,7 @@ public class ReshareApplicationEventHandlerService {
         ContextLogging.startTime();
         ContextLogging.setValue(ContextLogging.FIELD_ACTION, ContextLogging.ACTION_HANDLE_REQUEST_MESSAGE);
         ContextLogging.setValue(ContextLogging.FIELD_JSON, eventData);
-        log.debug(ContextLogging.MESSAGE_ENTERING);
+        log.debug("${ContextLogging.MESSAGE_ENTERING} handleRequestMessage");
 
         // Just call event handler directly
         EventResultDetails eventResultDetails = eventMessageRequestIndService.processEvent(null, eventData, new EventResultDetails());
@@ -372,7 +374,7 @@ public class ReshareApplicationEventHandlerService {
         inboundMessage.setActionStatus(status)
 
         if (status == "Unfilled") {
-          inboundMessage.setActionData(eventData.messageInfo.reasonunfilled)
+          inboundMessage.setActionData(eventData.messageInfo.reasonUnfilled)
         }
       }
 
@@ -384,11 +386,13 @@ public class ReshareApplicationEventHandlerService {
 
       inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
+      inboundMessage.setSenderSymbol("${eventData.header.supplyingAgencyId.agencyIdType}:${eventData.header.supplyingAgencyId.agencyIdValue}")
       inboundMessage.setAttachedAction(eventData.messageInfo.reasonForMessage)
       inboundMessage.setMessageContent(note)
     } else {
       inboundMessage.setMessageSender(DirectoryEntryService.resolveSymbol(eventData.header.requestingAgencyId.agencyIdType, eventData.header.requestingAgencyId.agencyIdValue))
       inboundMessage.setMessageReceiver(DirectoryEntryService.resolveSymbol(eventData.header.supplyingAgencyId.agencyIdType, eventData.header.supplyingAgencyId.agencyIdValue))
+      inboundMessage.setSenderSymbol("${eventData.header.requestingAgencyId.agencyIdType}:${eventData.header.requestingAgencyId.agencyIdValue}")
       inboundMessage.setAttachedAction(eventData.action)
       inboundMessage.setMessageContent(note)
     }
@@ -400,15 +404,20 @@ public class ReshareApplicationEventHandlerService {
     //inboundMessage.save(flush:true, failOnError:true)
   }
 
-  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null) {
+  public void addLoanConditionToRequest(PatronRequest pr, String code, Symbol relevantSupplier, String note = null, String cost = null, String costCurrency = null, Boolean accepted = false) {
 	  def loanCondition = new PatronRequestLoanCondition();
 	  loanCondition.setPatronRequest(pr);
 	  loanCondition.setCode(code);
+	  loanCondition.setAccepted(accepted);
 	  if (note != null) {
 		  loanCondition.setNote(stripOutSystemCode(note));
 	  }
 	  loanCondition.setRelevantSupplier(relevantSupplier);
       loanCondition.setSupplyingInstitutionSymbol(pr.supplyingInstitutionSymbol)
+      if (cost != null && costCurrency != null) {
+          loanCondition.setCost(new BigDecimal(cost));
+          loanCondition.setCostCurrency(referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, costCurrency));
+      }
 	  pr.addToConditions(loanCondition);
   }
 
@@ -430,10 +439,14 @@ public class ReshareApplicationEventHandlerService {
   }
 
   public void markAllLoanConditionsAccepted(PatronRequest pr) {
-    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr)
+    def conditions = PatronRequestLoanCondition.findAllByPatronRequest(pr, [sort: "dateCreated", order: "asc"])
     conditions.each {cond ->
-      cond.setAccepted(true)
-      cond.save(flush: true, failOnError: true)
+      cond.setAccepted(true);
+      cond.save(flush: true, failOnError: true);
+      if (cond.cost != null && cond.costCurrency != null) {
+          pr.cost = cond.cost;
+          pr.costCurrency = cond.costCurrency;
+      }
     }
   }
 

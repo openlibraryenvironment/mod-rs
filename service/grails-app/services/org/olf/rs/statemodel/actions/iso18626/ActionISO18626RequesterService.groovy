@@ -1,9 +1,12 @@
 package org.olf.rs.statemodel.actions.iso18626
 
 import org.olf.rs.DirectoryEntryService
+import org.olf.rs.ReferenceDataService
 import org.olf.rs.RerequestService
 import org.olf.rs.SettingsService
+import org.olf.rs.referenceData.RefdataValueData
 import org.olf.rs.statemodel.StateModel
+import org.olf.rs.statemodel.Status
 import org.olf.rs.statemodel.events.EventMessageRequestIndService;
 
 import java.util.regex.Matcher;
@@ -11,6 +14,7 @@ import java.util.regex.Matcher;
 import com.k_int.web.toolkit.settings.AppSetting;
 import org.olf.okapi.modules.directory.Symbol;
 import org.olf.rs.PatronRequest;
+import org.olf.rs.PatronRequestAudit;
 import org.olf.rs.RequestVolume;
 import org.olf.rs.statemodel.ActionResultDetails;
 import org.olf.rs.statemodel.StatusService;
@@ -26,9 +30,10 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
     private static final String VOLUME_STATUS_AWAITING_TEMPORARY_ITEM_CREATION = 'awaiting_temporary_item_creation';
     private static final String SETTING_YES = 'yes';
 
-    StatusService statusService;
-    SettingsService settingsService;
+    ReferenceDataService referenceDataService;
     RerequestService rerequestService;
+    SettingsService settingsService;
+    StatusService statusService;
 
     @Override
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
@@ -36,28 +41,58 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
         // Grab hold of the statusInfo as we may want to override it
         Map incomingStatus = parameters.statusInfo;
 
+        // Reset cost when receiving ExpectToSupply from new supplier
+        if (incomingStatus?.status == "ExpectToSupply" || incomingStatus?.status == "WillSupply" ) {
+            log.debug("RequestResponse/StatusChange with ExpectToSupply/WillSupply - resetting cost fields");
+            String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
+            if (requestRouterSetting == "disabled") {
+                // Using tiers - reset to maximum cost
+                request.cost = request.maximumCostsMonetaryValue;
+                request.costCurrency = request.maximumCostsCurrencyCode;
+                log.debug("Router disabled: reset cost to maxCost ${request.cost}");
+            } else {
+                // Using router - clear cost fields
+                request.cost = null;
+                request.costCurrency = null;
+                log.debug("Router enabled: cleared cost fields");
+            }
+        }
+
         // Extract the sequence from the note
         Map sequenceResult = protocolMessageBuildingService.extractSequenceFromNote(parameters.messageInfo?.note);
         String note = sequenceResult.note;
         request.lastSequenceReceived = sequenceResult.sequence;
 
         // if parameters.deliveryInfo.itemId then we should stash the item id
-        if (parameters?.deliveryInfo) { // TODO check if status is Loaned or CopyCompleted
+        if (parameters?.deliveryInfo) {
             if (parameters?.deliveryInfo?.loanCondition) {
                 // Are we in a valid state for loan conditions ?
                 log.debug("Loan condition found: ${parameters?.deliveryInfo?.loanCondition}")
-                incomingStatus = [status: 'Conditional']
+
+                // Don't override status to Conditional for supplied items
+                boolean isSupplied = incomingStatus?.status in ['Loaned', 'CopyCompleted'];
+
+                if (!isSupplied) {
+                    incomingStatus = [status: 'Conditional']
+                }
 
                 // Save the loan condition to the patron request
                 String loanCondition = parameters?.deliveryInfo?.loanCondition;
                 Symbol relevantSupplier = DirectoryEntryService.resolveSymbol(parameters.header.supplyingAgencyId.agencyIdType, parameters.header.supplyingAgencyId.agencyIdValue);
 
-                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note);
+                // Conditions on supplied items are presumed to be accepted but not explicitly so ergo null
+                Boolean accepted = isSupplied ? null : false;
+                reshareApplicationEventHandlerService.addLoanConditionToRequest(request, loanCondition, relevantSupplier, note, parameters?.messageInfo?.offeredCosts?.monetaryValue, parameters?.messageInfo?.offeredCosts?.currencyCode, accepted);
+
+                if (isSupplied && parameters?.messageInfo?.offeredCosts?.monetaryValue && parameters?.messageInfo?.offeredCosts?.currencyCode) {
+                    request.cost = new BigDecimal(parameters.messageInfo.offeredCosts.monetaryValue);
+                    request.costCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.messageInfo.offeredCosts.currencyCode);
+                }
             }
 
             // Could receive a single string or an array here as per the standard/our profile
             Object itemId = parameters?.deliveryInfo?.itemId
-            if (itemId) {
+            if (itemId && parameters?.deliveryInfo?.sentVia != 'URL') {
                 def useBarcodeSetting = AppSetting.findByKey(SettingsData.SETTING_NCIP_USE_BARCODE);
                 String useBarcodeValue = useBarcodeSetting?.value ?: "No";
                 log.debug("Value for setting ${SettingsData.SETTING_NCIP_USE_BARCODE} is ${useBarcodeValue}");
@@ -150,16 +185,51 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
             }
 
             // If the deliveredFormat is URL and a URL is present, store it on the request
-            if (parameters.deliveryInfo?.deliveredFormat == 'URL') {
-                def url = parameters.deliveryInfo?.URL ?: parameters.deliveryInfo?.sentVia
+            if (parameters.deliveryInfo?.sentVia == 'URL') {
+                def url = parameters.deliveryInfo?.itemId
                 if (url) {
                     request.pickupURL = url
                 }
             }
+
+            // Handle deliveryCosts if present
+            if (parameters.deliveryInfo?.deliveryCosts instanceof Map &&
+                parameters.deliveryInfo?.deliveryCosts?.monetaryValue &&
+                parameters.deliveryInfo?.deliveryCosts?.currencyCode) {
+                BigDecimal newCost = new BigDecimal(parameters.deliveryInfo.deliveryCosts.monetaryValue)
+                def newCurrency = referenceDataService.lookup(RefdataValueData.VOCABULARY_CURRENCY_CODES, parameters.deliveryInfo.deliveryCosts.currencyCode)
+
+                // Check if costs are different from what requester expected
+                boolean costsDiffer = false
+                if (request.cost != null && newCost != request.cost) {
+                    costsDiffer = true
+                } else if (request.costCurrency != null && newCurrency != request.costCurrency) {
+                    costsDiffer = true
+                } else if ((request.cost == null) != (newCost == null) || (request.costCurrency == null) != (newCurrency == null)) {
+                    costsDiffer = true
+                }
+
+                if (costsDiffer) {
+                    String costNote = "Delivery cost differs from expected: supplier reports ${newCurrency?.value ?: 'unknown currency'} ${newCost}, requester expected ${request.costCurrency?.value ?: 'unknown currency'} ${request.cost ?: 'no cost'}"
+                    request.addToAudit(new PatronRequestAudit(
+                        patronRequest: request,
+                        dateCreated: new Date(),
+                        fromStatus: request.state,
+                        toStatus: request.state,
+                        message: costNote,
+                        auditNo: request.incrementLastAuditNo(),
+                        rotaPosition: request.rotaPosition
+                    ))
+                    log.warn("Cost difference detected for request ${request.hrid}: ${costNote}")
+                }
+
+                request.cost = newCost
+                request.costCurrency = newCurrency
+            }
         }
 
-        // If there is a note, create notification entry
-        if (note) {
+        // If there is a note, or a reason for the message create a notification entry
+        if (note || parameters.messageInfo?.reasonUnfilled) {
             reshareApplicationEventHandlerService.incomingNotificationEntry(request, parameters, true, note);
         }
 
@@ -210,6 +280,17 @@ public abstract class ActionISO18626RequesterService extends ActionISO18626Servi
                             } else {
                                 log.debug("reasonUnfilled was 'transfer', but a valid cluster id was not found in note: ${note}");
                             }
+                        }
+                    }
+
+                    // Special handling for Unfilled in Notification messages
+                    if (parameters.messageInfo?.reasonForMessage == "Notification") {
+                        if (request.state.code in [Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED]) {
+                            // Clear supplyingInstitutionSymbol when Unfilled comes in as a Notification
+                            request.supplyingInstitutionSymbol = null;
+
+                            // Set qualifier to UnfilledContinue for notifications to distinguish from StatusChange unfilled
+                            actionResultDetails.qualifier = "UnfilledContinue";
                         }
                     }
                 }

@@ -1,22 +1,15 @@
-name: deploy
+name: slnp-1-2-deploy
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Build mod-rs
-    branches:
-      - master
-    types:
-      - completed
 
 env:
   K8S_NAMESPACE: 'reshare'
-  K8S_DEPLOYMENT: 'mod-rs-latest'
+  K8S_DEPLOYMENT: 'mod-rs-eighteen'
 
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+
     runs-on: ubuntu-latest
     steps:
       - name: checkout module
@@ -28,6 +21,7 @@ jobs:
             -a "disable" \
             -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
             -u "okapi_admin" \
+            -e "slnp" \
             -p ${{ secrets.OKAPI_ADMIN_PW }} \
 
       - name: Deploy latest to K8s
@@ -48,5 +42,6 @@ jobs:
             -a "enable" \
             -o "https://okapi-reshare-1.folio-dev-us-east-1-1.folio-dev.indexdata.com" \
             -u "okapi_admin" \
+            -e "slnp" \
             -p ${{ secrets.OKAPI_ADMIN_PW }} \
             -r "https://registry.reshare-dev.indexdata.com"

@@ -1,5 +1,6 @@
 package org.olf.rs
 
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.olf.rs.iso18626.TypeStatus
 import org.olf.rs.referenceData.SettingsData
@@ -28,10 +29,11 @@ class ProtocolMessageBuildingService {
    *
   */
 
+  NewDirectoryService newDirectoryService
   ProtocolMessageService protocolMessageService
   ReshareApplicationEventHandlerService reshareApplicationEventHandlerService
   ReshareActionService reshareActionService
-    SettingsService settingsService
+  SettingsService settingsService
 
   public Map buildSkeletonMessage(String messageType) {
     Map message = [
@@ -156,6 +158,8 @@ class ProtocolMessageBuildingService {
     ]
      */
 
+    String requestRouterSetting = settingsService.getSettingValue(SettingsData.SETTING_ROUTING_ADAPTER);
+
     // Since ISO18626-2017 doesn't yet offer DeliveryMethod here we encode it as an ElectronicAddressType
     if (req.deliveryMethod?.value == 'url') {
       message.requestedDeliveryInfo = [
@@ -166,6 +170,19 @@ class ProtocolMessageBuildingService {
           ]
         ]
       ]
+    } else if (requestRouterSetting == "disabled") {
+        if (req.deliveryAddress) {
+            def slurper = new JsonSlurper();
+            def physicalAddress = slurper.parseText(req.deliveryAddress);
+
+            if (physicalAddress) {
+                message.requestedDeliveryInfo = [
+                        address: [
+                                physicalAddress: physicalAddress
+                        ]
+                ]
+            }
+        }
     } else {
       message.requestedDeliveryInfo = [
         // SortOrder
@@ -176,7 +193,7 @@ class ProtocolMessageBuildingService {
             locality:null,
             postalCode:null,
             region:null,
-            county:null
+            country:null
           ]
         ]
       ]
@@ -190,25 +207,33 @@ class ProtocolMessageBuildingService {
      * Address
     ]
      */
-     message.patronInfo = [
-      // Note that the internal names differ from the protocol name
-      patronId: req.patronIdentifier,
-      surname: req.patronSurname,
-      givenName: req.patronGivenName,
+      boolean suppressPatron = false;
+      if (settingsService.getSettingValue(SettingsData.SETTING_SUPPRESS_PATRON_INFO) == "yes") {
+          suppressPatron = true;
+      }
+      if (!suppressPatron) {
+          message.patronInfo = [
+                  // Note that the internal names differ from the protocol name
+                  patronId  : req.patronIdentifier,
+                  surname   : req.patronSurname,
+                  givenName : req.patronGivenName,
 
-      patronType: req.patronType,
-      /* Also permitted:
+                  patronType: req.patronType,
+                  /* Also permitted:
        * SendToPatron
        * Address
       */
-     ]
+          ]
+      } else {
+          message.patronInfo = null
+      }
 
      Map maximumCosts = null;
-      if ( req.maximumCostsCurrencyCode?.value && req.maximumCostsMonetaryValue) {
-          maximumCosts = [:];
-          maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
-          maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
-      }
+     if ( req.maximumCostsCurrencyCode?.value != null && req.maximumCostsMonetaryValue != null) {
+         maximumCosts = [:];
+         maximumCosts.monetaryValue = req.maximumCostsMonetaryValue;
+         maximumCosts.currencyCode = req.maximumCostsCurrencyCode?.value;
+     }
      message.billingInfo = [
       /*
       * Permitted fields:
@@ -240,12 +265,22 @@ class ProtocolMessageBuildingService {
       boolean routingDisabled = (requestRouterSetting == 'disabled');
 
       if (routingDisabled) {
-          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          String supplierSymbolString = pr.supplyingInstitutionSymbol;
+          //message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', supplierSymbolString, defaultPeerSymbolString)
       } else {
           message.header = buildHeader(pr, 'SUPPLYING_AGENCY_MESSAGE', pr.resolvedSupplier, pr.resolvedRequester)
       }
+
+      Map offeredCosts = null;
+      if ( messageParams?.cost ) {
+          offeredCosts = [:];
+          offeredCosts.monetaryValue = messageParams?.cost;
+          offeredCosts.currencyCode = messageParams?.costCurrency;
+      }
     message.messageInfo = [
-      reasonForMessage:reason_for_message,
+      offeredCosts: offeredCosts,
+      reasonForMessage: reason_for_message,
       note: buildNote(pr, messageParams?.note, appendSequence)
     ]
     message.statusInfo = [
@@ -269,30 +304,31 @@ class ProtocolMessageBuildingService {
     message.deliveryInfo = [:]
     if ( messageParams?.loanCondition ) {
       message.deliveryInfo['loanCondition'] = messageParams?.loanCondition
-      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note)
+      reshareApplicationEventHandlerService.addLoanConditionToRequest(pr, messageParams.loanCondition, pr.resolvedSupplier, note, messageParams?.cost, messageParams?.costCurrency)
     }
 
-    // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
-      Map actionMap = [action: reason_for_message]
-      actionMap.status = status
+    // Notification will be created in sendProtocolMessage after protocol response
 
-      if (messageParams.loanCondition) {
-        actionMap.status = "Conditional"
-        actionMap.data = messageParams.loanCondition
-      }
-      if (messageParams.reason) {
-        actionMap.data = messageParams.reason
-      }
-
-      reshareActionService.outgoingNotificationEntry(pr, messageParams.note, actionMap, pr.resolvedSupplier, pr.resolvedSupplier, false)
-    }
-
+    boolean isUrlDelivery = false;
     if (messageParams?.deliveredFormat) {
-      message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
-      if (messageParams.url) {
-        message.deliveryInfo['url'] = messageParams.url;
-      }
+        message.deliveryInfo['deliveredFormat'] = messageParams.deliveredFormat
+    }
+
+   if (messageParams.url) {
+          //this needs to go into itemId instead
+          message.deliveryInfo['url'] = messageParams.url;
+          message.deliveryInfo['itemId'] = messageParams.url; //this is needed because url isn't a valid subfield?
+          isUrlDelivery = true;
+    }
+
+    if (pr?.cost && pr?.costCurrency && (status == 'Loaned' || status == 'CopyCompleted')) {
+        message.deliveryInfo['deliveryCosts'] = [:]
+        message.deliveryInfo['deliveryCosts']['currencyCode'] = pr.costCurrency.value
+        message.deliveryInfo['deliveryCosts']['monetaryValue'] = pr.cost.toString()
+    }
+    message.returnInfo = [:];
+    if (messageParams.returnAddress) {
+        message.returnInfo.physicalAddress = messageParams.returnAddress;
     }
 
     if (!TypeStatus.CANCELLED.value().equalsIgnoreCase(status) &&
@@ -300,17 +336,19 @@ class ProtocolMessageBuildingService {
         Set<RequestVolume> filteredVolumes = pr.volumes.findAll { rv ->
             rv.status.value != VOLUME_STATUS_ILS_REQUEST_CANCELLED
         }
-        switch (filteredVolumes.size()) {
-            case 0:
-                break;
-            case 1:
-                // We have a single volume, send as a single itemId string
-                message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
-                break;
-            default:
-                // We have many volumes, send as an array of multiVol itemIds
-                message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
-                break;
+        if (!isUrlDelivery) {
+            switch (filteredVolumes.size()) {
+                case 0:
+                    break;
+                case 1:
+                    // We have a single volume, send as a single itemId string
+                    message.deliveryInfo['itemId'] = "${filteredVolumes[0].name},${filteredVolumes[0].callNumber ? filteredVolumes[0].callNumber : ""},${filteredVolumes[0].itemId}"
+                    break;
+                default:
+                    // We have many volumes, send as an array of multiVol itemIds
+                    message.deliveryInfo['itemId'] = filteredVolumes.collect { vol -> "multivol:${vol.name},${vol.callNumber ? vol.callNumber : ""},${vol.itemId}" }
+                    break;
+            }
         }
     }
 
@@ -326,8 +364,6 @@ class ProtocolMessageBuildingService {
       Map message = buildSkeletonMessage('REQUESTING_AGENCY_MESSAGE')
 
       String requestRouterSetting = settingsService.getSettingValue('routing_adapter');
-      String defaultPeerSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_PEER_SYMBOL);
-      String defaultRequestSymbolString = settingsService.getSettingValue(SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL);
 
       Symbol message_sender_symbol = DirectoryEntryService.resolveCombinedSymbol(message_sender)
       Symbol peer_symbol = DirectoryEntryService.resolveCombinedSymbol(peer)
@@ -335,24 +371,13 @@ class ProtocolMessageBuildingService {
       if (requestRouterSetting != 'disabled') {
           message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender_symbol, peer_symbol)
       } else {
-          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', defaultRequestSymbolString, defaultPeerSymbolString)
+          message.header = buildHeader(pr, 'REQUESTING_AGENCY_MESSAGE', message_sender, peer)
       }
 
       message.action = action
       message.note = buildNote(pr, note, appendSequence)
 
-    // Whenever a note is attached to the message, create a notification with action.
-    if (note != null) {
-      Map actionMap = [action: action]
-      reshareActionService.outgoingNotificationEntry(
-        pr,
-        note,
-        actionMap,
-        message_sender_symbol,
-        peer_symbol,
-        true
-      )
-    }
+    // Notification will be created in sendProtocolMessage after protocol response
     return message
   }
 

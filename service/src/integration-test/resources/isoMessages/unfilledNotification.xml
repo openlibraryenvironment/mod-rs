@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ISO18626Message xmlns="http://illtransactions.org/2013/iso18626" version="1.0">
+    <supplyingAgencyMessage>
+        <header>
+            <supplyingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>supplierSymbol_holder</agencyIdValue>
+            </supplyingAgencyId>
+            <requestingAgencyId>
+                <agencyIdType>ISIL</agencyIdType>
+                <agencyIdValue>requesterSymbol_holder</agencyIdValue>
+            </requestingAgencyId>
+            <timestamp>timestamp_holder</timestamp>
+            <requestingAgencyRequestId>requestId_holder</requestingAgencyRequestId>
+            <supplyingAgencyRequestId>requestId_holder</supplyingAgencyRequestId>
+        </header>
+        <messageInfo>
+            <reasonForMessage>Notification</reasonForMessage>
+            <note>can't find it after all</note>
+        </messageInfo>
+        <statusInfo>
+            <status>Unfilled</status>
+        </statusInfo>
+        <deliveryInfo>
+            <loanCondition></loanCondition>
+        </deliveryInfo>
+    </supplyingAgencyMessage>
+</ISO18626Message>

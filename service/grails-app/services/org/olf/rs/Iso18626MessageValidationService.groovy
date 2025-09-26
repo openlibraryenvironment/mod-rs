@@ -7,23 +7,26 @@ import javax.xml.XMLConstants
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
 import javax.xml.validation.Schema
+import javax.xml.validation.Validator
 
 @Slf4j
 class Iso18626MessageValidationService {
-
-    def validator = null
+    Schema schema = null; //Schema should be thread-safe, according to java docs
 
     void validateAgainstXSD(String xml) {
         try {
-            if (validator == null) {
+            if (schema == null) {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                Schema schema = schemaFactory.newSchema(this.class.classLoader.getResource('xsd/ISO-18626-v1_2.xsd'))
-                validator = schema.newValidator()
+                schema = schemaFactory.newSchema(this.class.classLoader.getResource('xsd/ISO-18626-v1_2.xsd'))
             }
+            Validator validator = schema.newValidator() //Validator is NOT thread-safe, cannot be shared
             validator.validate(new StreamSource(new StringReader(xml)))
             log.debug("XSD validation successful")
         } catch (SAXException e) {
             log.error("XSD schema validation failed", e)
+            throw e
+        } catch (Exception e) {
+            log.error("Error attempting to validate iso18626 message against schema  ${e.getLocalizedMessage()}")
             throw e
         }
     }

@@ -32,7 +32,8 @@ where pr.dateCreated < :staleDate and
                          s.canTriggerStaleRequest = true)
 """;
 
-	private static Map checkMap = [
+
+	private static Map<String, Map> checkMap = [
 			"default" : [ setting: SettingsData.SETTING_STALE_REQUEST_2_DAYS, hoursMultiplier: 24] ,
 			"rush" : [ setting: SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS,  hoursMultiplier: 1],
 			"express" : [ setting: SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS, hoursMultiplier: 1],
@@ -52,8 +53,11 @@ where pr.dateCreated < :staleDate and
 
 	@Override
 	public void performTask(String tenant, String config) {
+		boolean excludeWeekends = settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES);
+		boolean staleRequestsEnabled = settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES);
+		log.debug("Stale Supplier Request timer task launched for tenant ${tenant}, stale requests enabled is ${staleRequestsEnabled}, exclude weekends is ${excludeWeekends}");
 		def checkLevels = checkMap.keySet();
-		if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_1_ENABLED, SETTING_ENABLED_YES)) {
+		if (staleRequestsEnabled) {
 			// We look to see if a request has been sitting at a supplier for more than X days without the pull slip being printed
 
 			// The date that we request must have been created before, for us to take notice off, I believe dates are stored as UTC
@@ -64,44 +68,34 @@ where pr.dateCreated < :staleDate and
 				if (!numberOfIdleHours) {
 					return;
 				}
+
 				int numberOfIdleDays = Math.floor(numberOfIdleHours / 24);
 
 				//initialize initial date before we remove durations from it
-				DateTime idleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis())).startOfDay();
+				DateTime initialIdleBeyondDate = (new DateTime(TimeZone.getTimeZone(TIME_ZONE_UTC), System.currentTimeMillis()));
+				log.debug("Initial idle date prior to adjustment is ${initialIdleBeyondDate}");
 
-				// if we are ignoring weekends then the calculation for the idle start date will be slightly different
-				if (settingsService.hasSettingValue(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND, SETTING_EXCLUDE_WEEKEND_YES) && (numberOfIdleDays > 0)) {
-					// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
-					for (int i = 0; i < numberOfIdleDays; i++) {
-						idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
-						int dayOfWeek = idleBeyondDate.getDayOfWeek();
-						if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
-							// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
-							i--;
-						}
-					}
-				} else {
-					// We do not ignore weekends
-					Duration duration = new Duration(-1, 0, numberOfIdleHours);
-					idleBeyondDate = idleBeyondDate.addDuration(duration);
-				}
+				DateTime idleBeyondDate = getAdjustedDateTime(numberOfIdleHours, initialIdleBeyondDate, excludeWeekends);
 
 
+				Date staleDate = new Date(idleBeyondDate.getTimestamp());
+				log.debug("Checking requests at level '${level}' at a threshold of ${numberOfIdleHours} hours, stale date is ${staleDate} (${idleBeyondDate})");
 
 				// Now find all the stale requests
-				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : new Date(idleBeyondDate.getTimestamp()) ]);
+				List<PatronRequest> requests = PatronRequest.findAll(STALE_REQUESTS_QUERY, [ staleDate : staleDate ]);
 
 				if ((requests != null) && (requests.size() > 0)) {
-					requests.each { request ->
-
+					for ( request in requests ) {
 						if ( (level == "default" && !checkLevels.contains(request.serviceLevel?.value)) ||
 							level == request.serviceLevel?.value) {
 							// Perform a supplier cannot supply action
 							try {
+								log.debug("Calling stale request action '${request?.stateModel?.staleAction?.code}' for request ${request?.hrid} with createDate ${request?.dateCreated}");
 								actionService.performAction(request.stateModel.staleAction.code, request, ['note': 'Request has been idle for more than ' + numberOfIdleHours + ' hours.']);
 							} catch (Exception e) {
 								log.error("Exception thrown while performing stale action " + request.stateModel.staleAction.code + " on request " + request.hrid + " ( " + request.id.toString() + " )", e);
 							}
+							break;
 						}
 					}
 				}
@@ -110,19 +104,36 @@ where pr.dateCreated < :staleDate and
 		}
 	}
 
-	/**
-	 * Obtains the number of idle days
-	 * @return the number of idle days
-	 */
-	/*
-	private int numberOfIdleDays() {
-		// Get hold of the number of idle days
-		return(settingsService.getSettingAsInt(SettingsData.SETTING_STALE_REQUEST_2_DAYS, DEFAULT_IDLE_DAYS, false));
-	}
-	*/
 
 	private int getNumberOfIdleHours(String setting, int hoursMultiplier) {
 		int number = settingsService.getSettingAsInt(setting, DEFAULT_IDLE_DAYS, false);
 		return number * hoursMultiplier;
+	}
+
+	public static DateTime getAdjustedDateTime(int idleHoursThreshold, DateTime idleBeyondDate, boolean excludeWeekends) {
+		int numberOfIdleDays = Math.floor(idleHoursThreshold / 24);
+
+		int hoursPart = idleHoursThreshold % 24;
+
+		if (excludeWeekends && (numberOfIdleDays > 0)) {
+			// We ignore weekends, probably not the best way of doing this but it will work, can be optimised later
+			for (int i = 0; i < numberOfIdleDays; i++) {
+				idleBeyondDate = idleBeyondDate.addDuration(DURATION_ONE_DAY);
+				int dayOfWeek = idleBeyondDate.getDayOfWeek();
+				if ((dayOfWeek == DAY_OF_WEEK_SUNDAY)  || (dayOfWeek == DAY_OF_WEEK_SATURDAY)) {
+					// It is either a Saturday or Sunday, so subtract 1 from i, so we go round the loop again
+					i--;
+				}
+			}
+			//Now remove the hours part
+			Duration duration = new Duration( -1, 0, hoursPart, 0, 0);
+			idleBeyondDate = idleBeyondDate.addDuration(duration);
+		} else {
+			// We do not ignore weekends
+			Duration duration = new Duration(-1, numberOfIdleDays, hoursPart, 0, 0);
+			idleBeyondDate = idleBeyondDate.addDuration(duration);
+		}
+
+		return idleBeyondDate;
 	}
 }

@@ -27,9 +27,58 @@ databaseChangeLog = {
         addForeignKeyConstraint(baseColumnNames: "pr_service_level_fk", baseTableName: "patron_request", constraintName: "FK_pr_service_level", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
 
     }
+
     changeSet(author: "janis", id: '20250508-1514-001') {
         addColumn(tableName: "patron_request_loan_condition") {
             column(name: "prlc_sup_inst_symbol", type: "VARCHAR")
         }
     }
+
+    changeSet(author: "jskomorowski", id: '20250523-1200-001') {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_delivery_address", type: "TEXT")
+        }
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_return_address", type: "TEXT")
+        }
+    }
+
+    changeSet(author: "jskomorowski", id: '20250613-1200-001') {
+        addColumn(tableName: "patron_request_loan_condition") {
+            column(name: "prlc_cost", type: "DECIMAL(10,2)")
+            column(name: "prlc_cost_currency_fk", type: "VARCHAR(36)")
+        }
+        addForeignKeyConstraint(baseColumnNames: "prlc_cost_currency_fk", baseTableName: "patron_request_loan_condition", constraintName: "FK_prlc_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    }
+
+    changeSet(author: "jskomorowski", id: '20250718-0900-001') {
+        addColumn(tableName: "patron_request") {
+            column(name: "pr_cost", type: "DECIMAL(10,2)")
+            column(name: "pr_cost_currency_fk", type: "VARCHAR(36)")
+        }
+
+        addForeignKeyConstraint(baseColumnNames: "pr_cost_currency_fk", baseTableName: "patron_request", constraintName: "FK_pr_cost_currency", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "rdv_id", referencedTableName: "refdata_value")
+    }
+
+
+    changeSet(author: "knordstrom", id: '20250729-1543-001') {
+        modifyDataType(tableName: "patron_request", columnName: "pr_patron_note", newDataType: "TEXT")
+    }
+
+    changeSet(author: "jskomorowski", id: '20250828-1200-001') {
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_sender_symbol", type: "VARCHAR(255)")
+        }
+    }
+
+    changeSet(author: "jskomorowski", id: '20250905-1200-001') {
+        addColumn(tableName: "patron_request_notification") {
+            column(name: "prn_message_status", type: "TEXT")
+        }
+    }
+
+    changeSet(author: "jskomorowski", id: "20250909-1700-001") {
+        dropNotNullConstraint(tableName: "patron_request_notification", columnName: "prn_message_content", columnDataType: "TEXT")
+    }
+     
 }

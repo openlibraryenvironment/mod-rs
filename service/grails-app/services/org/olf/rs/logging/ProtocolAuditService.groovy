@@ -1,5 +1,7 @@
 package org.olf.rs.logging
 
+import grails.events.annotation.Subscriber
+import grails.gorm.multitenancy.Tenants
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ProtocolAudit;
 import org.olf.rs.ProtocolMethod;
@@ -9,7 +11,8 @@ import org.olf.rs.SettingsService;
 import org.olf.rs.referenceData.RefdataValueData;
 import org.olf.rs.referenceData.SettingsData;
 
-import groovyx.net.http.URIBuilder;
+import groovyx.net.http.URIBuilder
+import org.springframework.dao.OptimisticLockingFailureException
 
 /**
  * Provides the necessary methods for interfacing with the ProtocolAudit table
@@ -83,10 +86,20 @@ public class ProtocolAuditService {
     }
 
     void save(String patronRequestId, IBaseAuditDetails baseAuditDetails) {
-        PatronRequest request = PatronRequest.findById(patronRequestId)
+        PatronRequest request = PatronRequest.get(patronRequestId)
         if (request) {
-            save(request, baseAuditDetails)
-            request.save(flush:true, failOnError:false)
+            try {
+                save(request, baseAuditDetails)
+            } catch (OptimisticLockingFailureException olfe) {
+                log.warn("Optimistic Locking Failure: ${olfe.getLocalizedMessage()}");
+            }
+        }
+    }
+
+    @Subscriber("ProtocolAuditService.saveSubscriber")
+    void saveSubscriber(Serializable tenant, String patronRequestId, IBaseAuditDetails baseAuditDetails){
+        Tenants.withId(tenant) {
+            save(patronRequestId, baseAuditDetails)
         }
     }
 
@@ -112,6 +125,8 @@ public class ProtocolAuditService {
                 protocolAudit.responseStatus = baseAuditDetails.getResponseStatus()?.take(30); // truncate to column size
                 protocolAudit.responseBody = responseBody;
                 protocolAudit.duration = baseAuditDetails.duration();
+                protocolAudit.patronRequest = patronRequest
+                protocolAudit.save(flush: true, failOnError: true);
                 patronRequest.addToProtocolAudit(protocolAudit);
             }
         }

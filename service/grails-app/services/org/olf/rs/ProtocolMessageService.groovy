@@ -66,7 +66,7 @@ class ProtocolMessageService {
   SettingsService settingsService;
   Iso18626MessageValidationService iso18626MessageValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class)
-  Marshaller marshaller = null
+  
   def grailsApplication
 
   // Max milliseconds an apache httpd client request can take. initially for sendISO18626Message but may extend to other calls
@@ -314,26 +314,25 @@ class ProtocolMessageService {
     def sym = DirectoryEntryService.resolveCombinedSymbol(symbolStr)
 
     if (sym == null) {
-      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}")
-    }
+      log.warn("Attempted to find ILL service accounts for unknown symbol ${symbolStr}");
+    } else {
 
-    log.debug("Finding ILL service accounts for ${sym?.symbol}")
-    try {
-      def criteria = ServiceAccount.where {
-        accountHolder == sym.owner && service.businessFunction.value == 'ill'
+      log.debug("Finding ILL service accounts for ${sym?.symbol}")
+      try {
+        def criteria = ServiceAccount.where {
+          accountHolder == sym.owner && service.businessFunction.value == 'ill'
+        }
+        result = criteria.list()
+        log.debug("Got service accounts: ${result}");
+      } catch (Exception e) {
+        log.error("Unable to find service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
       }
-      result = criteria.list()
-    } catch (Exception e) {
-      log.error("Error getting service accounts for symbol ${sym?.symbol}: ${e.getLocalizedMessage()}");
     }
-
-    log.debug("Got service accounts: ${result}")
     return result;
   }
 
 
   def makeISO18626Message(Map eventData) {
-
     log.debug("Creating ISO18626 Message")
     log.debug("Message Type: ${eventData.messageType}")
     ISO18626Message message = new ISO18626Message()
@@ -356,24 +355,25 @@ class ProtocolMessageService {
     return message
   }
 
-  Marshaller getMarshaller() {
-    if(marshaller == null){
-      marshaller = context.createMarshaller()
-      marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
-      marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper())
-    }
-    return marshaller
+
+  void marshalIsoMessage(ISO18626Message isoMessage, StringWriter stringWriter) {
+    log.debug("Attempting to marshal ISO message");
+    Marshaller marshaller = context.createMarshaller();
+    marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION);
+    marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper());
+
+    marshaller.marshal(isoMessage, stringWriter);
   }
 
-  private Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
+  protected Map sendISO18626Message(Map eventData, String address, Map additionalHeaders, Map auditMap, IIso18626LogDetails iso18626LogDetails) {
 
     Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
     StringWriter sw = new StringWriter()
-    getMarshaller().marshal(makeISO18626Message(eventData), sw)
+    ISO18626Message isoMessage = makeISO18626Message(eventData);
+    marshalIsoMessage(isoMessage, sw);
     String message = sw.toString();
-    iso18626MessageValidationService.validateAgainstXSD(message)
     log.debug("ISO18626 Message: ${address} ${message} ${additionalHeaders}")
-//    new File("D:/Source/Folio/mod-rs/logs/isomessages.log").append(message + "\n\n");
+    iso18626MessageValidationService.validateAgainstXSD(message);
 
     if ( address != null ) {
       // It is stored as seconds in the settings, so need to multiply by 1000
@@ -452,7 +452,7 @@ class ProtocolMessageService {
               } else {
                   // We did so pull back the status and any error data
                   result.messageStatus = responseNode.confirmationHeader.messageStatus;
-                  result.errorData = responseNode.confirmationHeader.errorData;
+                  result.errorData = responseNode.errorData;
               }
           }
         }
@@ -784,10 +784,10 @@ class ProtocolMessageService {
     messageInfo.setNote(eventData.messageInfo.note)
     messageInfo.setReasonUnfilled(toTypeSchemeValuePair(eventData.messageInfo.reasonUnfilled))
     messageInfo.setReasonRetry(toTypeSchemeValuePair(eventData.messageInfo.reasonRetry))
-    if (eventData.messageInfo.offeredCosts) {
+    if (eventData.messageInfo?.offeredCosts?.monetaryValue && eventData?.messageInfo?.offeredCosts?.currencyCode) {
       TypeCosts offeredCosts = new TypeCosts()
-      offeredCosts.setCurrencyCode()
-      offeredCosts.setMonetaryValue(eventData.messageInfo.offeredCosts)
+      offeredCosts.setCurrencyCode(toTypeSchemeValuePair(eventData.messageInfo.offeredCosts.currencyCode))
+      offeredCosts.setMonetaryValue(new BigDecimal(eventData.messageInfo.offeredCosts.monetaryValue))
       messageInfo.setOfferedCosts(offeredCosts)
     }
     if (eventData.messageInfo.retryAfter) {
@@ -848,8 +848,7 @@ class ProtocolMessageService {
     }
     if (!eventData.deliveryInfo.sentVia && eventData.deliveryInfo.url) {
       TypeSchemeValuePair pair = new TypeSchemeValuePair()
-      pair.setScheme('URL')
-      pair.setValue(eventData.deliveryInfo.url)
+      pair.setValue('URL')
       deliveryInfo.setSentVia(pair)
     }
     deliveryInfo.setSentToPatron(eventData.deliveryInfo.sentToPatron ? true : false)
@@ -857,8 +856,8 @@ class ProtocolMessageService {
     deliveryInfo.setDeliveredFormat(toTypeSchemeValuePair(eventData.deliveryInfo.deliveredFormat))
     if (eventData.deliveryInfo.deliveryCosts) {
       TypeCosts costs = new TypeCosts()
-      costs.setCurrencyCode(null)
-      costs.setMonetaryValue(eventData.deliveryInfo.deliveryCosts)
+      costs.setCurrencyCode(toTypeSchemeValuePair(eventData.deliveryInfo.deliveryCosts.currencyCode))
+      costs.setMonetaryValue(new BigDecimal(eventData.deliveryInfo.deliveryCosts.monetaryValue))
       deliveryInfo.setDeliveryCosts(costs)
     }
     return deliveryInfo
@@ -876,9 +875,28 @@ class ProtocolMessageService {
 
     }
     returnInfo.setName(eventData.returnInfo.name)
-    if (eventData.returnInfo.physicalAddress) {
+    if (eventData.returnInfo?.physicalAddress) {
+      def physicalAddressMap = eventData.returnInfo.physicalAddress;
       PhysicalAddress physicalAddress = new PhysicalAddress()
-      physicalAddress.setLine1(eventData.returnInfo.physicalAddress)
+      //physicalAddress.setLine1(eventData.returnInfo.address.physicalAddress)
+      if (physicalAddressMap.line1) {
+        physicalAddress.setLine1(physicalAddressMap.line1)
+      }
+      if (physicalAddressMap.line2) {
+        physicalAddress.setLine2(physicalAddressMap.line2)
+      }
+      if (physicalAddressMap.locality) {
+        physicalAddress.setLocality(physicalAddressMap.locality)
+      }
+      if (physicalAddressMap.postalCode) {
+        physicalAddress.setPostalCode(physicalAddressMap.postalCode)
+      }
+      if (physicalAddressMap.region instanceof List && physicalAddressMap.region.size() == 2) {
+        physicalAddress.setRegion(toTypeSchemeValuePair(physicalAddressMap.region[1]))
+      }
+      if (physicalAddressMap.country instanceof List && physicalAddressMap.country.size() == 2) {
+        physicalAddress.setCountry(toTypeSchemeValuePair(physicalAddressMap.country[1]))
+      }
       returnInfo.setPhysicalAddress(physicalAddress)
     }
     return returnInfo

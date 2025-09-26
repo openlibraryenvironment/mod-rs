@@ -1,5 +1,6 @@
 package org.olf
 
+import com.k_int.web.toolkit.refdata.RefdataCategory
 import com.k_int.web.toolkit.refdata.RefdataValue
 import grails.databinding.SimpleMapDataBindingSource
 import grails.util.Holders
@@ -9,6 +10,8 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.olf.okapi.modules.directory.DirectoryEntry
 import org.olf.rs.constants.Directory
 import org.olf.rs.lms.HostLMSActions
+import org.olf.rs.referenceData.RefdataValueData
+import org.olf.rs.statemodel.ActionEventResult
 import org.olf.rs.statemodel.StateModel
 import grails.gorm.multitenancy.Tenants
 import grails.testing.mixin.integration.Integration
@@ -30,6 +33,12 @@ import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Ignore
 import java.text.SimpleDateFormat
+import org.olf.rs.statemodel.ActionResultDetails
+import org.olf.rs.iso18626.ReasonForMessage
+import org.olf.rs.statemodel.ActionEventResultQualifier
+
+
+
 
 
 @Slf4j
@@ -102,6 +111,8 @@ class RSLifecycleSpec extends TestBase {
   Z3950Service z3950Service
   SettingsService settingsService;
   AutoTimestampEventListener autoTimestampEventListener;
+  ReshareActionService reshareActionService;
+
 
 
 
@@ -255,85 +266,8 @@ class RSLifecycleSpec extends TestBase {
     def cleanup() {
     }
 
-    private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
-        Map params = [
-                'max':'100',
-                'offset':'0',
-                'match':'patronReference',
-                'term':patron_reference
-        ];
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
 
-    private String waitForRequestStateById(String tenant, long timeout, String id, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'id',
-                'term':id
-        ];
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
 
-    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'hrid',
-                'term':hrid
-        ]
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
-
-    private String waitForRequestStateParams(String tenant, long timeout, Map params, String required_state) {
-        long start_time = System.currentTimeMillis();
-        String request_id = null;
-        String request_state = null;
-        long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders(['X-Okapi-Tenant': tenant]);
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    params)
-            if (resp?.size() == 1) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with params ${params} not found");
-            }
-
-            if (required_state != request_state) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping");
-                Thread.sleep(1000);
-            }
-            elapsed = System.currentTimeMillis() - start_time
-        }
-        log.debug("Found request on tenant ${tenant} with params ${params} in state ${request_state} after ${elapsed} milliseconds");
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-        }
-
-        return request_id;
-    }
-
-    // For the given tenant fetch the specified request
-    private Map fetchRequest(String tenant, String requestId) {
-
-        setHeaders([ 'X-Okapi-Tenant': tenant ]);
-        // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests/{id}
-        def response = doGet("${baseUrl}rs/patronrequests/${requestId}")
-        return response;
-    }
-
-    private String randomCrap(int length) {
-        String source = (('A'..'Z') + ('a'..'z')).join();
-        Random rand = new Random();
-        return (1..length).collect { source[rand.nextInt(source.length())]}.join();
-    }
 
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
@@ -714,6 +648,55 @@ class RSLifecycleSpec extends TestBase {
 
     }
 
+    void "Test nonreturnable copycomplete state transition in sent-to-supplier"() {
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String patronIdentifier = "TEST-COPY-COMPLETE-0001";
+        String patronReference = 'ref-' + patronIdentifier;
+        when: "We create a requester request"
+        Map request = [
+                patronReference: patronReference,
+                title: 'Nonreturnable State Transition Test',
+                author: 'El Guapo',
+                requestingInstitutionSymbol: 'ISIL:RST1',
+                systemInstanceIdentifier: '323-121',
+                patronIdentifier: patronIdentifier,
+                isRequester: true,
+                serviceType: "Copy",
+                deliveryMethod: "URL"
+        ];
+
+
+        setHeaders([ 'X-Okapi-Tenant': requesterTenantId ]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        // requester request sent to supplier?
+        String requesterId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        // responder request created?
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
+        //Manually send ISO18626 message to requester to with CopyCompleted status to send requester to Document Delivered
+        Tenants.withId(responderTenantId.toLowerCase() + "_mod_rs", {
+            PatronRequest req;
+            req = PatronRequest.get(responderRequestId);
+
+            def parameters = [:];
+            ActionResultDetails ard = new ActionResultDetails();
+            reshareActionService.sendSupplyingAgencyMessage(req,
+                    ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_COPY_COMPLETED,
+                    parameters, ard);
+        });
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_DOCUMENT_DELIVERED);
+
+        then: "Assert values"
+        assert(true);
+
+    }
+
+
 
     /**
      * Important note for the scenario test case, as we are relying on the routing and directory entries that have been setup earlier
@@ -893,8 +876,8 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 0        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 0        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | null              | 1        | true              | null                                | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | null                                        | "RSInstThree"      | Status.RESPONDER_IDLE | null           | null        | null                   | null
-        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupply.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | null
-        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierConditionalSupplyWithCost.json"    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.conditions[0].cost == 42.54 && r.conditions[0].costCurrency.value == "cad" && s.conditions[0].cost == 42.54 && s.conditions[0].costCurrency.value == "cad" })
+        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterAgreeConditions.json"     | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.cost == 42.54 && s.cost == 42.54 })
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterCancel.json"              | Status.PATRON_REQUEST_CANCEL_PENDING              | Status.RESPONDER_CANCEL_REQUEST_RECEIVED    | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierRespondToCancelNo.json"    | Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY           | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | null           | null        | "{}"                   | null
@@ -945,7 +928,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "supplierAddCondition.json"         | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_PENDING_CONDITIONAL_ANSWER | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "supplierMarkConditionsAgreed.json" | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_NEW_AWAIT_PULL_SLIP        | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierPrintPullSlip.json"      | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_COPY_AWAIT_PICKING         | null               | null                  | "URL"          | "Copy"      | "{status=true}"        | null
-        "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 10       | false             | "nrSupplierAddURLToDocument.json"   | Status.PATRON_REQUEST_DOCUMENT_DELIVERED          | Status.RESPONDER_DOCUMENT_DELIVERED         | null               | null                  | "URL"          | "Copy"      | "{}"                   | ({ r, s -> r.pickupURL == 'https://s3-ap-southeast-2.amazonaws.com/grove-dev-msd/perth/e600598c-6287-4514-bc88-3acdec4a3172' })
     }
 
     void "test Dynamic Groovy"() {
@@ -2055,6 +2038,90 @@ class DosomethingSimple {
         'RSInstOne' | 'We Gotta Do it Over'        | 'Pete, Rea'   | '1533-2233-1654-9192' | '8887-6644'       | 'ISIL:RST1'
     }
 
+    void "test transmission of physical address in supplying agency message"() {
+
+        String patronIdentifier = "ABf-SPS-FJF-222";
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String requestTitle = "Sending it Back";
+        String requestAuthor = "Myne, Gymee";
+        String requestSymbol = "ISIL:RST1";
+        String patronReference = "ref-" + patronIdentifier + randomCrap(6);
+        String systemInstanceIdentifier = "144-636-999";
+
+        when: "Do it"
+
+        def changeSettingsResp = changeSettings(responderTenantId, [(SettingsData.SETTING_AUTO_RESPONDER_STATUS) : "off"]);
+
+        Map request = [
+                requestingInstitutionSymbol: requestSymbol,
+                title                      : requestTitle,
+                author                     : requestAuthor,
+                patronIdentifier           : patronIdentifier,
+                isRequester                : true,
+                patronReference            : patronReference,
+                systemInstanceIdentifier   : systemInstanceIdentifier,
+                deliveryMethod             : "URL",
+                tags                       : ['RS-PHYSADDRESS-TEST-1']
+        ];
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        String requesterRequestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+
+        String responderPerformActionUrl = "${baseUrl}/rs/patronrequests/${responderRequestId}/performAction".toString();
+
+        Map respondYesPayload = [
+                action: "respondYes",
+                "actionParams": [
+                        "callnumber": "call number",
+                        "pickLocation": "location",
+                        "pickShelvingLocation": "shelving location",
+                        "note": "Notes"
+                ]
+        ];
+
+        log.debug("Posting 'respondYes' to responder at url ${responderPerformActionUrl}");
+        setHeaders(['X-Okapi-Tenant': responderTenantId]);
+
+        def respondYesActionResponse = doPost(responderPerformActionUrl, respondYesPayload);
+
+        waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_NEW_AWAIT_PULL_SLIP);
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY);
+
+        Tenants.withId(responderTenantId.toLowerCase() + "_mod_rs", {
+            PatronRequest req;
+            req = PatronRequest.get(responderRequestId);
+
+            def parameters = [:];
+            def physicalAddress = [
+                    "line1":"Melbourne dev tenant / Remote Storage",
+                    "line2":"99 Starving Road",
+                    "locality":"Everywhere",
+                    "postalCode":"7800",
+                    "region":["#text":"ACT"],"country":[:]
+            ];
+            parameters.returnAddress = physicalAddress;
+            ActionResultDetails ard = new ActionResultDetails();
+            reshareActionService.sendSupplyingAgencyMessage(req,
+                    ReasonForMessage.MESSAGE_REASON_STATUS_CHANGE, ActionEventResultQualifier.QUALIFIER_LOANED,
+                    parameters, ard);
+
+            Thread.sleep(2000); //Let the status change go through
+
+            def requesterRequestData = doGet("${baseUrl}/rs/patronrequests/${requesterRequestId}");
+
+            assert(requesterRequestData.returnAddress != null)
+        });
+        then:
+        assert(true);
+    }
+
+
     void "Test transmission of values to supplier"(
             String copyrightType, String publicationType, String patronIdentifier) {
         String requesterTenantId = "RSInstOne";
@@ -2075,7 +2142,13 @@ class DosomethingSimple {
                 copyrightType: copyrightType,
                 serviceLevel: "Rush",
                 maximumCostsMonetaryValue: "329.43",
-                maximumCostsCurrencyCode: "AUD"
+                maximumCostsCurrencyCode: "AUD",
+                patronNote: """This is the note that never ends, yes it goes
+on and on my friend, some people started singing it, not knowing what it what
+and they'll just keep on singing it forever just because this is the note that
+never ends, yes it goes on and on my friend, some people started singing it not
+knowing what it was and they'll just keep on singing it forever just because it 
+is the note that never ends..."""
         ];
 
 
@@ -2101,10 +2174,67 @@ class DosomethingSimple {
         where:
             copyrightType | publicationType | patronIdentifier
             'us-ccg'      | "book"          | "TRANS-VALS-TYPE-0001"
-        // Create request on first tenant w/ copyright and pub info
-        // Look for request to get to 'sent to supplier'
-        // Look for responder request w/ patron reference
-        // check for copyright and publication type in responder request
+
+    }
+
+
+    void "Test transmission of patron info"(
+            String patronIdentifier,
+            boolean suppressPatronInfo) {
+        String requesterTenantId = "RSInstOne";
+        String responderTenantId = "RSInstThree";
+        String patronReference = 'ref-' + patronIdentifier;
+        when: "We create a requester request with copyright and pub info"
+        Map request = [
+                patronReference            : patronReference,
+                title                      : 'Patron Info Transmission Test',
+                author                     : 'UR DAD',
+                requestingInstitutionSymbol: 'ISIL:RST1',
+                systemInstanceIdentifier   : '123-321-321-123',
+                patronIdentifier           : patronIdentifier,
+                patronGivenName            : "Borgar",
+                patronSurname              : "Kang",
+                patronEmail                : "bk@bk.com",
+                isRequester                : true,
+                serviceType                : "Copy",
+                deliveryMethod             : "URL"
+        ];
+
+        String settingsValue = suppressPatronInfo ? "yes" : "no";
+
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_SUPPRESS_PATRON_INFO): settingsValue]);
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId]);
+        doPost("${baseUrl}/rs/patronrequests".toString(), request);
+
+        // requester request sent to supplier?
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        // responder request created?
+        String responderRequestId = waitForRequestState(responderTenantId, 10000, patronReference, Status.RESPONDER_IDLE);
+        def responderRequestData = doGet("${baseUrl}rs/patronrequests/${responderRequestId}");
+
+        changeSettings(requesterTenantId, [(SettingsData.SETTING_SUPPRESS_PATRON_INFO): "no"]); //clean up
+
+        then: "Assert values"
+        assert (responderRequestData.patronReference == patronReference);
+
+        if (suppressPatronInfo) {
+            assert(responderRequestData.patronIdentifier == null);
+            assert(responderRequestData.patronGivenName == null);
+            assert(responderRequestData.patronSurname == null);
+            assert(responderRequestData.patronEmail == null);
+        } else {
+            assert(responderRequestData.patronIdentifier == patronIdentifier);
+            assert(responderRequestData.patronGivenName == 'Borgar');
+            assert(responderRequestData.patronSurname == 'Kang');
+            assert(responderRequestData.patronEmail == null);
+        }
+
+        where:
+        patronIdentifier               | suppressPatronInfo
+        "patron_info_transmission_001" | false
+        "patron_info_transmission_002" | true
     }
 
     void "Test automatic rerequest to different cluster id after unfilled transfer"(
@@ -2275,6 +2405,8 @@ class DosomethingSimple {
 
         String newRequesterRequestId = waitForRequestState(requesterTenantId, 10000, newPatronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
 
+        waitForRequestStateById(requesterTenantId, 10000, requesterRequestId, Status.PATRON_REQUEST_END_OF_ROTA_REVIEWED);
+
         def newRequesterRequestData = doGet("${baseUrl}rs/patronrequests/${newRequesterRequestId}");
 
 
@@ -2317,7 +2449,6 @@ class DosomethingSimple {
                 serviceType                : "Copy",
                 tags                       : ['RS-COPY-AUTORESPOND-TEST-1']
         ];
-        
 
         setHeaders(['X-Okapi-Tenant': requesterTenantId]);
         doPost("${baseUrl}/rs/patronrequests".toString(), request);
@@ -2331,6 +2462,8 @@ class DosomethingSimple {
         assert(true);
 
     }
+
+
 
     @Ignore //Inconsistent
     void "test messaging between tenants"() {
@@ -2556,14 +2689,18 @@ class DosomethingSimple {
 
     }
 
-    @Ignore //Cannot get the creation of a past-dated request to work
+    // @Ignore //Cannot get the creation of a past-dated request to work
     void "Test stale request timers"(
-            String tenantId
+            String tenantId,
+            String serviceLevel,
+            int durationDays,
+            int durationHours,
+            boolean excludeWeekends
     ) {
         when:
-        final Duration durationOneWeek = new Duration(-1, 7, 0);
+        final Duration duration = new Duration(-1, durationDays, durationHours);
         DateTime createDate = (new DateTime(TimeZone.getTimeZone("UTC"), System.currentTimeMillis())).startOfDay();
-        createDate = createDate.addDuration(durationOneWeek);
+        createDate = createDate.addDuration(duration);
         String tenantString = tenantId.toLowerCase() + "_mod_rs";
         String requestId;
         Long dateStamp;
@@ -2572,34 +2709,65 @@ class DosomethingSimple {
         def timerService = Holders.grailsApplication.mainContext.getBean(timerBeanName);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_1_ENABLED) : "yes"]);
         changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_2_DAYS) : 3]);
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_RUSH_HOURS) : 76])
+        changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_EXPRESS_HOURS) : 2])
+        if (excludeWeekends) {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'yes']);
+        } else {
+            changeSettings(tenantId, [(SettingsData.SETTING_STALE_REQUEST_3_EXCLUDE_WEEKEND) : 'no']);
+        }
+
         PatronRequest newRequest;
+
+        String updateQuery = "update PatronRequest set dateCreated = :newDateCreated where id = :id"
         Tenants.withId(tenantString) {
 
-            autoTimestampEventListener.withoutDateCreated(PatronRequest, {
-                newRequest = new PatronRequest(dateCreated: new Date(createDate.getTimestamp()));
+            autoTimestampEventListener.withoutTimestamps({
+                //newRequest = new PatronRequest(dateCreated: new Date(createDate.getTimestamp()));
+                newRequest = new PatronRequest();
                 newRequest.state = Status.lookup(Status.RESPONDER_IDLE);
                 newRequest.stateModel = StateModel.lookup(StateModel.MODEL_RESPONDER);
                 newRequest.isRequester = false;
-                newRequest.save(flush:true);
+                if (serviceLevel) {
+                    RefdataValue rdv = findRefdataValue(serviceLevel.toLowerCase(), RefdataValueData.VOCABULARY_SERVICE_LEVELS);
+                    newRequest.serviceLevel = rdv;
+                }
+                newRequest.save(flush: true);
                 requestId = newRequest.id;
-            });
-            //newRequest.dateCreated = new Date(createDate.getTimestamp());
-            //newRequest.save(flush:true)
 
+
+                //newRequest.dateCreated = new Date(createDate.getTimestamp());
+                //newRequest.save(flush: true)
+            });
+
+        }
+
+        //pull the request via web and look at it to check date
+        assert(newRequest != null);
+
+        Tenants.withId(tenantString) {
+            PatronRequest.executeUpdate(updateQuery, [ newDateCreated: new Date(createDate.getTimestamp()), id: requestId])
         }
 
         Tenants.withId(tenantString) {
             timerService.performTask(tenantId, null);
         }
 
-        then:
-        assert(requestId != null);
-        assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
-        assert(newRequest.state.getCode() == Status.RESPONDER_NOT_SUPPLIED);
+        setHeaders(['X-Okapi-Tenant':tenantId]);
+        def newRequestData = doGet("${baseUrl}rs/patronrequests/${requestId}");
 
+        then:
+        //assert(requestId != null);
+        //assert(newRequest.dateCreated == new Date(createDate.getTimestamp()))
+        assert(newRequestData.state.code == Status.RESPONDER_UNFILLED);
+        assert(true)
         where:
-        tenantId | _
-        "RSInstThree" | _
+        tenantId      | serviceLevel | durationDays | durationHours | excludeWeekends
+        "RSInstThree" | null         | 7            | 0             | false
+        "RSInstThree" | "rush"       | 4            | 2             | false
+        "RSInstThree" | "express"    | 0            | 3             | false
 
     }
+
+
  }
