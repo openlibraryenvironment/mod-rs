@@ -58,8 +58,8 @@ class ExternalApiSpec extends TestBase {
         then:"check expected structure"
             assert(response != null);
             assert(response.asAt != null);
-            assert(response.current != null);
             assert(response.requestsByState != null);
+            assert(response.requestsByTag != null);
 
         where:
             tenantId    | ignore
