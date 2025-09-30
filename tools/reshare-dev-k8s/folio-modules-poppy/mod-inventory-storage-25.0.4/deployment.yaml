@@ -1,0 +1,57 @@
+# -*- mode: yaml; -*-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "mod-inventory-storage-25-0-4"
+  labels:
+    app: "mod-inventory-storage-25-0-4"
+    module: "mod-inventory-storage"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "mod-inventory-storage-25-0-4"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mod-inventory-storage-25-0-4"
+        module: "mod-inventory-storage"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: "mod-inventory-storage-25-0-4"
+          image: "folioorg/mod-inventory-storage:25.0.4"
+          envFrom:
+            - secretRef:
+                name: folio-db-connect
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j.configuration=file:/etc/log4j2.properties -Dlog4j2.formatMsgNoLookups=true"
+            - name: "KAFKA_HOST"
+              value: "reshare-kafka-cardinal"
+            - name: "KAFKA_PORT"
+              value: "9092"
+            - name: "REPLICATION_FACTOR"
+              value: "1"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: inventory-storage-log4j-config
+              mountPath: "/etc/log4j.properties"
+              subPath: "log4j.properties"
+      volumes:
+        - name: "inventory-storage-log4j-config"
+          configMap:
+            name: "inventory-storage-log4j-config"
+      imagePullSecrets:
+        - name: "dockerhub-cred"

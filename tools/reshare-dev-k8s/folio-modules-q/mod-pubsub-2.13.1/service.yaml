@@ -1,0 +1,13 @@
+# -*- mode: yaml; -*-
+apiVersion: v1
+kind: Service
+metadata:
+  name: "mod-pubsub-2-13-1"
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: "mod-pubsub-2-13-1"
+  ports:
+    - port: 8081
+      name: 8081tcp

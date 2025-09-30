@@ -1,5 +1,5 @@
 {
   "srvcId": "${info.app.name}-${info.app.version}",
-  "instId": "10.0.2.2-${info.app.name}-${info.app.version}",
-  "url": "http://10.0.2.2:8081/"
+  "instId": "host.k3d.internal-${info.app.name}-${info.app.version}",
+  "url": "http://host.k3d.internal:8081/"
 }

@@ -1,0 +1,49 @@
+# -*- mode: yaml; -*-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "mod-circulation-storage-17-2-6"
+  labels:
+    app: "mod-circulation-storage-17-2-6"
+    module: "mod-circulation-storage"
+    folio_role: "backend-module"
+  namespace: "reshare"
+spec:
+  selector:
+    matchLabels:
+      app: "mod-circulation-storage-17-2-6"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "mod-circulation-storage-17-2-6"
+        module: "mod-circulation-storage"
+        folio_role: "backend-module"
+    spec:
+      containers:
+        - name: "mod-circulation-storage-17-2-6"
+          image: "ghcr.io/indexdata/mod-circulation-storage:17.2.6-reshare"
+          envFrom:
+            - secretRef:
+                name: "folio-db-connect"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=66.0 -Dlog4j2.formatMsgNoLookups=true"
+            - name: "ENV"
+              value: "reshare"
+            - name: "KAFKA_HOST"
+              value: "reshare-kafka-cardinal"
+            - name: "KAFKA_PORT"
+              value: "9092"
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          resources:
+            limits:
+              memory: 805306368
+      imagePullSecrets:
+        - name: "dockerhub-cred"
