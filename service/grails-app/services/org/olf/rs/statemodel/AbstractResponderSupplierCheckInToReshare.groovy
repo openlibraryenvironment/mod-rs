@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
 import java.time.Instant
-import org.olf.rs.Counter
 import org.olf.rs.DirectoryEntryService
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
@@ -194,7 +193,6 @@ abstract class AbstractResponderSupplierCheckInToReshare extends AbstractAction 
                 }
 
                 if (volumesNotCheckedIn.size() == 0) {
-                    statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_LOANS);
                     request.activeLoan = true;
                     request.needsAttention = false;
                     if (!settingsService.hasSettingValue(SettingsData.SETTING_NCIP_USE_DUE_DATE, 'off')) {

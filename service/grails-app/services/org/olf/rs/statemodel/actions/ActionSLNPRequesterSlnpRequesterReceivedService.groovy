@@ -3,7 +3,6 @@ package org.olf.rs.statemodel.actions
 import com.k_int.web.toolkit.refdata.RefdataValue
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import org.olf.rs.Counter
 import org.olf.rs.HostLMSService
 import org.olf.rs.PatronRequest
 import org.olf.rs.RequestVolume
@@ -33,8 +32,6 @@ public class ActionSLNPRequesterSlnpRequesterReceivedService extends AbstractAct
     ActionResultDetails performAction(PatronRequest request, Object parameters, ActionResultDetails actionResultDetails) {
         boolean ncipResult = false;
 
-        // Increment the active borrowing counter
-        statisticsService.incrementCounter(Counter.COUNTER_ACTIVE_BORROWING);
 
         // Check the item in to the local LMS
         RequestVolume[] volumesWithoutTemporaryItem = request.volumes.findAll { rv ->
