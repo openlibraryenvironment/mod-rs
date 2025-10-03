@@ -14,7 +14,6 @@ class ConfirmationMessageService {
 
   Iso18626MessageValidationService iso18626MessageValidationService
   JAXBContext context = JAXBContext.newInstance(ObjectFactory.class)
-  Marshaller marshaller = null
 
   def confirmationMessageReadable(def confirmationMessage) {
     StringWriter sw = new StringWriter()
@@ -25,11 +24,12 @@ class ConfirmationMessageService {
   }
 
   Marshaller getMarshaller() {
-      if(marshaller == null){
-          marshaller = context.createMarshaller()
-          marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
-          marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper())
-      }
+      Marshaller marshaller;
+
+      marshaller = context.createMarshaller()
+      marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, Iso18626Constants.SCHEMA_LOCATION)
+      marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new IllNamespacePrefixMapper())
+
       return marshaller
   }
 
