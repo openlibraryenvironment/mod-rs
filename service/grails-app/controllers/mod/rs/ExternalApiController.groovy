@@ -188,7 +188,8 @@ class ExternalApiController implements EventPublisher {
     } catch (SAXException e){
       return render(status: 400, text: "Response validation failed: ${e.message}")
     } catch ( Exception e ) {
-      log.error("Exception receiving ISO message",e);
+      log.error("Exception while handling incoming ISO message",e);
+      return render(status: 500, text: "Error: ${e.getLocalizedMessage()}");
     } finally {
       log.debug("ExternalApiController::iso18626 exiting cleanly");
     }
