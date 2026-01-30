@@ -26,6 +26,17 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Debug k-int repo response
+        run: |
+          set -euxo pipefail
+          url="https://maven.k-int.com/content/repositories/public/com/k_int/grails/web-toolkit-ce/8.1.0/web-toolkit-ce-8.1.0.module"
+          echo "URL: $url"
+          curl -sS -L -D /tmp/headers.txt -o /tmp/body.bin "$url" || true
+          echo "---- headers ----"
+          cat /tmp/headers.txt
+          echo "---- first bytes of body ----"
+          head -c 300 /tmp/body.bin | sed -e 's/</\n</g' | head -n 30
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
 
