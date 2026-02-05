@@ -6,8 +6,9 @@ repositories {
   maven { url "https://repo.grails.org/grails/plugins" }
   maven { url "https://jitpack.io" }
   maven { url "https://repository.folio.org/repository/maven-folio" }
-  //maven { url "https://maven.k-int.com/content/repositories/public" }
-  //maven { url "https://maven.k-int.com/repository/releases" }
+  maven { url "https://maven.k-int.com/content/repositories/public" }
+  maven { url "https://maven.k-int.com/repository/releases" }
+  maven { url "https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts" }
   maven {
     name "reposiliteRepositoryReleases"
     url "https://reposilite.reshare.indexdata.com/releases"
@@ -371,4 +372,3 @@ tasks.withType(Test) {
 springBoot {
   mainClass = 'mod.rs.Application'
 }
-
