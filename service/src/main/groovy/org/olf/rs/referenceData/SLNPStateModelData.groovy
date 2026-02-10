@@ -124,6 +124,46 @@ public class SLNPStateModelData {
             nextActionEvent : null
     ];
 
+    private static Map slnpRequesterManualCloseCancelled = [
+            code: 'slnpRequesterManualCloseCancelled',
+            description: 'Requester is closing this request as cancelled',
+            result: true,
+            status: Status.SLNP_REQUESTER_CANCELLED,
+            qualifier: Status.SLNP_REQUESTER_CANCELLED,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map slnpRequesterManualCloseComplete = [
+            code: 'slnpRequesterManualCloseComplete',
+            description: 'Requester is closing this request as completed',
+            result: true,
+            status: Status.SLNP_REQUESTER_COMPLETE,
+            qualifier: Status.SLNP_REQUESTER_COMPLETE,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map slnpRequesterManualCloseItemLost = [
+            code: 'slnpRequesterManualCloseItemLost',
+            description: 'Requester is closing this request as lost',
+            result: true,
+            status: Status.SLNP_REQUESTER_ITEM_LOST,
+            qualifier: Status.SLNP_REQUESTER_ITEM_LOST,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
+    private static Map slnpRequesterManualClosePatronInvalid = [
+            code: 'slnpRequesterManualClosePatronInvalid',
+            description: 'Requester is closing this request due to invalid patron',
+            result: true,
+            status: Status.SLNP_REQUESTER_PATRON_INVALID,
+            qualifier: Status.SLNP_REQUESTER_PATRON_INVALID,
+            saveRestoreState: null,
+            nextActionEvent: null
+    ];
+
     public static Map slnpResponderRespondYes = [
             code: 'slnpResponderRespondYes',
             description: 'Item has been located and we expect to supply, staff is awaiting printing pull slip',
@@ -244,6 +284,7 @@ public class SLNPStateModelData {
             nextActionEvent: null
     ];
 
+
     private static Map slnpResponderNewPatronRequestIndRequestItemUnfilled = [
             code: 'slnpResponderNewPatronRequestIndRequestItemUnfilled',
             description: 'Event triggered by incoming request, respond with message Unfilled',
@@ -253,6 +294,36 @@ public class SLNPStateModelData {
             saveRestoreState: null,
             nextActionEvent: null
     ];
+
+    private static Map slnpResponderManualCloseUnfilled = [
+            code: 'slnpResponderManualCloseUnfilled',
+            description: 'Responder is closing this request as unfilled',
+            result: true,
+            status: Status.SLNP_RESPONDER_UNFILLED,
+            qualifier: Status.SLNP_RESPONDER_UNFILLED, //Qualifier matches state name?
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
+
+    private static Map slnpResponderManualCloseAborted = [
+            code: 'slnpResponderManualCloseAborted',
+            description: 'Responder is closing this request as aborted',
+            result: true,
+            status: Status.SLNP_RESPONDER_ABORTED,
+            qualifier: Status.SLNP_RESPONDER_ABORTED, //Qualifier matches state name?
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
+
+    private static Map slnpResponderManualCloseComplete = [
+            code: 'slnpResponderManualCloseComplete',
+            description: 'Responder is closing this request as completed',
+            result: true,
+            status: Status.SLNP_RESPONDER_COMPLETE,
+            qualifier: Status.SLNP_RESPONDER_COMPLETE, //Qualifier matches state name?
+            saveRestoreState: null,
+            nextActionEvent: null
+    ]
 
     // SLNP Requester lists
 
@@ -320,6 +391,18 @@ public class SLNPStateModelData {
                     slnpRequesterMarkItemLost
             ]
     ];
+
+    private static Map slnpRequesterCloseManualList = [
+            code: ActionEventResultList.SLNP_REQUESTER_CLOSE_MANUAL,
+            description: 'The requester is terminating this request',
+            model: StateModel.MODEL_SLNP_REQUESTER,
+            results: [
+                    slnpRequesterManualCloseCancelled,
+                    slnpRequesterManualCloseComplete,
+                    slnpRequesterManualCloseItemLost,
+                    slnpRequesterManualClosePatronInvalid
+            ]
+    ]
 
     // SLNP responder lists
     private static Map slnpResponderRespondYesList = [
@@ -390,6 +473,17 @@ public class SLNPStateModelData {
             ]
     ];
 
+    private static Map slnpResponderCloseManualList = [
+            code: ActionEventResultList.SLNP_RESPONDER_CLOSE_MANUAL,
+            description: 'The responder is terminating this request',
+            model: StateModel.MODEL_SLNP_RESPONDER,
+            results: [
+                    slnpResponderManualCloseUnfilled,
+                    slnpResponderManualCloseAborted,
+                    slnpResponderManualCloseComplete
+            ]
+    ]
+
     private static Map[] resultLists = [
             slnpRequesterCancelList,
             slnpRequesterReceivedList,
@@ -397,6 +491,7 @@ public class SLNPStateModelData {
             slnpRequesterCheckedInList,
             slnpRequesterShippedReturnList,
             slnpRequesterISO18626StatusChangeList,
+            slnpRequesterCloseManualList,
             slnpResponderRespondYesList,
             slnpResponderRespondCannotSupplyList,
             slnpResponderAbortSupplyList,
@@ -404,7 +499,8 @@ public class SLNPStateModelData {
             slnpResponderSupplierFillAndMarkShippedList,
             slnpResponderCheckoutOfReshareList,
             slnpResponderNewPatronRequestIndList,
-            slnpRequesterMarkItemLostList
+            slnpRequesterMarkItemLostList,
+            slnpResponderCloseManualList
     ];
 
     public static void loadStatusData() {
@@ -500,6 +596,10 @@ public class SLNPStateModelData {
 
         // SLNP_REQ_AWAITING_RETURN_SHIPPING OR "Awaiting return shipping"
         AvailableAction.ensure(StateModel.MODEL_SLNP_REQUESTER, Status.SLNP_REQUESTER_AWAITING_RETURN_SHIPPING, Actions.ACTION_REQUESTER_SHIPPED_RETURN, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_SHIPPED_RETURN, null, Boolean.TRUE, Boolean.FALSE);
+
+        // Manual close
+        AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_SLNP_REQUESTER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_REQUESTER_CLOSE_MANUAL)
+        AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_SLNP_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_RESPONDER_CLOSE_MANUAL)
     }
 
     public static void loadActionEventData() {

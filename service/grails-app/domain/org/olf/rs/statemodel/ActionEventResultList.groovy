@@ -55,6 +55,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
     // SLNP requester event lists
     static public final String SLNP_REQUESTER_CANCEL                    = 'slnpRequesterCancel';
+    static public final String SLNP_REQUESTER_CLOSE_MANUAL              = 'slnpRequesterCloseManual'
     static public final String SLNP_REQUESTER_RECEIVED                  = 'slnpRequesterReceived';
     static public final String SLNP_REQUESTER_ABORTED                   = 'slnpRequesterAborted';
     static public final String SLNP_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpRequesterISO18626StatusChange';
@@ -65,6 +66,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     // SLNP responder event lists
     static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
     static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
+    static public final String SLNP_RESPONDER_CLOSE_MANUAL                            = 'slnpResponderCloseManual'
     static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
     static public final String SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED          = "slnpResponderSupplierFillAndMarkShipped"

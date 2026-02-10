@@ -4,7 +4,8 @@ import org.olf.rs.PatronRequest;
 import org.olf.rs.statemodel.AbstractAction;
 import org.olf.rs.statemodel.ActionResult;
 import org.olf.rs.statemodel.ActionResultDetails;
-import org.olf.rs.statemodel.Actions;
+import org.olf.rs.statemodel.Actions
+import org.olf.rs.statemodel.StateModel;
 import org.olf.rs.statemodel.Status;
 import org.olf.rs.statemodel.StatusService;
 
@@ -32,8 +33,8 @@ public class ActionManualCloseService extends AbstractAction {
             // Have we been supplied a valid close status
             if (closeStatus && closeStatus.terminal) {
                 reshareActionService.sendMessage(request, [note: "The ${request.isRequester ? 'requester' : 'responder'} has manually closed this request."], actionResultDetails);
-                actionResultDetails.auditMessage = 'Manually closed';
-                actionResultDetails.qualifier = parameters.terminalState;
+                actionResultDetails.auditMessage = 'Manually closed' ;
+                actionResultDetails.qualifier = parameters.terminalState ;
             } else {
                 actionResultDetails.result = ActionResult.INVALID_PARAMETERS;
                 actionResultDetails.auditMessage = "Attemped manualClose action with non-terminal state: ${s} ${parameters?.terminalState}";
