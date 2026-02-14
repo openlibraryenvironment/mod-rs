@@ -1,0 +1,4 @@
+{
+  "action": "manualClose",
+  "actionParams": { "terminalState" :  "SLNP_REQ_DOCUMENT_SUPPLIED" }
+}

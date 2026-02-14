@@ -55,6 +55,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
 
     // SLNP requester event lists
     static public final String SLNP_REQUESTER_CANCEL                    = 'slnpRequesterCancel';
+    static public final String SLNP_REQUESTER_CLOSE_MANUAL              = 'slnpRequesterCloseManual'
     static public final String SLNP_REQUESTER_RECEIVED                  = 'slnpRequesterReceived';
     static public final String SLNP_REQUESTER_ABORTED                   = 'slnpRequesterAborted';
     static public final String SLNP_REQUESTER_ISO_18626_STATUS_CHANGE   = 'slnpRequesterISO18626StatusChange';
@@ -65,6 +66,7 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     // SLNP responder event lists
     static public final String SLNP_RESPONDER_RESPOND_YES                             = 'slnpResponderRespondYes'
     static public final String SLNP_RESPONDER_CANNOT_SUPPLY                           = 'slnpResponderCannotSupply'
+    static public final String SLNP_RESPONDER_CLOSE_MANUAL                            = 'slnpResponderCloseManual'
     static public final String SLNP_RESPONDER_ABORT_SUPPLY                            = 'slnpResponderAbortSupply'
     static public final String SLNP_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                = "slnpResponderSupplierPrintPullSlip"
     static public final String SLNP_RESPONDER_SUPPLIER_FILL_AND_MARK_SHIPPED          = "slnpResponderSupplierFillAndMarkShipped"
@@ -77,11 +79,13 @@ class ActionEventResultList implements MultiTenant<ActionEventResultList> {
     static public final String SLNP_NON_RETURNABLE_REQUESTER_RECEIVED                  = 'slnpNonReturnableRequesterReceived';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED    = 'slnpNonReturnableRequesterManuallyMarkSupplied';
     static public final String SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE   = 'slnpNonReturnableRequesterManuallyMarkAvailable';
+    static public final String SLNP_NON_RETURNABLE_REQUESTER_CLOSE_MANUAL              = 'slnpNonReturnableRequesterCloseManual'
 
     // SLNP responder non returnable event lists
     static public final String SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY                 = 'slnpNonReturnableResponderCannotSupply'
     static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_PRINT_PULL_SLIP      = "slnpNonReturnableResponderSupplierPrintPullSlip"
     static public final String SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT    = "slnpNonReturnableResponderSupplierSuppliesDocument"
+    static public final String SLNP_NON_RETURNABLE_RESPONDER_CLOSE_MANUAL                  = "slnpNonReturnableResponderSupplierCloseManual"
 
     // The responder lists
     static public final String RESPONDER_ADD_CONDITIONAL                = 'responderAddConditional';

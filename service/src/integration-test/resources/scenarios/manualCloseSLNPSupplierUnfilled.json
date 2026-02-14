@@ -1,0 +1,4 @@
+{
+  "action": "manualClose",
+  "actionParams": { "terminalState" :  "SLNP_RES_UNFILLED" }
+}
