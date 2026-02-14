@@ -782,6 +782,7 @@ class SLNPStateModelSpec extends TestBase {
             String requestSymbol,
             String initialState,
             String resultState,
+            String testQualifier,
             String action,
             String jsonFileName,
             Boolean isRequester) {
@@ -814,7 +815,7 @@ class SLNPStateModelSpec extends TestBase {
             performAction(slnpPatronRequest?.id, jsonFileName)
 
             // Validate result status after performed action
-            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, null, true, true)
+            NewStatusResult newResultStatus = statusService.lookupStatus(slnpPatronRequest, action, testQualifier, true, true)
             validateStateTransition(newResultStatus, resultState)
         }
 
@@ -822,16 +823,19 @@ class SLNPStateModelSpec extends TestBase {
         assert true;
 
         where:
-        tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                          | action                                                                     | jsonFileName                                  | isRequester
-        'RSSlnpOne'   | 'request1nrs' | 'test1nrs'    | '1234-5678-9123-2221' | '9876-7771'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_REQUESTER_REQUESTER_CANCEL                                  | 'slnpRequesterCancel'                         | true
-        'RSSlnpOne'   | 'request2nrs' | 'test2nrs'    | '1234-5678-9123-2222' | '9876-7772'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'                 | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT                                 | 'slnpRequesterHandleAbort'                    | true
-        'RSSlnpOne'   | 'request3nrs' | 'test3nrs'    | '1234-5678-9123-2223' | '9876-7773'       | 'ISIL:RSS1'   | 'SLNP_REQ_DOCUMENT_AVAILABLE'       | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED            | 'slnpNonReturnableRequesterRequesterReceived' | true
-        'RSSlnpOne'   | 'request4nrs' | 'test4nrs'    | '1234-5678-9123-2224' | '9876-7774'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED        | 'manuallyMarkSupplied'                        | true
-        'RSSlnpOne'   | 'request5nrs' | 'test5nrs'    | '1234-5678-9123-2234' | '9876-7274'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_AVAILABLE'        | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_AVAILABLE       | 'manuallyMarkAvailable'                       | true
-        'RSSlnpOne'   | 'supply1nrs'  | 'test5nrs'    | '1234-5678-9123-2225' | '9876-7775'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_AWAIT_PICKING'             | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                          | 'supplierPrintPullSlip'                       | false
-        'RSSlnpOne'   | 'supply2nrs'  | 'test6nrs'    | '1234-5678-9123-2226' | '9876-7776'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                            | 'supplierCannotSupply'                        | false
-        'RSSlnpOne'   | 'supply3nrs'  | 'test7nrs'    | '1234-5678-9123-2217' | '9876-7717'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_DOCUMENT_SUPPLIED'         | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT                   | 'slnpNonReturnableSupplierSuppliesDocument'   | false
-        'RSSlnpOne'   | 'supply4nrs'  | 'test8nrs'    | '1234-5678-9123-2218' | '9876-7718'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'                  | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                            | 'supplierCannotSupply'                        | false
+        tenantId      | requestTitle  | requestAuthor | requestSystemId       | requestPatronId   | requestSymbol | initialState                        | resultState                     | testQualifier                            | action                                                              | jsonFileName                                  | isRequester
+        'RSSlnpOne'   | 'request1nrs' | 'test1nrs'    | '1234-5678-9123-2221' | '9876-7771'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_CANCELLED'            | null                                     | Actions.ACTION_REQUESTER_REQUESTER_CANCEL                           | 'slnpRequesterCancel'                         | true
+        'RSSlnpOne'   | 'request2nrs' | 'test2nrs'    | '1234-5678-9123-2222' | '9876-7772'       | 'ISIL:RSS1'   | 'SLNP_REQ_ABORTED'                  | 'SLNP_REQ_CANCELLED'            | null                                     | Actions.ACTION_SLNP_REQUESTER_HANDLE_ABORT                          | 'slnpRequesterHandleAbort'                    | true
+        'RSSlnpOne'   | 'request3nrs' | 'test3nrs'    | '1234-5678-9123-2223' | '9876-7773'       | 'ISIL:RSS1'   | 'SLNP_REQ_DOCUMENT_AVAILABLE'       | 'SLNP_REQ_DOCUMENT_SUPPLIED'    | null                                     | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED     | 'slnpNonReturnableRequesterRequesterReceived' | true
+        'RSSlnpOne'   | 'request4nrs' | 'test4nrs'    | '1234-5678-9123-2224' | '9876-7774'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_SUPPLIED'    | null                                     | Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_MANUALLY_MARK_SUPPLIED | 'manuallyMarkSupplied'                        | true
+        'RSSlnpOne'   | 'supply1nrs'  | 'test5nrs'    | '1234-5678-9123-2225' | '9876-7775'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_AWAIT_PICKING'        | null                                     | Actions.ACTION_RESPONDER_SUPPLIER_PRINT_PULL_SLIP                   | 'supplierPrintPullSlip'                       | false
+        'RSSlnpOne'   | 'supply2nrs'  | 'test6nrs'    | '1234-5678-9123-2226' | '9876-7776'       | 'ISIL:RSS1'   | 'SLNP_RES_NEW_AWAIT_PULL_SLIP'      | 'SLNP_RES_UNFILLED'             | null                                     | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                     | 'supplierCannotSupply'                        | false
+        'RSSlnpOne'   | 'supply3nrs'  | 'test7nrs'    | '1234-5678-9123-2217' | '9876-7717'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_DOCUMENT_SUPPLIED'    | null                                     | Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT            | 'slnpNonReturnableSupplierSuppliesDocument'   | false
+        'RSSlnpOne'   | 'supply4nrs'  | 'test8nrs'    | '1234-5678-9123-2218' | '9876-7718'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'             | null                                     | Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY                     | 'supplierCannotSupply'                        | false
+        'RSSlnpOne'   | 'supply5nrs'  | 'test9nrs'    | '1234-5678-9123-2219' | '9876-7719'       | 'ISIL:RSS1'   | 'SLNP_RES_AWAIT_PICKING'            | 'SLNP_RES_UNFILLED'             | Status.SLNP_RESPONDER_UNFILLED           | Actions.ACTION_MANUAL_CLOSE                                         | 'manualCloseSLNPSupplierUnfilled'             | false
+        'RSSlnpOne'   | 'request5nrs' | 'test10nrs'   | '1234-5678-9123-2220' | '9876-7720'       | 'ISIL:RSS1'   | 'SLNP_REQ_IDLE'                     | 'SLNP_REQ_DOCUMENT_SUPPLIED'    | Status.SLNP_REQUESTER_DOCUMENT_SUPPLIED  | Actions.ACTION_MANUAL_CLOSE                                         | 'manualCloseSLNPDocumentSupplied'             | true
+
+
     }
 
     void "Test end to end actions and events from supplier to requester for nonreturnables"(

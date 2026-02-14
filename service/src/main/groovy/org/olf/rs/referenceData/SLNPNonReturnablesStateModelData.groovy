@@ -75,6 +75,37 @@ public class SLNPNonReturnablesStateModelData {
             nextActionEvent : null
     ];
 
+    private static Map slnpNonReturnableRequesterManualCloseCancelled = [
+            code: 'slnpNonReturnableRequesterManualCloseCancelled',
+            description: 'Manually closing because the request is cancelled',
+            result: true,
+            status: Status.SLNP_REQUESTER_CANCELLED,
+            qualifier: Status.SLNP_REQUESTER_CANCELLED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableRequesterManualCloseDocumentSupplied = [
+            code: 'slnpNonReturnableRequesterManualCloseDocumentSupplied',
+            description: 'Manually closing because the document was supplied',
+            result: true,
+            status: Status.SLNP_REQUESTER_DOCUMENT_SUPPLIED,
+            qualifier: Status.SLNP_REQUESTER_DOCUMENT_SUPPLIED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableRequesterManualClosePatronInvalid = [
+            code: 'slnpNonReturnableRequesterManualClosePatronInvalid',
+            description: 'Manually closing because the patron is invalid',
+            result: true,
+            status: Status.SLNP_REQUESTER_PATRON_INVALID,
+            qualifier: Status.SLNP_REQUESTER_PATRON_INVALID,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+
     private static Map slnpNonReturnableResponderSupplierSuppliesDocument = [
             code: 'slnpNonReturnableResponderSupplierSuppliesDocument',
             description: 'The document has been uploaded to a server in ZFL to fill the request. No message is sent.',
@@ -83,6 +114,50 @@ public class SLNPNonReturnablesStateModelData {
             qualifier: null,
             saveRestoreState: null,
             nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableResponderManualCloseUnfilled = [
+            code: 'slnpNonReturnableResponderManualCloseUnfilled',
+            description: 'Manually closing because the request was unfilled',
+            result: true,
+            status: Status.SLNP_RESPONDER_UNFILLED,
+            qualifier: Status.SLNP_RESPONDER_UNFILLED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableResponderManualCloseAborted = [
+            code: 'slnpNonReturnableResponderManualCloseAborted',
+            description: 'Manually closing because the request was aborted',
+            result: true,
+            status: Status.SLNP_RESPONDER_ABORTED,
+            qualifier: Status.SLNP_RESPONDER_ABORTED,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+    private static Map slnpNonReturnableResponderManualCloseComplete = [
+            code: 'slnpNonReturnableResponderManualCloseComplete',
+            description: 'Manually closing because the request was completed',
+            result: true,
+            status: Status.SLNP_RESPONDER_COMPLETE,
+            qualifier: Status.SLNP_RESPONDER_COMPLETE,
+            saveRestoreState: null,
+            nextActionEvent : null
+    ];
+
+
+    //Define Lists
+
+    private static Map slnpNonReturnableResponderCloseManualList = [
+            code: ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CLOSE_MANUAL,
+            description: 'The responder is terminating this request',
+            model: StateModel.MODEL_SLNP_RESPONDER,
+            results: [
+                    slnpNonReturnableResponderManualCloseUnfilled,
+                    slnpNonReturnableResponderManualCloseAborted,
+                    slnpNonReturnableResponderManualCloseComplete
+            ]
     ];
 
     // Requester Event lists
@@ -145,6 +220,17 @@ public class SLNPNonReturnablesStateModelData {
             ]
     ];
 
+    private static Map slnpNonReturnableRequesterCloseManualList = [
+            code: ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_CLOSE_MANUAL,
+            description: 'The requester is terminating this request',
+            model: StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER,
+            results: [
+                        slnpNonReturnableRequesterManualCloseCancelled,
+                        slnpNonReturnableRequesterManualCloseDocumentSupplied,
+                        slnpNonReturnableRequesterManualClosePatronInvalid,
+            ]
+    ];
+
     // Responder Event lists
 
     private static Map slnpNonReturnableResponderRespondCannotSupplyList = [
@@ -181,10 +267,12 @@ public class SLNPNonReturnablesStateModelData {
             slnpNonReturnableRequesterReceivedList,
             slnpNonReturnableRequesterManuallyMarkSuppliedList,
             slnpNonReturnableRequesterManuallyMarkAvailableList,
+            slnpNonReturnableRequesterCloseManualList,
 
             slnpNonReturnableResponderRespondCannotSupplyList,
             slnpNonReturnableResponderSupplierPrintPullSlipList,
-            slnpNonReturnableResponderSupplierSuppliesDocumentList
+            slnpNonReturnableResponderSupplierSuppliesDocumentList,
+            slnpNonReturnableResponderCloseManualList
     ];
 
     public static void loadStatusData() {
@@ -241,7 +329,13 @@ public class SLNPNonReturnablesStateModelData {
         // SLNP_RES_AWAIT_PICKING OR "Searching"
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_SLNP_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_SUPPLIER_SUPPLIES_DOCUMENT);
         AvailableAction.ensure(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Status.SLNP_RESPONDER_AWAIT_PICKING, Actions.ACTION_RESPONDER_SUPPLIER_CANNOT_SUPPLY, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CANNOT_SUPPLY);
+
+        // Manual Close
+        AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_CLOSE_MANUAL)
+        AvailableActionData.assignToNonTerminalStates(StateModel.MODEL_SLNP_NON_RETURNABLE_RESPONDER, Actions.ACTION_MANUAL_CLOSE, AvailableAction.TRIGGER_TYPE_MANUAL, ActionEventResultList.SLNP_NON_RETURNABLE_RESPONDER_CLOSE_MANUAL)
     }
+
+
 
     public static void loadActionEventData() {
         ActionEvent.ensure(Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED, 'Mark received and complete the request. This action is for BVB.', true, StateModel.MODEL_SLNP_NON_RETURNABLE_REQUESTER.capitalize() + Actions.ACTION_SLNP_NON_RETURNABLE_REQUESTER_REQUESTER_RECEIVED.capitalize(), ActionEventResultList.SLNP_NON_RETURNABLE_REQUESTER_RECEIVED, true);
