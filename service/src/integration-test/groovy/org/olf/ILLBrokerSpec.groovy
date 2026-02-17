@@ -29,9 +29,11 @@ class ILLBrokerSpec extends TestBase {
 
     final static String TENANT_ONE_NAME = "BrokerInstOne"
     final static String TENANT_TWO_NAME = "BrokerInstTwo"
+    final static String TENANT_THREE_NAME = "BrokerInstThree"
     final static String SYMBOL_AUTHORITY = "ISIL"
     final static String SYMBOL_ONE_NAME = "BIO1"
     final static String SYMBOL_TWO_NAME = "BIO2"
+    final static String SYMBOL_THREE_NAME = "BIO3"
     final static String BROKER_BASE_URL = "http://localhost:19082"
 
     def setupSpecWithSpring() {
@@ -42,6 +44,7 @@ class ILLBrokerSpec extends TestBase {
     //Do we need to make sure the base version doesn't happen?
     def setupSpec() {
         log.debug("setupSpec called")
+        setEnv("MOD_RS_DISABLE_KAFKA", "true");
     }
 
     def setup() {
@@ -52,6 +55,7 @@ class ILLBrokerSpec extends TestBase {
 
     def cleanup() {
         log.debug("Cleanup called")
+        setEnv("MOD_RS_DISABLE_KAFKA", "false");
     }
 
     public String getBaseUrl() {
@@ -59,114 +63,8 @@ class ILLBrokerSpec extends TestBase {
         return super.getBaseUrl()?.replace("null", "")
     }
 
-    Map sendXMLMessage(String url, String message, Map additionalHeaders, long timeout) {
-        Map result = [ messageStatus: EventISO18626IncomingAbstractService.STATUS_ERROR ]
 
-        HttpBuilder http_client = ApacheHttpBuilder.configure({
-            client.clientCustomizer({  HttpClientBuilder builder ->
-                   RequestConfig.Builder requestBuilder = RequestConfig.custom()
-                   requestBuilder.connectTimeout = timeout
-                   requestBuilder.connectionRequestTimeout = timeout
-                   requestBuilder.socketTimeout = timeout
-                   builder.defaultRequestConfig = requestBuilder.build()
-            })
-            request.uri = url
-            request.contentType = XML[0]
-            request.headers['accept'] = 'application/xml, text/xml'
-            additionalHeaders?.each{ k, v ->
-                request.headers[k] = v
-            }
-        })
 
-        def response = http_client.post {
-            request.body = message
-            response.failure({ FromServer fromServer ->
-                String errorMessage = "Error from address ${url}: ${fromServer.getStatusCode()} ${fromServer}"
-                log.error(errorMessage)
-                String responseStatus = fromServer.getStatusCode().toString() + " " + fromServer.getMessage()
-                throw new RuntimeException(errorMessage)
-            })
-            response.success({ FromServer fromServer, xml ->
-                String responseStatus = "${fromServer.getStatusCode()} ${fromServer.getMessage()}"
-                log.debug("Got response: ${responseStatus}")
-                if (xml != null) {
-                    result.rawData = groovy.xml.XmlUtil.serialize(xml)
-                } else {
-                    result.errorData = EventISO18626IncomingAbstractService.ERROR_TYPE_NO_XML_SUPPLIED
-                }
-
-            })
-        }
-        log.debug("Got response message: ${response}")
-
-        return result
-
-    }
-
-    private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
-        Map params = [
-                'max':'100',
-                'offset':'0',
-                'match':'patronReference',
-                'term':patron_reference
-        ]
-        return waitForRequestStateParams(tenant, timeout, params, required_state)
-    }
-
-    private String waitForRequestStateById(String tenant, long timeout, String id, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'id',
-                'term':id
-        ]
-        return waitForRequestStateParams(tenant, timeout, params, required_state)
-    }
-
-    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'hrid',
-                'term':hrid
-        ]
-        return waitForRequestStateParams(tenant, timeout, params, required_state)
-    }
-
-    private String waitForRequestStateParams(String tenant, long timeout, Map params, String required_state) {
-        long start_time = System.currentTimeMillis()
-        String request_id = null
-        String request_state = null
-        long elapsed = 0
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders(['X-Okapi-Tenant': tenant])
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    params)
-            if (resp?.size() == 1) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with params ${params} not found")
-            }
-
-            if (required_state != request_state) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping")
-                Thread.sleep(1000)
-            }
-            elapsed = System.currentTimeMillis() - start_time
-        }
-        log.debug("Found request on tenant ${tenant} with params ${params} in state ${request_state} after ${elapsed} milliseconds")
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}")
-        }
-
-        return request_id
-    }
 
     private Map performActionFromFileAndCheckStatus(String performSupActionUrl, String actionFileName, String tenant,
             String reqStatus, String supStatus, String requesterTenantId, String responderTenantId,
@@ -194,7 +92,6 @@ class ILLBrokerSpec extends TestBase {
         return data;
     }
 
-
     void "Attempt to delete any old tenants"(tenantid, name) {
         when:"We post a delete request"
         boolean result = deleteTenant(tenantid, name)
@@ -204,8 +101,9 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         tenantid | name
-        TENANT_ONE_NAME | TENANT_ONE_NAME
-        TENANT_TWO_NAME | TENANT_TWO_NAME
+        TENANT_ONE_NAME   | TENANT_ONE_NAME
+        TENANT_TWO_NAME   | TENANT_TWO_NAME
+        TENANT_THREE_NAME | TENANT_THREE_NAME
     }
 
     void "Set up test tenants"(tenantid, name) {
@@ -217,8 +115,9 @@ class ILLBrokerSpec extends TestBase {
 
         where:
         tenantid | name
-        TENANT_ONE_NAME | TENANT_ONE_NAME
-        TENANT_TWO_NAME | TENANT_TWO_NAME
+        TENANT_ONE_NAME   | TENANT_ONE_NAME
+        TENANT_TWO_NAME   | TENANT_TWO_NAME
+        TENANT_THREE_NAME | TENANT_THREE_NAME
     }
 
     void "Configure Tenants for lending without rota or directory"(String tenant_id, Map changes_needed, Map changes_needed_hidden) {
@@ -233,7 +132,9 @@ class ILLBrokerSpec extends TestBase {
         where:
         tenant_id          | changes_needed               | changes_needed_hidden
         TENANT_ONE_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'auto_rerequest':'yes',  'request_id_prefix' : 'TENANTONE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
-        TENANT_TWO_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTTWO', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+        TENANT_TWO_NAME    | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'on', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTTWO', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+        TENANT_THREE_NAME  | [ 'auto_responder_status':'off', 'auto_responder_cancel': 'off', 'routing_adapter':'disabled',  'request_id_prefix' : 'TENANTHREE', (SettingsData.SETTING_NETWORK_ISO18626_GATEWAY_ADDRESS) : "${BROKER_BASE_URL}/iso18626", (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}", (SettingsData.SETTING_DEFAULT_REQUEST_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" ] | ['requester_returnables_state_model':'PatronRequest', 'responder_returnables_state_model':'Responder', 'requester_non_returnables_state_model':'NonreturnableRequester', 'responder_non_returnables_state_model':'NonreturnableResponder', 'requester_digital_returnables_state_model':'DigitalReturnableRequester', 'state_model_responder_cdl':'CDLResponder']
+
     }
 
     void "Create broker peers"(String peer_symbol, String tenant) {
@@ -250,9 +151,10 @@ class ILLBrokerSpec extends TestBase {
         1==1
 
         where:
-        peer_symbol | tenant
-        "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}" | TENANT_ONE_NAME
-        "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" | TENANT_TWO_NAME
+        peer_symbol                                | tenant
+        "${SYMBOL_AUTHORITY}:${SYMBOL_ONE_NAME}"   | TENANT_ONE_NAME
+        "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}"   | TENANT_TWO_NAME
+        "${SYMBOL_AUTHORITY}:${SYMBOL_THREE_NAME}" | TENANT_THREE_NAME
     }
 
 
@@ -599,7 +501,7 @@ class ILLBrokerSpec extends TestBase {
     }
 
 
-    void "Test continuations after requester has rejected loan conditions"(String xmlFileTemplate, String finalState,
+    void "Test continuations after requester has rejected loan conditions (manual xml)"(String xmlFileTemplate, String finalState,
             String serviceType, String deliveryMethod) {
         String requesterTenantId = TENANT_ONE_NAME
         String supplierTenantId = TENANT_TWO_NAME
@@ -667,6 +569,69 @@ class ILLBrokerSpec extends TestBase {
         "statusChangeExpectToSupplyTemplate.xml" | Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER    | "Copy"      | "URL"
         "statusChangeUnfilledTemplate.xml"       | Status.PATRON_REQUEST_END_OF_ROTA                 | "Copy"      | "URL"
         "cancelResponseReplyNoTemplate.xml"      | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | null        | null
+
+
+    }
+
+    void "Test continuations after requester has rejected loan conditions"(String serviceType, String deliveryMethod) {
+        String requesterTenantId = TENANT_ONE_NAME
+        String supplierTenantId = TENANT_TWO_NAME
+        String patronIdentifier = "Broker-reject-continue-test-" + System.currentTimeMillis()
+        String patronReference = "ref-${patronIdentifier}"
+        String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::98754541231;return-ISIL:${SYMBOL_THREE_NAME}::98754541231" //test transmission to supplierUniqueRecordId
+        //String systemInstanceIdentifier = "return-ISIL:${SYMBOL_TWO_NAME}::WILLSUPPLY_LOANED" //test transmission to supplierUniqueRecordId
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:DUMMY" ])
+
+        long start_time = System.currentTimeMillis();
+
+        when: "We create a request"
+        Map request = [
+                patronReference         : patronReference,
+                title                   : "Testing cancel continuation with broker",
+                author                  : "Bott, Rob",
+                patronIdentifier        : patronIdentifier,
+                isRequester             : true,
+                systemInstanceIdentifier: systemInstanceIdentifier,
+                serviceType             : serviceType,
+                deliveryMethod          : deliveryMethod
+        ]
+
+        setHeaders(['X-Okapi-Tenant': requesterTenantId])
+        doPost("${baseUrl}/rs/patronrequests".toString(), request)
+
+        String requestId = waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER)
+        String supReqId = waitForRequestState(supplierTenantId, 10000, patronReference, Status.RESPONDER_IDLE)
+
+        Map requesterData = getPatronRequestData(requestId, requesterTenantId)
+        String requesterHrid = requesterData.hrid
+
+        String performSupActionUrl = "${baseUrl}/rs/patronrequests/${supReqId}/performAction"
+        String performActionUrl = "${baseUrl}/rs/patronrequests/${requestId}/performAction"
+
+        performActionFromFileAndCheckStatus(performSupActionUrl, "supplierConditionalSupply.json", supplierTenantId, Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED, Status.RESPONDER_PENDING_CONDITIONAL_ANSWER, requesterTenantId, supplierTenantId, patronReference);
+
+        performActionFromFileAndCheckStatus(performActionUrl, "requesterRejectConditions.json", requesterTenantId, Status.PATRON_REQUEST_CANCEL_PENDING, Status.RESPONDER_CANCEL_REQUEST_RECEIVED, requesterTenantId, supplierTenantId, patronReference);
+
+        long finish_time = System.currentTimeMillis()
+
+        waitForRequestState(requesterTenantId, 10000, patronReference, Status.PATRON_REQUEST_REQUEST_SENT_TO_SUPPLIER);
+
+        //performActionFromFileAndCheckStatus(performSupActionUrl, "supplierRespondToCancelYes.json", supplierTenantId, Status.PATRON_REQUEST_EXPECTS_TO_SUPPLY, Status.RESPONDER_CANCELLED, requesterTenantId, supplierTenantId, patronReference);
+
+
+        long elapsed_time = finish_time - start_time;
+        log.debug("Test ran in ${elapsed_time} millis");
+
+        changeSettings(requesterTenantId, [ (SettingsData.SETTING_DEFAULT_PEER_SYMBOL) : "${SYMBOL_AUTHORITY}:${SYMBOL_TWO_NAME}" ]) //so future tests aren't messed
+
+        then:
+        assert(elapsed_time < 10000);
+
+        where:
+        serviceType | deliveryMethod
+        null        | null
+        "Copy"      | "URL"
 
 
     }

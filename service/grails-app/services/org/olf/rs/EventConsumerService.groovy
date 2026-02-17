@@ -1,6 +1,7 @@
 package org.olf.rs
 
 import com.k_int.web.toolkit.tags.Tag
+import groovy.util.logging.Slf4j
 import org.olf.okapi.modules.directory.Symbol
 
 import static groovy.transform.TypeCheckingMode.SKIP;
@@ -38,6 +39,7 @@ import groovy.transform.CompileStatic;
  * reacting to application events. Whatever implementation is used, it ultimately needs to call notify('PREventIndication',DATA) in order
  * for
  */
+@Slf4j
 @CompileStatic
 public class EventConsumerService implements EventPublisher, DataBinder {
 
@@ -57,7 +59,10 @@ public class EventConsumerService implements EventPublisher, DataBinder {
 
   @javax.annotation.PostConstruct
   public void init() {
-    if (Boolean.parseBoolean(System.getenv('MOD_RS_DISABLE_KAFKA'))) return;
+    if (Boolean.parseBoolean(System.getenv('MOD_RS_DISABLE_KAFKA'))) {
+      log.debug("Kafka is disabled");
+      return;
+    }
     log.debug("Configuring event consumer service")
     version = grailsApplication.metadata.applicationVersion ?: version
     final Properties props = new Properties()

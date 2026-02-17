@@ -266,95 +266,8 @@ class RSLifecycleSpec extends TestBase {
     def cleanup() {
     }
 
-    private String waitForRequestState(String tenant, long timeout, String patron_reference, String required_state) {
-        Map params = [
-                'max':'100',
-                'offset':'0',
-                'match':'patronReference',
-                'term':patron_reference
-        ];
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
 
-    private String waitForRequestStateById(String tenant, long timeout, String id, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'id',
-                'term':id
-        ];
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
 
-    private String waitForRequestStateByHrid(String tenant, long timeout, String hrid, String required_state) {
-        Map params = [
-                'max':'1',
-                'offset':'0',
-                'match':'hrid',
-                'term':hrid
-        ]
-        return waitForRequestStateParams(tenant, timeout, params, required_state);
-    }
-
-    private String waitForRequestStateParams(String tenant, long timeout, Map params, String required_state) {
-        long start_time = System.currentTimeMillis();
-        String request_id = null;
-        String request_state = null;
-        long elapsed = 0;
-        while ( ( required_state != request_state ) &&
-                ( elapsed < timeout ) ) {
-
-            setHeaders(['X-Okapi-Tenant': tenant]);
-            // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests?filters=isRequester%3D%3Dtrue&match=patronGivenName&perPage=100&sort=dateCreated%3Bdesc&stats=true&term=Michelle
-            def resp = doGet("${baseUrl}rs/patronrequests",
-                    params)
-            if (resp?.size() == 1) {
-                request_id = resp[0].id
-                request_state = resp[0].state?.code
-            } else {
-                log.debug("waitForRequestState: Request with params ${params} not found");
-            }
-
-            if (required_state != request_state) {
-                // Request not found OR not yet in required state
-                log.debug("Not yet found.. sleeping");
-                Thread.sleep(1000);
-            }
-            elapsed = System.currentTimeMillis() - start_time
-        }
-        log.debug("Found request on tenant ${tenant} with params ${params} in state ${request_state} after ${elapsed} milliseconds");
-
-        if ( required_state != request_state ) {
-            throw new Exception("Expected ${required_state} but timed out waiting, current state is ${request_state}");
-        }
-
-        return request_id;
-    }
-
-    // For the given tenant fetch the specified request
-    private Map fetchRequest(String tenant, String requestId) {
-
-        setHeaders([ 'X-Okapi-Tenant': tenant ]);
-        // https://east-okapi.folio-dev.indexdata.com/rs/patronrequests/{id}
-        def response = doGet("${baseUrl}rs/patronrequests/${requestId}")
-        return response;
-    }
-
-    private String randomCrap(int length) {
-        String source = (('A'..'Z') + ('a'..'z')).join();
-        Random rand = new Random();
-        return (1..length).collect { source[rand.nextInt(source.length())]}.join();
-    }
-
-    // Rudely copy-pasted from EventMessageRequestIndService
-    RefdataValue findRefdataValue(String label, String vocabulary) {
-        RefdataCategory cat = RefdataCategory.findByDesc(vocabulary);
-        if (cat) {
-            RefdataValue rdv = RefdataValue.findByOwnerAndValue(cat, label);
-            return rdv;
-        }
-        return null;
-    }
 
   /** Grab the settings for each tenant so we can modify them as needeed and send back,
    *  then work through the list posting back any changes needed for that particular tenant in this testing setup
@@ -973,7 +886,7 @@ class RSLifecycleSpec extends TestBase {
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckInToReshare.json"     | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | null           | null        | "{}"                   | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "localNote.json"                    | Status.PATRON_REQUEST_CONDITIONAL_ANSWER_RECEIVED | Status.RESPONDER_AWAIT_SHIP                 | null               | null                  | null           | null        | "{}"                   | ({ r, s -> s.localNote == 'Noted!' })
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierMarkShipped.json"          | Status.PATRON_REQUEST_SHIPPED                     | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null           | null        | "{}"                   | null
-        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null           | null        | "{}"                   | null
+        "RSInstOne"       | "RSInstThree"     | 1        | true              | "requesterReceived.json"            | Status.PATRON_REQUEST_CHECKED_IN                  | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null           | null        | "{}"                   | ({ r, s -> r.volumes[0].itemId == '123' })
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "patronReturnedItem.json"           | Status.PATRON_REQUEST_AWAITING_RETURN_SHIPPING    | Status.RESPONDER_ITEM_SHIPPED               | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 1        | true              | "shippedReturn.json"                | Status.PATRON_REQUEST_SHIPPED_TO_SUPPLIER         | Status.RESPONDER_ITEM_RETURNED              | null               | null                  | null           | null        | "{status=true}"        | null
         "RSInstOne"       | "RSInstThree"     | 1        | false             | "supplierCheckOutOfReshare.json"    | Status.PATRON_REQUEST_REQUEST_COMPLETE            | Status.RESPONDER_COMPLETE                   | null               | null                  | null           | null        | "{status=true}"        | null
@@ -1230,17 +1143,11 @@ class DosomethingSimple {
         log.debug("Response from statistics: " + statisticsResponse.toString());
 
         then:"Check we have received some statistics"
-        // Should have the current statistics
-        assert(statisticsResponse?.current != null);
-
-        // We should also have the requests by state
+        // We should have the requests by state
         assert(statisticsResponse.requestsByState != null);
 
-        // We should have the number of requests that are actively borrowing
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeBorrowing") } != null);
-
-        // We should also have the number of requests that are currently on loan
-        assert(statisticsResponse?.current.find { statistic -> statistic.context.equals("/activeLoans") } != null);
+        // We should have the requests by tag (includes active borrowing and loans)
+        assert(statisticsResponse.requestsByTag != null);
 
         where:
         tenantId      | ignore

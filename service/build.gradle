@@ -218,6 +218,10 @@ dependencies {
 
   // Iso java classes
   implementation 'org.olf.rs.iso18626:iso18626-client:1.2'
+
+  implementation("com.ibm.icu:icu4j:78.2")
+  implementation("com.github.zafarkhaja:java-semver:0.10.2")
+  implementation("org.antlr:antlr4-runtime:4.9.2")
 }
 
 bootRun {

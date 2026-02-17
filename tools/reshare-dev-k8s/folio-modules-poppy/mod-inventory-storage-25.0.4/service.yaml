@@ -1,0 +1,12 @@
+# -*- mode: yaml; -*-
+apiVersion: v1
+kind: Service
+metadata:
+  name: "mod-inventory-storage-25-0-4"
+  namespace: "reshare"
+spec:
+  type: "ClusterIP"
+  selector:
+    app: "mod-inventory-storage-25-0-4"
+  ports:
+    - port: 8081

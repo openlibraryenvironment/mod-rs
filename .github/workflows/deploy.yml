@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout module
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Deactivate mod-rs
         run: |
@@ -31,7 +31,7 @@ jobs:
             -p ${{ secrets.OKAPI_ADMIN_PW }} \
 
       - name: Deploy latest to K8s
-        uses: actions-hub/kubectl@v1.21.2
+        uses: actions-hub/kubectl@v1.34.1
         env:
           KUBE_CONFIG: ${{ secrets.RESHARE_DEV_SA_KUBECONFIG }}
         with:

@@ -4,7 +4,6 @@ import grails.events.EventPublisher
 import grails.gorm.multitenancy.Tenants
 import groovy.xml.StreamingMarkupBuilder
 import org.olf.rs.ConfirmationMessageService;
-import org.olf.rs.Counter;
 import org.olf.rs.PatronRequest;
 import org.olf.rs.ReshareApplicationEventHandlerService;
 import org.olf.rs.StatisticsService;
@@ -59,7 +58,6 @@ class ExternalApiController implements EventPublisher {
     try {
       result = [
         asAt:new Date(),
-        current:Counter.list().collect { [ context:it.context, value:it.value, description:it.description ] },
         requestsByState: statisticsService.generateRequestsByState(),
         requestsByTag: statisticsService.generateRequestsByStateTag()
       ]
@@ -190,7 +188,8 @@ class ExternalApiController implements EventPublisher {
     } catch (SAXException e){
       return render(status: 400, text: "Response validation failed: ${e.message}")
     } catch ( Exception e ) {
-      log.error("Exception receiving ISO message",e);
+      log.error("Exception while handling incoming ISO message",e);
+      return render(status: 500, text: "Error: ${e.getLocalizedMessage()}");
     } finally {
       log.debug("ExternalApiController::iso18626 exiting cleanly");
     }
