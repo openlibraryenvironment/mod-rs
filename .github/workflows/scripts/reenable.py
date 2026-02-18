@@ -107,7 +107,7 @@ def enable(args, token, tenants, k8s_environment):
     latest_versions = []
 
     if k8s_environment == 'slnp':
-        latest_versions = ["mod-rs-2.18.5-release"]
+        latest_versions = ["mod-rs-2.18-release"].
     else:
         # sync mds
         print("syncing module descriptors from registry...")
@@ -124,17 +124,20 @@ def enable(args, token, tenants, k8s_environment):
             latest_versions.append(json.loads(r)[0]['id'])
 
     # post new deployment descriptors
-    for module in latest_versions:
-        payload = json.dumps({
-            "instId": "{}-cluster".format(module),
-            "srvcId": module,
-            "url": "http://{}-latest:{}".format('-'.join(module.split('-', 2)[:2]), port)
-        }).encode('UTF-8')
-        try:
-            print("posting new deployment descriptors...")
-            r = okapi_post(okapi_url + '/_/discovery/modules', payload=payload, tenant='supertenant', token=token)
-        except:
-            print("deployment descriptor exists, moving on")
+    if k8s_environment == 'slnp':
+        pass
+    else:
+        for module in latest_versions:
+            payload = json.dumps({
+                "instId": "{}-cluster".format(module),
+                "srvcId": module,
+                "url": "http://{}-latest:{}".format('-'.join(module.split('-', 2)[:2]), port)
+            }).encode('UTF-8')
+            try:
+                print("posting new deployment descriptors...")
+                r = okapi_post(okapi_url + '/_/discovery/modules', payload=payload, tenant='supertenant', token=token)
+            except:
+                print("deployment descriptor exists, moving on")
 
     # re-enable modules
     print("re-enabling pods on tenants...")
