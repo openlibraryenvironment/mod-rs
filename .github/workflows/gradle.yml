@@ -135,7 +135,7 @@ jobs:
         with:
           package-name: 'mod-rs'
           package-type: 'container'
-          min-versions-to-keep: 0
+          min-versions-to-keep: 2
           delete-only-untagged-versions: 'true'
 
       - name: Publish Descriptor
