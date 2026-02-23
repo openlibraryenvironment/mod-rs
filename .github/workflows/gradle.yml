@@ -38,7 +38,7 @@ jobs:
           cd tools/testing
           docker compose down -v
           docker compose up -d &> dockerOutput.log
-          sleep 20
+          sleep 50
 
       - name: Inject github build number
         run: |
