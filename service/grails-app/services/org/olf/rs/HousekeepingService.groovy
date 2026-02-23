@@ -3,7 +3,6 @@ package org.olf.rs
 import org.olf.rs.referenceData.ActionEventData;
 import org.olf.rs.referenceData.ActionEventResultData;
 import org.olf.rs.referenceData.AvailableActionData;
-import org.olf.rs.referenceData.CounterData;
 import org.olf.rs.referenceData.CustomTextProperties;
 import org.olf.rs.referenceData.NamingAuthority;
 import org.olf.rs.referenceData.RefdataValueData
@@ -90,8 +89,6 @@ public class HousekeepingService implements EventPublisher {
 		// Load the Available actions, must be loaded after ActionEventResultData and ActionEventData
 		AvailableActionData.loadAll();
 
-		// Load the counter data
-		CounterData.loadAll();
 
 		// Load the counter data
 		TimerData.loadAll();
