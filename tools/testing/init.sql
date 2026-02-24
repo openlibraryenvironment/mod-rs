@@ -1,38 +1,33 @@
 select 1;
 
-CREATE USER folio_admin WITH PASSWORD 'folio_admin';
-DROP DATABASE if exists okapi_modules;
-CREATE DATABASE okapi_modules;
-GRANT ALL PRIVILEGES ON DATABASE okapi_modules to folio_admin;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='folio_admin') THEN
+    CREATE ROLE folio_admin LOGIN PASSWORD 'folio_admin' SUPERUSER CREATEDB CREATEROLE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='crosslink') THEN
+    CREATE ROLE crosslink LOGIN PASSWORD 'crosslink';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='crosslink_broker') THEN
+    CREATE ROLE crosslink_broker NOLOGIN;
+  END IF;
+END $$;
 
-ALTER USER folio_admin CREATEDB;
-ALTER USER folio_admin CREATEROLE;
-ALTER USER folio_admin WITH SUPERUSER;
+DROP DATABASE IF EXISTS okapi_modules;
+CREATE DATABASE okapi_modules OWNER folio_admin;
+GRANT ALL PRIVILEGES ON DATABASE okapi_modules TO folio_admin;
 
 -- BROKER setup
--- create app login role
-CREATE ROLE crosslink LOGIN PASSWORD 'crosslink';
-
--- Create non-login role that owns broker schema/privileges
-CREATE ROLE crosslink_broker NOLOGIN;
-
--- Grant ownership role to app login role
+\connect okapi_modules
 GRANT crosslink_broker TO crosslink;
+GRANT CONNECT ON DATABASE okapi_modules TO crosslink;
 
--- Allow this role to connect to the database
-GRANT CONNECT ON DATABASE "okapi_modules" TO crosslink;
-
--- Create schema owned by ownership role
--- Note: if schema already exists (migration) ensure USAGE and CREATE are granted for future and existing objects
 CREATE SCHEMA IF NOT EXISTS crosslink_broker AUTHORIZATION crosslink_broker;
 
--- Prevent crosslink from using or creating in public schema
 REVOKE ALL ON SCHEMA public FROM crosslink;
+GRANT USAGE, CREATE ON SCHEMA crosslink_broker TO crosslink;
 
--- Set default schema for this role
-ALTER ROLE crosslink IN DATABASE "okapi_modules"
-
+ALTER ROLE crosslink IN DATABASE okapi_modules
 SET search_path = crosslink_broker, pg_temp;
--- END broker setup
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
