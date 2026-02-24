@@ -52,7 +52,7 @@ services:
       DB_PASSWORD: folio_admin
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DATABASE: postgres
+      DB_DATABASE: okapi_modules
       BROKER_MODE: transparent
     extra_hosts:
       - "host.docker.internal:host-gateway"
