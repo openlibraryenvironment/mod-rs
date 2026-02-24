@@ -65,6 +65,7 @@ jobs:
           cd tools/testing
           docker ps -a > ps.log
           docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
+          docker logs `docker ps -a | grep "illbroker" | cut -d " " -f 1` > illbroker.log
           docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
           docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
           docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
