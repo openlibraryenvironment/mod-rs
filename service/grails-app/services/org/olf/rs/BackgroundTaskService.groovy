@@ -75,6 +75,11 @@ public class BackgroundTaskService {
 
             long current_systime = System.currentTimeMillis();
 
+            int maxDelay = 5000
+            int delay = Math.abs(new Random().nextInt() % maxDelay) + 1
+            log.debug("Delaying ${delay} milliseconds prior to running background tasks");
+            sleep(delay);
+
             log.debug("Checking timers");
             Timer[] timers = Timer.executeQuery('select t from Timer as t where ( ( t.nextExecution is null ) OR ( t.nextExecution < :now ) ) and t.enabled=:en',
                                [now:current_systime, en: true]);
