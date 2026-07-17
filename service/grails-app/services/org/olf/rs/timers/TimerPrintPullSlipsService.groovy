@@ -220,7 +220,7 @@ where h.id in ( :loccodes )
                                         attachments = [
                                             [
                                                 contentType: 'application/pdf',
-                                                name: 'pullSlips' + subjectPostfix,
+                                                name: 'pullSlips' + subjectPostfix + '.pdf',
                                                 description: 'Pull Slip for ' + subjectPostfix,
                                                 data: encoded,
                                                 disposition: 'base64'
