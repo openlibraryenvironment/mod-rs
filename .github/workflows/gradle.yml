@@ -63,13 +63,8 @@ jobs:
         if: always()
         run: |
           cd tools/testing
-          docker ps -a > ps.log
-          docker logs `docker ps -a | grep "minio_setup" | cut -d " " -f 1` > minioSetup.log
-          docker logs `docker ps -a | grep "illbroker" | cut -d " " -f 1` > illbroker.log
-          docker logs `docker ps | grep "minio_tests" | cut -d " " -f 1` > minio.log
-          docker logs `docker ps | grep "testing_kafka" | cut -d " " -f 1` > kafka.log
-          docker logs `docker ps | grep "testing_pg" | cut -d " " -f 1` > postgres.log
-          docker logs `docker ps | grep "testing_zookeeper" | cut -d " " -f 1` > zookeeper.log
+          docker compose ps -a > ps.log 2>&1 || true
+          docker compose logs --no-color > containers.log 2>&1 || true
 
       - name: Upload container logs
         if: always()
