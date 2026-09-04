@@ -2,10 +2,12 @@ package mod.rs
 
 import org.grails.datastore.mapping.model.MappingContext;
 import org.grails.datastore.mapping.validation.ValidatorRegistry
+import org.springframework.scheduling.annotation.EnableScheduling
 
 import grails.boot.GrailsApp;
 import grails.boot.config.GrailsAutoConfiguration;
 
+@EnableScheduling
 class Application extends GrailsAutoConfiguration {
 
   static void main(String[] args) {
