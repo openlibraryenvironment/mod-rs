@@ -76,6 +76,7 @@ dependencies {
   /* ---- Grails 5 ---- */
   //developmentOnly("org.springframework.boot:spring-boot-devtools")
   compileOnly "io.micronaut:micronaut-inject-groovy"
+  compileOnly "com.ibm.icu:icu4j:74.2"
   console "org.grails:grails-console"
   // The version here is the version that in theory is pulled in from spring-boot-starter-logging according to dependenies
   implementation "org.springframework.boot:spring-boot-starter-logging"
