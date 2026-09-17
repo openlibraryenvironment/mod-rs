@@ -12,6 +12,7 @@ repositories {
     name "reposiliteRepositoryReleases"
     url "https://reposilite.reshare.indexdata.com/releases"
   }
+  maven { url "https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/" }
 }
 
 buildscript {
